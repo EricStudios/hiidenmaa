@@ -301,11 +301,20 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     SET.torchSharp=false;applyGfx();const b=torchLight.shadow.mapSize.x===40&&!torchSharpOn();SET.torchSharp=pv;applyGfx();
     const c=SET_DEF.torchSharp===false&&SET_PAGES.xgfx.includes('torchSharp')&&/torchSharpOn\(\)\?6\.7:2\.1/.test(updatePlayer.toString())&&/torchSharpOn\(\)\|\|shFrame%fT===0/.test(updateStations.toString());
     return a&&b&&c||`virhe terävä ${a} oletus ${b} koodi ${c}`;});
+  t('v2.57 siirtoääni vain valmiissa siirrossa (ei valinnassa/raahauksen alussa), valittu ruutu ei kasva (ei transformia), arkun ohjerivi kiinteä, ulvonta −30 % kuuluvuus ja voimakkuus (päivällä kuuluvuus lisäksi −40 %), puun narina pienissä puissa korkeampi',()=>{
+    const pd=dayT;dayT=.5;const day=wolfHowlRK();dayT=.95;const night=wolfHowlRK();dayT=pd;
+    const a=Math.abs(night-.85*.7)<1e-9&&Math.abs(day-.85*.7*.6)<1e-9&&WOLF_HOWL_V===.7&&/WOLF_HOWL_V:1\)/.test(creSnd.toString())&&/\*WOLF_HOWL_R,x=/.test(farHowl.toString());
+    const sel=[...document.styleSheets].flatMap(ss=>{try{return [...ss.cssRules];}catch(e){return [];}}).find(r=>r.name==='selPulse');
+    const b=!!sel&&!/transform|scale/.test(sel.cssText);
+    const h=document.getElementById('chestHint'),c=!!h&&getComputedStyle(h).height!=='auto'&&getComputedStyle(h).overflow==='hidden';
+    const d=!/invSnd\('siirto'\)/.test(selectFor.toString())&&/invSnd\('siirto'\)/.test(moveSlot.toString());
+    const e=creakP({type:'koivu',s:.5})>creakP({type:'kuusi',s:1.5})&&Math.abs(creakP({type:'aarnipuu',s:1})-.85)<1e-9&&/p:creakP\(n\)/.test(doMeleeHit.toString());
+    return a&&b&&c&&d&&e||`virhe ulvonta ${a} (${day.toFixed(3)}/${night.toFixed(3)}) sykintä ${b} ohjerivi ${c} äänet ${d} narina ${e}`;});
   t('v2.56 puolitus klikkaamalla: valittu pino + oikea kohteeseen = puolet, valinta poistuu, kohderuutu ei aloita raahausta, puolitusääni vasta siirrossa, siirtoäänet −30 %, sulkemisäänet',()=>{
     const L=[],o=window.plSnd,pi=inv.slice(),pp=openPanel;let r='';
     try{window.plSnd=(g,e,x)=>{L.push(e+(x&&x.v?'@'+x.v:''));return true;};for(let i=0;i<inv.length;i++)inv[i]=null;inv[9]={id:'puu',n:10};inv[13]={id:'puu',n:2};
       if(openPanel)closePanels(true);togglePanel('inv');renderInv();L.length=0;const S=()=>document.querySelectorAll('#invGrid .slot');
-      S()[9].click();const a1=selSlot===9&&L.join()==='siirto@0.7',d1=selSlot+'/'+L.join(';');L.length=0;
+      S()[9].click();const a1=selSlot===9&&L.length===0,d1=selSlot+'/'+L.join(';');L.length=0;   /* v2.57: valinta hiljaa */
       S()[13].dispatchEvent(new MouseEvent('mousedown',{bubbles:true,button:0}));const a2=!slotDrag;   /* kohde ei aloita raahausta */slotDrag=null;
       S()[14].dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,button:2}));const a3=inv[14]&&inv[14].n===5&&inv[9].n===5&&selSlot===-1&&L.join()==='puolitus@0.7';
       r=a1&&a2&&a3?'':`valinta ${a1} (${d1}) kohde ${a2} puolitus ${a3} [${L}]`;}
@@ -537,7 +546,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       ME(slot(0),'contextmenu',{button:2});ME(slot(7),'contextmenu',{button:2,shiftKey:true});const o3=SPL.on,tr=document.querySelector('#splitDlg .spTrack'),rr=tr.getBoundingClientRect();
       ME(tr,'mousedown',{button:0,x:rr.left+rr.width*.25});ME(tr,'mouseup',{x:rr.left+rr.width*.25});ME(document.querySelector('#splitDlg .spOk'),'click');r.push(o3&&inv[7]&&inv[7].n===4&&inv[0].n===13);
       ME(slot(0),'mousedown',{button:2,buttons:2});ME(slot(9),'mousemove',{buttons:2});ME(slot(9),'mouseup',{button:2});dragEat=false;r.push(!SPL.on&&inv[9]&&inv[9].n===6);
-      r.push(sounds.includes('siirto')&&sounds.includes('puolitus'));}
+      r.push(sounds.includes('puolitus')&&!sounds.includes('siirto'));}   // v2.57: puolituksissa vain puolitusääni
     finally{plSnd=o0;splitClose();closePanels();inv.splice(0,inv.length,...sv);if(op)togglePanel(op);if(mb)mb.style.display=md;if(ls)ls.style.display=ld;dragEat=false;}
     return r.every(Boolean)||'virhe '+r.map(v=>v?1:0).join('')+' '+dbg;});
   t('v2.28 äänierä osa 2 (22 ääntä) + puun tömähdys maahan, reppu kiinni = sama ääni, oman arkun sulkemisääni',()=>{
@@ -575,7 +584,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     finally{barSeen=bs;mobRemove(m);P.pos.copy(pp);camera.position.copy(cp);camera.quaternion.copy(cq);camera.updateMatrixWorld(true);updateMobBars();}
     return r.every(Boolean)||'virhe '+r.map(v=>v?1:0).join('');});
   t('v2.25 sudet: suuttumis- ja jahtiääni −30 % ja kantama −20 %, ulvonnan kantama −15 % (myös kaukainen ulvonta)',()=>{
-    const a=creRK('susi','aggro')===.8&&creRK('routasusi','chase')===.8&&creRK('kalmasusi','idle',1)===.85&&creRK('susi','idle',0)===1&&creRK('karhu','aggro')===1&&creRK('karhu','idle',1)===1;
+    const a=creRK('susi','aggro')===.8&&creRK('routasusi','chase')===.8&&creRK('kalmasusi','idle',1)===wolfHowlRK()&&creRK('susi','idle',0)===1&&creRK('karhu','aggro')===1&&creRK('karhu','idle',1)===1;
     const b=CRE_WOLF_V.aggro===.7&&CRE_WOLF_V.chase===.7&&/CRE_WOLF_V\[kind\]/.test(creSnd.toString())&&/rk=creRK\(m\.type,kind,far\)/.test(creSnd.toString())&&/\*\.85/.test(farHowl.toString());
     const c=Math.abs(creDistK(64*.8,false,.8)-1)<1e-9&&creDistK(60,false,1)<1;return a&&b&&c||`virhe ${a}${b}${c}`;});
   t('v2.25 Aarnipuun törmäys kattaa rungon ja juuret (cr 1 × koko): pelaaja ei mene rungon sisään',()=>{const g=window.__game,A=nodes.filter(n=>n.type==='aarnipuu'&&n.alive&&n.col);if(!A.length)return 'ei aarnipuita';

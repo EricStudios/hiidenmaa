@@ -293,10 +293,10 @@ function renderInv(){initSearch();renderEffects();
   // Jos seuraava napsautus osuu toiseen ruutuun, esine siirtyy ja käyttöönotto perutaan (selEq.undo). Kaksoisnapsautus ei enää syö (kohta 3).
   [...g.children].forEach((el,i)=>{el.classList.toggle('sel',i===selSlot);el.onclick=()=>{
       if(selSlot>=0&&selSlot!==i&&inv[selSlot]){if(selEq&&selEq.i===selSlot)selEq.undo();selEq=null;(selHalf?moveHalf:moveSlot)(inv,selSlot,inv,i);selSlot=-1;selHalf=false;upPrev=null;invDirty=true;updateGear();renderInv();return;}
-      upPrev=null;selHalf=false;selEq=null;if(selSlot===i){selSlot=-1;renderInv();return;}selSlot=inv[i]?i:-1;if(inv[i])invSnd('siirto');   /* v2.29 nostoääni */
+      upPrev=null;selHalf=false;selEq=null;if(selSlot===i){selSlot=-1;renderInv();return;}selSlot=inv[i]?i:-1;   /* v2.57: valinta hiljaa – siirtoääni vasta siirrossa */
       if(inv[i]&&clickEquips(inv[i]))selEq={i,undo:clickEquip(inv[i])};renderInv();};
     el.ondblclick=()=>{const s=inv[i];if(s&&!ITEMS[s.id].food&&!clickEquips(s))useSlot(i);selSlot=-1;renderInv();};el.oncontextmenu=e=>{e.preventDefault();if(dragEat)return;if(selSlot>=0&&selSlot!==i&&inv[selSlot]){if(selEq&&selEq.i===selSlot)selEq.undo();selEq=null;if(e.shiftKey&&splitOpen(inv,selSlot,inv,i,e.clientX,e.clientY))return;moveHalf(inv,selSlot,inv,i);   /* v1.40 (kohta 26): vasen tai oikea valinta → oikea toiseen ruutuun = puolet */selSlot=-1;selHalf=false;upPrev=null;invDirty=true;updateGear();renderInv();}   // v2.56 valinta pois siirron jälkeen
-      else{const h=pickHalf(inv[i]);upPrev=null;selEq=null;if(selSlot===i&&selHalf===h){selSlot=-1;selHalf=false;}else{selSlot=inv[i]?i:-1;selHalf=h;if(inv[i])invSnd('siirto');}renderInv();}};   // v1.30: oikea = ota puolet valituksi
+      else{const h=pickHalf(inv[i]);upPrev=null;selEq=null;if(selSlot===i&&selHalf===h){selSlot=-1;selHalf=false;}else{selSlot=inv[i]?i:-1;selHalf=h;}renderInv();}};   // v1.30: oikea = ota puolet valituksi
     slotUX(el,'i',i);});
   $('#invW').textContent=`Paino ${invWeight().toFixed(0)} / ${MAXW}`;updGhost();
   if(selSlot<0)selHalf=false;const det=$('#detail'),s=inv[selSlot];
@@ -474,22 +474,22 @@ function renderChest(){if(!curChest)return;const items=curChest.data.items;$('#c
   for(const [G,el0] of [['c',C],['i',I]])[...el0.children].forEach((el,i)=>{el.classList.toggle('sel',!!chestSel&&chestSel.g===G&&chestSel.i===i);el.onclick=e=>chestClick(G,i,e.shiftKey);
     el.oncontextmenu=ev=>{ev.preventDefault();const arr=G==='c'?items:inv;   // v1.08: valittuna oikea klikkaus siirtää puolet, muuten puolittaa pinon samalla puolella
       if(dragEat)return;if(chestSel&&!(chestSel.g===G&&chestSel.i===i)){const sa=chestSel.g==='c'?items:inv;if(ev.shiftKey&&splitOpen(sa,chestSel.i,arr,i,ev.clientX,ev.clientY))return;moveHalf(sa,chestSel.i,arr,i);chestSel=null;invDirty=true;updateGear();}   // v2.56 valinta pois
-      else{const h=pickHalf(arr[i]);if(chestSel&&chestSel.g===G&&chestSel.i===i&&!!chestSel.half===h)chestSel=null;else{chestSel=arr[i]?{g:G,i,half:h}:null;if(arr[i])invSnd('siirto');}}renderChest();};
+      else{const h=pickHalf(arr[i]);if(chestSel&&chestSel.g===G&&chestSel.i===i&&!!chestSel.half===h)chestSel=null;else{chestSel=arr[i]?{g:G,i,half:h}:null;}}renderChest();};
     slotUX(el,G,i);});
   const h=$('#chestHint');if(h)h.textContent=chestSel&&chestSel.half?'Puolet valittu – napsauta ruutua siirtääksesi ne.':chestSel?'Valittu – napsauta ruutua siirtääksesi (oikea: puolet, Shift + oikea: valitse määrä). Shift+napsautus siirtää heti toiselle puolelle.':'Napsauta tai raahaa esinettä siirtääksesi sen. Shift+napsautus siirtää heti toiselle puolelle.';updGhost();}
 let chestSel=null;
 function chestClick(g,i,shift){const items=curChest.data.items,arr=g==='c'?items:inv,s=arr[i];
-  if(shift){chestSel=null;if(!s)return;invSnd('siirto');if(g==='c'){const left=invAdd(s.id,s.n,s.q||1);if(left===0){items[i]=null;if(s.fuel!==undefined){const t=[...inv].reverse().find(x=>x&&x.id===s.id&&x.fuel===undefined);if(t){t.fuel=s.fuel;t.lit=s.lit;}}}else s.n=left;}
-    else{if(s.eq){s.eq=false;updateGear();}const j=items.findIndex(x=>!x);if(j<0){msg('Arkku on täynnä.','warn');return;}items[j]=s;inv[i]=null;}
+  if(shift){chestSel=null;if(!s)return;if(g==='c'){const left=invAdd(s.id,s.n,s.q||1);if(left<s.n)invSnd('siirto');if(left===0){items[i]=null;if(s.fuel!==undefined){const t=[...inv].reverse().find(x=>x&&x.id===s.id&&x.fuel===undefined);if(t){t.fuel=s.fuel;t.lit=s.lit;}}}else s.n=left;}
+    else{if(s.eq){s.eq=false;updateGear();}const j=items.findIndex(x=>!x);if(j<0){msg('Arkku on täynnä.','warn');return;}items[j]=s;inv[i]=null;invSnd('siirto');}   // v2.57 ääni vasta siirron jälkeen
     invDirty=true;renderChest();return;}
-  if(!chestSel){if(s){chestSel={g,i};invSnd('siirto');renderChest();}return;}
+  if(!chestSel){if(s){chestSel={g,i};renderChest();}return;}
   if(chestSel.g===g&&chestSel.i===i){chestSel=null;renderChest();return;}
   const src=chestSel.g==='c'?items:inv;(chestSel.half?moveHalf:moveSlot)(src,chestSel.i,arr,i);chestSel=null;invDirty=true;updateGear();renderChest();}
 // Siirto paikasta toiseen: tyhjään siirtyy, samaan pinottavaan esineeseen yhdistyy, muuten paikat vaihtuvat.
 // Arkkuun siirtyvä varuste riisutaan.
 /* v2.56 REPUN/ARKUN SIIRTOÄÄNET: 30 % hiljaisemmat (INV_SND_V) ja vaihtelevampi sävel (±INV_SND_PJ). Puolitusääni vain kun puolitus
    todella tapahtuu (puolet siirtyy kohteeseen); valinta (myös oikealla) soittaa siirtoäänen. */
-const INV_SND_V=.7,INV_SND_PJ=.12;
+const INV_SND_V=.7,INV_SND_PJ=.12;   // v2.57: siirto soi VAIN valmiissa tavallisessa siirrossa, puolitus vain puolituksessa (ei valinnassa, raahauksen alussa tai sliderin avauksessa)
 function invSnd(ev){return plSnd('valikot',ev,{v:INV_SND_V,pj:INV_SND_PJ});}
 function moveSlot(sa,si,da,di){const a=sa[si],b=da[di];if(!a||(sa===da&&si===di))return;invSnd('siirto');   /* v2.29 laskuääni */
   if(b&&b.id===a.id&&ITEMS[a.id].s>1&&(b.q||1)===(a.q||1)){const k=Math.min(a.n,ITEMS[a.id].s-b.n);b.n+=k;a.n-=k;if(a.n<=0)sa[si]=null;return;}
@@ -532,7 +532,7 @@ function slotUX(el,g,i){el.dataset.g=g;el.dataset.i=i;
 function selectFor(g,i,half){if(openPanel==='inv'){selSlot=i;selHalf=!!half;upPrev=null;}else chestSel={g,i,half:!!half};}
 function uxRerender(){if(openPanel==='inv')renderInv();else if(openPanel==='chest')renderChest();}
 addEventListener('mousemove',e=>{mouseXY=[e.clientX,e.clientY];
-  if(slotDrag&&!slotDrag.on&&Math.hypot(e.clientX-slotDrag.x,e.clientY-slotDrag.y)>DRAG_PX){slotDrag.on=true;selectFor(slotDrag.g,slotDrag.i,slotDrag.half);invSnd('siirto');uxRerender();}
+  if(slotDrag&&!slotDrag.on&&Math.hypot(e.clientX-slotDrag.x,e.clientY-slotDrag.y)>DRAG_PX){slotDrag.on=true;selectFor(slotDrag.g,slotDrag.i,slotDrag.half);uxRerender();}   // v2.57: raahauksen alku hiljaa
   if(GHOST.style.display==='flex')updGhost();});
 addEventListener('mouseup',e=>{const d=slotDrag;slotDrag=null;if(!d||!d.on)return;dragEat=true;setTimeout(()=>dragEat=false,0);
   const src=uxArr(d.g),a=src[d.i];if(!a){uxRerender();return;}
@@ -751,7 +751,7 @@ function splitOpen(sa,si,da,di,x,y){const a=sa[si],b=da[di];if(!a||a.n<2||(sa===
   if(b&&!(b.id===a.id&&ITEMS[a.id].s>1&&(b.q||1)===(a.q||1)))return false;
   const d=splitEl();Object.assign(SPL,{on:true,drag:false,sa,si,da,di,n:a.n,v:Math.floor(a.n/2)});d.querySelector('.spT').textContent='Siirrä: '+ITEMS[a.id].n;d.hidden=false;
   const w=d.offsetWidth||260,h=d.offsetHeight||120;d.style.left=clamp(x-w/2,8,innerWidth-w-8)+'px';d.style.top=(y-h-14>=8?y-h-14:clamp(y+44,8,innerHeight-h-8))+'px';   /* yläpuolelle, ellei tilaa → kohderuudun alle (ei peitä kohdetta) */
-  selSlot=-1;selHalf=false;selEq=null;chestSel=null;splitSet(SPL.v);uxRerender();updGhost();invSnd('siirto');return true;}
+  selSlot=-1;selHalf=false;selEq=null;chestSel=null;splitSet(SPL.v);uxRerender();updGhost();return true;}
 function splitSet(v){if(!SPL.on)return;SPL.v=clamp(Math.round(v),0,SPL.n);const d=SPL.el,k=SPL.n?SPL.v/SPL.n:0;d.querySelector('.spFill').style.width=k*100+'%';d.querySelector('.spKnob').style.left=k*100+'%';
   d.querySelector('.spV').textContent=`${SPL.v} / ${SPL.n}`;d.querySelector('.spOk').textContent=SPL.v>0?`Siirrä ${SPL.v}`:'Siirrä 0 (ei mitään)';}
 function splitAt(x){const r=SPL.el.querySelector('.spTrack').getBoundingClientRect();splitSet((x-r.left)/Math.max(1,r.width)*SPL.n);}

@@ -310,7 +310,9 @@ def step_segments(ff, src, k=5, win=0.01, gap=0.35, seg_max=1.2):
 
 def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, loop=False, mode=None, seg=None):
     """prof (toiminnot): (yläraja, iso yläraja, häivytys, LUFS) – isojen +2 dB on jo mukana; big valitsee ison ylärajan."""
-    cap_n, cap_b, fade, target = prof or PROFIILI.get(kind, PROFIILI['idle'])
+    pr = prof or PROFIILI.get(kind, PROFIILI['idle'])
+    cap_n, cap_b, fade, target = pr[:4]
+    fcurve = pr[4] if len(pr) > 4 else 'tri'   # v2.57 häivytyksen käyrä (esin = pehmeä alku ja loppu)
     AC, BR = ('2', '160k') if kind in MUSIC_EV else ('1', '96k')   # v2.53 musiikki stereona ja paremmalla laadulla
     boss = ai in BOSS_DB or big
     cap = cap_b if boss else cap_n
@@ -377,7 +379,7 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
         f = min(max(fade, 0.6) if cut and L > cap else fade, L * 0.5)
         if not loop:
             r = run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', w1, '-af',
-                     f'atrim=duration={L:.3f},afade=t=in:d=0.006,afade=t=out:st={max(L - f, 0):.3f}:d={f:.3f}', '-c:a', 'pcm_s16le', w2])
+                     f'atrim=duration={L:.3f},afade=t=in:d=0.006,afade=t=out:st={max(L - f, 0):.3f}:d={f:.3f}:curve={fcurve}', '-c:a', 'pcm_s16le', w2])
             if r.returncode != 0:
                 return r.stderr.strip()[-300:], None
         # 3) äänekkyyden mittaus → vahvistus tavoitteeseen (−24…+24 dB) + alimiter (katto −1 dBFS)
@@ -624,7 +626,7 @@ T_PROF['pusikko'] = (.3, .42, .07, -27)   # v2.27 Aarnimetsän askel lyhyemmäks
 T_DEF = (1.5, 1.5, .15, -22)
 # v2.50: tiedostokohtainen profiili (käsitellyn nimen mukaan, ohittaa t_prof:n) – puun tömähdykset: _2 pitkä (iso puu) selvällä pitkällä
 # häivytyksellä, perus ja _1 lyhyellä häivytyksellä
-F_PROF = {'puu_tomahdys_0': (2.4, 2.4, .35, -17), 'puu_tomahdys_1': (.8, .8, .12, -17), 'puu_tomahdys_2': (5.2, 5.2, 2.6, -17)}
+F_PROF = {'puu_tomahdys_0': (2.4, 2.4, 1.1, -17, 'esin'), 'puu_tomahdys_1': (.8, .8, .22, -17, 'esin'), 'puu_tomahdys_2': (5.2, 5.2, 3.4, -17, 'esin')}   # v2.57 pidempi ja pehmeämpi häivytys
 def t_prof(ev, big):
     k = 'kahlaus' if ev == 'askel_kahlaus' else 'uinti' if ev == 'askel_uinti' else 'pusikko' if ev == 'askel_pusikko' else ev if ev in T_PROF else ev.split('_')[0]
     a, b, f, t = T_PROF.get(k, T_DEF)

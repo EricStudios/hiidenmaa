@@ -440,6 +440,17 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   `newGame(); startPlay()` (pelkkä setState jättää `#menuBg`-kanvaksen ruutujen päälle → mikään klikkaus ei osu). VC-tila: `locked=true;
   state='ui'; vcSync()`, ja **liikuta oikeaa hiirtä ensin, aseta sitten `VC.x/VC.y`** (hiiren liike siirtää virtuaaliosoitinta).
   Kokeile: oikea+vasen, vasen+oikea, oikea+oikea, liikahdus 8–9 px pinoon, nopea toisto, arkku. Tarkistusrivi v2.56.
+- **Äänisääntö (v2.57, käyttäjä):** `siirto` soi VAIN valmiissa tavallisessa siirrossa (`moveSlot`, arkun Shift-siirron onnistuessa) – ei
+  valinnassa (vasen/oikea), raahauksen alussa eikä sliderin avauksessa; puolituksessa VAIN `puolitus` (`moveCount(…,'puolitus')`).
+
+## 61. Repun/arkun ikkuna "venyi" ja ruudut siirtyivät valittaessa (v2.57)
+- Oire: esineen valinta (repussa tai arkussa) sai ikkunan näyttämään kasvavan ja ruudut siirtyvän.
+- Syyt: (1) valitun ruudun sykintä `selPulse` käytti `transform: translateY + scale(1,04–1,08)` → ruutu kasvoi ja nousi, ja reunalla
+  ylivuoto saattoi tuoda vierityspalkin (koko ruudukko siirtyi); (2) arkun ohjerivi `#chestHint` piteni valittaessa ja rivittyi kapealla
+  näytöllä kahdelle riville → ikkuna kasvoi.
+- Ratkaisu: sykintä pelkällä `box-shadow`-hehkulla (inset-reuna + hehku, ei transformia); `#chestHint` kiinteä 2 rivin korkeus
+  (`height:2.7em; overflow:hidden`). **Paneelien ruutujen tiloihin ei transformia, marginaalia tai reunan paksuuden muutosta.**
+  Testi: mittaa kaikkien ruutujen `getBoundingClientRect` ennen/jälkeen valinnan (1280 × 800 ja 1000 × 620) – ei muutosta. Rivi v2.57.
 
 ## Herkät kohdat (lue ennen muokkausta)
 
