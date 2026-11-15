@@ -132,9 +132,16 @@ function zoneAt(x,z){const h=terrainH(x,z),b=biomeAt(x,z,h);return b==='mountain
 const HGT=new Float32Array(HN*HN);
 for(let iz=0;iz<HN;iz++)for(let ix=0;ix<HN;ix++)HGT[iz*HN+ix]=heightFn(-HALF+ix*GS,-HALF+iz*GS);
 const HGT0=HGT.slice(),TERRA={}; // alkuperäinen korkeuskartta ja lapiolla muokatut kärjet (indeksi → korkeus)
+/* v2.65 TARKKA MAANMUOKKAUS: lapion/kuokan koskemat 16 × 16 m lohkot (FT_CS × FT_CS ruutua) saavat oman 1 m verkon (FT_S = 2 → 4× kärkiä
+   ruutua kohden). FT_IDX[lohko] = laikun indeksi + 1, FT_P = laikut {cx,cz,h,h0,mud,c0,mesh}. terrainH lukee laikun tarkat korkeudet (sama
+   kolmiojako kuin karkeassa verkossa). Laikut ja niiden verkot: resources.js (ftEnsure, ftTool, ftList/ftApply/ftReset). */
+const FT_CS=8,FT_S=2,FT_NV=FT_CS*FT_S+1,FT_CN=Math.ceil(GN/FT_CS),FT_IDX=new Int32Array(FT_CN*FT_CN),FT_P=[];let FT_ANY=false;
+function ftH(p,gx,gz){const F=FT_S,lx=(gx-p.cx*FT_CS)*F,lz=(gz-p.cz*FT_CS)*F,ix=Math.min(FT_NV-2,lx|0),iz=Math.min(FT_NV-2,lz|0),fx=lx-ix,fz=lz-iz,i=iz*FT_NV+ix,H=p.h;
+  const h00=H[i],h10=H[i+1],h01=H[i+FT_NV],h11=H[i+FT_NV+1];if(fx+fz<1)return h00+(h10-h00)*fx+(h01-h00)*fz;return h11+(h01-h11)*(1-fx)+(h10-h11)*(1-fz);}
 function terrainH(x,z){
   const gx=(x+HALF)/GS,gz=(z+HALF)/GS;
   if(gx<0||gz<0||gx>=GN||gz>=GN)return SEA_FLOOR;
+  if(FT_ANY){const pi=FT_IDX[((gz/FT_CS)|0)*FT_CN+((gx/FT_CS)|0)];if(pi)return ftH(FT_P[pi-1],gx,gz);}
   const ix=gx|0,iz=gz|0,fx=gx-ix,fz=gz-iz,i=iz*HN+ix;
   const h00=HGT[i],h10=HGT[i+1],h01=HGT[i+HN],h11=HGT[i+HN+1];
   if(fx+fz<1)return h00+(h10-h00)*fx+(h01-h00)*fz;

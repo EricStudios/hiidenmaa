@@ -39,23 +39,23 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 | Tiedosto | Sisältö |
 | --- | --- |
 | `js/boot.js` | (ladataan `index.html`:ssä ennen muita) aloitusjakso, suorituskykytesti omassa näkymässä (`__boot`), pelin skriptien lataus listasta `window.__GJS` (uusi tiedosto lisätään SINNE) |
-| `js/core.js` | `DEV` (oletus pois, `localStorage.hiidenmaa_devon` / `?dev=1`, kytkin Asetukset › Ohjaus ja ääni; Ä = DEV-valikko (Näkymätön `DEVF.unseen`), Ö = olennot ja pomot `renderDevM`, Å = esineet `renderDevI`/`DEV_PICKS`, täpät `DEVF`), `$`, `clamp`, `lerp`, `sstep`, kohina (`fbm`, `ridge`), `mulberry32` |
-| `js/world.js` | `WS` (skaala), `MAPS`/`MAP`/`MAP_ID` (6 karttaa), `dirIn`, `HALF`, `LOC` (+ arvotut `SITE_DEFS`-paikat), `AARNI`, `DUN`, `heightFn`, `biomeAt`, `zoneAt`, `BIOMES` (nimet + ominaisuudet), `terrainH`, merenpohja `SEA_FLOOR`, meren raja `seaBorder`, ylämäen hidastus `uphillK`, hautakummun kohouma `barrowMound` |
-| `js/render.js` | renderer, scene, camera, valot, näytön auringonsäteet ja linssiheijastus (`RAYS`/`drawRays`, `#raysC`, `SET.flare`, päivä `raysDay`, peitto `raysPeek`, peitto suunnittain `RAYS.dir`/`rayOcc`, voimakkuus `RAYS_A`), pilvien varjostus `cloudShade`, terävät soihtuvarjot `torchSharpOn`/`torchShadowApply`, säteiden taustaluku `RPK`/`raysEval`, varjon vaalennus varjostimessa `hmLift`/`SUN_SH_BASE`, Ultran pehmeä pilvimatto `deckSoftSet`, tekstuurit, `MAT`, `mat()`, `bx()`, maasto, vesi (varjostin `WATER_U`, syvyyskartta `WATER_DEP`/`waterDepSet`, aallot `WV`/`waveAt`, verkko `waterGeo`, low poly / realistinen `waterApply`), taivas, sade |
-| `js/collision.js` | törmäysruudukko: `addBox`, `addCircle`, `groundAt`, `collideXZ`, `pointBlocked`, `STEPUP` |
+| `js/core.js` | `DEV` (oletus pois, `localStorage.hiidenmaa_devon` / `?dev=1`, kytkin Asetukset › Ohjaus; Ä = DEV-valikko (Näkymätön `DEVF.unseen`), Ö = olennot ja pomot `renderDevM`, Å = esineet `renderDevI`/`DEV_PICKS`, täpät `DEVF`), `$`, `clamp`, `lerp`, `sstep`, kohina (`fbm`, `ridge`), `mulberry32` |
+| `js/world.js` | `WS` (skaala), `MAPS`/`MAP`/`MAP_ID` (6 karttaa), `dirIn`, `HALF`, `LOC` (+ arvotut `SITE_DEFS`-paikat), `AARNI`, `DUN`, `heightFn`, `biomeAt`, `zoneAt`, `BIOMES` (nimet + ominaisuudet), `terrainH`, merenpohja `SEA_FLOOR`, meren raja `seaBorder`, ylämäen hidastus `uphillK`, hautakummun kohouma `barrowMound`, tarkat maanmuokkauslaikut `FT_*`/`ftH` (v2.65, laikut resources.js `ftEnsure`/`ftTool`) |
+| `js/render.js` | renderer, scene, camera, valot, näytön auringonsäteet ja linssiheijastus (`RAYS`/`drawRays`, `#raysC`, `SET.flare`, päivä `raysDay`, peitto `raysPeek`, peitto suunnittain `RAYS.dir`/`rayOcc`, voimakkuus `RAYS_A`), pilvien varjostus `cloudShade`, terävät soihtuvarjot `torchSharpOn`/`torchShadowApply`, säteiden taustaluku `RPK`/`raysEval`, varjon vaalennus varjostimessa `hmLift`/`SUN_SH_BASE`, Ultran pehmeä pilvimatto `deckSoftSet`, tekstuurit, `MAT`, `mat()`, `bx()`, maasto (väri `terrCol`, tiheämpi väritys `TFINE`/`terrFineSet`, biomien sekoitus `blendApply`/`TSOFT`, laikkumaski `FTM`/`terrHook`), vesi (varjostin `WATER_U`, syvyyskartta `WATER_DEP`/`waterDepSet`, aallot `WV`/`waveAt`, verkko `waterGeo`, low poly / realistinen `waterApply`), taivas, sade |
+| `js/collision.js` | törmäysruudukko: `addBox`, `addCircle`, `groundAt` (ympyrälattia `ground`/`gr`/`dr`: kivet, tynnyrit, muurin harja), `collideXZ`, `pointBlocked` (`lw` = muuri estää näön), `STEPUP` |
 | `js/items.js` | `ITEMS`, `RECIPES`, `RECIPE_BY`, `icon(id)` (canvas-kuvakkeet) |
-| `js/audio.js` | `sfx(nimi)` – hiljainen äänikoukku (`SFX_HOOKS`; v2.22: EI generoituja ääniä – vain käyttäjän omat tiedostot); osumat `TG_HIT`/`tgHit`, törmäykset `tgHeavy`; olentojen tiedostoäänet: varaääniketju `VARAANI`, `creLoad`/`creSnd`/`creTick` (3D); toimintoäänet `TG` (ryhmät; pomot lainaavat `pomot/`-kansiosta `TG_BORROW`; kerrostus pohjaryhmän päälle `TG_BASE`/`TG_BASEP`, askelkerros `TG_STEP_LAYER`), `tgSnd`/`tgPlay`/`tgTick`/`tgSurface` (askeleet, budjetti `TGV`; kuuluvuus `TG_RK`/`tgR2`/`tgDistK`, tahti `TG_WALK_K`/`TG_RUN_K`); olentoäänten taso `CRE_VK`; pelaajan äänet `plSnd`/`plTick`/`plSurface`/`plBody`/`plLoop`/`plBush`/`plNodeAt` (`PLV`, `SET.plVol`, `PL_STEP_V`); susien kerroin `creRK`/`CRE_WOLF_V` |
+| `js/audio.js` | `sfx(nimi)` – hiljainen äänikoukku; v2.53 äänenvoimakkuus `volK` (`SFX_HOOKS`; v2.22: EI generoituja ääniä – vain käyttäjän omat tiedostot); osumat `TG_HIT`/`tgHit`, törmäykset `tgHeavy`; olentojen tiedostoäänet: varaääniketju `VARAANI`, `creLoad`/`creSnd`/`creTick` (3D); toimintoäänet `TG` (ryhmät; pomot lainaavat `pomot/`-kansiosta `TG_BORROW`; kerrostus pohjaryhmän päälle `TG_BASE`/`TG_BASEP`, askelkerros `TG_STEP_LAYER`), `tgSnd`/`tgPlay`/`tgTick`/`tgSurface` (askeleet, budjetti `TGV`; kuuluvuus `TG_RK`/`tgR2`/`tgDistK`, tahti `TG_WALK_K`/`TG_RUN_K`); olentoäänten taso `CRE_VK`; pelaajan äänet `plSnd`/`plTick`/`plSurface`/`plBody`/`plLoop`/`plBush`/`plNodeAt` (`PLV`, `SET.plVol`, `PL_STEP_V`); susien kerroin `creRK`/`CRE_WOLF_V` |
 | `js/models.js` | `makeHumanoid` (yksityiskohtaiset kaksijalkaiset), `makeAnimal` (eläimet; kaulan nivel `nk`, kuonon ulottuma `nkTab`, venymä `nkRig`, pään asento `NK_HP`), `makeBiped`, `makeQuad`, `makeHeld`, `makeShield`, `makeBird` (metso), pelaaja `makePlayer`, haarniskat `buildArmor` |
 | `js/bossmodels.js` | pomojen korkealaatuiset mallit (`figVartija`, `figJaatar`, `figKalmaherra`, `figAarni`), apurit `bqLump`/`bqTaper`/`bqCloth`/`bqCrystal`…, Ultra-efektit `f.fx` + `bossUltra()` |
 | `js/resources.js` | `NODE` (`cr` = törmäyssäde, jos eri kuin `r`), `NGEO`, sijoittelu ruutuihin (`CHN`, `VIS_R`), `nodes`, tukit (`logs`), `regrowForest`, kohteiden suoja `siteBlocked`, ruoho `rebuildGrass`, maaston LOD `terrLodTick`, staattisten yhdistäminen `mergeStatics`/`mergeTick`, kallistus rinteessä `NTILT`/`groundSlope`; v2.41 kaukomalli `NGEO_LOW` (`treeLod`, jaettu instanceMatrix), varjomallit `SHP`/`shpTick`/`shpFire` (`NGEO_SHF`, `shLod`, `shOpt`, varjopassin kääre – KORJAUKSET 55) |
 | `js/landmarks.js` | riimukivet, rauniot, Hautakumpu, Kalmankehä, luolasto (`DMAP`), `wallTorch`, `brazier`, `rockC`, liekkirekisteri `FLAMES`, arkut `makeChest`/`openLid`/`syncChests`; maahan asti ulottuva kivi `stoneCol`/`gmin` (KORJAUKSET 58), Hautakummun stencil-luolasuu `barrowCave`/`CAVE` |
 | `js/pieces.js` | `G`, `WH`, `DOOR_W/H`, tikkaiden kulmat `LADDER_RUN`/`ladRun`, saumaton puusyy `seamLen`, `PIECES`, `pieceBoxes` (tagit `door`/`glass`), `buildPieceMesh` (`GLASS_MAT`, `IRON_MAT`), `addPiece`, `removePiece`, kaukaisten rakennusten yhdistäminen `bmTick`/`BMC` (`mergeSt`); v2.43 liekit pystyyn `FLAME_UP`/`flameUpTick` (models.js) |
 | `js/mobs.js` | `MOBDEF`, mallit (`figGolem` kivivartija, `figYlimys`, `figKalmo`, `figHiisi`; pomot bossmodels.js:ssä), `spawnMob`, `mobs`, `boss` |
-| `js/dungeons.js` | `REALMS` (3 ulottuvuutta, avainketju `lock`/`key`/`alt`), generaattorit, `ensureRealm`, koristeet (`dressFloor`, tynnyrit, spawneri), portaalit, `realmBossAI`, Kalmanpesän murskaus `hitSpawner`, usva/höyry/pisarat (v2.43 yksi instanssipiirto `SMK`/`smkDraw`, Ultra-savut `smokeUltra`), `P.spawnProt`, `fo(k)` |
-| `js/story.js` | löytöpaikat (`SITE_KEYS`, rauniot, arkkukivilinnakkeet `FORT`), vartijat (`GUARDS`), lisäriimukivet (`XRUNES`), tehtävät (`QUESTS`), leirit `CAMPS`/`ensureCamps`, kiviröykkiöt `STASHES`, maailman saalis `planLoot`/`wlLoot`, arvoesineiden palautus `relocateValuable`/`valuableCensus`, kyltit `SIGNS` |
+| `js/dungeons.js` | `REALMS` (3 ulottuvuutta, avainketju `lock`/`key`/`alt`, v2.62 useampi lukko `locks`/`lockOpen`/`portalLabel`), generaattorit, `ensureRealm`, koristeet (`dressFloor`, tynnyrit, spawneri), portaalit, `realmBossAI`, Kalmanpesän murskaus `hitSpawner`, usva/höyry/pisarat (v2.43 yksi instanssipiirto `SMK`/`smkDraw`, Ultra-savut `smokeUltra`), `P.spawnProt`, `fo(k)` |
+| `js/story.js` | löytöpaikat (`SITE_KEYS`, rauniot, arkkukivilinnakkeet `FORT`), vartijat (`GUARDS`), lisäriimukivet (`XRUNES`), tehtävät (`QUESTS`), Avaimen kätkijä `LOC.runeK`/`keeperHint`/`keeperTick`, hukattujen arvoesineiden kohde `VAL_HOME`/`relocateRealm`, leirit `CAMPS`/`ensureCamps`, kiviröykkiöt `STASHES`, maailman saalis `planLoot`/`wlLoot`, arvoesineiden palautus `relocateValuable`/`valuableCensus`, kyltit `SIGNS` |
 | `js/state.js` | `P` (pelaaja), `inv`, `flags`, pelaajahahmo, reppu, selkäesineet (`backPose`), maahan pudonneet esineet (arvoesineet `isValuable`, 3D-kuvakkeet `dropMesh`, 3D-mallit `dropModel`/`armorDropMesh`/`keyMesh`/`treasureMesh`/`potionMesh`, majakkasäde `beaconAdd`), partikkelit, ammukset; jousen osumamerkki `hitMarker` (punainen = pääosuma `headShot`), selän nuolet `hasArrows` |
 | `js/effects.js` | veri (`bleed`, `splat`, `addWound`, rinne `slopeN`, valuminen `poolFlow`, Ultra `bloodUltra`), savupilvet (`smokePuff`), kuolema-animaatiot (`mobDeathAnim`, tuhka), syntyanimaatio `bornStart`/`bornTick` (`opts.noBorn`), pelaajan palaminen ja kuolema (vedessä `D.water`); veden alla `CAM_UW`, `updateWaterFx` (kuplat `UWF`, roiskeet, `#uwTint`/`#drownV`) |
-| `js/settings.js` | `ACTIONS`/`BIND` (näppäinsidonnat, `kd()`), `SET`/`SET_DEF` (oletus = yleisin taso), `SET_PAGES`, `applyGfx()`, asetusvalikko (Grafiikka, Varjot, …); automaattisäätö `AUTO`/`autoOn`, väliotsikot; esiasetussäätimen teemat `pvTheme`/`PV_FX`; kaikki toiminnot -ikkuna `ALL_KEYS`/`showAllKeys` (päivitä, kun lisäät näppäimen). |
+| `js/settings.js` | `ACTIONS`/`BIND` (näppäinsidonnat, `kd()`), `SET`/`SET_DEF` (oletus = yleisin taso), `SET_PAGES`, `applyGfx()`, HUD-skaala `hudK`/`hudScaleApply` (css `--hudK`), silmäpainike `seeThruSet`/`seeThruSync` (`#menu.seeThru`, vain pelin aikana), asetusvalikko (Grafiikka, Varjot, …); automaattisäätö `AUTO`/`autoOn`, väliotsikot; esiasetussäätimen teemat `pvTheme`/`PV_FX`; kaikki toiminnot -ikkuna `ALL_KEYS`/`showAllKeys` (päivitä, kun lisäät näppäimen). |
 | `js/input.js` | näppäimet, hiiri, hiiren lukitus; virtuaalinen osoitin `VC`/`vcSync`/`vcFlush` (lukitus pysyy paneelien ajan; herkkyys `SET.sens`/`SET.curSens`) |
 | `js/actions.js` | hyökkäys, vahinko, syöminen, `interact()`, alttari, luolastoon meno; jousi `bowSpread`/`bowShot`/`bowCrouch`, tähtäys `bowAimPoint`, lentorata `bowTraj` |
 | `js/building.js` | rakennushaamu, ruudukkoon kohdistus, reunakohdistus `smartSnap`, tikkaiden/portaiden jatko `jatkoFind`/`jPlace` (tila `JK`, G-tila jatko), tikkaat seinään `ladderWall`, `validPlace`, purku |
@@ -67,7 +67,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 | `js/progress.js` | `bump`, XP ja taso (`lvlInfo`), saavutukset (`ACH`, `BON`), `GOALS`, edistymispaneeli (J) |
 | `js/save.js` | `serialize`, `loadData`, `saveGame`, `SKEY`, tallennuspaikat (`SLOTS`, `slotKey`, `slotMeta`, `curSlot`) |
 | `js/menubg.js` | valikon animoidut taustakuvat (`MBG_SCENES` 21 kpl, `mbgFrame`, `mbgShow`); valikossa ei piirretä 3D:tä; valikon partikkelit `MFX`/`mfxFrame` (laji taustan mukaan), SVG-logo `buildLogo`, 7 teemaa `LOGO_T`, arvonta `logoRandom` |
-| `js/main.js` | valikko, pääsilmukka `frame()`, mukautuva laatu, testirajapinta `window.__game`; valikon taustakameran kierros (`menuCam`, `buildMenuSpots`), automaattisäätö (`autoQuality`), FPS (`updateFps`); valikon näkymät `setMenuView`/`menuBack` (`#menu[data-view]`), intro `startIntro`/`introCam` (uusi maailma `worldLoad`, pilvet `introCloudsMake`/`introVeil`), suorituskykytesti `perf*`, taukotila `pauseRun`, DEV-suorituskykymittari `perfTick`. Latausnäyttö on `index.html`:ssä (`__ldSet`/`__ldDone`/`__ldShow`, `__ldAfter`), samoin ensikäynnin aloitusjakso `#splash` (`__splashOn`). |
+| `js/main.js` | valikko, pääsilmukka `frame()`, mukautuva laatu, testirajapinta `window.__game`; valikon taustakameran kierros (`menuCam`, `buildMenuSpots`), automaattisäätö (`autoQuality`), FPS (`updateFps`); valikon näkymät `setMenuView`/`menuBack` (`#menu[data-view]`), intro `startIntro`/`introCam` (uusi maailma `worldLoad`, tallennuksen jatko latausnäytöllä `saveLoad`, pilvet `introCloudsMake`/`introVeil`), suorituskykytesti `perf*`, taukotila `pauseRun`, DEV-suorituskykymittari `perfTick`. Latausnäyttö on `index.html`:ssä (`__ldSet`/`__ldDone`/`__ldShow`, `__ldAfter`), samoin ensikäynnin aloitusjakso `#splash` (`__splashOn`). |
 
 ## Mittayksiköt ja sopimukset
 
@@ -95,6 +95,11 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 - Työtapa ja säännöt: `docs/KEHITYSMUISTIO.md` → "Äänisuunnitelma". Projektit omissa kansioissaan `sounds/<projekti>/` (`raw/`, `valmiit/`, oma lista):
   `olennot_aanet/` (AANILISTA.md), `pelaaja_1_liike/`, `pelaaja_2_toiminnot/`, `pelaaja_3_aanet/` (v2.25; avaimet `p/<ryhmä>/…`, työkalun `P_PARTS`; **yksi numeroton paikkamerkki per ääni**, lisäversiot `_1` …; listat `AANILISTA_OSA<n>.csv` + `sounds/AANILISTA_PELAAJA.xlsx`) ja `olennot_toiminnot/` (ryhmäkansiot `raw/<ryhmä>/` → `valmiit/<ryhmä>_valmis/`, AANILISTA_TOIMINNOT.md; kerrostuvissa ryhmissä vain
   kerrokset kuten tömistys/kalina – pohjaääni kaksi- tai nelijalkaisilta); `sounds/manifest.json` yhteinen (`f`-polku).
+  Valikot (v2.51–): `menu_1_valikko/` ja `menu_2_efektit/` (avaimet `m/<ryhmä>/…`, työkalun `M_PARTS`, listat `AANILISTA_MENU<n>.csv` + `AANILISTA_MENU.xlsx`), peli `mSnd`/`mStop` (audio.js, `SET.uiVol`);
+  ennen pelin skriptejä `__bootSnd` (boot.js, yhteinen AudioContext `window.__AC`, äänten avausmerkki `#sndHint`).
+  Musiikki (v2.53): `musiikki/` (avaimet `mu/…`, stereo), soitin boot.js `__mus` + main.js `musicTick`; ilmoitukset `ilmoitukset/` (avaimet `i/…`, yhteinen + biomi/ulottuvuuskohtaiset);
+  sää ja tunnelma (v2.61) `saa_ja_tunnelma/` (avaimet `a/…`, silmukat `X_ACT`, soitin audio.js `ambTick`/`ambTargets`, ukkonen `ambThunder`);
+  voimakkuus `volK(kategoria)` (audio.js, sivu Äänet ja musiikki, 100 % = `VOL_BASE`).
 - Käyttäjä korvaa paikkamerkin projektin `raw/`-kansiossa samalla nimellä (lisäversiot `_4`, `_5` … ilman rajaa) → aja `python3 tools/process_sounds.py` (uudet nimet: `--init`).
   Peli lukee vain `sounds/manifest.json`:n käsitellyt äänet. Uusi olento → aja `--init` (tekee sen paikkamerkit).
 - **Äänierä (uudet äänet):** noudata kehitysmuistion "Äänierän rutiini" (pull → `process_sounds.py` → lue HUOM-rivit → muistio, versio, `tarkistus.mjs` → PR). Pelkkä äänidata ei vaadi
@@ -109,20 +114,21 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 
 ## Grafiikka-asetukset
 
+- Kaikki automaattiset grafiikkasäädöt kulkevat `autoOn()`:n kautta (Extra › `noAuto` sammuttaa ne); uusi automaattinen säätö → tarkista `SET.noAuto`.
 - Oletuksena pois olevat, vain käsin laitettavat (raskaat) asetukset kuuluvat Extra-grafiikka-välilehdelle (`SET_PAGES.xgfx`, rivi `xRow()`; ei esiasetuksiin).
 - Uusi asetus: lisää `SET_DEF`:iin (oletus = nykyinen ulkoasu), sivun avainlistaan `SET_PAGES` ja riviksi `setRow()`:lla
   (oletusmerkintä ja sivun palautus tulevat automaattisesti). Ota käyttöön `applyGfx()`:ssa.
 
 ## Etenemisketju
 
-- Ulottuvuuksiin mennään järjestyksessä: avain maailmasta → 1. → 2. → 3. Jokaisella portilla on varmistus (`alt`), jottei
+- Ulottuvuuksiin mennään järjestyksessä: Kalmon sinetti (Hautakumpu) + Jääavain (maailman arkku) → 1. → 2. → 3. (koko kulku: kehitysmuistio › Pysyvät päätökset › PELIN KULKU). Jokaisella portilla on varmistus (`alt`), jottei
   kadonnut avain jumita peliä. Uutta lukkoa lisättäessä tarkista, että avaimen lähde on aina saavutettavissa ilman lukon takana olevaa.
 
 ## Tallennus
 
 - Tallennus: 5 maailmaa. Paikka 0 = `hiidenmaa_save_v1`, paikat 1–4 = `hiidenmaa_save_v1_1`…`_4`, lista `hiidenmaa_slots` (`slotMeta`,
   `curSlot`). Lisäksi valikossa on tallennuskoodi. Automaattitallennus 2 min välein.
-- Kun tallennusmuoto muuttuu, nosta `serialize()`:n `v`-numeroa ja käsittele vanha versio
+- Tallennusmuoto nyt `v` 11 (v2.65: `ft` = tarkat maanmuokkauslaikut). Kun tallennusmuoto muuttuu, nosta `serialize()`:n `v`-numeroa ja käsittele vanha versio
   `loadData()`:ssa. Kirjaa muutos kehitysmuistioon.
 
 ## Testaus
@@ -136,6 +142,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 - Tarkista aina, ettei konsoliin tule virheitä, ja että tallennus + lataus toimii.
 - **Ennen koodausta lue kehitysmuistion "Koodausmuistiinpanot"** (maahan sijoittaminen, stencil, yhdistäminen, Ultra-tunnistus, testiajojen vinkit)
   ja "Osumaäänien tarkistus" (uusi hyökkäys pelaajaan aina `mobHurtP`:n kautta).
+- **Syntaksi ennen testejä (KORJAUKSET 62):** `for f in js/*.js tools/tarkistus.mjs; do node --check $f >/dev/null || echo VIRHE $f; done`.
 - **Ominaisuustarkistus jokaisen erän jälkeen:** `tools/tarkistus.mjs` (pitää tulostaa `KAIKKI OK`; rivi palauttaa `true` tai virhetekstin – teksti = virhe, KORJAUKSET 48). Lisää uudelle ominaisuudelle
   oma tarkistusrivi, jotta sen katoaminen huomataan. Ennen haaran nollausta tarkista, ettei yhdistämättömiä committeja katoa.
 

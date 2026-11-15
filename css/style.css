@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'2.49';
+:root{--css-v:'2.65';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -17,7 +17,8 @@ button:focus-visible{outline:2px solid var(--frost);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
 
 /* HUD */
-#hud{position:fixed;inset:0;pointer-events:none}
+#hud{position:fixed;inset:0;pointer-events:none;zoom:var(--hudK,1)}   /* v2.63 HUD-skaala (Asetukset › Ohjaus › HUD) */
+#floaters{position:absolute;inset:0;zoom:calc(1 / var(--hudK,1))}   /* maailmaan sidotut: koordinaatit näytön pikseleinä, koko skaalataan alla */
 #cross{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(238,229,211,.85);box-shadow:0 0 0 1.5px rgba(0,0,0,.45)}
 #cross.aim{width:18px;height:18px;margin:-9px 0 0 -9px;background:transparent;border:2px solid var(--ember)}
 #goal{position:absolute;left:16px;top:calc(16px + env(safe-area-inset-top,0px));max-width:300px;padding:10px 14px;background:linear-gradient(90deg,rgba(19,17,14,.85) 65%,rgba(19,17,14,0));border-left:2px solid var(--ember)}
@@ -62,8 +63,8 @@ button:focus-visible{outline:2px solid var(--frost);outline-offset:2px}
 #uwTint{position:fixed;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 30%,rgba(10,40,55,.55),rgba(0,6,12,.95))}   /* v2.18 veden alla */
 #drownV{position:fixed;inset:0;pointer-events:none;opacity:0;box-shadow:inset 0 0 220px 90px rgba(0,4,10,.95)}
 #hurt{position:fixed;inset:0;pointer-events:none;opacity:0;box-shadow:inset 0 0 160px 40px rgba(170,30,20,.75);transition:opacity .3s}
-.floater{position:absolute;font-weight:800;font-size:16px;text-shadow:0 1px 3px #000;pointer-events:none;transform:translate(-50%,-50%);white-space:nowrap}
-.mobbar{position:absolute;width:56px;transform:translate(-50%,-100%);pointer-events:none}   /* v1.21: pino kasvaa ylöspäin */
+.floater{position:absolute;font-weight:800;font-size:16px;text-shadow:0 1px 3px #000;pointer-events:none;transform:scale(var(--hudK,1)) translate(-50%,-50%);transform-origin:0 0;white-space:nowrap}
+.mobbar{position:absolute;width:56px;transform:scale(var(--hudK,1)) translate(-50%,-100%);transform-origin:0 0;pointer-events:none}   /* v1.21: pino kasvaa ylöspäin */
 .mobbar .rows{display:flex;flex-direction:column;gap:2px}
 .mobbar .r{position:relative;height:5px;background:rgba(0,0,0,.6)}
 .mobbar .r i{position:absolute;left:0;top:0;bottom:0;display:block}.mobbar .r i.a{background:var(--blood)}.mobbar .r i.b{background:#e8862a}
@@ -260,7 +261,8 @@ input.isdef{filter:brightness(1.25)}
 
 /* v1.08 (lista 2, kohta 1): valitun esineen selkeys, haamukuvake ja kohderuudun vihje */
 .grid .slot.sel{border-color:var(--ember);animation:selPulse 1.1s ease-in-out infinite;z-index:2}
-@keyframes selPulse{0%,100%{box-shadow:0 0 0 1px var(--ember),0 0 6px rgba(232,164,74,.45);transform:translateY(-1px) scale(1.04)}50%{box-shadow:0 0 0 2px var(--ember),0 0 16px rgba(232,164,74,.85);transform:translateY(-3px) scale(1.08)}}
+/* v2.57: valittu ruutu sykkii vain hehkulla (ei transform/scale) → ruutu ei kasva eikä liiku, eikä paneeliin tule vierityspalkkia (ruudukko ei siirry) */
+@keyframes selPulse{0%,100%{box-shadow:inset 0 0 0 1px var(--ember),0 0 6px rgba(232,164,74,.45)}50%{box-shadow:inset 0 0 0 2px var(--ember),0 0 14px rgba(232,164,74,.85)}}
 .grid .slot.tgt{outline:2px dashed var(--frost);outline-offset:-3px}
 .grid .slot.tgt::after{content:attr(data-hint);position:absolute;left:0;right:0;bottom:-1px;text-align:center;font-size:10px;font-weight:800;color:#13110e;background:var(--frost);border-radius:0 0 3px 3px;line-height:13px;pointer-events:none}
 #ghostIt{position:fixed;display:none;width:40px;height:40px;margin:12px 0 0 12px;background-size:contain;background-repeat:no-repeat;background-position:center;opacity:.55;pointer-events:none;z-index:9999;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7))}
@@ -849,3 +851,52 @@ button:focus,select:focus{outline:none}
 #splitDlg .spV{margin:8px 0 6px;font-size:18px;font-weight:700}
 #splitDlg .spOk{width:100%}
 #splitDlg .spH{margin-top:6px;font-size:11.5px;color:var(--dim)}
+/* v2.52 äänten avaus: kaiutinmerkki + teksti alareunassa (boot.js), kunnes käyttäjä napauttaa; sitten "äänet päällä" ja häivytys */
+#sndHint{position:fixed;left:50%;bottom:6vh;transform:translate(-50%,12px);z-index:100001;display:flex;align-items:center;gap:10px;padding:10px 20px 10px 16px;border-radius:999px;
+  background:rgba(14,10,7,.74);border:1px solid rgba(232,180,110,.32);box-shadow:0 6px 24px rgba(0,0,0,.5);color:#ecd8bc;font:500 17px 'Alegreya Sans',sans-serif;letter-spacing:.02em;
+  opacity:0;transition:opacity .6s ease,transform .6s ease,color .4s,border-color .4s;pointer-events:none}
+#sndHint.in{opacity:1;transform:translate(-50%,0)}
+#sndHint svg{width:24px;height:24px;flex:none}
+#sndHint.onS{color:#ffd59a;border-color:rgba(255,190,110,.65)}
+#sndHint.in.out{opacity:0;transition:opacity .9s ease}
+/* v2.55 Kalmanvartijan raivo (alle 50 %): mittari ja reunahehku punaisiksi */
+#bossbar.rage,#bbVig.rage{--bc:255,52,30;--bd:46,6,6;--bl:255,196,160}
+#bossbar.rage .name{animation:bbName 1.6s infinite}
+/* v2.57 arkun ohjerivi aina kahden rivin korkuinen → valinta (pidempi teksti) ei kasvata ikkunaa eikä siirrä ruutuja */
+#chestHint{height:2.7em;line-height:1.35em;overflow:hidden;box-sizing:content-box}
+
+/* v2.63 silmäpainike (Asetukset › Grafiikka ja Extra-grafiikka): valikko läpinäkyväksi, jotta grafiikkamuutokset näkyvät valikon läpi */
+#menu .seeBtn{position:absolute;right:-26px;top:92px;z-index:5;width:52px;height:52px;padding:0;border-radius:50%;cursor:pointer;display:grid;place-items:center;
+  color:#f6dcaa;border:2px solid #e8a44a;background:radial-gradient(circle at 34% 28%,#9a6229 0%,#5a3616 55%,#2e1b0b 100%);
+  box-shadow:0 5px 14px rgba(0,0,0,.65),inset 0 2px 0 rgba(255,226,170,.35),inset 0 -3px 6px rgba(0,0,0,.45);transition:transform .15s ease,box-shadow .2s ease,background .25s ease,border-color .25s ease}
+#menu .seeBtn[hidden]{display:none}
+#menu .seeBtn:hover{transform:scale(1.08);box-shadow:0 0 0 3px rgba(232,164,74,.25),0 0 18px rgba(232,164,74,.55),inset 0 2px 0 rgba(255,226,170,.35)}
+#menu .seeBtn:active{transform:scale(.95)}
+#menu .seeBtn svg{width:32px;height:32px;overflow:visible}
+#menu .seeBtn .seLid{fill:rgba(20,12,6,.55);stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+#menu .seeBtn .seIris{fill:#c98a3e;stroke:currentColor;stroke-width:1.2}#menu .seeBtn .sePup{fill:#1a0f06}#menu .seeBtn .seGl{fill:#fff4dc}
+#menu .seeBtn .seRay{stroke:currentColor;stroke-width:1.6;stroke-linecap:round;opacity:0;transition:opacity .25s}
+#menu .seeBtn .seTip{position:absolute;right:calc(100% + 8px);top:50%;transform:translateY(-50%);white-space:nowrap;font:700 12px 'Alegreya Sans',sans-serif;letter-spacing:.08em;
+  color:#f6dcaa;background:rgba(20,12,6,.85);border:1px solid #7a4b1c;border-radius:4px;padding:3px 8px;opacity:0;pointer-events:none;transition:opacity .2s}
+#menu .seeBtn:hover .seTip{opacity:1}
+#menu .seeBtn.on{color:#dffffb;border-color:#7fe0d6;background:radial-gradient(circle at 34% 28%,#3f9a92 0%,#1d5551 55%,#0c2624 100%);box-shadow:0 0 0 3px rgba(127,224,214,.22),0 0 22px rgba(127,224,214,.6),inset 0 2px 0 rgba(220,255,250,.35)}
+#menu .seeBtn.on .seIris{fill:#7fe0d6}#menu .seeBtn.on .seRay{opacity:1}
+#menu .seeBtn.dis,#menu .seeBtn:disabled{cursor:not-allowed;color:#9a958c;border-color:#6a665f;background:radial-gradient(circle at 34% 28%,#5c5a56 0%,#3a3936 55%,#1f1e1c 100%);
+  box-shadow:0 4px 10px rgba(0,0,0,.55),inset 0 2px 0 rgba(255,255,255,.12);filter:grayscale(1);opacity:.75;transform:none}
+#menu .seeBtn.dis .seIris{fill:#77746e}#menu .seeBtn.dis .seGl{fill:#bdb9b1}#menu .seeBtn.dis:hover{transform:none;box-shadow:0 4px 10px rgba(0,0,0,.55)}
+@media (max-width:700px){#menu .seeBtn{right:6px;top:64px;width:44px;height:44px}}
+#menu.seeThru{background:none!important}#menu.seeThru #menuFx{opacity:0!important}
+#menu.seeThru .mView{background:none;box-shadow:none;border-color:rgba(232,164,74,.3);-webkit-backdrop-filter:none;backdrop-filter:none}
+#menu.seeThru .mView::before,#menu.seeThru .mView::after{opacity:.2}
+#menu.seeThru .setCard,#menu.seeThru .setRow,#menu.seeThru .setRow.ultraRow,#menu.seeThru .setRow.ultraRow.on{background:none;box-shadow:none}
+#menu.seeThru .mvHead,#menu.seeThru .mvBody{text-shadow:0 1px 2px #000,0 0 6px rgba(0,0,0,.95),0 0 12px rgba(0,0,0,.7)}
+/* v2.65 läpinäkyvä tila: vain ääriviivat, symbolit ja tekstit – kaikki pinnat ja varjot pois (reunat ohuina viivoina) */
+#menu.seeThru .mView .setCard{border:1px solid rgba(232,164,74,.45)!important}
+#menu.seeThru .mView :is(.tab,.tab.on,.tgl,select,.uo,.btn,.mBack,.presetBox,.defTag,kbd,.ultraBang,input,textarea,.setSub){background:transparent!important;background-image:none!important;box-shadow:none!important}
+#menu.seeThru .mView :is(.tab,.tgl,select,.uo,.btn,.mBack,.presetBox,.setRow.ultraRow){border-color:rgba(240,214,168,.55)!important}
+#menu.seeThru .mView :is(.tab.on,.uo.sel){border-color:#e8a44a!important;color:#ffd79a!important}
+#menu.seeThru .mView .setRow{border:1px solid rgba(240,214,168,.18)}
+#menu.seeThru .mView .presetBox .pvFx{display:none}
+#menu.seeThru .mView .sld .sldT{background:transparent!important;box-shadow:inset 0 0 0 1px rgba(240,214,168,.7)!important}
+#menu.seeThru .mView select option{background:#2a1a0d;color:#f1e6cc}
+#menu.seeThru .mView .defTag{color:#f0d6a8!important;border:1px solid rgba(240,214,168,.55)}

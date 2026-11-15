@@ -13,10 +13,11 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
   Kivivuori, Routahuiput, Hietaranta, järvi, meri (`BIOMES`, world.js).
 - **Kaikki ominaisuudet, säännöt ja fysiikan arvot: `docs/OMINAISUUDET.md`** (päivitä se, kun ominaisuus tai arvo muuttuu).
 
-## Nykytila (päivitetty v2.49)
+## Nykytila (päivitetty v2.59)
 
-- **PR #35 (v2.28–v2.49) on yhdistetty → `main` = v2.49.** Seuraava työ alkaa haaralla uudelleen mainista.
-- **Versio 2.49**, haara `claude/hiidenmaa-survival-game-fmxt0m` (jatkettu mainista). **PR #25** (v1.38–v1.83), **#27** (v1.84–v1.95) ja **#28** (v1.96–v2.10) on **yhdistetty**. **#29** (v2.11–v2.15) on **yhdistetty**. **#30** (v2.16: kivivartija, ääniprojektien kansiot, toimintoäänet B1) on **yhdistetty**. v2.17 (pomojen toimintokansio, ryntäysäänet, vesi sammuttaa, sade sammuttaa nuotion) ja v2.18 (vesiuudistus: uinti, hukkuminen, vesivarjostin, vedenalaiset efektit, K pois) PR #31:ssä; v2.19 korjaa valikon 3D-piirron (KORJAUKSET 47); v2.20 Extra-grafiikka, low poly -vesi, rantaroiskeet, ylämäen hidastus, kohteet rinteen mukaan. **PR #31 (v2.17–v2.20) on yhdistetty.** **PR #32 (v2.21) on yhdistetty.** **PR #33 (v2.22) on yhdistetty.** v2.23 (toimintoäänierä 2, kivivartijan äänet, toimintosilmukat, tarkistustyökalun korjaus) ja v2.24 (äänitasot, juominen, pää alas, pelaajan toimintoäänet) ja v2.25 (sudet hiljemmaksi, Aarnipuun törmäys, karhun syöksy, pelaajan äänet osat 1–3) ja v2.26 (pensasäänet, askeleet −20 %, terveyspalkkien näkyvyys) ja v2.27 (Aarnimetsän askel, oksat) – **PR #34 (v2.23–v2.27) on yhdistetty.** v2.28 (pelaajan äänierä osa 2: 22 ääntä, puun tömähdys, reppu kiinni, arkun sulkeminen) ja v2.29 (narinan ajoitus, siirto- ja puolitusäänet, Shift-siirtoslider) ja v2.30 (sliderin korjaukset, poimintaääni) ja v2.31 (poimintaäänen sävy) ja v2.32 (valitse + oikea klikkaus puolittaa myös hiiren lukituksessa) ja v2.33 (valinta säilyy pienessä liikkeessä, avointen biomien vaaleammat varjot) ja v2.34 (metsien varjot 20 % vaaleammat, vuorokauden vaihtelu ±15 %) ja v2.35 (näytön auringonsäteet, linssiheijastus) ja v2.36 (säteiden ajoitus, päiväkohtaisuus, peitto) ja v2.37 (säteet takaisin koko päiväksi) ja v2.38 (pyöreä auringon hehku, pilvien syvyys, kovat/pehmeät säteet) ja v2.39 (pienempi auringon hehku) ja v2.40 (elävät säteet, peitto suunnittain) ja v2.41 (suorituskykyoptimoinnit: puiden LOD, varjomallit, rakennusten yhdistäminen) ja v2.42 (low poly -sävytys säilyy varjojen vaalennuksessa) ja v2.43 (hautakummun kieleke, savujen optimointi, liekit pystyyn) ja v2.44 (satunnainen pilvimatto) ja v2.45 (terävät soihtuvarjot Extra-grafiikkaan) ja v2.46 (repun vilkkuminen/puolitus, pilvet, hukkumisen tarkistus) ja v2.47 (pilvipäivät, pilvimatto 50 %, heijastuksen päivävaihtelu, pilvet ylemmäs) PR #35:ssä. Käyttäjä tekee seuraavaksi ehkä ketulle omat äänet. Aiemmin #27: äänierä A (v1.84–v1.86: äänet, Aarnihirviön äänet pääääneksi, kaiku ulottuvuuksiin). **JATKA TÄSTÄ (äänet):** käyttäjä lisää olentojen ääniä erissä → noudata "Äänierän rutiini"; v2.11 HUOM: `aarnihirvio_chase_2` ja `karhu_hurt_1` ovat sama tiedosto; isot vahvistukset (raaka hiljainen): `kalmo_chase_1` +24, `susi_hurt_2` +23,7 (raaka 7,5 s ulvonta osumapaikassa → 0,18 s, väärä paikka?), `metso_hurt_1/2`, `hiisi_death_1` (+12…14 dB). Puuttuvat ketjun alut (🎯): `hiidenkarhu_chase`, `hiidenhirvi_chase`. Aiempi:
+- **PR #35 (v2.28–v2.49) ja #36 (muistiinpanot) on yhdistetty. PR #37 (v2.50–v2.56, lista 7 kokonaan + sarvien varaääni + Kalmanvartija 10 + puolituksen korjaus + äänet ja ikkunat v2.57–v2.58 + latausnäyttö v2.59) odottaa yhdistämistä.**
+  Lista 7: ks. Ideajono › "Lista 7" (kaikki kohdat tehty; uudet äänet paikkamerkkeinä). **Lista 8 tehty v2.60–v2.62 (Ideajono › "Lista 8").** Avoimet: Ideajono › "Avoimet havainnot".
+- **Versio 2.65** (v2.65 tarkka maanmuokkaus + biomien sekoitus, v2.64 silmäpainike grafiikkasivuille, v2.60 ovi + äänirajat, v2.61 sää- ja tunnelmaäänet, v2.62 kaksi lukkoa + Avaimen kätkijä + 9 hiidenkiveä, v2.63 nummi, väritys, kivet, arkut, muuri, HUD), haara `claude/hiidenmaa-survival-game-fmxt0m` (jatkettu mainista). **PR #25** (v1.38–v1.83), **#27** (v1.84–v1.95) ja **#28** (v1.96–v2.10) on **yhdistetty**. **#29** (v2.11–v2.15) on **yhdistetty**. **#30** (v2.16: kivivartija, ääniprojektien kansiot, toimintoäänet B1) on **yhdistetty**. v2.17 (pomojen toimintokansio, ryntäysäänet, vesi sammuttaa, sade sammuttaa nuotion) ja v2.18 (vesiuudistus: uinti, hukkuminen, vesivarjostin, vedenalaiset efektit, K pois) PR #31:ssä; v2.19 korjaa valikon 3D-piirron (KORJAUKSET 47); v2.20 Extra-grafiikka, low poly -vesi, rantaroiskeet, ylämäen hidastus, kohteet rinteen mukaan. **PR #31 (v2.17–v2.20) on yhdistetty.** **PR #32 (v2.21) on yhdistetty.** **PR #33 (v2.22) on yhdistetty.** v2.23 (toimintoäänierä 2, kivivartijan äänet, toimintosilmukat, tarkistustyökalun korjaus) ja v2.24 (äänitasot, juominen, pää alas, pelaajan toimintoäänet) ja v2.25 (sudet hiljemmaksi, Aarnipuun törmäys, karhun syöksy, pelaajan äänet osat 1–3) ja v2.26 (pensasäänet, askeleet −20 %, terveyspalkkien näkyvyys) ja v2.27 (Aarnimetsän askel, oksat) – **PR #34 (v2.23–v2.27) on yhdistetty.** v2.28 (pelaajan äänierä osa 2: 22 ääntä, puun tömähdys, reppu kiinni, arkun sulkeminen) ja v2.29 (narinan ajoitus, siirto- ja puolitusäänet, Shift-siirtoslider) ja v2.30 (sliderin korjaukset, poimintaääni) ja v2.31 (poimintaäänen sävy) ja v2.32 (valitse + oikea klikkaus puolittaa myös hiiren lukituksessa) ja v2.33 (valinta säilyy pienessä liikkeessä, avointen biomien vaaleammat varjot) ja v2.34 (metsien varjot 20 % vaaleammat, vuorokauden vaihtelu ±15 %) ja v2.35 (näytön auringonsäteet, linssiheijastus) ja v2.36 (säteiden ajoitus, päiväkohtaisuus, peitto) ja v2.37 (säteet takaisin koko päiväksi) ja v2.38 (pyöreä auringon hehku, pilvien syvyys, kovat/pehmeät säteet) ja v2.39 (pienempi auringon hehku) ja v2.40 (elävät säteet, peitto suunnittain) ja v2.41 (suorituskykyoptimoinnit: puiden LOD, varjomallit, rakennusten yhdistäminen) ja v2.42 (low poly -sävytys säilyy varjojen vaalennuksessa) ja v2.43 (hautakummun kieleke, savujen optimointi, liekit pystyyn) ja v2.44 (satunnainen pilvimatto) ja v2.45 (terävät soihtuvarjot Extra-grafiikkaan) ja v2.46 (repun vilkkuminen/puolitus, pilvet, hukkumisen tarkistus) ja v2.47 (pilvipäivät, pilvimatto 50 %, heijastuksen päivävaihtelu, pilvet ylemmäs) PR #35:ssä. Käyttäjä tekee seuraavaksi ehkä ketulle omat äänet. Aiemmin #27: äänierä A (v1.84–v1.86: äänet, Aarnihirviön äänet pääääneksi, kaiku ulottuvuuksiin). **JATKA TÄSTÄ (äänet):** käyttäjä lisää olentojen ääniä erissä → noudata "Äänierän rutiini"; v2.11 HUOM: `aarnihirvio_chase_2` ja `karhu_hurt_1` ovat sama tiedosto; isot vahvistukset (raaka hiljainen): `kalmo_chase_1` +24, `susi_hurt_2` +23,7 (raaka 7,5 s ulvonta osumapaikassa → 0,18 s, väärä paikka?), `metso_hurt_1/2`, `hiisi_death_1` (+12…14 dB). Puuttuvat ketjun alut (🎯): `hiidenkarhu_chase`, `hiidenhirvi_chase`. Aiempi:
   `main` = v1.37. Kaikki käyttäjän pyynnöt tehty: päivityslistat 4 (v1.39–v1.44), 5 (v1.49–v1.52) ja 6 (v1.53–v1.57) sekä valikon ja
   logon uudistukset (v1.45–v1.48). Seuraava työ: uusi lista käyttäjältä.
 - **Koko pelin tarkistus v1.57** (6 karttaa, päivä/yö, kaikki 22 vihollistyyppiä, 3 ulottuvuutta + pomot, Hautakumpu, tallennus/lataus,
@@ -42,14 +43,14 @@ Testattu ajossa: jokainen hyökkäävä olento (hostile + neutral) lyö pelaajaa
 | susi, routasusi, kalmasusi, ahma, emakko | purema | ✓ |
 | ilves, karhu, hiidenkarhu, suonäkki | raapaisu | ✓ |
 | kivivartija, Kalmanvartija, Jäätär, Aarnihirviö | murskaus | ✓ (Jäätären kivi myös) |
-| **karju, hirvi, hiidenhirvi** (peura/poro eivät hyökkää) | **sarvet** | **✗ puuttuu** – `raw/osumat/osuma_sarvet_1.mp3` 0 t, `_2` 288 t (paikkamerkit) |
+| **karju, hirvi, hiidenhirvi** (peura/poro eivät hyökkää) | **sarvet** | v2.54: soi **isku** (varakategoria `TG_HIT_ALT`), kunnes `osuma_sarvet_1/_2` lisätään |
 
 - **Ilman osumaääntä myös:** pomojen alueiskut, jotka kutsuvat `hurtPlayer`:ia suoraan (ei `mobHurtP` → ei `tgHit`): Kalmanvartijan
   maaisku `slam` (ai.js `vartija`-AI), ulottuvuuspomojen `slam` ja `nova` (dungeons.js `realmBossAI`) – niissä vain hiljainen `sfx('slam')`.
   Tulilinja (dungeons.js) ja palaminen ovat tulivahinkoa (ei osumaääntä tarkoituksella?). Huitaisu/ryntäys menevät `mobHurtP`:n kautta ✓.
 - Osumaääni soi vain, jos `P.hp` laski (`mobHurtP`) → DEV-kuolemattomuus vaimentaa sen (ei vika).
-- Korjausvaihtoehdot (käyttäjä päättää): käyttäjä tuo `osuma_sarvet`-äänet (→ `process_sounds.py`), tai varakategoria
-  (`sarvet` → `murskaus`/`isku`, jos `tgRes` tyhjä) + `tgHit('murskaus',…)` slam/nova-osumiin.
+- **Käyttäjän päätös v2.54:** sarvet → varakategoria `isku` (`tgHitCat`), oma ääni myöhemmin; pomojen alueiskut (slam, nova) ja
+  Kalmaherran tulilinja jäävät **tarkoituksella ilman osumaääntä**.
 
 ### Koodausmuistiinpanot (opittua v2.41–v2.49 – lue ennen vastaavia muutoksia)
 - **Maahan sijoittaminen:** `terrainH` on 2 m ruudukon kolmiointerpolaatio – yksi näytepiste rakenteen alla voi poiketa metrin
@@ -73,6 +74,24 @@ Testattu ajossa: jokainen hyökkäävä olento (hostile + neutral) lyö pelaajaa
   satunnaissijoittelua ja voivat harvoin epäonnistua – aja uudelleen ennen kuin epäilet koodia.
 - **KORJAUKSET 49 toistuu** (`//` rivin keskellä, viimeksi v2.47 ja v2.49) – tarkistusrivi v2.23 huomaa sen; kirjoita `/* */`.
 - **PR-kuvaus:** päivitettäessä kuvaus korvautuu kokonaan → pidä mukana koko PR:n versioväli, ei vain uusin versio.
+
+### Koodausmuistiinpanot (opittua v2.50–v2.53: äänet, musiikki, valikot)
+- **Uusi ääniprojekti:** lisää osa työkaluun (`P_PARTS` pelaaja `p/`, `M_PARTS` valikot `m/`, `X_PARTS` muut: musiikki `mu/`, ilmoitukset `i/`)
+  → `python3 tools/process_sounds.py --init` tekee kansiot, numerottomat paikkamerkit ja listat. Ryhmä-id:t ovat yhteisessä `P_EV`:ssä
+  → ei samaa ryhmän nimeä kahteen projektiin. Tiedostokohtainen profiili `F_PROF` (käsitelty nimi, esim. `puu_tomahdys_2`).
+  Huom: `import process_sounds` (testi) kirjoittaa `tools/__pycache__`:n → `git checkout tools/__pycache__` ennen committia.
+- **Äänen soitto:** pelaaja `plSnd` (3D, `o.v_ix` = sallitut versiot), valikot/ilmoitukset `mSnd(ryhmä, ääni, {pre, cat, v, loop})`
+  palauttaa kahvan → `mStop(kahva, s)`. Ennen pelin skriptejä vain boot.js `__bootSnd`/`__mus` (samassa `window.__AC`:ssa).
+  Voimakkuus aina `volK(kategoria)` (audio.js) / `bsVolK` (boot.js) – älä lue `SET.xxxVol`:ia suoraan.
+- **Autoplay:** AudioContext on lukossa ennen käyttäjän elettä. Testaa lukko: Playwright `--autoplay-policy=document-user-activation-required`
+  + `Object.defineProperty(navigator,'webdriver',{get:()=>false})` (muuten automaatio ohittaa aloitusjakson ja merkin). Ilman lukkoa
+  `--autoplay-policy=no-user-gesture-required`. Uusi ääni, joka voi soida ennen ensimmäistä elettä → odota (`muTry`-malli).
+- **Valikkojen tapahtumat:** virtuaalinen osoitin (VC) lähettää MouseEventejä → kuuntele `mouseover`/`click`/`mousedown`, ei pointer-*.
+  Asetussivu piirtyy uudelleen klikkauksesta → hover-ääni estetty 350 ms (`MSND.clickT`).
+- **Intro:** `update()` ei aja maailman introa – `introCam(dt)` kutsutaan piirtosilmukassa (testissä suoraan). `endIntro(true)` = luonnollinen loppu.
+- **Testiajoitus:** latausnäyttö peittää valikon ensimmäiset sekunnit → odota `!document.getElementById('loadScr')` ennen hiiritestiä.
+- **Asetusten uusi asteikko:** vanha tallenne muunnetaan kertaalleen lippujen avulla (`_v`, `_sv`); muunnos käyttää tallennettua `sv`:tä
+  (oletusarvoja ei saa muuntaa).
 
 ## PR #25 – yhteenveto (v1.38–v1.83, valmis yhdistettäväksi)
 
@@ -164,7 +183,7 @@ Testattu ajossa: jokainen hyökkäävä olento (hostile + neutral) lyö pelaajaa
   **Pelaajan osissa yksi paikkamerkki per ääni ilman numeroa** (`mahakipu.mp3`), lisäversiot `mahakipu_1`, `_2` … (käyttäjän päätös v2.25; numeroton
   = manifestissa `_0`). Äänilistat taulukkoina: `AANILISTA_OSA<n>.csv` jokaisessa osassa (GitHub näyttää taulukkona) + yhteinen
   `sounds/AANILISTA_PELAAJA.xlsx` (välilehdet Osa 1–3, värit, lukittu otsikko; kirjoitetaan ilman lisäkirjastoja `write_xlsx`). Ei enää md-listaa pelaajalle.
-  Tulevat projektit (sää, musiikki) samalla mallilla.
+  Musiikki (v2.53) ja sää ja tunnelma (v2.61, `sounds/saa_ja_tunnelma/`, avaimet `a/…`) samalla mallilla.
   Jos raaka palautetaan paikkamerkiksi, käsitelty ääni poistuu.
 - **Peli lukee vain käsitellyt äänet** `sounds/`-kansiosta (manifestin kautta, tiiviste osoitteessa → välimuisti ei näytä vanhaa ääntä).
   Ilman palvelinta (tuplaklikkaus, file://) tiedostoäänet eivät lataudu → peli käyttää tehtyjä ääniä / hiljaisuutta.
@@ -209,7 +228,7 @@ discover, block, chop, chopFinal, chopLog, logBreak, rockBreak, woodBreak. Uutta
 koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = hiljaisuus.
 
 **Äänierän rutiini (kun käyttäjä lisää uusia ääniä; v1.86, jotta isotkin erät sujuvat nopeasti):**
-1. `git pull`/fetch: katso mitä uusia tiedostoja `sounds/olennot_aanet/raw/`, `sounds/olennot_toiminnot/raw/` ja `sounds/pelaaja_*/raw/` saivat (`git diff --stat HEAD origin/main`). Älä lue ääniä itse – työkalu mittaa.
+1. `git pull`/fetch (v2.53: myös `sounds/menu_*/raw/`, `sounds/musiikki/raw/`, `sounds/ilmoitukset/raw/`): katso mitä uusia tiedostoja `sounds/olennot_aanet/raw/`, `sounds/olennot_toiminnot/raw/` ja `sounds/pelaaja_*/raw/` saivat (`git diff --stat HEAD origin/main`). Älä lue ääniä itse – työkalu mittaa.
 2. `python3 tools/process_sounds.py` (tarvittaessa `--init` uusille olennoille). Lue **HUOM**-rivit: sama tiedosto kahdessa paikassa, vahvistus yli ±12 dB
    (raaka hyvin hiljainen/kova → kerro käyttäjälle), ylimääräiset paikat. Tuplatiedosto tai kova vahvistus ei estä erää; ilmoita ne ja jatka.
 3. Tarkista AANILISTA.md:n tilarivit ja VARAANI: jos olento sai omat äänet, varaääniketju voi jäädä; uusi 💎/⭐-rooli päivittyy itse.
@@ -232,15 +251,44 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
   korostusväri hiillos-oranssi `--ember`, hiidenkivien hehku `--frost`.
 - Kuolemassa koko reppu jää hautakasaan kuolinpaikalle (näkyy kartalla).
 - Sänky asettaa herätyspaikan. Nukkuminen vaatii yön, katon ja ettei vihollisia ole lähellä.
-- Pomo palaa maahan ja hiidenkivet jäävät alttarille, jos pelaaja poistuu yli 90 m päähän.
-- **Ulottuvuuksien etenemisketju (ei jumiutumista):** Jääavain löytyy maailmasta (rauniotalo `poiR1`) → Routaportti → Jäätär antaa
+- Pomo palaa maahan ja kruununsirpaleet jäävät alttarille, jos pelaaja poistuu yli 90 m päähän (v1.34 alkaen alttari vaatii sirpaleet, ei hiidenkiviä).
+- **PELIN KULKU (v2.62, käyttäjän päätös – pidä tämä ajan tasalla):**
+  1. Saari: kerää, rakenna, vahvistu. 2. Hautakumpu: kaada **Kalmon ylimys** (solu `B`) → **Kalmon sinetti** (kerran, `flags.sinetti`) + kirstuista 2 hiidenkiveä.
+  3. Saaren arkut: **Jääavain** arvottu tavalliseen maailman arkkuun (rauniot, linnakkeet, kiviröykkiöt – ei Hautakummun kirstuihin).
+  4. **Routaportti** (kaksi lukkoa: sinetti + avain, kumpi tahansa ensin) → Routaluola: Jäätär → **Luuavain** (+ hiidenkivi; arkussa 1 hiidenkivi).
+  5. Kalmankammio: Kalmaherra → **Aarniavain** (+ hiidenkivi; arkussa 1 hiidenkivi). 6. Aarnihauta: Aarnihirviö → 1 hiidenkivi + **3 kruunusirpaletta**
+     (1 pomolta, 2 satunnaisesta arkusta `flags.sirpC`). 7. **Kalmankehä:** 3 sirpaletta alttarille → **Kalmanvartija** (loppupomo, vaikeus 10).
+  - **Hiidenkivet: tasan 9** (maailma 4: Hautakummun kirstut 2 + POI_LOOT poiR3/poiK3 2, sekoitetaan maailman arkkujen kesken; Jäätär, Kalmaherra,
+    Aarnihirviö 1 kukin; Routaluolan ja Kalmankammion satunnainen arkku 1 + 1 `flags.hkC`). Ei satunnaisia lähteitä (RARE_LOOT, CHEST_LOOT, Kalmanpesä,
+    PEACE_LOOT poistettu v2.62). Käyttö vain 3 reseptiin: hiidenjousi 2, hiidenmiekka 3, hiidenpanssari 4 (= 9).
+  - **Avaimen kätkijä** (`LOC.runeK`, story.js): näyttävä riimukivi korkealla vuorella, ei kartalla ennen käyntiä (25 m). Kertoo aina seuraavan
+    etenemiseen tarvittavan avaimen/esineen paikan runollisesti (`keeperHint`, vaiheet A–I). 15 min (`KEEPER_T`) ilman edistymistä → vihje tarkentuu ja
+    ilmoitus. **Avaimen arkkua ei koskaan merkitä kartalle** (käyttäjän päätös). Riimukivi "Vuoren kuiskaus" (`runeB`) kertoo kätkijän suunnan.
+  - **Arvoesineet:** jos esine on maassa (pelaaja > 10 m tai muualla) 60 s (`VAL_LOST`) → "… on hukattu" ja siirto arkkuun, josta sen normaalistikin
+    löytää (`VAL_HOME`): ulottuvuuspomon esine saman ulottuvuuden arkkuun (`flags.xadd`), sinetti Hautakummun kirstuun, muut maailman arkkuihin.
+    Reppu, pelin arkut, omat arkut ja hautakasa ovat turvassa. Laskenta `valuableCensus` palauttaa kadonneet uniikit.
+- **Ulottuvuuksien etenemisketju (ei jumiutumista):** Jääavain löytyy maailmasta (v2.62: + Kalmon sinetti ylimykseltä) → Routaportti → Jäätär antaa
   Luuavaimen → Kalmankammion portti → Kalmaherra antaa Aarniavaimen → Aarnihaudan portti. Ensimmäinen ulottuvuus ei vaadi mitään
   muista ulottuvuuksista. Avain annetaan suoraan reppuun (`REALMS[id].key`, `onMobKilled`). Varmistus: portti aukeaa ilman avainta,
   jos avaimen lähde on jo käyty (`REALMS[id].alt`: arkku avattu / edellinen pomo kaadettu) tai ulottuvuudessa on jo käyty (`flags.rs`).
-  Maahan pudonneita esineitä ei tallenneta, joten tämä varmistus on pakollinen. Hiidenkiviä on tarjolla 8 (kumpu 3, pomot 3, arkut 2),
-  alttari tarvitsee 3.
+  Maahan pudonneita esineitä ei tallenneta, joten tämä varmistus on pakollinen. v2.62: lukkoja voi olla useita (`REALMS[id].locks`, tila `fo('lk')`),
+  jokaisella oma varmistus (sinetti: `flags.sinetti` tai ylimys kaadettu). Hiidenkiviä tasan 9 (ks. yllä); alttari vaatii 3 kruunusirpaletta.
 
 ## Tasapainoarvot (päivitä kun muutat)
+
+**Pomot (v2.55, koodista; HP = perus × `BOSS_HP_K` (mobs.js), ulottuvuuspomojen `dmg` × 1,15; pomojen iskut lisäksi × `HURT_K` 1,2 ennen
+haarniskaa; nopeus = `run` × `MOB_SPD` 0,85 × vaihe). Huom: v2.54:n taulukossa oli virheellisesti kertomattomat perusarvot.**
+
+| Pomo (paikka) | HP | Iskut (ennen ×1,2) | Nopeus m/s (vaiheet) | Vaiheet | Paraneminen |
+| --- | --- | --- | --- | --- | --- |
+| Jäätär (Routaluola, 1.) | 840 (560 × 1,5) | huitaisu 25, maaisku 30 (7 m), kivi 22, nova 28 (11 m) | 3,1 / 3,4 / 3,8 | 66 % ja 33 %: +10 % / +25 % nopeus, iskuväli 1,9 → 1,4 → 1,0 s (×1,1 heittäjä) | 60 s ilman osumaa → 10 %/s |
+| Kalmaherra (Kalmankammio, 2.) | 1 280 (640 × 2) | huitaisu 28, ryntäys 30 (11,9–14,9 m/s), nova 30, tulilinja 20 + palaminen | 3,4 / 3,7 / 4,3 | ph2 2 kalmoa, ph3 3; alle 50 % tulilinjat; alle 30 % viimeinen raivo (ryntäys 3,1 s välein, 5 kalmoa / 20 s, enint. 12) | 60 s → 10 %/s |
+| Aarnihirviö (Aarnihauta, 3.) | 1 872 (720 × 2,6) | huitaisu 30, ryntäys 33, maaisku 36 (7 m) | 3,4 / 3,7 / 4,3 | ph3 3 kätyriä | 102 s → 1 %/s (hidas) |
+| Kalmanvartija (Kalmankehä, alttari 3 kruunusirpaletta) | 2 250 (900 × 2,5) | v2.55: huitaisu 29, maaisku 36 (7 m), ryntäys 34 (12,8 m/s), kivi 26; raivo: kivisade 6–8 × 22, maapiikit 30, 3 kiveä × 26 | 3,1 / 3,7 (alle 50 %) | alle 50 %: raivo (punaiset silmät ja mittari), 3 kalmoa, +20 % nopeus, iskuväli 2,1 → 1,45 s, uudet hyökkäykset | 30 s → 10 %/s; vajoaa yli 90 m:ssä, nousee täysin HP:in |
+
+Armo: pelaajan 3. kuolema samalle pomolle (Kalmanvartija 5., `BOSS_MERCY`) → ei enää parane (`bossTired`); Kalmanvartija säilyttää silloin HP:n
+myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juoksu 8 m/s.
+
 
 | Asia | Arvo |
 | --- | --- |
@@ -288,6 +336,255 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
   hirvi (3), karju (2), kalmo (1), karhu (1), sammalhiisi (1); ⭐ peura, kettu, ilves, kalmanvartija (1 kukin); kalmon ylimys ja hiidenhirvi vain lainaavat.
   Metsolla ei ole varaääntä (ei merkkiä, ei lainaa).
 
+### v2.65 (tarkka maanmuokkaus, biomien sekoitus, läpinäkyvä valikko vain ääriviivoin, 8× varmistus – käyttäjän pyynnöt)
+- **Tarkka maanmuokkaus** (world.js `FT_*`/`ftH`, resources.js `ftEnsure`/`ftTool`/`ftAt`/`ftList`/`ftApply`/`ftReset`/`ftRecolor`, render.js `FTM`/`terrHook`):
+  lapio ja kuokka muokkaavat 1 m verkkoa (`FT_S` 2 → 4× kärkiä ruutua kohden). Työkalun alueen (+1 m) koskemat 16 × 16 m lohkot (`FT_CS` 8 ruutua)
+  saavat oman laikun (17 × 17 kärkeä, oma verkko `FT_MAT` samalla varjostimella, myös tiheämpi väritys toimii); alkuarvot = karkea interpolointi.
+  `terrainH` lukee laikun (sama kolmiojako) → törmäys, puut, rakentaminen, pudotukset toimivat. Karkeaa maastoa ei piirretä laikun kohdalla
+  (maskitekstuuri `FTM` → `discard`). Jaetut reunakärjet päivitetään kaikkiin laikkuihin (`ftAt`) → ei saumoja; karkeat kärjet samoissa kohdissa
+  päivitetään (vesi, ruoho, kartta). Kartan reunalohkossa ei voi muokata (ilmoitus). Muta laikun kärjissä (`p.mud`), väri `p.c0` + muta.
+  **Tallennus v11:** `ft` = [[cx, cz, [[kärki, h, muta]…]]…] (vain muuttuneet); vanha tallennus (ei `ft`) toimii. Vanha karkea silmukka poistettu.
+- **Biomien sekoitus** (render.js `TSOFT`/`terrSoft`/`TBLEND_HARD`/`TCOL_RAW`/`blendApply`, `SET.biomeBlend` 0–3, **oletus 1 Normaali**, Extra-grafiikka):
+  pehmeät pinnat (maa, hiekka, niitty, metsä, suo, nummi, tunturi) sekoittuvat peitetyllä sumennuksella (säde `BLEND_R` 0/1/2/4 kärkeä = 0/2/4/8 m);
+  kivikot (mountain, rakka, peak), lumi yli 33 m, jyrkät rinteet (> 0,75) ja meri eivät → vuoren juuri pysyy terävänä. Muta säilyy (TCOL0 + mudSet),
+  tiheämmän värityksen ero heikennetään pehmeillä pinnoilla (`BLEND_FK`) ja tekstuuri rakennetaan uudelleen; laikut `ftRecolor`.
+- **Extra: Sammuta kaikki automaattiset grafiikkasäädöt** (`SET.noAuto`, Extra-grafiikan ylin rivi, oletus pois): `autoOn()` aina false (resoluutio,
+  piirtoetäisyys, hiukkaset/usva/ruoho, varjojen taso `QUAL`), `autoQuality` ei aja, `applyGfx` nollaa `AUTO`:n, käynnistyksen suorituskykytestin
+  esiasetusta ei oteta käyttöön (`perfApply`). Grafiikka-sivun automaattirivit kertovat "POIS: Extra-grafiikka › …". Tarkistusrivi v2.65.
+- **Maaston väritys:** 16× poistettu (vanha arvo → 8×). 8× kysyy varmistuksen: "ei ole pelin low poly -teeman mukainen ulkonäkö – oletko varma?" (`keyDialog`).
+- **Silmäpainike:** läpinäkyvässä tilassa vain ääriviivat, symbolit ja tekstit – välilehtien, valintojen, kytkimien, nappien, esiasetuslaatikon,
+  merkintöjen ja liukusäätimen radan pinnat pois (`#menu.seeThru .mView :is(…)`), reunat ohuina vaaleina viivoina, "OLETUS"-merkit vaaleiksi.
+- Testattu: kuoppa 2 × 0,3 m (keskellä −0,6 m, 0,5 m sivussa −0,56 m), saumat < 0,01 m, tallennus/lataus täsmälleen, uusi peli tyhjentää; silmä-tila kuvana.
+  Tarkistusrivit v2.65 (3 kpl); vanha kuokka/lapio-rivi päivitetty (`ftTool`).
+
+### v2.64 (silmäpainike: läpinäkyvä valikko grafiikkasivuilla – käyttäjän pyyntö)
+- **Silmäpainike** (`#bSeeThru` index.html `.mView`:ssä, oma SVG-silmä, pyöreä painike paneelin oikeassa reunassa; kapealla näytöllä sisäpuolella):
+  näkyy vain sivuilla Grafiikka ja Extra-grafiikka (`SEE_TABS`). Painaminen → `#menu.seeThru`: valikon ruskea tausta, paneelin tausta, rivien taustat,
+  sumennus ja partikkelit pois, tekstiin vahva varjo → peli näkyy läpi ja asetusmuutokset nähdään suoraan. Uusi painallus palauttaa taustan.
+- **Vain pelin ollessa taustalla** (`seeThruOk`: `started` ja `state==='paused'`); päävalikossa (ei peliä) painike on harmaa (`.dis`, `disabled`,
+  vihje "Vain pelin aikana"). Tila poistuu, kun vaihdetaan muulle sivulle tai valikko suljetaan (`seeThruSync` joka ruutu main.js `frame`).
+- Napsautusääni tulee valikon yhteisestä kuuntelijasta. Testattu: päävalikossa harmaa ja ei reagoi, pelissä päälle/pois, Ääni-sivulla piilossa. Rivi v2.64.
+
+### v2.63 (nummen usva, tiheämpi maaston väritys, kivet ja arkut kiinteiksi, törmäysääni, linnakkeen muuri, HUD-skaala – käyttäjän pyynnöt ja vastaukset)
+- **Tarkistus: ominaisuuksia ei poistettu** (v2.49 → v2.62): yhtään ylimmän tason funktiota/vakiota ei puutu (85 uutta), `SET_DEF`-avaimet tallessa,
+  tarkistusrivejä 240 → 258. Nummen usva toimi, mutta puolet päivistä oli tarkoituksella heikkoja (v2.49) → vahvistettu (ks. Tasapainoarvot › Kalmanummen usva).
+- **Nummi Aarnimetsän tapaan** (environment.js): `MOOR_FAR` 52, `MOOR_GREY` 0,7, `MOOR_SAT` 0,42, `MOOR_IN` 0,2, valot ja hehku moorK:n mukaan; sisään ja ulos pehmeästi.
+- **Tiheämpi maaston väritys** (render.js): `terrCol(x,z,h,slope,b)` (sama kaava kärjille), `TFINE` + `terrFineRows`/`terrFineBuild`/`terrFineSet`:
+  eroteksturi (tarkka väri − kolmion interpolointi, tavu = ero × 2 + 0,5) lisätään kärkiväriin varjostimessa (`onBeforeCompile`, `#include <color_fragment>`),
+  lineaarinen suodatus. Laskenta taustalla ~12 ms paloissa. `SET.terrFine` (esiasetukset High+ ja Ultra, kertasiirto `_v` 6), Extra `SET.terrFineX`
+  4 / 8 / 16 (8× ja 16× = 4×-tekstuuri + varjostimen kohina `uDet` 4 / 8; koko saaren 16×-tekstuuri olisi ~500 Mt). Muta/kaivu toimivat (ero päälle).
+- **Extra: pehmeä rantaveden väri** (`SET.waterSmooth`, `WATER_U.uSmooth`): low poly -veden 5-portainen väri (`dk=floor`) pois → liukuu.
+- **Kivet** (resources.js `rockTop`, collision.js `groundAt`): kiven törmäysympyrä on lattia (`ground`), kantava osuus `gr` 0,5 säteestä, pinta laskee
+  reunaa kohti `dr` 0,45 × koko (käyttäjä: "noin puolet"). Ennen ympyrä ei kantanut lainkaan → pelaaja liukui pois, ellei ollut aivan keskellä.
+- **Säiliöt kiinteiksi** (käyttäjä: kaikki säiliöt): arkkukivilinnakkeen laatta + arkku, kiviröykkiön laatta + arkku, leirin säkki (`addBox`),
+  ulottuvuuksien tynnyrit `ground` (päällä voi seistä). Raunioiden, ulottuvuuksien ja Hautakummun arkut/kirstut ja omat arkut olivat jo kiinteitä.
+- **Törmäysääni** (ai.js `moveMob`): vaatii todellisen vauhdin edellisessä ruudussa (`m._spd`, ei aiottua nopeutta) ja jyrkän pysähdyksen,
+  tauko `TM_CD` 3 s (ennen 1,2 s ja aiottu nopeus → seinää vasten työntävä olento soitti jatkuvasti).
+- **Linnakkeen muuri** (story.js `lw`, collision.js `pointBlocked`, ai.js `fortIn`/`fortLost`): muuri estää näköyhteyden; kun pelaaja ja olento
+  ovat muurin eri puolilla, olento luopuu `FORT_MEM` 3 s jälkeen (käyttäjä: 3 s).
+- **HUD-skaala** (settings.js `hudScale`/`hudK`/`hudScaleApply`, css `--hudK`): Asetukset › Ohjaus › HUD, 60–150 %, oletus 100 %. `#hud` zoom →
+  jokainen osa kasvaa omasta reunastaan; `#floaters` kumoaa zoomin ja `.floater`/`.mobbar` skaalautuvat itse (paikka tarkka). Yli 100 % rajoitetaan
+  näytön mukaan (`HUD_MIN_W` 1000 × `HUD_MIN_H` 620 → ei päällekkäisyyksiä, säätimessä "näytöllä X %"). Pikapaikan nimi `showHotName` jaetaan `hudK()`:lla.
+- **Virheet kehityksessä:** KORJAUKSET 62 (`//`-kommentti nielaisi koodia) ja 63 (ylimmän tason vakio ennen määrittelyä) – molemmat korjattu ennen committia.
+- Testattu: tarkistus KAIKKI OK (rivit v2.63 × 6), HUD 1100 × 680 ja 1920 × 1080 (60/100/150 %), maailmaan sidottu teksti täsmälleen projektiopisteessä,
+  kivi: keskeltä 0,52 m asti pysyy, 0,7 × säde putoaa; muuri estää näön; väritys rakentuu ja varjostin kääntyy ilman virheitä.
+
+### v2.62 (Routaportin kaksi lukkoa, Kalmon sinetti, Avaimen kätkijä, arvoesineiden siirto lähteeseen, 9 hiidenkiveä – lista 8, kohdat 1–3)
+- **Kalmon sinetti** (`ITEMS.sinetti`, kuvake, 3D `sinettiMesh` state.js, arvoesine): Hautakummun ylimys (`dunSpawns` B) kantaa sitä vyöllä
+  (`sinettiCarry`, actions.js) ja pudottaa kerran (`killMob`, `flags.sinetti`).
+- **Lukot** (dungeons.js): `REALMS[id].locks` [{it, alt, hint}], Routaportilla jaaavain + sinetti, muilla yksi (johdettu `lock`/`alt`/`hint`:stä).
+  `lockOpen`/`lockSet` (`fo('lk')`), `portalNeed`, `portalLabel` (✓/✗), riippulukot `pads` (värimerkki, avattu katoaa). `portalLocked` ennallaan (`rl`/`rs`).
+- **Jääavain** vain tavallisiin maailman arkkuihin (`planLoot` `KW`); vanhoissa tallennuksissa jo arvottu paikka säilyy.
+- **Avaimen kätkijä** (story.js loppu): paikka kasvillisuuden jälkeen (korkein tasainen kohta ≥ 12 m, ei puita/kiviä, 40 m muista), malli 4,2 m
+  paasi + 5 kiveä + leijuva kristalli + violetti valo. `keeperHint()` vaiheet A–I (sig), taso 2 kun `playTime−flags.kpT ≥ KEEPER_T` (900 s),
+  `keeperTick()` (1 s välein) → ilmoitus kerran vaihetta kohden (`flags.kpN`), löytö 25 m. Runeb → "Vuoren kuiskaus".
+- **Arvoesineet:** `VAL_LOST` 120 → 60 s. `VAL_HOME`, `relocateRealm` (vain käydyt ulottuvuudet `fo('rs')`; arkkujen määrä `fo('rnc')`/`R.nChest`),
+  avaamattomaan `flags.xadd` (openFound lisää, `countAll` laskee), avattuun `chestPut`. Uusi ilmoitus "… on hukattu – sen voi löytää jostain … arkusta".
+- **Hiidenkivet 9:** SARC_LOOT 3 → 2, ulottuvuusarkut `flags.hkC` (portal1/2), poistettu CHEST_LOOT/RARE_LOOT/Kalmanpesä/PEACE_LOOT-hiidenkivet.
+- **Tehtävät:** uusi tehtävä 4 "Kaada Hautakummun ylimys"; vanha tallennus `flags.qv` < 2 ja `qi` ≥ 3 → `qi+1` (save.js). "Avaa Routaportti" -teksti.
+- **Tekstikorjaukset:** hiidenkiven kuvaus (ei alttaria), Jääavaimen kuvaus, vartijan vajoamisviesti "Kruununsirpaleet jäävät alttarille", muistion pysyvät päätökset.
+- Testattu: kaikki 6 karttaa (kätkijä 21–64 m korkeudella, maailmassa 4 hiidenkiveä, avain ei kirstussa); ylimys → sinetti → lukko ✓ → Jääavain →
+  portti auki; hukattu Luuavain → Routaluolan arkku (xadd) → avattaessa repussa. Tarkistusrivit v2.62 (5 kpl).
+
+### v2.61 (sää- ja tunnelmaäänet: kansiot, paikkamerkit ja soitin – käyttäjän pyyntö)
+- **Uusi ääniprojekti** `sounds/saa_ja_tunnelma/` (process_sounds.py X_PARTS, avaimet `a/<ryhmä>/<ääni>_<n>`, lista `AANILISTA_SAA_TUNNELMA.csv`
+  + välilehti `AANILISTA_MENU.xlsx`:ssä): `saa/` silmukat sade, tihku, myrsky, tuuli, lumi, sumu + kertaääni ukkonen; `tunnelma/` silmukka per paikka
+  (tunnelma_routaluola, _kalmankammio, _aarnihauta, _hautakumpu); `satunnaiset/` kertaäänet (satunnainen_yhteinen + paikkakohtaiset).
+  Silmukat käsitellään saumattomiksi (`X_ACT`, enintään 60 s `LONG_LOOP`), kertaäänet T_PROF (ukkonen 8 s, satunnaiset 6 s).
+- **Soitin** (audio.js `ambTick` main.js `frame`:ssa, myös tauolla → häivytys pois): `ambTargets()` = tavoitetasot (sade `wRain`, tihku `wRain/.35`,
+  myrsky `wRain/1.4`, tuuli `(WIND.spd−6)/8` paitsi myrskyssä, lumi `wSnow` yli 10 m, sumu `(1−wFog)/.85`; sisällä ×(1−0,55·indoorK), veden alla ×0,25;
+  luolastossa vain tunnelma). Ristihäivytys `AMB_FADE` 2,5 s, oma GainNode (`setTargetAtTime`), silmukka alkaa satunnaisesta kohdasta.
+  Satunnaiset `AMB_RND_MIN`–`AMB_RND_MAX` 10–40 s (`mSnd` pre 'a', varaääni yhteinen). Ukkonen `ambThunder(d)` environment.js salamasta
+  (lähi-isku 0,1 s, muuten 0,4–2,6 s, kauempana hiljaisempi). Taso Taustaäänet (`volK('amb')`, AMB_V per ääni). Hautakumpu lisätty paikaksi.
+- Testattu testipuskureilla (ei peliin): sade 0,8 → myrsky 1, ukkonen soi, Routaluolassa vain tunnelma 0,75, satunnainen → yhteinen-varaääni,
+  tauolla kaikki pois. Tarkistusrivi v2.61.
+
+### v2.60 (oven animaatio, olentoäänten päällekkäisyysraja – lista 8, kohdat 4–5)
+- **Ovi** (pieces.js): `setDoor(p,open,dir,inst)` käynnistää `DOOR_T` 0,6 s käännön (`doorEase` = ease-out kuutio), `doorTick(dt)` main.js `update`:ssa
+  (`DOOR_ANIM`-joukko). Avatessa `c.off` heti, sulkiessa vasta lopussa; `doorInWay(p)` → sulkeminen palauttaa false ja interact ilmoittaa.
+  `addPiece` (lataus, rakentaminen) käyttää `inst`-tilaa. Liikkeen aikana `shDirty`/`bldDirty` joka ruutu (ei `bmDirty`: oven lehti ei yhdisty).
+- **Olentoäänet** (audio.js `creSnd`): `CRE_OVL` {kinds idle/chase/aggro/echo, max 3, cd2 1 s, win 3 s, n3 3 → cd3 8 s, gap 0,15 s, perKind 3},
+  `creFileOk`/`creFileUse`/`creFileN` (tiedoston nimi `v.name`), `CRE.fcd` (tauot), `CRE.fh` (alkuhetket), `CRE.skip` (DEV-mittari). Ajat
+  `performance.now()`:lla, koska suodatus tehdään ennen AudioContextin tarkistusta. Ennen raja 3 per olento+laji koski vain idle/chasea.
+- Testattu: ovi 0,6 s (kulma 1,49 rad), este oikein, oviaukossa ei sulkeudu; 6 kalmoa hyökkää yhtä aikaa → 2 ääntä (eri versiot), loput pois.
+  Tarkistusrivit v2.60 (2 kpl).
+
+### v2.59 (tallennuksen jatkaminen latausnäytöllä, latausnäytön ääni – käyttäjän pyyntö)
+- **Jatka tallennusta** (Jatka-nappi ja maailmalista, sama kartta): `playSave` → `saveLoad(s, tervehdys)` (main.js): `__ldShow('Maailma herää…')` →
+  90 ms → `loadData` + `startPlay` + `P.spawnProt` ≥ 4 s → `SAVE_LD_FRAMES` 20 ruutua (varjostimet) → `__ldDone` (leimahdus + häivytys
+  peliin, tervehdys `__ldAfter`). Ennen `loadData` jäädytti valikon näytön. Eri kartta = sivun lataus kuten ennen (pend 'load').
+- **Latausnäytön ääni** (`lataus_valmis`, index.html `__ldDone`): soi vain myöhemmissä latausnäytöissä (`__ldShow` merkitsee
+  `dataset.later`: tallennuksen jatko, uusi maailma) ja karttavaihdon sivulatauksen jälkeen (`window.__ldSndOnce`, main.js pend);
+  pelin käynnistyksen latausnäytössä vain, jos uusi asetus **Latausnäytön ääni aina** (`SET.ldSnd`, oletus pois, Äänet ja musiikki,
+  alimpana).
+- Testattu: oletus → käynnistyksessä ei ääntä, asetus päällä → ääni; jatko: loading → done → out → poistettu, ääni leimahduksessa,
+  reppu palautuu, suoja päällä. Tarkistusrivi v2.59.
+
+### v2.58 (äänet vain samassa tilassa, kuuluvuus −20 % – käyttäjän pyyntö)
+- **Tila** `creSpaceOk(m)` (audio.js): olennon ääni vain, jos pelaaja on samassa tilassa (maailma; Hautakumpu = `dun` ilman realmia;
+  ulottuvuus = sama `realm`). Kaikki ulottuvuudet ovat samalla alueella (`DUN` x/z 900), joten ilman tätä toisen ulottuvuuden olento olisi
+  voinut kuulua. Suodatin olentoäänten (creTick) ja toimintoäänten (tgTick) silmukoissa; soivat äänet (myös pomojen kaiut ja Kalmanvartijan
+  maanalainen kaiku) katkeavat 0,15 s:ssa, kun tila vaihtuu. Pomojen kaiku oli jo rajattu samaan ulottuvuuteen (`P.realm===m.realm`).
+- **Kuuluvuus −20 %** `SND_DIST_K` 0,8: olentojen laukaisusäteet `CRE_FAR_R` 120, `CRE_NEAR_R` 51,2, `CRE_IDLE_R` 28,8 m ja paneri; toiminnot
+  `TG_RK` 0,64; pelaajan `plSnd`-paneri 3,2 / 48 m; kaukainen yöulvonta 48–69 m; Kalmanvartijan kaiku alle 64 m alttarista. Säätimet ennallaan.
+- Tarkistusrivi v2.58 (+ v2.14, v2.16, v2.24, v2.25, v2.57 päivitetty uusiin etäisyyksiin).
+
+### v2.57 (siirtoäänet, ikkunat eivät veny, ulvonta, puun narina ja tömähdys – käyttäjän pyynnöt)
+- **Siirtoääni** vain valmiissa tavallisessa siirrossa (ei valinnassa, raahauksen alussa tai sliderin avauksessa); puolituksessa vain
+  puolitusääni (KORJAUKSET 60).
+- **Ikkunat eivät veny** (KORJAUKSET 61): `selPulse` ilman transformia, `#chestHint` kiinteä 2 riviä.
+- **Susieläinten ulvonta** (susi, routasusi, kalmasusi; idle-kutsuääni `far`): kuuluvuus × `WOLF_HOWL_R` 0,7 ja voimakkuus ×
+  `WOLF_HOWL_V` 0,7 aina; päivällä kuuluvuus lisäksi × `WOLF_HOWL_DAY_R` 0,6 (`wolfHowlRK`: yö 0,595, päivä 0,357 alkuperäisestä);
+  kaukainen yöulvonta 60–86 m (ennen 85–123). Säätimet ennallaan.
+- **Puun kaatumisnarina** `creakP(n)` (actions.js): sävel 1,25 − 0,025 × korkeus, rajat 0,85–1,2 (pieni puu korkeampi).
+- **Puun tömähdys** pidemmällä ja pehmeämmällä häivytyksellä: `F_PROF` 5. kenttä = häivytyskäyrä (`esin`), `_0` 1,1 s, `_1` 0,22 s,
+  `_2` 3,4 s (ennen 0,35 / 0,12 / 2,6 lineaarisesti). Työkalu: profiilin valinnainen käyrä (`fcurve`, oletus `tri`).
+- Tarkistusrivi v2.57 (+ v2.29 ja v2.25-rivit päivitetty).
+
+### v2.56 (puolitus klikkaamalla korjattu, repun/arkun äänet – käyttäjän pyyntö, KORJAUKSET 60)
+- **Puolitus:** valittu pino + oikea kohteeseen = puolet; valinta poistuu siirron jälkeen (reppu, arkku); kohderuutu ei aloita raahausta,
+  kun toinen ruutu on valittuna; raahausraja `DRAG_PX` 6 → 10 px. Testattu oikealla hiirellä tavallisessa ja lukitussa (VC) tilassa.
+- **Äänet:** `invSnd(ääni)` = repun/arkun siirtoäänet `INV_SND_V` 0,7 (−30 %, säätimet ennallaan) ja sävelvaihtelu ±`INV_SND_PJ` 12 %
+  (`plSnd` uusi `o.pj`, oletus ±5 %); valinta (vasen tai oikea) = siirto; puolitus vain kun puolet siirtyy (myös sliderin Siirrä);
+  sliderin avaus = siirto.
+- **Sulkemisäänet:** reppu `REPPU_CLOSE_P` 1,08 → 1,3; kaikki arkut (omat ja maailman, myös hautakasa) = `arkku_auki` hiljempaa
+  `ARKKU_CLOSE_V` 0,8 ja korkeammalta `ARKKU_CLOSE_P` 1,15 (ennen oma arkku `arkku_kiinni`, muut `sulje`).
+- Tarkistusrivi v2.56 (+ v2.26, v2.28, v2.50 päivitetty uusiin arvoihin).
+
+### v2.55 (Kalmanvartija: täysi HP noustessa, paraneminen 30 s, vaikeus 10 – käyttäjän pyyntö)
+- **Käyttäjän vastaukset:** iskut +30 % (HP ennallaan 2 250); uudet hyökkäykset vasta raivossa (alle 50 % HP): silmät ja mittari punaisiksi,
+  kivisade, maapiikit, kolmen kiven heitto; armo vasta 5. kuolemasta ja siitä ilmoitus.
+- **Nousu:** `useAltar` antaa täyden HP:n (ennen `flags.bossHp` säilyi); uupuneena (armo) HP säilyy. Vajoamisviesti kertoo kumman.
+- **Paraneminen:** `VARTIJA_REGEN_T` 30 s ilman osumaa → 10 %/s (muut pomot 60 s, Aarnihirviö 102 s).
+- **Vahinko** `VT` (ai.js): huitaisu 22 → 29, maaisku 28 → 36, ryntäys 26 → 34, kivi 20 → 26 (+ HURT_K 1,2).
+- **Raivo** (`m.phase2` → `vartijaRage`): silmien perusväri 0xff2a14 + jatkuva hehku `bossEyes(m,.5)`, pomomittari ja reunahehku `.rage`
+  (css: punaiset `--bc/--bd/--bl`). Hyökkäykset: lähellä (< 5 m) 25 % maapiikit; 5–30 m: ryntäys 20 % (> 9 m, väli 10 s), kivisade 30 %,
+  maapiikit 25 %, kolmen kiven viuhka (±0,24 rad) loput; väli 2,1 s.
+  - `rockRain`: 6–8 kiveä (2 ennakoiden pelaajan liikkeen, muut 2–7,5 m säteellä), punainen sykkivä varoitusrengas `warnRing` 1,57 s
+    (= kiven lentoaika `throwRock`, 19 m korkeudelta), 22 / kivi.
+  - `spikeLine`: 14 kivipiikkiä 1,4 m välein pelaajan suuntaan, 0,07 s porrastus, osuma kerran (1,15 m), 30 + heitto ylös.
+- **Armo:** `BOSS_MERCY` {vartija: 5}, `bossMercyN`; kuolemaruudun teksti käyttää rajaa (x/5), 5. kuolemasta ilmoitus heräämisen jälkeen.
+- Testattu: raivo (silmät #7ffff0 → punainen, mittarin luokka rage), 60 s raivotaistelussa kaikki hyökkäykset (kivisade 14×, piikit 7×,
+  3 kiveä 4×), enint. 8 kiveä ja 14 piikkiä, paraneminen 29 s ei / 31 s kyllä, nousu 2250/2250, armo 5 → 200/2250.
+- KORJAUKSET 59: ylimmän tason nimi `_spGeo` oli jo effects.js:ssä → ai.js ei latautunut (`updateMobs is not defined`).
+- Tarkistusrivi v2.55 (+ v1.81 käyttää nyt ulottuvuuspomoa).
+
+### v2.54 (sarvi-osumien varaääni, muistion tarkistus, pomotaulukko)
+- **Sarvi-osumat** (karju, hirvi, hiidenhirvi): `TG_HIT_ALT` = {sarvet: 'isku'}, `tgHitCat(kat)` (audio.js) – kategoria, jolla ei ole yhtään
+  ääntä manifestissa, soittaa varakategorian. Kun `osuma_sarvet`-äänet lisätään, ne soivat automaattisesti. Testattu oikeassa taistelussa.
+- Käyttäjän päätös: pomojen alueiskut (slam, nova) ja Kalmaherran tulilinja ilman osumaääntä.
+- Muistio tarkistettu: koodausmuistiinpanot v2.50–v2.53 lisätty, äänierän rutiini kattaa uudet kansiot, pomotaulukko (Tasapainoarvot).
+- Tarkistusrivi v2.54.
+
+### v2.53 (valikkomusiikki, Äänet ja musiikki -sivu, ilmoitus-/löytöäänet, taustakuvien äänet – lista 7, kohta 5)
+- **Käyttäjän vastaukset:** kaksi kappaletta (valikko + tauko), paikkamerkit ilman numeroa (`valikkomusiikki.mp3`, lisää `_1`, `_2` …);
+  kappaleen loputtua hiljainen tauko ja uudelleen; uusi sivu **Äänet ja musiikki**: master ylimpänä, mykistykset (kaikki, musiikki,
+  ääniefektit), 6 säädintä 0–150 % (oletus 100 % = entinen taso), ilmoitus-, alue- ja ulottuvuusäänten valinnat; vanhat äänisäätimet
+  siirretty pois Ohjaus-sivulta (ent. "Ohjaus ja ääni"). Ilmoitusäänet omaan kansioon: yhteinen ääni + biomeille ja ulottuvuuksille omat
+  (puuttuva → yhteinen). Taustakuvat: Öinen leiri, Myrsky, Ahjo yöllä.
+- **Kansiot:** `sounds/musiikki/` (valikko/`valikkomusiikki`, tauko/`taukomusiikki`; avaimet `mu/…`, lista `AANILISTA_MUSIIKKI.csv`;
+  käsittely STEREO 160 kbps `MUSIC_EV`, enintään 900 s, loppuhäivytys 1,5 s, −20/−21 LUFS) ja `sounds/ilmoitukset/` (ilmoitukset/`ilmoitus`;
+  biomit/`biomi_yhteinen` + 13 `biomi_<alue>` (`BIO_FI`); ulottuvuudet/`ulottuvuus_yhteinen` + 3 (`REALM_FI`); avaimet `i/…`, lista
+  `AANILISTA_ILMOITUKSET.csv`). `menu_2_efektit/taustat`: `tausta_leiri`, `tausta_myrsky`, `tausta_ahjo`. Työkalu `X_PARTS`; kaikki
+  välilehtinä `AANILISTA_MENU.xlsx`:ssä. Yhteensä 26 uutta paikkamerkkiä.
+- **Musiikki (boot.js `__mus`)**: `want('valikko'|'tauko')`, `stop(f)`, `apply()`, `state`. Ei fade in (0,05 s naksahduksen esto);
+  ulos `MU_FADE` 2 s; kappaleen loputtua `MU_GAP_MIN–MAX` 20–40 s ja uusi versio (eri kuin edellinen, jos on). Valikkomusiikki alkaa
+  aloitusjakson spTitle-vaiheesta (ensi- ja palaava käynti); lukossa odottaa avausta (`muTry` avauksessa ja puskurin valmistuessa).
+  main.js: `startPlay` → `stop()`; `musicTick` (frame): taukovalikko auki `PAUSE_MUSIC_T` 15 s → `want('tauko')`, pois tauolta → stop.
+  Karttavaihdon sivulataus odottaa 0,55 s, jos musiikki soi (häivytys 0,5 s).
+- **Voimakkuus** `volK(kategoria)` (audio.js) = master × säädin × `VOL_BASE` (cre .8, pl .8, ui .7, amb .7, notif .7, music 1) –
+  100 % = entinen oletus. Mykistys: `sound` (kaikki), `musicOn`, `sfxOn` (kaikki muu). boot.js `bsVolK` sama kaava (pelin SET tai
+  tallenne). Kertasiirto `_sv`: vanhat creVol/plVol (/0,8) ja uiVol (/0,7) uudelle asteikolle. `mSnd` uusi `o.cat` (ui/amb/notif) ja
+  `o.pre` (m/i); intron tuuli ja linnut = amb.
+- **Ilmoitukset (ui.js):** `msg` → `msgSnd` (enintään `MSG_SND_GAP` 0,35 s välein, ei 0,4 s löytöäänen jälkeen); `nextZoneBanner` →
+  `biomeSnd(z)`; `realmIntro` (dungeons.js) → `realmSnd(id)`; `iSnd` kokeilee omaa ja sitten yhteistä ääntä. Valinnat `notifSnd`,
+  `biomeSnd`, `realmSnd`.
+- **Taustakuvat (menubg.js):** `mbgSndTick` (mbgFrame): `MBG_SND` kolmelle kuvalle, ensimmäinen 2–6 s kuvan vaihdosta, sitten
+  5–14 s välein, `mSnd('taustat',…,{cat:'amb',v:.7})`.
+- Testattu: muunto (.8/.4/.7 → 1/.5/1), kaava (150 % × 150 %), sivu ja veto (150 % tallentuu), kytkimet, musiikki (soitto, tauko
+  kappaleiden välissä, stop, taukomusiikki 14 s ei / 15 s kyllä, jatko pysäyttää), aloitusjakso lukossa → napautus → soi → päävalikko
+  → peliin = stop; ilmoitusten raja, yhteinen ääni, valinnat; taustat vain kolmessa kuvassa. Tarkistusrivi v2.53 (+ v2.24/v2.51 päivitetty).
+
+### v2.52 (ääniprojekti MENU 2: äänten avaus, aloitusjakso, lataus, maailman intro, varmistus – lista 7, kohta 4)
+- **Käyttäjän vastaukset:** selain estää äänen ennen ensimmäistä elettä → alareunaan yliviivattu kaiutin + "Napauta näyttöä kuullaksesi
+  äänet"; napautus → kaiutin äänet päällä + "Äänet päällä", sitten häivytys (aikaisintaan 2 s näyttämisestä); koko jakso alkaa 2 s myöhemmin.
+  Ensikäynti: studiologo, HIIDENMAA-otsikko ja riimusiirtymä soivat. Palaava kävijä: (musiikki alkaa logosta – kohta 5) + latauksen loppuääni.
+  Latausnäytön ääni vain lopussa. Intron tuuli ja linnut hiipuvat pois lopussa (ohitus = nopea hiipuminen).
+- **Kansio `sounds/menu_2_efektit/`** (lista `AANILISTA_MENU2.csv`, sama `AANILISTA_MENU.xlsx` toisena välilehtenä): aloitus/`studio`,
+  `otsikko`, `riimusiirtyma`; lataus/`lataus_valmis`; uusi_maailma/`tuuli`, `linnut` (silmukat, työkalun act-tila ≤ 20 s + saumaton
+  ristihäivytys), `pilvet_wuush`, `kamera_laskeutuu`; varmistus/`varmistus` (9 paikkamerkkiä). `M_PARTS` osa 2, profiilit `T_PROF`.
+- **boot.js:** yksi AudioContext koko sivulle `window.__AC` (audio.js `audio()` käyttää samaa). `__bootSnd(ryhmä, ääni)` soittaa ennen
+  pelin skriptejä (lataa manifestista vain `m/aloitus` ja `m/lataus`; taso `hiidenmaa_set.uiVol`, `sound:false` mykistää).
+  Lukossa (`sndLocked`, ei automaatiossa) → `#sndHint` (css) ja kuuntelijat mousedown/keydown/touchstart (window capture, rekisteröity
+  ennen ohitusta): avaava painallus EI ohita aloitusjaksoa eikä maailman introa (`stopImmediatePropagation`, kun `__splashOn` tai
+  `state==='intro'`). Jakso alkaa `700 + SND_DELAY` (2 000) ms. Toimii myös maailman käynnistyksen sivulatauksen jälkeen (pend), koska
+  uusi sivu on taas lukossa – merkki näkyy silloinkin.
+- **Aloitusjakso:** `next()` → spStudio = studio, spTitle (vain ensikäynti) = otsikko, spTrans = riimusiirtyma. Latausnäyttö
+  (`__ldDone`, index.html) → `lataus_valmis` leimahduksen hetkellä (kaikki latausnäytöt).
+- **Maailman intro (main.js):** `introSndStart` (introRelease tai startIntro ilman pitoa) → tuuli + linnut `mSnd(…,{loop:true})`
+  (0,15 s naksahduksen esto, ei fade in) + `pilvet_wuush`; t = 4 s `kamera_laskeutuu`. `endIntro(true)` (luonnollinen, t = 6 s) →
+  silmukat hiipuvat `INTRO_FADE` 2,5 s; ohitus `endIntro()` → kaikki hiipuu `INTRO_SKIP_FADE` 0,3 s (kertaäänet 0,15 s). Huom:
+  `update()` ei aja introa – `introCam(dt)` kutsutaan piirtosilmukassa (testeissä kutsu suoraan).
+- **audio.js:** `mSnd` palauttaa kahvan `{src,g,done}` (ennen true), `o.loop`; `mStop(kahva, s)` häivyttää ja pysäyttää. Manifesti
+  ladataan heti (`creInit()` tiedoston lopussa, `mLoad` manifestin tultua) → intron äänet valmiina sivulatauksen jälkeen.
+- **Varmistus:** `keyDialog` soittaa `varmistus`, kun nappeja ≥ 2 (kysymys + peruutus); näppäimen odotus (1 nappi) ei soita.
+- Tarkistusrivi v2.52. Rivi v2.11 korjattu: manifesti ladataan nyt heti, joten rivi tarkistaa vain olentojen avaimet (ei `t/ p/ m/`).
+- Testattu: lukittu autoplay (`--autoplay-policy=document-user-activation-required`, `navigator.webdriver` false): merkki, 2 s viive,
+  napautus → running, otsikko ei ohitu, merkki häipyy; ensikäynnin studio 2,8 s ja otsikko 6,3 s; intro luonnollinen/ohitus 1 s/4,5 s.
+
+### v2.51 (ääniprojekti MENU 1: valikkojen napit ja säätimet – lista 7, kohta 3)
+- **Käyttäjän vastaukset:** äänet kaikissa pelin ulkopuolisissa valikoissa; kaikki liukusäätimet napsuvat (yksi naputusääni, jota peli
+  toistaa tiheästi ja hiljaa vain säädintä liikutettaessa, ei paikallaan pidettäessä); Ultra-ääni kun Ultra asetetaan (säädin vapautetaan);
+  Extra-grafiikassa sama ääni violetille ja punaiselle, oma ääni puiselle (Pois).
+- **Kansio `sounds/menu_1_valikko/`** (raw/<ryhmä>/ → valmiit/<ryhmä>_valmis/, lista `AANILISTA_MENU1.csv` + `sounds/AANILISTA_MENU.xlsx`):
+  napit/`hover`, napit/`klikkaus`, liukusaatimet/`naputus`, esiasetus/`ultra`, extra/`extra_paalle`, extra/`extra_pois` (6 paikkamerkkiä).
+  Työkalu: `M_PARTS` (process_sounds.py) = sama käsittely kuin pelaajan osilla, avaimet `m/<ryhmä>/<ääni>_<n>` (numeroton = `_0`),
+  profiilit `T_PROF` (hover 0,3 s −29 LUFS, klikkaus 0,4 s −24, naputus 0,12 s −27, ultra 3 s −20, extra_paalle 1,5 s −22, extra_pois 0,8 s −24).
+- **Peli (audio.js):** `mSnd(ryhmä, ääni, {v,p,pj})` 2D-toisto, taso uusi asetus **Valikkoäänet** `SET.uiVol` (oletus 70 %, Ohjaus ja ääni);
+  `mLoad` hakee kaikki `m/`-äänet heti. Delegoidut kuuntelijat (capture): `mouseover` → hover (uusi nappi, ei 350 ms klikkauksen jälkeen –
+  sivu piirtyy uudelleen), `click` → klikkaus tai Extra (`.uo`: arvo = `SET_DEF` tai `shUltra` off → extra_pois, muuten extra_paalle),
+  `mousedown`/`keydown` → `mWake` (AudioContext käyntiin). Rajaus `MENU_SEL` = #menu, #settings, #keyDlg, #deadS, #winS; napit `MENU_BTN`.
+  Mouse-tapahtumat (ei pointer), koska virtuaalinen osoitin VC lähettää MouseEventejä.
+- **Liukusäädin** (settings.js mousemove vedon aikana) → `mSliderMove` → `mSliderTick` (rAF): naputus `MSND.tickDt` 55 ms välein, voimakkuus
+  `MSND.tickV` 0,35, loppuu 80 ms liikkeen pysähtymisestä. **Ultra:** `sPreset`-säätimen vapautus tasolle 7 → `mSnd('esiasetus','ultra')`.
+- Huom: ennen ensimmäistä klikkausta/näppäintä selain ei salli ääntä (AudioContext odottaa käyttäjän elettä) → ensimmäiset hoverit hiljaa.
+- Testattu oikealla hiirellä (Playwright): hover, klikkaus, Extra päälle/pois, säätimen veto (10 naputusta / 0,35 s), paikallaan 0 naputusta,
+  Ultra vapautuksessa, pelin reppu-nappi hiljaa; oikea puskuri soi ja 0 % mykistää. Tarkistusrivi v2.51.
+
+### v2.50 (äänierä: tömähdykset, rakentaminen, valikot – käyttäjän lista 7, kohdat 0–2)
+- **Uudet äänet** (käyttäjän commit "ääniä lisää 1213"): puun tömähdys `_0` (2,35 s), `_1` (0,44 s), `_2` (4,62 s); rakentaminen: asetus,
+  korjaus, purku, valmistus; valikot: kartta (+ `_1`), puolitus, rakennusvalikko, reppu, siirto, sulje.
+- **process_sounds.py:** tiedostokohtainen profiili `F_PROF` (käsitellyn nimen mukaan, ohittaa `t_prof`:n): `puu_tomahdys_2` 5,2 s, häivytys
+  2,6 s (selvä pitkä hiipuminen ~2,0 → 4,6 s); `_0` 2,4 s / 0,35 s; `_1` 0,8 s / 0,12 s. Hyvin lyhyt ääni: jos leikattu alle 0,12 s, uusi
+  leikkaus −66 dB:llä (ei askel/silmukka), ja hylkäysraja 0,05 → 0,015 s – `sulje.mp3` (~0,04 s naksahdus + häntä) hylättiin ennen
+  "käytännössä hiljaa" → nyt 0,15 s.
+- **Tömähdys koon mukaan** `tomahdysIx(H)` (state.js, `fallTree`): H = `TREE_H` × koko; ≥ `TOM_BIG` 9,5 m → `_2` (aarnipuut 17–24 m ja
+  suurimmat kuuset/koivut/männyt), < `TOM_SMALL` 4,5 m → `_1`, muut `_0`/`_1` satunnaisesti. `plSnd` uusi `o.v_ix` = sallitut versionumerot
+  (jos yhtään ei ole, kaikki). Puiden H-jakauma (kartta 0): kuusi 3–11,6 (mediaani 5,7), koivu 2,1–12,4 (6,2), kelo 3–5,7, mänty 5,9–10,9
+  (8,2), aarnipuu 16,8–24,1.
+- **Repun sulkeminen** soittaa saman `reppu`-äänen 8 % korkeammalta (`REPPU_CLOSE_P` 1,08, ui.js `closePanels`; plSnd:n ±5 % vaihtelu päälle).
+- Tarkistusrivi v2.50.
+
 ### v2.49 (Hautakummun suu, nummen usva, pehmeä pilvimatto – käyttäjän pyynnöt)
 - **Hautakumpu maahan (KORJAUKSET 58):** `stoneCol`/`gmin` (landmarks.js) – portin pylväät, sivukivet, portaat, tulimaljat, riimulaatat ja
   kummun pystykivet ulottuvat matalimman nurkan alle. Kumpuun lovi portin taakse (`barrowMound`: × (1 − sstep(6,4, 8, bdx)·sstep(4,6, 3,2, |bdz|))),
@@ -296,7 +593,9 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
   Sen läpi piirretään (stencil = 1, ei syvyystestiä) 9 m käytävä, joka kapenee 3,2 → 2,1 m ja laskee 1,3 m (kivitekstuuri, lämmin hehku
   suulla verteksiväreinä), ja `CAVE.N` = 7 mustaa levyä peitolla 0,3 poikkileikkauksen kokoisina → pimeys syvenee. Kupera käytävä → levyt
   ovat oikein ilman syvyyttä. Valoisuus `barrowCaveTick(light)` (environment). Ryhmä `noMerge`, läpinäkyvät eivät yhdisty.
-- **Kalmanummen usva:** `moorK` → `moorDay()` (päivän numerosta: `MOOR_P` = 50 % täysi 1, muuten 0,3–0,55), nousu hitaasti (dt × 0,13 ≈ 8 s).
+- **Kalmanummen usva:** `moorK` → `moorDay()` (päivän numerosta: `MOOR_P` = 60 % täysi 1, muuten `MOOR_LO` 0,55–0,8; v2.49: 50 % / 0,3–0,55), sisään ja ulos pehmeästi
+  (dt × `MOOR_IN` 0,2 ≈ 5 s; ennen 0,13). v2.63 Aarnimetsän tapaan miedommin: kaukoraja `MOOR_FAR` 52 m (ennen 80), lähiraja 3 m, harmaa `MOOR_GREY` 0,7 (ennen 0,55),
+  kylläisyys −`MOOR_SAT` 42 % (ennen 32 %), aurinko −25 %, taivasvalo −20 %, auringon hehku −50 %, säteet −60–80 %.
   Sumu: near → 4 m ja far → `MOOR_FAR` 80 m (lerp moorK:lla, vain lyhentää; Ultran pitkällä piirtoetäisyydellä prosenttikerroin ei näkynyt); taivas/sumun väri kohti `cMoor` 0x8b9094 (× 0,55); värikylläisyys kankaalle
   `saturate(1 − 0,32·moorK)` (`moorSatSet`, vain muuttuessa; luolastossa nollataan).
 - **Pehmeä pilvimatto Ultralla:** `deckSoftSet` (render.js, kutsu `applyGfx`): saumaton kohinatekstuuri (kokonaislukutaajuudet, toisto 1,7)
@@ -3064,9 +3363,56 @@ kanssa; (3) Ultra-asetuksella jopa ~830 piirtokutsua.
 
 ## Ideajono
 
+### Lista 7 (v2.50–, käyttäjän päivitysideat 13.11.) – yksi kohta kerrallaan, 1–5 tarkentavaa kysymystä per kohta
+0. Äsken lisätyt äänet peliin → **tehty v2.50**.
+1. Puun tömähdykset: `_2` pitkä selvä fade out, muihin pieni fade; `_2` isoille puille, `_1` pienille, perus/`_1` normaaleille → **tehty v2.50**.
+2. Repun sulkeminen = sama `reppu`-ääni hieman korkeammalta → **tehty v2.50**.
+3. → **tehty v2.51** (paikkamerkit; käyttäjä tuo äänet). Ääniprojekti "MENU" (kansiot, paikkamerkit, lista): napin/toiminnon päälle vienti (hover), klikkaus, esiasetusliukusäätimen
+   napsutus, Ultra-esiasetuksen merkkiääni, Extra-grafiikan violetti/puinen valinta.
+4. → **tehty v2.52** (paikkamerkit). Ääniprojekti "menun ääniefektit": alkuintron äänet kohdittain, latausnäytön ääni (kirjaimet valaistuvat ennen sulkeutumista), uuden
+   maailman intro (tuuli, linnut, wuush pilvien siirtyessä, eri ääni kameran laskeutuessa; katkeaa, jos intro ohitetaan),
+   varmistusikkunoiden oma ääni (oletko varma, maailman poisto, DEV:n avaus …).
+5. → **tehty v2.53** (paikkamerkit; käyttäjä tuo musiikin ja äänet). Musiikkikansio (ensin valikkomusiikit): soi intron "Hiidenmaa"-tekstistä päävalikkoon, häivytys ulos peliin liittyessä; taukovalikossa
+   alkaa 15 s jälkeen; aina pieni fade out, fade in vain pyydettäessä. Extra: 3 animoitua taustakuvaa, joihin satunnaisia hiljaisia ääniä.
+
+### Lista 8 (15.11.) – **kaikki tehty v2.60–v2.62** (kohdat 4–5 v2.60, 1–3 v2.62; lisäksi sää- ja tunnelmaäänet v2.61)
+- Käyttäjän vastaukset: nimi Kalmon sinetti; ylimyksen vyöllä hehkuva sinetti; kartalle EI merkitä mitään; äänisääntö 2 päällekkäin → 1 s, 3 kertaa 3 s sisällä → 8 s;
+  Avaimen kätkijä vuorelle, piilossa kartalta, vihje päivittyy, 15 min → uusi vihje; hiidenkiven kuvaus ja vartijan viesti korjataan.
+1. **Hiidenkivet tasan 9 kätkettynä** (jousi 2 + miekka 3 + panssari 4). Ehdotettu jako: Hautakummun kirstut 2, maailman raunio/linnake 1,
+   hyvin piilotettu maailman paikka 1, ulottuvuuspomot 3, Routaluolan arkku 1, Kalmankammion arkku 1 (maailma 4, ulottuvuudet 5).
+   Avoinna: satunnaiset kivet (RARE_LOOT, CHEST_LOOT, Aarnihaudan lattia, PEACE_LOOT) kokonaan pois vai lisäksi; kelpaako jako.
+   Samalla vanhentuneet tekstit: hiidenkiven kuvaus (items.js) ja vartijan vajoamisviesti "Hiidenkivet jäävät alttarille" (ai.js) → sirpaleet.
+2. **Routaportti kahdella lukolla** (käyttäjä hyväksyi nimen **Kalmon sinetti**):
+   - Kalmon ylimys (Hautakumpu, solu `B`) pudottaa **Kalmon sinetin** kerran (lippu).
+   - **Jääavain** arvotaan tavallisiin maailman arkkuihin (rauniot, linnakkeet, kiviröykkiöt) – EI Hautakummun kirstuihin.
+   - Portissa 2 riippulukkoa, kumman tahansa voi laittaa ensin, lukko katoaa; teksti "vaatii: Jääavain ✓, Kalmon sinetti ✗"; vajaa tila tallentuu.
+   - Varmistukset: ylimys kaadettu → sinetin lukko auki; arvottu arkku avattu → avaimen lukko auki.
+   - Vanhat tallennukset: portti auki → ei muutosta; arkkuun arvottu Jääavain säilyy; ylimys kantaa sinetin.
+   - Uudet riimukivi-, tehtävä- ja vihjetekstit (`keyHint`, `runeB`, `QUESTS`, kyltit). Kuvakkeet selvästi erilaiset (luinen sinetti, kristallinen avain).
+   - Avoinna: riittääkö riimukiven suuntavihje vai epätarkka alue kartalle; saako ylimys erityispiirteen (hehkuva sinetti vyöllä, nimi, HP).
+3. **Arvoesineiden katoaminen 1 min säännöllä** (käyttäjä): jos avain/arvoesine ei ole 1 min ajan pelin arkuissa, pelaajan rakentamissa arkuissa
+   eikä repussa → ilmoitus "… on hukattu, sen voi löytää jostain arkusta" ja esine siirtyy arkkuun, josta sen **normaalistikin löytää**:
+   - maailman arkusta saatava (Jääavain) → johonkin maailman arkkuun;
+   - maailman olennolta saatava (Kalmon sinetti) → maailman arkkuun (ehdotus: Hautakummun kirstu tai maailman arkku);
+   - ulottuvuuspomolta saatava → saman pomon ulottuvuuden arkkuun (Luuavain → Routaluola, Aarniavain → Kalmankammio,
+     kruunusirpale → Aarnihauta), ei koskaan ulottuvuuteen, johon ei vielä pääse.
+   - Nykyinen (v2.59): maassa oleva katoaa 120 s jälkeen (`VAL_LOST`, kun pelaaja > 10 m tai muussa tilassa), laskenta `valuableCensus` 15 s välein
+     ja siirto aina maailman arkkuun (`relocateValuable`). Avoinna: lasketaanko hautakasa (kuolema) ja maassa pelaajan vieressä oleva turvalliseksi.
+   - `keyHint`/riimukivi osoittavat uuteen paikkaan (`flags.vloc`).
+4. **Olentojen äänten päällekkäisyysraja** (ei pelaajan ääniä): lajit idle, chase, aggro (hyökkäys), echo.
+   - Sama äänitiedosto enintään 3 päällekkäin, ylimääräiset hiljaisia; kun toinen päällekkäinen kopio alkaa → 1 s jäähdytys sille tiedostolle.
+   - Ehdotus: estetyn tilalle valitaan toinen versio (`_0`/`_1`/…); hiljaisuus vasta kun kaikki estetty; sama tiedosto ei uudelleen alle 0,15 s
+     (kampasuodinilmiö); estettyä ei siirretä myöhemmäksi. hurt ja death eivät kuulu sääntöön.
+   - Esimerkki: Hautakummussa ei 5 kalmon hyökkäysääntä päällekkäin. Nykyinen: idle/chase 3 per olento+laji ja 0,3 s väli (`creSnd`), aggro rajaton.
+   - Avoinna: myös raja olentolajia kohden (esim. kalmojen aggro yhteensä 3); kuuluvatko toimintoäänet (huitaisu, ryntäys); tiukemmat luvut idlelle;
+     DEV-mittariin rivi pois jääneistä äänistä.
+5. **Oven aukeamisanimaatio** (käyttäjä): ovi aukeaa ja sulkeutuu noin 0,6 s pehmeästi, liike hidastuu loppua kohti (ease-out).
+   - Nykyinen: `setDoor` (pieces.js) kääntää lehden heti. Ehdotus: avatessa törmäys pois heti, sulkiessa vasta lopussa (ja jos pelaaja on
+     oviaukossa, ovi ei sulkeudu päälle); varjot päivitetään liikkeen aikana; latauksessa asento suoraan ilman animaatiota; ääni liikkeen alkuun.
+
 ### Avoimet havainnot (v2.49-tarkistus)
-- Sarvi-osumien ääni puuttuu (karju, hirvi, hiidenhirvi) – käyttäjän äänitiedostot tai varakategoria (ks. "Osumaäänien tarkistus").
-- Pomojen alueiskuista (slam, nova) puuttuu osumaääni.
+- ~~Sarvi-osumien ääni puuttuu~~ → v2.54 varakategoria isku; omat `osuma_sarvet`-äänet käyttäjältä.
+- ~~Pomojen alueiskuista puuttuu osumaääni~~ → käyttäjän päätös v2.54: ei ääntä.
 - Pehmeä pilvimatto myös muille tasoille kuin Ultralle (vanhan maton raja liikkuu taivaalla).
 
 Lisää käyttäjän ehdotukset tähän ja merkitse tehdyt versiolokiin.

@@ -24,12 +24,8 @@ function terraTool(mode){
   const c=camRayPoint(6);if(dist2(c.x,c.z,P.pos.x,P.pos.z)>7*7)return;
   const R=mode==='path'?3.2:2.6;for(const p of pieces)if(dist2(p.x,p.z,c.x,c.z)<(R+G*.6)**2){msg('Rakennus on tiellä.','warn');shovelCd=playTime+.8;return;}
   P.stam-=6;P.stamDelay=1;shovelCd=playTime+.45;P.atk={t:0,dur:.45,hitAt:.2,done:true,w:{},offBusy:true};P.yaw=camYaw+Math.PI;
-  const h0=P.pos.y,i0=Math.max(0,Math.floor((c.x-R+HALF)/GS)),i1=Math.min(GN,Math.ceil((c.x+R+HALF)/GS)),j0=Math.max(0,Math.floor((c.z-R+HALF)/GS)),j1=Math.min(GN,Math.ceil((c.z+R+HALF)/GS));
-  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const x=-HALF+i*GS,z=-HALF+j*GS,d=Math.hypot(x-c.x,z-c.z);if(d>=R)continue;const k=j*HN+i;
-    if(mode==='path'){const w=sstep(R,R*.4,d),dh=clamp((h0-HGT[k])*w,-.4,.4);if(Math.abs(dh)>.002)terraSetVertex(k,HGT[k]+dh);if(d<R*.65)mudSet(k,MUD[k]+.4*sstep(R*.65,R*.2,d));}
-    else if(mode==='raise'){const w=sstep(R,R*.25,d);if(Math.hypot(x-P.pos.x,z-P.pos.z)>.9)terraSetVertex(k,Math.min(HGT0[k]+3,HGT[k]+.3*w));mudSet(k,MUD[k]-w);}
-    else if(mode==='dig'){const w=sstep(R,R*.25,d);terraSetVertex(k,Math.max(HGT0[k]-3,HGT[k]-.3*w));mudSet(k,MUD[k]-w);}
-    else if(mode==='restore'){mudSet(k,MUD[k]-sstep(R,R*.25,d));}}
+  const h0=P.pos.y;
+  if(!ftTool(mode,c.x,c.z,R,h0)){msg('Maailman reunalla maata ei voi muokata.','warn');return;}   // v2.65 tarkka 1 m verkko (4× kärkiä)
   terraFlush();mudFlush();for(const n of nodesNear(c.x,c.z,R+3,_sh))syncNodeY(n);
   sfx('build');burst(c.x,terrainH(c.x,c.z)+.2,c.z,mode==='path'?0x7a5a38:0x6b5a3a,8,3);}
 function useTool(alt){const w=curWeapon();if(w.cat!=='shovel')return;terraTool(w.id==='kuokka'?(alt?'restore':'raise'):(alt?'path':'dig'));}
@@ -57,6 +53,8 @@ function startAttack(){
 const PCOMBAT=.9;
 function weaponDmg(w){return PCOMBAT*w.dmg*(1+.25*((w.q||1)-1))*(P.buffs.voima?1.15:1)*P.fx.dmg;}
 const _nl=[];
+/* v2.57 puun kaatumisnarinan sävel puun korkeuden mukaan: pieni puu korkeampi (3 m ≈ 1,17×), iso matalampi (10 m 1,0×, aarnipuu 20 m ≈ 0,85×) */
+function creakP(n){const H=(TREE_H[n.type]||5)*(n.s||1);return clamp(1.25-H*.025,.85,1.2);}
 function doMeleeHit(w){
   const fx=Math.sin(P.yaw),fz=Math.cos(P.yaw);let hitMob=false;const dmg=weaponDmg(w);
   for(const m of mobs){if(m.dead)continue;const dx=m.pos.x-P.pos.x,dz=m.pos.z-P.pos.z,d=Math.hypot(dx,dz);
@@ -82,7 +80,7 @@ function doMeleeHit(w){
   const n=best;
   if(n.def.kind==='tree'||n.def.kind==='log'){if(!w.chop){if(!hitMob){msg('Tarvitset kirveen kaataaksesi puun.','warn');sfx('hit');plSnd('osumat','ei_tehoa');}return;}
     const tier=n.isLog?n.tier:(n.def.tier||1);if(w.chop<tier){if(!hitMob){msg('Tarvitset vahvemman kirveen.','warn');sfx('hit');plSnd('osumat','ei_tehoa');}return;}
-    n.hp-=(5+w.chop*4)*(1+.25*((w.q||1)-1));sfx(n.hp<=0?(n.isLog?'logBreak':'chopFinal'):n.isLog?'chopLog':'chop');shake(.08);{const q={x:n.isLog?P.pos.x+fx:n.x,y:n.y+1,z:n.isLog?P.pos.z+fz:n.z};plSnd('osumat','osuma_puu',{pos:q});if(n.hp<=0)plSnd('osumat',n.isLog?'tukki_hajoaa':'puu_kaatuu',n.isLog?{pos:q}:{pos:q,until:fallDur(n),fit:1});}   /* v2.25 */
+    n.hp-=(5+w.chop*4)*(1+.25*((w.q||1)-1));sfx(n.hp<=0?(n.isLog?'logBreak':'chopFinal'):n.isLog?'chopLog':'chop');shake(.08);{const q={x:n.isLog?P.pos.x+fx:n.x,y:n.y+1,z:n.isLog?P.pos.z+fz:n.z};plSnd('osumat','osuma_puu',{pos:q});if(n.hp<=0)plSnd('osumat',n.isLog?'tukki_hajoaa':'puu_kaatuu',n.isLog?{pos:q}:{pos:q,until:fallDur(n),fit:1,p:creakP(n)});}   /* v2.25 */
     if(n.isLog)chopLog(n);else burst(n.x,n.y+1.2,n.z,0x8a5a32,5,3);
     if(n.hp<=0){if(n.isLog){removeLog(n);const c=Math.max(1,Math.round(rint(rng,3,4)*n.s));for(let j=0;j<c;j++){const t=(j+.5)/c;spawnDrop(n.dropId,1,n.ax+(n.bx-n.ax)*t,n.y+.8,n.az+(n.bz-n.az)*t);}burst(n.x,n.y+.4,n.z,0x6b4527,12,4);}
       else{killNode(n);fallTree(n,undefined,true);bump('trees');}}}
@@ -139,6 +137,7 @@ function killMob(m){m.dead=true;m.deadT=0;m.ashDeath=m.burnT>0||!!m.fireHit;if(m
   if(m.archer&&Math.random()<.5)spawnDrop('nuolet',2+(Math.random()*4|0),m.pos.x,m.pos.y+1,m.pos.z);   // v1.42 jousikalmo pudottaa joskus nuolia
   if(m.type==='vartija'&&!m.devSpawn){flags.boss=1;bossDefeated();}   /* v1.94: palkin piilotus/KUKISTETTU hoitaa bossBarTick */   // v1.91: DEV-luotu vartija ei kirjaa voittoa
   if(m.dunIdx!==undefined)dunKilled[m.dunIdx]=1;
+  if(m.sinetti&&!flags.sinetti){flags.sinetti=1;spawnDrop('sinetti',1,m.pos.x,m.pos.y+1,m.pos.z);msg('Ylimyksen vyöltä putoaa Kalmon sinetti!','loot');}   // v2.62
   onMobKilled(m);
 }
 // Jousi: täysi vetoaika 1,6 s (laatu 2: 1,3 s, laatu 3: 1,07 s). Vajaa veto = vähemmän vahinkoa, hitaampi nuoli ja jyrkempi kaari; laatu suoristaa ja pidentää lentoa.
@@ -268,7 +267,7 @@ function interact(){
   if(t.kind==='grave'){const g=t.g;if(fitsAll(g.items.filter(Boolean))){for(const s of g.items)if(s)invAdd(s.id,s.n,s.q||1);g.items.length=0;graveVanish(g);msg('Sait tavarasi takaisin.','loot');sfx('pickup');return;}
     while(g.items.length<Math.max(16,g.items.length))g.items.push(null);if(openPanel)closePanels(true);togglePanel('chest');curChest={found:true,grave:g,title:'Hautakasa',data:{items:g.items}};sfx('pickup');plSnd('kaytto','arkku_auki');renderChest();
     msg('Kaikki ei mahdu reppuun – ota mitä tarvitset, loput jäävät kasaan.','warn');return;}
-  if(t.kind==='piece'){const p=t.p;if(bt(p.t)==='ovi'){const a=p.rot*Math.PI/4,lz=(P.pos.x-p.x)*Math.sin(a)+(P.pos.z-p.z)*Math.cos(a);setDoor(p,!p.data.open,p.data.open?p.data.dir:(lz>0?1:-1));sfx('build');return;}if(PIECES[p.t].store){openChest(p);return;}switch(p.t){
+  if(t.kind==='piece'){const p=t.p;if(bt(p.t)==='ovi'){const a=p.rot*Math.PI/4,lz=(P.pos.x-p.x)*Math.sin(a)+(P.pos.z-p.z)*Math.cos(a);if(!setDoor(p,!p.data.open,p.data.open?p.data.dir:(lz>0?1:-1))){msg('Seisot oviaukossa – siirry, niin ovi sulkeutuu.','warn');return;}sfx('build');return;}   /* v2.60 ovi kääntyy 0,6 s */if(PIECES[p.t].store){openChest(p);return;}switch(p.t){
     case 'nuotio':case 'grilli':fireInteract(p);break;
     case 'seinasoihtu':{if(invCount('pihka')>0&&p.data.burn<1800){invRemove('pihka',1);p.data.burn=Math.min(1800,p.data.burn+900);markFull(p);msg('Pihka: seinäsoihtu palaa 15 min lisää.');sfx('build');}else msg(invCount('pihka')>0?'Seinäsoihdussa on jo tarpeeksi pihkaa.':'Tarvitset pihkaa seinäsoihtuun.','warn');break;}
     case 'soihtuteline':{const b=p.data.burn;if(torchPct(p)>50){msg(`Soihdussa on jo tarpeeksi polttoainetta (${torchPct(p)} %).`);break;}if(invCount('puu')>0&&b<600){invRemove('puu',1);p.data.burn=600;markFull(p);msg('Soihtu palaa 10 min.');sfx('build');}else if(invCount('hiili')>0&&b<1800){invRemove('hiili',1);p.data.burn=1800;markFull(p);msg('Hiili: soihtu palaa 30 min.');sfx('build');}else msg(invCount('puu')>0||invCount('hiili')>0?'Soihdussa on jo tarpeeksi polttoainetta.':'Tarvitset puuta tai hiiltä.','warn');break;}
@@ -313,7 +312,7 @@ function useAltar(){
   if(!flags.altarSt){if(invCount('kruunusirpale')<3){msg('Alttarin kolme koloa ovat tyhjiä. Tarvitset kolme Kalmankruunun sirpaletta – ne ovat Aarnihaudan syvyyksissä.','warn');return;}invRemove('kruunusirpale',3);}   // v1.34 (kohta 8)
   flags.altarSt=0;syncAltar();msg('Sirpaleet hehkuvat… maa vapisee!','warn');sfx('roar');shake(.6);
   circleStones.forEach(r=>r.material=MAT.glow);
-  const L=LOC.circle;setTimeout(()=>{boss=spawnMob('vartija',L.x,L.z-4);if(flags.bossHp){boss.hp=Math.min(boss.maxHp,flags.bossHp);delete flags.bossHp;}boss.state='rise';boss.t=0;boss.sinking=1;boss.pos.y-=7.5;shockwave(L.x,6,L.z-4,10);},1600);
+  const L=LOC.circle;setTimeout(()=>{boss=spawnMob('vartija',L.x,L.z-4);if(flags.bossHp){if(bossTired('vartija'))boss.hp=Math.min(boss.maxHp,flags.bossHp);delete flags.bossHp;}   /* v2.55: noustessaan täysi terveys (armon jälkeen säilyy) */boss.state='rise';boss.t=0;boss.sinking=1;boss.pos.y-=7.5;shockwave(L.x,6,L.z-4,10);},1600);
 }
 function openSarc(i){
   const first=!flags.sarc[i],s=sarcs[i];
@@ -323,9 +322,11 @@ function openSarc(i){
 function showLore(t,txt){const el=$('#msgs');const d=document.createElement('div');d.innerHTML=`<b style="color:var(--frost)">${t}</b><br><span style="font-weight:500">${txt}</span>`;d.style.maxWidth='440px';d.style.whiteSpace='normal';el.appendChild(d);d._life=14;msgEls.push(d);}
 
 /* ---------------- DUNGEON TRAVEL ---------------- */
+// v2.62 Hautakummun ylimys kantaa Kalmon sinettiä vyöllään (hehkuu himmeästi), kunnes se on pudonnut kerran (flags.sinetti).
+function sinettiCarry(m){m.sinetti=1;const T=m.f&&m.f.torso;if(!T)return;const s=sinettiMesh(.9);s.position.set(.13,-.4,.21);s.rotation.y=.25;s.traverse(o=>{o.castShadow=false;});T.add(s);m.sinMesh=s;}
 const dunKilled={};
 function fadeTo(cb){const f=$('#fade');f.style.opacity=1;setTimeout(()=>{cb();setTimeout(()=>f.style.opacity=0,120);},380);}
 function enterDungeon(){fadeTo(()=>{P.inDun=true;P.realm=null;P.spawnProt=3.2;P.pos.set(dunEntry.x+.6,DUN.y+.05,dunEntry.z);P.vy=0;camYaw=-Math.PI/2;P.yaw=Math.PI/2;
-  dunSpawns.forEach((s,i)=>{if(dunKilled[i])return;if(mobs.some(m=>m.dunIdx===i))return;const m=spawnMob(s.type,s.x,s.z,{y:DUN.y,dun:true,noBorn:1});m.dunIdx=i;});
+  dunSpawns.forEach((s,i)=>{if(dunKilled[i])return;if(mobs.some(m=>m.dunIdx===i))return;const m=spawnMob(s.type,s.x,s.z,{y:DUN.y,dun:true,noBorn:1});m.dunIdx=i;if(s.type==='ylimys'&&!flags.sinetti)sinettiCarry(m);});
   msg('Hautakumpu. Ilma on kylmää ja seisovaa.');});}
 function exitDungeon(){fadeTo(()=>{P.inDun=false;P.realm=null;P.spawnProt=3.2;const L=LOC.barrow;P.pos.set(L.x+12.5,terrainH(L.x+12.5,L.z),L.z);P.vy=0;camYaw=-Math.PI/2;for(const m of [...mobs])if(m.dun)mobRemove(m);});}

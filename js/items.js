@@ -15,10 +15,11 @@ const ITEMS={
   rautamalmi:{n:'Rautamalmi',w:6,s:30,c:'#7a5a50',d:'Vuorten syvistä suonista. Sulata sulatusuunissa raudaksi.'},
   rauta:{n:'Rautaharkko',w:4,s:30,c:'#8a96a3',d:'Kovaa ja raskasta. Parhaat työkalut ja aseet taotaan raudasta.'},
   tervaspuu:{n:'Tervaspuu',w:2.5,s:50,c:'#4a3424',d:'Aarnipuun tummaa, pihkaista puuta. Kestää kaksi kertaa tavallista puuta.'},
-  jaaavain:{n:'Jääavain',w:.3,s:1,c:'#9fd8ff',d:'Kylmä, huurteinen avain rauniotalon arkusta. Aukaisee Routaportin lukon.'},
+  jaaavain:{n:'Jääavain',w:.3,s:1,c:'#9fd8ff',d:'Kylmä, huurteinen avain jostain saaren vanhasta arkusta. Toinen Routaportin kahdesta lukosta.'},
+  sinetti:{n:'Kalmon sinetti',w:.4,s:1,c:'#c9b8ff',d:'Luinen sinetti, joka hohtaa himmeästi. Hautakummun ylimys kantoi sitä vyöllään. Toinen Routaportin kahdesta lukosta.'},   // v2.62
   luuavain:{n:'Luuavain',w:.3,s:1,c:'#e6e0cf',d:'Luusta veistetty avain, jonka Jäätär kantoi. Aukaisee Kalmankammion portin lukon.'},
   aarniavain:{n:'Aarniavain',w:.3,s:1,c:'#7aff9a',d:'Sammaleen peittämä vihreä avain. Aukaisee Aarnihaudan portin lukon.'},
-  hiidenkivi:{n:'Hiidenkivi',w:2,s:10,c:'#7fd6cc',d:'Kylmä, sisältä hehkuva kivi. Kalmankehän alttari kaipaa kolmea.'},
+  hiidenkivi:{n:'Hiidenkivi',w:2,s:10,c:'#7fd6cc',d:'Harvinainen, sisältä hehkuva kivi – siitä taotaan hiidenaseita ja -panssari. Saarelle on kätketty yhdeksän.'},
   kruunusirpale:{n:'Kalmankruunun sirpale',w:1,s:5,c:'#9aff7a',d:'Murtuneen kruunun hehkuva palanen Aarnihaudan syvyyksistä. Kalmankehän alttari kaipaa kolmea. (Harvinainen)'},
   sydan:{n:'Vartijan sydän',w:3,s:1,c:'#5fe6d9',d:'Kivinen sydän, joka sykkii vielä hiljaa. Voittosi merkki.'},
   liha:{n:'Raaka liha',w:1,s:20,c:'#c9554e',food:{h:6,raw:true},d:'Paista nuotiolla. Raakana vatsa voi kääntyä.'},
@@ -132,6 +133,7 @@ function icon(id){
     case 'kupari':poly([[8,32],[14,20],[40,20],[44,32]],'#e0904f','#8f5326');poly([[14,20],[18,14],[36,14],[40,20]],'#f2b07a');break;
     case 'hiidenkivi':poly([[24,6],[34,20],[30,40],[18,40],[14,20]],'#7fd6cc','#2f8f86');poly([[24,10],[28,20],[24,34],[20,20]],'#c9fff8');break;
     case 'jaaavain':case 'aarniavain':case 'luuavain':{const c1=id==='jaaavain'?'#9fd8ff':id==='luuavain'?'#e6e0cf':'#7aff9a',c2=id==='jaaavain'?'#3d7fa8':id==='luuavain'?'#8a8070':'#2f8f4a';circ(15,15,9,c1,c2);circ(15,15,4,'#13110e');line(21,21,40,40,5,c1);line(33,33,38,28,4,c1);line(38,38,42,34,4,c1);line(21,21,40,40,1.5,c2);break;}
+    case 'sinetti':circ(24,24,15,'#e6e0cf','#6a5a8a');circ(24,24,11,'#c9b8ff','#8a78b8');circ(19,21,3,'#2a2236');circ(29,21,3,'#2a2236');poly([[24,24],[21,30],[27,30]],'#2a2236');line(18,33,30,33,2,'#2a2236');line(24,9,24,4,3,'#e6e0cf');break;   // v2.62 kallosinetti
     case 'kruunusirpale':poly([[10,30],[16,14],[22,26],[28,8],[34,24],[40,16],[38,36],[12,38]],'#9aff7a','#2f6a2a');poly([[16,18],[22,28],[28,12],[30,26]],'#e8ffd8');circ(24,33,3,'#ffe27a');break;
     case 'parannusjuoma':case 'elpymisjuoma':case 'sisujuoma':{const lc=d.c,dk=id==='parannusjuoma'?'#6a1018':id==='elpymisjuoma'?'#145a24':'#14306a';   // v2.00 pullo: lasi, neste, korkki, heijastus
       circ(24,30,12,'rgba(210,235,240,.55)','#3a4a50');g.save();g.beginPath();g.arc(24,30,10.5,0,TAU);g.clip();g.fillStyle=lc;g.fillRect(10,25,28,18);g.fillStyle=dk;g.fillRect(10,38,28,6);g.fillStyle='rgba(255,255,255,.35)';g.fillRect(10,25,28,2);g.restore();

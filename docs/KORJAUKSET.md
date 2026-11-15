@@ -418,13 +418,66 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   portin taakse (`barrowMound`, bdx 6,4–8) → maa aukon kohdalla tasainen, kivimassa täyttää loven. Aukko on stencil-ikkuna (`barrowCave`).
   **Uudet kiinteät rakenteet rinteessä: käytä `stoneCol`:ia tai mittaa maa nurkista, älä yhdestä pisteestä.** Tarkistusrivi v2.49 mittaa nurkat.
 
+## 59. Uusi ylimmän tason nimi törmäsi toisen tiedoston nimeen → koko tiedosto ei latautunut (v2.55)
+- Oire: peli ei käynnisty, konsolissa `Identifier '_spGeo' has already been declared` ja myöhemmin `updateMobs is not defined` (ai.js jäi lataamatta).
+- Syy: tiedostot jakavat yhden globaalin näkyvyysalueen; `node --check` ei huomaa törmäystä, koska se tarkistaa vain yhden tiedoston.
+- Ratkaisu: kuvaava, tiedostokohtainen nimi (`VT_SPK_GEO`). **Ennen uutta ylimmän tason nimeä: `grep -n "\bnimi\b" js/*.js`.** Testaa aina
+  sivun lataus selaimessa (tarkistus.mjs tai Playwright `pageerror`), ei pelkkä `node --check`.
+
+## 60. Puolitus klikkaamalla ei toiminut luotettavasti (v2.56; aiemmin v2.32, v2.33, v2.46)
+- Käyttäjän malli: **pino valittuna (vasen tai oikea) → OIKEA napsautus kohderuutuun = puolet siirtyy** (Shift + oikea = määrä sliderilla);
+  vasen kohteeseen = koko pino. Ratkaiseva on oikea napsautus kohdetta valittaessa.
+- Oireet ja syyt:
+  1. Oikealla siirron jälkeen **valinta jäi päälle** (`oncontextmenu`/arkku: ei `selSlot=-1`/`chestSel=null`) → seuraava napsautus siirsi
+     taas alkuperäisestä pinosta → näytti rikkinäiseltä.
+  2. **Hiiren pieni liikahdus (> 6 px) kohderuudussa, jossa on esine** (pinoaminen), aloitti raahauksen KOHTEESTA ja vei valinnan
+     siihen → siirtoa ei tullut.
+  3. Puolitusääni soi oikean napin valinnassa eikä vasta siirrossa (hämäsi: kuulosti onnistuneelta).
+- Ratkaisu: valinta pois siirron jälkeen (reppu ja arkku); `slotUX.onmousedown` ei aloita raahausta, jos JOKIN MUU ruutu on valittuna
+  (ruutu on kohde); raahausraja `DRAG_PX` 10 px; ääni `invSnd`: valinta = siirto, puolitus vasta `moveCount(…,'puolitus')` onnistuessa
+  (myös sliderin Siirrä-nappi).
+- **Testaus (tärkeä, muuten testi näyttää väärin):** oikea hiiri Playwrightilla (`page.mouse` down/up `button:'right'`), peli käyntiin
+  `newGame(); startPlay()` (pelkkä setState jättää `#menuBg`-kanvaksen ruutujen päälle → mikään klikkaus ei osu). VC-tila: `locked=true;
+  state='ui'; vcSync()`, ja **liikuta oikeaa hiirtä ensin, aseta sitten `VC.x/VC.y`** (hiiren liike siirtää virtuaaliosoitinta).
+  Kokeile: oikea+vasen, vasen+oikea, oikea+oikea, liikahdus 8–9 px pinoon, nopea toisto, arkku. Tarkistusrivi v2.56.
+- **Äänisääntö (v2.57, käyttäjä):** `siirto` soi VAIN valmiissa tavallisessa siirrossa (`moveSlot`, arkun Shift-siirron onnistuessa) – ei
+  valinnassa (vasen/oikea), raahauksen alussa eikä sliderin avauksessa; puolituksessa VAIN `puolitus` (`moveCount(…,'puolitus')`).
+
+## 61. Repun/arkun ikkuna "venyi" ja ruudut siirtyivät valittaessa (v2.57)
+- Oire: esineen valinta (repussa tai arkussa) sai ikkunan näyttämään kasvavan ja ruudut siirtyvän.
+- Syyt: (1) valitun ruudun sykintä `selPulse` käytti `transform: translateY + scale(1,04–1,08)` → ruutu kasvoi ja nousi, ja reunalla
+  ylivuoto saattoi tuoda vierityspalkin (koko ruudukko siirtyi); (2) arkun ohjerivi `#chestHint` piteni valittaessa ja rivittyi kapealla
+  näytöllä kahdelle riville → ikkuna kasvoi.
+- Ratkaisu: sykintä pelkällä `box-shadow`-hehkulla (inset-reuna + hehku, ei transformia); `#chestHint` kiinteä 2 rivin korkeus
+  (`height:2.7em; overflow:hidden`). **Paneelien ruutujen tiloihin ei transformia, marginaalia tai reunan paksuuden muutosta.**
+  Testi: mittaa kaikkien ruutujen `getBoundingClientRect` ennen/jälkeen valinnan (1280 × 800 ja 1000 × 620) – ei muutosta. Rivi v2.57.
+
+## 62. `//`-kommentti nielaisi rivin loppukoodin – peli ei käynnistynyt (v2.63, kehityksen aikana; toistuva, ks. 49)
+- Oire: peli ei käynnistynyt ollenkaan (`window.__game` puuttui); konsolissa `Unexpected end of input` ja sen seurauksena `updateLights is not defined`.
+- Syy: muokkauksessa lisättiin `// v2.63 …` -selitys rivin KESKELLE (`moorDay()`, environment.js): kommentin perään jäi `return moorDayV;}` →
+  funktio ja koko tiedosto jäivät kesken. Sama virhe kuin KORJAUKSET 49 – syntyy helposti, kun kommentti lisätään korvattavan pätkän perään
+  automaattisella korvauksella eikä tarkisteta, mitä rivillä on korvatun kohdan jälkeen.
+- Ratkaisu: kommentti rivin loppuun. **Ehkäisy (pakollinen jokaisen koodimuutoksen jälkeen):** aja kaikille tiedostoille
+  `for f in js/*.js tools/tarkistus.mjs; do node --check $f >/dev/null 2>&1 || echo VIRHE $f; done` ennen testejä. Lisäämässä `//`-kommenttia
+  korvauksen sisään: varmista, ettei korvattavan tekstin perässä ole samalla rivillä koodia – muuten käytä `/* … */`.
+
+## 63. Ylimmän tason vakio käytettiin ennen määrittelyä – peli ei käynnistynyt (v2.63, kehityksen aikana)
+- Oire: `newGame` kaatui `Cannot access 'logs' before initialization` (resources.js jäi kesken).
+- Syy: uusi `const ROCK_GR` lisättiin tiedoston loppupuolelle, mutta funktio `rockTop`, joka käytti sitä, kutsuttiin jo kasvillisuuden sijoittelussa
+  (ylimmän tason koodi ylempänä) → temporaalinen kuollut alue (TDZ) → tiedoston loput (myös `logs`) jäivät määrittelemättä.
+- Ratkaisu: arvo funktion sisään. **Sääntö:** funktio, jota kutsutaan ylimmän tason koodista, saa käyttää vain YLEMPÄNÄ määriteltyjä vakioita
+  (funktiot nousevat, `const`/`let` eivät). Testaa aina `newGame()` selaimessa muutoksen jälkeen.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`
   ja kohdistusskenaariot (kehitysmuistio v0.65).
 - **Varjot** (`ai.js` updateStations, `render.js` setQuality, `settings.js` applyGfx): autoUpdate=false-valot.
 - **Latausjärjestys** (CLAUDE.md): ylimmän tason koodi vain aiemmin ladattuihin muuttujiin.
+- **Repun/arkun siirrot** (`ui.js` `slotUX`, `oncontextmenu`, `moveHalf`/`moveCount`, `chestClick`): lue KORJAUKSET 60 ja aja sen testit.
+- **Uudet olento- ja toimintoäänet** (audio.js): kulje `creSpaceOk(m)`-suodattimen kautta ja käytä etäisyyksissä `SND_DIST_K`:ta (v2.58).
 - **Osumaäänet** (`ai.js` `mobHurtP` → `tgHit(TG_HIT[tyyppi])`): uusi hyökkäys pelaajaan kulkekoon `mobHurtP`:n kautta, muuten osumaääntä
   ei tule (pomojen slam/nova kutsuvat `hurtPlayer`:ia suoraan). Uusi olento → lisää `TG_HIT`-kategoria ja tarkista, että kategorialla on ääni.
 - **Maahan sijoittaminen** (`landmarks.js` `stoneCol`/`gmin`): mittaa maa nurkista, ei yhdestä pisteestä (KORJAUKSET 58).
+- **Kommentit** (KORJAUKSET 49, 62): `//` vain rivin loppuun; jokaisen muutoksen jälkeen `node --check` kaikille js-tiedostoille.
 - **Tallennus** (`save.js`): uudet liput `flags`-olioon (tallentuvat automaattisesti); muotomuutoksessa nosta `v`.

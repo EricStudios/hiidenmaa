@@ -4,10 +4,12 @@
 
 const fo=k=>flags[k]||(flags[k]={});
 const REALMS={
-  portal1:{n:'Routaluola',gen:'maze',W:31,H:31,wall:0x9fb4c6,floor:0x6a7c8c,tc:0x8fd0ff,fog:0x08121a,glow:0x7fd0ff,mist:0xb8d8f0,boss:'jaajattari',mobs:['routasusi','routasusi','kalmo'],dens:.04,spw:'routasusi',lock:'jaaavain',key:'luuavain',alt:()=>!!(flags.wl&&flags.wl._key&&fo('fc')[flags.wl._key])||!!fo('poi').poiR1&&!(flags.wl&&flags.wl._key),hint:()=>keyHint(),reveal:null},
+  portal1:{n:'Routaluola',gen:'maze',W:31,H:31,wall:0x9fb4c6,floor:0x6a7c8c,tc:0x8fd0ff,fog:0x08121a,glow:0x7fd0ff,mist:0xb8d8f0,boss:'jaajattari',mobs:['routasusi','routasusi','kalmo'],dens:.04,spw:'routasusi',lock:'jaaavain',key:'luuavain',alt:()=>!!(flags.wl&&flags.wl._key&&fo('fc')[flags.wl._key])||!!fo('poi').poiR1&&!(flags.wl&&flags.wl._key),hint:()=>keyHint(),reveal:null,
+    locks:[{it:'jaaavain',alt:()=>REALMS.portal1.alt(),hint:()=>keyHint()},{it:'sinetti',alt:()=>!!flags.sinetti||ylimysDead(),hint:()=>sinettiHint()}]},   // v2.62 kaksi lukkoa
   portal2:{n:'Kalmankammio',gen:'rooms',W:43,H:35,wall:0x9a8f7e,floor:0x5c554a,tc:0xff8a36,fog:0x0d0806,glow:0xe6e0cf,mist:0xcfc4b0,boss:'kalmaherra',mobs:['kalmo','kalmo','kalmo','ylimys'],dens:.035,spw:'kalmo',lock:'luuavain',key:'aarniavain',alt:()=>!!fo('rb').portal1,hint:()=>'Luuavain on Jäättärellä Routaluolan perimmäisessä kammiossa.',reveal:'portal1'},
   portal3:{n:'Aarnihauta',gen:'cave',W:47,H:47,wall:0x6f8a5a,floor:0x4a5a3a,tc:0x9aff7a,fog:0x050c06,glow:0x7aff9a,mist:0x9fd8a0,boss:'aarnihirvio',mobs:['hiisi','hiisi','susi','kivivartija'],dens:.03,spw:'hiisi',lock:'aarniavain',key:'kruunusirpale',alt:()=>!!fo('rb').portal2,hint:()=>'Aarniavain on Kalmaherralla Kalmankammiossa.',reveal:'portal2'},
 };
+for(const id in REALMS){const D=REALMS[id];if(!D.locks&&D.lock)D.locks=[{it:D.lock,alt:()=>D.alt(),hint:()=>D.hint()}];}   // v2.62 yksi lukko
 const SPW_T=20; // spawnerin tauko (s) sen jälkeen, kun sen kaikki viholliset ovat kuolleet
 const SPW_HP=240; // Kalmanpesän kestävyys: murskataan hakulla (louhintateho per isku), tuhottu pesä tallentuu (flags.sd[ulottuvuus])
 const RCH=7.6; // sisätilan kattokorkeus (pomojen pää ei osu kattoon)
@@ -15,12 +17,12 @@ const REALM_IDS=Object.keys(REALMS);
 REALM_IDS.forEach((id,k)=>{REALMS[id].cx=DUN.x+(k+1)*230;REALMS[id].cz=DUN.z;});
 const BUILT={}, PORTALS=[], VENTS=[];
 // v1.42 (lista 4, kohdat 12–13): Kalmankammiossa arkkujen saalis 2×; Kalmankammiossa ja Aarnihaudassa 30 % mahdollisuus harvinaiseen:
-// metson sulkia, karhuntalja, hiidenkivi tai ★2-ase/-kilpi.
-const RARE_LOOT=[()=>['sulka',3+(Math.random()*3|0)],()=>['karhuntalja',1],()=>['hiidenkivi',1+(Math.random()*2|0)],
+// metson sulkia, karhuntalja, sulkanuolia tai ★2-ase/-kilpi (v2.62: hiidenkivi pois – tasan 9 kätkettyä, ks. HK_PLAN).
+const RARE_LOOT=[()=>['sulka',3+(Math.random()*3|0)],()=>['karhuntalja',1],()=>['sulkanuolet',8+(Math.random()*6|0)],   /* v2.62 hiidenkivi pois */
   ()=>[['rautamiekka','rautakirves','miekka','keihas','kuparikilpi','rautakilpi','jousi'][Math.random()*7|0],1,2]];
 function realmLoot(id,base){const L=base.map(([k,n])=>[k,id==='portal2'?n*2:n]);
   if((id==='portal2'||id==='portal3')&&Math.random()<.3){const r=RARE_LOOT[Math.random()*RARE_LOOT.length|0]();if(ITEMS[r[0]])L.push(r);}return L;}
-const CHEST_LOOT=[[['rauta',3],['kupari',3],['nuolet',12]],[['rautamalmi',4],['pihka',3],['nahka',3]],[['hiidenkivi',1],['luu',4]],[['kupari',5],['kivi',6],['nuolet',10]],[['rauta',2],['hiili',4],['liha',3]]];
+const CHEST_LOOT=[[['rauta',3],['kupari',3],['nuolet',12]],[['rautamalmi',4],['pihka',3],['nahka',3]],[['rautamalmi',3],['luu',4]],[['kupari',5],['kivi',6],['nuolet',10]],[['rauta',2],['hiili',4],['liha',3]]];
 
 /* ---------------- GENERAATTORIT: ruudukko, jossa '#' on seinä ja '.' lattia ---------------- */
 function carve(g,x0,z0,x1,z1){for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)if(x>0&&z>0&&x<g[0].length-1&&z<g.length-1)g[z][x]='.';}
@@ -121,7 +123,7 @@ function buildBarrel(add,cols,its,x,y,z,key,li){
   const body=new THREE.Mesh(new THREE.CylinderGeometry(.4,.36,1,10),wd);body.position.y=.5;body.castShadow=true;g.add(body);
   for(const yy of [.22,.78]){const b=new THREE.Mesh(new THREE.CylinderGeometry(.415,.415,.06,10),ir);b.position.y=yy;g.add(b);}
   const lid=new THREE.Mesh(new THREE.CylinderGeometry(.37,.37,.06,10),mat(0x5a3a20));lid.position.y=1.02;g.add(lid);add(g);
-  cols.push(addCircle(x,z,.44,y,y+1.05,'static'));
+  {const bc=addCircle(x,z,.44,y,y+1.05,'static');bc.ground=1;cols.push(bc);}   // v2.63 tynnyrin päällä voi seistä
   // Kansi avataan laiskasti (label-kutsussa): tynnyreitä rakennetaan myös latauksessa ennen kuin flags on olemassa.
   let lidOpen=false;const open=()=>{lidOpen=true;lid.position.set(.35,.6,0);lid.rotation.z=1.3;};
   const it={x,y:y+.8,z,r:2.2,label:()=>{if(!lidOpen&&fo('rc')[key])open();return foundEmpty(key)?'Tynnyri (tyhjä)':'Avaa tynnyri';},use:()=>{const first=!fo('rc')[key];
@@ -194,6 +196,8 @@ function ensureRealm(id){
     R.room={x:R.boss.x,z:R.boss.z,rays,avg:rays.reduce((a,b)=>a+b,0)/N};}
   R.grid={g,W,H,cx:D.cx,cz:D.cz};   // v1.92: ruudukko talteen (DEV-reittiviiva bossRoute)
   R.mobs=L.mobs.map(m=>({...cell(m.ix,m.iz),type:m.type}));
+  fo('rnc')[id]=L.chests.length;R.nChest=L.chests.length;   // v2.62 arkkujen määrä (hukattujen arvoesineiden siirto)
+  if((id==='portal1'||id==='portal2')&&!(flags.hkC&&flags.hkC[id]!=null)&&L.chests.length){const a=[...L.chests.keys()].filter(i=>!fo('rc')[id+':'+i]);if(a.length)(flags.hkC=flags.hkC||{})[id]=a[Math.random()*a.length|0];}   // v2.62 HK_PLAN: 1 hiidenkivi Routaluolan ja Kalmankammion arkkuun
   if(id==='portal3'&&!flags.sirpC&&L.chests.length){const a=[...L.chests.keys()].sort(()=>Math.random()-.5);flags.sirpC=a.slice(0,Math.min(2,a.length));}   // v1.34: 2 sirpaletta satunnaisiin arkkuihin
   L.chests.forEach((c,i)=>{const p=cell(c.ix,c.iz),key=id+':'+i,sarc=D.gen==='rooms';
     let b;if(sarc){b=bx(1.1,.8,2.2,MAT.stone,p.x,y0+.4,p.z);b.add(bx(1.2,.18,2.3,mat(0x6f6a62),0,.5,0));}else{b=makeChest('wood',1,.7,.65);b.position.set(p.x,y0,p.z);}add(b);   // v1.41 lankkuarkku
@@ -240,23 +244,38 @@ function buildPortal(id){
   const plane=new THREE.Mesh(new THREE.PlaneGeometry(3.7,4.3),gm);plane.position.set(px,y+2.4,pz);plane.rotation.y=ax==='x'?0:Math.PI/2;statics.add(plane);
   const [w2,d2]=dims(3.7,.5);addBox(px-w2/2,y,pz-d2/2,px+w2/2,y+4.4,pz+d2/2,'static');
   const lock=new THREE.Group();lock.position.set(px,y+2.4,pz);lock.rotation.y=ax==='x'?0:Math.PI/2;
-  const iron=mat(0x3a3a3a,{metalness:.6});lock.add(bx(.8,1,.3,iron,0,0,0),bx(.5,.5,.3,iron,0,.7,0));
+  const iron=mat(0x3a3a3a,{metalness:.6}),pads={};
+  // v2.62 jokaisella lukolla oma riippulukko (Routaportissa kaksi: Jääavain ja Kalmon sinetti); avattu lukko katoaa
+  D.locks.forEach((L,i)=>{const n=D.locks.length,u=n>1?(i-(n-1)/2)*1.25:0,pg=new THREE.Group();pg.position.x=u;pg.add(bx(.8,1,.3,iron,0,0,0),bx(.5,.5,.3,iron,0,.7,0));
+    if(n>1)pg.add(bx(.3,.3,.04,mat(ITEMS[L.it]?parseInt(ITEMS[L.it].c.slice(1),16):0x888888,{emissive:ITEMS[L.it]?parseInt(ITEMS[L.it].c.slice(1),16):0,emissiveIntensity:.5}),0,0,.17,false));
+    lock.add(pg);pads[L.it]=pg;});
   for(const a of [-.55,.55]){const c=bx(4.2,.14,.14,iron,0,0,0,false);c.rotation.z=a;lock.add(c);}statics.add(lock);
   lightSources.push({x:px,y:y+3,z:pz,c:D.glow,i:1.7,on:()=>true});
-  const o={id,plane,lock,ph:Math.random()*6};PORTALS.push(o);
-  interactables.push({x:px,y:y+2,z:pz,r:3.2,label:()=>portalLocked(id)?`Lukittu portti – vaatii: ${ITEMS[D.lock].n}`:`Astu portaaliin: ${D.n}`,use:()=>portalUse(id)});
+  const o={id,plane,lock,pads,ph:Math.random()*6};PORTALS.push(o);
+  interactables.push({x:px,y:y+2,z:pz,r:3.2,label:()=>portalLocked(id)?portalLabel(id):`Astu portaaliin: ${D.n}`,use:()=>portalUse(id)});
 }
 const portalLocked=id=>!!REALMS[id].lock&&!fo('rl')[id]&&!fo('rs')[id];
-function setPortalLook(id){const p=PORTALS.find(q=>q.id===id);if(!p)return;const lk=portalLocked(id);p.lock.visible=lk;p.plane.material.color.setHex(lk?0x7a1a14:REALMS[id].glow);}
+/* v2.62 lukot: D.locks = [{it, alt, hint}] (Routaportissa kaksi). Avattu lukko fo('lk')[id][it]; kun kaikki auki → fo('rl')[id] (portti auki).
+   Kummankin lukon voi avata ensin; vajaa tila tallentuu. Varmistus jumittumista vastaan (alt): lähde käyty (arkku avattu, ylimys tai
+   edellinen pomo kaadettu) tai ulottuvuudessa jo käyty → lukko aukeaa ilman esinettä. */
+const lockOpen=(id,it)=>!!(fo('lk')[id]&&fo('lk')[id][it]);
+function lockSet(id,it){(fo('lk')[id]=fo('lk')[id]||{})[it]=1;}
+const portalNeed=id=>REALMS[id].locks.filter(L=>!lockOpen(id,L.it));
+const itNames=a=>a.map(it=>ITEMS[it].n).join(' ja ');
+function portalLabel(id){const D=REALMS[id];if(D.locks.length<2)return `Lukittu portti – vaatii: ${ITEMS[D.lock].n}`;return 'Lukittu portti – vaatii: '+D.locks.map(L=>ITEMS[L.it].n+(lockOpen(id,L.it)?' ✓':' ✗')).join(', ');}
+function setPortalLook(id){const p=PORTALS.find(q=>q.id===id);if(!p)return;const lk=portalLocked(id);p.lock.visible=lk;p.plane.material.color.setHex(lk?0x7a1a14:REALMS[id].glow);
+  if(p.pads)for(const it in p.pads)p.pads[it].visible=!lockOpen(id,it);}
 function portalUse(id){
   const D=REALMS[id];
   if(!portalLocked(id)){enterRealm(id);return;}
-  if(invCount(D.lock)>0){invRemove(D.lock,1);fo('rl')[id]=1;setPortalLook(id);msg(`${ITEMS[D.lock].n} sopii lukkoon – portti aukeaa!`,'loot');sfx('craft');shake(.15);return;}
-  // Varmistus jumittumista vastaan: jos avaimen lähde on jo käyty (arkku avattu / edellinen pomo kaadettu) tai ulottuvuudessa on jo käyty,
-  // portti aukeaa ilman avainta (avain on voinut jäädä maahan, kadota latauksessa tai päätyä arkkuun).
-  if(D.alt()||fo('rs')[id]){fo('rl')[id]=1;setPortalLook(id);msg('Portti tunnistaa tekosi ja aukeaa.','loot');sfx('craft');return;}
+  const put=[];let alt=false;
+  for(const L of portalNeed(id)){if(invCount(L.it)>0){invRemove(L.it,1);lockSet(id,L.it);put.push(L.it);}else if(L.alt()||fo('rs')[id]){lockSet(id,L.it);alt=true;}}
+  const need=portalNeed(id);
+  if(!need.length){fo('rl')[id]=1;setPortalLook(id);msg(put.length?`${itNames(put)} ${put.length>1?'sopivat lukkoihin':'sopii lukkoon'} – portti aukeaa!`:'Portti tunnistaa tekosi ja aukeaa.','loot');sfx('craft');shake(.15);return;}
+  setPortalLook(id);
+  if(put.length||alt){msg(`${put.length?itNames(put)+' sopii lukkoon':'Yksi lukoista tunnistaa tekosi ja aukeaa'}. Vielä puuttuu: ${itNames(need.map(L=>L.it))}.`,'loot');sfx('craft');return;}
   if(D.reveal&&!flags.disc[D.reveal]){flags.disc[D.reveal]=1;msg(`${LOC[D.reveal].name} merkittiin karttaan.`,'loot');}
-  msg(`Portti on lukittu. Tarvitset: ${ITEMS[D.lock].n}. ${D.hint()}`,'warn');sfx('hit');
+  msg(`Portti on lukittu. Tarvitset: ${itNames(need.map(L=>L.it))}. ${need.map(L=>L.hint()).join(' ')}`,'warn');sfx('hit');
 }
 for(const id of REALM_IDS)buildPortal(id);
 
@@ -274,7 +293,7 @@ function realmIntro(id){const t=realmGoalText(id);
   if(fo('ri')[id]){setTimeout(()=>msg(t),900);return;}fo('ri')[id]=1;
   const el=$('#realmBan');if(!el){msg(t);return;}const c='#'+REALMS[id].glow.toString(16).padStart(6,'0');el.style.setProperty('--rc',c);
   const rr=()=>Array.from({length:13},()=>RUNE_ROW[Math.random()*RUNE_ROW.length|0]).join('');$('#realmBanR1').textContent=rr();$('#realmBanR2').textContent=rr();
-  $('#realmBanN').textContent=REALMS[id].n;$('#realmBanT').textContent=t;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');sfx('roar');shake(.35);
+  $('#realmBanN').textContent=REALMS[id].n;$('#realmBanT').textContent=t;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');sfx('roar');realmSnd(id);shake(.35);
   clearTimeout(realmBanT);realmBanT=setTimeout(()=>el.classList.remove('on'),6500);msg(t,'warn');}
 function exitRealm(){fadeTo(()=>{for(const f of FIRELINES)f.t=0;
   const id=P.realm,F=portalFront(id);P.inDun=false;P.realm=null;P.pos.set(F.x,terrainH(F.x,F.z),F.z);P.vy=0;P.vel.set(0,0,0);camYaw=Math.atan2(-F.fx,-F.fz);P.spawnProt=3.2;
@@ -417,7 +436,7 @@ function hitSpawner(w){if(!P.inDun||!P.realm)return false;const R=BUILT[P.realm]
   R.g.remove(S.g);for(const c of S.cols){gridRemove(c);const i=R.cols.indexOf(c);if(i>=0)R.cols.splice(i,1);}if(S.light)S.light.on=()=>false;
   spwRubble(R,S.x,S.y0,S.z);fo('sd')[P.realm]=1;R.spw=null;
   {const dk=fo('rm')[P.realm]||(fo('rm')[P.realm]={});R.mobs.forEach((q,i)=>{if(dist2(q.x,q.z,S.x,S.z)<12*12)dk[i]=1;});}   /* v0.93: pesän ympärille ei enää synny huoneen mobeja */sfx('crumble');shake(.5);shockwave(S.x,S.y0+.2,S.z,4,D.glow);burst(S.x,S.y0+1,S.z,0x6e665c,24,7);
-  for(const [id,n] of [['luu',4],['kivi',4],...(P.realm==='portal2'?[['kupari',3]]:P.realm==='portal3'?[['hiidenkivi',1]]:[])])if(ITEMS[id])for(let j=0;j<n;j++)spawnDrop(id,1,S.x+(Math.random()-.5)*1.6,S.y0+1,S.z+(Math.random()-.5)*1.6);
+  for(const [id,n] of [['luu',4],['kivi',4],...(P.realm==='portal2'?[['kupari',3]]:P.realm==='portal3'?[['pihka',3]]:[])])if(ITEMS[id])for(let j=0;j<n;j++)spawnDrop(id,1,S.x+(Math.random()-.5)*1.6,S.y0+1,S.z+(Math.random()-.5)*1.6);
   addXp(40,'Kalmanpesä murskattu');msg('Murskasit Kalmanpesän – se ei enää nostata vihollisia.','loot');return true;}
 // Murskatun pesän rauniot: matalia kiviä ja luita (ei törmäystä)
 function spwRubble(R,x,y0,z){const r=mulberry32(((x*73)^(z*37))|0);for(let k=0;k<9;k++){const a=r()*TAU,d=r()*1.1,s=.25+r()*.35;const m=bx(s,.12+r()*.25,s*(.7+r()*.6),mat(k%3?0x3a3632:0x2a2622),x+Math.cos(a)*d,y0+.08,z+Math.sin(a)*d,false);m.rotation.y=r()*3;R.g.add(m);}

@@ -90,6 +90,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   ellei kaikki mahdu reppuun.
 
 ## 4. Keräily, puut ja maasto
+- **Tarkka maanmuokkaus (v2.65):** lapio ja kuokka muokkaavat maata 1 m tarkkuudella (4× enemmän kärkiä kuin muu maasto); muokattu 16 × 16 m alue
+  saa oman tiheän verkon ilman saumoja, ja se tallentuu. Kartan aivan reunalla ei voi muokata.
 
 - **Solmut (resources.js `NODE`):** puut (kuusi, koivu, kelo, aarnipuu), kivet (lohkare, kupari- ja rautasuoni), poimittavat (oksa, kivi,
   piikivi, marjat, sieni), koristeet (pensas). Piirretään ruuduittain instansseina (`CHUNK_IMS`).
@@ -168,7 +170,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   napsautus siirtää esineen, käyttöönotto perutaan. Ruoka syödään VAIN pikapaikan numerolla. Pudotus (Q, Pudota-nappi, raahaus ulos) heittää
   esineen ~3 m eteenpäin kameran suuntaan.
 - **Reppu:** 32 paikkaa, kehitys +8 paikkaa / +40 painoa (2 tasoa). Arkku 16→24→32, tynnyri 10→16→22.
-- **Avaimet:** Jääavain, Luuavain, Aarniavain (ulottuvuuksien portit).
+- **Avaimet:** Jääavain, Kalmon sinetti (v2.62, Routaportin toinen lukko), Luuavain, Aarniavain (ulottuvuuksien portit).
 
 ## 6. Rakentaminen (pieces.js, building.js)
 
@@ -197,7 +199,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Rakennusnäppäimet** (R, Shift+R, G, H, Q, Z) toimivat ja ilmoittavat vain rakennustilassa: vasara kädessä ja osa valittuna (`isBuilding`).
 - **Säännöt (`validPlace`):** sama osa samaan paikkaan kielletty, ei liian syvälle veteen, katto ei pelaajan päälle, maksu repusta.
 - **Kunto:** 3 vauriotasoa näkyvät tekstuurissa; vasara: X purkaa (materiaalit takaisin), F korjaa. Paaluaita kestää mobit (piikit vahingoittavat).
+- **Kivet ja säiliöt (v2.63):** kiven päällä voi seistä noin puolen säteen alueella (reunalta valuu); kaikki säiliöt (arkut, kirstut, tynnyrit,
+  leirin säkki) ovat kiinteitä ja niiden päällä voi seistä.
 - **Ovet:** kaksipuoliset, aukeavat pelaajasta poispäin. Katoilla voi kävellä.
+  **v2.60:** ovi kääntyy 0,6 s pehmeästi (liike hidastuu loppua kohti, `DOOR_T`, `doorTick`). Avatessa oviaukko vapautuu heti, sulkiessa este
+  palaa vasta, kun ovi on kiinni. Jos pelaaja seisoo oviaukossa, ovi ei sulkeudu ("Seisot oviaukossa"). Ladattu tallennus näyttää asennon suoraan.
 - **Sade ja valo** eivät tule katon läpi (`roofTopAt`, `indoorK`).
 
 ## 7. Tuli ja valo
@@ -226,6 +232,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   alttarille, jos vartija vajoaa takaisin – uusi herätys ilman uusia kiviä.
 
 ## 9. Viholliset ja eläimet (mobs.js, ai.js)
+- **v2.63:** arkkukivilinnakkeen muuri estää näkemisen; muurin takana olento muistaa pelaajan 3 s. Törmäysääni vain kovasta vauhdista (3 s tauko).
+- **v2.63 Kalmanummi:** usva Aarnimetsän tapaan (näkyvyys ~52 m), harmaampi ja hämärämpi, vaihtuu sisään ja ulos pehmeästi ~5 s.
 
 - **Nopeudet −15 %** (`MOB_SPD` 0,85 kaikessa liikkeessä).
 - **Terveyspalkit (v2.26):** piilossa, kunnes tähtäin on olennon päällä (alle 12 m, vaikeat ≥ 3 kalloa alle 70 m). Jos olento ei ole täysissä
@@ -296,8 +304,13 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   Katto 7,6 m. Sisältö: soihdut telineissä, luut, tippukivet + pisarat, lätäköt, usva ja höyry, arkut ja tynnyrit, Kalmanpesä-spawneri
   (3 vihollista 20 s välein, kun edelliset kuolleet ja pelaaja < 26 m). **Kalmanpesän voi murskata hakulla** (kestävyys 240, isku =
   louhintateho, kivihakulla 20 iskua) → rauniot, saalista ja 40 XP; tuhottu pesä pysyy tuhottuna (`flags.sd`).
-- **Etenemisketju:** Jääavain maailmasta → Routaluola → Luuavain → Kalmankammio → Aarniavain → Aarnihauta. Varmistus: portti aukeaa
-  ilman avainta, jos lähde on jo käyty tai ulottuvuudessa on käyty.
+- **Etenemisketju (v2.62):** Kalmon sinetti (Hautakummun ylimys) + Jääavain (maailman arkku) → Routaportti (kaksi lukkoa, kumpi tahansa ensin,
+  teksti ✓/✗) → Routaluola → Luuavain → Kalmankammio → Aarniavain → Aarnihauta → 3 kruunusirpaletta → Kalmankehä → Kalmanvartija.
+  Varmistus: lukko aukeaa ilman esinettä, jos lähde on jo käyty (arkku avattu, ylimys tai pomo kaadettu) tai ulottuvuudessa on käyty.
+- **Avaimen kätkijä (v2.62):** näyttävä riimukivi korkealla vuorella, ei kartalla ennen kuin siellä käy. Kertoo runollisesti seuraavan avaimen tai
+  esineen paikan pelitilanteen mukaan; 15 min ilman edistymistä → tarkempi vihje ja ilmoitus. Avaimen arkkua ei merkitä kartalle.
+- **Hiidenkivet (v2.62):** tasan 9 – maailmassa 4 (Hautakummun kirstut 2 + arkut 2, arvotaan maailman arkkuihin), ulottuvuuspomot 3,
+  Routaluolan ja Kalmankammion arkussa 1 + 1. Riittää hiidenjouseen (2), -miekkaan (3) ja -panssariin (4).
 - **Portaalisuoja:** 3,2 s siirtymän jälkeen viholliset eivät voi vahingoittaa eivätkä aloita jahtia; viholliset ≥ 10 ruudun päässä sisäänkäynnistä.
 
 ## 12. Löytöpaikat, tarina ja eteneminen
@@ -338,6 +351,14 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Tehtävä ja tavoite piiloon (v1.18):** T kiertää: molemmat → vain tehtävä → vain tavoite → ei kumpaakaan; piilotettuna pieni vihje, valinta muistetaan.
 
 ## 15. Asetukset ja näppäimet (settings.js)
+- **v2.63:** Grafiikka › Tiheämpi maaston väritys (High+ ja Ultra: värit 1 m välein, värineliöt eivät erotu). Extra-grafiikka › Maaston väritys
+  tarkemmaksi (4× / 8× / 16×) ja Pehmeä rantaveden väri. Ohjaus › HUD › HUD:n koko 60–150 % (oletus 100 %; koko pelin HUD, osat kasvavat
+  reunoiltaan, yli 100 % rajoittuu näytön koon mukaan, ettei mikään mene päällekkäin).
+- **v2.65:** Extra-grafiikka › Sammuta kaikki automaattiset grafiikkasäädöt (ylin rivi): päällä grafiikka ei muutu koskaan itsestään (ei suorituskyvyn
+  mukaista säätöä eikä käynnistystestin esiasetusta). Extra-grafiikka › Biomien sekoitus (Pois / Normaali = oletus / Vahva / Erittäin vahva): maa-, hiekka- ja metsäalueiden värit liukuvat toisiinsa,
+  kivikot ja vuoren juuri pysyvät terävinä. Maaston väritys tarkemmaksi: 4× tai 8× (8× kysyy varmistuksen; 16× poistettu).
+- **v2.64 silmäpainike:** Grafiikka- ja Extra-grafiikka-sivun reunassa; pelin aikana (tauko) valikko muuttuu läpinäkyväksi, jolloin muutokset näkyvät
+  pelissä suoraan. Päävalikossa (ei peliä käynnissä) painike on harmaa eikä toimi. v2.65: näkyvissä vain ääriviivat, symbolit ja tekstit.
 
 - **Näppäimet** vaihdettavissa vahvistuksella (ei varattuja eikä päällekkäisiä); oletus mm. WASD, Shift juoksu, Välilyönti hyppy, C kyykky,
   E käytä, B rakennus, R/G/H/Q/Z/X/F rakentaminen, Tab reppu, M kartta, J taso, L ilmoitukset, T tehtävä/tavoite piiloon, (K ei tee mitään – koko näytön näppäin poistettu v2.18; käytä selaimen F11:tä), N minikartan zoom.
@@ -352,7 +373,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Äänet:** proseduraaliset (`sfx`), sävelkorkeus vaihtelee ±3,5 % joka soitolla. Puun ja tukin iskut ovat sama kirveenisku; viimeinen isku
   lähes sama (pystypuu: hiljainen ritinä, tukki: pehmeä tumma tömähdys), kaatunut puu tömähtää tummasti. Tömähdyksen sävel puun koon ja
   voimakkuus etäisyyden mukaan; omat äänet kiven hajoamiselle ja rakenteiden murtumiselle.
-- **Ohjaus ja ääni:** rulla pikapaikoille, kameran etäisyys, äänet, käänteinen pystyhiiri. Oletukset merkitty, sivukohtainen palautus.
+- **Ohjaus (v2.53, ent. Ohjaus ja ääni):** rulla pikapaikoille, kameran etäisyys, käänteinen pystyhiiri; äänet omalla sivullaan Äänet ja musiikki. Oletukset merkitty, sivukohtainen palautus.
 - **Piirtoetäisyys karsii:** maisema sumuun, puut ruuduittain, rakennukset, viholliset (ei animointia), staattiset kohteet, ulottuvuudet.
 
 ## 16. Tallennus (save.js)
@@ -372,12 +393,13 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Tulinuolen valo hiipuu lennossa, sateessa kaksi kertaa nopeammin; osumasta sammuu 2 s:ssa.
 
 ## Eteneminen ja arvoesineet v1.34
-- Järjestys: Jääavain (satunnainen vanha arkku, portti kertoo suunnan) → Routaportti → Jäätär (luuavain) → Kalmankammio → Kalmaherra
+- Järjestys (v2.62: + Kalmon sinetti ylimykseltä): Jääavain (satunnainen vanha arkku, ei Hautakummun kirstu) → Routaportti → Jäätär (luuavain) → Kalmankammio → Kalmaherra
   (aarniavain) → Aarnihauta → Aarnihirviö (Kalmankruunun sirpale) + 2 sirpaletta Aarnihaudan arkuissa → Kalmankehän alttari (3 sirpaletta)
   → Kalmanvartija (viimeinen pomo).
 - Pääsaaren arkkujen tavalliset tavarat arvotaan maailman luonnissa.
-- Arvoesineet (avaimet, Vartijan sydän, sirpaleet, hiidenkivet, harvinaiset ★) eivät katoa maasta, hehkuvat ja siirtyvät 2 min jälkeen
-  (pelaaja > 10 m tai muualla) satunnaiseen pääsaaren arkkuun. Kadonneet uniikit palautetaan automaattisesti.
+- Arvoesineet (avaimet, sinetti, Vartijan sydän, sirpaleet, hiidenkivet, harvinaiset ★) eivät katoa maasta, hehkuvat ja siirtyvät **v2.62: 60 s**
+  jälkeen (pelaaja > 10 m tai muualla) arkkuun, josta ne normaalistikin löytää: ulottuvuuspomon esine saman ulottuvuuden arkkuun, sinetti
+  Hautakummun kirstuun, muut maailman arkkuihin (ilmoitus "… on hukattu"). Reppu, arkut ja hautakasa ovat turvassa. Kadonneet uniikit palautetaan.
 - Kaksi kylttiä antaa kryptiset vihjeet (E lukee).
 - Maassa olevat esineet näkyvät kuvakkeina, joilla on paksuutta (asetus).
 
@@ -449,6 +471,30 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ## Lista 4, erä F (v1.44)
 - Grafiikka › Suorituskyky: kaukainen maasto kevennetty (yli 100 m), staattisten kohteiden yhdistäminen, auringon varjot harvemmin paikallaan.
   Esiasetukset: Low–Medium- kaikki päällä, Medium–Ultra vain yhdistäminen.
+- **v2.59:** tallennuksen jatkaminen näyttää latausnäytön (riimukivi, leimahdus ja pehmeä häivytys peliin) eikä jäädytä näyttöä;
+  latausnäytön ääni soi vain myöhemmissä latauksissa (pelin käynnistyksessä vain asetuksella Latausnäytön ääni aina).
+- **v2.58:** äänet kuuluvat vain siinä tilassa, jossa olet (maailma, Hautakumpu tai kyseinen ulottuvuus) – myös pomojen kaiut katkeavat
+  tilaa vaihdettaessa; kaikkien äänten kuuluvuusetäisyys 20 % lyhyempi.
+- **v2.57:** siirtoääni vain valmiissa siirrossa (puolituksessa vain puolitusääni); repun ja arkun ikkunat eivät enää veny valittaessa;
+  susien ulvonta hiljaisempi ja lyhyemmälle kuuluva (päivällä vielä lyhyemmälle); pienten puiden kaatumisnarina korkeampi; puun
+  tömähdys hiipuu pidempään ja pehmeämmin.
+- **v2.56:** puolitus: valitse pino ja napsauta kohderuutua hiiren oikealla → puolet siirtyy (Shift + oikea: valitse määrä); valinta
+  poistuu siirron jälkeen, eikä hiiren pieni liikahdus sotke. Puolitusääni soi vasta siirrossa; siirtoäänet hiljaisemmat ja vaihtelevammat;
+  repun sulkemisääni korkeampi; arkut sulkeutuvat avausäänellä hiljempaa ja korkeammalta.
+- **v2.55:** Kalmanvartija on vaikeampi (vaikeus 10): iskut +30 %; alle puolikkaalla terveydellä se raivostuu (punaiset silmät ja
+  mittari) ja käyttää kivisadetta (punaiset varoitusrenkaat), maapiikkirivejä ja kolmen kiven heittoa; paranee 30 s ilman osumaa; nousee
+  alttarilta täysin voimin; lakkaa paranemasta vasta 5. kuolemasta (ilmoitus).
+- **v2.54:** karju, hirvi ja hiidenhirvi soittavat osuessaan iskuäänen, kunnes omat sarviosumaäänet lisätään.
+- **v2.53:** valikkomusiikki (aloitusjakson logosta päävalikkoon, häipyy peliin liityttäessä; taukovalikossa 15 s jälkeen); uusi
+  asetussivu **Äänet ja musiikki** (master, mykistykset, 6 säädintä 0–150 %, ilmoitus-/alue-/ulottuvuusäänten valinnat); ilmoitus-,
+  alueen löytö- ja ulottuvuusäänet; kolmen valikkotaustan satunnaiset hiljaiset äänet (kun äänet on lisätty).
+- **v2.52:** jos selain estää äänet, alareunassa näkyy kaiutinmerkki ja "Napauta näyttöä kuullaksesi äänet" (jakso alkaa 2 s
+  myöhemmin; napautus ei ohita jaksoa); äänet aloitusjaksoon, latausnäytön loppuun, uuden maailman introon (tuuli, linnut, pilvien
+  wuush, syöksy) ja varmistusikkunoihin (kun äänet on lisätty).
+- **v2.51:** valikkoäänet (kun äänet on lisätty): napin päälle vienti ja painallus, liukusäätimen naputus liikutettaessa, Ultra-merkkiääni,
+  Extra-grafiikan päälle/pois-äänet; uusi asetus Valikkoäänet (Ohjaus ja ääni, oletus 70 %).
+- **v2.50:** puun tömähdys riippuu puun koosta (isot puut pitkä hiipuva tömähdys, pienet lyhyt); repun sulkemisääni on sama kuin
+  avaamisen mutta hieman korkeampi; uudet rakentamisen ja valikoiden äänet (asetus, korjaus, purku, valmistus, kartta, sulje …).
 - **v2.49:** Kalmanummella usva sakenee ja maailma harmaantuu hitaasti (puolena päivistä voimakkaasti, muulloin lievemmin); Hautakummun
   suusta näkyy syvenevä luolakäytävä, ja portti on maassa kaikilla kartoilla; Ultralla pilvimaton reuna häipyy pehmeästi.
 - **v2.48:** sumuinen sää on sakeampi (näkyvyys noin 22 % lyhyempi); pilvimatto noin 60 %:na päivistä, ja muina päivinä se on usein (70 %)
@@ -545,13 +591,21 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Esiasetukset Low–Medium+ kytkevät automaattisäädöt (myös osa-alueet ja varjojen laadun) päälle, High–Ultra pois.
 - Erittäin tarkat varjot ohittavat tavalliset varjoasetukset (näkyvät harmaina): 8192 px, päivitys joka ruutu, etäisyys 90 / 110 / 160 m.
 - Jos kuolet samalle pomolle 3 kertaa (sama maailma), se pomo ei enää koskaan palauta terveyttään. Kuolinruutu näyttää laskurin (1/3, 2/3).
-- Kehittäjätyökalut (DEV) ovat oletuksena pois; päälle Asetukset › Ohjaus ja ääni › alin rivi (sivu latautuu uudelleen).
+- Kehittäjätyökalut (DEV) ovat oletuksena pois; päälle Asetukset › Ohjaus › alin rivi (sivu latautuu uudelleen).
 - Päävalikossa versionumeron perässä "Early Access 1.0". DEV-viitteet näkyvät vain DEV-tilassa.
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
-- **Osumaäänet (tila v2.49):** olennon isku pelaajaan soittaa kategoriansa äänen (isku, purema, raapaisu, murskaus ✓; **sarvet puuttuu** –
-  karju, hirvi, hiidenhirvi lyövät hiljaa). Pomojen maaisku ja nova eivät soita osumaääntä.
+- **v2.61 sää ja tunnelma** (`sounds/saa_ja_tunnelma/`, käyttäjän äänet): maailmassa sään silmukat (sade, tihku, myrsky, tuuli, lumisade vuorilla,
+  sumu) voimistuvat ja hiipuvat sään mukana (ristihäivytys 2,5 s), sisällä vaimeampina, veden alla hiljaa; ukkonen jyrähtää salaman jälkeen.
+  Ulottuvuuksissa ja Hautakummussa oma tunnelmasilmukka ja 10–40 s välein satunnainen tunnelmaääni (puuttuessa yhteinen). Taso Taustaäänet.
+- **v2.60 päällekkäisyysraja (olennot, ei pelaaja):** lajeissa idle, chase, aggro (hyökkäys) ja echo sama äänitiedosto soi enintään 3 päällekkäin;
+  kun toinen päällekkäinen kopio alkaa, tiedosto on 1 s tauolla; jos sama tiedosto on alkanut 3 kertaa 3 s sisällä, tauko on 8 s; sama tiedosto
+  ei ala uudelleen alle 0,15 s päästä. Estetyn tilalle arvotaan toinen versio, ja ääni jää pois vasta, kun kaikki versiot ovat estettyjä (ei siirretä
+  myöhemmäksi). Lisäksi sama olentolaji + äänilaji enintään 3 kerralla (esim. kalmojen hyökkäysäänet Hautakummussa). Osuma- ja kuolemaäänet
+  eivät kuulu rajaan. DEV-suorituskykymittari näyttää pois jääneet äänet.
+- **Osumaäänet (tila v2.49):** olennon isku pelaajaan soittaa kategoriansa äänen (isku, purema, raapaisu, murskaus ✓; sarvet → v2.54 iskuääni,
+  kunnes omat äänet lisätään). Pomojen maaisku ja nova eivät soita osumaääntä.
 - **v2.14 kuuluvuus:** kutsuäänet kuuluvat noin 150 m, muut 64 m, rauhallinen ääntely 36 m. Kaukana suora ääni hiljenee 30 %, tummuu
   (puolimatkassa alle 1,5 kHz), kaikuu (jopa ~1,9 × suora) ja huojuu hieman. Sudet ulvovat päivällä 3× harvemmin, yöllä 20 % harvemmin; yön
   kaukainen ulvonta 100–145 m.
@@ -600,7 +654,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **v2.24 pelaajan toimintoäänet** (v2.25 alkaen osat 1 ja 2, ks. yllä): askel jalan osuessa maahan (kävellen ~2,6/s, juosten ~3,3/s,
   kyykyssä hiljaa) alustan mukaan (ruoho, kivi, hiekka, lumi, suo, puu, jää, pusikko; rakennuksissa puu/kivi), hypyn alastulo, kahlaus, uintiveto,
   loiskahdus veteen mennessä (kova pudotus kovempi), pelaajan iskun osuma (nuija = murskaus, muut = isku) ja pelaajan nuolen osuma. Aloitusäänet
-  kopioitu olentojen kansiosta. Asetukset › Ohjaus ja ääni › Pelaajan äänet (oletus 80 %).
+  kopioitu olentojen kansiosta. Asetukset › Äänet ja musiikki › Pelaaja (v2.53: 100 % = entinen 80 %).
 - **Toimintosilmukat (v2.23):** syöminen, tonkiminen ja nuuhkiminen soivat koko toiminnon ajan ja hiljenevät pehmeästi, kun eläin lopettaa.
   Askeleet: kohinanpoisto, yksi askel per ääni, voimakkuus vaihtelee hieman askeleittain. Kivivartijalla omat äänet.
 - **Osumat ja törmäykset (v2.22):** osumaäänet 6 kategoriassa (raapaisu, purema, murskaus, sarvet, isku, nuoli) – soivat kun olento osuu

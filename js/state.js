@@ -103,9 +103,9 @@ const dropGeo=new THREE.BoxGeometry(.32,.32,.32);
 // v1.34 (lista 3, kohdat 9, 25, 39): maassa oleva esine. Arvoesine (isValuable) ei koskaan katoa, hehkuu (valo + kipinät) ja siirtyy
 // satunnaiseen maailman arkkuun, jos se on ollut maassa 2 min pelaajan ollessa yli 10 m päässä tai toisessa tilassa, tai putoaa kartalta.
 // Grafiikka: SET.drop3d → kuvake syvyydellä (kerrostetut tasot), muuten entinen värikuutio.
-const VALUABLE=['jaaavain','luuavain','aarniavain','sydan','kruunusirpale','hiidenkivi'];
+const VALUABLE=['jaaavain','sinetti','luuavain','aarniavain','sydan','kruunusirpale','hiidenkivi'];   // v2.62 sinetti
 const isValuable=id=>VALUABLE.includes(id)||!!(ITEMS[id]&&ITEMS[id].rare);
-const VAL_LOST=120,VAL_FAR=10;
+const VAL_LOST=60,VAL_FAR=10;   // v2.62: maassa (pelaaja yli 10 m tai muualla) 60 s → hukattu, siirtyy arkkuun (ennen 120 s)
 const _icoMat={},_icoGeo=new THREE.PlaneGeometry(.5,.5);
 /* v2.00: juomapullo maassa oikeana 3D-mallina (lasi, värillinen neste joka hehkuu hieman, kaula, korkki) – myös ilman 3D-kuvakkeita. */
 function potionMesh(id){const c=new THREE.Color(ITEMS[id].c),g=new THREE.Group();
@@ -138,9 +138,15 @@ function armorDropMesh(id){const d=ITEMS[id],c=new THREE.Color(d.c),met=/rauta|k
 function keyMesh(id){const C={jaaavain:[0x9fd8ff,0x3d7fa8],luuavain:[0xe6e0cf,0x8a8070],aarniavain:[0x7aff9a,0x2f8f4a]}[id],g=new THREE.Group(),M=dm(C[0],{metalness:id==='luuavain'?0:.5,roughness:.35,emissive:C[0],emissiveIntensity:.25});
   const bow=new THREE.Mesh(new THREE.TorusGeometry(.09,.025,8,18),M);bow.position.y=.2;g.add(bow);const sh=new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,.32,8),M);sh.position.y=-.03;g.add(sh);
   for(const [y,w] of [[-.16,.08],[-.09,.06]]){const t=new THREE.Mesh(new THREE.BoxGeometry(w,.035,.03),dm(C[1],{metalness:.4}));t.position.set(w/2,y,0);g.add(t);}return g;}
+// v2.62 Kalmon sinetti: luinen kiekko, violetti hehku, kallon merkki (maassa ja ylimyksen vyöllä)
+function sinettiMesh(s){s=s||1;const g=new THREE.Group(),bone=dm(0xe6e0cf,{roughness:.6}),glow=dm(0xc9b8ff,{emissive:0x8a6aff,emissiveIntensity:.9,roughness:.3}),dk=dm(0x2a2236);
+  const d=new THREE.Mesh(new THREE.CylinderGeometry(.13*s,.13*s,.03*s,16),bone);d.rotation.x=Math.PI/2;g.add(d);const f=new THREE.Mesh(new THREE.CylinderGeometry(.095*s,.095*s,.035*s,16),glow);f.rotation.x=Math.PI/2;g.add(f);
+  for(const x of [-.035,.035]){const e=new THREE.Mesh(new THREE.SphereGeometry(.022*s,6,5),dk);e.position.set(x*s,.02*s,.02*s);g.add(e);}const n=new THREE.Mesh(new THREE.BoxGeometry(.05*s,.012*s,.01*s),dk);n.position.set(0,-.035*s,.02*s);g.add(n);
+  const r=new THREE.Mesh(new THREE.TorusGeometry(.03*s,.008*s,6,10),bone);r.position.y=.15*s;g.add(r);return g;}
 function treasureMesh(id){const g=new THREE.Group();
   if(id==='hiidenkivi'){const m=new THREE.Mesh(new THREE.OctahedronGeometry(.16,0),dm(0x7fd6cc,{emissive:0x2fbfb0,emissiveIntensity:.6,metalness:.2,roughness:.15,flatShading:true}));m.scale.set(.75,1.4,.75);g.add(m);
     for(const [x,s] of [[-.11,.5],[.12,.42]]){const k=m.clone();k.scale.multiplyScalar(s);k.position.set(x,-.1,0);k.rotation.z=x*3;g.add(k);}}
+  else if(id==='sinetti'){g.add(sinettiMesh());}   // v2.62
   else if(id==='kruunusirpale'){const M=dm(0x9aff7a,{emissive:0x3a8a2a,emissiveIntensity:.6,roughness:.25,flatShading:true});const base=new THREE.Mesh(new THREE.CylinderGeometry(.16,.18,.08,8,1,true,0,Math.PI),dm(0xc9a24a,{metalness:.8,roughness:.3,side:THREE.DoubleSide}));g.add(base);
     for(const [a,h] of [[.4,.22],[1.2,.3],[2,.2],[2.7,.26]]){const sp=new THREE.Mesh(new THREE.ConeGeometry(.04,h,5),M);sp.position.set(Math.cos(a)*.16,.04+h/2,Math.sin(a)*.16);g.add(sp);}}
   else if(id==='sydan'){const M=dm(0x5fe6d9,{emissive:0x2fbfb0,emissiveIntensity:.8,roughness:.3});for(const sx of [-1,1]){const s=new THREE.Mesh(new THREE.SphereGeometry(.1,14,10),M);s.position.set(sx*.07,.05,0);g.add(s);}
@@ -260,7 +266,7 @@ function fallTree(n,dir,crush,src){const g=new THREE.Group();const m=new THREE.M
   fx.push({obj:g,t:0,update:(f,dt)=>{const k=Math.min(1,f.t/dur);g.rotation.set(0,0,0);g.rotateOnWorldAxis(_tmpV.set(Math.cos(a),0,-Math.sin(a)),Math.pow(k,2.6)*Math.PI/2);
     for(const b of brs)if(!b.userData.off&&k>=b.userData.det&&k<1){b.userData.off=1;g.updateMatrixWorld(true);dropBranch(b,Math.sin(a)*k*4,Math.cos(a)*k*4);}
     if(f.t>dur&&!f.dropped){f.dropped=1;{const dd=Math.hypot(P.pos.x-n.x,P.pos.z-n.z);sfx('thud',1/clamp(n.s,.7,1.6),clamp(1.15-dd/90,.12,1));}if(crush)crushPlayer(n,a,src);
-      const mx=n.x+Math.sin(a)*H*.5,mz=n.z+Math.cos(a)*H*.5,dd=Math.hypot(P.pos.x-mx,P.pos.z-mz);plSnd('osumat','puu_tomahdys',{pos:{x:mx,y:n.y+.4,z:mz},v:1.5,p:clamp(1.12-.15*n.s,.8,1.05)});   /* v2.28 puu iskeytyy maahan (myös karhun kaatama) */if(!P.inDun&&dd<H+8)shake(Math.min(.5,.12+.35*(1-dd/(H+8))*Math.min(1.5,n.s)));
+      const mx=n.x+Math.sin(a)*H*.5,mz=n.z+Math.cos(a)*H*.5,dd=Math.hypot(P.pos.x-mx,P.pos.z-mz);plSnd('osumat','puu_tomahdys',{pos:{x:mx,y:n.y+.4,z:mz},v:1.5,p:clamp(1.12-.15*n.s,.8,1.05),v_ix:tomahdysIx(H)});   /* v2.28 puu iskeytyy maahan (myös karhun kaatama) */if(!P.inDun&&dd<H+8)shake(Math.min(.5,.12+.35*(1-dd/(H+8))*Math.min(1.5,n.s)));
       burst(n.x+Math.sin(a)*3,n.y+.5,n.z+Math.cos(a)*3,0x6b4527,10,4);
       for(const [id,lo,hi] of n.def.drops){if(id==='puu'&&!small)continue;const c=Math.max(id==='puu'?1:0,Math.round(rint(rng,lo,hi)*n.s));for(let j=0;j<c;j++){const t=.8+j*H/(c+1);spawnDrop(id,1,n.x+Math.sin(a)*t,n.y+1,n.z+Math.cos(a)*t);}}
       g.updateMatrixWorld(true);for(const b of brs)if(!b.userData.off)dropBranch(b);
@@ -275,6 +281,9 @@ function dropBranch(b,ivx=0,ivz=0){scene.attach(b);const vx=(Math.random()-.5)*1
     if(f.t>10){b.traverse(o=>{if(o.geometry)o.geometry.dispose();});return true;}return false;}});}
 /* v1.19 (lista 2, kohta 9): kaatuva puu (myrsky, pelaajan kaatama, karhun kaatama) osuu kaikkeen rungon alla: pelaaja ja mobit
    menettävät 80 % suurimmasta terveydestään; haarniska ja kilpi eivät suojaa. Puun kaatanut mob (karhu, src) ei vahingoitu. */
+/* v2.50 puun tömähdys koon mukaan: iso (H ≥ 9,5 m: aarnipuut ja suurimmat kuuset/koivut/männyt) → _2 (pitkä, hiipuva), pieni (H < 4,5 m) → _1,
+   muut → perus (_0) tai _1 satunnaisesti. Puuttuva versio → kaikki (plSnd v_ix). */
+const TOM_BIG=9.5,TOM_SMALL=4.5;function tomahdysIx(H){return H>=TOM_BIG?[2]:H<TOM_SMALL?[1]:[0,1];}
 function treeHit(n,a,x,z,y){const H=(TREE_H[n.type]||5)*n.s,dx=x-n.x,dz=z-n.z,along=dx*Math.sin(a)+dz*Math.cos(a),lat=Math.abs(dx*Math.cos(a)-dz*Math.sin(a));
   return along>0&&along<H&&lat<1.4*Math.max(1,n.s)&&y-terrainH(x,z)<3;}   // kohde lähellä maata (ei esim. katolla)
 function crushPlayer(n,a,src){

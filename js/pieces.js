@@ -258,14 +258,25 @@ function addPiece(t,x,y,z,rot,hp,data,f=0){
   if(t==='sulatin'){p.data.ore=p.data.ore||0;p.data.iore=p.data.iore||0;p.data.wood=p.data.wood||0;p.data.done=p.data.done||0;p.data.idone=p.data.idone||0;p.data.sand=p.data.sand||0;p.data.glass=p.data.glass||0;p.data.t=0;lightSources.push(p.light={x,y:y+.6,z,c:0xff7a2a,i:1.2,on:()=>(p.data.ore>0||p.data.iore>0||p.data.sand>=2)&&p.data.wood>0,piece:p});}
   if(t==='tyopenkki')p.ring=makeBenchRing(x,z,y<DUN.y+5&&y>DUN.y-5&&Math.abs(y-terrainH(x,z))>3?y:null);
   if(def.store){p.data.lv=p.data.lv||0;p.data.items=p.data.items||[];while(p.data.items.length<storeSlots(p))p.data.items.push(null);}
-  if(bt(t)==='ovi'){p.data.open=!!p.data.open;setDoor(p,p.data.open,p.data.dir||1);}
+  if(bt(t)==='ovi'){p.data.open=!!p.data.open;setDoor(p,p.data.open,p.data.dir||1,true);}
   pieces.push(p);pieceRoots.push(mesh);setPieceDamage(p);markShadowDirty();return p;
 }
 function removePiece(p){markShadowDirty();scene.remove(p.mesh);if(p.ring){scene.remove(p.ring);p.ring.geometry.dispose();}for(const c of p.cols)gridRemove(c);pieces.splice(pieces.indexOf(p),1);pieceRoots.splice(pieceRoots.indexOf(p.mesh),1);if(p.light){const i=lightSources.indexOf(p.light);if(i>=0)lightSources.splice(i,1);}}
 // Ovi aukeaa pelaajasta poispäin (dir ±1 = kummalle puolelle lehti kääntyy), sarana pysyy samassa kohdassa.
 const STORE_UP=[null,{tervaspuu:6},{kupari:6,nahka:4}];
 function storeSlots(p){return PIECES[p.t].store+8*(p.data.lv||0);}
-function setDoor(p,open,dir){markShadowDirty();if(dir)p.data.dir=dir;p.data.open=open;p.mesh.userData.leaf.rotation.y=open?(p.data.dir||1)*Math.PI/2*.95:0;for(const c of p.cols)if(c.door)c.off=open;}
+// v2.60 ovi kääntyy DOOR_T s pehmeästi (liike hidastuu loppua kohti). inst = suoraan (lataus, rakentaminen). Avatessa oviaukko vapautuu heti,
+// sulkiessa este palaa vasta lopussa. Palauttaa false, jos pelaaja seisoo oviaukossa (ovi ei sulkeudu päälle).
+const DOOR_T=.6,DOOR_ANIM=new Set();
+const doorEase=k=>1-Math.pow(1-k,3);
+function doorInWay(p){const r=(P.r||.38)+.05,y0=P.pos.y,y1=P.pos.y+1.8;for(const c of p.cols)if(c.door&&P.pos.x>c.minX-r&&P.pos.x<c.maxX+r&&P.pos.z>c.minZ-r&&P.pos.z<c.maxZ+r&&y1>c.minY&&y0<c.maxY)return true;return false;}
+function setDoor(p,open,dir,inst){const lf=p.mesh.userData.leaf;if(!open&&!inst&&p.data.open&&doorInWay(p))return false;
+  if(dir)p.data.dir=dir;p.data.open=open;const a1=open?(p.data.dir||1)*Math.PI/2*.95:0;markShadowDirty();
+  if(inst||!lf){if(lf)lf.rotation.y=a1;p._da=null;DOOR_ANIM.delete(p);for(const c of p.cols)if(c.door)c.off=open;return true;}
+  p._da={a0:lf.rotation.y,a1,t:0,open};DOOR_ANIM.add(p);if(open)for(const c of p.cols)if(c.door)c.off=true;return true;}
+function doorTick(dt){if(!DOOR_ANIM.size)return;for(const p of DOOR_ANIM){const d=p._da,lf=p.mesh&&p.mesh.userData.leaf;
+    if(!d||!lf||!pieces.includes(p)){DOOR_ANIM.delete(p);continue;}d.t+=dt;const k=Math.min(1,d.t/DOOR_T);lf.rotation.y=d.a0+(d.a1-d.a0)*doorEase(k);shDirty=true;bldDirty=true;
+    if(k>=1){DOOR_ANIM.delete(p);p._da=null;if(!d.open)for(const c of p.cols)if(c.door)c.off=false;markShadowDirty();}}}
 function nearPiece(t,x,z,r){for(const p of pieces)if(p.t===t&&dist2(p.x,p.z,x,z)<r*r)return p;return null;}
 
 /* ---------------- v2.41 KAUKAISTEN RAKENNUSTEN YHDISTÄMINEN (SET.mergeSt) ----------------
