@@ -158,6 +158,16 @@ function loadProfiles(){try{return JSON.parse(localStorage.getItem('hiidenmaa_pr
 function saveProfiles(p){try{localStorage.setItem('hiidenmaa_profiles',JSON.stringify(p));}catch(e){}}
 function presetOf(set){const i=PRESETS.findIndex(p=>Object.keys(p).every(k=>String(set[k])===String(p[k])));return i<0?'':PRESET_N[i];}
 function openSettings(tab){if(tab==='shadow')tab='gfx';if(tab)setTab=tab;$('#settings').hidden=false;renderSettings();}
+/* v2.63 silmäpainike: vain grafiikkasivuilla (SEE_TABS); päällä #menu.seeThru = ei taustaa (peli tai päävalikossa 3D-maailma näkyy läpi).
+   Poistuu, kun vaihdetaan muulle sivulle tai suljetaan asetukset. */
+const SEE_TABS=['gfx','xgfx'];let seeThru=false;
+function seeThruSet(on){seeThru=!!on;const M=$('#menu'),b=$('#bSeeThru');if(M)M.classList.toggle('seeThru',seeThru);if(b){b.classList.toggle('on',seeThru);b.setAttribute('aria-pressed',String(seeThru));
+  b.title=seeThru?'Näytä valikon tausta':'Läpinäkyvä valikko: katso grafiikkamuutokset valikon läpi';const tp=b.querySelector('.seTip');if(tp)tp.textContent=seeThru?'Tausta takaisin':'Läpinäkyvä';}}
+// Käytettävissä vain, kun peli on käynnissä valikon takana (tauko); muuten painike näkyy harmaana (ei käytettävissä).
+const seeThruOk=()=>typeof started!=='undefined'&&!!started&&typeof state!=='undefined'&&state==='paused';
+function seeThruSync(){const M=$('#menu'),b=$('#bSeeThru');const vis=!!(M&&!M.hidden&&M.dataset.view==='settings'&&SEE_TABS.includes(setTab)),ok=vis&&seeThruOk();
+  if(b){b.hidden=!vis;if(b.disabled===ok){b.disabled=!ok;b.classList.toggle('dis',!ok);const tp=b.querySelector('.seTip');if(!ok){b.title='Läpinäkyvä valikko – käytettävissä vain pelin aikana (peli taustalla)';if(tp)tp.textContent='Vain pelin aikana';}else seeThruSet(seeThru);}}
+  if(!ok&&seeThru)seeThruSet(false);}
 function renderSettings(){const t=$('#setTabs');t.innerHTML='';
   for(const [id,nm] of SET_TABS){const b=document.createElement('button');b.className='tab'+(id===setTab?' on':'');b.textContent=nm;b.onclick=()=>{setTab=id;renderSettings();};t.appendChild(b);}
   const body=$('#setBody');
@@ -362,3 +372,4 @@ function pvFxStart(){if(pvRun)return;pvRun=true;const P=[];let last=performance.
         if(F.up<0&&!F.ice){g.fillStyle=F.c;g.fillRect(p.x,p.y,1.5,1.5);}else{const z=p.s*4;g.drawImage(sp(F.c),p.x-z/2,p.y-z/2,z,z);}}
       g.globalAlpha=1;g.globalCompositeOperation='source-over';}else P.length=0;};
   requestAnimationFrame(loop);}
+{const b=document.getElementById('bSeeThru');if(b)b.onclick=e=>{e.stopPropagation();if(!seeThruOk())return;seeThruSet(!seeThru);};}   // v2.63 (napsautusääni tulee valikon yhteisestä kuuntelijasta)

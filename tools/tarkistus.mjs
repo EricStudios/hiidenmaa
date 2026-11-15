@@ -382,6 +382,13 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     SET.hudScale=pv;hudScaleApply();const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(e){return [];}}).join(' ');
     const d=/#hud[^}]*zoom: var\(--hudK/.test(css)&&/#floaters[^}]*zoom: calc\(1 \/ var\(--hudK/.test(css)&&/\.mobbar[^}]*scale\(var\(--hudK/.test(css);
     return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
+  t('v2.64 silmäpainike: grafiikkasivuilla, valikko läpinäkyväksi vain pelin ollessa taustalla, muuten harmaa; poistuu muilla sivuilla',()=>{
+    const b=document.getElementById('bSeeThru');if(!b)return 'painike puuttuu';const a=SEE_TABS.join()==='gfx,xgfx'&&!!b.querySelector('svg')&&/seeThruSync\(\)/.test(frame.toString());
+    const sv=[state,started,setTab,$('#menu').hidden,$('#menu').dataset.view];let r;
+    try{$('#menu').hidden=false;$('#menu').dataset.view='settings';setTab='gfx';state='menu';started=false;seeThruSync();const c=!b.hidden&&b.disabled&&b.classList.contains('dis');b.onclick({stopPropagation(){}});const d=!seeThru;
+      state='paused';started=true;seeThruSync();const e=!b.disabled;b.onclick({stopPropagation(){}});const f=seeThru&&$('#menu').classList.contains('seeThru');
+      setTab='snd';seeThruSync();const g=b.hidden&&!seeThru&&!$('#menu').classList.contains('seeThru');r=a&&c&&d&&e&&f&&g||`virhe ${a}${c}${d}${e}${f}${g}`;}
+    finally{[state,started,setTab]=sv;$('#menu').hidden=sv[3];$('#menu').dataset.view=sv[4];seeThruSync();}return r;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
