@@ -438,4 +438,40 @@ function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('syda
   const pv=!!P.buffs.pahoinvointi;if(pv&&(!S.pv||plCd('pv',15)))plSnd('keho','pahoinvointi');if(pv&&!S.pv)PLV.cd.pv=playTime+15;S.pv=pv;
   const ty=!!P.buffs.taysi;if(ty&&!S.ty)plSnd('keho','kylla');S.ty=ty;
   const lv=!!P.buffs.levannyt;if(lv&&!S.lv)plSnd('keho','levannyt');S.lv=lv;}
+/* v2.61 SÄÄ JA TUNNELMA (projekti sounds/saa_ja_tunnelma, avaimet a/<ryhmä>/<ääni>, taso Taustaäänet = volK('amb')). Vain käyttäjän omat äänet.
+   saa/: silmukat sade, tihku, myrsky, tuuli, lumi, sumu – voimakkuus sään mukaan (wRain, WIND.spd, wSnow, wFog), ristihäivytys AMB_FADE s,
+   sisällä vaimeampi (indoorK), veden alla hiljaa; ukkonen = kertaääni salaman jälkeen (viive). Vain maailmassa (ei luolastossa).
+   tunnelma/: silmukka ulottuvuudessa (tunnelma_routaluola …) ja Hautakummussa (tunnelma_hautakumpu).
+   satunnaiset/: kertaääni AMB_RND_MIN–AMB_RND_MAX s välein samoissa paikoissa (satunnainen_<paikka>, puuttuessa satunnainen_yhteinen).
+   Pelin ulkopuolella (valikko, tauko, kuolema) silmukat häivytetään pois. Puuttuva ääni = hiljaisuus. */
+const AMB={L:{},rndT:15,gain:null,ld:0,thT:-1,thV:1};
+const AMB_FADE=2.5,AMB_RND_MIN=10,AMB_RND_MAX=40,AMB_RND_V=.8;
+const AMB_V={sade:.8,tihku:.6,myrsky:1,tuuli:.7,lumi:.5,sumu:.5,ukkonen:1,tunnelma:.75};
+const AMB_REALM={portal1:'routaluola',portal2:'kalmankammio',portal3:'aarnihauta'};
+function ambLoad(){if(AMB.ld||!CRE.ok)return;AMB.ld=1;for(const n in CRE.man)if(n.startsWith('a/'))creBuf(n);}
+function ambPlace(){return P.realm?AMB_REALM[P.realm]||'hautakumpu':'hautakumpu';}
+function ambTargets(){const t={};if(typeof state==='undefined'||state!=='play'||P.dead)return t;
+  if(P.inDun){t['tunnelma/tunnelma_'+ambPlace()]=AMB_V.tunnelma;return t;}
+  const W=WEATHERS[weather.cur]||WEATHERS.selkea,cur=weather.cur;
+  if(W.storm)t['saa/myrsky']=clamp(wRain/1.4,0,1)*AMB_V.myrsky;else if(cur==='tihku')t['saa/tihku']=clamp(wRain/.35,0,1)*AMB_V.tihku;else t['saa/sade']=clamp(wRain,0,1)*AMB_V.sade;
+  if(!W.storm)t['saa/tuuli']=clamp((WIND.spd-6)/8,0,1)*AMB_V.tuuli;
+  t['saa/lumi']=(P.pos.y>10?clamp(wSnow,0,1):0)*AMB_V.lumi;t['saa/sumu']=(cur==='sumu'?clamp((1-wFog)/.85,0,1):0)*AMB_V.sumu;
+  const k=(1-.55*(indoorK||0))*(CAM_UW>0?.25:1);for(const n in t)t[n]*=k;return t;}
+function ambStart(key){const [g,ev]=key.split('/'),L0=mRes(g,ev,'a');if(!L0)return null;const L=L0.filter(n=>CRE.buf[n]);if(!L.length){ambLoad();return null;}
+  const a=actx,name=L[Math.random()*L.length|0],src=a.createBufferSource(),gn=a.createGain();src.buffer=CRE.buf[name];src.loop=true;const lp=tgLoopPts(src.buffer);src.loopStart=lp[0];src.loopEnd=lp[1];
+  if(!AMB.gain){AMB.gain=a.createGain();AMB.gain.connect(a.destination);}gn.gain.value=0;src.connect(gn);gn.connect(AMB.gain);src.start(0,Math.random()*Math.max(0,lp[1]-lp[0]-.1));return {src,g:gn};}
+function ambStop(h){if(!h)return;try{h.src.stop();}catch(e){}try{h.g.disconnect();}catch(e){}}
+// salama: ukkonen d s myöhemmin (kaukainen salama 0,4–2,6 s, lähelle iskevä 0,1 s)
+function ambThunder(d){AMB.thT=Math.max(.05,d);AMB.thV=d<.3?1:clamp(1.15-d*.25,.45,1);}
+function ambTick(dt){const a=actx;if(!a||a.state!=='running'||!soundOn||!CRE.ok){for(const k in AMB.L){ambStop(AMB.L[k].h);delete AMB.L[k];}return;}
+  const vol=volK('amb'),T=ambTargets(),now=a.currentTime;dt=Math.min(dt,.25);if(Object.keys(T).length)ambLoad();
+  for(const k in T)if(!AMB.L[k]&&T[k]>.002)AMB.L[k]={h:null,cur:0,retry:0};
+  for(const k in AMB.L){const L=AMB.L[k],tg=T[k]||0,st=dt/AMB_FADE;L.cur=L.cur<tg?Math.min(tg,L.cur+st):Math.max(tg,L.cur-st);
+    if(!L.h&&tg>.002){L.retry-=dt;if(L.retry<=0){L.h=ambStart(k);L.retry=2;}}
+    if(L.h)L.h.g.gain.setTargetAtTime(L.cur*vol,now,.08);
+    if(L.cur<=.001&&tg<=.002){ambStop(L.h);delete AMB.L[k];}}
+  if(AMB.thT>0){AMB.thT-=dt;if(AMB.thT<=0){AMB.thT=-1;if(state==='play'&&!P.inDun)mSnd('saa','ukkonen',{pre:'a',cat:'amb',v:AMB_V.ukkonen*AMB.thV*(1-.45*(indoorK||0)),pj:.08});}}
+  if(state==='play'&&P.inDun&&!P.dead){AMB.rndT-=dt;if(AMB.rndT<=0){AMB.rndT=AMB_RND_MIN+Math.random()*(AMB_RND_MAX-AMB_RND_MIN);ambLoad();
+      if(!mSnd('satunnaiset','satunnainen_'+ambPlace(),{pre:'a',cat:'amb',v:AMB_RND_V,pj:.06}))mSnd('satunnaiset','satunnainen_yhteinen',{pre:'a',cat:'amb',v:AMB_RND_V,pj:.06});}}
+  else AMB.rndT=AMB_RND_MIN+Math.random()*(AMB_RND_MAX-AMB_RND_MIN);}
 creInit();   // v2.52: manifesti ja valikko-/introäänet heti (maailman intro sivun uudelleenlatauksen jälkeen)

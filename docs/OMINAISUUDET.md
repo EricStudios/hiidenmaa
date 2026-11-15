@@ -576,6 +576,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.61 sää ja tunnelma** (`sounds/saa_ja_tunnelma/`, käyttäjän äänet): maailmassa sään silmukat (sade, tihku, myrsky, tuuli, lumisade vuorilla,
+  sumu) voimistuvat ja hiipuvat sään mukana (ristihäivytys 2,5 s), sisällä vaimeampina, veden alla hiljaa; ukkonen jyrähtää salaman jälkeen.
+  Ulottuvuuksissa ja Hautakummussa oma tunnelmasilmukka ja 10–40 s välein satunnainen tunnelmaääni (puuttuessa yhteinen). Taso Taustaäänet.
 - **v2.60 päällekkäisyysraja (olennot, ei pelaaja):** lajeissa idle, chase, aggro (hyökkäys) ja echo sama äänitiedosto soi enintään 3 päällekkäin;
   kun toinen päällekkäinen kopio alkaa, tiedosto on 1 s tauolla; jos sama tiedosto on alkanut 3 kertaa 3 s sisällä, tauko on 8 s; sama tiedosto
   ei ala uudelleen alle 0,15 s päästä. Estetyn tilalle arvotaan toinen versio, ja ääni jää pois vasta, kun kaikki versiot ovat estettyjä (ei siirretä

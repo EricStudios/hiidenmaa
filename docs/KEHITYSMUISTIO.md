@@ -183,7 +183,7 @@ Testattu ajossa: jokainen hyökkäävä olento (hostile + neutral) lyö pelaajaa
   **Pelaajan osissa yksi paikkamerkki per ääni ilman numeroa** (`mahakipu.mp3`), lisäversiot `mahakipu_1`, `_2` … (käyttäjän päätös v2.25; numeroton
   = manifestissa `_0`). Äänilistat taulukkoina: `AANILISTA_OSA<n>.csv` jokaisessa osassa (GitHub näyttää taulukkona) + yhteinen
   `sounds/AANILISTA_PELAAJA.xlsx` (välilehdet Osa 1–3, värit, lukittu otsikko; kirjoitetaan ilman lisäkirjastoja `write_xlsx`). Ei enää md-listaa pelaajalle.
-  Tulevat projektit (sää, musiikki) samalla mallilla.
+  Musiikki (v2.53) ja sää ja tunnelma (v2.61, `sounds/saa_ja_tunnelma/`, avaimet `a/…`) samalla mallilla.
   Jos raaka palautetaan paikkamerkiksi, käsitelty ääni poistuu.
 - **Peli lukee vain käsitellyt äänet** `sounds/`-kansiosta (manifestin kautta, tiiviste osoitteessa → välimuisti ei näytä vanhaa ääntä).
   Ilman palvelinta (tuplaklikkaus, file://) tiedostoäänet eivät lataudu → peli käyttää tehtyjä ääniä / hiljaisuutta.
@@ -320,6 +320,19 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
   sarakkeen rivi `lainaavat: …` (suorat ensin, ketjun kautta tulevat "via X"). Selite taulukoiden alussa. Nykyiset (v1.95): 💎 susi (6), aarnihirviö (4),
   hirvi (3), karju (2), kalmo (1), karhu (1), sammalhiisi (1); ⭐ peura, kettu, ilves, kalmanvartija (1 kukin); kalmon ylimys ja hiidenhirvi vain lainaavat.
   Metsolla ei ole varaääntä (ei merkkiä, ei lainaa).
+
+### v2.61 (sää- ja tunnelmaäänet: kansiot, paikkamerkit ja soitin – käyttäjän pyyntö)
+- **Uusi ääniprojekti** `sounds/saa_ja_tunnelma/` (process_sounds.py X_PARTS, avaimet `a/<ryhmä>/<ääni>_<n>`, lista `AANILISTA_SAA_TUNNELMA.csv`
+  + välilehti `AANILISTA_MENU.xlsx`:ssä): `saa/` silmukat sade, tihku, myrsky, tuuli, lumi, sumu + kertaääni ukkonen; `tunnelma/` silmukka per paikka
+  (tunnelma_routaluola, _kalmankammio, _aarnihauta, _hautakumpu); `satunnaiset/` kertaäänet (satunnainen_yhteinen + paikkakohtaiset).
+  Silmukat käsitellään saumattomiksi (`X_ACT`, enintään 60 s `LONG_LOOP`), kertaäänet T_PROF (ukkonen 8 s, satunnaiset 6 s).
+- **Soitin** (audio.js `ambTick` main.js `frame`:ssa, myös tauolla → häivytys pois): `ambTargets()` = tavoitetasot (sade `wRain`, tihku `wRain/.35`,
+  myrsky `wRain/1.4`, tuuli `(WIND.spd−6)/8` paitsi myrskyssä, lumi `wSnow` yli 10 m, sumu `(1−wFog)/.85`; sisällä ×(1−0,55·indoorK), veden alla ×0,25;
+  luolastossa vain tunnelma). Ristihäivytys `AMB_FADE` 2,5 s, oma GainNode (`setTargetAtTime`), silmukka alkaa satunnaisesta kohdasta.
+  Satunnaiset `AMB_RND_MIN`–`AMB_RND_MAX` 10–40 s (`mSnd` pre 'a', varaääni yhteinen). Ukkonen `ambThunder(d)` environment.js salamasta
+  (lähi-isku 0,1 s, muuten 0,4–2,6 s, kauempana hiljaisempi). Taso Taustaäänet (`volK('amb')`, AMB_V per ääni). Hautakumpu lisätty paikaksi.
+- Testattu testipuskureilla (ei peliin): sade 0,8 → myrsky 1, ukkonen soi, Routaluolassa vain tunnelma 0,75, satunnainen → yhteinen-varaääni,
+  tauolla kaikki pois. Tarkistusrivi v2.61.
 
 ### v2.60 (oven animaatio, olentoäänten päällekkäisyysraja – lista 8, kohdat 4–5)
 - **Ovi** (pieces.js): `setDoor(p,open,dir,inst)` käynnistää `DOOR_T` 0,6 s käännön (`doorEase` = ease-out kuutio), `doorTick(dt)` main.js `update`:ssa

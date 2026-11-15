@@ -316,6 +316,16 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const k=CRE_OVL.kinds,h=k.has('idle')&&k.has('chase')&&k.has('aggro')&&k.has('echo')&&!k.has('hurt')&&!k.has('death')&&CRE_OVL.perKind===3;
       const src=creSnd.toString(),i2=/creFileOk\(n,tn\)/.test(src)&&/creFileUse\(name,tn\)/.test(src)&&!/creFile/.test(plSnd.toString());
       r=a&&b&&c&&e&&f&&g&&h&&i2||`virhe ${a}${b}${c}${e}${f}${g}${h}${i2}`;}finally{CRE.voices.length=0;CRE.voices.push(...sv);CRE.fcd=fc;CRE.fh=fh;}return r;});
+  t('v2.61 sää- ja tunnelmaäänet: silmukat sään mukaan, ulottuvuuden tunnelma, satunnaiset 10–40 s, ukkonen, tauolla hiljaa, taso Taustaäänet',()=>{
+    const sv=[weather.cur,wRain,wSnow,wFog,WIND.spd,P.inDun,P.realm,indoorK];let r;
+    try{weather.cur='sade';wRain=1;WIND.spd=3;indoorK=0;P.inDun=false;let T=ambTargets();const a=Math.abs(T['saa/sade']-AMB_V.sade)<1e-6&&!T['saa/myrsky']&&!(T['saa/tuuli']>0);
+      weather.cur='myrsky';wRain=1.4;T=ambTargets();const b=T['saa/myrsky']>0&&!T['saa/sade']&&T['saa/tuuli']===undefined;
+      indoorK=1;const c=Math.abs(ambTargets()['saa/myrsky']-AMB_V.myrsky*.45)<1e-6;indoorK=0;weather.cur='tuuli';wRain=0;WIND.spd=14;const e=Math.abs(ambTargets()['saa/tuuli']-AMB_V.tuuli)<1e-6;
+      P.inDun=true;P.realm='portal2';T=ambTargets();const f=Object.keys(T).join()==='tunnelma/tunnelma_kalmankammio';P.realm=null;const g=!!ambTargets()['tunnelma/tunnelma_hautakumpu'];
+      const st=state;state='paused';const h=Object.keys(ambTargets()).length===0;state=st;
+      const src=ambTick.toString(),i2=/satunnainen_yhteinen/.test(src)&&AMB_RND_MIN===10&&AMB_RND_MAX===40&&/volK\('amb'\)/.test(src)&&/ambThunder\(/.test(updateEnvironment.toString())&&/ambTick\(raw\)/.test(frame.toString());
+      r=a&&b&&c&&e&&f&&g&&h&&i2||`virhe ${a}${b}${c}${e}${f}${g}${h}${i2}`;}
+    finally{[weather.cur,wRain,wSnow,wFog,WIND.spd,P.inDun,P.realm,indoorK]=sv;}return r;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());

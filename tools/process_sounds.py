@@ -354,7 +354,7 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
                 w1 = w1b
                 d = duration(ff, w1)
         if loop:
-            L = min(d, 20.0 if mode == 'act' else 6.0)
+            L = min(d, LONG_LOOP.get(kind, 20.0) if mode == 'act' else 6.0)   # v2.61 sää- ja tunnelmasilmukat 60 s
             xf = min(0.25, L * 0.15)
             r = run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', w1, '-i', w1, '-filter_complex',
                      f'[0:a]atrim=start={xf:.3f}:end={L:.3f},asetpts=PTS-STARTPTS[body];'
@@ -808,6 +808,7 @@ BIO_FI = [('meadow', 'rantaniitty', 'Rantaniitty'), ('koivu', 'koivulehto', 'Koi
           ('kangas', 'jakalakangas', 'Jäkäläkangas'), ('aarni', 'aarnimetsa', 'Aarnimetsä'), ('moor', 'kalmanummi', 'Kalmanummi'), ('tunturi', 'tunturikangas', 'Tunturikangas'),
           ('rakka', 'rakka', 'Rakka'), ('mountain', 'kivivuori', 'Kivivuori'), ('peak', 'routahuiput', 'Routahuiput'), ('beach', 'hietaranta', 'Hietaranta'), ('sea', 'meri', 'Meri')]
 REALM_FI = [('portal1', 'routaluola', 'Routaluola'), ('portal2', 'kalmankammio', 'Kalmankammio'), ('portal3', 'aarnihauta', 'Aarnihauta')]
+AMB_PL = REALM_FI + [('barrow', 'hautakumpu', 'Hautakumpu')]   # v2.61 tunnelmaäänien paikat
 X_PARTS = [   # (kansio, etuliite, listan nimi, otsikko, ryhmät)
     ('musiikki', 'mu', 'AANILISTA_MUSIIKKI.csv', 'Musiikki – valikot', [
         ('valikko', 'Valikkomusiikki', '🎵', [('valikkomusiikki', 'soi HIIDENMAA-logosta (aloitusjakso) päävalikon ajan, kunnes liityt peliin (häivytys ulos); loppuessa 20–40 s tauko ja uudelleen (versio arvotaan)', 'nordic folk ambient menu music, calm epic')]),
@@ -818,7 +819,22 @@ X_PARTS = [   # (kansio, etuliite, listan nimi, otsikko, ryhmät)
          + [(f'biomi_{fi}', f'uusi alue löydetty: {nm} (oma ääni; puuttuessa biomi_yhteinen)', 'discovery chime, ' + nm.lower()) for _, fi, nm in BIO_FI]),
         ('ulottuvuudet', 'Ulottuvuuteen saapuminen', '🌀', [('ulottuvuus_yhteinen', 'saavut ulottuvuuteen ensimmäistä kertaa (ulottuvuuden banneri) – soi, jos ulottuvuudella ei ole omaa ääntä', 'dark realm reveal, ominous magic boom')]
          + [(f'ulottuvuus_{fi}', f'saavut ulottuvuuteen {nm} (oma ääni; puuttuessa ulottuvuus_yhteinen)', 'realm reveal, ' + nm.lower()) for _, fi, nm in REALM_FI])]),
+    # v2.61 SÄÄ JA TUNNELMA (avaimet a/<ryhmä>/<ääni>_<n>): silmukat (saumaton, enintään 60 s) + kertaäänet; taso Taustaäänet
+    ('saa_ja_tunnelma', 'a', 'AANILISTA_SAA_TUNNELMA.csv', 'Sää ja tunnelma', [
+        ('saa', 'Sää (maailmassa)', '🌦️', [('sade', 'SILMUKKA: sade – voimakkuus sateen mukaan, sisällä vaimeampi (loopattava pätkä, 10–60 s)', 'rain loop, steady rain ambience seamless'),
+                                          ('tihku', 'SILMUKKA: tihkusade – hiljainen ropina', 'light drizzle loop, soft rain'),
+                                          ('myrsky', 'SILMUKKA: myrsky – rankka sade ja puuskittainen tuuli (ukkonen erikseen)', 'storm loop, heavy rain and wind gusts'),
+                                          ('tuuli', 'SILMUKKA: tuuli – voimistuu tuulen mukaan (tuulinen sää, kova tuuli)', 'wind loop, strong wind howling seamless'),
+                                          ('lumi', 'SILMUKKA: lumisade – pehmeä tuuli ja lumen suhina (vuorilla)', 'snowfall wind loop, soft winter wind'),
+                                          ('sumu', 'SILMUKKA: sumu – hiljainen, painostava humina', 'fog ambience loop, eerie quiet drone'),
+                                          ('ukkonen', 'kertaääni: ukkosen jyrähdys salaman jälkeen (viive 0,1–2,6 s, kaukana hiljaisempi)', 'thunder rumble, distant thunder crack')]),
+        ('tunnelma', 'Ulottuvuuksien tunnelma', '🌀', [(f'tunnelma_{fi}', f'SILMUKKA: tunnelmaääni – {nm} (soi koko ajan siellä ollessa)', 'dark ambience loop, ' + nm.lower()) for _, fi, nm in AMB_PL]),
+        ('satunnaiset', 'Satunnaiset tunnelmaäänet', '🎲', [('satunnainen_yhteinen', 'kertaääni 10–40 s välein ulottuvuuksissa ja Hautakummussa – soi, jos paikalla ei ole omaa ääntä', 'eerie distant sound, dungeon creak, distant moan')]
+         + [(f'satunnainen_{fi}', f'kertaääni 10–40 s välein: {nm} (oma; puuttuessa satunnainen_yhteinen)', 'eerie distant sound, ' + nm.lower()) for _, fi, nm in AMB_PL])]),
 ]
+AMB_LOOPS = {'sade', 'tihku', 'myrsky', 'tuuli', 'lumi', 'sumu'} | {f'tunnelma_{fi}' for _, fi, _ in AMB_PL}
+X_ACT = {'saa_ja_tunnelma': AMB_LOOPS}   # v2.61 silmukat (saumaton sauma, ei hiljaisuuden leikkausta)
+LONG_LOOP = {e: 60.0 for e in AMB_LOOPS}   # v2.61 silmukan enimmäispituus (muuten 20 s)
 for _proj, _pre, _list, _tit, _grs in X_PARTS:
     _g = [(gid, gn, emo, ['peli'], [e[0] for e in evs], False) for gid, gn, emo, evs in _grs]
     for gid, _, _, evs in _grs:
@@ -826,12 +842,15 @@ for _proj, _pre, _list, _tit, _grs in X_PARTS:
             P_EV[(gid, e[0])] = (e[1], e[2])
     _by = {x[0]: x for x in _g}
     P_CFGS.append({'part': 0, 'title': _tit, 'groups': _g, 'by': _by, 'raw': os.path.join(SND, _proj, 'raw'), 'out': os.path.join(SND, _proj, 'valmiit'),
-                   'pre': _pre, 'proj': _proj, 'single': True, 'act': set(), 'list': os.path.join(SND, _proj, _list),
+                   'pre': _pre, 'proj': _proj, 'single': True, 'act': X_ACT.get(_proj, set()), 'list': os.path.join(SND, _proj, _list),
                    'allowed': (lambda by: (lambda g: list(by[g][4])))(_by), 'xlsx': 'menu'})
 T_PROF.update({'valikkomusiikki': (900.0, 900.0, 1.5, -20), 'taukomusiikki': (900.0, 900.0, 1.5, -21), 'ilmoitus': (.8, .8, .1, -25),
                'tausta_leiri': (4.0, 4.0, .5, -28), 'tausta_myrsky': (5.0, 5.0, .8, -26), 'tausta_ahjo': (3.0, 3.0, .4, -28)})
 T_PROF.update({e: (3.0, 3.0, .5, -21) for e in ['biomi_yhteinen'] + [f'biomi_{fi}' for _, fi, _ in BIO_FI]})
 T_PROF.update({e: (4.0, 4.0, .6, -20) for e in ['ulottuvuus_yhteinen'] + [f'ulottuvuus_{fi}' for _, fi, _ in REALM_FI]})
+T_PROF.update({e: (60.0, 60.0, .3, -24) for e in AMB_LOOPS})   # v2.61 sää- ja tunnelmasilmukat
+T_PROF.update({'ukkonen': (8.0, 8.0, 1.2, -19)})
+T_PROF.update({e: (6.0, 6.0, .8, -26) for e in ['satunnainen_yhteinen'] + [f'satunnainen_{fi}' for _, fi, _ in AMB_PL]})
 T_PROF.update({'studio': (4.0, 4.0, .6, -20), 'otsikko': (4.5, 4.5, .7, -19), 'riimusiirtyma': (5.0, 5.0, .8, -19), 'lataus_valmis': (2.5, 2.5, .5, -21),
                'tuuli': (20.0, 20.0, .3, -25), 'linnut': (20.0, 20.0, .3, -27), 'pilvet_wuush': (3.0, 3.0, .5, -21), 'kamera_laskeutuu': (3.0, 3.0, .5, -21),
                'varmistus': (1.2, 1.2, .2, -22)})   # v2.52 menu 2

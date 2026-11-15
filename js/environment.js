@@ -120,7 +120,7 @@ function updateEnvironment(dt){
   // Pilvet tummuvat ensin (hitaasti), sade alkaa vasta kun taivas on tarpeeksi tumma.
   wDark=lerp(wDark,W.dark,Math.min(1,dt*.12));wFog=lerp(wFog,W.fog,k);wCloud=lerp(wCloud,W.cloud||0,Math.min(1,dt*.15));
   wRain=lerp(wRain,W.rain*(W.dark>.4?sstep(.6,.92,wDark/W.dark):1),Math.min(1,dt*.4));wSnow=lerp(wSnow,W.snow||0,Math.min(1,dt*.4));wWind=lerp(wWind,W.wind||0,k);
-  if(W.storm&&!P.inDun&&playTime>nextBolt){nextBolt=playTime+4+Math.random()*10;flash=.45;if(Math.random()<.35)strikeBolt();}
+  if(W.storm&&!P.inDun&&playTime>nextBolt){nextBolt=playTime+4+Math.random()*10;flash=.45;const nb=Math.random()<.35;if(nb)strikeBolt();ambThunder(nb?.1:.4+Math.random()*2.2);}   // v2.61 ukkonen
   // Myrskyssä tuuli kaataa puun noin 5 s välein jossain 100 m säteellä (ei pelaajan rakennusten lähellä)
   if(W.storm&&!P.inDun){stormT-=dt;if(stormT<=0){stormT=4+Math.random()*2;stormFellTree();}}
   flash=Math.max(0,flash-dt*5);

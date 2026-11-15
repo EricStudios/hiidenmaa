@@ -250,7 +250,7 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       <h4 class="setSub">Mykistys</h4><div class="setGrid">${setRow('Äänet','sound',null,'pois = kaikki äänet ja musiikki hiljaa')+setRow('Musiikki','musicOn')+setRow('Ääniefektit','sfxOn',null,'kaikki muu kuin musiikki')}</div>
       <h4 class="setSub">Äänenvoimakkuudet</h4><div class="setGrid">${vr('Musiikki','musicVol','valikko- ja taukomusiikki')+vr('Olennot','creVol','eläinten ja hirviöiden äänet ja toiminnot')+
         vr('Pelaaja','plVol','askeleet, vesi, lyönnit, rakentaminen, reppu, kipu')+vr('Valikot ja intro','uiVol','napit, säätimet, aloitusjakso, latausnäyttö, varmistukset')+
-        vr('Taustaäänet','ambVol','intron tuuli ja linnut, valikon taustakuvien äänet')+vr('Ilmoitukset','notifVol','viestit sekä alueiden ja ulottuvuuksien löytöäänet')}</div>
+        vr('Taustaäänet','ambVol','sää (sade, tuuli, myrsky …), ulottuvuuksien tunnelma, intron tuuli ja linnut, valikon taustakuvat')+vr('Ilmoitukset','notifVol','viestit sekä alueiden ja ulottuvuuksien löytöäänet')}</div>
       <h4 class="setSub">Ilmoitukset ja löydöt</h4><div class="setGrid">${setRow('Ilmoitusäänet','notifSnd',null,'ääni, kun ruudulle tulee viesti tai ilmoitus')+
         setRow('Alueiden löytöäänet','biomeSnd',null,'ääni, kun uusi alue (biomi) löytyy')+setRow('Ulottuvuuksien löytöäänet','realmSnd',null,'ääni, kun saavut ulottuvuuteen ensimmäistä kertaa')}</div>
       <h4 class="setSub">Latausnäyttö</h4><div class="setGrid">${setRow('Latausnäytön ääni aina','ldSnd',null,'pois: riimujen leimahdusääni vain kun jatkat tallennusta, luot maailman tai vaihdat karttaa; päällä: myös pelin käynnistyessä')}</div>`+resetBtn;   // v2.59
