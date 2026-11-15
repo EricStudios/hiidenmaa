@@ -406,6 +406,10 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     return a&&b&&c||`virhe ${a}${b}${c}`;});
   t('v2.65 silmäpainike: läpinäkyvässä tilassa vain ääriviivat, symbolit ja tekstit (ei pintoja)',()=>{const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(e){return [];}}).join(' ');
     return /#menu\.seeThru \.mView :is\(\.tab/.test(css)&&/background: transparent !important/.test(css)&&/#menu\.seeThru \.mView \.presetBox \.pvFx \{ display: none/.test(css)||'virhe';});
+  t('v2.65 Extra: sammuta kaikki automaattiset grafiikkasäädöt (autoOn aina false, autoQuality ei aja, testin esiasetus ohitetaan)',()=>{
+    const a=SET_DEF.noAuto===false&&SET_PAGES.xgfx[0]==='noAuto';const pv=[SET.noAuto,SET.autoAll,SET.autoRes,AUTO.res];SET.autoAll=true;SET.autoRes=true;SET.noAuto=true;
+    const b=['res','fx','dist','q'].every(k=>!autoOn(k));AUTO.res=2;applyGfx();const c=AUTO.res===0;[SET.noAuto,SET.autoAll,SET.autoRes]=pv;AUTO.res=pv[3];applyGfx();
+    const d=/!SET\.noAuto\)autoQuality/.test(frame.toString())&&/SET\.noAuto/.test(perfApply.toString());return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());

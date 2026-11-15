@@ -354,7 +354,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **v2.63:** Grafiikka › Tiheämpi maaston väritys (High+ ja Ultra: värit 1 m välein, värineliöt eivät erotu). Extra-grafiikka › Maaston väritys
   tarkemmaksi (4× / 8× / 16×) ja Pehmeä rantaveden väri. Ohjaus › HUD › HUD:n koko 60–150 % (oletus 100 %; koko pelin HUD, osat kasvavat
   reunoiltaan, yli 100 % rajoittuu näytön koon mukaan, ettei mikään mene päällekkäin).
-- **v2.65:** Extra-grafiikka › Biomien sekoitus (Pois / Normaali = oletus / Vahva / Erittäin vahva): maa-, hiekka- ja metsäalueiden värit liukuvat toisiinsa,
+- **v2.65:** Extra-grafiikka › Sammuta kaikki automaattiset grafiikkasäädöt (ylin rivi): päällä grafiikka ei muutu koskaan itsestään (ei suorituskyvyn
+  mukaista säätöä eikä käynnistystestin esiasetusta). Extra-grafiikka › Biomien sekoitus (Pois / Normaali = oletus / Vahva / Erittäin vahva): maa-, hiekka- ja metsäalueiden värit liukuvat toisiinsa,
   kivikot ja vuoren juuri pysyvät terävinä. Maaston väritys tarkemmaksi: 4× tai 8× (8× kysyy varmistuksen; 16× poistettu).
 - **v2.64 silmäpainike:** Grafiikka- ja Extra-grafiikka-sivun reunassa; pelin aikana (tauko) valikko muuttuu läpinäkyväksi, jolloin muutokset näkyvät
   pelissä suoraan. Päävalikossa (ei peliä käynnissä) painike on harmaa eikä toimi. v2.65: näkyvissä vain ääriviivat, symbolit ja tekstit.

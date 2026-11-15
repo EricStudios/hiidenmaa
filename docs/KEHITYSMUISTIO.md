@@ -348,6 +348,9 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
   pehmeät pinnat (maa, hiekka, niitty, metsä, suo, nummi, tunturi) sekoittuvat peitetyllä sumennuksella (säde `BLEND_R` 0/1/2/4 kärkeä = 0/2/4/8 m);
   kivikot (mountain, rakka, peak), lumi yli 33 m, jyrkät rinteet (> 0,75) ja meri eivät → vuoren juuri pysyy terävänä. Muta säilyy (TCOL0 + mudSet),
   tiheämmän värityksen ero heikennetään pehmeillä pinnoilla (`BLEND_FK`) ja tekstuuri rakennetaan uudelleen; laikut `ftRecolor`.
+- **Extra: Sammuta kaikki automaattiset grafiikkasäädöt** (`SET.noAuto`, Extra-grafiikan ylin rivi, oletus pois): `autoOn()` aina false (resoluutio,
+  piirtoetäisyys, hiukkaset/usva/ruoho, varjojen taso `QUAL`), `autoQuality` ei aja, `applyGfx` nollaa `AUTO`:n, käynnistyksen suorituskykytestin
+  esiasetusta ei oteta käyttöön (`perfApply`). Grafiikka-sivun automaattirivit kertovat "POIS: Extra-grafiikka › …". Tarkistusrivi v2.65.
 - **Maaston väritys:** 16× poistettu (vanha arvo → 8×). 8× kysyy varmistuksen: "ei ole pelin low poly -teeman mukainen ulkonäkö – oletko varma?" (`keyDialog`).
 - **Silmäpainike:** läpinäkyvässä tilassa vain ääriviivat, symbolit ja tekstit – välilehtien, valintojen, kytkimien, nappien, esiasetuslaatikon,
   merkintöjen ja liukusäätimen radan pinnat pois (`#menu.seeThru .mView :is(…)`), reunat ohuina vaaleina viivoina, "OLETUS"-merkit vaaleiksi.

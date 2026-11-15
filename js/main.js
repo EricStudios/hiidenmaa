@@ -189,7 +189,7 @@ addEventListener('mousedown',e=>{if(state==='intro'&&!(intro&&intro.hold)){e.sto
 addEventListener('touchstart',()=>{if(state==='intro'&&!(intro&&intro.hold))endIntro();},{capture:true,passive:true});
 /* v1.43/v1.60: suorituskykytesti tehdään ennen pelin latausta (js/boot.js, oma kevyt 3D-näkymä). Tulos on localStorage hiidenmaa_perf;
    pend:1 = esiasetusta ei ole vielä otettu käyttöön → otetaan tässä (perfApply) ja merkitään tehdyksi. */
-function perfApply(){try{const r=JSON.parse(localStorage.getItem('hiidenmaa_perf')||'null');if(!r||!r.pend)return;applyPreset(clamp(r.idx|0,0,7));r.pend=0;localStorage.setItem('hiidenmaa_perf',JSON.stringify(r));}catch(e){}}
+function perfApply(){try{const r=JSON.parse(localStorage.getItem('hiidenmaa_perf')||'null');if(!r||!r.pend)return;if(SET.noAuto){r.pend=0;localStorage.setItem('hiidenmaa_perf',JSON.stringify(r));return;}   /* v2.65 noAuto: testin esiasetusta ei oteta käyttöön */applyPreset(clamp(r.idx|0,0,7));r.pend=0;localStorage.setItem('hiidenmaa_perf',JSON.stringify(r));}catch(e){}}
 /* ---------------- MAIN LOOP ---------------- */
 let last=performance.now(),slowT=0,saveT=0,lightT=0,menuA=0;
 function update(dt){
@@ -273,7 +273,7 @@ const MENU_EL=$('#menu');
 function frame(now){
   requestAnimationFrame(frame);
   const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;let skip3d=false;seeThruSync();
-  if(state==='play'&&SET.autoAll)autoQuality(raw);updateFps(raw);if(DEV)perfTick(raw);musicTick();try{ambTick(raw);}catch(err){}   /* v2.61 sää ja tunnelma */
+  if(state==='play'&&SET.autoAll&&!SET.noAuto)autoQuality(raw);   /* v2.65 noAuto: ei mitään automaattista säätöä */updateFps(raw);if(DEV)perfTick(raw);musicTick();try{ambTick(raw);}catch(err){}   /* v2.61 sää ja tunnelma */
   try{
     if(state==='play'||state==='ui')update(dt);
     else if(state==='menu'&&MENU_V2_OFF)menuCamOld(dt);

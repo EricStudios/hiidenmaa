@@ -38,10 +38,10 @@ function validateKey(action,code){
 // shRate = varjojen päivitystiheys, ptRes = tulien/soihtujen varjokartta (px). res = 3D-resoluution kerroin ('native' = näytön tarkkuus).
 const SET_DEF={res:1,shadow:'high',sunRes:2048,shDist:55,shRate:'normal',ptShadow:true,ptRes:384,autoQ:true,sway:true,grass:1,particles:1,detail:'high',terrFine:false,biomeBlend:1,bldDetail:true,
   renderDist:165,lights:6,lightDist:60,lightRange:17,mist:.6,clouds:1,drop3d:true,blood:1,bloodFx:true,keyHints:true,shafts:true,flare:false,wheelHotbar:false,zoom:5.5,sound:true,invY:false,
-  autoAll:true,autoRes:true,autoFx:true,autoDist:true,fps:'off',terrLod:false,mergeSt:true,shFar:false,treeLod:80,shOpt:true,shLod:40,sens:1,curSens:1,hudMode:0,hudScale:1,creVol:1,plVol:1,uiVol:1,volMaster:1,musicVol:1,ambVol:1,notifVol:1,musicOn:true,sfxOn:true,notifSnd:true,biomeSnd:true,realmSnd:true,ldSnd:false,_sv:1,arrowLight:false,menuBg:'img',shUltra:'off',menuAnimKeep:false,waterFx:false,waterOpt:true,uwFx:false,waterMega:false,smokeUltra:false,terrFineX:0,waterSmooth:false,torchSharp:false,waterHQ:false,shoreSpray:false};   // hudMode v1.18: 0 molemmat, 1 vain tehtävä, 2 vain tavoite, 3 piilossa   // v1.12 yleinen automaattisäätö (+ osa-alueet) ja FPS-näyttö
+  autoAll:true,autoRes:true,autoFx:true,autoDist:true,fps:'off',terrLod:false,mergeSt:true,shFar:false,treeLod:80,shOpt:true,shLod:40,sens:1,curSens:1,hudMode:0,hudScale:1,creVol:1,plVol:1,uiVol:1,volMaster:1,musicVol:1,ambVol:1,notifVol:1,musicOn:true,sfxOn:true,notifSnd:true,biomeSnd:true,realmSnd:true,ldSnd:false,_sv:1,arrowLight:false,menuBg:'img',shUltra:'off',menuAnimKeep:false,waterFx:false,waterOpt:true,uwFx:false,waterMega:false,smokeUltra:false,noAuto:false,terrFineX:0,waterSmooth:false,torchSharp:false,waterHQ:false,shoreSpray:false};   // hudMode v1.18: 0 molemmat, 1 vain tehtävä, 2 vain tavoite, 3 piilossa   // v1.12 yleinen automaattisäätö (+ osa-alueet) ja FPS-näyttö
 // Asetussivujen avaimet (sivun "Palauta oletukset" palauttaa vain nämä)
 // v1.35 (lista 3, kohta 16): varjot ovat Grafiikka-sivun väliotsikko (ei omaa sivua).
-const SET_PAGES={gfx:['menuBg','res','autoAll','autoRes','renderDist','autoDist','fps','detail','terrFine','grass','sway','clouds','lights','lightDist','lightRange','shafts','flare','arrowLight','particles','mist','autoFx','bldDetail','drop3d','blood','bloodFx','waterFx','uwFx','waterOpt','shadow','sunRes','shDist','shRate','autoQ','ptShadow','ptRes','terrLod','mergeSt','shFar','treeLod','shOpt','shLod'],xgfx:['shUltra','waterHQ','waterMega','shoreSpray','waterSmooth','smokeUltra','torchSharp','terrFineX','biomeBlend'],ctl:['wheelHotbar','zoom','sens','curSens','invY','keyHints','menuAnimKeep','hudScale'],snd:['sound','musicOn','sfxOn','volMaster','musicVol','creVol','plVol','uiVol','ambVol','notifVol','notifSnd','biomeSnd','realmSnd','ldSnd']};
+const SET_PAGES={gfx:['menuBg','res','autoAll','autoRes','renderDist','autoDist','fps','detail','terrFine','grass','sway','clouds','lights','lightDist','lightRange','shafts','flare','arrowLight','particles','mist','autoFx','bldDetail','drop3d','blood','bloodFx','waterFx','uwFx','waterOpt','shadow','sunRes','shDist','shRate','autoQ','ptShadow','ptRes','terrLod','mergeSt','shFar','treeLod','shOpt','shLod'],xgfx:['noAuto','shUltra','waterHQ','waterMega','shoreSpray','waterSmooth','smokeUltra','torchSharp','terrFineX','biomeBlend'],ctl:['wheelHotbar','zoom','sens','curSens','invY','keyHints','menuAnimKeep','hudScale'],snd:['sound','musicOn','sfxOn','volMaster','musicVol','creVol','plVol','uiVol','ambVol','notifVol','notifSnd','biomeSnd','realmSnd','ldSnd']};
 /* v1.35 (lista 3, kohta 17): esiasetukset Low … Ultra (8 tasoa, oletus Medium = SET_DEF:n grafiikka). Esiasetus muuttaa kaikki alla
    luetellut asetukset; Low–Medium kytkee automaattisäädön päälle, High–Ultra pois. Ultra ylittää aiemmat maksimit (piirtoetäisyys 520 m,
    ruoho Ultra, varjoalue 140 m, tulien varjot 1024). Jos jotain säädetään käsin, nimi on "Custom".
@@ -88,7 +88,7 @@ const AUTO={res:0,fx:0,dist:0},AUTO_K={res:[1,.85,.7,.55],fx:[1,.5,.25],dist:[1,
 const SHU={sharp:{d:90,n:'8192 px · 90 m · päivitys joka ruutu'},soft:{d:110,n:'8192 px · 110 m · pehmeät reunat · joka ruutu'},wide:{d:160,n:'8192 px · 160 m näkymän suuntaan · joka ruutu'}};
 const SHU_OVR=['shadow','sunRes','shDist','shRate','autoQ','shFar'];
 function shUltraOn(){return !!SHU[SET.shUltra];}
-function autoOn(k){if(k==='q'&&shUltraOn())return false;return !!SET.autoAll&&!!SET[{res:'autoRes',fx:'autoFx',dist:'autoDist',q:'autoQ'}[k]];}
+function autoOn(k){if(SET.noAuto)return false;if(k==='q'&&shUltraOn())return false;   /* v2.65 Extra: kaikki automaattiset säädöt pois */return !!SET.autoAll&&!!SET[{res:'autoRes',fx:'autoFx',dist:'autoDist',q:'autoQ'}[k]];}
 // Ottaa asetukset käyttöön (kutsutaan käynnistyksessä ja kun asetusta muutetaan)
 // v2.63 HUD-skaala: CSS-muuttuja --hudK (#hud zoom, maailmaan sidotut tekstit ja palkit kumoavat ja skaalaavat itse; css/style.css)
 // Yli 100 %: rajoitetaan näytön koon mukaan (HUD tarvitsee noin HUD_MIN_W × HUD_MIN_H pikseliä ilman päällekkäisyyksiä), 100 % ja alle ennallaan.
@@ -185,7 +185,7 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
     $('#bAllKeys').onclick=showAllKeys;
     $('#bKeysReset').onclick=()=>keyDialog('Palautetaanko kaikki näppäimet oletuksiin?',[['Palauta',()=>{Object.assign(BIND,BIND_DEF);saveBinds();renderSettings();}],['Peruuta',null]]);
   }else if(setTab==='gfx'){
-    const sub=t=>`<h4 class="setSub">${t}</h4>`,autoN=k=>SET.autoAll?'':' (vaatii yleisen automaattisäädön)',pi=presetIdx();   // v1.12 väliotsikot
+    const sub=t=>`<h4 class="setSub">${t}</h4>`,autoN=k=>SET.noAuto?' (POIS: Extra-grafiikka › Sammuta kaikki automaattiset)':SET.autoAll?'':' (vaatii yleisen automaattisäädön)',pi=presetIdx();   // v1.12 väliotsikot
     body.innerHTML=`<div class="presetBox pv${pi<0?'c':pi}" id="presetBox"><canvas class="pvFx"></canvas><div class="presetHead"><b>Esiasetus</b><span id="presetName" class="${pi<0?'custom':''}">${pi<0?'Custom':PRESET_N[pi]}</span></div>
       ${sldHTML('sPreset',0,7,1,pi<0?3:pi)}<div class="presetTicks">${PRESET_N.map((n,i)=>`<span class="${i===pi?'on':''}${i===3?' def':''}">${n}</span>`).join('')}</div>
       <div class="note">Muuttaa kaikki grafiikka- ja varjoasetukset kerralla. Low–Medium: automaattinen säätö päällä, High–Ultra: pois. Muutokset näkyvät heti.</div></div>
@@ -193,7 +193,7 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       sub('Yleiset')+
       (typeof MENU_V2_OFF!=='undefined'&&MENU_V2_OFF?'':setRow('Valikon tausta','menuBg',[['img','Animoidut kuvat (kevyt)'],['3d','3D-kamera (raskas)']],'kuvat eivät kuormita konetta valikossa'))+
       setRow('3D-resoluutio','res',[['native','Terävä (näytön tarkkuus)'],[1,'Normaali'],[.85,'85 %'],[.7,'70 %'],[.55,'55 %'],[.4,'40 %']],'pienempi = kevyempi, käyttöliittymä pysyy terävänä')+
-      setRow('Automaattinen säätö','autoAll',null,'laskee grafiikkaa jos peli nykii ja palauttaa kun sujuu (alla olevat osa-alueet)')+
+      setRow('Automaattinen säätö','autoAll',null,'laskee grafiikkaa jos peli nykii ja palauttaa kun sujuu (alla olevat osa-alueet)'+(SET.noAuto?' – POIS: Extra-grafiikka › Sammuta kaikki automaattiset':''))+
       setRow('– Resoluutio automaattisesti','autoRes',null,'enintään 55 %'+autoN())+
       setRow('Piirtoetäisyys','renderDist',[[60,'Hyvin lähellä (60 m)'],[90,'Lähellä (90 m)'],[120,'Lyhyt (120 m)'],[165,'Normaali (165 m)'],[210,'Pitkä (210 m)'],[260,'Kaukana (260 m)'],[400,'Äärimmäinen (400 m)'],[520,'Ultra (520 m)']],'kauempana olevaa ei piirretä eikä animoida')+
       setRow('– Piirtoetäisyys automaattisesti','autoDist',null,'enintään −40 %'+autoN())+
@@ -246,6 +246,8 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
     /* v2.20: Extra-grafiikka – asetukset, jotka ovat oletuksena pois kaikissa esiasetuksissa (eivät kuulu esiasetuksiin, laitetaan käsin).
        Violetti = vaativa, punainen = raskain. */
     body.innerHTML=`<p class="note">Nämä asetukset eivät kuulu esiasetuksiin, ja ne ovat oletuksena pois. Ne on tarkoitettu tehokkaille koneille: <b style="color:#c8a8ff">violetti</b> = vaativa, <b style="color:#ff8a70">punainen</b> = raskain.</p><div class="setGrid">${
+      `<h4 class="setSub">Automatiikka</h4>`+
+      xRow('Sammuta kaikki automaattiset grafiikkasäädöt','noAuto',[['false','Sallittu (asetusten mukaan)'],['true','Kaikki pois','']],'päällä grafiikka ei muutu koskaan itsestään: ei automaattista säätöä suorituskyvyn mukaan (resoluutio, piirtoetäisyys, hiukkaset, varjojen taso) eikä käynnistyksen suorituskykytestin esiasetusta – vain sinun valintasi')+
       `<h4 class="setSub">Varjot</h4>`+ultraShRow()+
       xRow('Terävät soihtuvarjot','torchSharp',[['false','Pois'],['true','Terävät','red']],'käsisoihdun varjot tarkat (1024 px) ja päivittyvät joka kuva, kantama 7 m – laatu heikkenee matkan kasvaessa')+
       `<h4 class="setSub">Vesi</h4>`+
