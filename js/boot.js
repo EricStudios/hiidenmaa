@@ -3,7 +3,7 @@
    vasta sitten latausnäyttö ja pelin skriptit. Ennen jakso pyöri pelin latauksen päällä, jolloin häivytykset pätkivät. Pelin skriptit
    esiladataan taustalla (<link rel=preload>) ja ajetaan yksi kerrallaan pienellä tauolla, jotta riimut ehtivät syttyä näkyvästi.
    Välilyönti, Enter tai napsautus ohittaa koko jakson (ja testin) ja vie suoraan latausnäyttöön. */
-window.__BJV='2.65';
+window.__BJV='2.66';
 (function(){
   var Q=location.search,wd=!!navigator.webdriver;
   function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
@@ -46,25 +46,65 @@ window.__BJV='2.65';
   function bsVolK(c){var st=(typeof SET!=='undefined'&&SET)||bsSet();   /* pelin SET (myös liukusäädintä vedettäessä), muuten tallenne */if(st.sound===false||(c==='music'?st.musicOn===false:st.sfxOn===false))return 0;
     var v=st[VK[c]];if(v==null)v=1;else if(!(st._sv>=1))v=v/VB[c];var m=st.volMaster;if(m==null)m=1;return +m*v*VB[c];}
   try{fetch('sounds/manifest.json?v='+(window.HV||'')).then(function(r){return r.ok?r.json():null;}).then(function(j){BS.man=(j&&j.sounds)||{};
-    for(var k in BS.man)if(/^(m\/(aloitus|lataus)|mu)\//.test(k))(function(k){var e=BS.man[k];fetch('sounds/'+e.f+'?h='+e.h).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer();})
-      .then(function(b){return BS.ac.decodeAudioData(b);}).then(function(B){BS.buf[k]=B;if(k.indexOf('mu/')===0)muTry();}).catch(function(){});})(k);}).catch(function(){});}catch(e){}
+    for(var k in BS.man)if(/^m\/(aloitus|lataus)\//.test(k))(function(k){var e=BS.man[k];fetch('sounds/'+e.f+'?h='+e.h).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer();})
+      .then(function(b){return BS.ac.decodeAudioData(b);}).then(function(B){BS.buf[k]=B;}).catch(function(){});})(k);muTry();}).catch(function(){});}catch(e){}   // v2.66 musiikkia ei pureta muistiin (suoratoisto, ks. alla)
   window.__bootSnd=function(g,ev){var ac=BS.ac;if(!ac||ac.state!=='running')return false;var v=bsVolK('ui');if(!(v>0))return false;
     var L=[];for(var k in BS.buf)if(k.indexOf('m/'+g+'/'+ev+'_')===0)L.push(k);if(!L.length)return false;
     var src=ac.createBufferSource(),gn=ac.createGain();src.buffer=BS.buf[L[Math.random()*L.length|0]];gn.gain.value=v;src.connect(gn);gn.connect(ac.destination);src.start();return true;};
-  /* v2.53 VALIKKOMUSIIKKI (sounds/musiikki, avaimet mu/<valikko|tauko>/<kappale>_<n>): __mus.want('valikko'|'tauko') aloittaa (ei fade in;
-     0,05 s naksahduksen esto), kappaleen loputtua MU_GAP_MIN–MAX s hiljaisuus ja uusi (eri versio, jos on). __mus.stop(f) häivyttää ulos
-     (oletus MU_FADE). Lukossa tai puskurin puuttuessa odottaa (muTry: avaus ja puskurin valmistuminen). Taso bsVolK('music'). */
-  var MU_FADE=2,MU_GAP_MIN=20,MU_GAP_MAX=40,MU={want:null,cur:null,tm:0,last:{}};
-  function muStopH(h,f){if(!h||h.done)return;h.done=true;var ac=BS.ac,t=ac.currentTime,g=h.g.gain;try{g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(0,t+f);h.src.stop(t+f+.05);}catch(e){}}
-  function muTry(){var ac=BS.ac,tr=MU.want;if(!tr||MU.cur||MU.tm||!ac||ac.state!=='running')return false;var L=[],k;for(k in BS.buf)if(k.indexOf('mu/'+tr+'/')===0)L.push(k);if(!L.length)return false;
-    if(L.length>1&&MU.last[tr])L=L.filter(function(x){return x!==MU.last[tr];});var name=L[Math.random()*L.length|0];MU.last[tr]=name;
-    var src=ac.createBufferSource(),g=ac.createGain(),v=bsVolK('music');src.buffer=BS.buf[name];g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(v,ac.currentTime+.05);
-    src.connect(g);g.connect(ac.destination);var h={src:src,g:g,tr:tr,name:name,done:false};src.onended=function(){if(MU.cur===h){MU.cur=null;if(MU.want===tr&&!h.done){MU.tm=setTimeout(function(){MU.tm=0;muTry();},(MU_GAP_MIN+Math.random()*(MU_GAP_MAX-MU_GAP_MIN))*1000);}}h.done=true;};
-    src.start();MU.cur=h;return true;}
-  window.__mus={want:function(tr){if(MU.want===tr&&(MU.cur||MU.tm))return;MU.want=tr;clearTimeout(MU.tm);MU.tm=0;if(MU.cur&&MU.cur.tr!==tr){muStopH(MU.cur,MU_FADE);MU.cur=null;}muTry();},
-    stop:function(f){MU.want=null;clearTimeout(MU.tm);MU.tm=0;if(MU.cur){muStopH(MU.cur,f==null?MU_FADE:f);MU.cur=null;}},
-    apply:function(){var h=MU.cur,ac=BS.ac;if(!h||h.done||!ac)return;var t=ac.currentTime;h.g.gain.cancelScheduledValues(t);h.g.gain.setTargetAtTime(bsVolK('music'),t,.08);},
-    get state(){return {want:MU.want,playing:!!MU.cur,track:MU.cur&&MU.cur.name,gap:!!MU.tm};},MU_FADE:MU_FADE,MU_GAP_MIN:MU_GAP_MIN,MU_GAP_MAX:MU_GAP_MAX};
+  /* v2.66 MUSIIKKI (pääkansio music/, avaimet mu/<valikko|biomit|ulottuvuudet>/<kappale>_<n>, manifestin polku sounds/ + f = ../music/valmiit/…).
+     Kappaleet soitetaan suoratoistona (<audio> → MediaElementSource → GainNode; ei purkua muistiin). Konteksti __mus.set(c):
+       'valikko' = menu1 kerran (aloitusjakson logosta), sen jälkeen menu2-versiot satunnaisesti, välissä MUC.GAP_MIN–MAX s;
+       'tauko'   = menu2 satunnaisesti (taukovalikko 15 s jälkeen);
+       'w:<biomi>' = maailma: ensimmäinen kappale MUC.JOIN_MIN–MAX s liittymisestä, kappaleen jälkeen MUC.SIL_MIN–MAX s hiljaisuutta;
+                    biomin vaihtuessa kappaleen aikana MUC.SWITCH_P (80 %) vaihtuu biomin kappaleeseen, muuten (20 %) loppuu ja alkaa hiljaisuus;
+                    hiljaisuuden aikana biomin vaihto ei tee mitään (seuraava kappale valitaan sen hetken biomin mukaan);
+       'd:<paikka>' = ulottuvuus / Hautakumpu: kappale alkaa heti sisään astuessa (saapumisääni voi viivästyttää: __mus.hold(ms)), välissä hiljaisuus;
+       'boss' = pomotaistelu: alkaa heti, toistuu taistelun ajan; taistelun päättyessä häivytys ja maailman säännöt.
+     Häivytykset (käyttäjä): vanha hiljenee MUC.OUT 2,5 s, sitten uusi tulee sisään MUC.IN 2,5 s (valikossa uusi alkaa ilman fade iniä).
+     Puuttuva kappale = hiljaisuus. Taso bsVolK('music') (__mus.apply). */
+  var MUC={OUT:2.5,IN:2.5,GAP_MIN:20,GAP_MAX:40,JOIN_MIN:10,JOIN_MAX:40,SIL_MIN:50,SIL_MAX:120,SWITCH_P:.8,BOSS_GAP:1.5};   // ajat (s) ja todennäköisyys; testit voivat lyhentää
+  var MU={ctx:null,cur:null,tm:0,tok:0,last:{},m1:false,hold:0,pend:null};
+  var muRnd=function(a,b){return a+Math.random()*(b-a);};
+  function muType(c){return !c?null:c==='valikko'||c==='tauko'?'menu':c==='boss'?'boss':c.charAt(0)==='w'?'bio':'dun';}
+  function muKeys(c){if(!BS.man)return [];var pre=c==='valikko'?(MU.m1?'mu/valikko/menu2_':'mu/valikko/menu1_'):c==='tauko'?'mu/valikko/menu2_':c==='boss'?'mu/ulottuvuudet/pomotaistelu_':
+      c.charAt(0)==='w'?'mu/biomit/'+c.slice(2)+'_':'mu/ulottuvuudet/'+c.slice(2)+'_',L=[],k;
+    for(k in BS.man)if(k.indexOf(pre)===0)L.push(k);if(!L.length&&c==='valikko'&&!MU.m1){MU.m1=true;return muKeys(c);}return L;}
+  function muVol(){return bsVolK('music');}
+  function muFade(h,to,sec){if(!h||!BS.ac)return;var t=BS.ac.currentTime,g=h.g.gain;try{g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(to,t+Math.max(.02,sec));}catch(e){}}
+  function muKill(h,sec){if(!h||h.done)return;h.done=true;muFade(h,0,sec);setTimeout(function(){try{h.el.pause();h.el.removeAttribute('src');h.el.load();}catch(e){}try{h.s.disconnect();h.g.disconnect();}catch(e){}},sec*1000+120);}
+  function muClear(){clearTimeout(MU.tm);MU.tm=0;MU.tok++;MU.pend=null;}
+  function muLater(sec,fn){clearTimeout(MU.tm);var tk=++MU.tok;MU.tm=setTimeout(function(){MU.tm=0;if(tk===MU.tok)fn();},Math.max(0,sec)*1000);}
+  // seuraava kappale nykyiselle kontekstille (fi = fade in s); lukossa / puuttuva → odottaa (MU.pend), muTry yrittää uudelleen
+  function muStart(fi){var c=MU.ctx,ac=BS.ac;if(!c||MU.cur)return false;MU.pend={fi:fi};if(!ac||ac.state!=='running'||!BS.man)return false;
+    if(muType(c)==='dun'&&Date.now()<MU.hold){muLater((MU.hold-Date.now())/1000,function(){muStart(fi);});return false;}
+    var L=muKeys(c);if(!L.length){MU.pend=null;if(muType(c)!=='menu'&&muType(c)!=='boss')muLater(muRnd(MUC.SIL_MIN,MUC.SIL_MAX),function(){muStart(MUC.IN);});return false;}
+    var lk=c+(c==='valikko'&&!MU.m1?'1':'');if(L.length>1&&MU.last[lk])L=L.filter(function(x){return x!==MU.last[lk];});var key=L[Math.random()*L.length|0],e=BS.man[key];MU.last[lk]=key;
+    if(c==='valikko'&&!MU.m1&&key.indexOf('mu/valikko/menu1_')===0)MU.m1=true;
+    var el=new Audio();el.preload='auto';el.src='sounds/'+e.f+'?h='+e.h;var h={el:el,key:key,ctx:c,done:false};
+    try{h.s=ac.createMediaElementSource(el);h.g=ac.createGain();h.g.gain.value=0;h.s.connect(h.g);h.g.connect(ac.destination);}catch(er){return false;}
+    MU.pend=null;MU.cur=h;var v=muVol();muFade(h,v,fi||.05);
+    el.onended=function(){if(MU.cur!==h)return;MU.cur=null;h.done=true;try{h.s.disconnect();h.g.disconnect();}catch(er){}muAfter(c);};
+    el.onerror=function(){if(MU.cur!==h)return;MU.cur=null;h.done=true;muAfter(c);};
+    var pr=el.play();if(pr&&pr.catch)pr.catch(function(){if(MU.cur===h){MU.cur=null;h.done=true;MU.pend={fi:fi};}});return true;}
+  // kappale loppui luonnollisesti
+  function muAfter(c){if(MU.ctx!==c)return;var t=muType(c);
+    if(t==='menu')muLater(muRnd(MUC.GAP_MIN,MUC.GAP_MAX),function(){muStart(.05);});
+    else if(t==='boss')muLater(MUC.BOSS_GAP,function(){muStart(MUC.IN);});
+    else muLater(muRnd(MUC.SIL_MIN,MUC.SIL_MAX),function(){muStart(MUC.IN);});}
+  // vanha ulos MUC.OUT, sitten uusi sisään MUC.IN
+  function muSwap(fi){var h=MU.cur;MU.cur=null;if(h){muKill(h,MUC.OUT);muLater(MUC.OUT,function(){muStart(fi);});}else{muClear();muStart(fi);}}
+  function muSet(c,f){var o=MU.ctx;if(c===o)return;MU.ctx=c;var to=muType(c),fo=muType(o);
+    if(!c){muClear();if(MU.cur){muKill(MU.cur,f==null?MUC.OUT:f);MU.cur=null;}return;}
+    if(to==='menu'){muClear();muSwap(.05);return;}
+    if(to==='bio'){
+      if(fo==='bio'){if(MU.cur){if(Math.random()<MUC.SWITCH_P)muSwap(MUC.IN);else{muKill(MU.cur,MUC.OUT);MU.cur=null;muLater(MUC.OUT+muRnd(MUC.SIL_MIN,MUC.SIL_MAX),function(){muStart(MUC.IN);});}}return;}   // hiljaisuus jatkuu
+      muClear();if(MU.cur){muKill(MU.cur,MUC.OUT);MU.cur=null;}muLater(muRnd(MUC.JOIN_MIN,MUC.JOIN_MAX),function(){muStart(MUC.IN);});return;}
+    muClear();if(MU.cur)muSwap(MUC.IN);else muLater(1,function(){muStart(MUC.IN);});}   // ulottuvuus, Hautakumpu, pomotaistelu: heti (1 s: saapumisääni ehtii asettaa viiveen)
+  function muTry(){if(MU.pend&&!MU.cur&&!MU.tm)muStart(MU.pend.fi);}
+  window.__mus={set:muSet,want:function(c){muSet(c);},stop:function(f){muSet(null,f);},hold:function(ms){MU.hold=Math.max(MU.hold,Date.now()+ms);},
+    apply:function(){var h=MU.cur;if(h&&!h.done)muFade(h,muVol(),.08);},
+    get state(){return {ctx:MU.ctx,want:MU.ctx,playing:!!MU.cur,track:MU.cur&&MU.cur.key,gap:!!MU.tm,pend:!!MU.pend};},
+    C:MUC,_mu:MU,_bs:BS};
   function hintIco(on){return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/>'+(on?'<path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>')+'</svg>';}
   function hintShow(){var h=document.createElement('div');h.id='sndHint';h.innerHTML=hintIco(false)+'<span>Napauta näyttöä kuullaksesi äänet</span>';document.body.appendChild(h);BS.hint=h;BS.shown=performance.now();
     requestAnimationFrame(function(){h.classList.add('in');});}

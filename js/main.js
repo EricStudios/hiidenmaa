@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='2.65';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='2.66';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -77,12 +77,21 @@ let started=false,confirmNew=false;
 (function(){const h=$('#pcHint');if(!h||true)return;   // v1.55: varoitus näytetään vain ensikäynnin aloitusjaksossa
   /* ajastin alkaa vasta kun valikko on piirretty (2. kehys), jotta latausaika ei syö näkymisaikaa */
   requestAnimationFrame(()=>requestAnimationFrame(()=>{if(started)return;h.hidden=false;setTimeout(()=>h.classList.add('fade'),3000);setTimeout(()=>{h.hidden=true;},4600);   /* v1.30: 3 s (ennen 6 s) */}));})();
-/* v2.53 MUSIIKKI (boot.js __mus): valikkomusiikki alkaa aloitusjakson HIIDENMAA-logosta ja soi päävalikossa, kunnes liitytään peliin
-   (startPlay → häivytys ulos). Taukovalikko: PAUSE_MUSIC_T s auki → taukomusiikki; peliin palatessa häivytys ulos. */
-const PAUSE_MUSIC_T=15;
-function musicTick(){const M=window.__mus;if(!M)return;const w=M.state.want;
-  if(state==='paused'&&started&&performance.now()-pausedAt>=PAUSE_MUSIC_T*1000){if(w!=='tauko')M.want('tauko');}
-  else if(w==='tauko'&&state!=='paused')M.stop();}
+/* v2.53/v2.66 MUSIIKKI (boot.js __mus, säännöt siellä): valikko = menu1 aloitusjakson logosta ja sen jälkeen menu2; liityttäessä peliin
+   (startPlay) valikkomusiikki häivytetään ja maailman musiikki alkaa 10–40 s kuluttua. Pelissä konteksti joka ruutu (musicCtx): pomotaistelu
+   (pomopalkki näkyvissä, BB.m), ulottuvuus / Hautakumpu (P.inDun) tai biomi. Biomi vaihtuu vasta, kun pelaaja on ollut uudessa biomissa
+   MUS_BIO_T s (raja-alueella ei heilu). Taukovalikko: PAUSE_MUSIC_T s auki → menu2 (tauko); peliin palatessa maailman säännöt alusta. */
+const PAUSE_MUSIC_T=15,MUS_BIO_T=4,MUS_REALM={portal1:'routaluola',portal2:'kalmankammio',portal3:'aarnihauta'};
+const MUSB={cur:null,cand:null,t:0};
+function musicBiome(dt){const b=(typeof BIO_SND!=='undefined'&&BIO_SND[biomeHere(P.pos.x,P.pos.z)])||'rantaniitty';
+  if(!MUSB.cur){MUSB.cur=b;return b;}if(b===MUSB.cur){MUSB.cand=null;return b;}if(b!==MUSB.cand){MUSB.cand=b;MUSB.t=0;}MUSB.t+=dt;if(MUSB.t>=MUS_BIO_T){MUSB.cur=b;MUSB.cand=null;}return MUSB.cur;}
+function musicCtx(dt){if(typeof BB!=='undefined'&&BB.m&&!BB.m.dead&&!P.dead)return 'boss';
+  if(P.inDun)return 'd:'+(P.realm?MUS_REALM[P.realm]||'hautakumpu':'hautakumpu');return 'w:'+musicBiome(dt);}
+let musT=performance.now();
+function musicTick(){const M=window.__mus;if(!M||!M.set)return;const now=performance.now(),dt=Math.min(.5,(now-musT)/1000);musT=now;const c=M.state.ctx;
+  if(state==='paused'&&started){if(now-pausedAt>=PAUSE_MUSIC_T*1000&&c!=='tauko')M.set('tauko');return;}   // alle 15 s: maailman musiikki jatkuu
+  if(started&&(state==='play'||state==='ui')){M.set(musicCtx(dt));return;}
+  if(c==='tauko'&&state!=='paused')M.set(null);}
 function startPlay(){if(window.__mus)window.__mus.stop();if(typeof menuClear==='function')menuClear();if(typeof mbgShow==='function'&&MBG.cv)mbgShow(false);setTimeout(()=>{if(typeof applyHudMode==='function')applyHudMode();},50);{const f=$('#menuFade');if(f)f.style.opacity=0;}fig.g.visible=true;started=true;{const h=$('#pcHint');if(h&&!h.hidden){h.classList.add('fade');setTimeout(()=>h.hidden=true,1600);}}state='play';$('#menu').hidden=true;$('#hud').hidden=false;requestLock();invDirty=true;}
 function pauseGame(){if(state!=='play'||openPanel||P.dead)return;state='paused';pausedAt=performance.now();$('#menu').hidden=false;$('#settings').hidden=true;setMenuView('main');if(typeof logoRandom==='function')logoRandom();/* v1.48: uusi logoteema joka valikkokäynnillä */$('#hud').hidden=true;refreshMenu();mouseL=mouseR=false;P.drawing=false;}
 addEventListener('beforeunload',e=>{if(started&&!flags.won&&!reloading){e.preventDefault();e.returnValue='';}});

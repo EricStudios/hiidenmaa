@@ -17,7 +17,9 @@ let msgSndT=-9,msgQuietT=-9;
 function iSnd(g,ev,common){const o={pre:'i',cat:'notif'};return mSnd(g,ev,o)||(common?mSnd(g,common,o):false);}
 function msgSnd(){const t=performance.now()/1000;if(SET.notifSnd===false||t-msgSndT<MSG_SND_GAP||t<msgQuietT)return;msgSndT=t;iSnd('ilmoitukset','ilmoitus');}
 function biomeSnd(z){msgQuietT=performance.now()/1000+.4;if(SET.biomeSnd===false)return;iSnd('biomit','biomi_'+(BIO_SND[z]||z),'biomi_yhteinen');}
-function realmSnd(id){msgQuietT=performance.now()/1000+.4;if(SET.realmSnd===false)return;iSnd('ulottuvuudet','ulottuvuus_'+(REALM_SND[id]||id),'ulottuvuus_yhteinen');}
+function realmSnd(id){msgQuietT=performance.now()/1000+.4;if(SET.realmSnd===false)return;const h=iSnd('ulottuvuudet','ulottuvuus_'+(REALM_SND[id]||id),'ulottuvuus_yhteinen');
+  if(h&&h.src&&h.src.buffer&&window.__mus&&window.__mus.hold)window.__mus.hold(Math.min(MUS_HOLD_MAX,h.src.buffer.duration*.8)*1000);}   // v2.66 saapumisääni ensin, ulottuvuuden musiikki sen jälkeen
+const MUS_HOLD_MAX=12;
 function msg(t,cls=''){msgLog.push({t,cls,at:playTime});msgSnd();if(msgLog.length>10)msgLog.shift();const el=$('#msgs');const d=document.createElement('div');d.textContent=t;if(cls)d.className=cls;el.appendChild(d);d._life=clamp(3+t.length*.07,4,13);msgEls.push(d);while(msgEls.length>7){const o=msgEls.shift();o.remove();}}
 function updateMsgs(dt){for(let i=msgEls.length-1;i>=0;i--){const d=msgEls[i];d._life-=dt;if(d._life<1)d.style.opacity=Math.max(0,d._life);if(d._life<=0){d.remove();msgEls.splice(i,1);}}}
 const floaters=[];
