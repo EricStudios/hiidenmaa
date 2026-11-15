@@ -16,7 +16,7 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 ## Nykytila (päivitetty v2.59)
 
 - **PR #35 (v2.28–v2.49) ja #36 (muistiinpanot) on yhdistetty. PR #37 (v2.50–v2.56, lista 7 kokonaan + sarvien varaääni + Kalmanvartija 10 + puolituksen korjaus + äänet ja ikkunat v2.57–v2.58 + latausnäyttö v2.59) odottaa yhdistämistä.**
-  Lista 7: ks. Ideajono › "Lista 7" (kaikki kohdat tehty; uudet äänet paikkamerkkeinä). Avoimet: Ideajono › "Avoimet havainnot".
+  Lista 7: ks. Ideajono › "Lista 7" (kaikki kohdat tehty; uudet äänet paikkamerkkeinä). **Lista 8 (ideointi, ei tehty): Ideajono › "Lista 8".** Avoimet: Ideajono › "Avoimet havainnot".
 - **Versio 2.59**, haara `claude/hiidenmaa-survival-game-fmxt0m` (jatkettu mainista). **PR #25** (v1.38–v1.83), **#27** (v1.84–v1.95) ja **#28** (v1.96–v2.10) on **yhdistetty**. **#29** (v2.11–v2.15) on **yhdistetty**. **#30** (v2.16: kivivartija, ääniprojektien kansiot, toimintoäänet B1) on **yhdistetty**. v2.17 (pomojen toimintokansio, ryntäysäänet, vesi sammuttaa, sade sammuttaa nuotion) ja v2.18 (vesiuudistus: uinti, hukkuminen, vesivarjostin, vedenalaiset efektit, K pois) PR #31:ssä; v2.19 korjaa valikon 3D-piirron (KORJAUKSET 47); v2.20 Extra-grafiikka, low poly -vesi, rantaroiskeet, ylämäen hidastus, kohteet rinteen mukaan. **PR #31 (v2.17–v2.20) on yhdistetty.** **PR #32 (v2.21) on yhdistetty.** **PR #33 (v2.22) on yhdistetty.** v2.23 (toimintoäänierä 2, kivivartijan äänet, toimintosilmukat, tarkistustyökalun korjaus) ja v2.24 (äänitasot, juominen, pää alas, pelaajan toimintoäänet) ja v2.25 (sudet hiljemmaksi, Aarnipuun törmäys, karhun syöksy, pelaajan äänet osat 1–3) ja v2.26 (pensasäänet, askeleet −20 %, terveyspalkkien näkyvyys) ja v2.27 (Aarnimetsän askel, oksat) – **PR #34 (v2.23–v2.27) on yhdistetty.** v2.28 (pelaajan äänierä osa 2: 22 ääntä, puun tömähdys, reppu kiinni, arkun sulkeminen) ja v2.29 (narinan ajoitus, siirto- ja puolitusäänet, Shift-siirtoslider) ja v2.30 (sliderin korjaukset, poimintaääni) ja v2.31 (poimintaäänen sävy) ja v2.32 (valitse + oikea klikkaus puolittaa myös hiiren lukituksessa) ja v2.33 (valinta säilyy pienessä liikkeessä, avointen biomien vaaleammat varjot) ja v2.34 (metsien varjot 20 % vaaleammat, vuorokauden vaihtelu ±15 %) ja v2.35 (näytön auringonsäteet, linssiheijastus) ja v2.36 (säteiden ajoitus, päiväkohtaisuus, peitto) ja v2.37 (säteet takaisin koko päiväksi) ja v2.38 (pyöreä auringon hehku, pilvien syvyys, kovat/pehmeät säteet) ja v2.39 (pienempi auringon hehku) ja v2.40 (elävät säteet, peitto suunnittain) ja v2.41 (suorituskykyoptimoinnit: puiden LOD, varjomallit, rakennusten yhdistäminen) ja v2.42 (low poly -sävytys säilyy varjojen vaalennuksessa) ja v2.43 (hautakummun kieleke, savujen optimointi, liekit pystyyn) ja v2.44 (satunnainen pilvimatto) ja v2.45 (terävät soihtuvarjot Extra-grafiikkaan) ja v2.46 (repun vilkkuminen/puolitus, pilvet, hukkumisen tarkistus) ja v2.47 (pilvipäivät, pilvimatto 50 %, heijastuksen päivävaihtelu, pilvet ylemmäs) PR #35:ssä. Käyttäjä tekee seuraavaksi ehkä ketulle omat äänet. Aiemmin #27: äänierä A (v1.84–v1.86: äänet, Aarnihirviön äänet pääääneksi, kaiku ulottuvuuksiin). **JATKA TÄSTÄ (äänet):** käyttäjä lisää olentojen ääniä erissä → noudata "Äänierän rutiini"; v2.11 HUOM: `aarnihirvio_chase_2` ja `karhu_hurt_1` ovat sama tiedosto; isot vahvistukset (raaka hiljainen): `kalmo_chase_1` +24, `susi_hurt_2` +23,7 (raaka 7,5 s ulvonta osumapaikassa → 0,18 s, väärä paikka?), `metso_hurt_1/2`, `hiisi_death_1` (+12…14 dB). Puuttuvat ketjun alut (🎯): `hiidenkarhu_chase`, `hiidenhirvi_chase`. Aiempi:
   `main` = v1.37. Kaikki käyttäjän pyynnöt tehty: päivityslistat 4 (v1.39–v1.44), 5 (v1.49–v1.52) ja 6 (v1.53–v1.57) sekä valikon ja
   logon uudistukset (v1.45–v1.48). Seuraava työ: uusi lista käyttäjältä.
@@ -3264,6 +3264,39 @@ kanssa; (3) Ultra-asetuksella jopa ~830 piirtokutsua.
    varmistusikkunoiden oma ääni (oletko varma, maailman poisto, DEV:n avaus …).
 5. → **tehty v2.53** (paikkamerkit; käyttäjä tuo musiikin ja äänet). Musiikkikansio (ensin valikkomusiikit): soi intron "Hiidenmaa"-tekstistä päävalikkoon, häivytys ulos peliin liittyessä; taukovalikossa
    alkaa 15 s jälkeen; aina pieni fade out, fade in vain pyydettäessä. Extra: 3 animoitua taustakuvaa, joihin satunnaisia hiljaisia ääniä.
+
+### Lista 8 (ideointi 15.11., EI vielä tehty) – yksi kohta kerrallaan, 1–5 tarkentavaa kysymystä per kohta
+1. **Hiidenkivet tasan 9 kätkettynä** (jousi 2 + miekka 3 + panssari 4). Ehdotettu jako: Hautakummun kirstut 2, maailman raunio/linnake 1,
+   hyvin piilotettu maailman paikka 1, ulottuvuuspomot 3, Routaluolan arkku 1, Kalmankammion arkku 1 (maailma 4, ulottuvuudet 5).
+   Avoinna: satunnaiset kivet (RARE_LOOT, CHEST_LOOT, Aarnihaudan lattia, PEACE_LOOT) kokonaan pois vai lisäksi; kelpaako jako.
+   Samalla vanhentuneet tekstit: hiidenkiven kuvaus (items.js) ja vartijan vajoamisviesti "Hiidenkivet jäävät alttarille" (ai.js) → sirpaleet.
+2. **Routaportti kahdella lukolla** (käyttäjä hyväksyi nimen **Kalmon sinetti**):
+   - Kalmon ylimys (Hautakumpu, solu `B`) pudottaa **Kalmon sinetin** kerran (lippu).
+   - **Jääavain** arvotaan tavallisiin maailman arkkuihin (rauniot, linnakkeet, kiviröykkiöt) – EI Hautakummun kirstuihin.
+   - Portissa 2 riippulukkoa, kumman tahansa voi laittaa ensin, lukko katoaa; teksti "vaatii: Jääavain ✓, Kalmon sinetti ✗"; vajaa tila tallentuu.
+   - Varmistukset: ylimys kaadettu → sinetin lukko auki; arvottu arkku avattu → avaimen lukko auki.
+   - Vanhat tallennukset: portti auki → ei muutosta; arkkuun arvottu Jääavain säilyy; ylimys kantaa sinetin.
+   - Uudet riimukivi-, tehtävä- ja vihjetekstit (`keyHint`, `runeB`, `QUESTS`, kyltit). Kuvakkeet selvästi erilaiset (luinen sinetti, kristallinen avain).
+   - Avoinna: riittääkö riimukiven suuntavihje vai epätarkka alue kartalle; saako ylimys erityispiirteen (hehkuva sinetti vyöllä, nimi, HP).
+3. **Arvoesineiden katoaminen 1 min säännöllä** (käyttäjä): jos avain/arvoesine ei ole 1 min ajan pelin arkuissa, pelaajan rakentamissa arkuissa
+   eikä repussa → ilmoitus "… on hukattu, sen voi löytää jostain arkusta" ja esine siirtyy arkkuun, josta sen **normaalistikin löytää**:
+   - maailman arkusta saatava (Jääavain) → johonkin maailman arkkuun;
+   - maailman olennolta saatava (Kalmon sinetti) → maailman arkkuun (ehdotus: Hautakummun kirstu tai maailman arkku);
+   - ulottuvuuspomolta saatava → saman pomon ulottuvuuden arkkuun (Luuavain → Routaluola, Aarniavain → Kalmankammio,
+     kruunusirpale → Aarnihauta), ei koskaan ulottuvuuteen, johon ei vielä pääse.
+   - Nykyinen (v2.59): maassa oleva katoaa 120 s jälkeen (`VAL_LOST`, kun pelaaja > 10 m tai muussa tilassa), laskenta `valuableCensus` 15 s välein
+     ja siirto aina maailman arkkuun (`relocateValuable`). Avoinna: lasketaanko hautakasa (kuolema) ja maassa pelaajan vieressä oleva turvalliseksi.
+   - `keyHint`/riimukivi osoittavat uuteen paikkaan (`flags.vloc`).
+4. **Olentojen äänten päällekkäisyysraja** (ei pelaajan ääniä): lajit idle, chase, aggro (hyökkäys), echo.
+   - Sama äänitiedosto enintään 3 päällekkäin, ylimääräiset hiljaisia; kun toinen päällekkäinen kopio alkaa → 1 s jäähdytys sille tiedostolle.
+   - Ehdotus: estetyn tilalle valitaan toinen versio (`_0`/`_1`/…); hiljaisuus vasta kun kaikki estetty; sama tiedosto ei uudelleen alle 0,15 s
+     (kampasuodinilmiö); estettyä ei siirretä myöhemmäksi. hurt ja death eivät kuulu sääntöön.
+   - Esimerkki: Hautakummussa ei 5 kalmon hyökkäysääntä päällekkäin. Nykyinen: idle/chase 3 per olento+laji ja 0,3 s väli (`creSnd`), aggro rajaton.
+   - Avoinna: myös raja olentolajia kohden (esim. kalmojen aggro yhteensä 3); kuuluvatko toimintoäänet (huitaisu, ryntäys); tiukemmat luvut idlelle;
+     DEV-mittariin rivi pois jääneistä äänistä.
+5. **Oven aukeamisanimaatio** (käyttäjä): ovi aukeaa ja sulkeutuu noin 0,6 s pehmeästi, liike hidastuu loppua kohti (ease-out).
+   - Nykyinen: `setDoor` (pieces.js) kääntää lehden heti. Ehdotus: avatessa törmäys pois heti, sulkiessa vasta lopussa (ja jos pelaaja on
+     oviaukossa, ovi ei sulkeudu päälle); varjot päivitetään liikkeen aikana; latauksessa asento suoraan ilman animaatiota; ääni liikkeen alkuun.
 
 ### Avoimet havainnot (v2.49-tarkistus)
 - ~~Sarvi-osumien ääni puuttuu~~ → v2.54 varakategoria isku; omat `osuma_sarvet`-äänet käyttäjältä.
