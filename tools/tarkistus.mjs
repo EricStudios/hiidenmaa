@@ -194,7 +194,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const b=!moorFightBlock('kalmo',L.x+30,L.z);boss={type:'vartija',dead:false};const c=moorFightBlock('kalmo',L.x+30,L.z)&&moorFightBlock('ylimys',L.x+70,L.z)&&!moorFightBlock('kalmo',L.x+80,L.z)&&!moorFightBlock('karju',L.x+5,L.z);boss=ob;
     return a&&b&&c&&/moorFightBlock\(type,x,z\)/.test(spawner.toString())||`virhe palaminen ${a} ei taistelua ${b} taistelu ${c}`;});
   t('v2.14 äänet: kutsuäänet 150 m, muut 64 m, ääntely 36 m; vahvempi kaukaisuusefekti (hiljaisuus, tummuus, kaiku, huojunta); sudet ulvovat päivällä 3× ja yöllä 1,25× harvemmin',()=>{
-    const a=CRE_FAR_R===150&&CRE_NEAR_R===64&&CRE_IDLE_R===36&&CRE_WOLF.has('susi')&&CRE_WOLF.has('routasusi')&&CRE_WOLF.has('kalmasusi');
+    const a=CRE_FAR_R===150*SND_DIST_K&&CRE_NEAR_R===64*SND_DIST_K&&CRE_IDLE_R===36*SND_DIST_K&&CRE_WOLF.has('susi')&&CRE_WOLF.has('routasusi')&&CRE_WOLF.has('kalmasusi');
     const b=creLpf(0)>15000&&creLpf(.5)<1500&&creLpf(1)===500&&/dg\.gain/.test(creDistFx.toString())&&/lg\.gain/.test(creDistFx.toString())&&/1\.8\*k/.test(creDistFx.toString())&&/src\.detune/.test(creSnd.toString());
     const c=/CRE_WOLF\.has\(m\.type\)\?\(isNight\(\)\?1\.25:3\)/.test(creTick.toString())&&/100\+Math\.random\(\)\*45/.test(farHowl.toString())&&/\*1\.25/.test(farHowl.toString());
     return a&&b&&c||`virhe kantamat ${a} efekti ${b} ulvonta ${c}`;});
@@ -224,7 +224,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     return a&&b&&c||`virhe polut ${a} kivivartija ${b} ryhmät ${c}`;});
   t('v2.16 toimintoäänet: askeleet matkan mukaan alustan mukaan (lähimmät 6), isku ja osuma, kaatuminen, palaminen, syöminen, nousu, lento, törmäys, vesi',()=>{const ms=[],L=[],o=tgSnd,ok=CRE.ok,st=state;let res;
     try{tgSnd=(m,ev)=>{L.push(ev);return ev==='palaminen'?{src:null}:1;};CRE.ok=true;state='play';
-      const w=spawnMob('susi',P.pos.x+8,P.pos.z+8,{noBorn:1});ms.push(w);for(let i=0;i<45;i++){w.pos.x+=.15;tgTick(1/30);}const a=L.filter(e=>e.startsWith('askel_')).length>=4;
+      const w=spawnMob('susi',P.pos.x+3,P.pos.z+3,{noBorn:1});ms.push(w);   /* v2.58: kuuluvuus −20 % → lähemmäs */for(let i=0;i<45;i++){w.pos.x+=.15;tgTick(1/30);}const a=L.filter(e=>e.startsWith('askel_')).length>=4;
       const b=tgSurface({pos:{x:0,y:0,z:0},dun:true,realm:'portal1'},'nelijalkaiset')==='jaa'&&tgSurface({pos:{x:0,y:0,z:0},dun:true,realm:'portal2'},'luurangot')==='kivi';
       L.length=0;w.burnT=5;tgTick(1/30);const c=L.includes('palaminen')&&!!w.tgBurn;w.burnT=0;w.tgBurn=null;
       const d=/tgSnd\(m,'huitaisu'\)/.test(updateMobs.toString())&&/tgHit\(/.test(mobHurtP.toString())&&/'kaatuminen'/.test(mobDeathAnim.toString())&&/'nousu'/.test(bornTick.toString())&&/lentoonlahto/.test(startFlee.toString())&&/tormays_/.test(moveMob.toString())&&/loiskahdus/.test(tgTick.toString())&&/ravistus/.test(tgTick.toString());
@@ -248,8 +248,8 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
           if((/[;{}]\s*(if|const|let|for|return|[A-Za-z_$][\w$.]*\s*\(|[A-Za-z_$][\w$.]*\s*=[^=])/.test(r)||/\)\s*(if|for|while|return)\s*\(/.test(r))&&!/^\s*v\d\.\d\d juomat|DEV seinien|Terveyspalkit|Haku ohittaa|täyden vedon|Matala usva/.test(r))bad.push(u.split('?')[0]+':'+(i+1));break;}}});}
     return !bad.length||'koodia kommentin perässä: '+bad.join(', ');});
   t('v2.24 olentojen äänet −20 %, toimintoäänten kuuluvuus −20 % ja jyrkempi vaimeneminen, askeleet harvemmin (kävely ×1,2, juoksu ×1,375)',()=>{
-    const a=CRE_VK===.8&&/\*CRE_VK/.test(creSnd.toString()),b=TG_RK===.8&&tgDistK(TG_R)===1&&tgDistK(5)===0&&/rolloffFactor=step\?1\.8:1\.45/.test(tgPlay.toString())&&/\*TG_RK/.test(tgPlay.toString());
-    const c=TG_WALK_K===1.2&&Math.abs(TG_RUN_K-1.375)<1e-9&&/TG_RUN_K:TG_WALK_K/.test(tgTick.toString())&&/tgR2\(/.test(tgTick.toString())&&tgR2(20)===16*16;
+    const a=CRE_VK===.8&&/\*CRE_VK/.test(creSnd.toString()),b=Math.abs(TG_RK-.8*SND_DIST_K)<1e-9&&tgDistK(TG_R)===1&&tgDistK(5)===0&&/rolloffFactor=step\?1\.8:1\.45/.test(tgPlay.toString())&&/\*TG_RK/.test(tgPlay.toString());
+    const c=TG_WALK_K===1.2&&Math.abs(TG_RUN_K-1.375)<1e-9&&/TG_RUN_K:TG_WALK_K/.test(tgTick.toString())&&/tgR2\(/.test(tgTick.toString())&&Math.abs(tgR2(20)-(20*TG_RK)**2)<1e-9;
     return a&&b&&c||`virhe ${a}${b}${c}`;});
   t('v2.24 kaula laskee kuonon maahan syödessä ja tonkiessa (peura, hirvi, karju, susi, jänis; kaula venyy pitkäjalkaisilla)',()=>{const out=[],_tb=new THREE.Box3(),_tv=new THREE.Vector3();
     for(const ty of ['peura','hirvi','karju','susi','janis']){const x=P.pos.x+40,z=P.pos.z+40,m=spawnMob(ty,x,z,{noBorn:1});m.born=undefined;m.state='idle';m.yaw=.7;
@@ -301,9 +301,15 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     SET.torchSharp=false;applyGfx();const b=torchLight.shadow.mapSize.x===40&&!torchSharpOn();SET.torchSharp=pv;applyGfx();
     const c=SET_DEF.torchSharp===false&&SET_PAGES.xgfx.includes('torchSharp')&&/torchSharpOn\(\)\?6\.7:2\.1/.test(updatePlayer.toString())&&/torchSharpOn\(\)\|\|shFrame%fT===0/.test(updateStations.toString());
     return a&&b&&c||`virhe terävä ${a} oletus ${b} koodi ${c}`;});
+  t('v2.58 äänet vain samassa tilassa (maailma / Hautakumpu / sama ulottuvuus, myös pomojen kaiut) ja kaikkien äänten kuuluvuus −20 %',()=>{
+    const pv=[P.inDun,P.realm];let a=false;try{P.inDun=false;P.realm=null;const w=creSpaceOk({dun:false})&&!creSpaceOk({dun:true,realm:'portal1'})&&!creSpaceOk({dun:true});
+      P.inDun=true;P.realm='portal1';const r1=creSpaceOk({dun:true,realm:'portal1'})&&!creSpaceOk({dun:true,realm:'portal2'})&&!creSpaceOk({dun:false})&&creSpaceOk({dun:true});
+      P.realm=null;const bw=creSpaceOk({dun:true})&&!creSpaceOk({dun:true,realm:'portal3'});a=w&&r1&&bw;}finally{[P.inDun,P.realm]=pv;}
+    const b=SND_DIST_K===.8&&/creSpaceOk\(m\)/.test(creTick.toString())&&/creSpaceOk\(v\.m\)/.test(creTick.toString())&&/creSpaceOk\(m\)/.test(tgTick.toString())&&/rk\*SND_DIST_K/.test(creSnd.toString())&&/4\*SND_DIST_K/.test(plSnd.toString());
+    return a&&b||`virhe tila ${a} etäisyys ${b}`;});
   t('v2.57 siirtoääni vain valmiissa siirrossa (ei valinnassa/raahauksen alussa), valittu ruutu ei kasva (ei transformia), arkun ohjerivi kiinteä, ulvonta −30 % kuuluvuus ja voimakkuus (päivällä kuuluvuus lisäksi −40 %), puun narina pienissä puissa korkeampi',()=>{
     const pd=dayT;dayT=.5;const day=wolfHowlRK();dayT=.95;const night=wolfHowlRK();dayT=pd;
-    const a=Math.abs(night-.85*.7)<1e-9&&Math.abs(day-.85*.7*.6)<1e-9&&WOLF_HOWL_V===.7&&/WOLF_HOWL_V:1\)/.test(creSnd.toString())&&/\*WOLF_HOWL_R,x=/.test(farHowl.toString());
+    const a=Math.abs(night-.85*.7)<1e-9&&Math.abs(day-.85*.7*.6)<1e-9&&WOLF_HOWL_V===.7&&/WOLF_HOWL_V:1\)/.test(creSnd.toString())&&/\*WOLF_HOWL_R\*SND_DIST_K,x=/.test(farHowl.toString());
     const sel=[...document.styleSheets].flatMap(ss=>{try{return [...ss.cssRules];}catch(e){return [];}}).find(r=>r.name==='selPulse');
     const b=!!sel&&!/transform|scale/.test(sel.cssText);
     const h=document.getElementById('chestHint'),c=!!h&&getComputedStyle(h).height!=='auto'&&getComputedStyle(h).overflow==='hidden';
@@ -586,7 +592,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('v2.25 sudet: suuttumis- ja jahtiääni −30 % ja kantama −20 %, ulvonnan kantama −15 % (myös kaukainen ulvonta)',()=>{
     const a=creRK('susi','aggro')===.8&&creRK('routasusi','chase')===.8&&creRK('kalmasusi','idle',1)===wolfHowlRK()&&creRK('susi','idle',0)===1&&creRK('karhu','aggro')===1&&creRK('karhu','idle',1)===1;
     const b=CRE_WOLF_V.aggro===.7&&CRE_WOLF_V.chase===.7&&/CRE_WOLF_V\[kind\]/.test(creSnd.toString())&&/rk=creRK\(m\.type,kind,far\)/.test(creSnd.toString())&&/\*\.85/.test(farHowl.toString());
-    const c=Math.abs(creDistK(64*.8,false,.8)-1)<1e-9&&creDistK(60,false,1)<1;return a&&b&&c||`virhe ${a}${b}${c}`;});
+    const c=Math.abs(creDistK(CRE_NEAR_R*.8,false,.8)-1)<1e-9&&creDistK(40,false,1)<1;return a&&b&&c||`virhe ${a}${b}${c}`;});
   t('v2.25 Aarnipuun törmäys kattaa rungon ja juuret (cr 1 × koko): pelaaja ei mene rungon sisään',()=>{const g=window.__game,A=nodes.filter(n=>n.type==='aarnipuu'&&n.alive&&n.col);if(!A.length)return 'ei aarnipuita';
     const bad=A.filter(n=>Math.abs(n.col.r-NODE.aarnipuu.cr*n.s)>1e-6).length;const n=A[0],p0=P.pos.clone(),a=.7;P.pos.set(n.x-Math.sin(a)*4,0,n.z-Math.cos(a)*4);P.pos.y=groundAt(P.pos.x,P.pos.z,.38,99);P.vel.set(0,0,0);
     let md=99;try{for(let i=0;i<75;i++){P.yaw=Math.atan2(n.x-P.pos.x,n.z-P.pos.z);camYaw=P.yaw+Math.PI;keys['KeyW']=true;g.update(1/30);md=Math.min(md,Math.hypot(P.pos.x-n.x,P.pos.z-n.z));}}finally{keys['KeyW']=false;P.pos.copy(p0);P.vel.set(0,0,0);}

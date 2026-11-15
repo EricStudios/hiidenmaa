@@ -449,6 +449,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ## Lista 4, erä F (v1.44)
 - Grafiikka › Suorituskyky: kaukainen maasto kevennetty (yli 100 m), staattisten kohteiden yhdistäminen, auringon varjot harvemmin paikallaan.
   Esiasetukset: Low–Medium- kaikki päällä, Medium–Ultra vain yhdistäminen.
+- **v2.58:** äänet kuuluvat vain siinä tilassa, jossa olet (maailma, Hautakumpu tai kyseinen ulottuvuus) – myös pomojen kaiut katkeavat
+  tilaa vaihdettaessa; kaikkien äänten kuuluvuusetäisyys 20 % lyhyempi.
 - **v2.57:** siirtoääni vain valmiissa siirrossa (puolituksessa vain puolitusääni); repun ja arkun ikkunat eivät enää veny valittaessa;
   susien ulvonta hiljaisempi ja lyhyemmälle kuuluva (päivällä vielä lyhyemmälle); pienten puiden kaatumisnarina korkeampi; puun
   tömähdys hiipuu pidempään ja pehmeämmin.

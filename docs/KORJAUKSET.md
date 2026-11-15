@@ -459,6 +459,7 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - **Varjot** (`ai.js` updateStations, `render.js` setQuality, `settings.js` applyGfx): autoUpdate=false-valot.
 - **Latausjärjestys** (CLAUDE.md): ylimmän tason koodi vain aiemmin ladattuihin muuttujiin.
 - **Repun/arkun siirrot** (`ui.js` `slotUX`, `oncontextmenu`, `moveHalf`/`moveCount`, `chestClick`): lue KORJAUKSET 60 ja aja sen testit.
+- **Uudet olento- ja toimintoäänet** (audio.js): kulje `creSpaceOk(m)`-suodattimen kautta ja käytä etäisyyksissä `SND_DIST_K`:ta (v2.58).
 - **Osumaäänet** (`ai.js` `mobHurtP` → `tgHit(TG_HIT[tyyppi])`): uusi hyökkäys pelaajaan kulkekoon `mobHurtP`:n kautta, muuten osumaääntä
   ei tule (pomojen slam/nova kutsuvat `hurtPlayer`:ia suoraan). Uusi olento → lisää `TG_HIT`-kategoria ja tarkista, että kategorialla on ääni.
 - **Maahan sijoittaminen** (`landmarks.js` `stoneCol`/`gmin`): mittaa maa nurkista, ei yhdestä pisteestä (KORJAUKSET 58).
