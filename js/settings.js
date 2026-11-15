@@ -36,12 +36,12 @@ function validateKey(action,code){
 /* ---------------- ASETUKSET ---------------- */
 // Oletukset = taso, jolla suurin osa pelaa. Varjot: sunRes = auringon varjokartta (px), shDist = auringon varjoalueen säde (m),
 // shRate = varjojen päivitystiheys, ptRes = tulien/soihtujen varjokartta (px). res = 3D-resoluution kerroin ('native' = näytön tarkkuus).
-const SET_DEF={res:1,shadow:'high',sunRes:2048,shDist:55,shRate:'normal',ptShadow:true,ptRes:384,autoQ:true,sway:true,grass:1,particles:1,detail:'high',terrFine:false,bldDetail:true,
+const SET_DEF={res:1,shadow:'high',sunRes:2048,shDist:55,shRate:'normal',ptShadow:true,ptRes:384,autoQ:true,sway:true,grass:1,particles:1,detail:'high',terrFine:false,biomeBlend:1,bldDetail:true,
   renderDist:165,lights:6,lightDist:60,lightRange:17,mist:.6,clouds:1,drop3d:true,blood:1,bloodFx:true,keyHints:true,shafts:true,flare:false,wheelHotbar:false,zoom:5.5,sound:true,invY:false,
   autoAll:true,autoRes:true,autoFx:true,autoDist:true,fps:'off',terrLod:false,mergeSt:true,shFar:false,treeLod:80,shOpt:true,shLod:40,sens:1,curSens:1,hudMode:0,hudScale:1,creVol:1,plVol:1,uiVol:1,volMaster:1,musicVol:1,ambVol:1,notifVol:1,musicOn:true,sfxOn:true,notifSnd:true,biomeSnd:true,realmSnd:true,ldSnd:false,_sv:1,arrowLight:false,menuBg:'img',shUltra:'off',menuAnimKeep:false,waterFx:false,waterOpt:true,uwFx:false,waterMega:false,smokeUltra:false,terrFineX:0,waterSmooth:false,torchSharp:false,waterHQ:false,shoreSpray:false};   // hudMode v1.18: 0 molemmat, 1 vain tehtävä, 2 vain tavoite, 3 piilossa   // v1.12 yleinen automaattisäätö (+ osa-alueet) ja FPS-näyttö
 // Asetussivujen avaimet (sivun "Palauta oletukset" palauttaa vain nämä)
 // v1.35 (lista 3, kohta 16): varjot ovat Grafiikka-sivun väliotsikko (ei omaa sivua).
-const SET_PAGES={gfx:['menuBg','res','autoAll','autoRes','renderDist','autoDist','fps','detail','terrFine','grass','sway','clouds','lights','lightDist','lightRange','shafts','flare','arrowLight','particles','mist','autoFx','bldDetail','drop3d','blood','bloodFx','waterFx','uwFx','waterOpt','shadow','sunRes','shDist','shRate','autoQ','ptShadow','ptRes','terrLod','mergeSt','shFar','treeLod','shOpt','shLod'],xgfx:['shUltra','waterHQ','waterMega','shoreSpray','waterSmooth','smokeUltra','torchSharp','terrFineX'],ctl:['wheelHotbar','zoom','sens','curSens','invY','keyHints','menuAnimKeep','hudScale'],snd:['sound','musicOn','sfxOn','volMaster','musicVol','creVol','plVol','uiVol','ambVol','notifVol','notifSnd','biomeSnd','realmSnd','ldSnd']};
+const SET_PAGES={gfx:['menuBg','res','autoAll','autoRes','renderDist','autoDist','fps','detail','terrFine','grass','sway','clouds','lights','lightDist','lightRange','shafts','flare','arrowLight','particles','mist','autoFx','bldDetail','drop3d','blood','bloodFx','waterFx','uwFx','waterOpt','shadow','sunRes','shDist','shRate','autoQ','ptShadow','ptRes','terrLod','mergeSt','shFar','treeLod','shOpt','shLod'],xgfx:['shUltra','waterHQ','waterMega','shoreSpray','waterSmooth','smokeUltra','torchSharp','terrFineX','biomeBlend'],ctl:['wheelHotbar','zoom','sens','curSens','invY','keyHints','menuAnimKeep','hudScale'],snd:['sound','musicOn','sfxOn','volMaster','musicVol','creVol','plVol','uiVol','ambVol','notifVol','notifSnd','biomeSnd','realmSnd','ldSnd']};
 /* v1.35 (lista 3, kohta 17): esiasetukset Low … Ultra (8 tasoa, oletus Medium = SET_DEF:n grafiikka). Esiasetus muuttaa kaikki alla
    luetellut asetukset; Low–Medium kytkee automaattisäädön päälle, High–Ultra pois. Ultra ylittää aiemmat maksimit (piirtoetäisyys 520 m,
    ruoho Ultra, varjoalue 140 m, tulien varjot 1024). Jos jotain säädetään käsin, nimi on "Custom".
@@ -98,6 +98,8 @@ function hudScaleApply(){const k=hudK();document.documentElement.style.setProper
 addEventListener('resize',()=>hudScaleApply());
 function applyGfx(){
   hudScaleApply();
+  if(typeof blendApply==='function')blendApply(+SET.biomeBlend||0);   // v2.65 biomien sekoitus
+  if(+SET.terrFineX>8)SET.terrFineX='8';   // v2.65 16× poistettu (vanha tallennettu arvo → 8×)
   if(typeof TFINE!=='undefined')terrFineSet(+SET.terrFineX||(SET.terrFine?2:0));   // v2.63 tiheämpi maaston väritys (Extra 4/8/16 ohittaa esiasetuksen 2×)
   {const pi=presetIdx();deckSoftSet(pi===7||(pi<0&&(+SET.renderDist||0)>=520));}   // v2.49 pehmeä pilvimatto Ultralla
   if(typeof grassDirty!=='undefined')grassDirty=true;   // v1.00 ruohon tiheys vaihtui
@@ -252,13 +254,16 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       xRow('Aallot iskevät rantaan','shoreSpray',[['false','Pois'],['true','Roiskeet','']],'isot aallot heittävät vesipisaroita korkealle rannassa (painovoima tuo ne alas)')+
       xRow('Pehmeä rantaveden väri','waterSmooth',[['false','Pois (portaittain)'],['true','Pehmeä liuku','']],'low poly -veden väri vaihtuu rannasta syvään pehmeästi eikä viidessä portaassa')+
       `<h4 class="setSub">Maasto</h4>`+
-      xRow('Maaston väritys tarkemmaksi','terrFineX',[['0','Esiasetuksen mukaan'],['4','4×',''],['8','8×','red'],['16','16×','red']],'värit 0,5 m välein (4×); 8× ja 16× lisäävät hienon värivaihtelun 0,25 / 0,125 m välein – lasketaan taustalla pelin alussa')+
+      xRow('Maaston väritys tarkemmaksi','terrFineX',[['0','Esiasetuksen mukaan'],['4','4×',''],['8','8×','red']],'värit 0,5 m välein (4×); 8× lisää hienon värivaihtelun 0,25 m välein (poikkeaa low poly -tyylistä, kysyy varmistuksen) – lasketaan taustalla')+
+      xRow('Biomien sekoitus','biomeBlend',[['0','Pois (terävät rajat)'],['1','Normaali'],['2','Vahva',''],['3','Erittäin vahva','']],'oletuksena Normaali: maa-, hiekka- ja metsäalueiden värit liukuvat toisiinsa; kivikot ja vuoren juuri pysyvät terävinä')+
       `<h4 class="setSub">Efektit</h4>`+
       xRow('Ultra-savut','smokeUltra',[['false','Pois (kevennetty)'],['true','Ultra','red']],'porttien, arkkukivien, raunioiden ja kummun usva ja höyry ilman v2.43:n kevennystä: näkyy jo 60 m päästä, täysi määrä, erilliset spritet')
     }</div>`+resetBtn;
     $('#bPageReset').onclick=()=>resetPage('xgfx');
     body.querySelectorAll('[data-ush]').forEach(b=>b.onclick=()=>{SET.shUltra=b.dataset.ush;saveSet();applyGfx();renderSettings();});
-    body.querySelectorAll('[data-xk]').forEach(b=>b.onclick=()=>{const k=b.dataset.xk,v=b.dataset.xv;SET[k]=v==='true'?true:v==='false'?false:v;saveSet();applyGfx();renderSettings();});
+    body.querySelectorAll('[data-xk]').forEach(b=>b.onclick=()=>{const k=b.dataset.xk,v=b.dataset.xv,go=()=>{SET[k]=v==='true'?true:v==='false'?false:v;saveSet();applyGfx();renderSettings();};
+      if(k==='terrFineX'&&v==='8'&&String(SET.terrFineX)!=='8')keyDialog('Maaston väritys 8× – oletko varma?',[['Vahvista',go],['Peruuta',null]],'Näin tarkka värivaihtelu ei ole pelin low poly -teeman mukainen ulkonäkö. Voit palauttaa asetuksen milloin tahansa.');
+      else go();});   // v2.65 8× kysyy varmistuksen
   }else if(setTab==='prof'){
     const P0=loadProfiles(),names=Object.keys(P0);
     body.innerHTML=`<p class="note">Profiili tallentaa kaikki asetukset: grafiikan, varjot, ohjauksen, äänet ja näppäimet. Valitse nimi ja tallenna – profiiliin voi palata myöhemmin.</p>

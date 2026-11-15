@@ -62,7 +62,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('hylätyt leirit (1–2): sammunut nuotio, teltta + sänky, säkki',()=>CAMPS.length>=1&&CAMPS.length<=2&&!!PIECES.teltta&&typeof ensureCamps==='function'&&!!flags.camps&&pieces.filter(p=>p.t==='teltta').length>=CAMPS.length);
   t('arkkukivet: suljettu linnake, hyppypilarit (nousu ≤ 0,85 m) ja kierreportaat (≤ 0,5 m)',()=>['poiK1','poiK2','poiK3'].filter(k=>LOC[k]).every(k=>{const f=FORT[k];if(!f||f.pillars.length!==5||f.steps.length<5)return false;const y=terrainH(LOC[k].x,LOC[k].z);let prev=y;for(const p of f.pillars){if(p.top-prev>.85)return false;prev=p.top;}prev=y+3.5;for(const s of f.steps){if(prev-s.top>.55)return false;prev=s.top;}return true;}));
   t('aluevartijat: alue ×2, rajalla seisoo 1–10 s, sitten palaa',()=>/atBorder/.test(updateMobs.toString())&&/1\+Math\.random\(\)\*9/.test(updateMobs.toString())&&/\*2\}/.test(updateSites.toString()));
-  t('kuokka: vasen nostaa 0,3 m + perusväri, oikea palauttaa värin; lapio: vasen kuoppa 0,3 m, oikea polku',()=>typeof terraTool==='function'&&/'restore'/.test(useTool.toString())&&/'dig'/.test(useTool.toString())&&/\.3\*w/.test(terraTool.toString())&&/useTool\(true\)/.test(onSecondary.toString()));
+  t('kuokka: vasen nostaa 0,3 m + perusväri, oikea palauttaa värin; lapio: vasen kuoppa 0,3 m, oikea polku',()=>typeof terraTool==='function'&&/'restore'/.test(useTool.toString())&&/'dig'/.test(useTool.toString())&&/\.3\*w/.test(ftTool.toString())&&/ftTool\(mode/.test(terraTool.toString())&&/useTool\(true\)/.test(onSecondary.toString()));
   t('vartija vajoaa (3 s) ja nousee (2,5 s) maasta, haavoittumaton',()=>/state==='sink'/.test(bossAI.toString())&&/state==='rise'/.test(bossAI.toString())&&/sinking/.test(damageMob.toString())&&/state='rise'/.test(useAltar.toString()));
   t('Shift + hiiri esineen päällä näyttää tiedot (itemTip)',()=>!!$('#itemTip')&&typeof updateItemTip==='function'&&/data-it/.test(slotHTML({id:'kivi',n:1})));
   t('välilisäys v0.93: DEV-täpät, hautakasa arkkuna + vajoaminen, pesä millä vain, harppova juoksu',()=>typeof devOn==='function'&&'god' in DEVF&&'food' in DEVF&&typeof graveVanish==='function'&&!/vain hakulla/.test(hitSpawner.toString())&&/runK/.test(updatePlayer.toString())&&(!DEV||!!$('#devP')));
@@ -357,7 +357,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=PRESETS.every((p,i)=>p.terrFine===(i>=6))&&SET_DEF.terrFine===false&&SET_PAGES.gfx.includes('terrFine')&&SET_DEF.terrFineX===0&&SET_PAGES.xgfx.includes('terrFineX');
     const b=typeof terrainMesh.material.onBeforeCompile==='function'&&/tFine/.test(terrainMesh.material.onBeforeCompile.toString())&&/uDet/.test(terrainMesh.material.onBeforeCompile.toString());
     const sv=[TFINE.want];terrFineSet(0);const c=TFINE.u.uFine.value===0;const d=/terrFineSet\(\+SET\.terrFineX\|\|\(SET\.terrFine\?2:0\)\)/.test(applyGfx.toString());
-    const e=/level>=16\?8:level>=8\?4:0/.test(terrFineSet.toString())&&/F=level>=4\?4:2/.test(terrFineSet.toString());terrFineSet(sv[0]);
+    const e=/level>=8\?4:0/.test(terrFineSet.toString())&&!/16/.test(terrFineSet.toString().replace(/\/\/.*$/gm,''))&&/F=level>=4\?4:2/.test(terrFineSet.toString());terrFineSet(sv[0]);
     const T=terrCol(0,0,terrainH(0,0),0);const f=Array.isArray(T)&&T.length===3&&T.every(v=>v>0&&v<1.2);
     return a&&b&&c&&d&&e&&f||`virhe ${a}${b}${c}${d}${e}${f}`;});
   t('v2.63 Extra: pehmeä rantaveden väri (low poly -veden värin portaat pois), oletus pois',()=>{const a=SET_DEF.waterSmooth===false&&SET_PAGES.xgfx.includes('waterSmooth')&&'uSmooth' in WATER_U;
@@ -389,6 +389,23 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       state='paused';started=true;seeThruSync();const e=!b.disabled;b.onclick({stopPropagation(){}});const f=seeThru&&$('#menu').classList.contains('seeThru');
       setTab='snd';seeThruSync();const g=b.hidden&&!seeThru&&!$('#menu').classList.contains('seeThru');r=a&&c&&d&&e&&f&&g||`virhe ${a}${c}${d}${e}${f}${g}`;}
     finally{[state,started,setTab]=sv;$('#menu').hidden=sv[3];$('#menu').dataset.view=sv[4];seeThruSync();}return r;});
+  t('v2.65 tarkka maanmuokkaus: lapio ja kuokka 1 m verkko (4× kärkiä), ei saumoja, karkea maasto piilossa laikussa, tallennus v11 ja lataus',()=>{
+    if(!(FT_S===2&&FT_CS===8&&typeof ftTool==='function'))return 'puuttuu';const sv=serialize();let r;
+    try{const cx=P.pos.x+40,cz=P.pos.z+40,b0=terrainH(cx,cz),bh=terrainH(cx+.5,cz+.5);const n0=FT_P.length;ftTool('dig',cx,cz,2.6,P.pos.y);
+      const a=FT_P.length>n0&&FT_ANY&&Math.abs(b0-terrainH(cx,cz)-.3)<.02&&Math.abs(bh-terrainH(cx+.5,cz+.5)-.3*sstep(2.6,.65,Math.hypot(.5,.5)))<.03;
+      let gap=0;for(const q of FT_P)for(let t=0;t<=16;t++)for(const [gx,gz] of [[q.cx*8+t/2,q.cz*8],[q.cx*8,q.cz*8+t/2]]){const x=-HALF+gx*GS,z=-HALF+gz*GS;gap=Math.max(gap,Math.abs(terrainH(x+.005,z+.005)-terrainH(x-.005,z-.005)));}
+      const b=gap<.02,c=FTM.d[(FT_P[0].cz*FT_CN+FT_P[0].cx)*4]===255&&/discard/.test(terrainMesh.material.onBeforeCompile.toString()+terrHook.toString());
+      const s=serialize(),d=s.v===11&&s.ft.length>0;const hc=terrainH(cx,cz);loadData(JSON.parse(JSON.stringify(s)));const e=Math.abs(terrainH(cx,cz)-hc)<.002&&FT_P.length>0;
+      r=a&&b&&c&&d&&e||`virhe muokkaus ${a} saumat ${b} (${gap.toFixed(3)}) maski ${c} tallennus ${d} lataus ${e}`;}finally{loadData(sv);}
+    return r;});
+  t('v2.65 biomien sekoitus: oletus Normaali (Extra), pehmeät pinnat sekoittuvat, kivikko ja vuoren juuri eivät; 8× väritys kysyy varmistuksen, 16× pois',()=>{
+    const a=SET_DEF.biomeBlend===1&&SET_PAGES.xgfx.includes('biomeBlend')&&!SET_PAGES.gfx.includes('biomeBlend')&&TBLEND_HARD.has('mountain')&&TBLEND_HARD.has('rakka');
+    let hard=-1,soft=-1;for(let i=HN*5;i<TSOFT.length-HN*5;i+=7){if(hard<0&&!TSOFT[i]&&TCOL_RAW[i*3]>0)hard=i;if(soft<0&&TSOFT[i]&&TSOFT[i+1]&&TSOFT[i-1]&&TSOFT[i+HN])soft=i;if(hard>=0&&soft>=0)break;}
+    const pv=SET.biomeBlend;blendApply(0);const raw=terrainColors[soft*3];blendApply(3);const b=Math.abs(terrainColors[hard*3]-TCOL_RAW[hard*3])<1e-6;blendApply(+pv||0);
+    const src=renderSettings.toString()+'';const c=!/\['16','16×'/.test(src)&&/terrFineX'&&v==='8'/.test(src)&&/oletko varma/.test(src);
+    return a&&b&&c||`virhe ${a}${b}${c}`;});
+  t('v2.65 silmäpainike: läpinäkyvässä tilassa vain ääriviivat, symbolit ja tekstit (ei pintoja)',()=>{const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(e){return [];}}).join(' ');
+    return /#menu\.seeThru \.mView :is\(\.tab/.test(css)&&/background: transparent !important/.test(css)&&/#menu\.seeThru \.mView \.presetBox \.pvFx \{ display: none/.test(css)||'virhe';});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());

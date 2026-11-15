@@ -287,7 +287,7 @@ function terraSetVertex(i,h){if(Math.abs(h-HGT0[i])<.005){delete TERRA[i];h=HGT0
 function terraFlush(){terrainMesh.geometry.attributes.position.needsUpdate=true;WATER_DEP.needsUpdate=true;   /* v2.18: veden syvyyskartta seuraa lapiota */terrainMesh.geometry.computeBoundingSphere();}
 function terraList(){return Object.entries(TERRA).map(([i,h])=>[+i,+h.toFixed(2)]);}
 function applyTerra(list){for(const [i,h] of list)terraSetVertex(i,h);terraFlush();for(const n of nodes)syncNodeY(n);}
-function resetTerra(){for(const i in TERRA){HGT[i]=HGT0[i];terrainMesh.geometry.attributes.position.array[i*3+1]=HGT0[i];waterDepSet(+i);delete TERRA[i];}terraFlush();resetMud();}
+function resetTerra(){ftReset();for(const i in TERRA){HGT[i]=HGT0[i];terrainMesh.geometry.attributes.position.array[i*3+1]=HGT0[i];waterDepSet(+i);delete TERRA[i];}terraFlush();resetMud();}
 // Multaisuus (0–1) maaston kärjissä: lapio lisää (tummat polut), kuokka vähentää. Väri sekoittuu alkuperäisestä kohti tummaa multaa.
 const MUD=new Float32Array(HN*HN),TCOL0=terrainColors.slice(),MUDC=[.25,.18,.12];
 function mudSet(i,v){v=clamp(v,0,1);if(v<.01)v=0;MUD[i]=v;const c=terrainMesh.geometry.attributes.color.array,j=((i*2654435761)>>>0)%100/100*.16+.92;for(let k=0;k<3;k++)c[i*3+k]=lerp(TCOL0[i*3+k],MUDC[k]*j,v);}
@@ -295,6 +295,52 @@ function mudFlush(){terrainMesh.geometry.attributes.color.needsUpdate=true;grass
 function mudList(){const o=[];for(let i=0;i<MUD.length;i++)if(MUD[i]>0)o.push([i,+MUD[i].toFixed(2)]);return o;}
 function applyMud(list){for(const [i,v] of list)mudSet(i,v);mudFlush();}
 function resetMud(){for(let i=0;i<MUD.length;i++)if(MUD[i]>0)mudSet(i,0);mudFlush();}
+/* v2.65 TARKKA MAANMUOKKAUS (laikut, ks. world.js FT_*): lapio ja kuokka muokkaavat 1 m verkkoa (4× kärkiä). Laikku luodaan lohkolle, kun työkalun
+   alue (+1 m) koskee sitä; alkuarvot = karkean verkon interpolointi (ei näkyvää muutosta). Yhteiset reunakärjet päivitetään kaikkiin laikkuihin,
+   joten saumoja ei synny; uloimmat reunat jäävät työkalun säteen ulkopuolelle (= karkea interpolointi). Karkeat kärjet samoissa kohdissa
+   päivitetään myös (vesi, ruoho, kartta, vanha tallennus). Karkeaa maastoa ei piirretä laikkujen kohdalla (render.js FTM-maski). */
+const FT_MAT=(function(){const m=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:1});m.onBeforeCompile=terrHook(false);m.customProgramCacheKey=()=>'terrFine';return m;})();
+const FT_HS=GS/FT_S;   // tarkan verkon väli (1 m)
+function ftTri(get,gx,gz){const ix=Math.min(GN-1,gx|0),iz=Math.min(GN-1,gz|0),fx=gx-ix,fz=gz-iz,i=iz*HN+ix;const a=get(i),b=get(i+1),c=get(i+HN),d=get(i+HN+1);
+  return fx+fz<1?a+(b-a)*fx+(c-a)*fz:d+(c-d)*(1-fx)+(b-d)*(1-fz);}
+const ftOk=(cx,cz)=>cx>=0&&cz>=0&&(cx+1)*FT_CS<=GN&&(cz+1)*FT_CS<=GN;
+function ftColors(p){const col=p.mesh.geometry.attributes.color.array;for(let k=0;k<p.h.length;k++){const m=p.mud[k],j=((k*2654435761+p.cx*977+p.cz*131)>>>0)%100/100*.16+.92;
+  for(let q=0;q<3;q++)col[k*3+q]=lerp(p.c0[k*3+q],MUDC[q]*j,m);}p.mesh.geometry.attributes.color.needsUpdate=true;}
+function ftGeo(p){const g=p.mesh.geometry,pos=g.attributes.position.array;for(let k=0;k<p.h.length;k++)pos[k*3+1]=p.h[k];g.attributes.position.needsUpdate=true;g.computeVertexNormals();g.computeBoundingSphere();}
+function ftEnsure(cx,cz){if(!ftOk(cx,cz))return null;const pi=FT_IDX[cz*FT_CN+cx];if(pi)return FT_P[pi-1];
+  const N=FT_NV,n=N*N,p={cx,cz,h:new Float32Array(n),h0:new Float32Array(n),mud:new Float32Array(n),c0:new Float32Array(n*3),mesh:null},pos=new Float32Array(n*3);
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const k=j*N+i,gx=cx*FT_CS+i/FT_S,gz=cz*FT_CS+j/FT_S;
+    p.h[k]=ftTri(q=>HGT[q],gx,gz);p.h0[k]=ftTri(q=>HGT0[q],gx,gz);p.mud[k]=ftTri(q=>MUD[q],gx,gz);for(let c=0;c<3;c++)p.c0[k*3+c]=ftTri(q=>TCOL0[q*3+c],gx,gz);
+    pos[k*3]=-HALF+gx*GS;pos[k*3+1]=p.h[k];pos[k*3+2]=-HALF+gz*GS;}
+  const idx=[];for(let j=0;j<N-1;j++)for(let i=0;i<N-1;i++){const a=j*N+i,b=a+N,c=a+1,d=b+1;idx.push(a,b,c,c,b,d);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(n*3),3));g.setIndex(idx);
+  p.mesh=new THREE.Mesh(g,FT_MAT);p.mesh.receiveShadow=true;scene.add(p.mesh);ftColors(p);ftGeo(p);
+  FT_P.push(p);FT_IDX[cz*FT_CN+cx]=FT_P.length;FT_ANY=true;FTM.d[(cz*FT_CN+cx)*4]=255;FTM.t.needsUpdate=true;return p;}
+// tarkan pisteen (GX, GZ = koko kartan 1 m indeksit) laikut: 1–4 (reunoilla jaettu)
+function ftAt(GX,GZ,out){out.length=0;const S=FT_CS*FT_S,cx=Math.floor(GX/S),cz=Math.floor(GZ/S);
+  for(const ax of (GX%S===0?[cx,cx-1]:[cx]))for(const az of (GZ%S===0?[cz,cz-1]:[cz])){if(ax<0||az<0||ax>=FT_CN||az>=FT_CN)continue;const pi=FT_IDX[az*FT_CN+ax];if(pi)out.push(FT_P[pi-1]);}return out;}
+const _ftA=[];
+// työkalu tarkalla verkolla; palauttaa false, jos alue ulottuu kartan reunalohkoon (silloin ei muokata)
+function ftTool(mode,cx0,cz0,R,h0){const m=1,S=FT_CS*FT_S,c0x=Math.floor((cx0-R-m+HALF)/GS/FT_CS),c1x=Math.floor((cx0+R+m+HALF)/GS/FT_CS),c0z=Math.floor((cz0-R-m+HALF)/GS/FT_CS),c1z=Math.floor((cz0+R+m+HALF)/GS/FT_CS);
+  for(let cz=c0z;cz<=c1z;cz++)for(let cx=c0x;cx<=c1x;cx++)if(!ftOk(cx,cz))return false;
+  for(let cz=c0z;cz<=c1z;cz++)for(let cx=c0x;cx<=c1x;cx++)ftEnsure(cx,cz);
+  const dirty=new Set(),G0x=Math.ceil((cx0-R+HALF)/FT_HS),G1x=Math.floor((cx0+R+HALF)/FT_HS),G0z=Math.ceil((cz0-R+HALF)/FT_HS),G1z=Math.floor((cz0+R+HALF)/FT_HS);
+  for(let GZ=G0z;GZ<=G1z;GZ++)for(let GX=G0x;GX<=G1x;GX++){const x=-HALF+GX*FT_HS,z=-HALF+GZ*FT_HS,d=Math.hypot(x-cx0,z-cz0);if(d>=R)continue;
+    const L=ftAt(GX,GZ,_ftA);if(!L.length)continue;const p=L[0],k=(GZ-p.cz*S)*FT_NV+(GX-p.cx*S);let h=p.h[k],md=p.mud[k];const b0=p.h0[k];
+    if(mode==='path'){const w=sstep(R,R*.4,d),dh=clamp((h0-h)*w,-.4,.4);if(Math.abs(dh)>.002)h+=dh;if(d<R*.65)md+=.4*sstep(R*.65,R*.2,d);}
+    else if(mode==='raise'){const w=sstep(R,R*.25,d);if(Math.hypot(x-P.pos.x,z-P.pos.z)>.9)h=Math.min(b0+3,h+.3*w);md-=w;}
+    else if(mode==='dig'){const w=sstep(R,R*.25,d);h=Math.max(b0-3,h-.3*w);md-=w;}
+    else if(mode==='restore'){md-=sstep(R,R*.25,d);}
+    md=clamp(md,0,1);if(md<.01)md=0;if(Math.abs(h-b0)<.005)h=b0;
+    for(const q of L){const kk=(GZ-q.cz*S)*FT_NV+(GX-q.cx*S);q.h[kk]=h;q.mud[kk]=md;dirty.add(q);}
+    if(!(GX%FT_S)&&!(GZ%FT_S)){const ck=(GZ/FT_S)*HN+GX/FT_S;terraSetVertex(ck,h);mudSet(ck,md);}}   // karkea kärki samassa kohdassa
+  for(const q of dirty){ftGeo(q);ftColors(q);}return true;}
+function ftList(){const o=[];for(const p of FT_P){const e=[];for(let k=0;k<p.h.length;k++)if(Math.abs(p.h[k]-p.h0[k])>=.005||p.mud[k]>0)e.push([k,+p.h[k].toFixed(3),+p.mud[k].toFixed(2)]);if(e.length)o.push([p.cx,p.cz,e]);}return o;}
+function ftApply(list){for(const [cx,cz,e] of list||[]){const p=ftEnsure(cx,cz);if(!p)continue;for(const [k,h,m] of e){if(k>=0&&k<p.h.length){p.h[k]=h;p.mud[k]=m;}}ftGeo(p);ftColors(p);}
+  for(const n of nodes)syncNodeY(n);}
+function ftReset(){for(const p of FT_P){scene.remove(p.mesh);p.mesh.geometry.dispose();}FT_P.length=0;FT_IDX.fill(0);FT_ANY=false;FTM.d.fill(0);FTM.t.needsUpdate=true;}
+// biomien sekoituksen muutos → laikkujen pohjavärit uudelleen (render.js blendApply)
+function ftRecolor(){for(const p of FT_P){for(let j=0;j<FT_NV;j++)for(let i=0;i<FT_NV;i++){const k=j*FT_NV+i,gx=p.cx*FT_CS+i/FT_S,gz=p.cz*FT_CS+j/FT_S;for(let c=0;c<3;c++)p.c0[k*3+c]=ftTri(q=>TCOL0[q*3+c],gx,gz);}ftColors(p);}}
 function restoreNode(n){if(n.x!==n.ox||n.z!==n.oz||n.s!==n.s0)moveNode(n,n.ox,n.oz,n.s0);syncNodeY(n);if(!n.alive)reviveNode(n);else setNodeMatrix(n,true);}
 
 /* ---------------- TUKIT (kaatuneet puut) ---------------- */

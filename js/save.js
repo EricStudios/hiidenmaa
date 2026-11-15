@@ -17,10 +17,10 @@ function setCurSlot(i){curSlot=i;try{sessionStorage.setItem('hiidenmaa_cur',Stri
 function freeSlot(){const m=slotMeta();return m.findIndex(x=>!x);}
 function slotData(i){try{return JSON.parse(localStorage.getItem(slotKey(i))||'null');}catch(e){return null;}}
 function deleteSlot(i){try{localStorage.removeItem(slotKey(i));}catch(e){}const m=slotMeta();m[i]=null;setSlotMeta(m);if(curSlot===i&&!started)setCurSlot(-1);}
-function serialize(){return{v:10,vdrops:drops.filter(d=>isValuable(d.id)).map(d=>({id:d.id,n:d.n,q:d.q})),mapId:MAP_ID,bossPending:!!(boss&&!boss.dead&&!flags.boss),playTime,dayT,dayN,weather,flags,P:{x:P.pos.x,y:P.pos.y,z:P.pos.z,hp:P.hp,stam:P.stam,hunger:P.hunger,buffs:P.buffs,spawn:P.spawn,deaths:P.deaths,kills:P.kills,inDun:P.inDun,realm:P.realm||null,packLv:P.packLv},cam:[camYaw,camPitch],inv,
+function serialize(){return{v:11,vdrops:drops.filter(d=>isValuable(d.id)).map(d=>({id:d.id,n:d.n,q:d.q})),mapId:MAP_ID,bossPending:!!(boss&&!boss.dead&&!flags.boss),playTime,dayT,dayN,weather,flags,P:{x:P.pos.x,y:P.pos.y,z:P.pos.z,hp:P.hp,stam:P.stam,hunger:P.hunger,buffs:P.buffs,spawn:P.spawn,deaths:P.deaths,kills:P.kills,inDun:P.inDun,realm:P.realm||null,packLv:P.packLv},cam:[camYaw,camPitch],inv,
   pieces:pieces.map(p=>({t:p.t,x:p.x,y:p.y,z:p.z,r:p.rot,f:p.f||0,hp:p.hp,d:PIECES[p.t].store?{items:p.data.items,lv:p.data.lv}:isFirePiece(p.t)?{fuel:p.data.fuel,burn:p.data.burn,cook:p.data.cook,full:p.data.full}:p.t==='soihtuteline'||p.t==='seinasoihtu'?{burn:p.data.burn,full:p.data.full}:p.t==='sulatin'?{ore:p.data.ore,iore:p.data.iore,wood:p.data.wood,done:p.data.done,idone:p.data.idone}:bt(p.t)==='ovi'?{open:p.data.open,dir:p.data.dir}:{}})),
   moved:nodes.filter(n=>n.x!==n.ox||n.z!==n.oz||n.s!==n.s0).map(n=>[n.id,+n.x.toFixed(2),+n.z.toFixed(2),+n.s.toFixed(2)]),
-  terra:terraList(),mud:mudList(),
+  terra:terraList(),mud:mudList(),ft:ftList(),   /* v2.65 (v11) tarkat laikut */
   planted:nodes.filter(n=>n.planted).map(n=>[n.type,+n.x.toFixed(2),+n.z.toFixed(2),+n.s.toFixed(2)]),
   nodes:nodes.filter(n=>!n.alive).map(n=>[n.id,Math.round(n.respawnAt-playTime)]),graves:graves.map(g=>({x:g.x,y:g.y,z:g.z,items:g.items,dim:g.dim})),dk:dunKilled,
   explored:btoa(String.fromCharCode.apply(null,packBits(explored)))};}
@@ -41,7 +41,7 @@ function loadData(s){
   if(s.cam){camYaw=s.cam[0];camPitch=s.cam[1];}
   P.packLv=q.packLv||0;migrateProgress();inv=(s.inv||[]).slice(0,invN());while(inv.length<invN())inv.push(null);
   if(!oldWorld){
-    applyTerra(s.terra||[]);applyMud(s.mud||[]);
+    applyTerra(s.terra||[]);applyMud(s.mud||[]);ftApply(s.ft||[]);   // v2.65 tarkat laikut (vanhassa tallennuksessa ei ole)
     for(const p of s.pieces||[])addPiece(p.t,p.x,p.y,p.z,(s.v||1)<7?p.r*2:p.r,p.hp,p.d,p.f||0);
     for(const [t,x,z,sc] of s.planted||[])plantTree(t,x,z,sc);
     // v<5: maiseman solmujen numerointi muuttui (pensaat), joten kaadettujen lista ohitetaan.

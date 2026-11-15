@@ -90,6 +90,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   ellei kaikki mahdu reppuun.
 
 ## 4. Keräily, puut ja maasto
+- **Tarkka maanmuokkaus (v2.65):** lapio ja kuokka muokkaavat maata 1 m tarkkuudella (4× enemmän kärkiä kuin muu maasto); muokattu 16 × 16 m alue
+  saa oman tiheän verkon ilman saumoja, ja se tallentuu. Kartan aivan reunalla ei voi muokata.
 
 - **Solmut (resources.js `NODE`):** puut (kuusi, koivu, kelo, aarnipuu), kivet (lohkare, kupari- ja rautasuoni), poimittavat (oksa, kivi,
   piikivi, marjat, sieni), koristeet (pensas). Piirretään ruuduittain instansseina (`CHUNK_IMS`).
@@ -352,8 +354,10 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **v2.63:** Grafiikka › Tiheämpi maaston väritys (High+ ja Ultra: värit 1 m välein, värineliöt eivät erotu). Extra-grafiikka › Maaston väritys
   tarkemmaksi (4× / 8× / 16×) ja Pehmeä rantaveden väri. Ohjaus › HUD › HUD:n koko 60–150 % (oletus 100 %; koko pelin HUD, osat kasvavat
   reunoiltaan, yli 100 % rajoittuu näytön koon mukaan, ettei mikään mene päällekkäin).
+- **v2.65:** Extra-grafiikka › Biomien sekoitus (Pois / Normaali = oletus / Vahva / Erittäin vahva): maa-, hiekka- ja metsäalueiden värit liukuvat toisiinsa,
+  kivikot ja vuoren juuri pysyvät terävinä. Maaston väritys tarkemmaksi: 4× tai 8× (8× kysyy varmistuksen; 16× poistettu).
 - **v2.64 silmäpainike:** Grafiikka- ja Extra-grafiikka-sivun reunassa; pelin aikana (tauko) valikko muuttuu läpinäkyväksi, jolloin muutokset näkyvät
-  pelissä suoraan. Päävalikossa (ei peliä käynnissä) painike on harmaa eikä toimi.
+  pelissä suoraan. Päävalikossa (ei peliä käynnissä) painike on harmaa eikä toimi. v2.65: näkyvissä vain ääriviivat, symbolit ja tekstit.
 
 - **Näppäimet** vaihdettavissa vahvistuksella (ei varattuja eikä päällekkäisiä); oletus mm. WASD, Shift juoksu, Välilyönti hyppy, C kyykky,
   E käytä, B rakennus, R/G/H/Q/Z/X/F rakentaminen, Tab reppu, M kartta, J taso, L ilmoitukset, T tehtävä/tavoite piiloon, (K ei tee mitään – koko näytön näppäin poistettu v2.18; käytä selaimen F11:tä), N minikartan zoom.
