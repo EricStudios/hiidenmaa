@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='2.58';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='2.59';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -91,7 +91,14 @@ let reloading=false;
 function switchMap(id,pending,data){try{localStorage.setItem('hiidenmaa_map',String(id));sessionStorage.setItem('hiidenmaa_pending',pending);if(data)sessionStorage.setItem('hiidenmaa_data',data);}catch(e){return false;}
   reloading=true;$('#fade').style.opacity=1;const mp=window.__mus&&window.__mus.state.playing;if(mp){window.__mus.stop(.5);setTimeout(()=>location.reload(),550);}else location.reload();return true;}   // v2.53 musiikki häivyttäen
 function startNewGame(){const id=Math.floor(Math.random()*MAPS.length);if(id!==MAP_ID&&switchMap(id,'new'))return;worldLoad(()=>{newGame();startPlay();saveGame(true);msg(`Kartta: ${MAP.name}`);startIntro(true);});}
-function playSave(s,welcome){if(curSlot<0){const f=freeSlot();setCurSlot(f<0?0:f);}const mid=s.mapId||0;if(mid!==MAP_ID&&switchMap(mid,'load',JSON.stringify(s)))return;loadData(s);startPlay();msg(welcome,'loot');}
+function playSave(s,welcome){if(curSlot<0){const f=freeSlot();setCurSlot(f<0?0:f);}const mid=s.mapId||0;if(mid!==MAP_ID&&switchMap(mid,'load',JSON.stringify(s)))return;saveLoad(s,welcome);}
+/* v2.59 TALLENNUKSEN JATKAMINEN LATAUSNÄYTÖLLÄ (ennen loadData jäädytti näytön): riimukivi (__ldShow) → lataus seuraavassa ruudussa → muutama
+   ruutu varjostimille → valmis-leimahdus, häivytys peliin (__ldDone). Pelaaja suojassa (P.spawnProt) latausnäytön ajan. */
+const SAVE_LD_FRAMES=20;
+function saveLoad(s,welcome){if(!window.__ldShow){loadData(s);startPlay();msg(welcome,'loot');return;}
+  window.__ldShow('Maailma herää…');if(window.__ldSet)window.__ldSet(.1);
+  setTimeout(()=>{if(window.__ldSet)window.__ldSet(.45);loadData(s);startPlay();P.spawnProt=Math.max(P.spawnProt||0,4);let n=0;
+    const tick=()=>{if(window.__ldSet)window.__ldSet(.45+n/SAVE_LD_FRAMES*.55);if(++n<SAVE_LD_FRAMES)requestAnimationFrame(tick);else{window.__ldAfter=()=>msg(welcome,'loot');if(window.__ldDone)window.__ldDone();}};requestAnimationFrame(tick);},90);}
 $('#bRun').onclick=()=>{pauseRun=!pauseRun;try{localStorage.setItem('hiidenmaa_prun',pauseRun?'1':'0');}catch(e){}refreshMenu();};
 $('#bResume').onclick=()=>{state='play';$('#menu').hidden=true;$('#hud').hidden=false;requestLock();};
 // Tallenna: ei avaa asetuksia; ilmoitus näkyy painikkeessa ja valikon tilariviltä
@@ -106,8 +113,8 @@ $('#bWinCont').onclick=()=>{$('#winS').hidden=true;$('#hud').hidden=false;state=
 refreshMenu();scrollHints($("#menu"));
 // Kartanvaihdon jälkeinen jatko: aloita uusi peli tai lataa tallennus automaattisesti.
 (function(){let p=null,d=null;try{p=sessionStorage.getItem('hiidenmaa_pending');d=sessionStorage.getItem('hiidenmaa_data');sessionStorage.removeItem('hiidenmaa_pending');sessionStorage.removeItem('hiidenmaa_data');}catch(e){}
-  if(p==='new'){newGame();startPlay();saveGame(true);setTimeout(()=>msg(`Kartta: ${MAP.name}`),300);startIntro(true);introVeil(true);window.__ldAfter=introRelease;}
-  else if(p==='load'&&d){try{loadData(JSON.parse(d));startPlay();setTimeout(()=>msg('Tervetuloa takaisin.','loot'),300);}catch(e){}}})();
+  if(p==='new'){window.__ldSndOnce=1;newGame();startPlay();saveGame(true);setTimeout(()=>msg(`Kartta: ${MAP.name}`),300);startIntro(true);introVeil(true);window.__ldAfter=introRelease;}
+  else if(p==='load'&&d){window.__ldSndOnce=1;try{loadData(JSON.parse(d));startPlay();setTimeout(()=>msg('Tervetuloa takaisin.','loot'),300);}catch(e){}}})();
 
 /* v1.43 (lista 4, kohta 11): uuden maailman intro ~6 s. 4 s korkealla pilvien yläpuolella (175 m, hidas kierto pelaajan ympäri),
    "Hiidenmaa" ja kartan nimi animoituna; sitten 2 s nopea syöksy (easeInOut) tavalliseen kameraan. Ohitus millä tahansa näppäimellä tai napsautuksella. */

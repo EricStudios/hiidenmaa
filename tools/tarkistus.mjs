@@ -301,6 +301,11 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     SET.torchSharp=false;applyGfx();const b=torchLight.shadow.mapSize.x===40&&!torchSharpOn();SET.torchSharp=pv;applyGfx();
     const c=SET_DEF.torchSharp===false&&SET_PAGES.xgfx.includes('torchSharp')&&/torchSharpOn\(\)\?6\.7:2\.1/.test(updatePlayer.toString())&&/torchSharpOn\(\)\|\|shFrame%fT===0/.test(updateStations.toString());
     return a&&b&&c||`virhe terävä ${a} oletus ${b} koodi ${c}`;});
+  t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
+    const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
+    const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
+    const c=SET_DEF.ldSnd===false&&SET_PAGES.snd.includes('ldSnd');
+    return a&&b&&c||`virhe jatko ${a} ääni ${b} asetus ${c}`;});
   t('v2.58 äänet vain samassa tilassa (maailma / Hautakumpu / sama ulottuvuus, myös pomojen kaiut) ja kaikkien äänten kuuluvuus −20 %',()=>{
     const pv=[P.inDun,P.realm];let a=false;try{P.inDun=false;P.realm=null;const w=creSpaceOk({dun:false})&&!creSpaceOk({dun:true,realm:'portal1'})&&!creSpaceOk({dun:true});
       P.inDun=true;P.realm='portal1';const r1=creSpaceOk({dun:true,realm:'portal1'})&&!creSpaceOk({dun:true,realm:'portal2'})&&!creSpaceOk({dun:false})&&creSpaceOk({dun:true});
