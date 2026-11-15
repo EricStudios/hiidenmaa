@@ -452,6 +452,22 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   (`height:2.7em; overflow:hidden`). **Paneelien ruutujen tiloihin ei transformia, marginaalia tai reunan paksuuden muutosta.**
   Testi: mittaa kaikkien ruutujen `getBoundingClientRect` ennen/jälkeen valinnan (1280 × 800 ja 1000 × 620) – ei muutosta. Rivi v2.57.
 
+## 62. `//`-kommentti nielaisi rivin loppukoodin – peli ei käynnistynyt (v2.63, kehityksen aikana; toistuva, ks. 49)
+- Oire: peli ei käynnistynyt ollenkaan (`window.__game` puuttui); konsolissa `Unexpected end of input` ja sen seurauksena `updateLights is not defined`.
+- Syy: muokkauksessa lisättiin `// v2.63 …` -selitys rivin KESKELLE (`moorDay()`, environment.js): kommentin perään jäi `return moorDayV;}` →
+  funktio ja koko tiedosto jäivät kesken. Sama virhe kuin KORJAUKSET 49 – syntyy helposti, kun kommentti lisätään korvattavan pätkän perään
+  automaattisella korvauksella eikä tarkisteta, mitä rivillä on korvatun kohdan jälkeen.
+- Ratkaisu: kommentti rivin loppuun. **Ehkäisy (pakollinen jokaisen koodimuutoksen jälkeen):** aja kaikille tiedostoille
+  `for f in js/*.js tools/tarkistus.mjs; do node --check $f >/dev/null 2>&1 || echo VIRHE $f; done` ennen testejä. Lisäämässä `//`-kommenttia
+  korvauksen sisään: varmista, ettei korvattavan tekstin perässä ole samalla rivillä koodia – muuten käytä `/* … */`.
+
+## 63. Ylimmän tason vakio käytettiin ennen määrittelyä – peli ei käynnistynyt (v2.63, kehityksen aikana)
+- Oire: `newGame` kaatui `Cannot access 'logs' before initialization` (resources.js jäi kesken).
+- Syy: uusi `const ROCK_GR` lisättiin tiedoston loppupuolelle, mutta funktio `rockTop`, joka käytti sitä, kutsuttiin jo kasvillisuuden sijoittelussa
+  (ylimmän tason koodi ylempänä) → temporaalinen kuollut alue (TDZ) → tiedoston loput (myös `logs`) jäivät määrittelemättä.
+- Ratkaisu: arvo funktion sisään. **Sääntö:** funktio, jota kutsutaan ylimmän tason koodista, saa käyttää vain YLEMPÄNÄ määriteltyjä vakioita
+  (funktiot nousevat, `const`/`let` eivät). Testaa aina `newGame()` selaimessa muutoksen jälkeen.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`
@@ -463,4 +479,5 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - **Osumaäänet** (`ai.js` `mobHurtP` → `tgHit(TG_HIT[tyyppi])`): uusi hyökkäys pelaajaan kulkekoon `mobHurtP`:n kautta, muuten osumaääntä
   ei tule (pomojen slam/nova kutsuvat `hurtPlayer`:ia suoraan). Uusi olento → lisää `TG_HIT`-kategoria ja tarkista, että kategorialla on ääni.
 - **Maahan sijoittaminen** (`landmarks.js` `stoneCol`/`gmin`): mittaa maa nurkista, ei yhdestä pisteestä (KORJAUKSET 58).
+- **Kommentit** (KORJAUKSET 49, 62): `//` vain rivin loppuun; jokaisen muutoksen jälkeen `node --check` kaikille js-tiedostoille.
 - **Tallennus** (`save.js`): uudet liput `flags`-olioon (tallentuvat automaattisesti); muotomuutoksessa nosta `v`.

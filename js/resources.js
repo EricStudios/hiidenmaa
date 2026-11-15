@@ -237,7 +237,7 @@ function mergeTick(){if(!SET.mergeSt){if(MERGED.length)unmergeStatics();return;}
 function initNode(n){n.ox=n.x;n.oz=n.z;n.s0=n.s;n.id=nodeIdN++;n.def=NODE[n.type];n.maxHp=(n.def.hp||1)*(n.def.kind==='tree'?n.s*n.s*1.2:1);n.hp=n.maxHp;n.alive=true;n.respawnAt=0;
   setNodeMatrix(n,true);
   if(n.def.kind==='tree')n.col=addCircle(n.x,n.z,(n.def.cr||n.def.r)*n.s,n.y-1,n.y+6*n.s,n);
-  else if(n.def.kind==='rock')n.col=addCircle(n.x,n.z,n.def.r*n.s,n.y-1,n.y+1.2*n.s,n);
+  else if(n.def.kind==='rock'){n.col=addCircle(n.x,n.z,n.def.r*n.s,n.y-1,n.y+1.2*n.s,n);rockTop(n.col,n.s);}
   nodes.push(n);}
 /* v2.20: kohteet mukailevat maan muotoa. Kivet, malmit, poimittavat ja koristeet kallistuvat maan normaalin mukaan (pensas 80 %), jotta ne
    eivät jyrkillä rinteillä näytä vinoilta (pystyssä y-akselilla). Puut pysyvät pystyssä, mutta tyvi upotetaan rinteeseen (ei kellu alamäen
@@ -259,11 +259,13 @@ function killNode(n){markShadowDirty();n.alive=false;n.respawnAt=playTime+n.def.
 function reviveNode(n){markShadowDirty();n.alive=true;n.hp=n.maxHp;setNodeMatrix(n,true);if(n.col)n.col.off=false;}
 // Siirtää puun/kasvin uuteen paikkaan (törmäys, ruudukko, korkeus, koko).
 function moveNode(n,x,z,s){n.x=x;n.z=z;n.s=s;n.y=terrainH(x,z);n.maxHp=(n.def.hp||1)*(n.def.kind==='tree'?s*s*1.2:1);
-  if(n.col){gridRemove(n.col);const off=n.col.off;if(n.def.kind==='tree')n.col=addCircle(x,z,(n.def.cr||n.def.r)*s,n.y-1,n.y+6*s,n);else n.col=addCircle(x,z,n.def.r*s,n.y-1,n.y+1.2*s,n);n.col.off=off;}
+  if(n.col){gridRemove(n.col);const off=n.col.off;if(n.def.kind==='tree')n.col=addCircle(x,z,(n.def.cr||n.def.r)*s,n.y-1,n.y+6*s,n);else{n.col=addCircle(x,z,n.def.r*s,n.y-1,n.y+1.2*s,n);rockTop(n.col,s);}n.col.off=off;}
   ngridRemove(n);ngridAdd(n);
   // Kuva siirtyy törmäyksen ja hakkuukohteen mukana (ennen latauksessa siirretyn puun kuva jäi alkuperäiselle paikalle → haamupuu)
   if(n.alive)setNodeMatrix(n,true);}
 // v1.04 kohteiden suoja-alue (m): puut, kivet, poimittavat ja ruoho eivät kasva/uusiudu näiden päälle (vrt. rakennukset 15 m, kohteilla pienempi).
+// v2.63 kiven päällä voi seistä: kantava alue noin puolet säteestä (gr), pinta laskee reunaa kohti (dr) – ennen pelaaja valui pois, ellei ollut aivan keskellä
+function rockTop(c,s){c.ground=1;c.gr=.5;c.dr=.45*s;}   // (ei ylimmän tason vakiota: kutsutaan jo sijoittelussa ennen tätä riviä)
 const SITE_CLEAR={camp:8,stash:6.5,rock:12,ruin:10,portal:9,rune:3.5};
 function siteBlocked(x,z){for(const k in LOC){const L=LOC[k],r=SITE_CLEAR[L.kind]||(k==='barrow'?13:k==='circle'?15:k.startsWith('rune')?3.5:k.startsWith('ruin')?10:0);if(r&&dist2(x,z,L.x,L.z)<r*r)return true;}return false;}
 function locMin(x,z){let m=1e9;for(const k in LOC)m=Math.min(m,Math.hypot(x-LOC[k].x,z-LOC[k].z));return m;}

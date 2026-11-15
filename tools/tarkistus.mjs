@@ -353,6 +353,35 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('v2.62 vanha tallennus: tehtäväindeksi siirtyy uuden ylimystehtävän yli, Kalmanvartijan vajoamisviesti kertoo sirpaleista',()=>{
     const sd=serialize();sd.flags=JSON.parse(JSON.stringify(sd.flags));delete sd.flags.qv;sd.flags.qi=5;const cur=serialize();let r;
     try{loadData(sd);const a=flags.qi===6&&flags.qv===2,b=/Kruununsirpaleet jäävät alttarille/.test(bossAI.toString())&&!/Hiidenkivet jäävät/.test(bossAI.toString());r=a&&b||`virhe ${a}${b}`;}finally{loadData(cur);}return r;});
+  t('v2.63 tiheämpi maaston väritys: High+ ja Ultra 2×, muut pois, Extra 4×/8×/16×, varjostin lisää eron kärkiväreihin, kertasiirto',()=>{
+    const a=PRESETS.every((p,i)=>p.terrFine===(i>=6))&&SET_DEF.terrFine===false&&SET_PAGES.gfx.includes('terrFine')&&SET_DEF.terrFineX===0&&SET_PAGES.xgfx.includes('terrFineX');
+    const b=typeof terrainMesh.material.onBeforeCompile==='function'&&/tFine/.test(terrainMesh.material.onBeforeCompile.toString())&&/uDet/.test(terrainMesh.material.onBeforeCompile.toString());
+    const sv=[TFINE.want];terrFineSet(0);const c=TFINE.u.uFine.value===0;const d=/terrFineSet\(\+SET\.terrFineX\|\|\(SET\.terrFine\?2:0\)\)/.test(applyGfx.toString());
+    const e=/level>=16\?8:level>=8\?4:0/.test(terrFineSet.toString())&&/F=level>=4\?4:2/.test(terrFineSet.toString());terrFineSet(sv[0]);
+    const T=terrCol(0,0,terrainH(0,0),0);const f=Array.isArray(T)&&T.length===3&&T.every(v=>v>0&&v<1.2);
+    return a&&b&&c&&d&&e&&f||`virhe ${a}${b}${c}${d}${e}${f}`;});
+  t('v2.63 Extra: pehmeä rantaveden väri (low poly -veden värin portaat pois), oletus pois',()=>{const a=SET_DEF.waterSmooth===false&&SET_PAGES.xgfx.includes('waterSmooth')&&'uSmooth' in WATER_U;
+    const pv=SET.waterSmooth;SET.waterSmooth=true;waterApply();const b=WATER_U.uSmooth.value===1;SET.waterSmooth=pv;waterApply();const c=WATER_U.uSmooth.value===(pv?1:0);
+    const d=/if\(uSmooth<\.5\)dk=floor/.test(WATER_MATS.low.fragmentShader);return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
+  t('v2.63 kivien päällä voi seistä (puolet säteestä), arkut/tynnyrit/säkki kiinteitä ja päällä voi seistä',()=>{
+    const rk=nodes.find(n=>n.alive&&n.def.kind==='rock'&&n.col);if(!rk)return 'ei kiveä';const c=rk.col,top=c.maxY,R=c.r;
+    const a=c.ground===1&&c.gr===.5&&groundAt(rk.x,rk.z,.38,top-.1)>top-.01&&groundAt(rk.x+R*.45,rk.z,.38,top)>top-.2&&groundAt(rk.x+R*.95,rk.z,.38,top)<top-.3;
+    const K=Object.keys(FORT)[0],L=LOC[K],y=terrainH(L.x,L.z),b=groundAt(L.x,L.z,.38,y+.6)>=y+.89&&groundAt(L.x,L.z,.38,y+.1)>=y+.24;
+    const st=STASHES[0],sy=terrainH(st.x,st.z),c2=!st||groundAt(st.x,st.z,.38,sy+.5)>=sy+.83;
+    const p={x:L.x+.2,z:L.z};collideXZ(p,.38,1.8,y+.25);const d=Math.hypot(p.x-L.x,p.z-L.z)>.45;   /* arkun läpi ei pääse */
+    const e=/bc\.ground=1/.test(buildBarrel.toString());return a&&b&&c2&&d&&e||`virhe kivi ${a} linnake ${b} röykkiö ${c2} läpi ${d} tynnyri ${e}`;});
+  t('v2.63 olennon törmäysääni vain todellisesta vauhdista (ei seinää vasten työntäessä) ja 3 s tauko',()=>{const src=moveMob.toString();
+    return TM_CD===3&&/spd0=m\._spd\|\|0;m\._spd=dt>0\?moved\/dt:0/.test(src)&&/moved<spd0\*dt\*\.35/.test(src)&&/>TM_CD/.test(src)||'virhe';});
+  t('v2.63 linnakkeen muuri estää näköyhteyden, olento muistaa pelaajan muurin takana 3 s',()=>{const K=Object.keys(FORT)[0],L=LOC[K],y=terrainH(L.x,L.z);
+    const a=!losClear(L.x,y+1.5,L.z,L.x+9,terrainH(L.x+9,L.z)+1.3,L.z,true)&&FORT_MEM===3;const p0=P.pos.clone(),pt=playTime;let r;
+    try{const m={pos:new THREE.Vector3(L.x,y,L.z),los:false,seenT:playTime};P.pos.set(L.x+9,terrainH(L.x+9,L.z),L.z);const b=!fortLost(m);m.seenT=playTime-3.2;const c=fortLost(m);
+      P.pos.set(L.x+1,y,L.z);const d=!fortLost(m);r=a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;}finally{P.pos.copy(p0);}return r;});
+  t('v2.63 HUD-skaala: oletus 100 %, Ohjaus-sivulla, #hud zoom, maailmaan sidotut kumoavat, yli 100 % rajoitetaan näytön mukaan',()=>{
+    const a=SET_DEF.hudScale===1&&SET_PAGES.ctl.includes('hudScale');const pv=SET.hudScale;SET.hudScale=.8;hudScaleApply();
+    const b=getComputedStyle(document.documentElement).getPropertyValue('--hudK').trim()==='0.8';SET.hudScale=1.5;const c=hudK()<=Math.max(1,Math.min(1.5,innerWidth/HUD_MIN_W,innerHeight/HUD_MIN_H))+1e-9;
+    SET.hudScale=pv;hudScaleApply();const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(e){return [];}}).join(' ');
+    const d=/#hud[^}]*zoom: var\(--hudK/.test(css)&&/#floaters[^}]*zoom: calc\(1 \/ var\(--hudK/.test(css)&&/\.mobbar[^}]*scale\(var\(--hudK/.test(css);
+    return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
@@ -441,7 +470,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       g.children[1].material.depthTest===false&&g.children[1].material.stencilFunc===THREE.EqualStencilFunc&&Math.abs(terrainH(ex-.25,ez)-y)<.01&&barrowMound(ex-1,ez)===0;
     const pv=dayN,v=[];for(let n=1;n<=300;n++){dayN=n;moorDayN=-1;v.push(moorDay());}dayN=pv;moorDayN=-1;const full=v.filter(x=>x===1).length/300;
     const pk=moorK;moorK=1;moorSatSet();const f1=renderer.domElement.style.filter;moorK=0;moorSatSet();const f0=renderer.domElement.style.filter;moorK=pk;moorSatSet();
-    const b=MOOR_P===.5&&full>.38&&full<.62&&v.every(x=>x===1||x>=.3&&x<=.55)&&/saturate\(0\.68\)/.test(f1)&&f0===''&&/moorK=lerp\(moorK,bh==='moor'\?moorDay\(\):0/.test(updateEnvironment.toString())&&MOOR_FAR===80&&/lerp\(fr,MOOR_FAR,moorK\)/.test(updateEnvironment.toString());
+    const b=MOOR_P===.6&&MOOR_LO===.55&&full>.48&&full<.72&&v.every(x=>x===1||x>=.55&&x<=.8)&&/saturate\(0\.58\)/.test(f1)&&f0===''&&/moorK=lerp\(moorK,bh==='moor'\?moorDay\(\):0/.test(updateEnvironment.toString())&&MOOR_FAR===52&&MOOR_GREY===.7&&MOOR_IN===.2&&/moorK\*\.5/.test(updateSky.toString()+updateEnvironment.toString())&&/lerp\(fr,MOOR_FAR,moorK\)/.test(updateEnvironment.toString());
     const sv=Object.assign({},SET);Object.assign(SET,PRESETS[7]);applyGfx();const u=cloudDeck.material===deckSoftMat&&cloudDeck.geometry===deckSoftGeo;
     Object.assign(SET,PRESETS[3]);applyGfx();const lo=cloudDeck.material===deckOld.mat;Object.assign(SET,sv);applyGfx();
     const c=u&&lo&&deckSoftMat.map.wrapS===THREE.RepeatWrapping&&DECK_SOFT_R<1000;

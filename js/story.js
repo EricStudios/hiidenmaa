@@ -31,7 +31,7 @@ function buildPoiRock(k){const L=LOC[k],y=terrainH(L.x,L.z),r=mulberry32(k.charC
   for(let i=0;i<18;i++){const a=i/18*TAU,[x,z]=P2(WR,a),gy=Math.min(y,terrainH(x,z)),h=WH+(y-gy)+1,len=WR*TAU/18+.35;
     const m=stoneBox(WT,h,len,x,gy-1+h/2,z,-a,stoneM(),false);m.add(bx(WT*1.02,.15,len*.95,mossM,0,h/2,0,false));}
   // v1.39 (lista 4, extra 2): muurin osuma kaaren mukaan ympyröinä (ennen kierretyn lohkon AABB, joka ulottui jopa ~0,9 m sisään portaille)
-  for(let i=0,n=Math.ceil(WR*TAU/.42);i<n;i++){const a=i/n*TAU,[x,z]=P2(WR,a),gy=Math.min(y,terrainH(x,z));addCircle(x,z,WT/2+.04,gy-1,y+WH+.07,'static').ground=1;}   // v2.04: harja on kävelypinta (sammaleen pinta +7 cm)
+  for(let i=0,n=Math.ceil(WR*TAU/.42);i<n;i++){const a=i/n*TAU,[x,z]=P2(WR,a),gy=Math.min(y,terrainH(x,z));const wc=addCircle(x,z,WT/2+.04,gy-1,y+WH+.07,'static');wc.ground=1;wc.lw=1;}   /* v2.63 lw: muuri estää näköyhteyden */   // v2.04: harja on kävelypinta (sammaleen pinta +7 cm)
   // v1.03 vaikeammat hypyt: 5 kapeaa pilaria (0,75–0,85 m) siksakissa (säde vuorotellen 8,2 / 10,2 m), nousu 0,8 m (huippu 4,0 m),
   // välit reunasta reunaan 2,0–2,4 m → vaatii juoksuhypyn (kävellen ~2,4 m, juosten ~4 m). Viimeiseltä pudotaan 0,5 m muurin harjalle (väli 1,6 m).
   const PH=[.8,1.6,2.4,3.2,4.0];let a=a0,prevP=null;
@@ -46,6 +46,7 @@ function buildPoiRock(k){const L=LOC[k],y=terrainH(L.x,L.z),r=mulberry32(k.charC
   stoneBox(2.2,.5,2.2,L.x,y,L.z,.4,mat(0x5b5853),false);
   const g=bx(.5,1.2,.04,MAT.glow,0,0,0,false);{const [gx,gz]=P2(WR-WT/2-.03,a0+Math.PI);g.position.set(gx,y+2.2,gz);g.rotation.y=-(a0+Math.PI)+Math.PI/2;statics.add(g);}   // hehkuva riimu muurin sisäpinnalla
   const ch=makeChest('stone',.95,.65,.62);ch.position.set(L.x,y+.25,L.z);statics.add(ch);
+  addBox(L.x-1.0,y-.3,L.z-1.0,L.x+1.0,y+.25,L.z+1.0,'static');addBox(L.x-.48,y+.25,L.z-.31,L.x+.48,y+.9,L.z+.31,'static');   // v2.63 laatta ja arkku kiinteiksi (päällä voi seistä)
   chestUse(k,ch,L.x,y+.4,L.z,true);
   lightSources.push({x:L.x,y:y+2,z:L.z,c:0x7fd6cc,i:.8,on:()=>true});
 }
@@ -139,7 +140,7 @@ const CAMPS=(function(){const r=mulberry32(97531+MAP_ID*7919),out=[],n=1+(r()<.5
     nodesNear(x,z,7,tmp);if(tmp.some(o=>o.def.kind==='tree'||o.def.kind==='rock'))continue;
     const k='camp'+(out.length+1);LOC[k]={x,z,name:'Hylätty leiri',kind:'camp'};out.push({k,x,z,y:h,rot:(r()*8)|0});}
   for(const c of out){const sx=c.x+2.2,sz=c.z-1.6,sy=terrainH(sx,sz),key='camp:'+c.k,sk=new THREE.Group();sk.position.set(sx,sy,sz);
-    sk.add(bx(.55,.5,.42,mat(0x8a7454),0,.25,0),bx(.2,.12,.2,mat(0x6a5434),0,.55,0));statics.add(sk);   // säkki
+    sk.add(bx(.55,.5,.42,mat(0x8a7454),0,.25,0),bx(.2,.12,.2,mat(0x6a5434),0,.55,0));statics.add(sk);addBox(sx-.28,sy,sz-.21,sx+.28,sy+.61,sz+.21,'static');   // säkki (v2.63 kiinteä)
     // v1.04 leirin yksityiskohdat: puupino, nahankuivausteline (taljoja), kaatunut ämpäri ja luita/oksia maassa
     {const wp=new THREE.Group(),wx=c.x-2.4,wz=c.z+1.8,wy=terrainH(wx,wz);wp.position.set(wx,wy,wz);const lw=mat(0x6b4a2e),cut=mat(0xc08a52);
       for(let row=0;row<3;row++)for(let q=0;q<4-row;q++){const lg=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,1.1,7),lw);lg.rotation.x=Math.PI/2;lg.position.set((q-(3-row)/2)*.23,.11+row*.2,0);lg.castShadow=true;wp.add(lg);
@@ -171,6 +172,7 @@ const STASHES=(function(){const r=mulberry32(24680+MAP_ID*104729),out=[],tmp=[];
     const n=7;for(let i=0;i<n;i++){const a=i/n*TAU+rr()*.3,w=1.4+rr()*1.1,hh=1.3+rr()*1.8,d=2.3+w*.6+rr()*.6;if(inGap(a))continue;const x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;
       const m=stoneBox(w,hh,w*(.7+rr()*.4),x,y+hh/2-.2,z,a+Math.PI/2+(rr()-.5)*.4,mat(rockC(0x6f6c66,rr())));m.add(bx(w*.9,.22,w*.8,mossM,0,hh/2,0,false));}
     stoneBox(2,.45,2,c.x,y,c.z,.3,mat(0x5b5853),false);const ch=makeChest('wood',.9,.62,.6);ch.position.set(c.x,y+.22,c.z);statics.add(ch);
+    addBox(c.x-.9,y-.3,c.z-.9,c.x+.9,y+.22,c.z+.9,'static');addBox(c.x-.45,y+.22,c.z-.3,c.x+.45,y+.84,c.z+.3,'static');   // v2.63 laatta ja arkku kiinteiksi
     const key='stash:'+c.k,loot=[[['kupari',2],['nuolet',10],['liha',2]],[['pihka',3],['kivi',8],['luu',3]]][out.indexOf(c)%2];
     interactables.push({x:c.x,y:y+.6,z:c.z,r:2.6,label:()=>foundEmpty(key)?'Arkku (tyhjä)':'Avaa arkku',use:()=>{const first=!fo('fc')[key];openFound(key,'Kiviröykkiön arkku',loot);if(first)addXp(20,'Kiviröykkiö tutkittu');}});}
   return out;})();

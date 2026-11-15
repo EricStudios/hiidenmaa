@@ -15,7 +15,7 @@ const STEPUP=.55, _cl=[];
 function groundAt(x,z,r,feet){
   let g=terrainH(x,z);
   gridQuery(x,z,r+.1,_cl);
-  for(const c of _cl){if(c.t==='c'&&c.ground){if(c.maxY>feet+STEPUP+.01||c.maxY<=g)continue;if(dist2(x,z,c.x,c.z)<(c.r+r*.35)**2)g=c.maxY;continue;}   // v2.04: ympyrä lattiana (linnakkeen muurin harja)
+  for(const c of _cl){if(c.t==='c'&&c.ground){if(c.off||c.maxY>feet+STEPUP+.01||c.maxY<=g)continue;const d2=dist2(x,z,c.x,c.z),rr=c.r*(c.gr||1)+r*.35;if(d2<rr*rr){const gy=c.maxY-(c.dr?c.dr*Math.min(1,d2/(c.r*c.r)):0);if(gy>g)g=gy;}continue;}   // v2.04: ympyrä lattiana (linnakkeen muurin harja); v2.63 kivet (gr = kantava osuus säteestä, dr = pinnan lasku reunalle), tynnyrit
     if(c.t!=='b'||c.noGround)continue;if(c.maxY>feet+STEPUP+.01)continue;
     const cx=clamp(x,c.minX,c.maxX),cz=clamp(z,c.minZ,c.maxZ);if(dist2(x,z,cx,cz)<(r*.7)**2&&c.maxY>g)g=c.maxY;}
   return g;
@@ -41,4 +41,4 @@ function losClear(ax,ay,az,bx,by,bz,doors){const dx=bx-ax,dy=by-ay,dz=bz-az,L=Ma
 function arrowBlocked(x,y,z){gridQuery(x,z,.1,_cl);for(const c of _cl){if(c.t==='c'){if(y>c.minY&&y<c.maxY&&(x-c.x)**2+(z-c.z)**2<c.r*c.r)return true;continue;}
   if(c.t==='b'&&x>c.minX-.02&&x<c.maxX+.02&&z>c.minZ-.02&&z<c.maxZ+.02&&y>c.minY-.02&&y<c.maxY+.02)return true;}return false;}
 // v1.39 (lista 4, extra 1): circ = myös ympyräosumat (puut, kivet, tukit, linnakkeen muuri) – nuolet ja veripisarat eivät mene niiden läpi
-function pointBlocked(x,y,z,doors,circ,seeThru){gridQuery(x,z,.2,_cl);for(const c of _cl){if(c.t==='c'){if(!circ)continue;if(y>c.minY&&y<c.maxY&&(x-c.x)**2+(z-c.z)**2<(c.r+.05)**2)return true;continue;}if(c.t!=='b'||(c.door&&!doors)||(seeThru&&c.glass))continue;if(x>c.minX-.15&&x<c.maxX+.15&&z>c.minZ-.15&&z<c.maxZ+.15&&y>c.minY-.15&&y<c.maxY+.15)return true;}return false;}
+function pointBlocked(x,y,z,doors,circ,seeThru){gridQuery(x,z,.2,_cl);for(const c of _cl){if(c.t==='c'){if(!circ&&!c.lw)continue;   /* v2.63 lw = linnakkeen muuri estää aina (näköyhteys) */if(y>c.minY&&y<c.maxY&&(x-c.x)**2+(z-c.z)**2<(c.r+.05)**2)return true;continue;}if(c.t!=='b'||(c.door&&!doors)||(seeThru&&c.glass))continue;if(x>c.minX-.15&&x<c.maxX+.15&&z>c.minZ-.15&&z<c.maxZ+.15&&y>c.minY-.15&&y<c.maxY+.15)return true;}return false;}

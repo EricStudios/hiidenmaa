@@ -197,6 +197,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Rakennusnäppäimet** (R, Shift+R, G, H, Q, Z) toimivat ja ilmoittavat vain rakennustilassa: vasara kädessä ja osa valittuna (`isBuilding`).
 - **Säännöt (`validPlace`):** sama osa samaan paikkaan kielletty, ei liian syvälle veteen, katto ei pelaajan päälle, maksu repusta.
 - **Kunto:** 3 vauriotasoa näkyvät tekstuurissa; vasara: X purkaa (materiaalit takaisin), F korjaa. Paaluaita kestää mobit (piikit vahingoittavat).
+- **Kivet ja säiliöt (v2.63):** kiven päällä voi seistä noin puolen säteen alueella (reunalta valuu); kaikki säiliöt (arkut, kirstut, tynnyrit,
+  leirin säkki) ovat kiinteitä ja niiden päällä voi seistä.
 - **Ovet:** kaksipuoliset, aukeavat pelaajasta poispäin. Katoilla voi kävellä.
   **v2.60:** ovi kääntyy 0,6 s pehmeästi (liike hidastuu loppua kohti, `DOOR_T`, `doorTick`). Avatessa oviaukko vapautuu heti, sulkiessa este
   palaa vasta, kun ovi on kiinni. Jos pelaaja seisoo oviaukossa, ovi ei sulkeudu ("Seisot oviaukossa"). Ladattu tallennus näyttää asennon suoraan.
@@ -228,6 +230,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   alttarille, jos vartija vajoaa takaisin – uusi herätys ilman uusia kiviä.
 
 ## 9. Viholliset ja eläimet (mobs.js, ai.js)
+- **v2.63:** arkkukivilinnakkeen muuri estää näkemisen; muurin takana olento muistaa pelaajan 3 s. Törmäysääni vain kovasta vauhdista (3 s tauko).
+- **v2.63 Kalmanummi:** usva Aarnimetsän tapaan (näkyvyys ~52 m), harmaampi ja hämärämpi, vaihtuu sisään ja ulos pehmeästi ~5 s.
 
 - **Nopeudet −15 %** (`MOB_SPD` 0,85 kaikessa liikkeessä).
 - **Terveyspalkit (v2.26):** piilossa, kunnes tähtäin on olennon päällä (alle 12 m, vaikeat ≥ 3 kalloa alle 70 m). Jos olento ei ole täysissä
@@ -345,6 +349,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Tehtävä ja tavoite piiloon (v1.18):** T kiertää: molemmat → vain tehtävä → vain tavoite → ei kumpaakaan; piilotettuna pieni vihje, valinta muistetaan.
 
 ## 15. Asetukset ja näppäimet (settings.js)
+- **v2.63:** Grafiikka › Tiheämpi maaston väritys (High+ ja Ultra: värit 1 m välein, värineliöt eivät erotu). Extra-grafiikka › Maaston väritys
+  tarkemmaksi (4× / 8× / 16×) ja Pehmeä rantaveden väri. Ohjaus › HUD › HUD:n koko 60–150 % (oletus 100 %; koko pelin HUD, osat kasvavat
+  reunoiltaan, yli 100 % rajoittuu näytön koon mukaan, ettei mikään mene päällekkäin).
 
 - **Näppäimet** vaihdettavissa vahvistuksella (ei varattuja eikä päällekkäisiä); oletus mm. WASD, Shift juoksu, Välilyönti hyppy, C kyykky,
   E käytä, B rakennus, R/G/H/Q/Z/X/F rakentaminen, Tab reppu, M kartta, J taso, L ilmoitukset, T tehtävä/tavoite piiloon, (K ei tee mitään – koko näytön näppäin poistettu v2.18; käytä selaimen F11:tä), N minikartan zoom.

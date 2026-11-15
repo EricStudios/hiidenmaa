@@ -19,6 +19,11 @@ function nearestOpening(m){let best=null,bd=1e9;for(const p of pieces){const b=b
    seinä (lasi ei ole erikoisasemassa). packAlert: saman lajin viholliset 20 m säteellä liittyvät jahtiin/piiritykseen. */
 const MOB_MEM=30,SIEGE_WALLS=new Set(['seina','tervasseina','kiviseina','ikkunaseina']);
 function mobKnows(m){return playTime-(m.seenT??-99)<MOB_MEM;}
+// v2.63 arkkukivilinnake: kun muuri on pelaajan ja olennon välissä (toinen sisällä, toinen ulkona) eikä näköyhteyttä ole, olento muistaa
+// pelaajan vain FORT_MEM s (sitten luopuu). Muuri estää näkemisen (collision.js lw).
+const FORT_MEM=3,FORT_IN=5.1;
+function fortIn(x,z){for(const k in FORT){const L=LOC[k];if(L&&dist2(x,z,L.x,L.z)<FORT_IN*FORT_IN)return k;}return null;}
+function fortLost(m){if(m.los||m.dun||P.inDun)return false;const a=fortIn(m.pos.x,m.pos.z),b=fortIn(P.pos.x,P.pos.z);return a!==b&&playTime-(m.seenT??-99)>FORT_MEM;}
 function siegeTarget(m){let door=null,dd=1e9,wall=null,wd=1e9;
   for(const p of pieces){const def=PIECES[p.t],b=bt(p.t);if(def.mobProof||def.snap!=='wall')continue;if(dist2(p.x,p.z,P.pos.x,P.pos.z)>14*14)continue;const d=dist2(p.x,p.z,m.pos.x,m.pos.z);if(d>40*40||Math.abs(p.y-m.pos.y)>1.6)continue;
     if(b==='ovi'){if(p.data.open)continue;if(d<dd){dd=d;door=p;}}else if(SIEGE_WALLS.has(b)&&d<wd){wd=d;wall=p;}}
@@ -108,7 +113,7 @@ function updateMobs(dt){
     else if(hostile&&!P.dead&&!(P.spawnProt>0)&&!(m.forgetT>0)&&((m.los&&dist<aggroR)||hurt)&&Math.abs(P.pos.y-m.pos.y)<6){if(m.state!=='chase'){m.seenT=playTime;m.lastPX=P.pos.x;m.lastPZ=P.pos.z;packAlert(m);}m.state='chase';}
     /* v2.08: jahti jatkuu niin kauan kuin vihollinen muistaa pelaajan (MOB_MEM 30 s viimeisestä näkemisestä/osumasta), vaikka näköyhteys katkeaisi
        (esim. pelaaja pakenee taloon) → piiritys. Muistin loputtua rauhoittuu; talon sisällä ollessaan poistuu murtokohdasta ulos (tila 'exit'). */
-    else if(m.state==='chase'&&!hurt&&(P.dead||(!d.stalk&&((dist>aggroR*1.6&&m.los)||!mobKnows(m))))){m.state='idle';m.siege=null;if(!mobKnows(m)){m.angry=false;m.lastHit=-99;}m.noLos=0;
+    else if(m.state==='chase'&&!hurt&&(P.dead||(!d.stalk&&((dist>aggroR*1.6&&m.los)||!mobKnows(m)||fortLost(m))))){m.state='idle';m.siege=null;if(fortLost(m))m.seenT=-99;if(!mobKnows(m)){m.angry=false;m.lastHit=-99;}m.noLos=0;
       if(m.breach&&dist2(m.pos.x,m.pos.z,m.breach.x,m.breach.z)<10*10){const ux=m.breach.x-(m.lastPX??P.pos.x),uz=m.breach.z-(m.lastPZ??P.pos.z),ul=Math.hypot(ux,uz)||1;m.exitP={x:m.breach.x+ux/ul*4,z:m.breach.z+uz/ul*4};m.exitT=10;m.state='exit';}m.breach=null;}
     if(m.state==='flee'){// pakosuunta pois pelaajasta satunnaisella poikkeamalla, vaihtuu 1.2–3 s välein
       const zig=d.per&&d.per.zig;m.fleeT=(m.fleeT||0)-dt;if(m.fleeT<=0){m.fleeT=zig?.35+Math.random()*.35:1.2+Math.random()*1.8;m.fleeA=(m.herdA??Math.atan2(-dx,-dz))+(Math.random()-.5)*(zig?2.2:hurt?1.6:.8);m.herdA=null;}
@@ -360,6 +365,7 @@ function archerPose(m,dt){const f=m.f,b=m.bow;if(!b)return;if(m.aimT>0&&m.state!
    Suojaa: katos (rakennus yläpuolella), sää (pilvisyys wDark > .35 tai sade), metsäbiomit (korpi, koivikko, aarnimetsä), yö (lightK < .55).
    Kulku ~6 s: 0–3 s paniikkiryntäily (suunta vaihtuu 0,35–0,6 s välein, 1,3× juoksu), 3–5,2 s hidastuu ja horjuu, sitten kaatuu tuhkaksi
    (killMob → tuhkakuolema, ei saalista). Ryntäilevä sytyttää pelaajan 1 m päästä (P.burnT 4 s). Tarkistus 0,5 s välein. */
+const TM_CD=3;   // v2.63 olennon törmäysäänen tauko (s)
 const SUN_BURN=new Set(['kalmo','ylimys','hiidenkarhu','hiidenhirvi','kalmasusi','suonakki']),SUN_SHADE={forest:1,koivu:1,aarni:1};
 // v2.14: Kalmanummen omat epäkuolleet (kalmo, ylimys) eivät pala nummella; nummelta poistuessaan palavat normaalisti
 const MOOR_UNDEAD=new Set(['kalmo','ylimys']);
@@ -397,8 +403,11 @@ function moveMob(m,tx,tz,spd,dt){
   const moved=Math.hypot(m.pos.x-ox,m.pos.z-oz);
   // v2.16: törmäys kovassa vauhdissa (juoksu tai tönäisy) esteeseen → törmäysääni (1,2 s tauko)
   // v2.22: juoksuvauhdissa (yli 1,3 × kävely ja yli 2,5 m/s, tai tönäisy) esteeseen (puu, kivi, seinä) → törmäys: kevyt tai raskas (tormaykset/)
-  {const want=Math.hypot(vx+m.vel.x,vz+m.vel.z);if(want>Math.max(2.5,(m.def.walk||1.5)*1.3)&&_hitl.length&&moved<want*dt*.35&&playTime-(m.tmT??-9)>1.2&&!(m.def.fells&&_hitl.every(c=>c.owner&&(c.owner.isLog||c.owner.def&&c.owner.def.kind==='tree'&&c.owner.type!=='aarnipuu')))){m.tmT=playTime;const hv=tgHeavy(m);   /* v2.25: puita kaatava karhu ei tömähdä kaadettavaan puuhun tai tukkiin */
-    tgSnd(m,hv?'tormays_raskas':'tormays_kevyt',{g:'tormaykset',p:hv?clamp(tgSize(m)*1.1,.75,1.05):clamp(tgSize(m),.85,1.3),v:clamp(want/6,.55,1)});}}
+  // v2.63 (käyttäjän palaute: seinää vasten kävelevä olento toisti ääntä jatkuvasti): vaaditaan TODELLINEN vauhti edellisessä ruudussa
+  // (m._spd, ei aiottu nopeus) ja jyrkkä pysähdys; tauko TM_CD 3 s samalla olennolla
+  const spd0=m._spd||0;m._spd=dt>0?moved/dt:0;
+  {const want=Math.hypot(vx+m.vel.x,vz+m.vel.z);if(want>Math.max(2.5,(m.def.walk||1.5)*1.3)&&spd0>Math.max(2.5,(m.def.walk||1.5)*1.3)*.8&&_hitl.length&&moved<spd0*dt*.35&&playTime-(m.tmT??-9)>TM_CD&&!(m.def.fells&&_hitl.every(c=>c.owner&&(c.owner.isLog||c.owner.def&&c.owner.def.kind==='tree'&&c.owner.type!=='aarnipuu')))){m.tmT=playTime;const hv=tgHeavy(m);   /* v2.25: puita kaatava karhu ei tömähdä kaadettavaan puuhun tai tukkiin */
+    tgSnd(m,hv?'tormays_raskas':'tormays_kevyt',{g:'tormaykset',p:hv?clamp(tgSize(m)*1.1,.75,1.05):clamp(tgSize(m),.85,1.3),v:clamp(spd0/6,.55,1)});}}
   // stuck at player's buildings -> attack them
   if(m.state==='chase'&&spd>0&&moved<spd*dt*.3){m.stuck+=dt;if(m.stuck>.8&&m.atkCd<=0){const c=_hitl.find(c=>c.owner&&c.owner.t&&PIECES[c.owner.t]);if(c){damagePiece(c.owner,m.def.dmg,'mob');m.atkCd=m.def.cd;m.anim=.4;if(c.owner.t==='aita'){damageMob(m,6,'pierce',-(c.owner.x-m.pos.x),-(c.owner.z-m.pos.z));}}}}else m.stuck=0;
   const g=groundAt(m.pos.x,m.pos.z,m.def.r,m.pos.y);m.pos.y=lerp(m.pos.y,Math.max(g,m.dun?DUN.y:-1.4),Math.min(1,dt*10));

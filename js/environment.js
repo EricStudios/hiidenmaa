@@ -41,9 +41,9 @@ let lightK=1,wCloud=.2,wDark=0,wFog=1,wRain=0,wSnow=0,wWind=0,flash=0,nextBolt=0
 const cAarni=new THREE.Color(0x26302a);
 /* v2.49 KALMANUMMEN USVA: nummelle astuessa usva sakenee ja maailma harmaantuu hitaasti (~8 s). Voimakkuus päivän numerosta: MOOR_P = 50 %
    päivistä täysi (1), muina 0,3–0,55. Harmaus = sumun/taivaan väri kohti cMoor + kankaan värikylläisyys (CSS saturate, vain muuttuessa). */
-const MOOR_FAR=80,cMoor=new THREE.Color(0x8b9094),_cMoor=new THREE.Color(),MOOR_P=.5;let moorK=0,moorDayN=-1,moorDayV=1,moorSat=-1;
-function moorDay(){const n=typeof dayN==='number'?dayN:0;if(n!==moorDayN){moorDayN=n;const r=mulberry32(Math.imul(n+577,2654435761)^0x5bd1e995);r();moorDayV=r()<MOOR_P?1:.3+.25*r();}return moorDayV;}
-function moorSatSet(){const v=Math.round((1-.32*moorK)*100)/100;if(v!==moorSat){moorSat=v;renderer.domElement.style.filter=v<.995?`saturate(${v})`:'';}}
+const MOOR_FAR=52,MOOR_SAT=.42,MOOR_GREY=.7,MOOR_IN=.2,cMoor=new THREE.Color(0x8b9094),_cMoor=new THREE.Color(),MOOR_P=.6,MOOR_LO=.55;let moorK=0,moorDayN=-1,moorDayV=1,moorSat=-1;
+function moorDay(){const n=typeof dayN==='number'?dayN:0;if(n!==moorDayN){moorDayN=n;const r=mulberry32(Math.imul(n+577,2654435761)^0x5bd1e995);r();moorDayV=r()<MOOR_P?1:MOOR_LO+.25*r();}return moorDayV;}   // v2.63: täysi usva 60 % päivistä, muina 55–80 % (ennen 50 % / 30–55 % – käyttäjän palaute: liian vähän usvaa)
+function moorSatSet(){const v=Math.round((1-MOOR_SAT*moorK)*100)/100;if(v!==moorSat){moorSat=v;renderer.domElement.style.filter=v<.995?`saturate(${v})`:'';}}
 // Kuun kirkkaus vaihtelee 8 päivän kierrossa (uusikuu .2 … täysikuu 1).
 function moonPhase(){return .2+.8*(.5-.5*Math.cos((dayN%8)/8*TAU));}
 const cCloudDay=new THREE.Color(0xe4e9ef),cCloudNight=new THREE.Color(0x232a3a),cCloudGrey=new THREE.Color(0x4b5058),_cc=new THREE.Color();
@@ -85,13 +85,13 @@ function updateClouds(dt,cover,light,el){deckTick();cover*=cloudDayTick(dt);   /
 const _sky=new THREE.Color(),_skyS=new THREE.Vector3(),_up=new THREE.Vector3(0,1,0),_camD=new THREE.Vector3();
 function updateSky(light,sd0,el,sunK){const sd=_skyS.copy(sd0);skyDome.position.copy(camera.position);skyDome.visible=!P.inDun;
   SKY_U.uHor.value.copy(scene.background);_sky.copy(scene.background).multiplyScalar(.62);_sky.b=Math.min(1,_sky.b*1.25+.03*light);SKY_U.uTop.value.copy(_sky);
-  SKY_U.uSun.value.set(sd.x,sd.y,sd.z);SKY_U.uSunC.value.copy(cSun);SKY_U.uGlow.value=sunK*(1-Math.min(1,wDark*1.4))*(1-aarniK*.7);
-  const clear=(1-sstep(.35,.7,wCloud))*(1-Math.min(1,wDark*3))*sstep(.05,.25,el)*sstep(.85,.45,el)*sunK*(1-indoorK)*(1-aarniK);
+  SKY_U.uSun.value.set(sd.x,sd.y,sd.z);SKY_U.uSunC.value.copy(cSun);SKY_U.uGlow.value=sunK*(1-Math.min(1,wDark*1.4))*(1-aarniK*.7)*(1-moorK*.5);   /* v2.63 nummi kuten Aarnimetsä (miedommin) */
+  const clear=(1-sstep(.35,.7,wCloud))*(1-Math.min(1,wDark*3))*sstep(.05,.25,el)*sstep(.85,.45,el)*sunK*(1-indoorK)*(1-aarniK)*(1-moorK*.8);
   /* v2.35 näytön säteet (render.js RAYS/drawRays): voimakkuus säästä ja auringosta, maaston peitto marssilla kohti aurinkoa */
   /* v2.37: vahvat koko päivän (aamusta iltaan), hiipuvat auringon laskiessa kohti horisonttia ja yöksi pois (v2.36 hiipui väärin keskipäivällä);
      päiväkohtainen vahvuus raysDay() */
   /* v2.44 pilvimatto himmentää; v2.47 linssiheijastus omalla päiväkertoimella flareDay (0,9–1,1) – ei säteiden 0,3–1 vaihtelua */
-  {const kb=(1-sstep(.35,.75,wCloud))*(1-Math.min(1,wDark*3))*sstep(-.04,.35,el)*sunK*(1-indoorK)*(1-aarniK*.7),dk=1-deckRnd*.9;RAYS.k=kb*raysDay()*dk;RAYS.kf=kb*flareDay()*dk;}
+  {const kb=(1-sstep(.35,.75,wCloud))*(1-Math.min(1,wDark*3))*sstep(-.04,.35,el)*sunK*(1-indoorK)*(1-aarniK*.7)*(1-moorK*.6),dk=1-deckRnd*.9;RAYS.k=kb*raysDay()*dk;RAYS.kf=kb*flareDay()*dk;}
   {let o=1;if(RAYS.k>.01){const s=_skyS.copy(sd0).normalize(),cp=camera.position;for(let d=6;d<=300;d*=1.32){const x=cp.x+s.x*d,z=cp.z+s.z*d;if(terrainH(x,z)>cp.y+s.y*d){o=0;break;}}}
    const rdt=RAYS.dt||.016;RAYS.occ=lerp(RAYS.occ,o,Math.min(1,rdt*3));RAYS.occP=lerp(RAYS.occP,RAYS.pix,Math.min(1,rdt*(RAYS.pix<RAYS.occP?22:6)));}   /* v2.38: maasto rauhallisesti, este kiekon edessä lähes heti (22/s) */
   sunGlow.visible=!P.inDun&&el>-.08;if(sunGlow.visible){sunGlow.position.copy(sunDisc.position);sunGlow.material.opacity=(1-deckRnd*.8)*SUN_GLOW_K*(.55+.25*sstep(.3,0,el))*sunK*(1-Math.min(1,wDark*1.6))*(1-sstep(.4,.9,wCloud)*.6);}}
@@ -133,20 +133,20 @@ function updateEnvironment(dt){
   if(P.inDun){moorK=0;moorSatSet();const rf=P.realm?REALMS[P.realm].fog:0x050403;scene.background.setHex(rf);scene.fog.color.setHex(rf);scene.fog.near=3;scene.fog.far=28;hemi.intensity=.06+BOSS_GLOW*1.2;sun.intensity=0;shAmb.intensity=0;amb.intensity=.05+BOSS_GLOW*.5;stars.visible=false;sunDisc.visible=false;moon.visible=false;rain.visible=false;snow.visible=false;water.visible=false;return;}
   water.visible=true;stars.visible=true;
   // Aarnimetsässä tiheä sumu ja hämärä valo.
-  {const bh=biomeHere(P.pos.x,P.pos.z);aarniK=lerp(aarniK,bh==='aarni'?1:0,Math.min(1,dt*.8));moorK=lerp(moorK,bh==='moor'?moorDay():0,Math.min(1,dt*.13));moorSatSet();}
+  {const bh=biomeHere(P.pos.x,P.pos.z);aarniK=lerp(aarniK,bh==='aarni'?1:0,Math.min(1,dt*.8));moorK=lerp(moorK,bh==='moor'?moorDay():0,Math.min(1,dt*MOOR_IN));moorSatSet();}   // v2.63 sisään ja ulos pehmeästi (~5 s)
   if(light>.5)cTmp.copy(cSkyDusk).lerp(cSkyDay,(light-.5)*2);else cTmp.copy(cSkyNight).lerp(cSkyDusk,light*2);
   cTmp.lerp(cGrey,wDark*light*.8);cTmp.multiplyScalar(1-wDark*.35);cTmp.lerp(cFlash,flash*.35);
-  cTmp.lerp(_cMoor.copy(cMoor).multiplyScalar(Math.max(.12,light)),moorK*.55);   /* v2.49 nummen harmaa usva */
+  cTmp.lerp(_cMoor.copy(cMoor).multiplyScalar(Math.max(.12,light)),moorK*MOOR_GREY);   /* v2.49 nummen harmaa usva; v2.63 .55 → .7 */
   cTmp.lerp(cAarni,aarniK*.75*Math.max(.3,light));
   scene.background.copy(cTmp);scene.fog.color.copy(cTmp);barrowCaveTick(light);
   // Usvainen ja hämärä maailma; Aarnimetsässä sumu on sakeaa.
   {const nr=lerp(6,40,wFog)*lerp(.4,1,light)*RDK,fr=lerp(45,165,wFog)*lerp(.5,1,light)*RDK;   /* v2.49 nummen usva: kohti 4 / 80 m (moorK) */
-   scene.fog.near=lerp(Math.min(nr,lerp(nr,4,moorK)),3,aarniK);scene.fog.far=lerp(Math.min(fr,lerp(fr,MOOR_FAR,moorK)),38,aarniK);}
+   scene.fog.near=lerp(Math.min(nr,lerp(nr,3,moorK)),3,aarniK);scene.fog.far=lerp(Math.min(fr,lerp(fr,MOOR_FAR,moorK)),38,aarniK);}
   const ph=moonPhase();
   if(sunK>0){cSun.setHex(0xfff1d6).lerp(cSunLow,1-sstep(.1,.6,el));sun.color.copy(cSun);sun.intensity=1.4*sunK*sstep(-.12,.45,el)*(1-wDark*.7)*(1-deckRnd*.35);sun.position.set(P.pos.x+sd.x*120,P.pos.y+sd.y*120,P.pos.z+sd.z*120);}
   else{sun.color.setHex(0x8aa2d8);sun.intensity=.2*moonK*ph*(1-wDark*.6);sun.position.set(P.pos.x-sd.x*120,P.pos.y+Math.abs(sd.y)*120+40,P.pos.z-sd.z*120);}
   indoorK=lerp(indoorK,indoorT,Math.min(1,dt*2));
-  sun.intensity=sun.intensity*(1-.45*aarniK)*(1-.7*indoorK)+flash*.45*(1-indoorK);
+  sun.intensity=sun.intensity*(1-.45*aarniK)*(1-.25*moorK)*(1-.7*indoorK)+flash*.45*(1-indoorK);
   openK=lerp(openK,OPEN_BIOMES.has(zoneAt(P.pos.x,P.pos.z))?1:0,Math.min(1,dt*OPEN_RATE));
   /* v2.42: vaalennus k = 1 − shDepth jaetaan: SH_FILL (30 %) tasaisena aurinkovärisenä valona (vastavalon pinnat eivät mustu) ja loput suoraan
      varjoon varjostimessa (render.js hmLift, L = k(1−f)/(1−kf)) → valaistu maa ja varjot yhtä kirkkaat kuin ennen, mutta low poly -kolmioiden
@@ -155,7 +155,7 @@ function updateEnvironment(dt){
    shAmb.color.copy(sun.color);shAmb.intensity=sun.intensity*k*f*Math.max(.15,sd.y);sun.intensity*=1-k*f;sun.shadow.radius=SUN_SH_BASE+1000*Math.round(L*100);}
   sun.target.position.copy(P.pos);
   if(SET.shUltra==='wide'){const o=160*.45,fx=-Math.sin(camYaw)*o,fz=-Math.cos(camYaw)*o;sun.target.position.x+=fx;sun.target.position.z+=fz;sun.position.x+=fx;sun.position.z+=fz;}   // v1.76: laaja alue sovitetaan näkymän suuntaan
-  hemi.intensity=((.07+.2*light*(1-wDark*.4))*(1-.45*aarniK)+flash*.55)*(1-.6*indoorK)+BOSS_GLOW*.8;amb.intensity=(.03+.025*light+flash*.22)*(1-.5*indoorK)+BOSS_GLOW*.3;
+  hemi.intensity=((.07+.2*light*(1-wDark*.4))*(1-.45*aarniK)*(1-.2*moorK)+flash*.55)*(1-.6*indoorK)+BOSS_GLOW*.8;amb.intensity=(.03+.025*light+flash*.22)*(1-.5*indoorK)+BOSS_GLOW*.3;
   hemi.color.setHex(light>.3?0xcfe4ff:0x6a7fa8);hemi.color.lerp(cIndoor,indoorK);
   stars.material.opacity=(1-light)*(1-wDark);stars.position.copy(camera.position);
   sunDisc.position.set(camera.position.x+sd.x*380,camera.position.y+sd.y*380,camera.position.z+sd.z*380);sunDisc.visible=el>-.1&&wDark<.3;

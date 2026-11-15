@@ -119,14 +119,8 @@ const vcMat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,r
 const terrainColors=new Float32Array(HN*HN*3);
 // v1.00 maaston kärkien biomi ruohoa varten (indeksi GRASS_BIOMES-listaan, 255 = ei biomia)
 const GRASS_BIOMES=['meadow','koivu','forest','suo','kangas','aarni','moor','tunturi','rakka','mountain','beach'],TBIOME=new Uint8Array(HN*HN).fill(255);
-const terrainMesh=(function buildTerrain(){
-  const pos=new Float32Array(HN*HN*3);
-  for(let iz=0;iz<HN;iz++)for(let ix=0;ix<HN;ix++){
-    const i=iz*HN+ix,x=-HALF+ix*GS,z=-HALF+iz*GS,h=HGT[i];
-    pos[i*3]=x;pos[i*3+1]=h;pos[i*3+2]=z;
-    const hx=HGT[iz*HN+Math.min(ix+1,GN)]-HGT[iz*HN+Math.max(ix-1,0)],hz=HGT[Math.min(iz+1,GN)*HN+ix]-HGT[Math.max(iz-1,0)*HN+ix];
-    const slope=Math.hypot(hx,hz)/(GS*2);
-    const b=biomeAt(x,z,h); let c;{const bi=GRASS_BIOMES.indexOf(b);if(bi>=0&&!(b==='mountain'&&h>33))TBIOME[i]=bi;}
+// v2.63 maaston väri pisteessä (sama kaava kärjille ja tiheämmälle väritykselle TFINE)
+function terrCol(x,z,h,slope,b){b=b||biomeAt(x,z,h);let c;
     const n=(vnoise(x*.35,z*.35)-.5)*.1+(vnoise(x*.05,z*.05)-.5)*.08;
     if(b==='sea')c=[.42,.38,.28];
     else if(b==='beach')c=[.78,.7,.5];
@@ -144,6 +138,16 @@ const terrainMesh=(function buildTerrain(){
     if(slope>.75&&b!=='sea'&&b!=='beach'){const t=sstep(.75,1.3,slope);c=[lerp(c[0],.45,t),lerp(c[1],.44,t),lerp(c[2],.41,t)];}
     if(Math.hypot(x-LOC.circle.x,z-LOC.circle.z)<13){c=[c[0]*.75,c[1]*.75,c[2]*.8];}
     if(Math.hypot(x-LOC.barrow.x,z-LOC.barrow.z)<10.5||barrowMound(x,z)>.2){c=[.33+n,.36+n,.22];}   // v2.43: myös kieleke portin takana
+    return c;}
+const terrainMesh=(function buildTerrain(){
+  const pos=new Float32Array(HN*HN*3);
+  for(let iz=0;iz<HN;iz++)for(let ix=0;ix<HN;ix++){
+    const i=iz*HN+ix,x=-HALF+ix*GS,z=-HALF+iz*GS,h=HGT[i];
+    pos[i*3]=x;pos[i*3+1]=h;pos[i*3+2]=z;
+    const hx=HGT[iz*HN+Math.min(ix+1,GN)]-HGT[iz*HN+Math.max(ix-1,0)],hz=HGT[Math.min(iz+1,GN)*HN+ix]-HGT[Math.max(iz-1,0)*HN+ix];
+    const slope=Math.hypot(hx,hz)/(GS*2);
+    const b=biomeAt(x,z,h);{const bi=GRASS_BIOMES.indexOf(b);if(bi>=0&&!(b==='mountain'&&h>33))TBIOME[i]=bi;}
+    const c=terrCol(x,z,h,slope,b);
     terrainColors[i*3]=c[0];terrainColors[i*3+1]=c[1];terrainColors[i*3+2]=c[2];
   }
   const idx=new Uint32Array(GN*GN*6);let k=0;
@@ -151,6 +155,40 @@ const terrainMesh=(function buildTerrain(){
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(terrainColors,3));g.setIndex(new THREE.BufferAttribute(idx,1));g.computeVertexNormals();
   const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:1}));m.receiveShadow=true;scene.add(m);return m;
 })();
+/* v2.63 TIHEÄMPI MAASTON VÄRITYS: väri lasketaan F× tiheämmin (F = 2: 1 m välein, 701 × 701; F = 4: 0,5 m, 1401 × 1401) ja varjostin lisää
+   kärkiväreihin eron (tarkka väri − kolmion kärkien interpolointi) tekstuurista lineaarisesti → värineliöt ja kolmiot eivät erotu. Verkko ja
+   low poly -muoto ennallaan; muta ja kaivaminen muokkaavat kärkivärejä kuten ennen (ero lisätään päälle). Laskenta taustalla ~12 ms paloissa.
+   Taso: esiasetus High+ ja Ultra = 2× (SET.terrFine); Extra-grafiikka (SET.terrFineX) 4× / 8× / 16×: 8× ja 16× = 4×-tekstuuri + varjostimen
+   hieno värivaihtelu 0,25 / 0,125 m välein (koko saaren tekstuuri 8×/16× veisi 125–500 Mt muistia). */
+const TFINE={F:0,want:0,N:0,tex:null,data:null,row:0,done:false,busy:false,base:terrainColors.slice(),
+  u:{tFine:{value:null},uFine:{value:0},uFN:{value:1},uFS:{value:1},uDet:{value:0}}};
+terrainMesh.material.onBeforeCompile=sh=>{Object.assign(sh.uniforms,TFINE.u);
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec2 vTW;').replace('#include <begin_vertex>','#include <begin_vertex>\nvTW=position.xz;');
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform sampler2D tFine;uniform float uFine,uFN,uFS,uDet;varying vec2 vTW;\nfloat tfH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat tfN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(tfH(i),tfH(i+vec2(1,0)),f.x),mix(tfH(i+vec2(0,1)),tfH(i+vec2(1,1)),f.x),f.y);}')
+    .replace('#include <color_fragment>',`#ifdef USE_COLOR
+  vec3 tcol=vColor;if(uFine>.5){vec2 fu=((vTW+vec2(${HALF.toFixed(1)}))/uFS+.5)/uFN;tcol+=(texture2D(tFine,fu).rgb-.5)*.5;
+    if(uDet>0.)tcol*=1.+(tfN(vTW*uDet)-.5)*.09+(tfN(vTW*uDet*2.3+17.)-.5)*.05;}
+  diffuseColor.rgb*=tcol;
+#endif`);};
+terrainMesh.material.customProgramCacheKey=()=>'terrFine';
+function terrFineRows(ms){const F=TFINE.F,N=TFINE.N,D=TFINE.data,B=TFINE.base,hs=GS/F,H=(x,z)=>terrainH(x,z),v=(ix,iz,k)=>B[(Math.min(iz,GN)*HN+Math.min(ix,GN))*3+k],t0=performance.now();
+  while(TFINE.row<N&&performance.now()-t0<ms){const jz=TFINE.row++,iz=Math.floor(jz/F),fz=(jz%F)/F,z=-HALF+jz*hs;
+    for(let jx=0;jx<N;jx++){const ix=Math.floor(jx/F),fx=(jx%F)/F,x=-HALF+jx*hs,o=(jz*N+jx)*4;
+      if(!fx&&!fz){D[o]=D[o+1]=D[o+2]=128;D[o+3]=255;continue;}
+      const h=H(x,z),sl=Math.hypot(H(x+GS,z)-H(x-GS,z),H(x,z+GS)-H(x,z-GS))/(GS*2),c=terrCol(x,z,h,sl),lo=fx+fz<=1;
+      for(let k=0;k<3;k++){const c0=lo?v(ix,iz,k)+fx*(v(ix+1,iz,k)-v(ix,iz,k))+fz*(v(ix,iz+1,k)-v(ix,iz,k))   /* kolmio a,b,c (lävistäjä b–c) */
+          :v(ix+1,iz+1,k)+(1-fx)*(v(ix,iz+1,k)-v(ix+1,iz+1,k))+(1-fz)*(v(ix+1,iz,k)-v(ix+1,iz+1,k));
+        D[o+k]=Math.round(clamp((c[k]-c0)*2+.5,0,1)*255);}D[o+3]=255;}}
+  return TFINE.row>=N;}
+function terrFineBuild(F){if(TFINE.F===F&&(TFINE.done||TFINE.busy))return;TFINE.F=F;TFINE.N=GN*F+1;TFINE.row=0;TFINE.done=false;TFINE.u.uFine.value=0;
+  if(TFINE.tex){TFINE.tex.dispose();TFINE.tex=null;}TFINE.data=new Uint8Array(TFINE.N*TFINE.N*4);const tok=TFINE.tok=(TFINE.tok|0)+1;TFINE.busy=true;
+  const step=()=>{if(tok!==TFINE.tok)return;if(terrFineRows(12)){const N=TFINE.N,t=TFINE.tex=new THREE.DataTexture(TFINE.data,N,N,THREE.RGBAFormat,THREE.UnsignedByteType);
+      t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.needsUpdate=true;
+      TFINE.u.tFine.value=t;TFINE.u.uFN.value=N;TFINE.u.uFS.value=GS/F;TFINE.done=true;TFINE.busy=false;terrFineSet(TFINE.want);return;}setTimeout(step,0);};step();}
+// level: 0 = pois, 2, 4, 8, 16 (8 ja 16 käyttävät 4×-tekstuuria + hienoa vaihtelua)
+function terrFineSet(level){level=+level||0;TFINE.want=level;if(!level){TFINE.u.uFine.value=0;return;}const F=level>=4?4:2;
+  if(TFINE.F!==F||!(TFINE.done||TFINE.busy)){terrFineBuild(F);return;}if(!TFINE.done)return;
+  TFINE.u.uDet.value=level>=16?8:level>=8?4:0;TFINE.u.uFine.value=1;}
 /* ---------------- VESI (v2.18) ----------------
    Vedenpinta on oma varjostin: syvyys luetaan maaston korkeuskartasta (WATER_DEP, 1 tekseli / maaston kärki), joten vesi on matalassa
    läpinäkyvä ja sinertävä, tummuu yli 2 m syvyydessä ja häipyy rantaviivalla (ei välkkyvää leikkausviivaa maaston kanssa). Pinta heijastaa
@@ -167,7 +205,7 @@ function waveAt(x,z){const dep=water.position.y-terrainH(x,z),a=WV.a*sstep(.2,7,
   for(let i=0;i<3;i++){const D=WV.D[i];h+=WV.W[i]*Math.sin((D[0]*x+D[1]*z)*WV.K[i]+WV.ph[i]);}return a*h;}
 const WATER_U=Object.assign(THREE.UniformsUtils.clone(THREE.UniformsLib.fog),{uDep:{value:WATER_DEP},uPh:{value:new THREE.Vector3()},uAmp:{value:.07},uFar:{value:260},
   uSun:{value:new THREE.Vector3(0,1,0)},uSunC:{value:new THREE.Color(1,1,1)},uAmbC:{value:new THREE.Color(.5,.5,.5)},uSkyTop:{value:new THREE.Color(0x3d6fa8)},uSkyHor:{value:new THREE.Color(0x8fbfe0)},
-  uShal:{value:new THREE.Color(0x2f8f8c)},uDeep:{value:new THREE.Color(0x06222e)},uFoam:{value:0},uCap:{value:0},uT:{value:0},uW:{value:new THREE.Vector3(.62,.38,0)}});
+  uShal:{value:new THREE.Color(0x2f8f8c)},uDeep:{value:new THREE.Color(0x06222e)},uFoam:{value:0},uCap:{value:0},uT:{value:0},uSmooth:{value:0},uW:{value:new THREE.Vector3(.62,.38,0)}});
 const WATER_GLSL=`uniform sampler2D uDep;uniform vec3 uPh,uW;uniform float uAmp;
   const float WH=${HALF.toFixed(1)},WGS=${GS.toFixed(4)},WHN=${HN.toFixed(1)};
   float wDep(vec2 p){vec2 uv=((p+WH)/WGS+.5)/WHN;float e=texture2D(uDep,uv).r;return e*e*64.-1.;}
@@ -189,7 +227,7 @@ function waterMat(low){return new THREE.ShaderMaterial({uniforms:WATER_U,transpa
         vec4 mvPosition=viewMatrix*w;gl_Position=projectionMatrix*mvPosition;
         #include <fog_vertex>
       }`,
-    fragmentShader:WATER_GLSL+`uniform vec3 uSun,uSunC,uAmbC,uSkyTop,uSkyHor,uShal,uDeep;uniform float uFoam,uCap,uT;varying vec3 vW;varying vec2 vG;varying float vH;
+    fragmentShader:WATER_GLSL+`uniform vec3 uSun,uSunC,uAmbC,uSkyTop,uSkyHor,uShal,uDeep;uniform float uFoam,uCap,uT,uSmooth;varying vec3 vW;varying vec2 vG;varying float vH;
       #include <fog_pars_fragment>
       float hs(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
       float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hs(i),hs(i+vec2(1,0)),f.x),mix(hs(i+vec2(0,1)),hs(i+vec2(1,1)),f.x),f.y);}
@@ -214,7 +252,7 @@ function waterMat(low){return new THREE.ShaderMaterial({uniforms:WATER_U,transpa
         float alpha=1.-exp(-path*.5);
         float dk=smoothstep(2.,22.,d);
         #ifdef LOWPOLY
-        dk=floor(dk*5.+.5)/5.;   /* väri portaittain */
+        if(uSmooth<.5)dk=floor(dk*5.+.5)/5.;   /* väri portaittain; v2.63 Extra: pehmeä rantavärin vaihtuminen (uSmooth) */
         #endif
         vec3 lit=uAmbC+uSunC*max(uSun.y,0.)*.55;
         vec3 body=mix(uShal,uDeep,clamp(dk+(1.-exp(-path*.08))*.35,0.,1.))*lit;
@@ -246,7 +284,7 @@ const water=(function(){WATER_MATS.low=waterMat(true);const w=new THREE.Mesh(wat
 function waterApply(){const hq=!!SET.waterHQ,mode=SET.waterMega?'mega':hq?'hq':'low';
   if(water.geometry.userData.mode!==mode){const og=water.geometry;water.geometry=waterGeo(mode);og.dispose();}
   const k=hq?'hq':'low';if(!WATER_MATS[k])WATER_MATS[k]=waterMat(!hq);if(water.material!==WATER_MATS[k])water.material=WATER_MATS[k];
-  WV.W=hq?[.55,.3,.15]:[.62,.38,0];WATER_U.uW.value.set(WV.W[0],WV.W[1],WV.W[2]);}
+  WV.W=hq?[.55,.3,.15]:[.62,.38,0];WATER_U.uW.value.set(WV.W[0],WV.W[1],WV.W[2]);WATER_U.uSmooth.value=SET.waterSmooth?1:0;}   // v2.63
 /* Merenpohja maastoverkon ulkopuolella (maailman raja on nyt kauempana kuin maasto ±HALF). */
 const seaFloor=new THREE.Mesh(new THREE.PlaneGeometry(2800,2800).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0x4a5048}));seaFloor.position.y=SEA_FLOOR-2;scene.add(seaFloor);
 const stars=(function(){const g=new THREE.BufferGeometry(),p=[];const r=mulberry32(5);for(let i=0;i<700;i++){const u=r()*TAU,v=r()*.9+.05;p.push(Math.cos(u)*Math.sin(Math.acos(1-v))*400,(1-v)*400,Math.sin(u)*Math.sin(Math.acos(1-v))*400);}g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));const m=new THREE.Points(g,new THREE.PointsMaterial({color:0xdde8ff,size:1.6,sizeAttenuation:false,transparent:true,opacity:0,fog:false}));scene.add(m);return m;})();

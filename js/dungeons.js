@@ -123,7 +123,7 @@ function buildBarrel(add,cols,its,x,y,z,key,li){
   const body=new THREE.Mesh(new THREE.CylinderGeometry(.4,.36,1,10),wd);body.position.y=.5;body.castShadow=true;g.add(body);
   for(const yy of [.22,.78]){const b=new THREE.Mesh(new THREE.CylinderGeometry(.415,.415,.06,10),ir);b.position.y=yy;g.add(b);}
   const lid=new THREE.Mesh(new THREE.CylinderGeometry(.37,.37,.06,10),mat(0x5a3a20));lid.position.y=1.02;g.add(lid);add(g);
-  cols.push(addCircle(x,z,.44,y,y+1.05,'static'));
+  {const bc=addCircle(x,z,.44,y,y+1.05,'static');bc.ground=1;cols.push(bc);}   // v2.63 tynnyrin päällä voi seistä
   // Kansi avataan laiskasti (label-kutsussa): tynnyreitä rakennetaan myös latauksessa ennen kuin flags on olemassa.
   let lidOpen=false;const open=()=>{lidOpen=true;lid.position.set(.35,.6,0);lid.rotation.z=1.3;};
   const it={x,y:y+.8,z,r:2.2,label:()=>{if(!lidOpen&&fo('rc')[key])open();return foundEmpty(key)?'Tynnyri (tyhjä)':'Avaa tynnyri';},use:()=>{const first=!fo('rc')[key];
