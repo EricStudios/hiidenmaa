@@ -301,6 +301,21 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     SET.torchSharp=false;applyGfx();const b=torchLight.shadow.mapSize.x===40&&!torchSharpOn();SET.torchSharp=pv;applyGfx();
     const c=SET_DEF.torchSharp===false&&SET_PAGES.xgfx.includes('torchSharp')&&/torchSharpOn\(\)\?6\.7:2\.1/.test(updatePlayer.toString())&&/torchSharpOn\(\)\|\|shFrame%fT===0/.test(updateStations.toString());
     return a&&b&&c||`virhe terävä ${a} oletus ${b} koodi ${c}`;});
+  t('v2.60 ovi kääntyy 0,6 s pehmeästi (avatessa este pois heti, sulkiessa vasta lopussa, ei sulkeudu pelaajan päälle)',()=>{const x=P.pos.x+30,z=P.pos.z+30,p0=P.pos.clone();
+    const d=addPiece('ovi',x,terrainH(x,z),z,0),lf=d.mesh.userData.leaf,dc=d.cols.filter(c=>c.door);P.pos.set(x,d.y,z+4);let res;
+    try{setDoor(d,true,1);doorTick(.3);const a=lf.rotation.y>.5&&lf.rotation.y<1.45&&dc.every(c=>c.off);doorTick(.31);const b=Math.abs(lf.rotation.y-Math.PI/2*.95)<.01;
+      setDoor(d,false);doorTick(.3);const c=dc.every(c=>c.off)&&lf.rotation.y>.05;doorTick(.31);const e=lf.rotation.y===0&&dc.every(c=>!c.off);
+      setDoor(d,true,1);doorTick(.7);P.pos.set(d.x,d.y,d.z);const f=setDoor(d,false)===false&&d.data.open;
+      setDoor(d,false,0,true);const g=lf.rotation.y===0&&!DOOR_ANIM.has(d);res=a&&b&&c&&e&&f&&g&&DOOR_T===.6||`virhe ${a}${b}${c}${e}${f}${g}`;}
+    finally{removePiece(d);P.pos.copy(p0);}return res;});
+  t('v2.60 olentoäänten päällekkäisyysraja: sama tiedosto ≤3, 2 päällekkäin → 1 s tauko, 3 kertaa 3 s sisällä → 8 s, ei hurt/death eikä pelaajaa',()=>{
+    const sv=CRE.voices.slice(),fc=CRE.fcd,fh=CRE.fh;CRE.voices.length=0;CRE.fcd={};CRE.fh={};const n='x_aggro_1',t=1000;let r;
+    try{const a=creFileOk(n,t);CRE.voices.push({name:n});creFileUse(n,t);const b=!CRE.fcd[n]&&!creFileOk(n,t+.1);CRE.voices.push({name:n});creFileUse(n,t+.3);
+      const c=Math.abs(CRE.fcd[n]-(t+1.3))<1e-6&&!creFileOk(n,t+1)&&creFileOk(n,t+1.4);CRE.voices.push({name:n});creFileUse(n,t+1.5);const e=Math.abs(CRE.fcd[n]-(t+9.5))<1e-6;
+      CRE.voices.length=0;const f=!creFileOk(n,t+9)&&creFileOk(n,t+9.6);for(let i=0;i<3;i++)CRE.voices.push({name:n});const g=!creFileOk(n,t+50);
+      const k=CRE_OVL.kinds,h=k.has('idle')&&k.has('chase')&&k.has('aggro')&&k.has('echo')&&!k.has('hurt')&&!k.has('death')&&CRE_OVL.perKind===3;
+      const src=creSnd.toString(),i2=/creFileOk\(n,tn\)/.test(src)&&/creFileUse\(name,tn\)/.test(src)&&!/creFile/.test(plSnd.toString());
+      r=a&&b&&c&&e&&f&&g&&h&&i2||`virhe ${a}${b}${c}${e}${f}${g}${h}${i2}`;}finally{CRE.voices.length=0;CRE.voices.push(...sv);CRE.fcd=fc;CRE.fh=fh;}return r;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());

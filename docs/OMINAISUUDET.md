@@ -198,6 +198,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Säännöt (`validPlace`):** sama osa samaan paikkaan kielletty, ei liian syvälle veteen, katto ei pelaajan päälle, maksu repusta.
 - **Kunto:** 3 vauriotasoa näkyvät tekstuurissa; vasara: X purkaa (materiaalit takaisin), F korjaa. Paaluaita kestää mobit (piikit vahingoittavat).
 - **Ovet:** kaksipuoliset, aukeavat pelaajasta poispäin. Katoilla voi kävellä.
+  **v2.60:** ovi kääntyy 0,6 s pehmeästi (liike hidastuu loppua kohti, `DOOR_T`, `doorTick`). Avatessa oviaukko vapautuu heti, sulkiessa este
+  palaa vasta, kun ovi on kiinni. Jos pelaaja seisoo oviaukossa, ovi ei sulkeudu ("Seisot oviaukossa"). Ladattu tallennus näyttää asennon suoraan.
 - **Sade ja valo** eivät tule katon läpi (`roofTopAt`, `indoorK`).
 
 ## 7. Tuli ja valo
@@ -574,6 +576,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.60 päällekkäisyysraja (olennot, ei pelaaja):** lajeissa idle, chase, aggro (hyökkäys) ja echo sama äänitiedosto soi enintään 3 päällekkäin;
+  kun toinen päällekkäinen kopio alkaa, tiedosto on 1 s tauolla; jos sama tiedosto on alkanut 3 kertaa 3 s sisällä, tauko on 8 s; sama tiedosto
+  ei ala uudelleen alle 0,15 s päästä. Estetyn tilalle arvotaan toinen versio, ja ääni jää pois vasta, kun kaikki versiot ovat estettyjä (ei siirretä
+  myöhemmäksi). Lisäksi sama olentolaji + äänilaji enintään 3 kerralla (esim. kalmojen hyökkäysäänet Hautakummussa). Osuma- ja kuolemaäänet
+  eivät kuulu rajaan. DEV-suorituskykymittari näyttää pois jääneet äänet.
 - **Osumaäänet (tila v2.49):** olennon isku pelaajaan soittaa kategoriansa äänen (isku, purema, raapaisu, murskaus ✓; sarvet → v2.54 iskuääni,
   kunnes omat äänet lisätään). Pomojen maaisku ja nova eivät soita osumaääntä.
 - **v2.14 kuuluvuus:** kutsuäänet kuuluvat noin 150 m, muut 64 m, rauhallinen ääntely 36 m. Kaukana suora ääni hiljenee 30 %, tummuu

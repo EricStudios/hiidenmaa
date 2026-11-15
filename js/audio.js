@@ -111,17 +111,30 @@ function creEchoPos(m,pn){let x=m.pos.x,z=m.pos.z;const dx=x-P.pos.x,dz=z-P.pos.
 //   rev: pakotettu kaiun määrä (pomon kuolema), add: lisä-ääni joka ei katkaise olennon muita ääniä eikä katkea niistä} 
 // soittaa olennon äänen 3D:nä (arpoo ladatuista versioista). Palauttaa äänen keston sekunteina, jos olennolla on tiedostoääni
 // (silloin tehtyä ääntä ei soiteta), muuten false (ei ääntä tai vielä latautumassa).
+/* v2.60 päällekkäisyysraja (käyttäjän sääntö; ei pelaajan ääniä, ei hurt/death): sama äänitiedosto enintään 3 päällekkäin; kun toinen päällekkäinen
+   kopio alkaa → tiedostolle 1 s tauko; jos tiedosto on alkanut 3 kertaa 3 s sisällä → 8 s tauko; sama tiedosto ei uudelleen alle 0,15 s (kampasuodinilmiö).
+   Estetyn tilalle arvotaan toinen versio; estettyä ei siirretä myöhemmäksi. Lisäksi sama olentolaji + äänilaji enintään 3 kerralla (perKind). */
+const CRE_OVL={kinds:new Set(['idle','chase','aggro','echo']),max:3,cd2:1,win:3,n3:3,cd3:8,gap:.15,perKind:3};
+CRE.fcd={};CRE.fh={};CRE.skip=0;
+function creFileN(n){let c=0;for(const v of CRE.voices)if(v.name===n)c++;return c;}
+function creFileOk(n,t){if((CRE.fcd[n]||0)>t)return false;const h=CRE.fh[n];if(h&&h.length&&t-h[h.length-1]<CRE_OVL.gap)return false;return creFileN(n)<CRE_OVL.max;}
+function creFileUse(n,t){const h=(CRE.fh[n]=(CRE.fh[n]||[]).filter(x=>t-x<CRE_OVL.win));h.push(t);let cd=0;
+  if(creFileN(n)>=2)cd=CRE_OVL.cd2;if(h.length>=CRE_OVL.n3)cd=CRE_OVL.cd3;if(cd)CRE.fcd[n]=Math.max(CRE.fcd[n]||0,t+cd);}
 function creSnd(m,kind,o){if(!m)return false;const r=creRes(m.type,kind);if(!r)return false;
   let L=r.names.filter(n=>CRE.buf[n]);if(o&&o.farOnly)L=L.filter(creIsFar);if(!L.length){for(const n of r.names)creBuf(n);return false;}
-  const key=m.type+'_'+(o&&o.key||kind);let pick=L;if(L.length>1&&CRE.last[key])pick=L.filter(n=>n!==CRE.last[key]);
+  const key=m.type+'_'+(o&&o.key||kind),ovl=CRE_OVL.kinds.has(kind),tn=performance.now()/1000;let blk=false;
+  if(ovl){const L2=L.filter(n=>creFileOk(n,tn));if(L2.length)L=L2;else blk=true;}   // v2.60 estetty tiedosto → toinen versio, kaikki estetty → hiljaa
+  let pick=L;if(L.length>1&&CRE.last[key])pick=L.filter(n=>n!==CRE.last[key]);
   const name=pick[Math.random()*pick.length|0],B=CRE.buf[name],rate=r.p*(o&&o.p||1)*(1+(Math.random()*2-1)*.06),dur=B.duration/rate;
   const a=actx;if(!a||a.state!=='running'||!soundOn)return dur;const vol=volK('cre');if(!(vol>0))return dur;
+  if(blk){CRE.skip++;return dur;}
   const pri=o&&o.pri||CRE_PRI[kind]||1,now=a.currentTime,amb=pri<=2,boss=m.def.ai==='boss'||m.def.ai==='rboss';
   const ec=!!(o&&o.echo),rv=o&&o.rev,addv=!!(o&&o.add);
   if(!CRE.gain){CRE.gain=a.createGain();CRE.gain.connect(a.destination);}CRE.gain.gain.value=vol;
   // olennon oma ääni: heikompi ei katkaise, samanarvoinen vasta kun edellinen on soinut hetken
   if(!addv)for(const v of CRE.voices)if(v.m===m){if(v.pri>pri||(v.pri===pri&&now-v.t0<.35))return dur;}
-  if(amb){if(now-CRE.lastAmb<.3)return dur;let n=0;for(const v of CRE.voices)if(v.key===key)n++;if(n>=3)return dur;}
+  if(amb&&now-CRE.lastAmb<.3)return dur;
+  if(ovl){let n=0;for(const v of CRE.voices)if(v.key===key)n++;if(n>=CRE_OVL.perKind){CRE.skip++;return dur;}}   // v2.60 sama olentolaji + laji enintään 3 (ennen vain idle/chase)
   if(!addv)for(const v of CRE.voices.slice())if(v.m===m){creStop(v);CRE.voices.splice(CRE.voices.indexOf(v),1);}
   if(CRE.voices.length>=CRE.max){let w=null,wd=-1;for(const v of CRE.voices){const d=dist2(v.m.pos.x,v.m.pos.z,P.pos.x,P.pos.z);if(!w||v.pri<w.pri||(v.pri===w.pri&&d>wd)){w=v;wd=d;}}
     if(!w||w.pri>pri)return dur;creStop(w,.08);CRE.voices.splice(CRE.voices.indexOf(w),1);}
@@ -136,7 +149,7 @@ function creSnd(m,kind,o){if(!m)return false;const r=creRes(m.type,kind);if(!r)r
   pn.connect(CRE.gain);if(ec)creEchoPos(m,pn);else crePos(pn,m.pos.x,m.pos.y+(m.def.r||.5)*1.6,m.pos.z);
   let sd=null,sdo=null;if(m.dun||rv){const R=creRevOn(a);sd=a.createGain();sd.gain.value=rv||(ec?1.3:m.def.ai==='rboss'?.75:boss?.6:.45);pn.connect(sd);sd.connect(R.inp);}
   else if(!ec&&md>8){const R=creRevOn(a);sd=sdo=a.createGain();sdo.gain.value=.08+1.8*creDistK(md,far,rk);pn.connect(sdo);sdo.connect(R.inp);}   // v2.12: ulkona kaukana kaikuu
-  const v={src,pn,g,sd,sdo,df,dg,lg,far,rk,m,pri,t0:now,key,ec};CRE.voices.push(v);src.onended=()=>{const i=CRE.voices.indexOf(v);if(i>=0)CRE.voices.splice(i,1);try{pn.disconnect();}catch(e){}if(lfo)try{lfo.stop();lfo.disconnect();}catch(e){}if(sd)try{sd.disconnect();}catch(e){}};src.start();return dur;}
+  const v={src,pn,g,sd,sdo,df,dg,lg,far,rk,m,pri,t0:now,key,ec,name};CRE.voices.push(v);if(ovl)creFileUse(name,tn);src.onended=()=>{const i=CRE.voices.indexOf(v);if(i>=0)CRE.voices.splice(i,1);try{pn.disconnect();}catch(e){}if(lfo)try{lfo.stop();lfo.disconnect();}catch(e){}if(sd)try{sd.disconnect();}catch(e){}};src.start();return dur;}
 // v1.95: Kalmanvartijan kaikuääni maan alta: ennen ensimmäistä voittoa, kun vartija ei ole hereillä ja pelaaja on alle 80 m Kalmankehästä
 // (maailmassa). Soi 24–48 s välein (ensimmäinen 4–10 s), tumma ja kaiullinen; jos ääni latautuu vielä, uusi yritys 3 s päästä.
 // Ilman omaa kaikuääntä lainaa Aarnihirviön (💎) kaikuäänen; jos sitäkään ei ole, on hiljaa.

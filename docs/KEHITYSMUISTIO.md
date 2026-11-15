@@ -321,6 +321,16 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
   hirvi (3), karju (2), kalmo (1), karhu (1), sammalhiisi (1); ⭐ peura, kettu, ilves, kalmanvartija (1 kukin); kalmon ylimys ja hiidenhirvi vain lainaavat.
   Metsolla ei ole varaääntä (ei merkkiä, ei lainaa).
 
+### v2.60 (oven animaatio, olentoäänten päällekkäisyysraja – lista 8, kohdat 4–5)
+- **Ovi** (pieces.js): `setDoor(p,open,dir,inst)` käynnistää `DOOR_T` 0,6 s käännön (`doorEase` = ease-out kuutio), `doorTick(dt)` main.js `update`:ssa
+  (`DOOR_ANIM`-joukko). Avatessa `c.off` heti, sulkiessa vasta lopussa; `doorInWay(p)` → sulkeminen palauttaa false ja interact ilmoittaa.
+  `addPiece` (lataus, rakentaminen) käyttää `inst`-tilaa. Liikkeen aikana `shDirty`/`bldDirty` joka ruutu (ei `bmDirty`: oven lehti ei yhdisty).
+- **Olentoäänet** (audio.js `creSnd`): `CRE_OVL` {kinds idle/chase/aggro/echo, max 3, cd2 1 s, win 3 s, n3 3 → cd3 8 s, gap 0,15 s, perKind 3},
+  `creFileOk`/`creFileUse`/`creFileN` (tiedoston nimi `v.name`), `CRE.fcd` (tauot), `CRE.fh` (alkuhetket), `CRE.skip` (DEV-mittari). Ajat
+  `performance.now()`:lla, koska suodatus tehdään ennen AudioContextin tarkistusta. Ennen raja 3 per olento+laji koski vain idle/chasea.
+- Testattu: ovi 0,6 s (kulma 1,49 rad), este oikein, oviaukossa ei sulkeudu; 6 kalmoa hyökkää yhtä aikaa → 2 ääntä (eri versiot), loput pois.
+  Tarkistusrivit v2.60 (2 kpl).
+
 ### v2.59 (tallennuksen jatkaminen latausnäytöllä, latausnäytön ääni – käyttäjän pyyntö)
 - **Jatka tallennusta** (Jatka-nappi ja maailmalista, sama kartta): `playSave` → `saveLoad(s, tervehdys)` (main.js): `__ldShow('Maailma herää…')` →
   90 ms → `loadData` + `startPlay` + `P.spawnProt` ≥ 4 s → `SAVE_LD_FRAMES` 20 ruutua (varjostimet) → `__ldDone` (leimahdus + häivytys

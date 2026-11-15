@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='2.59';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='2.60';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -198,7 +198,7 @@ function update(dt){
   playTime+=dt;if(!lkT){dayT+=dt/DAY_LEN;if(dayT>=1){dayT-=1;dayN++;msg(`Päivä ${dayN}`);}}
   const wasNight=isNight();
   updatePlayer(dt);updateEffects(dt);updateDungeons(dt);updateStory(dt);
-  if(!fz){updateMobs(dt);creTick(dt);updateProjs(dt);updateDrops(dt);updateFx(dt);updateStations(dt);spawner(dt);survival(dt);}
+  if(!fz){updateMobs(dt);creTick(dt);updateProjs(dt);updateDrops(dt);updateFx(dt);updateStations(dt);doorTick(dt);spawner(dt);survival(dt);}
   if(!lkT)updateWeather();else weather.until=Math.max(weather.until,playTime+1);
   updateEnvironment(dt);updateCamera(dt);updateBenchRings();updateChunkVis();updateGrass();
   if(state==='play'){lookTarget=findInteract();updateGhost();}else if(ghost)ghost.visible=false;
@@ -265,7 +265,7 @@ let perfEl=null,perfT=0,perfN=0,perfMs=0,perfMax=0;
 function perfTick(raw){if(!devOn('perf')){if(perfEl){perfEl.remove();perfEl=null;}return;}
   if(!perfEl){perfEl=document.createElement('div');perfEl.id='devPerf';perfEl.style.cssText='position:fixed;left:8px;top:8px;z-index:9000;font:12px/1.35 monospace;color:#d8f0c8;background:rgba(0,0,0,.55);padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(perfEl);}
   perfN++;perfMs+=raw*1000;perfMax=Math.max(perfMax,raw*1000);perfT+=raw;if(perfT<.5)return;const i=renderer.info;
-  perfEl.textContent=`ruutu ${(perfMs/perfN).toFixed(1)} ms (max ${perfMax.toFixed(0)}) · ${Math.round(perfN/perfT)} FPS\npiirtokutsut ${i.render.calls} · kolmiot ${(i.render.triangles/1000).toFixed(0)}k\ngeometriat ${i.memory.geometries} · tekstuurit ${i.memory.textures}\nvarjomallit ${typeof SHP!=='undefined'?SHP.n+' (+'+SHP.nf+' tuli, '+SHP.occ+' piilossa)':'-'}\nyhdistetyt rakennussolut ${typeof BMC!=='undefined'?BMC.size:'-'}`;
+  perfEl.textContent=`ruutu ${(perfMs/perfN).toFixed(1)} ms (max ${perfMax.toFixed(0)}) · ${Math.round(perfN/perfT)} FPS\npiirtokutsut ${i.render.calls} · kolmiot ${(i.render.triangles/1000).toFixed(0)}k\ngeometriat ${i.memory.geometries} · tekstuurit ${i.memory.textures}\nvarjomallit ${typeof SHP!=='undefined'?SHP.n+' (+'+SHP.nf+' tuli, '+SHP.occ+' piilossa)':'-'}\nyhdistetyt rakennussolut ${typeof BMC!=='undefined'?BMC.size:'-'}\nolentoäänet ${CRE.voices.length} · pois jääneet ${CRE.skip}`;   // v2.60 päällekkäisyysraja
   perfT=0;perfN=0;perfMs=0;perfMax=0;}
 function updateFps(raw){if(SET.fps==='off')return;fpsN++;fpsT+=raw;if(fpsT<.5)return;const f=Math.round(fpsN/fpsT),el=$('#fps');fpsN=0;fpsT=0;
   if(el){el.textContent=f+' FPS';el.style.color=f>=50?'#8fd8a0':f>=30?'#e8c45a':'#e0614f';}}
