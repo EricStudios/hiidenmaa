@@ -16,7 +16,7 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 ## Nykytila (päivitetty v2.59)
 
 - **PR #35 (v2.28–v2.49) ja #36 (muistiinpanot) on yhdistetty. PR #37 (v2.50–v2.56, lista 7 kokonaan + sarvien varaääni + Kalmanvartija 10 + puolituksen korjaus + äänet ja ikkunat v2.57–v2.58 + latausnäyttö v2.59) odottaa yhdistämistä.**
-  Lista 7: ks. Ideajono › "Lista 7" (kaikki kohdat tehty; uudet äänet paikkamerkkeinä). **Lista 8 (ideointi, ei tehty): Ideajono › "Lista 8".** Avoimet: Ideajono › "Avoimet havainnot".
+  Lista 7: ks. Ideajono › "Lista 7" (kaikki kohdat tehty; uudet äänet paikkamerkkeinä). **Lista 8 tehty v2.60–v2.62 (Ideajono › "Lista 8").** Avoimet: Ideajono › "Avoimet havainnot".
 - **Versio 2.59**, haara `claude/hiidenmaa-survival-game-fmxt0m` (jatkettu mainista). **PR #25** (v1.38–v1.83), **#27** (v1.84–v1.95) ja **#28** (v1.96–v2.10) on **yhdistetty**. **#29** (v2.11–v2.15) on **yhdistetty**. **#30** (v2.16: kivivartija, ääniprojektien kansiot, toimintoäänet B1) on **yhdistetty**. v2.17 (pomojen toimintokansio, ryntäysäänet, vesi sammuttaa, sade sammuttaa nuotion) ja v2.18 (vesiuudistus: uinti, hukkuminen, vesivarjostin, vedenalaiset efektit, K pois) PR #31:ssä; v2.19 korjaa valikon 3D-piirron (KORJAUKSET 47); v2.20 Extra-grafiikka, low poly -vesi, rantaroiskeet, ylämäen hidastus, kohteet rinteen mukaan. **PR #31 (v2.17–v2.20) on yhdistetty.** **PR #32 (v2.21) on yhdistetty.** **PR #33 (v2.22) on yhdistetty.** v2.23 (toimintoäänierä 2, kivivartijan äänet, toimintosilmukat, tarkistustyökalun korjaus) ja v2.24 (äänitasot, juominen, pää alas, pelaajan toimintoäänet) ja v2.25 (sudet hiljemmaksi, Aarnipuun törmäys, karhun syöksy, pelaajan äänet osat 1–3) ja v2.26 (pensasäänet, askeleet −20 %, terveyspalkkien näkyvyys) ja v2.27 (Aarnimetsän askel, oksat) – **PR #34 (v2.23–v2.27) on yhdistetty.** v2.28 (pelaajan äänierä osa 2: 22 ääntä, puun tömähdys, reppu kiinni, arkun sulkeminen) ja v2.29 (narinan ajoitus, siirto- ja puolitusäänet, Shift-siirtoslider) ja v2.30 (sliderin korjaukset, poimintaääni) ja v2.31 (poimintaäänen sävy) ja v2.32 (valitse + oikea klikkaus puolittaa myös hiiren lukituksessa) ja v2.33 (valinta säilyy pienessä liikkeessä, avointen biomien vaaleammat varjot) ja v2.34 (metsien varjot 20 % vaaleammat, vuorokauden vaihtelu ±15 %) ja v2.35 (näytön auringonsäteet, linssiheijastus) ja v2.36 (säteiden ajoitus, päiväkohtaisuus, peitto) ja v2.37 (säteet takaisin koko päiväksi) ja v2.38 (pyöreä auringon hehku, pilvien syvyys, kovat/pehmeät säteet) ja v2.39 (pienempi auringon hehku) ja v2.40 (elävät säteet, peitto suunnittain) ja v2.41 (suorituskykyoptimoinnit: puiden LOD, varjomallit, rakennusten yhdistäminen) ja v2.42 (low poly -sävytys säilyy varjojen vaalennuksessa) ja v2.43 (hautakummun kieleke, savujen optimointi, liekit pystyyn) ja v2.44 (satunnainen pilvimatto) ja v2.45 (terävät soihtuvarjot Extra-grafiikkaan) ja v2.46 (repun vilkkuminen/puolitus, pilvet, hukkumisen tarkistus) ja v2.47 (pilvipäivät, pilvimatto 50 %, heijastuksen päivävaihtelu, pilvet ylemmäs) PR #35:ssä. Käyttäjä tekee seuraavaksi ehkä ketulle omat äänet. Aiemmin #27: äänierä A (v1.84–v1.86: äänet, Aarnihirviön äänet pääääneksi, kaiku ulottuvuuksiin). **JATKA TÄSTÄ (äänet):** käyttäjä lisää olentojen ääniä erissä → noudata "Äänierän rutiini"; v2.11 HUOM: `aarnihirvio_chase_2` ja `karhu_hurt_1` ovat sama tiedosto; isot vahvistukset (raaka hiljainen): `kalmo_chase_1` +24, `susi_hurt_2` +23,7 (raaka 7,5 s ulvonta osumapaikassa → 0,18 s, väärä paikka?), `metso_hurt_1/2`, `hiisi_death_1` (+12…14 dB). Puuttuvat ketjun alut (🎯): `hiidenkarhu_chase`, `hiidenhirvi_chase`. Aiempi:
   `main` = v1.37. Kaikki käyttäjän pyynnöt tehty: päivityslistat 4 (v1.39–v1.44), 5 (v1.49–v1.52) ja 6 (v1.53–v1.57) sekä valikon ja
   logon uudistukset (v1.45–v1.48). Seuraava työ: uusi lista käyttäjältä.
@@ -251,13 +251,28 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
   korostusväri hiillos-oranssi `--ember`, hiidenkivien hehku `--frost`.
 - Kuolemassa koko reppu jää hautakasaan kuolinpaikalle (näkyy kartalla).
 - Sänky asettaa herätyspaikan. Nukkuminen vaatii yön, katon ja ettei vihollisia ole lähellä.
-- Pomo palaa maahan ja hiidenkivet jäävät alttarille, jos pelaaja poistuu yli 90 m päähän.
-- **Ulottuvuuksien etenemisketju (ei jumiutumista):** Jääavain löytyy maailmasta (rauniotalo `poiR1`) → Routaportti → Jäätär antaa
+- Pomo palaa maahan ja kruununsirpaleet jäävät alttarille, jos pelaaja poistuu yli 90 m päähän (v1.34 alkaen alttari vaatii sirpaleet, ei hiidenkiviä).
+- **PELIN KULKU (v2.62, käyttäjän päätös – pidä tämä ajan tasalla):**
+  1. Saari: kerää, rakenna, vahvistu. 2. Hautakumpu: kaada **Kalmon ylimys** (solu `B`) → **Kalmon sinetti** (kerran, `flags.sinetti`) + kirstuista 2 hiidenkiveä.
+  3. Saaren arkut: **Jääavain** arvottu tavalliseen maailman arkkuun (rauniot, linnakkeet, kiviröykkiöt – ei Hautakummun kirstuihin).
+  4. **Routaportti** (kaksi lukkoa: sinetti + avain, kumpi tahansa ensin) → Routaluola: Jäätär → **Luuavain** (+ hiidenkivi; arkussa 1 hiidenkivi).
+  5. Kalmankammio: Kalmaherra → **Aarniavain** (+ hiidenkivi; arkussa 1 hiidenkivi). 6. Aarnihauta: Aarnihirviö → 1 hiidenkivi + **3 kruunusirpaletta**
+     (1 pomolta, 2 satunnaisesta arkusta `flags.sirpC`). 7. **Kalmankehä:** 3 sirpaletta alttarille → **Kalmanvartija** (loppupomo, vaikeus 10).
+  - **Hiidenkivet: tasan 9** (maailma 4: Hautakummun kirstut 2 + POI_LOOT poiR3/poiK3 2, sekoitetaan maailman arkkujen kesken; Jäätär, Kalmaherra,
+    Aarnihirviö 1 kukin; Routaluolan ja Kalmankammion satunnainen arkku 1 + 1 `flags.hkC`). Ei satunnaisia lähteitä (RARE_LOOT, CHEST_LOOT, Kalmanpesä,
+    PEACE_LOOT poistettu v2.62). Käyttö vain 3 reseptiin: hiidenjousi 2, hiidenmiekka 3, hiidenpanssari 4 (= 9).
+  - **Avaimen kätkijä** (`LOC.runeK`, story.js): näyttävä riimukivi korkealla vuorella, ei kartalla ennen käyntiä (25 m). Kertoo aina seuraavan
+    etenemiseen tarvittavan avaimen/esineen paikan runollisesti (`keeperHint`, vaiheet A–I). 15 min (`KEEPER_T`) ilman edistymistä → vihje tarkentuu ja
+    ilmoitus. **Avaimen arkkua ei koskaan merkitä kartalle** (käyttäjän päätös). Riimukivi "Vuoren kuiskaus" (`runeB`) kertoo kätkijän suunnan.
+  - **Arvoesineet:** jos esine on maassa (pelaaja > 10 m tai muualla) 60 s (`VAL_LOST`) → "… on hukattu" ja siirto arkkuun, josta sen normaalistikin
+    löytää (`VAL_HOME`): ulottuvuuspomon esine saman ulottuvuuden arkkuun (`flags.xadd`), sinetti Hautakummun kirstuun, muut maailman arkkuihin.
+    Reppu, pelin arkut, omat arkut ja hautakasa ovat turvassa. Laskenta `valuableCensus` palauttaa kadonneet uniikit.
+- **Ulottuvuuksien etenemisketju (ei jumiutumista):** Jääavain löytyy maailmasta (v2.62: + Kalmon sinetti ylimykseltä) → Routaportti → Jäätär antaa
   Luuavaimen → Kalmankammion portti → Kalmaherra antaa Aarniavaimen → Aarnihaudan portti. Ensimmäinen ulottuvuus ei vaadi mitään
   muista ulottuvuuksista. Avain annetaan suoraan reppuun (`REALMS[id].key`, `onMobKilled`). Varmistus: portti aukeaa ilman avainta,
   jos avaimen lähde on jo käyty (`REALMS[id].alt`: arkku avattu / edellinen pomo kaadettu) tai ulottuvuudessa on jo käyty (`flags.rs`).
-  Maahan pudonneita esineitä ei tallenneta, joten tämä varmistus on pakollinen. Hiidenkiviä on tarjolla 8 (kumpu 3, pomot 3, arkut 2),
-  alttari tarvitsee 3.
+  Maahan pudonneita esineitä ei tallenneta, joten tämä varmistus on pakollinen. v2.62: lukkoja voi olla useita (`REALMS[id].locks`, tila `fo('lk')`),
+  jokaisella oma varmistus (sinetti: `flags.sinetti` tai ylimys kaadettu). Hiidenkiviä tasan 9 (ks. yllä); alttari vaatii 3 kruunusirpaletta.
 
 ## Tasapainoarvot (päivitä kun muutat)
 
@@ -269,7 +284,7 @@ haarniskaa; nopeus = `run` × `MOB_SPD` 0,85 × vaihe). Huom: v2.54:n taulukossa
 | Jäätär (Routaluola, 1.) | 840 (560 × 1,5) | huitaisu 25, maaisku 30 (7 m), kivi 22, nova 28 (11 m) | 3,1 / 3,4 / 3,8 | 66 % ja 33 %: +10 % / +25 % nopeus, iskuväli 1,9 → 1,4 → 1,0 s (×1,1 heittäjä) | 60 s ilman osumaa → 10 %/s |
 | Kalmaherra (Kalmankammio, 2.) | 1 280 (640 × 2) | huitaisu 28, ryntäys 30 (11,9–14,9 m/s), nova 30, tulilinja 20 + palaminen | 3,4 / 3,7 / 4,3 | ph2 2 kalmoa, ph3 3; alle 50 % tulilinjat; alle 30 % viimeinen raivo (ryntäys 3,1 s välein, 5 kalmoa / 20 s, enint. 12) | 60 s → 10 %/s |
 | Aarnihirviö (Aarnihauta, 3.) | 1 872 (720 × 2,6) | huitaisu 30, ryntäys 33, maaisku 36 (7 m) | 3,4 / 3,7 / 4,3 | ph3 3 kätyriä | 102 s → 1 %/s (hidas) |
-| Kalmanvartija (Kalmankehä, alttari 3 hiidenkiveä) | 2 250 (900 × 2,5) | v2.55: huitaisu 29, maaisku 36 (7 m), ryntäys 34 (12,8 m/s), kivi 26; raivo: kivisade 6–8 × 22, maapiikit 30, 3 kiveä × 26 | 3,1 / 3,7 (alle 50 %) | alle 50 %: raivo (punaiset silmät ja mittari), 3 kalmoa, +20 % nopeus, iskuväli 2,1 → 1,45 s, uudet hyökkäykset | 30 s → 10 %/s; vajoaa yli 90 m:ssä, nousee täysin HP:in |
+| Kalmanvartija (Kalmankehä, alttari 3 kruunusirpaletta) | 2 250 (900 × 2,5) | v2.55: huitaisu 29, maaisku 36 (7 m), ryntäys 34 (12,8 m/s), kivi 26; raivo: kivisade 6–8 × 22, maapiikit 30, 3 kiveä × 26 | 3,1 / 3,7 (alle 50 %) | alle 50 %: raivo (punaiset silmät ja mittari), 3 kalmoa, +20 % nopeus, iskuväli 2,1 → 1,45 s, uudet hyökkäykset | 30 s → 10 %/s; vajoaa yli 90 m:ssä, nousee täysin HP:in |
 
 Armo: pelaajan 3. kuolema samalle pomolle (Kalmanvartija 5., `BOSS_MERCY`) → ei enää parane (`bossTired`); Kalmanvartija säilyttää silloin HP:n
 myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juoksu 8 m/s.
@@ -320,6 +335,23 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
   sarakkeen rivi `lainaavat: …` (suorat ensin, ketjun kautta tulevat "via X"). Selite taulukoiden alussa. Nykyiset (v1.95): 💎 susi (6), aarnihirviö (4),
   hirvi (3), karju (2), kalmo (1), karhu (1), sammalhiisi (1); ⭐ peura, kettu, ilves, kalmanvartija (1 kukin); kalmon ylimys ja hiidenhirvi vain lainaavat.
   Metsolla ei ole varaääntä (ei merkkiä, ei lainaa).
+
+### v2.62 (Routaportin kaksi lukkoa, Kalmon sinetti, Avaimen kätkijä, arvoesineiden siirto lähteeseen, 9 hiidenkiveä – lista 8, kohdat 1–3)
+- **Kalmon sinetti** (`ITEMS.sinetti`, kuvake, 3D `sinettiMesh` state.js, arvoesine): Hautakummun ylimys (`dunSpawns` B) kantaa sitä vyöllä
+  (`sinettiCarry`, actions.js) ja pudottaa kerran (`killMob`, `flags.sinetti`).
+- **Lukot** (dungeons.js): `REALMS[id].locks` [{it, alt, hint}], Routaportilla jaaavain + sinetti, muilla yksi (johdettu `lock`/`alt`/`hint`:stä).
+  `lockOpen`/`lockSet` (`fo('lk')`), `portalNeed`, `portalLabel` (✓/✗), riippulukot `pads` (värimerkki, avattu katoaa). `portalLocked` ennallaan (`rl`/`rs`).
+- **Jääavain** vain tavallisiin maailman arkkuihin (`planLoot` `KW`); vanhoissa tallennuksissa jo arvottu paikka säilyy.
+- **Avaimen kätkijä** (story.js loppu): paikka kasvillisuuden jälkeen (korkein tasainen kohta ≥ 12 m, ei puita/kiviä, 40 m muista), malli 4,2 m
+  paasi + 5 kiveä + leijuva kristalli + violetti valo. `keeperHint()` vaiheet A–I (sig), taso 2 kun `playTime−flags.kpT ≥ KEEPER_T` (900 s),
+  `keeperTick()` (1 s välein) → ilmoitus kerran vaihetta kohden (`flags.kpN`), löytö 25 m. Runeb → "Vuoren kuiskaus".
+- **Arvoesineet:** `VAL_LOST` 120 → 60 s. `VAL_HOME`, `relocateRealm` (vain käydyt ulottuvuudet `fo('rs')`; arkkujen määrä `fo('rnc')`/`R.nChest`),
+  avaamattomaan `flags.xadd` (openFound lisää, `countAll` laskee), avattuun `chestPut`. Uusi ilmoitus "… on hukattu – sen voi löytää jostain … arkusta".
+- **Hiidenkivet 9:** SARC_LOOT 3 → 2, ulottuvuusarkut `flags.hkC` (portal1/2), poistettu CHEST_LOOT/RARE_LOOT/Kalmanpesä/PEACE_LOOT-hiidenkivet.
+- **Tehtävät:** uusi tehtävä 4 "Kaada Hautakummun ylimys"; vanha tallennus `flags.qv` < 2 ja `qi` ≥ 3 → `qi+1` (save.js). "Avaa Routaportti" -teksti.
+- **Tekstikorjaukset:** hiidenkiven kuvaus (ei alttaria), Jääavaimen kuvaus, vartijan vajoamisviesti "Kruununsirpaleet jäävät alttarille", muistion pysyvät päätökset.
+- Testattu: kaikki 6 karttaa (kätkijä 21–64 m korkeudella, maailmassa 4 hiidenkiveä, avain ei kirstussa); ylimys → sinetti → lukko ✓ → Jääavain →
+  portti auki; hukattu Luuavain → Routaluolan arkku (xadd) → avattaessa repussa. Tarkistusrivit v2.62 (5 kpl).
 
 ### v2.61 (sää- ja tunnelmaäänet: kansiot, paikkamerkit ja soitin – käyttäjän pyyntö)
 - **Uusi ääniprojekti** `sounds/saa_ja_tunnelma/` (process_sounds.py X_PARTS, avaimet `a/<ryhmä>/<ääni>_<n>`, lista `AANILISTA_SAA_TUNNELMA.csv`
@@ -3288,7 +3320,9 @@ kanssa; (3) Ultra-asetuksella jopa ~830 piirtokutsua.
 5. → **tehty v2.53** (paikkamerkit; käyttäjä tuo musiikin ja äänet). Musiikkikansio (ensin valikkomusiikit): soi intron "Hiidenmaa"-tekstistä päävalikkoon, häivytys ulos peliin liittyessä; taukovalikossa
    alkaa 15 s jälkeen; aina pieni fade out, fade in vain pyydettäessä. Extra: 3 animoitua taustakuvaa, joihin satunnaisia hiljaisia ääniä.
 
-### Lista 8 (ideointi 15.11., EI vielä tehty) – yksi kohta kerrallaan, 1–5 tarkentavaa kysymystä per kohta
+### Lista 8 (15.11.) – **kaikki tehty v2.60–v2.62** (kohdat 4–5 v2.60, 1–3 v2.62; lisäksi sää- ja tunnelmaäänet v2.61)
+- Käyttäjän vastaukset: nimi Kalmon sinetti; ylimyksen vyöllä hehkuva sinetti; kartalle EI merkitä mitään; äänisääntö 2 päällekkäin → 1 s, 3 kertaa 3 s sisällä → 8 s;
+  Avaimen kätkijä vuorelle, piilossa kartalta, vihje päivittyy, 15 min → uusi vihje; hiidenkiven kuvaus ja vartijan viesti korjataan.
 1. **Hiidenkivet tasan 9 kätkettynä** (jousi 2 + miekka 3 + panssari 4). Ehdotettu jako: Hautakummun kirstut 2, maailman raunio/linnake 1,
    hyvin piilotettu maailman paikka 1, ulottuvuuspomot 3, Routaluolan arkku 1, Kalmankammion arkku 1 (maailma 4, ulottuvuudet 5).
    Avoinna: satunnaiset kivet (RARE_LOOT, CHEST_LOOT, Aarnihaudan lattia, PEACE_LOOT) kokonaan pois vai lisäksi; kelpaako jako.

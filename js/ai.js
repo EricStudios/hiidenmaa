@@ -473,7 +473,7 @@ function bossAI(m,dt,dx,dz,dist){
     m.f.g.position.copy(m.pos);m.f.g.rotation.y=m.yaw;return;}
   // v0.95 (kohta 10): yli 90 m:n päässä vartija pysähtyy ja vajoaa 3 s:ssa maahan (multaa, jyrinä), vajoamisen ajan haavoittumaton.
   if(m.state!=='sink'&&!m.devSpawn&&(dist2(P.pos.x,P.pos.z,L.x,L.z)>90*90||P.inDun)){   /* v1.91: DEV-luotu vartija ei vajoa */m.state='sink';m.t=0;m.act=null;m.sinking=1;m.y0=m.pos.y;sfx('slam',.5,.6);sfx('roar',.6,.5);
-    msg(bossTired('vartija')?'Vartija vajoaa takaisin maahan. Hiidenkivet jäävät alttarille – herätä se uudelleen alttarilta (uupuneena terveys säilyy).':'Vartija vajoaa takaisin maahan. Hiidenkivet jäävät alttarille – herätä se uudelleen alttarilta (se palaa täysin voimin).','warn');}
+    msg(bossTired('vartija')?'Vartija vajoaa takaisin maahan. Kruununsirpaleet jäävät alttarille – herätä se uudelleen alttarilta (uupuneena terveys säilyy).':'Vartija vajoaa takaisin maahan. Kruununsirpaleet jäävät alttarille – herätä se uudelleen alttarilta (se palaa täysin voimin).','warn');}
   if(m.state==='sink'){m.t+=dt;const k=Math.min(1,m.t/3);m.pos.y=m.y0-k*k*7.5;m.f.armL.rotation.x=m.f.armR.rotation.x=-2.6*Math.min(1,m.t*1.5);
     if(Math.random()<dt*30)burst(m.pos.x+(Math.random()-.5)*4,m.y0+.2,m.pos.z+(Math.random()-.5)*4,Math.random()<.5?0x5d5a54:0x6a5a44,4,5);
     if(dist2(P.pos.x,P.pos.z,m.pos.x,m.pos.z)<40*40&&Math.random()<dt*4)shake(.12);m.f.g.position.copy(m.pos);m.f.g.rotation.y=m.yaw;
@@ -513,7 +513,7 @@ let peaceTimer=0;
 function peaceTick(){if(flags.peacePend&&!peaceTimer&&state==='play'&&$('#winS').hidden)peaceTimer=setTimeout(peaceRefill,2000);}
 // maailman tyhjennetyt arkut (avattu ja kaikki otettu) täyttyvät: 8 eri tavaraa satunnaisin määrin, harvinaisia pienellä todennäköisyydellä
 const PEACE_LOOT=[['kupari',3,8],['rauta',2,5],['nuolet',10,25],['sulkanuolet',6,14],['tulinuolet',4,10],['liha',2,5],['nahka',2,5],['luu',3,8],['pihka',2,6],
-  ['hiili',3,8],['rautamalmi',2,6],['kivi',5,12],['piikivi',2,6],['sulka',2,6],['hiidenkivi',1,1,.25],['karhuntalja',1,1,.3]];
+  ['hiili',3,8],['rautamalmi',2,6],['kivi',5,12],['piikivi',2,6],['sulka',2,6],['karhuntalja',1,1,.3]];   // v2.62 hiidenkivi pois (tasan 9 kätkettyä)
 function peaceRefill(){peaceTimer=0;if(!flags.peacePend)return;flags.peacePend=0;const fc=fo('fc');let n=0;
   for(const c of worldChests()){const it=fc[c.key];if(!it||it.some(Boolean))continue;
     const pool=PEACE_LOOT.filter(e=>ITEMS[e[0]]&&(e[3]==null||Math.random()<e[3])).sort(()=>Math.random()-.5).slice(0,8);

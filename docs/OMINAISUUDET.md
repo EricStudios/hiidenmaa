@@ -168,7 +168,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   napsautus siirtää esineen, käyttöönotto perutaan. Ruoka syödään VAIN pikapaikan numerolla. Pudotus (Q, Pudota-nappi, raahaus ulos) heittää
   esineen ~3 m eteenpäin kameran suuntaan.
 - **Reppu:** 32 paikkaa, kehitys +8 paikkaa / +40 painoa (2 tasoa). Arkku 16→24→32, tynnyri 10→16→22.
-- **Avaimet:** Jääavain, Luuavain, Aarniavain (ulottuvuuksien portit).
+- **Avaimet:** Jääavain, Kalmon sinetti (v2.62, Routaportin toinen lukko), Luuavain, Aarniavain (ulottuvuuksien portit).
 
 ## 6. Rakentaminen (pieces.js, building.js)
 
@@ -298,8 +298,13 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   Katto 7,6 m. Sisältö: soihdut telineissä, luut, tippukivet + pisarat, lätäköt, usva ja höyry, arkut ja tynnyrit, Kalmanpesä-spawneri
   (3 vihollista 20 s välein, kun edelliset kuolleet ja pelaaja < 26 m). **Kalmanpesän voi murskata hakulla** (kestävyys 240, isku =
   louhintateho, kivihakulla 20 iskua) → rauniot, saalista ja 40 XP; tuhottu pesä pysyy tuhottuna (`flags.sd`).
-- **Etenemisketju:** Jääavain maailmasta → Routaluola → Luuavain → Kalmankammio → Aarniavain → Aarnihauta. Varmistus: portti aukeaa
-  ilman avainta, jos lähde on jo käyty tai ulottuvuudessa on käyty.
+- **Etenemisketju (v2.62):** Kalmon sinetti (Hautakummun ylimys) + Jääavain (maailman arkku) → Routaportti (kaksi lukkoa, kumpi tahansa ensin,
+  teksti ✓/✗) → Routaluola → Luuavain → Kalmankammio → Aarniavain → Aarnihauta → 3 kruunusirpaletta → Kalmankehä → Kalmanvartija.
+  Varmistus: lukko aukeaa ilman esinettä, jos lähde on jo käyty (arkku avattu, ylimys tai pomo kaadettu) tai ulottuvuudessa on käyty.
+- **Avaimen kätkijä (v2.62):** näyttävä riimukivi korkealla vuorella, ei kartalla ennen kuin siellä käy. Kertoo runollisesti seuraavan avaimen tai
+  esineen paikan pelitilanteen mukaan; 15 min ilman edistymistä → tarkempi vihje ja ilmoitus. Avaimen arkkua ei merkitä kartalle.
+- **Hiidenkivet (v2.62):** tasan 9 – maailmassa 4 (Hautakummun kirstut 2 + arkut 2, arvotaan maailman arkkuihin), ulottuvuuspomot 3,
+  Routaluolan ja Kalmankammion arkussa 1 + 1. Riittää hiidenjouseen (2), -miekkaan (3) ja -panssariin (4).
 - **Portaalisuoja:** 3,2 s siirtymän jälkeen viholliset eivät voi vahingoittaa eivätkä aloita jahtia; viholliset ≥ 10 ruudun päässä sisäänkäynnistä.
 
 ## 12. Löytöpaikat, tarina ja eteneminen
@@ -374,12 +379,13 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Tulinuolen valo hiipuu lennossa, sateessa kaksi kertaa nopeammin; osumasta sammuu 2 s:ssa.
 
 ## Eteneminen ja arvoesineet v1.34
-- Järjestys: Jääavain (satunnainen vanha arkku, portti kertoo suunnan) → Routaportti → Jäätär (luuavain) → Kalmankammio → Kalmaherra
+- Järjestys (v2.62: + Kalmon sinetti ylimykseltä): Jääavain (satunnainen vanha arkku, ei Hautakummun kirstu) → Routaportti → Jäätär (luuavain) → Kalmankammio → Kalmaherra
   (aarniavain) → Aarnihauta → Aarnihirviö (Kalmankruunun sirpale) + 2 sirpaletta Aarnihaudan arkuissa → Kalmankehän alttari (3 sirpaletta)
   → Kalmanvartija (viimeinen pomo).
 - Pääsaaren arkkujen tavalliset tavarat arvotaan maailman luonnissa.
-- Arvoesineet (avaimet, Vartijan sydän, sirpaleet, hiidenkivet, harvinaiset ★) eivät katoa maasta, hehkuvat ja siirtyvät 2 min jälkeen
-  (pelaaja > 10 m tai muualla) satunnaiseen pääsaaren arkkuun. Kadonneet uniikit palautetaan automaattisesti.
+- Arvoesineet (avaimet, sinetti, Vartijan sydän, sirpaleet, hiidenkivet, harvinaiset ★) eivät katoa maasta, hehkuvat ja siirtyvät **v2.62: 60 s**
+  jälkeen (pelaaja > 10 m tai muualla) arkkuun, josta ne normaalistikin löytää: ulottuvuuspomon esine saman ulottuvuuden arkkuun, sinetti
+  Hautakummun kirstuun, muut maailman arkkuihin (ilmoitus "… on hukattu"). Reppu, arkut ja hautakasa ovat turvassa. Kadonneet uniikit palautetaan.
 - Kaksi kylttiä antaa kryptiset vihjeet (E lukee).
 - Maassa olevat esineet näkyvät kuvakkeina, joilla on paksuutta (asetus).
 

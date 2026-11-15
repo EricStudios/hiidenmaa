@@ -159,7 +159,7 @@ let devQ='',devN=1;
 const WIND_WARN=8;   // v2.01 tuulivaroituksen raja (m/s)
 /* v2.00 DEV-valikko Å: esineet. Pikavalinnat (yksi painallus antaa ehdotetun määrän, "Anna kaikki" kaikki kerralla) + esinehaku määrällä. */
 const DEV_PICKS=[['hiidenmiekka',1],['hiidenpanssari',1],['rautakilpi',1],['hiidenjousi',1],['sulkanuolet',100],['tulinuolet',100],['pihka',100],['puu',100],
-  ['hiidenkivi',3],['jaaavain',1],['luuavain',1],['aarniavain',1],['kruunusirpale',3],['parannusjuoma',5],['elpymisjuoma',5],['sisujuoma',5]];
+  ['hiidenkivi',3],['jaaavain',1],['sinetti',1],['luuavain',1],['aarniavain',1],['kruunusirpale',3],['parannusjuoma',5],['elpymisjuoma',5],['sisujuoma',5]];
 function renderDevI(){const B=$('#devIBody');if(!B)return;
   B.innerHTML=`<div class="devRow"><b>Pikavalinnat</b><div class="devList devPicks">${DEV_PICKS.map(([id,n])=>`<div class="devIt"><span class="ic" style="background-image:url(${icon(id)})"></span><span class="nm">${esc(ITEMS[id].n)} × ${n}</span><button class="btn" data-pick="${id}" data-n="${n}">Anna</button></div>`).join('')}</div>
     <div class="devBtns"><button class="btn" id="devPickAll">Anna kaikki</button></div></div>
@@ -459,6 +459,8 @@ function foundItems(key,loot,slots=8){const fc=fo('fc');if(!fc[key]){const it=[]
 // v1.34: ensimmäisellä avauksella maailman saalissuunnitelma (wlLoot) ja Aarnihaudan sirpalearkut (flags.sirpC).
 const POTIONS=['parannusjuoma','elpymisjuoma','sisujuoma'];   // v2.00: arkkuun (ei tynnyri/säkki) 10 % / juoma ensimmäisellä avauksella
 function openFound(key,title,loot){if(loot&&!fo('fc')[key]){loot=wlLoot(key,loot).slice();const m=/^portal3:(\d+)$/.exec(key);if(m&&(flags.sirpC||[]).includes(+m[1]))loot.unshift(['kruunusirpale',1]);
+    const hk=/^(portal[12]):(\d+)$/.exec(key);if(hk&&flags.hkC&&flags.hkC[hk[1]]===+hk[2])loot.unshift(['hiidenkivi',1]);   // v2.62 HK_PLAN
+    const xa=flags.xadd&&flags.xadd[key];if(xa){for(const e of xa)loot.unshift([e[0],e[1]]);delete flags.xadd[key];}   // v2.62 hukatut arvoesineet ulottuvuuden arkkuun
     if(title!=='Tynnyri'&&title!=='Hylätty säkki')for(const id of POTIONS)if(Math.random()<.1&&loot.length<8)loot.push([id,1]);}
   const items=foundItems(key,loot);if(openPanel)closePanels(true);togglePanel('chest');curChest={found:true,title,data:{items}};sfx('pickup');plSnd('kaytto','arkku_auki');renderChest();}
 const foundEmpty=key=>{const it=fo('fc')[key];return !!it&&!it.some(Boolean);};

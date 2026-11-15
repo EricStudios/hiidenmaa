@@ -103,9 +103,9 @@ const dropGeo=new THREE.BoxGeometry(.32,.32,.32);
 // v1.34 (lista 3, kohdat 9, 25, 39): maassa oleva esine. Arvoesine (isValuable) ei koskaan katoa, hehkuu (valo + kipinät) ja siirtyy
 // satunnaiseen maailman arkkuun, jos se on ollut maassa 2 min pelaajan ollessa yli 10 m päässä tai toisessa tilassa, tai putoaa kartalta.
 // Grafiikka: SET.drop3d → kuvake syvyydellä (kerrostetut tasot), muuten entinen värikuutio.
-const VALUABLE=['jaaavain','luuavain','aarniavain','sydan','kruunusirpale','hiidenkivi'];
+const VALUABLE=['jaaavain','sinetti','luuavain','aarniavain','sydan','kruunusirpale','hiidenkivi'];   // v2.62 sinetti
 const isValuable=id=>VALUABLE.includes(id)||!!(ITEMS[id]&&ITEMS[id].rare);
-const VAL_LOST=120,VAL_FAR=10;
+const VAL_LOST=60,VAL_FAR=10;   // v2.62: maassa (pelaaja yli 10 m tai muualla) 60 s → hukattu, siirtyy arkkuun (ennen 120 s)
 const _icoMat={},_icoGeo=new THREE.PlaneGeometry(.5,.5);
 /* v2.00: juomapullo maassa oikeana 3D-mallina (lasi, värillinen neste joka hehkuu hieman, kaula, korkki) – myös ilman 3D-kuvakkeita. */
 function potionMesh(id){const c=new THREE.Color(ITEMS[id].c),g=new THREE.Group();
@@ -138,9 +138,15 @@ function armorDropMesh(id){const d=ITEMS[id],c=new THREE.Color(d.c),met=/rauta|k
 function keyMesh(id){const C={jaaavain:[0x9fd8ff,0x3d7fa8],luuavain:[0xe6e0cf,0x8a8070],aarniavain:[0x7aff9a,0x2f8f4a]}[id],g=new THREE.Group(),M=dm(C[0],{metalness:id==='luuavain'?0:.5,roughness:.35,emissive:C[0],emissiveIntensity:.25});
   const bow=new THREE.Mesh(new THREE.TorusGeometry(.09,.025,8,18),M);bow.position.y=.2;g.add(bow);const sh=new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,.32,8),M);sh.position.y=-.03;g.add(sh);
   for(const [y,w] of [[-.16,.08],[-.09,.06]]){const t=new THREE.Mesh(new THREE.BoxGeometry(w,.035,.03),dm(C[1],{metalness:.4}));t.position.set(w/2,y,0);g.add(t);}return g;}
+// v2.62 Kalmon sinetti: luinen kiekko, violetti hehku, kallon merkki (maassa ja ylimyksen vyöllä)
+function sinettiMesh(s){s=s||1;const g=new THREE.Group(),bone=dm(0xe6e0cf,{roughness:.6}),glow=dm(0xc9b8ff,{emissive:0x8a6aff,emissiveIntensity:.9,roughness:.3}),dk=dm(0x2a2236);
+  const d=new THREE.Mesh(new THREE.CylinderGeometry(.13*s,.13*s,.03*s,16),bone);d.rotation.x=Math.PI/2;g.add(d);const f=new THREE.Mesh(new THREE.CylinderGeometry(.095*s,.095*s,.035*s,16),glow);f.rotation.x=Math.PI/2;g.add(f);
+  for(const x of [-.035,.035]){const e=new THREE.Mesh(new THREE.SphereGeometry(.022*s,6,5),dk);e.position.set(x*s,.02*s,.02*s);g.add(e);}const n=new THREE.Mesh(new THREE.BoxGeometry(.05*s,.012*s,.01*s),dk);n.position.set(0,-.035*s,.02*s);g.add(n);
+  const r=new THREE.Mesh(new THREE.TorusGeometry(.03*s,.008*s,6,10),bone);r.position.y=.15*s;g.add(r);return g;}
 function treasureMesh(id){const g=new THREE.Group();
   if(id==='hiidenkivi'){const m=new THREE.Mesh(new THREE.OctahedronGeometry(.16,0),dm(0x7fd6cc,{emissive:0x2fbfb0,emissiveIntensity:.6,metalness:.2,roughness:.15,flatShading:true}));m.scale.set(.75,1.4,.75);g.add(m);
     for(const [x,s] of [[-.11,.5],[.12,.42]]){const k=m.clone();k.scale.multiplyScalar(s);k.position.set(x,-.1,0);k.rotation.z=x*3;g.add(k);}}
+  else if(id==='sinetti'){g.add(sinettiMesh());}   // v2.62
   else if(id==='kruunusirpale'){const M=dm(0x9aff7a,{emissive:0x3a8a2a,emissiveIntensity:.6,roughness:.25,flatShading:true});const base=new THREE.Mesh(new THREE.CylinderGeometry(.16,.18,.08,8,1,true,0,Math.PI),dm(0xc9a24a,{metalness:.8,roughness:.3,side:THREE.DoubleSide}));g.add(base);
     for(const [a,h] of [[.4,.22],[1.2,.3],[2,.2],[2.7,.26]]){const sp=new THREE.Mesh(new THREE.ConeGeometry(.04,h,5),M);sp.position.set(Math.cos(a)*.16,.04+h/2,Math.sin(a)*.16);g.add(sp);}}
   else if(id==='sydan'){const M=dm(0x5fe6d9,{emissive:0x2fbfb0,emissiveIntensity:.8,roughness:.3});for(const sx of [-1,1]){const s=new THREE.Mesh(new THREE.SphereGeometry(.1,14,10),M);s.position.set(sx*.07,.05,0);g.add(s);}

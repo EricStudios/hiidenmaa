@@ -326,6 +326,33 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const src=ambTick.toString(),i2=/satunnainen_yhteinen/.test(src)&&AMB_RND_MIN===10&&AMB_RND_MAX===40&&/volK\('amb'\)/.test(src)&&/ambThunder\(/.test(updateEnvironment.toString())&&/ambTick\(raw\)/.test(frame.toString());
       r=a&&b&&c&&e&&f&&g&&h&&i2||`virhe ${a}${b}${c}${e}${f}${g}${h}${i2}`;}
     finally{[weather.cur,wRain,wSnow,wFog,WIND.spd,P.inDun,P.realm,indoorK]=sv;}return r;});
+  t('v2.62 Routaportti: kaksi lukkoa (Jääavain + Kalmon sinetti), ylimys kantaa sinettiä, Jääavain ei Hautakumpuun, varmistukset',()=>{
+    const D=REALMS.portal1,a=D.locks.length===2&&D.locks[0].it==='jaaavain'&&D.locks[1].it==='sinetti'&&REALMS.portal2.locks.length===1&&ITEMS.sinetti&&VALUABLE.includes('sinetti');
+    const b=/sinettiCarry\(m\)/.test(enterDungeon.toString())&&/m\.sinetti&&!flags\.sinetti/.test(killMob.toString())&&/'sinetti'/.test(spawnDrop.toString()+killMob.toString());
+    const c=/KW=W\.filter\(c=>!c\.barrow\)/.test(planLoot.toString())&&!worldChests().filter(c=>c.barrow).some(c=>c.key===flags.wl._key);
+    const pu=portalUse.toString(),e=/L\.alt\(\)\|\|fo\('rs'\)\[id\]/.test(pu)&&/lockSet\(id,L\.it\)/.test(pu)&&/✓/.test(portalLabel.toString());
+    const f=/sinetti/.test(D.locks[1].alt.toString())&&/ylimysDead/.test(D.locks[1].alt.toString());
+    const q=QUESTS.findIndex(x=>/ylimys/.test(x.t))===3;
+    return a&&b&&c&&e&&f&&q||`virhe ${a}${b}${c}${e}${f}${q}`;});
+  t('v2.62 Avaimen kätkijä: vuorella, ei kartalla ennen käyntiä, vihje vaiheen mukaan, 15 min → tarkempi vihje + ilmoitus',()=>{
+    const K=LOC.runeK,a=K&&K.kind==='keeper'&&terrainH(K.x,K.z)>=12&&XRUNES.runeB.t==='Riimukivi – Vuoren kuiskaus';
+    const sv=[flags.kpT,flags.kpS,flags.kpN,flags.disc.runeK];let r;try{delete flags.disc.runeK;const h=keeperHint();const b=h.tier===1&&/sinettiä|hammas|Kulje|sokkelo|kaatunut|sirpale|Kalmaherra|Aarnihirviö|avain/.test(h.txt);
+      flags.kpT=playTime-KEEPER_T-1;const c=keeperHint().tier===2&&KEEPER_T===900;flags.kpS=keeperHint().sig;flags.kpN=0;let m0='';const om=msg;msg=t=>{m0=t;};try{keeperTick();}finally{msg=om;}
+      const e=flags.kpN===1&&/vuorella|Avaimen kätkijä/.test(m0)&&!flags.disc.runeK;r=a&&b&&c&&e||`virhe ${a}${b}${c}${e}`;}
+    finally{[flags.kpT,flags.kpS,flags.kpN]=sv;if(sv[3])flags.disc.runeK=sv[3];}return r;});
+  t('v2.62 hukattu arvoesine: 60 s, siirtyy lähteensä arkkuun (ulottuvuus / Hautakumpu / maailma), ulottuvuuden arkku flags.xadd',()=>{
+    const a=VAL_LOST===60&&VAL_HOME.luuavain==='portal1'&&VAL_HOME.aarniavain==='portal2'&&VAL_HOME.kruunusirpale==='portal3'&&VAL_HOME.sinetti==='barrow'&&!VAL_HOME.jaaavain;
+    const src=relocateValuable.toString()+relocateRealm.toString(),b=/xadd/.test(src)&&/fo\('rs'\)\[realm\]/.test(src)&&/c\.barrow:!c\.barrow/.test(src)&&/flags\.xadd/.test(countAll.toString())&&/flags\.xadd/.test(openFound.toString());
+    const c=expectedUnique.toString().includes("'sinetti'")&&valuableCensus.toString().includes("'sinetti'");return a&&b&&c||`virhe ${a}${b}${c}`;});
+  t('v2.62 hiidenkivet tasan 9: maailma 4 (2 kirstua + 2 arkkua), ulottuvuuspomot 3, Routaluolan ja Kalmankammion arkku 1+1, ei satunnaisia',()=>{
+    const sar=SARC_LOOT.flat().filter(e=>e[0]==='hiidenkivi').length,poi=Object.values(POI_LOOT).flat().filter(e=>e[0]==='hiidenkivi').length;
+    const boss=['jaajattari','kalmaherra','aarnihirvio'].every(t=>MOBDEF[t].drops.some(d=>d[0]==='hiidenkivi'&&d[1]===1&&d[2]===1))&&!MOBDEF.vartija.drops.some(d=>d[0]==='hiidenkivi'&&d[2]>0);
+    const rnd=!CHEST_LOOT.flat().some(e=>e[0]==='hiidenkivi')&&!PEACE_LOOT.some(e=>e[0]==='hiidenkivi')&&!RARE_LOOT.some(f=>/hiidenkivi/.test(f.toString()))&&!/hiidenkivi/.test(hitSpawner.toString());
+    const hk=/hkC/.test(openFound.toString())&&/hkC/.test(ensureRealm.toString());const txt=!/alttari/.test(ITEMS.hiidenkivi.d)&&/yhdeksän/.test(ITEMS.hiidenkivi.d);
+    return sar===2&&poi===2&&boss&&rnd&&hk&&txt||`virhe kirstut ${sar} arkut ${poi} pomot ${boss} satunnaiset pois ${rnd} ulottuvuus ${hk} teksti ${txt}`;});
+  t('v2.62 vanha tallennus: tehtäväindeksi siirtyy uuden ylimystehtävän yli, Kalmanvartijan vajoamisviesti kertoo sirpaleista',()=>{
+    const sd=serialize();sd.flags=JSON.parse(JSON.stringify(sd.flags));delete sd.flags.qv;sd.flags.qi=5;const cur=serialize();let r;
+    try{loadData(sd);const a=flags.qi===6&&flags.qv===2,b=/Kruununsirpaleet jäävät alttarille/.test(bossAI.toString())&&!/Hiidenkivet jäävät/.test(bossAI.toString());r=a&&b||`virhe ${a}${b}`;}finally{loadData(cur);}return r;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());

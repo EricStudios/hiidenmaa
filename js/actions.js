@@ -141,6 +141,7 @@ function killMob(m){m.dead=true;m.deadT=0;m.ashDeath=m.burnT>0||!!m.fireHit;if(m
   if(m.archer&&Math.random()<.5)spawnDrop('nuolet',2+(Math.random()*4|0),m.pos.x,m.pos.y+1,m.pos.z);   // v1.42 jousikalmo pudottaa joskus nuolia
   if(m.type==='vartija'&&!m.devSpawn){flags.boss=1;bossDefeated();}   /* v1.94: palkin piilotus/KUKISTETTU hoitaa bossBarTick */   // v1.91: DEV-luotu vartija ei kirjaa voittoa
   if(m.dunIdx!==undefined)dunKilled[m.dunIdx]=1;
+  if(m.sinetti&&!flags.sinetti){flags.sinetti=1;spawnDrop('sinetti',1,m.pos.x,m.pos.y+1,m.pos.z);msg('Ylimyksen vyöltä putoaa Kalmon sinetti!','loot');}   // v2.62
   onMobKilled(m);
 }
 // Jousi: täysi vetoaika 1,6 s (laatu 2: 1,3 s, laatu 3: 1,07 s). Vajaa veto = vähemmän vahinkoa, hitaampi nuoli ja jyrkempi kaari; laatu suoristaa ja pidentää lentoa.
@@ -325,9 +326,11 @@ function openSarc(i){
 function showLore(t,txt){const el=$('#msgs');const d=document.createElement('div');d.innerHTML=`<b style="color:var(--frost)">${t}</b><br><span style="font-weight:500">${txt}</span>`;d.style.maxWidth='440px';d.style.whiteSpace='normal';el.appendChild(d);d._life=14;msgEls.push(d);}
 
 /* ---------------- DUNGEON TRAVEL ---------------- */
+// v2.62 Hautakummun ylimys kantaa Kalmon sinettiä vyöllään (hehkuu himmeästi), kunnes se on pudonnut kerran (flags.sinetti).
+function sinettiCarry(m){m.sinetti=1;const T=m.f&&m.f.torso;if(!T)return;const s=sinettiMesh(.9);s.position.set(.13,-.4,.21);s.rotation.y=.25;s.traverse(o=>{o.castShadow=false;});T.add(s);m.sinMesh=s;}
 const dunKilled={};
 function fadeTo(cb){const f=$('#fade');f.style.opacity=1;setTimeout(()=>{cb();setTimeout(()=>f.style.opacity=0,120);},380);}
 function enterDungeon(){fadeTo(()=>{P.inDun=true;P.realm=null;P.spawnProt=3.2;P.pos.set(dunEntry.x+.6,DUN.y+.05,dunEntry.z);P.vy=0;camYaw=-Math.PI/2;P.yaw=Math.PI/2;
-  dunSpawns.forEach((s,i)=>{if(dunKilled[i])return;if(mobs.some(m=>m.dunIdx===i))return;const m=spawnMob(s.type,s.x,s.z,{y:DUN.y,dun:true,noBorn:1});m.dunIdx=i;});
+  dunSpawns.forEach((s,i)=>{if(dunKilled[i])return;if(mobs.some(m=>m.dunIdx===i))return;const m=spawnMob(s.type,s.x,s.z,{y:DUN.y,dun:true,noBorn:1});m.dunIdx=i;if(s.type==='ylimys'&&!flags.sinetti)sinettiCarry(m);});
   msg('Hautakumpu. Ilma on kylmää ja seisovaa.');});}
 function exitDungeon(){fadeTo(()=>{P.inDun=false;P.realm=null;P.spawnProt=3.2;const L=LOC.barrow;P.pos.set(L.x+12.5,terrainH(L.x+12.5,L.z),L.z);P.vy=0;camYaw=-Math.PI/2;for(const m of [...mobs])if(m.dun)mobRemove(m);});}
