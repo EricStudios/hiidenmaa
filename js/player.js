@@ -413,6 +413,15 @@ function respawn(){if(!P.dead||state!=='dead')return;endPlayerDeath();for(const 
    if(n)P.respawnCleared=n;}
   fig.g.rotation.x=0;P.vy=0;state='play';requestLock();msg('Heräät uudelleen. Hae tavarasi hautakasasta.');{const bk=P.bossKill;if(bk&&bk.c===bk.mn)setTimeout(()=>msg(`${bk.n} on uupunut: olet kaatunut sille ${bk.c} kertaa, eikä se enää palauta terveyttään.`,'warn'),1200);}   // v2.55 armon ilmoitus
 }
+/* v2.79 ENSIMMÄINEN UNI (käyttäjä: pelaajalle vihje Kalmanummesta ja Hautakummusta jo alussa): ensimmäisen sängyssä nukutun yön jälkeen
+   (bump('nights') → saavutus Hyvät yöunet) pelaaja näkee unen, joka kertoo nummen ja Hautakummun suunnan nukkumapaikasta (ei kiinteitä
+   ilmansuuntia, dirIn) ja merkitsee Hautakummun karttaan. Kerran per maailma (flags.dream). */
+function dreamHint(){if(P.dead)return;const mx=MAP.moor[0]*WS,mz=MAP.moor[1]*WS,a=Math.atan2(mx-P.pos.x,-(mz-P.pos.z)),md=DIRS_IN[((Math.round(a/(Math.PI/4))%8)+8)%8];
+  const B=LOC.barrow,near=Math.hypot(B.x-mx,B.z-mz)<90,bd=dirIn('barrow',P.pos);
+  showLore('Outo uni',`Näit unta harmaasta nummesta kaukana ${md}. Usva lepäsi kivien yllä, ja kalmot kulkivat siellä yön pimeydessä – Kalmanummi. `+
+    (near?`Nummen laidalla kohosi vanha Hautakumpu, ${bd}. `:`Unessa näit myös vanhan Hautakummun, ${bd}. `)+
+    `Sen syvyyksissä ylimys kantaa sinettiä, jota Routaportti odottaa. Herätessäsi tiedät: sinne ei mennä ilman kunnon asetta, soihtua ja ruokaa.`);
+  if(!flags.disc.barrow){flags.disc.barrow=1;setTimeout(()=>msg(`${LOC.barrow.name} merkittiin karttaan.`,'loot'),900);}}
 function sleepAt(p){
   P.spawn={x:p.x,z:p.z};msg('Herätyspaikka asetettu.','loot');
   if(!isNight())return;
@@ -420,5 +429,5 @@ function sleepAt(p){
   if(!sheltered(p.x,p.y,p.z)){msg('Sänky tarvitsee katon yläpuolelleen.','warn');return;}
   if(mobs.some(m=>!m.dead&&m.def.ai==='hostile'&&dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)<20*20)){msg('Et voi nukkua, vihollisia on lähellä.','warn');return;}
   const sh=HOME.inside&&!HOME.grey?(HOME.lvl===2?.2:HOME.lvl===1?.1:0):0;   // v2.09: nukkuminen parantaa vain kodin lämmössä (+10 % / +20 %), ei enää täyteen
-  fadeTo(()=>{flags.sleptN=nightId();dayT=.23;dayN++;P.buffs.levannyt=420;P.hunger=Math.max(20,P.hunger-15);const h0=P.hp;P.hp=Math.min(maxHp(),P.hp+maxHp()*sh);if(P.hp>h0+.5)setTimeout(()=>msg(`Nukuit ${sh>=.2?'lämpimässä kodissa':'mukavassa lämmössä'}: terveys +${Math.round(P.hp-h0)}.`,'loot'),900);for(const m of [...mobs])if(m.def.ai==='hostile'&&!m.dun)mobRemove(m);const gr=regrowForest();saveGame(true);msg(`Päivä ${dayN} alkaa.`+(gr.planted+gr.revived?' Metsä on kasvanut yön aikana.':''));});
+  fadeTo(()=>{flags.sleptN=nightId();bump('nights');if(!flags.dream){flags.dream=1;setTimeout(dreamHint,3200);}dayT=.23;dayN++;P.buffs.levannyt=420;P.hunger=Math.max(20,P.hunger-15);const h0=P.hp;P.hp=Math.min(maxHp(),P.hp+maxHp()*sh);if(P.hp>h0+.5)setTimeout(()=>msg(`Nukuit ${sh>=.2?'lämpimässä kodissa':'mukavassa lämmössä'}: terveys +${Math.round(P.hp-h0)}.`,'loot'),900);for(const m of [...mobs])if(m.def.ai==='hostile'&&!m.dun)mobRemove(m);const gr=regrowForest();saveGame(true);msg(`Päivä ${dayN} alkaa.`+(gr.planted+gr.revived?' Metsä on kasvanut yön aikana.':''));});
 }

@@ -11,7 +11,8 @@ let actx=null, soundOn=true;
    Hautakumpu / sama ulottuvuus) – soivat äänet katkeavat, kun pelaaja vaihtaa tilaa (myös pomojen kaiut). */
 const SND_DIST_K=.8;
 function creSpaceOk(m){if(!m)return true;return m.dun?(!!P.inDun&&(m.realm===undefined||m.realm===(P.realm||null))):!P.inDun;}
-const VOL_BASE={cre:.8,pl:.8,ui:.7,amb:.7,notif:.7,music:1},VOL_KEY={cre:'creVol',pl:'plVol',ui:'uiVol',amb:'ambVol',notif:'notifVol',music:'musicVol'};
+const VOL_BASE={cre:.8,pl:.8,ui:.7,amb:.56,notif:.7,music:1},VOL_KEY={cre:'creVol',pl:'plVol',ui:'uiVol',amb:'ambVol',notif:'notifVol',music:'musicVol'};
+/* v2.79 (käyttäjä): sää- ja tunnelmaäänet (amb) −20 % (.7 → .56). */
 function volK(c){if(typeof SET==='undefined')return VOL_BASE[c]||1;if(SET.sound===false||(c==='music'?SET.musicOn===false:SET.sfxOn===false))return 0;
   return (+(SET.volMaster??1))*(+(SET[VOL_KEY[c]]??1))*(VOL_BASE[c]||1);}
 function audio(){if(!actx){try{actx=window.__AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return actx;}   // v2.52 sama konteksti kuin boot.js (__AC)
@@ -86,7 +87,10 @@ const CRE_WOLF_V={aggro:.7,chase:.7},CRE_WOLF_R={aggro:.8,chase:.8};
 /* v2.57 (käyttäjä) SUSIELÄINTEN ULVONTA (kutsuääni, far): kuuluvuus × WOLF_HOWL_R 0,7 ja voimakkuus × WOLF_HOWL_V 0,7 aina; päivällä kuuluvuus
    lisäksi × WOLF_HOWL_DAY_R 0,6 (yhteensä 0,85 × 0,7 × 0,6 ≈ 0,36 alkuperäisestä). Kaukainen yöulvonta (farHowl) 60–86 m. */
 const WOLF_HOWL_R=.7,WOLF_HOWL_V=.7,WOLF_HOWL_DAY_R=.6;
-function wolfHowlRK(){return .85*WOLF_HOWL_R*(typeof isNight!=='function'||isNight()?1:WOLF_HOWL_DAY_R);}
+/* v2.79 (käyttäjä): susien ulvonnan (idle) kantama sama kuin muiden eläinten ääntelyllä: CRE_IDLE_R (36 m), päivällä ja yöllä. Ilman sutta
+   kuuluva kaukainen yöulvonta (farHowl) pois päältä (WOLF_FAR_AMB), koska se kuului kantaman ulkopuolelta. Voimakkuus (WOLF_HOWL_V) ennallaan. */
+const WOLF_FAR_AMB=false;
+function wolfHowlRK(){return CRE_IDLE_R/CRE_FAR_R;}
 function creRK(type,kind,far){return CRE_WOLF.has(type)?(CRE_WOLF_R[kind]||(kind==='idle'&&far?wolfHowlRK():1)):1;}
 function creAgR(m){const f=creHasFar(m.type,'aggro');return ((f?CRE_FAR_R:CRE_NEAR_R)*creRK(m.type,'aggro',f))**2;}   // suuttumisäänen kantama (neliö)
 function creDistK(d,far,rk){return clamp((d-8)/((far?CRE_FAR_R:CRE_NEAR_R)*(rk||1)-8),0,1);}
@@ -161,7 +165,7 @@ function creSnd(m,kind,o){if(!m)return false;if(kind==='idle'&&!realmIdleOk(m))r
 // v2.12: kaukainen ulvonta: yöllä ulkona (ei luolassa) susien kutsuääni kuuluu 100–145 m päästä (v2.14; ennen 150–230; v2.25 ×0,85 → 85–123 m) satunnaisesta suunnasta 56–138 s välein
 // (60 %:n todennäköisyydellä) – tumma ja kaikuinen etäisyysefektin ansiosta. Vain jos suden ulvontaääniä (far) on.
 const FHW={t:20,m:null};
-function farHowl(dt){if(P.inDun||P.dead||!isNight()){FHW.t=Math.max(FHW.t,15);return;}if((FHW.t-=dt)>0)return;FHW.t=(45+Math.random()*65)*1.25;   /* v2.14: 20 % harvemmin */
+function farHowl(dt){if(!WOLF_FAR_AMB)return;if(P.inDun||P.dead||!isNight()){FHW.t=Math.max(FHW.t,15);return;}if((FHW.t-=dt)>0)return;FHW.t=(45+Math.random()*65)*1.25;   /* v2.14: 20 % harvemmin */
   if(Math.random()>.6||!creHasFar('susi','idle'))return;creLoad('susi');const a=Math.random()*TAU,d=(100+Math.random()*45)*.85*WOLF_HOWL_R*SND_DIST_K,x=P.pos.x+Math.cos(a)*d,z=P.pos.z+Math.sin(a)*d;
   FHW.m={type:'susi',def:MOBDEF.susi,pos:{x,y:Math.max(terrainH(x,z),0)+1,z},dead:false,dun:false};creSnd(FHW.m,'idle',{farOnly:1,key:'farhowl'});}
 const VEC={t:-1,m:null};

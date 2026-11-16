@@ -363,6 +363,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Hahmo kaatuu painovoimalla iskun suuntaan maan tasalle, veri leviää kehon alle, ja kamera nousee yläviistoon. Hautakasa ei näy kuolinkamerassa.
 - Kuolinruutu kertoo syyn (taistelu ja tappajan nimi, hukkuminen, palaminen, putoaminen, kaatuva puu, nälkä, tyhjyys) ja tilastot.
 - **v2.77 vinkki vain tarvittaessa:** vinkkilaatikko näkyy vain ensimmäisellä kuolemalla tuleen, tyhjyyteen tai hukkumalla (asioita, joita ei voi arvata), pomon armosäännön laskurissa, tai kun kaadut samalle asialle (sama syy ja sama olento) 3 kertaa putkeen.
+- **Ensimmäinen uni (v2.79):** kun nukut ensimmäisen yön sängyssä (katon alla), saat saavutuksen Hyvät yöunet ja näet unen, joka kertoo Kalmanummen ja Hautakummun suunnan; Hautakumpu merkitään karttaan.
 - Herätessä ruumis alkaa heti hiipua: vajoaa hieman ja haalistuu 12 s:ssa, verilammikko samassa tahdissa (v2.78; ennen 60 s + 30 s).
 - Verilammikko (v2.78) seuraa maaston muotoja: leviää kehon alta 6 s, valuu alarinteeseen pidemmälle kuin ylärinteeseen, ei nouse jyrkkää ylämäkeä, pysähtyy jyrkänteen reunalle, veteen ja seinään; reunat pehmeät, pinta kiiltää märkänä.
 - Tyhjyyteen (maailman tai ulottuvuuden alle) pudonnut kuolee 1 s:n kuluttua; tavarat jäävät viimeiseen turvalliseen kohtaan.
@@ -629,6 +630,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.79:** susien ulvonta kuuluu yhtä kauas kuin muiden eläinten ääntely (36 m); kaukaista yöulvontaa ilman sutta ei enää ole. Sää- ja tunnelmaäänet 20 % hiljempaa.
 - **v2.76:** hengästys ei ala alusta: kun kestävyys palautuu, sama ääni hiljenee vähitellen (0 % täysi → 30 % hiljaa) ja voimistuu taas, jos kestävyys loppuu; loppuu vasta, kun kestävyys on ollut yli 30 % 4 s (häivytys 2,5 s, sen jälkeen vähintään 1 s tauko ennen uutta). Tiedosto toistuu kokonaisena (ei leikkausta).
 - **v2.75:** liukusäätimen napsu vielä 20 % hiljempaa ja tasaisempi sävel; esiasetussäätimessä napsu kuuluu vain, kun taso vaihtuu.
 - **v2.73:** liukusäätimen napsu 40 % hiljempaa, askeleet 30 % hiljempaa, hengästys 20 % hiljempaa; äänimerkki häipyy 2 s:ssa ja napautus aloittaa intron heti.

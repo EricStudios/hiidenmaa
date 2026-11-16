@@ -537,6 +537,13 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const b=CORPSE_HOLD===0&&CORPSE_ROT===12&&/c\.pool\.fk=op/.test(corpseTick.toString())&&/bloodPool\(/.test(updatePlayerDeath.toString());
     const c=typeof mudAt==='function'&&/mudAt\(ox,oz\)/.test(rebuildGrass.toString())&&/kasvillisuuden/.test(ITEMS.kuokka.d)&&/kasvillisuuden/.test(TIPS.find(t=>t.id==='lapio').d());
     return a&&b&&c||`virhe ${a}${b}${c} off ${off.toFixed(3)} dn ${dn.toFixed(2)} up ${up.toFixed(2)}`;});
+  t('v2.79 susien ulvonnan kantama = muiden eläinten ääntely (36 m), ei kaukaista yöulvontaa; ensimmäinen uni sängyssä vihjaa Kalmanummen ja Hautakummun; sää ja tunnelma −20 %',()=>{
+    const a=Math.abs(CRE_FAR_R*creRK('susi','idle',1)-CRE_IDLE_R)<1e-9&&WOLF_FAR_AMB===false&&VOL_BASE.amb===.56;
+    const sv=[flags.dream,flags.disc.barrow,flags.cnt&&flags.cnt.nights];let r;
+    try{flags.dream=0;delete flags.disc.barrow;const n0=$('#msgs').children.length;dreamHint();const el=[...$('#msgs').children].slice(n0).map(e=>e.textContent).join(' ');
+      const b=/Kalmanummi/.test(el)&&/Hautakum/.test(el)&&!!flags.disc.barrow&&/bump\('nights'\)/.test(sleepAt.toString())&&/dreamHint/.test(sleepAt.toString())&&/cnt\('nights'\)/.test(ACH.find(x=>x.id==='unet').pr.toString());
+      r=a&&b||`virhe ${a}${b} ${el.slice(0,80)}`;}
+    finally{flags.dream=sv[0];if(!sv[1])delete flags.disc.barrow;}return r;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;
@@ -559,7 +566,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     return a&&b||`virhe tila ${a} etäisyys ${b}`;});
   t('v2.57 siirtoääni vain valmiissa siirrossa (ei valinnassa/raahauksen alussa), valittu ruutu ei kasva (ei transformia), arkun ohjerivi kiinteä, ulvonta −30 % kuuluvuus ja voimakkuus (päivällä kuuluvuus lisäksi −40 %), puun narina pienissä puissa korkeampi',()=>{
     const pd=dayT;dayT=.5;const day=wolfHowlRK();dayT=.95;const night=wolfHowlRK();dayT=pd;
-    const a=Math.abs(night-.85*.7)<1e-9&&Math.abs(day-.85*.7*.6)<1e-9&&WOLF_HOWL_V===.7&&/WOLF_HOWL_V:1\)/.test(creSnd.toString())&&/\*WOLF_HOWL_R\*SND_DIST_K,x=/.test(farHowl.toString());
+    const a=Math.abs(night-CRE_IDLE_R/CRE_FAR_R)<1e-9&&Math.abs(day-night)<1e-9&&WOLF_HOWL_V===.7   /* v2.79: kantama = muiden eläinten ääntely */&&/WOLF_HOWL_V:1\)/.test(creSnd.toString())&&/\*WOLF_HOWL_R\*SND_DIST_K,x=/.test(farHowl.toString());
     const sel=[...document.styleSheets].flatMap(ss=>{try{return [...ss.cssRules];}catch(e){return [];}}).find(r=>r.name==='selPulse');
     const b=!!sel&&!/transform|scale/.test(sel.cssText);
     const h=document.getElementById('chestHint'),c=!!h&&getComputedStyle(h).height!=='auto'&&getComputedStyle(h).overflow==='hidden';
