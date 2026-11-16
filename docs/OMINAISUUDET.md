@@ -489,7 +489,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   Maailmassa biomin kappale 10–40 s liittymisestä, kappaleiden välissä 50 s – 2 min hiljaisuutta; biomia vaihdettaessa kappale vaihtuu 80 %
   todennäköisyydellä uuden biomin kappaleeseen (20 %: loppuu). Ulottuvuuksissa, Hautakummussa ja pomotaistelussa oma kappale heti. Häivytys 2,5 s + 2,5 s.
 - **v2.53:** valikkomusiikki (aloitusjakson logosta päävalikkoon, häipyy peliin liityttäessä; taukovalikossa 15 s jälkeen); uusi
-  asetussivu **Äänet ja musiikki** (master, mykistykset, 6 säädintä 0–150 %, ilmoitus-/alue-/ulottuvuusäänten valinnat); ilmoitus-,
+  asetussivu **Äänet ja musiikki** (master, mykistykset, 7 säädintä 0–150 % (v2.67 + napit), ilmoitus-/alue-/ulottuvuusäänten valinnat); ilmoitus-,
   alueen löytö- ja ulottuvuusäänet; kolmen valikkotaustan satunnaiset hiljaiset äänet (kun äänet on lisätty).
 - **v2.52:** jos selain estää äänet, alareunassa näkyy kaiutinmerkki ja "Napauta näyttöä kuullaksesi äänet" (jakso alkaa 2 s
   myöhemmin; napautus ei ohita jaksoa); äänet aloitusjaksoon, latausnäytön loppuun, uuden maailman introon (tuuli, linnut, pilvien
@@ -599,6 +599,16 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.67 silmukat ja tunnelma:** jokainen silmukka pitää yhden arvotun version; sää ristihäivyttää 2,5 s; siirtyessä maailman ja ulottuvuuden
+  välillä vanhat loppuvat 0,3 s ja uudet alkavat 1 s kuluttua; tauolla kaikki hiljenevät 1 s. Myrskyssä myrsky + ukkosen taustasilmukka, salaman
+  jälkeen 0–3 s salama-ääni. Veden alla oma silmukka (0,5 s) ja kaikki pelin äänet vaimeina (ei musiikki eikä valikot).
+  Luonto (linnunlaulu päivällä, heinäsirkat yöllä, puiden humina tuulella) ja biomien sivuäänet (korpi, koivulehto, aarnimetsä, upposuo,
+  kalmanummi, rantaniitty, päivä/yö) soivat satunnaisina 30 s – 2 min jaksoina hiljaa taustalla.
+- **v2.67 pelaaja:** hengästys silmukkana kestävyyden ollessa 0 → yli 30 %, ja ylikuormassa liikkuessa; ylikuorma kuluttaa kestävyyttä 5/s.
+  Putoamisvahingossa tömähdys, yli 25 % HP:sta myös nilkka-ääni; pää veden alle = sukellus, pintaan = pinnalle (yli 2 s → haukkoo henkeä).
+  Kaatuvan puun narina ja tömähdys kuuluvat puolet lyhyemmälle. Ulottuvuuksissa tavallisen olennon idle vain alle 15 m, yksi 40 s välein.
+- **v2.67 ilmoitusääni:** pitkät ja erityiset viestit tai hiljaisuus; ei päällekkäin pelaajan toimintoäänten kanssa.
+  Asetuksissa oma säädin Napit (hover ja klikkaus), perustaso 20 % hiljempi.
 - **v2.61 sää ja tunnelma** (`sounds/saa_ja_tunnelma/`, käyttäjän äänet): maailmassa sään silmukat (sade, tihku, myrsky, tuuli, lumisade vuorilla,
   sumu) voimistuvat ja hiipuvat sään mukana (ristihäivytys 2,5 s), sisällä vaimeampina, veden alla hiljaa; ukkonen jyrähtää salaman jälkeen.
   Ulottuvuuksissa ja Hautakummussa oma tunnelmasilmukka ja 10–40 s välein satunnainen tunnelmaääni (puuttuessa yhteinen). Taso Taustaäänet.

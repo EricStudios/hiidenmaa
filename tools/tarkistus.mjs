@@ -322,7 +322,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       weather.cur='myrsky';wRain=1.4;T=ambTargets();const b=T['saa/myrsky']>0&&!T['saa/sade']&&T['saa/tuuli']===undefined;
       indoorK=1;const c=Math.abs(ambTargets()['saa/myrsky']-AMB_V.myrsky*.45)<1e-6;indoorK=0;weather.cur='tuuli';wRain=0;WIND.spd=14;const e=Math.abs(ambTargets()['saa/tuuli']-AMB_V.tuuli)<1e-6;
       P.inDun=true;P.realm='portal2';T=ambTargets();const f=Object.keys(T).join()==='tunnelma/tunnelma_kalmankammio';P.realm=null;const g=!!ambTargets()['tunnelma/tunnelma_hautakumpu'];
-      const st=state;state='paused';const h=Object.keys(ambTargets()).length===0;state=st;
+      const st=state;state='menu';const h=Object.keys(ambTargets()).length===0;state=st;   /* v2.67: tauolla silmukat jatkuvat hiljennettyinä (AMB.duck), valikossa pois */
       const src=ambTick.toString(),i2=/satunnainen_yhteinen/.test(src)&&AMB_RND_MIN===10&&AMB_RND_MAX===40&&/volK\('amb'\)/.test(src)&&/ambThunder\(/.test(updateEnvironment.toString())&&/ambTick\(raw\)/.test(frame.toString());
       r=a&&b&&c&&e&&f&&g&&h&&i2||`virhe ${a}${b}${c}${e}${f}${g}${h}${i2}`;}
     finally{[weather.cur,wRain,wSnow,wFog,WIND.spd,P.inDun,P.realm,indoorK]=sv;}return r;});
@@ -416,6 +416,39 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const src=M.set.toString(),b=/SWITCH_P/.test(src)&&/JOIN_MIN/.test(src)&&/SIL_MIN/.test(src);
     const d1=musicCtx.toString(),c=/'boss'/.test(d1)&&/'d:'/.test(d1)&&/'w:'/.test(d1)&&MUS_BIO_T===4&&MUS_REALM.portal1==='routaluola'&&/hold/.test(realmSnd.toString());
     const ok=(async()=>1)();return a&&b&&c||`virhe ajat ${a} säännöt ${b} konteksti ${c}`;});
+  t('v2.67 äänet: kiviaskelten kohina, hytinä/kipu_tuli pätkinä, hengästys/ukkonen/vedenalainen silmukoina, uudet paikkamerkit',()=>{const M=manJ();
+    const a=['p/keho/hytina_0','p/keho/hytina_9901','p/kipu/kipu_tuli_0','p/kipu/kipu_tuli_9901','a/saa/ukkonen_0','a/tunnelma/tunnelma_vedenalla_0'].every(k=>M[k]);
+    const b=M['p/askeleet/askel_kivi_2']&&M['p/askeleet/askel_kivi_2'].dur<=.2;   /* suhinahäntä pois */
+    return a&&b||`virhe pätkät/silmukat ${a} kivi_2 ${b}`;});
+  t('v2.67 silmukat: yksi versio, sää 2,5 s, paikan vaihto 0,3 s + 1 s, tauko hiljentää 1 s, vedenalainen 0,5 s, myrsky + ukkonen, salama 0–3 s',()=>{
+    const a=AMB_FADE===2.5&&AMB_CUT===.3&&AMB_HOLD===1&&AMB_DUCK===1&&AMB_UW_FADE===.5;const src=ambTick.toString();
+    const b=/AMB\.place/.test(src)&&/ambStop\(AMB\.L\[k\]\.h,AMB_CUT\)/.test(src)&&/AMB\.duck/.test(src)&&/'salama'/.test(src)&&/sndBus/.test(ambStart.toString());
+    const sv=[weather.cur,wRain,P.inDun,CAM_UW];let r;try{weather.cur='myrsky';wRain=1.4;P.inDun=false;CAM_UW=0;const T=ambTargets(0);const c=T['saa/myrsky']>0&&T['saa/ukkonen']>0;
+      CAM_UW=1;const d=ambTargets(0)['tunnelma/tunnelma_vedenalla']>0;const e=/\.05\+Math\.random\(\)\*\.25:\.5\+Math\.random\(\)\*2\.5/.test(updateEnvironment.toString());
+      r=a&&b&&c&&d&&e||`virhe ${a}${b}${c}${d}${e}`;}finally{[weather.cur,wRain,P.inDun,CAM_UW]=sv;}return r;});
+  t('v2.67 luonto (linnunlaulu, heinäsirkat, puiden humina) ja biomien sivuäänet satunnaisina jaksoina, hiljaa',()=>{
+    const a=AMB_V.luonto===.35&&NAT_LEN[0]===30&&NAT_LEN[1]===120&&Object.keys(NAT_BIO).length===6&&NAT_NOBIRD.has('mountain')&&NAT_TREES.has('forest');
+    const sv=JSON.stringify(AMB.nat);AMB.nat={};let on=0;for(let i=0;i<400;i++)if(natEp('x',true,1)>0)on++;const b=on>20&&on<400;AMB.nat=JSON.parse(sv);
+    return a&&b||`virhe ${a} ${on}`;});
+  t('v2.67 hengästys silmukkana (0 % → yli 30 %, ylikuormassa liikkuessa), ylikuorma kuluttaa kestävyyttä 5/s',()=>{
+    const a=HENG_END===.3&&OVER_STAM===5&&/plLoop\('heng'/.test(plBody.toString())&&/OVER_STAM\*dt/.test(updatePlayer.toString())&&typeof plOverMoving==='function';
+    const b=/'sukellus'/.test(plBody.toString())&&/'pinnalle'/.test(plBody.toString())&&/'putoaminen_tomahdys'/.test(plBody.toString())&&/'nilkka'/.test(plBody.toString())&&FALL_ANKLE===.25;
+    return a&&b||`virhe ${a}${b}`;});
+  t('v2.67 ulottuvuuksissa idle vain alle 15 m ja yksi 40 s välein; puun narina ja tömähdys −50 % kuuluvuus; veden alla kaikki pelin äänet vaimeat',()=>{
+    const a=REALM_IDLE_R===15&&REALM_IDLE_GAP===40;const m={dun:1,realm:'portal1',def:{ai:'hostile'},pos:{x:P.pos.x+5,z:P.pos.z}};const sv=realmIdleT;realmIdleT=-1e9;
+    const b=realmIdleOk(m)&&!realmIdleOk(m);realmIdleT=-1e9;m.pos.x=P.pos.x+30;const c=!realmIdleOk(m);realmIdleT=sv;
+    const d=TREE_RK===.5;
+    const e=UW_LP===650&&/sndBus\(a\)/.test(creSnd.toString())&&/sndBus\(a\)/.test(plSnd.toString())&&typeof uwAudioTick==='function';
+    return a&&b&&c&&d&&e||`virhe ${a}${b}${c}${d}${e}`;});
+  t('v2.67 ilmoitusääni: pitkät ja erityiset viestit tai hiljaisuus, ei päällekkäin pelaajan toimintaäänen kanssa',()=>{const L=[],oi=iSnd,sv=[plActT,msgSndT,msgQuietT,SET.notifSnd];let r;
+    try{iSnd=(g,e)=>{L.push(e);return 1;};SET.notifSnd=true;msgQuietT=0;const now=performance.now()/1000;
+      plActT=now;msgSndT=-9;msgSnd('Puu kaatui.','');const a=L.length===0;   /* lyhyt viesti toiminnan aikana: ei ääntä */
+      plActT=now-5;msgSndT=-9;msgSnd('Puu kaatui.','');const b=L.length===1;   /* hiljaista: ääni */
+      plActT=now-1;msgSndT=-9;msgSnd('Lyhyt','');const c=L.length===1;   /* 1 s toiminnasta, lyhyt: ei */
+      plActT=now-1;msgSndT=-9;msgSnd('Löysit paikan','loot');const d=L.length===2;   /* erityinen: ääni (toiminnasta yli 0,8 s) */
+      r=a&&b&&c&&d&&MSG_LONG===40&&MSG_BUSY===.8||`virhe ${a}${b}${c}${d}`;}finally{iSnd=oi;[plActT,msgSndT,msgQuietT,SET.notifSnd]=sv;}return r;});
+  t('v2.67 nappien hover/klikkaus: oma säädin Äänet ja musiikki -sivulla, perustaso −20 %',()=>{const src=String(mSnd);
+    return BTN_BASE===.8&&SET_DEF.btnVol===1&&SET_PAGES.snd.includes('btnVol')&&/napit'\?BTN_BASE\*\(SET\.btnVol/.test(src)||'btnVol/BTN_BASE puuttuu';});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
