@@ -349,7 +349,8 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 - **Jousi:** testeissä lataus ja ampuminen toimivat (Ultra, kyykky, juoksu, kuoleman jälkeen, uusi maailma + ohitettu opastus, varustus repusta ja
   numerolla; myös main v2.75). Löytyi yksi syy "ei lataudu": kun hiiren lukitus oli vapautunut (kuolema, valikko, opastus, Esc), ensimmäinen painallus
   vain pyysi lukitusta eikä aloittanut toimintoa. Nyt sama painallus aloittaa jousen/lyönnin (ei vasaralla eikä lapiolla/kuokalla).
-- **Opastus:** liikkumisvaiheessa kyykky (C) on nyt pakollinen kuten muut (`TUT_MOVE_DONE`); varaehto 40 s + 3 näppäintä → 90 s + 5.
+- **Opastus:** liikkumisvaiheessa kyykky (C) on nyt pakollinen kuten muut (`TUT_MOVE_DONE`); varaehto 40 s + 3 näppäintä → 90 s + 5. Nopea napautus (hyppy, kyykky) kirjautuu nyt heti
+  näppäimen painalluksesta (`tutKey`), ei vain ruudunpäivityksen tarkistuksesta (testissä hyppy jäi muuten huomaamatta).
 - Tarkistusrivi v2.80.
 
 ### v2.79 (ulvonta, ensimmäinen uni, taustaäänet – käyttäjän pyyntö)

@@ -550,7 +550,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     try{invAdd('jousi',1);invAdd('nuolet',5);const s=inv.find(x=>x&&x.id==='jousi');const was=s.eq;if(!s.eq)toggleEquip(s);locked=false;lockFailed=false;
       canvas.dispatchEvent(new MouseEvent('mousedown',{button:0,bubbles:true}));bow=P.drawing===true;dispatchEvent(new MouseEvent('mouseup',{button:0,bubbles:true}));P.drawing=false;if(!was)toggleEquip(s);invRemove('jousi',1);invRemove('nuolet',5);}
     finally{locked=sv[0];lockFailed=sv[1];P.drawing=false;}
-    const b=TUT_MOVE_DONE.includes('crouch')&&PL_WHOLE.has('sydan')&&SYD_FADE===2.5&&SYD_KEEP===3&&/S\.sk/.test(plBody.toString())&&manJ()['p/keho/sydan_0'].pv==='9w1';
+    const b=TUT_MOVE_DONE.includes('crouch')&&/BIND\[a\]\)TUT\.mv\[a\]=1/.test(tutKey.toString())&&PL_WHOLE.has('sydan')&&SYD_FADE===2.5&&SYD_KEEP===3&&/S\.sk/.test(plBody.toString())&&manJ()['p/keho/sydan_0'].pv==='9w1';
     const c=['pienliha','liha','suurliha'].every(id=>ITEMS[id]&&ITEMS[id].food.raw&&COOKABLE[id]&&ITEMS[COOKABLE[id]].food)&&ITEMS.pienpaisti.food.h<ITEMS.paisti.food.h&&ITEMS.paisti.food.h<ITEMS.suurpaisti.food.h&&ITEMS.paisti.food.h>=55
       &&itemRarity({id:'suurpaisti'})==='rare'&&itemRarity({id:'paisti'})==='unc'&&itemRarity({id:'pienpaisti'})==='com'&&!!RECIPE_BY.lihakeitto&&!!RECIPE_BY.juhla
       &&MOBDEF.janis.drops.some(d=>d[0]==='pienliha')&&MOBDEF.hirvi.drops.some(d=>d[0]==='suurliha')&&MOBDEF.karhu.drops.some(d=>d[0]==='suurliha')&&MOBDEF.peura.drops.some(d=>d[0]==='liha');

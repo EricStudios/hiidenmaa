@@ -67,6 +67,7 @@ function tutEnd(skipped){TUT.on=false;TUT.hold=false;TUT.pending=false;if(TUT.el
 function tutKey(e){if(!TUT.on)return false;const S=TUT_STEPS[TUT.i],c=e.code;if(!S)return false;
   if(!$('#keyDlg').hidden)return false;
   if((c==='Enter'||c==='NumpadEnter')&&S.next){e.preventDefault();tutNext();return true;}
+  if(S.move&&state==='play'){for(const a of TUT_MOVE_DONE)if(a!=='run'&&c===BIND[a])TUT.mv[a]=1;}   // v2.80 nopea napautus (hyppy, kyykky) kirjautuu heti painalluksesta
   if(!TUT.hold)return false;
   const ok=(S.keys||[]).some(a=>BIND[a]===c||(a==='inv'&&c==='KeyI'&&BIND.inv==='Tab')||(a==='digits'&&/^Digit[1-8]$/.test(c)));if(ok&&/^Digit[1-8]$/.test(c))TUT.dig=true;
   if(c===BIND.menu&&!openPanel)return true;   // P ilman avointa ikkunaa avaisi päävalikon kesken opastuksen
