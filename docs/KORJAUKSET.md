@@ -492,6 +492,14 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   **Sääntö:** kun muutat trimmausta, vertaa vanha ja uusi tiedosto (alku, sisällön pituus, äänekkyys) kaikille muuttuneille – mittaa selaimella
   (decodeAudioData), ei pelkästään ffmpeg:llä. Ääntelyihin (PV) ei kosketa ilman kuuntelua.
 
+## 67. Hengästyssilmukka alkoi alusta ja oli lyhennetty (v2.76)
+- Oire: juoksu pohjassa hengästys alkoi koko ajan alusta; valmis silmukka oli 2,29 s, vaikka käyttäjän saumaton tiedosto on 2,68 s.
+- Syy: (1) `plBody` pysäytti silmukan heti kestävyyden noustessa yli 30 % ja aloitti uuden 0 %:ssa; (2) `process_sounds.py` käsitteli silmukan
+  'act'-tilassa: hiljaisuus leikattiin päistä (−48 dB) ja sauma ristihäivytettiin (0,25 s pois).
+- Ratkaisu: yksi jatkuva silmukka, jonka voimakkuus seuraa kestävyyttä; pysähtyy vasta 4 s yli 30 % (+ häivytys 2,5 s ja 1 s tauko).
+  Työkalussa `WHOLE_LOOP` (ei leikkausta eikä ristihäivytystä), pelissä `PL_WHOLE` (ei `tgLoopPts`-rajausta).
+  **Sääntö:** käyttäjän valmiiksi saumattomaksi tekemä silmukka → lisää `WHOLE_LOOP`- ja `PL_WHOLE`-joukkoon; tarkista selaimella, että purettu pituus = raaka.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`

@@ -376,7 +376,7 @@ function plSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;plLoad();const 
   if(pick.length>1&&PLV.last[key])pick=pick.filter(x=>x!==PLV.last[key]);const name=pick[Math.random()*pick.length|0];PLV.last[key]=name;
   if(!PLV.gain){PLV.gain=a.createGain();PLV.gain.connect(sndBus(a));}PLV.gain.gain.value=vol;
   const B=CRE.buf[name],q=o.pos||P.pos,src=a.createBufferSource();src.buffer=B;src.playbackRate.value=(o.p||1)*(o.loop?1:1+(Math.random()*2-1)*(o.pj??.05));   /* v2.56 o.pj: oma sävelvaihtelu */
-  if(o.loop){src.loop=true;const lp=tgLoopPts(B);src.loopStart=lp[0];src.loopEnd=lp[1];}
+  if(o.loop){src.loop=true;if(!PL_WHOLE.has(ev)){const lp=tgLoopPts(B);src.loopStart=lp[0];src.loopEnd=lp[1];}}   /* v2.76 PL_WHOLE: koko tiedosto silmukkana (käyttäjän saumaton tiedosto) */
   const gn=a.createGain();gn.gain.value=o.loop?0:(o.v??1)*(1+(Math.random()*2-1)*(o.vj??.05));   /* v2.26: voimakkuus ±5 % joka kerta (o.vj: oma vaihtelu) */if(o.loop)gn.gain.linearRampToValueAtTime(o.v??1,a.currentTime+.4);const pn=a.createPanner();pn.panningModel='equalpower';pn.distanceModel='inverse';pn.refDistance=4*SND_DIST_K*(o.rk||1);pn.maxDistance=60*SND_DIST_K*(o.rk||1);pn.rolloffFactor=1;   /* v2.67 o.rk: kuuluvuuskerroin */
   if(o.lp){const lf=a.createBiquadFilter();lf.type='lowpass';lf.frequency.value=o.lp;lf.Q.value=.6;src.connect(gn);gn.connect(lf);lf.connect(pn);}else{src.connect(gn);gn.connect(pn);}pn.connect(PLV.gain);   /* v2.31 o.lp: tumma alipäästö (Hz) */crePos(pn,q.x,(q.y??P.pos.y)+.2,q.z);
   let sd=null;if(P.inDun){const R=creRevOn(a);sd=a.createGain();sd.gain.value=.25;pn.connect(sd);sd.connect(R.inp);}
@@ -425,10 +425,11 @@ function plNodeAt(type,x,z,r){nodesNear(x,z,1.5,_plN);for(const n of _plN)if(n.t
    noustessa (yli 2 s sukelluksessa); hytinä palellessa 20–35 s välein; vatsan kurina nälkäisenä (alle 20) 40–70 s välein; pahoinvointi
    alkaessa ja 15 s välein; kylläinen kun syöt itsesi täyteen; lämmin kun pääset palelemasta lämpöön; levännyt kun levon vaikutus alkaa.
    Mahakipu soi ähkyn kouristuksessa (environment.js). PLV.st muistaa edelliset tilat (siirtymät). */
-const HENG_V=.64,PL_SCARY_R=35,HENG_END=.3,HENG_FADE=1.5,FALL_ANKLE=.25;
+const PL_WHOLE=new Set(['hengastys']);
+const HENG_V=.64,HENG_KEEP=4,HENG_UP=1.5,HENG_DOWN=.35,PL_SCARY_R=35,HENG_END=.3,HENG_FADE=2.5,HENG_CD=1,FALL_ANKLE=.25;
 function plOverMoving(){return typeof MAXW!=='undefined'&&!devOn('weight')&&invWeight()>MAXW&&Math.hypot(P.vel.x,P.vel.z)>.6&&!P.swim;}
 function plCd(k,t){if(playTime<(PLV.cd[k]||0))return false;PLV.cd[k]=playTime+t;return true;}
-function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('sydan',null,null,false);plLoop('heng',null,null,false,0,1,HENG_FADE);S.heng=false;return;}
+function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('sydan',null,null,false);plLoop('heng',null,null,false,0,1,HENG_FADE);if(S.heng)S.hCd=HENG_FADE+HENG_CD;S.heng=false;return;}
   if(P.dead){if(!S.dead){S.dead=1;plLoop('sydan',null,null,false);plSnd('kipu',P.deathCause==='drown'||P.waterDeath||(typeof pDeath!=='undefined'&&pDeath&&pDeath.water)?'kuolema_hukkuminen':'kuolema')||plSnd('kipu','kuolema');   /* v2.46: pDeath.water – syy ja lippu nollautuvat ennen tätä (KORJAUKSET 57) */}PLV.hp0=null;return;}S.dead=0;
   // kipu: terveyden lasku
   const hp=P.hp,mx=maxHp();if(PLV.hp0!==null&&hp<PLV.hp0-.01){const d=PLV.hp0-hp;
@@ -444,7 +445,14 @@ function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('syda
   plLoop('sydan','keho','sydan',k>0,.35+.65*k,.9+.35*k);
   // tilat (siirtymät)
   // v2.67 hengästys silmukkana: alkaa kun kestävyys loppuu (0 %) tai liikutaan ylikuormassa; loppuu kun kestävyys yli HENG_END (30 %) eikä liikuta ylikuormassa
-  {const ovm=plOverMoving();if(!S.heng&&(P.stam<1||ovm))S.heng=true;else if(S.heng&&P.stam>maxStam()*HENG_END&&!ovm)S.heng=false;plLoop('heng','keho','hengastys',S.heng,HENG_V,1,HENG_FADE);}S.stam=P.stam;
+  /* v2.76 hengästys yhtenä jatkuvana silmukkana (käyttäjä): alkaa, kun kestävyys on 0 % (tai ylikuormassa liikkuessa). Kestävyyden palautuessa
+     voimakkuus laskee vähitellen (0 % = täysi, 30 % = hiljaa) ja nousee taas, jos kestävyys putoaa – samaa ääntä EI aloiteta alusta. Silmukka
+     pysähtyy vasta, kun kestävyys on ollut yli 30 % HENG_KEEP s (silloin ääni on jo hiljaa).
+     Häivytys HENG_FADE 2,5 s, jonka jälkeen vähintään HENG_CD 1 s tauko ennen uutta alkua (alku häivyttyy sisään 0,4 s, plSnd). Tiedosto toistuu kokonaisena (WHOLE_LOOP). */
+  {const ovm=plOverMoving(),lim=maxStam()*HENG_END;S.hCd=Math.max(0,(S.hCd||0)-dt);if(!S.heng&&(P.stam<1||ovm)&&!S.hCd){S.heng=true;S.hv=HENG_V;S.hOff=0;}
+   if(S.heng){if(P.stam>lim&&!ovm){S.hOff=(S.hOff||0)+dt;if(S.hOff>=HENG_KEEP){S.heng=false;S.hCd=HENG_FADE+HENG_CD;}}else S.hOff=0;
+     const tv=ovm?HENG_V:HENG_V*clamp(1-P.stam/lim,0,1);S.hv=tv>S.hv?Math.min(tv,S.hv+dt*HENG_UP):Math.max(tv,S.hv-dt*HENG_DOWN);}
+   plLoop('heng','keho','hengastys',S.heng,S.heng?S.hv:0,1,HENG_FADE);}S.stam=P.stam;
   // v2.67 vesi: pää pinnan alle (sukellus) ja pinnalle (pinnalle; pitkän sukelluksen jälkeen myös haukkoo henkeä)
   const und=(P.underT||0)>0;if(und&&!S.under&&!P.dead)plSnd('vesi','sukellus');if(!und&&S.under>0&&!P.dead){plSnd('vesi','pinnalle');if(S.under>2)plSnd('keho','haukkoo_henkea');}S.under=und?P.underT:0;
   if(P.cold){S.coldT=(S.coldT||0)+dt;if(S.coldT>4&&plCd('hyt',20+Math.random()*15))plSnd('keho','hytina');}

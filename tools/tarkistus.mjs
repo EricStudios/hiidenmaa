@@ -510,6 +510,14 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const sv=explored.slice();explored.fill(0);const px=P.pos.x,pz=P.pos.z,inD=P.inDun;P.inDun=false;exploreTick(SPAWN_EXP);const n1=explored.reduce((a,v)=>a+v,0);explored.fill(0);exploreTick();const n0=explored.reduce((a,v)=>a+v,0);explored.set(sv);P.inDun=inD;
     const b=SPAWN_EXP>3&&n1>n0*1.6&&/exploreTick\(SPAWN_EXP\)/.test(newGame.toString());
     return a&&b||`virhe ${a}${b} ${n0}/${n1}`;});
+  t('v2.76 hengästys ei ala alusta: kestävyyden noustessa (alle 30 %) sama silmukka hiljenee ja voimistuu taas 0 %:ssa, pysähtyy vasta 4 s yli 30 %; häivytys 2,5 s + 1 s tauko ennen uutta; tiedosto kokonaisena',()=>{
+    const orig=plSnd,origL=plLoop,sv=[P.stam,P.hp],st=state,S=PLV.st,L=[];let starts=0,on=false,lastV=0;
+    plSnd=()=>1;plLoop=(k,g,ev,o,v)=>{if(k!=='heng')return;if(o&&!on)starts++;on=!!o;if(o)lastV=v;};
+    try{state='play';S.heng=false;S.hCd=0;P.hp=100;const M=maxStam(),run=(stam,t)=>{for(let i=0;i<t*30;i++){P.stam=stam;plBody(1/30);}};
+      run(0,1);const v0=lastV;run(M*.2,3);const v1=lastV,on1=on;run(0,1);const v2=lastV;run(M*.5,2);const on2=on;run(0,.5);run(M*.6,5);const on3=on;run(0,2);const st3=starts,on4=on;run(0,1.2);const on5=on;
+      const M2=manJ()['p/keho/hengastys_0'],ok=PL_WHOLE.has('hengastys')&&/PL_WHOLE\.has\(ev\)/.test(orig.toString())&&HENG_KEEP===4&&HENG_FADE===2.5&&HENG_CD===1&&!!M2&&/w1/.test(M2.pv)&&st3===1&&!on4&&on5&&starts===2&&on1&&on2&&!on3&&v0>HENG_V*.95&&v1<v0*.5&&v2>v0*.9;
+      return ok||`starts ${st3}/${starts} on4 ${on4} on5 ${on5} M ${M2&&M2.pv} v ${v0.toFixed(2)}/${v1.toFixed(2)}/${v2.toFixed(2)} on ${on1}${on2}${on3}`;}
+    finally{plSnd=orig;plLoop=origL;[P.stam,P.hp]=sv;state=st;S.heng=false;S.hCd=0;}});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;

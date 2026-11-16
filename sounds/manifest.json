@@ -1267,12 +1267,12 @@
    "f": "pelaaja_3_aanet/valmiit/keho_valmis/haukkoo_henkea_0.mp3"
   },
   "p/keho/hengastys_0": {
-   "h": "2e3c30e16c",
+   "h": "2ba962d7a2",
    "src": "5ff95951ec60",
-   "dur": 2.29,
-   "pv": 9,
-   "gain": -1.6,
-   "raw": 2.55,
+   "dur": 2.66,
+   "pv": "9w1",
+   "gain": -2.1,
+   "raw": 2.68,
    "f": "pelaaja_3_aanet/valmiit/keho_valmis/hengastys_0.mp3"
   },
   "p/keho/hytina_0": {
