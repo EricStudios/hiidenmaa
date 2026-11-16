@@ -372,11 +372,20 @@ const DEATH_INFO={
   hunger:{t:'Nälkä vei voimasi',c:'Kylläisyys loppui, ja terveys hupeni vähitellen.',tip:()=>'Syö ajoissa: marjat ja sienet auttavat hetken, kypsennetty liha ja varras pitkään. Kylläisyys näkyy terveyden alla – syö, ennen kuin se loppuu.'},
   void:{t:'Katosit tyhjyyteen',c:'Putosit maailman reunan yli pimeyteen.',tip:()=>'Tyhjyys nielee kaiken, mikä sinne putoaa – tavarasi kuitenkin jäivät hautakasaan kohtaan, jossa seisoit viimeksi tukevasti. Jos huomaat jääväsi seinän sisään, peräänny samaa reittiä takaisin.'},
   hit:{t:'Kaaduit',c:'Vammat kävivät liian raskaiksi.',tip:()=>'Torju kilvellä (hiiren oikea) ja pidä terveys yllä syömällä. Lepää tulen ääressä katon alla, niin saat Levännyt-tilan.'}};
+/* v2.77 VINKKI VAIN TARVITTAESSA (käyttäjä): kuolinruudussa ei enää vinkkiä joka kerta. Yksi vinkkilaatikko näytetään vain, kun
+   (1) tilanteesta ei voisi mitenkään tietää, miten toimia: ensimmäinen kuolema tuleen, tyhjyyteen tai hukkumalla (DT_UNKNOWN, flags.dTip),
+   sekä pomon armosääntö (bTip); tai (2) pelaaja on kaatunut samalle asialle (sama syy ja sama olento) DT_STREAK kertaa putkeen (flags.dStreak). */
+const DT_UNKNOWN={fire:1,void:1,drown:1},DT_STREAK=3;
+function deathTipPick(cause,bTip){const I=DEATH_INFO[cause.k]||DEATH_INFO.hit,key=cause.k+':'+(cause.type||''),S=flags.dStreak&&flags.dStreak.k===key?flags.dStreak:{k:key,n:0};
+  S.n++;flags.dStreak=S;flags.dTip=flags.dTip||{};
+  if(S.n>=DT_STREAK)return {h:(bTip?bTip+'<br>':'')+I.tip(cause),st:S.n};
+  if(DT_UNKNOWN[cause.k]&&!flags.dTip[cause.k]){flags.dTip[cause.k]=1;return {h:(bTip?bTip+'<br>':'')+I.tip(cause)};}
+  return bTip?{h:bTip}:null;}
 const fmtLife=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h} h ${m} min`:m?`${m} min ${s%60} s`:`${s} s`;};
 function deathScreen(cause,bTip,hadItems){const I=DEATH_INFO[cause.k]||DEATH_INFO.hit;
   $('#deadT').textContent=I.t;$('#deadC').textContent=typeof I.c==='function'?I.c(cause):I.c;
   const g=P.graveAt;$('#deadG').textContent=!hadItems?'Sinulla ei ollut tavaroita mukana.':cause.k==='void'?'Tavarasi ovat hautakasassa kohdassa, jossa seisoit viimeksi tukevasti. Kasa näkyy kartalla.':cause.k==='drown'?'Tavarasi ovat hautakasassa lähimmällä rannalla. Kasa näkyy kartalla.':'Tavarasi jäivät hautakasaan kuolinpaikalle. Hae ne takaisin – kasa näkyy kartalla.';
-  const dt=$('#deadTip');if(dt){dt.hidden=false;dt.innerHTML=(bTip?bTip+'<br>':'')+I.tip(cause);}   // deadTip: vinkkilaatikko (v1.70 → v2.73)
+  {const tp=deathTipPick(cause,bTip),dt=$('#deadTip'),bx=$('#deadTipBox');if(dt){dt.hidden=!tp;dt.innerHTML=tp?tp.h:'';}if(bx){bx.hidden=!tp;const hd=bx.querySelector('.dtHead');if(hd)hd.textContent=tp&&tp.st?`Vinkki – kaaduit samalla tavalla ${tp.st} kertaa putkeen`:'Vinkki';}}
   const life=playTime-(P.lifeStart??0);$('#deadStats').innerHTML=`<span><b>${fmtLife(life)}</b>elossa</span><span><b>${dayN}</b>päivä</span><span><b>${P.deaths}</b>${P.deaths===1?'kuolema':'kuolemaa'}</span><span><b>${P.kills||0}</b>kaatoa</span>`;}
 /* v2.18: lähin rantapiste (maata vähintään 0,5 m vedenpinnan yläpuolella) hautakasalle, kun kuolee vedessä: renkaat 1,5 m välein ulospäin. */
 function shorePoint(x,z){for(let r=1.5;r<700;r+=1.5){const n=Math.max(10,Math.round(r*1.2));let best=null,bh=1e9;

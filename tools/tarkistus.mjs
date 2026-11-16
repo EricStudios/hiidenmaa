@@ -518,6 +518,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const M2=manJ()['p/keho/hengastys_0'],ok=PL_WHOLE.has('hengastys')&&/PL_WHOLE\.has\(ev\)/.test(orig.toString())&&HENG_KEEP===4&&HENG_FADE===2.5&&HENG_CD===1&&!!M2&&/w1/.test(M2.pv)&&st3===1&&!on4&&on5&&starts===2&&on1&&on2&&!on3&&v0>HENG_V*.95&&v1<v0*.5&&v2>v0*.9;
       return ok||`starts ${st3}/${starts} on4 ${on4} on5 ${on5} M ${M2&&M2.pv} v ${v0.toFixed(2)}/${v1.toFixed(2)}/${v2.toFixed(2)} on ${on1}${on2}${on3}`;}
     finally{plSnd=orig;plLoop=origL;[P.stam,P.hp]=sv;state=st;S.heng=false;S.hCd=0;}});
+  t('v2.77 kuolinruudun vinkki vain tarvittaessa: tuli/tyhjyys/hukkuminen ensimmäisellä kerralla, pomon armosääntö, tai sama syy 3 kertaa putkeen',()=>{
+    const sv=[flags.dStreak,flags.dTip];let r;
+    try{flags.dStreak=null;flags.dTip={};const m={k:'mob',n:'Susi',type:'susi'},h={k:'mob',n:'Hiisi',type:'hiisi'},f={k:'fire'};
+      const a1=deathTipPick(m,''),a2=deathTipPick(m,''),a3=deathTipPick(m,''),a4=deathTipPick(h,''),b1=deathTipPick(f,''),b2=deathTipPick({k:'void'},''),b3=deathTipPick({k:'void'},''),c1=deathTipPick({k:'boss',type:'vartija'},'ARMO');
+      r=!a1&&!a2&&a3&&a3.st===3&&!a4&&b1&&!b1.st&&b2&&!b3&&c1&&c1.h==='ARMO'&&DT_STREAK===3&&!!$('#deadTipBox')&&/deathTipPick/.test(deathScreen.toString())||`${!!a1}${!!a2}${a3&&a3.st}${!!a4}${!!b1}${!!b2}${!!b3}${c1&&c1.h}`;}
+    finally{[flags.dStreak,flags.dTip]=sv;}return r;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;

@@ -361,7 +361,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 
 ## Kuolema (v2.73)
 - Hahmo kaatuu painovoimalla iskun suuntaan maan tasalle, veri leviää kehon alle, ja kamera nousee yläviistoon. Hautakasa ei näy kuolinkamerassa.
-- Kuolinruutu kertoo syyn (taistelu ja tappajan nimi, hukkuminen, palaminen, putoaminen, kaatuva puu, nälkä, tyhjyys), vinkin ja tilastot.
+- Kuolinruutu kertoo syyn (taistelu ja tappajan nimi, hukkuminen, palaminen, putoaminen, kaatuva puu, nälkä, tyhjyys) ja tilastot.
+- **v2.77 vinkki vain tarvittaessa:** vinkkilaatikko näkyy vain ensimmäisellä kuolemalla tuleen, tyhjyyteen tai hukkumalla (asioita, joita ei voi arvata), pomon armosäännön laskurissa, tai kun kaadut samalle asialle (sama syy ja sama olento) 3 kertaa putkeen.
 - Herätessä ruumis jää maahan 60 s ja maatuu 30 s:ssa.
 - Tyhjyyteen (maailman tai ulottuvuuden alle) pudonnut kuolee 1 s:n kuluttua; tavarat jäävät viimeiseen turvalliseen kohtaan.
 - Sateessa kasteltava pelaaja ei syty tuleen; sammumisen jälkeen 6 s ennen kuin voi syttyä uudelleen.
@@ -607,7 +608,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Siirtymä latausnäyttöön: riimukehä piirtyy, keskellä riimut tavaavat HIIDENMAA, sulautuvat sinetiksi joka leimahtaa (paineaalto, kipinät).
 - Suorituskykytesti valitsee kaikista 8 tasosta (Ultra, kun indeksi ≥ 140) ja huomioi tasaantumisnopeuden ja tasaisuuden.
 - AFK-eleet: heilunta, pään rapsutus, kädet levälleen; siirtymän lopussa sininen ᚺ ja kaartuva riimurivi.
-- Kaatuva puu: osumasta lyhyt sivuilmoitus (väistä sivuun); jos puu tappaa, kuolinruudussa vihje.
+- Kaatuva puu: osumasta lyhyt sivuilmoitus (väistä sivuun); kuolinruudun vihje vain, jos puu kaatuu päälle 3 kertaa putkeen (v2.77).
 - Ensikäynnin aloitusjaksoa ja suorituskykytestiä ei voi ohittaa; merkintä tallentuu vasta jakson lopussa. Palaava kävijä voi ohittaa otsikon.
 - Suorituskykytestin aikana (ei tulosruudussa) yläreunassa kerrotaan, että testi on heikompia koneita varten ja grafiikan voi nostaa itse (Asetukset › Grafiikka).
 - Näppäinlistassa myös kaikki kiinteät näppäimet (I, Q repussa, Enter, ohitus, DEV-näppäimet).
