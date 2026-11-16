@@ -627,6 +627,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.75:** liukusäätimen napsu vielä 20 % hiljempaa ja tasaisempi sävel; esiasetussäätimessä napsu kuuluu vain, kun taso vaihtuu.
 - **v2.73:** liukusäätimen napsu 40 % hiljempaa, askeleet 30 % hiljempaa, hengästys 20 % hiljempaa; äänimerkki häipyy 2 s:ssa ja napautus aloittaa intron heti.
 - **v2.72:** nopeat toiminto- ja käyttöliittymä-äänet alkavat heti (3 ms, ennen 20 ms); hengästys on käyttäjän uusi ääni saumattomana silmukkana.
 - **v2.67 silmukat ja tunnelma:** jokainen silmukka pitää yhden arvotun version; sää ristihäivyttää 2,5 s; siirtyessä maailman ja ulottuvuuden

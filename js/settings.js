@@ -137,8 +137,10 @@ const sldHTML=(id,min,max,step,v)=>`<div class="sld" id="${id}" data-min="${min}
 let sldDrag=null;
 function sldSet(el,v){const mn=+el.dataset.min,mx=+el.dataset.max,st=+el.dataset.step||1;v=clamp(Math.round((v-mn)/st)*st+mn,mn,mx);el.dataset.v=v;const k=(v-mn)/(mx-mn)*100;el.querySelector('b').style.width=k+'%';el.querySelector('s').style.left=k+'%';return v;}
 function sldFromX(el,x){const r=el.getBoundingClientRect(),mn=+el.dataset.min,mx=+el.dataset.max;return sldSet(el,mn+clamp((x-r.left)/r.width,0,1)*(mx-mn));}
-function bindSld(id,onInput,onChange){const el=document.getElementById(id);if(!el)return;el.onmousedown=e=>{e.preventDefault();e.stopPropagation();sldDrag={el,onInput,onChange};onInput&&onInput(sldFromX(el,e.clientX));};}
-addEventListener('mousemove',e=>{if(sldDrag){const v=sldFromX(sldDrag.el,e.clientX);sldDrag.onInput&&sldDrag.onInput(v);if(e.movementX||sldDrag.lx!==undefined&&e.clientX!==sldDrag.lx)mSliderMove();sldDrag.lx=e.clientX;}});   // v2.51 naputus vain liikkuessa
+/* v2.75 portaittainen säädin (≤ SLD_SNAP_N askelta, esim. esiasetus 8 tasoa): naputus vain arvon vaihtuessa; tiheät säätimet (äänenvoimakkuus ym.) naputtavat liikkeestä kuten ennen */
+const SLD_SNAP_N=12,sldSnap=el=>(+el.dataset.max-+el.dataset.min)/(+el.dataset.step||1)<=SLD_SNAP_N;
+function bindSld(id,onInput,onChange){const el=document.getElementById(id);if(!el)return;el.onmousedown=e=>{e.preventDefault();e.stopPropagation();const v0=+el.dataset.v;sldDrag={el,onInput,onChange,lv:v0};const v=sldFromX(el,e.clientX);if(sldSnap(el)&&v!==v0){sldDrag.lv=v;mSliderStep();}onInput&&onInput(v);};}
+addEventListener('mousemove',e=>{if(sldDrag){const v=sldFromX(sldDrag.el,e.clientX);sldDrag.onInput&&sldDrag.onInput(v);if(sldSnap(sldDrag.el)){if(v!==sldDrag.lv){sldDrag.lv=v;mSliderStep();}}else if(e.movementX||sldDrag.lx!==undefined&&e.clientX!==sldDrag.lx)mSliderMove();sldDrag.lx=e.clientX;}});   // v2.51 naputus vain liikkuessa
 addEventListener('mouseup',()=>{if(sldDrag){const d=sldDrag;sldDrag=null;d.onChange&&d.onChange(+d.el.dataset.v);}});
 const tglHTML=(id,on,extra='')=>`<button type="button" class="tgl${on?' on':''}" id="${id}" ${extra}><i></i><span>${on?'Päällä':'Pois'}</span></button>`;
 // Napsautuksen jälkeen nappi tai valikko ei jää fokukseen (näppäimet menevät peliin); tekstikenttään palatessa vanha teksti valitaan.

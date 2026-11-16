@@ -500,7 +500,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       d=d&&deathCauseOf(true).k==='drown';P.voidDeath=true;d=d&&deathCauseOf(false).k==='void';}finally{[P.voidDeath,P.ashDeath,P.lastFire,P.deathCause,P.fallT,P.lastMob,P.hunger]=sv;}
     return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
   t('v2.73 äänet ja merkit: sliderin napsu −40 %, askeleet −30 %, hengästys −20 %, äänimerkki häipyy 2 s, Extra-asetusten pallo suhteessa esiasetukseen',()=>{
-    const a=MSND.tickV===.21&&PL_STEP_V===.56&&TG_STEP_K===.7&&HENG_V===.64&&/TG_STEP_K/.test(tgStep.toString());
+    const a=MSND.tickV===.168&&PL_STEP_V===.56&&TG_STEP_K===.7&&HENG_V===.64&&/TG_STEP_K/.test(tgStep.toString());
     const sv=JSON.stringify(SET);let b;try{SET.torchSharp=true;applyPreset(0);SET.torchSharp=true;const lo=pfLvlRel('torchSharp');applyPreset(7);SET.torchSharp=true;const hi=pfLvlRel('torchSharp');SET.shUltra='sharp';const sh=pfLvl('shUltra');
       b=lo===3&&hi===1&&sh===3&&/tasolla/.test(pfDot('torchSharp'))||`lo ${lo} hi ${hi} sh ${sh}`;}finally{Object.assign(SET,JSON.parse(sv));applyGfx();}
     return a&&b===true||`virhe ${a} ${b}`;});
@@ -510,6 +510,15 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const sv=explored.slice();explored.fill(0);const px=P.pos.x,pz=P.pos.z,inD=P.inDun;P.inDun=false;exploreTick(SPAWN_EXP);const n1=explored.reduce((a,v)=>a+v,0);explored.fill(0);exploreTick();const n0=explored.reduce((a,v)=>a+v,0);explored.set(sv);P.inDun=inD;
     const b=SPAWN_EXP>3&&n1>n0*1.6&&/exploreTick\(SPAWN_EXP\)/.test(newGame.toString());
     return a&&b||`virhe ${a}${b} ${n0}/${n1}`;});
+  t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
+    const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
+    try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;
+      el.dispatchEvent(new MouseEvent('mousedown',{clientX:X(3),bubbles:true}));const a=L.length===0;   /* sama arvo: ei ääntä */
+      for(const dx of [1,2,3,-1,-2])dispatchEvent(new MouseEvent('mousemove',{clientX:X(3)+dx,movementX:dx}));const b=L.length===0;   /* liike saman arvon sisällä: ei ääntä */
+      dispatchEvent(new MouseEvent('mousemove',{clientX:X(5),movementX:40}));dispatchEvent(new MouseEvent('mousemove',{clientX:X(5)+2,movementX:2}));const c=L.length===1;
+      dispatchEvent(new MouseEvent('mouseup'));
+      r=a&&b&&c&&MSND.tickV===.168&&MSND.tickPj===.02&&L[0]===.02&&sldSnap($('#tSld'))&&!sldSnap($('#tSld2'))||`virhe ${a}${b}${c} ${L.length}`;}
+    finally{mSnd=om;box.remove();sldDrag=null;}return r;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
