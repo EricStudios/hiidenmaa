@@ -217,7 +217,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const b='unseen' in DEVF&&/data-big="\$\{k\}"/.test(renderDev.toString())&&/'unseen','Näkymätön'/.test(renderDev.toString());
     return a&&b||`virhe havaitseminen ${a} valikko ${b}`;}finally{DEVF.unseen=o;for(const m of ms)if(mobs.includes(m))mobRemove(m);}});
   t('v2.16 ääniprojektit kansioissa: olennot_aanet/ ja olennot_toiminnot/ (raw, valmiit, lista), manifestin f-polku, kivivartija ei lainaa (v2.23 omat äänet)',()=>{
-    const M=manJ(),ks=Object.keys(M),a=ks.length>50&&ks.filter(k=>!/^[tp]\//.test(k)).every(k=>M[k].f===`olennot_aanet/valmiit/${k}.mp3`)&&ks.filter(k=>k.startsWith('t/')).every(k=>M[k].f.startsWith('olennot_toiminnot/valmiit/'))
+    const M=manJ(),ks=Object.keys(M),a=ks.length>50&&ks.filter(k=>!/^[a-z]+\//.test(k)).every(k=>M[k].f===`olennot_aanet/valmiit/${k}.mp3`)   /* v2.66: m/, i/, mu/, a/ = muut projektit */&&ks.filter(k=>k.startsWith('t/')).every(k=>M[k].f.startsWith('olennot_toiminnot/valmiit/'))
       &&ks.filter(k=>k.startsWith('p/')).every(k=>/^pelaaja_[123]_[a-z]+\/valmiit\//.test(M[k].f));   /* v2.24: manifesti luetaan tiedostosta (CRE.man voi olla vielä lataamatta), pelaajan p/-avaimet */
     const b=/e\.f\|\|name\+'\.mp3'/.test(creBuf.toString())&&!VARAANI.kivivartija&&!CRE_SILENT.has('kivivartija')&&/CRE_SILENT\.has\(m\.type\)/.test(killMob.toString());   /* v2.23: kivivartija sai omat äänet */
     const c=Object.keys(MOBDEF).every(k=>TG[k]&&TG_STRIDE[TG[k]]);
@@ -410,6 +410,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=SET_DEF.noAuto===false&&SET_PAGES.xgfx[0]==='noAuto';const pv=[SET.noAuto,SET.autoAll,SET.autoRes,AUTO.res];SET.autoAll=true;SET.autoRes=true;SET.noAuto=true;
     const b=['res','fx','dist','q'].every(k=>!autoOn(k));AUTO.res=2;applyGfx();const c=AUTO.res===0;[SET.noAuto,SET.autoAll,SET.autoRes]=pv;AUTO.res=pv[3];applyGfx();
     const d=/!SET\.noAuto\)autoQuality/.test(frame.toString())&&/SET\.noAuto/.test(perfApply.toString());return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
+  t('v2.66 musiikki: pääkansio music/ (menu1, menu2, biomit 13, ulottuvuudet + Hautakumpu + pomotaistelu), säännöt ja häivytys 2,5 + 2,5 s',()=>{
+    const M=window.__mus;if(!M||!M.set||!M.C)return 'soitin puuttuu';const C=M.C;
+    const a=C.OUT===2.5&&C.IN===2.5&&C.JOIN_MIN===10&&C.JOIN_MAX===40&&C.SIL_MIN===50&&C.SIL_MAX===120&&C.SWITCH_P===.8&&C.GAP_MIN===20&&C.GAP_MAX===40;
+    const src=M.set.toString(),b=/SWITCH_P/.test(src)&&/JOIN_MIN/.test(src)&&/SIL_MIN/.test(src);
+    const d1=musicCtx.toString(),c=/'boss'/.test(d1)&&/'d:'/.test(d1)&&/'w:'/.test(d1)&&MUS_BIO_T===4&&MUS_REALM.portal1==='routaluola'&&/hold/.test(realmSnd.toString());
+    const ok=(async()=>1)();return a&&b&&c||`virhe ajat ${a} säännöt ${b} konteksti ${c}`;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
@@ -457,7 +463,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     try{a=SET_DEF.volMaster===1&&['musicVol','creVol','plVol','uiVol','ambVol','notifVol'].every(k=>SET_DEF[k]===1&&SET_PAGES.snd.includes(k))&&!SET_PAGES.ctl.includes('sound')&&
         SET_TABS.some(t=>t[0]==='snd'&&t[1]==='Äänet ja musiikki')&&Math.abs(volK('cre')-.8)<1e-9&&(SET.volMaster=1.5,SET.uiVol=1.5,Math.abs(volK('ui')-1.575)<1e-9)&&(SET.sfxOn=false,volK('pl')===0&&volK('music')>0);
       Object.assign(SET,o);
-      b=!!M&&M.MU_FADE===2&&M.MU_GAP_MIN===20&&M.MU_GAP_MAX===40&&PAUSE_MUSIC_T===15&&/__mus\.stop\(\)/.test(startPlay.toString())&&/want\('tauko'\)/.test(musicTick.toString());
+      b=!!M&&!!M.C&&M.C.GAP_MIN===20&&M.C.GAP_MAX===40&&PAUSE_MUSIC_T===15&&/__mus\.stop\(\)/.test(startPlay.toString())&&/set\('tauko'\)/.test(musicTick.toString());   /* v2.66 uusi soitin */
       window.mSnd=(g,e,x)=>{L.push(e+':'+(x&&x.cat));return e==='ilmoitus'||e.endsWith('_yhteinen');};msgSndT=-9;msgQuietT=-9;msgSnd();msgSnd();biomeSnd('aarni');msgSnd();realmSnd('portal1');
       c=L.join()==='ilmoitus:notif,biomi_aarnimetsa:notif,biomi_yhteinen:notif,ulottuvuus_routaluola:notif,ulottuvuus_yhteinen:notif';L.length=0;
       const pi=MBG.i;MBG.i=MBG_SCENES.findIndex(x=>x.n==='Ahjo yöllä');mbgSndTick(.1);mbgSndTick(20);MBG.i=MBG_SCENES.findIndex(x=>x.n==='Lumisade');mbgSndTick(.1);mbgSndTick(30);MBG.i=pi;d=L.join()==='tausta_ahjo:amb';}

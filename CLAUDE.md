@@ -97,9 +97,10 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
   kerrokset kuten tömistys/kalina – pohjaääni kaksi- tai nelijalkaisilta); `sounds/manifest.json` yhteinen (`f`-polku).
   Valikot (v2.51–): `menu_1_valikko/` ja `menu_2_efektit/` (avaimet `m/<ryhmä>/…`, työkalun `M_PARTS`, listat `AANILISTA_MENU<n>.csv` + `AANILISTA_MENU.xlsx`), peli `mSnd`/`mStop` (audio.js, `SET.uiVol`);
   ennen pelin skriptejä `__bootSnd` (boot.js, yhteinen AudioContext `window.__AC`, äänten avausmerkki `#sndHint`).
-  Musiikki (v2.53): `musiikki/` (avaimet `mu/…`, stereo), soitin boot.js `__mus` + main.js `musicTick`; ilmoitukset `ilmoitukset/` (avaimet `i/…`, yhteinen + biomi/ulottuvuuskohtaiset);
+  Musiikki (v2.66): **oma pääkansio `music/`** (raw/valikko menu1/menu2, raw/biomit, raw/ulottuvuudet; avaimet `mu/…`, stereo, manifestissa `../music/…`), soitin boot.js `__mus.set`/`hold` (suoratoisto, ajat `__mus.C`) + main.js `musicTick`/`musicCtx`; ilmoitukset `ilmoitukset/` (avaimet `i/…`, yhteinen + biomi/ulottuvuuskohtaiset);
   sää ja tunnelma (v2.61) `saa_ja_tunnelma/` (avaimet `a/…`, silmukat `X_ACT`, soitin audio.js `ambTick`/`ambTargets`, ukkonen `ambThunder`);
   voimakkuus `volK(kategoria)` (audio.js, sivu Äänet ja musiikki, 100 % = `VOL_BASE`).
+- Valikko-/UI-efektit trimmataan tarkasti (`TIGHT_EV`, työkalu): lisää uusi UI-efekti listaan.
 - Käyttäjä korvaa paikkamerkin projektin `raw/`-kansiossa samalla nimellä (lisäversiot `_4`, `_5` … ilman rajaa) → aja `python3 tools/process_sounds.py` (uudet nimet: `--init`).
   Peli lukee vain `sounds/manifest.json`:n käsitellyt äänet. Uusi olento → aja `--init` (tekee sen paikkamerkit).
 - **Äänierä (uudet äänet):** noudata kehitysmuistion "Äänierän rutiini" (pull → `process_sounds.py` → lue HUOM-rivit → muistio, versio, `tarkistus.mjs` → PR). Pelkkä äänidata ei vaadi

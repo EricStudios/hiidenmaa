@@ -240,6 +240,24 @@
    "raw": 0.74,
    "f": "olennot_aanet/valmiit/hirvi_idle_1.mp3"
   },
+  "i/ilmoitukset/ilmoitus_0": {
+   "h": "1c419ef227",
+   "src": "401c6f41f91a",
+   "dur": 0.07,
+   "pv": "9t3",
+   "gain": -8.4,
+   "raw": 0.09,
+   "f": "ilmoitukset/valmiit/ilmoitukset_valmis/ilmoitus_0.mp3"
+  },
+  "i/ulottuvuudet/ulottuvuus_aarnihauta_0": {
+   "h": "eed8b16d9e",
+   "src": "a47787f5f1f5",
+   "dur": 14.99,
+   "pv": 9,
+   "gain": -0.9,
+   "raw": 20.43,
+   "f": "ilmoitukset/valmiit/ulottuvuudet_valmis/ulottuvuus_aarnihauta_0.mp3"
+  },
   "ilves_idle_1": {
    "h": "2606b7ceaf",
    "src": "1c7a534273ce",
@@ -573,6 +591,60 @@
    "gain": -5.4,
    "raw": 1.62,
    "f": "olennot_aanet/valmiit/kivivartija_idle_1.mp3"
+  },
+  "m/esiasetus/ultra_0": {
+   "h": "357f31f5ea",
+   "src": "1d27a593e553",
+   "dur": 0.81,
+   "pv": "9t3",
+   "gain": -6.3,
+   "raw": 0.83,
+   "f": "menu_1_valikko/valmiit/esiasetus_valmis/ultra_0.mp3"
+  },
+  "m/extra/extra_paalle_0": {
+   "h": "b1cbaa7991",
+   "src": "c4b5c8c39279",
+   "dur": 0.07,
+   "pv": "9t3",
+   "gain": -1.0,
+   "raw": 0.09,
+   "f": "menu_1_valikko/valmiit/extra_valmis/extra_paalle_0.mp3"
+  },
+  "m/extra/extra_pois_0": {
+   "h": "7d19ed936d",
+   "src": "a0f40bbe3c98",
+   "dur": 0.02,
+   "pv": "9t3",
+   "gain": -3.9,
+   "raw": 0.04,
+   "f": "menu_1_valikko/valmiit/extra_valmis/extra_pois_0.mp3"
+  },
+  "m/liukusaatimet/naputus_0": {
+   "h": "936117e491",
+   "src": "21cccfc3f508",
+   "dur": 0.1,
+   "pv": "9t3",
+   "gain": 6.7,
+   "raw": 0.18,
+   "f": "menu_1_valikko/valmiit/liukusaatimet_valmis/naputus_0.mp3"
+  },
+  "m/napit/hover_0": {
+   "h": "c2e33254d7",
+   "src": "b9cbffc10264",
+   "dur": 0.02,
+   "pv": "9t3",
+   "gain": -11.8,
+   "raw": 0.04,
+   "f": "menu_1_valikko/valmiit/napit_valmis/hover_0.mp3"
+  },
+  "m/napit/klikkaus_0": {
+   "h": "121969a2eb",
+   "src": "f73160834288",
+   "dur": 0.07,
+   "pv": "9t3",
+   "gain": 24.0,
+   "raw": 0.09,
+   "f": "menu_1_valikko/valmiit/napit_valmis/klikkaus_0.mp3"
   },
   "metso_death_1": {
    "h": "d20d4192c3",

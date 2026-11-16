@@ -485,6 +485,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   mittari) ja käyttää kivisadetta (punaiset varoitusrenkaat), maapiikkirivejä ja kolmen kiven heittoa; paranee 30 s ilman osumaa; nousee
   alttarilta täysin voimin; lakkaa paranemasta vasta 5. kuolemasta (ilmoitus).
 - **v2.54:** karju, hirvi ja hiidenhirvi soittavat osuessaan iskuäänen, kunnes omat sarviosumaäänet lisätään.
+- **v2.66 musiikki** (kansio `music/`): päävalikossa menu1 (aloitusjakson logosta), sen jälkeen menu2-kappaleet; tauolla 15 s jälkeen menu2.
+  Maailmassa biomin kappale 10–40 s liittymisestä, kappaleiden välissä 50 s – 2 min hiljaisuutta; biomia vaihdettaessa kappale vaihtuu 80 %
+  todennäköisyydellä uuden biomin kappaleeseen (20 %: loppuu). Ulottuvuuksissa, Hautakummussa ja pomotaistelussa oma kappale heti. Häivytys 2,5 s + 2,5 s.
 - **v2.53:** valikkomusiikki (aloitusjakson logosta päävalikkoon, häipyy peliin liityttäessä; taukovalikossa 15 s jälkeen); uusi
   asetussivu **Äänet ja musiikki** (master, mykistykset, 6 säädintä 0–150 %, ilmoitus-/alue-/ulottuvuusäänten valinnat); ilmoitus-,
   alueen löytö- ja ulottuvuusäänet; kolmen valikkotaustan satunnaiset hiljaiset äänet (kun äänet on lisätty).

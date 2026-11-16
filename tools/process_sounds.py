@@ -37,6 +37,8 @@ AGGRO_AI = ('neutral', 'hostile', 'boss', 'rboss')   # suuttumisääni (aggro)
 CHASE_AI = ('hostile', 'boss', 'rboss')               # + toistuva jahtiääni (chase)
 ECHO_AI = ('rboss', 'boss')                           # v1.88: kaikuääni (echo): nukkuva ulottuvuuspomo kaikuu luolastossa kunnes pelaaja kohtaa sen; v1.95 myös Kalmanvartija maan alta
 VARIANTS = (1, 2, 3)                                  # paikkamerkit _1.._3; v2.11: lisäversiot _4, _5 … kelpaavat ilman koodimuutosta (peli arpoo kaikista)
+TIGHT_EV = {'hover', 'klikkaus', 'naputus', 'ultra', 'extra_paalle', 'extra_pois', 'varmistus', 'ilmoitus'}   # v2.66 käyttäjän valikko-/UI-efektit: tarkka trimmaus
+pv_of = lambda ev: f'{PV_T}t3' if ev in TIGHT_EV else PV_T   # tiukan trimmauksen äänet käsitellään kerran uudelleen
 PV_T = 9   # v2.30 poiminta lyhyemmäksi; v2.29 puun kaatumisnarina täyspitkäksi (peli katkaisee maahan osuessa); toimintoäänten käsittelyversio: v2.22 huippunormalisointi + saumattomat silmukat; v2.23 askeltila, pätkät, paras kohta, toimintosilmukat; v2.27 pusikkoaskel lyhyemmäksi
 PV = 4                                                # käsittelyn versio: vaihtuessa kaikki äänet käsitellään uudestaan
 
@@ -331,14 +333,15 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
         pre = f'volume={max(0.0, -1.0 - pk):.2f}dB,' if pk is not None and pk < -1.0 else ''
         if mode == 'step':   # v2.23: taustakohina (suhina, kahina) pois askelista – FFT-kohinanpoisto seuraa kohinatasoa
             pre += 'afftdn=nr=12:nf=-50:tn=1,'
-        r = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + ('highpass=f=40' if loop and mode != 'act' else f'highpass=f=40,{trim},areverse,{trim},areverse'),
+        trim_t = 'atrim=start=0.015,asetpts=PTS-STARTPTS,' + trim.replace('-48dB', '-42dB') if kind in TIGHT_EV else trim   # v2.66 valikkoefektit: loppu tiukemmin (viimeiset 15 ms = mahdollinen loppunapsahdus pois, häntä −42 dB)
+        r = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + ('highpass=f=40' if loop and mode != 'act' else f'highpass=f=40,{trim},areverse,{trim_t},areverse'),
                 '-ac', AC, '-ar', '44100', '-c:a', 'pcm_s16le', w1])
         if r.returncode != 0 or not os.path.exists(w1):
             return r.stderr.strip()[-300:] or 'tuntematon virhe', None
         d = duration(ff, w1)
         if d < 0.12 and mode != 'step' and not loop:   # v2.50: hyvin lyhyt naksahdus → lempeämpi leikkaus (−66 dB), ettei hiljainen häntä katoa
             tr2 = trim.replace('-48dB', '-66dB')
-            r2 = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + f'highpass=f=40,{tr2},areverse,{tr2},areverse',
+            r2 = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + f'highpass=f=40,{tr2},areverse,{trim_t if kind in TIGHT_EV else tr2},areverse',
                       '-ac', AC, '-ar', '44100', '-c:a', 'pcm_s16le', w1])
             if r2.returncode == 0:
                 d = duration(ff, w1)
@@ -803,16 +806,21 @@ for _n, _proj, _tit, _grs in M_PARTS:
                    'pre': 'm', 'proj': _proj, 'single': True, 'act': {'tuuli', 'linnut'}, 'list': os.path.join(SND, _proj, f'AANILISTA_MENU{_n}.csv'),
                    'allowed': (lambda by: (lambda g: list(by[g][4])))(_by), 'xlsx': 'menu'})
 # v2.53 MUSIIKKI (avaimet mu/<ryhmä>/<kappale>_<n>) ja ILMOITUKSET (avaimet i/<ryhmä>/<ääni>_<n>): sama käsittely, omat kansiot ja listat.
-MUSIC_EV = {'valikkomusiikki', 'taukomusiikki'}
 BIO_FI = [('meadow', 'rantaniitty', 'Rantaniitty'), ('koivu', 'koivulehto', 'Koivulehto'), ('forest', 'korpimetsa', 'Korpimetsä'), ('suo', 'upposuo', 'Upposuo'),
           ('kangas', 'jakalakangas', 'Jäkäläkangas'), ('aarni', 'aarnimetsa', 'Aarnimetsä'), ('moor', 'kalmanummi', 'Kalmanummi'), ('tunturi', 'tunturikangas', 'Tunturikangas'),
           ('rakka', 'rakka', 'Rakka'), ('mountain', 'kivivuori', 'Kivivuori'), ('peak', 'routahuiput', 'Routahuiput'), ('beach', 'hietaranta', 'Hietaranta'), ('sea', 'meri', 'Meri')]
 REALM_FI = [('portal1', 'routaluola', 'Routaluola'), ('portal2', 'kalmankammio', 'Kalmankammio'), ('portal3', 'aarnihauta', 'Aarnihauta')]
+MUSIC_EV = {'menu1', 'menu2', 'hautakumpu', 'pomotaistelu'} | {fi for _, fi, _ in BIO_FI} | {fi for _, fi, _ in REALM_FI}   # v2.66 stereo, parempi laatu
 AMB_PL = REALM_FI + [('barrow', 'hautakumpu', 'Hautakumpu')]   # v2.61 tunnelmaäänien paikat
 X_PARTS = [   # (kansio, etuliite, listan nimi, otsikko, ryhmät)
-    ('musiikki', 'mu', 'AANILISTA_MUSIIKKI.csv', 'Musiikki – valikot', [
-        ('valikko', 'Valikkomusiikki', '🎵', [('valikkomusiikki', 'soi HIIDENMAA-logosta (aloitusjakso) päävalikon ajan, kunnes liityt peliin (häivytys ulos); loppuessa 20–40 s tauko ja uudelleen (versio arvotaan)', 'nordic folk ambient menu music, calm epic')]),
-        ('tauko', 'Taukomusiikki', '⏸️', [('taukomusiikki', 'alkaa, kun taukovalikko on ollut auki 15 s; häivytys ulos peliin palatessa', 'calm ambient pause music, soft nordic')])]),
+    # v2.66 MUSIIKKI omassa pääkansiossa music/ (ei sounds/): manifestin polku '../music/valmiit/…' (peli hakee sounds/ + f)
+    ('../music', 'mu', 'MUSIIKKILISTA.csv', 'Musiikki', [
+        ('valikko', 'Valikko- ja taukomusiikki', '🎵', [('menu1', 'soi kerran HIIDENMAA-logosta (aloitusjakso) päävalikkoon; sen jälkeen menu2-kappaleet', 'nordic folk ambient menu theme, epic calm'),
+                                                     ('menu2', 'satunnaisesti: päävalikossa menu1:n jälkeen ja taukovalikossa (15 s jälkeen); lisää versiot menu2_1, menu2_2 … niin monta kuin haluat', 'calm nordic ambient music, soft folk')]),
+        ('biomit', 'Biomien musiikki', '🗺️', [(fi, f'maailmassa: {nm} – alkaa 10–40 s pelin alusta, kappaleiden välissä 50 s – 2 min hiljaisuutta; versiot {fi}_1 …', 'ambient nordic exploration music, ' + nm.lower()) for _, fi, nm in BIO_FI]),
+        ('ulottuvuudet', 'Ulottuvuudet, Hautakumpu ja pomotaistelu', '🌀', [(fi, f'{nm}: alkaa sisään astuessa (häivytys), välissä 50 s – 2 min hiljaisuutta', 'dark dungeon ambient music, ' + nm.lower()) for _, fi, nm in REALM_FI]
+         + [('hautakumpu', 'Hautakummun luolasto: alkaa sisään astuessa (häivytys)', 'dark barrow crypt ambient music'),
+            ('pomotaistelu', 'pomotaistelu (Jäätär, Kalmaherra, Aarnihirviö, Kalmanvartija): alkaa pomon herätessä, loppuu häivyttäen taistelun päättyessä', 'epic boss battle music, nordic drums choir')])]),
     ('ilmoitukset', 'i', 'AANILISTA_ILMOITUKSET.csv', 'Ilmoitukset ja löydöt', [
         ('ilmoitukset', 'Ilmoitukset', '💬', [('ilmoitus', 'viesti tai ilmoitus ruudulle (vasen reuna); enintään 0,35 s välein', 'ui notification soft, message pop')]),
         ('biomit', 'Uusi alue löydetty', '🗺️', [('biomi_yhteinen', 'uusi alue löydetty (aluebanneri) – soi, jos alueella ei ole omaa ääntä', 'discovery chime, new area found, mystical reveal')]
@@ -844,10 +852,11 @@ for _proj, _pre, _list, _tit, _grs in X_PARTS:
     P_CFGS.append({'part': 0, 'title': _tit, 'groups': _g, 'by': _by, 'raw': os.path.join(SND, _proj, 'raw'), 'out': os.path.join(SND, _proj, 'valmiit'),
                    'pre': _pre, 'proj': _proj, 'single': True, 'act': X_ACT.get(_proj, set()), 'list': os.path.join(SND, _proj, _list),
                    'allowed': (lambda by: (lambda g: list(by[g][4])))(_by), 'xlsx': 'menu'})
-T_PROF.update({'valikkomusiikki': (900.0, 900.0, 1.5, -20), 'taukomusiikki': (900.0, 900.0, 1.5, -21), 'ilmoitus': (.8, .8, .1, -25),
+T_PROF.update({e: (900.0, 900.0, 1.5, -20) for e in MUSIC_EV})   # v2.66 musiikki
+T_PROF.update({'ilmoitus': (.8, .8, .1, -25),
                'tausta_leiri': (4.0, 4.0, .5, -28), 'tausta_myrsky': (5.0, 5.0, .8, -26), 'tausta_ahjo': (3.0, 3.0, .4, -28)})
 T_PROF.update({e: (3.0, 3.0, .5, -21) for e in ['biomi_yhteinen'] + [f'biomi_{fi}' for _, fi, _ in BIO_FI]})
-T_PROF.update({e: (4.0, 4.0, .6, -20) for e in ['ulottuvuus_yhteinen'] + [f'ulottuvuus_{fi}' for _, fi, _ in REALM_FI]})
+T_PROF.update({e: (15.0, 15.0, 3.0, -20) for e in ['ulottuvuus_yhteinen'] + [f'ulottuvuus_{fi}' for _, fi, _ in REALM_FI]})   # v2.66: 4 → 15 s (käyttäjän ääni hiipuu luonnollisesti ~15 s)
 T_PROF.update({e: (60.0, 60.0, .3, -24) for e in AMB_LOOPS})   # v2.61 sää- ja tunnelmasilmukat
 T_PROF.update({'ukkonen': (8.0, 8.0, 1.2, -19)})
 T_PROF.update({e: (6.0, 6.0, .8, -26) for e in ['satunnainen_yhteinen'] + [f'satunnainen_{fi}' for _, fi, _ in AMB_PL]})
@@ -1020,7 +1029,7 @@ def process_toiminnot(ff, init, old, C=None):
         # v2.23: pitkä askelnauhoitus (yli 3 s) → useita askelpätkiä: voimakkain = _n, muut _n01, _n02 … (peli arpoo kaikista)
         jobs = [(base, None)]
         if mode == 'step':
-            prev = [k for k in old if k.startswith(f'{PRE}/{g}/{ev}_') and old[k].get('src') == src_h and old[k].get('pv') == PV_T]
+            prev = [k for k in old if k.startswith(f'{PRE}/{g}/{ev}_') and old[k].get('src') == src_h and old[k].get('pv') == pv_of(ev)]
             if prev and all(os.path.exists(os.path.join(odir(g), k.split('/')[2] + '.mp3')) for k in prev):
                 jobs = [(k.split('/')[2], old[k].get('seg')) for k in sorted(prev, key=natkey)]
             elif duration(ff, p) > 3.0:
@@ -1030,7 +1039,7 @@ def process_toiminnot(ff, init, old, C=None):
                     jobs = [(base, sg[0])] + [(f'{ev}_{num * 100 + i}', x) for i, x in enumerate(sg[1:], 1)]
         for kb, sg in jobs:
             nk, dk = f'{PRE}/{g}/{kb}', os.path.join(odir(g), kb + '.mp3')
-            if nk in old and old[nk].get('src') == src_h and old[nk].get('pv') == PV_T and os.path.exists(dk):
+            if nk in old and old[nk].get('src') == src_h and old[nk].get('pv') == pv_of(ev) and os.path.exists(dk):
                 sounds[nk] = old[nk]
                 skipped += 1
             else:
@@ -1040,7 +1049,7 @@ def process_toiminnot(ff, init, old, C=None):
                     errors.append(f'{nk}: {err}')
                     continue
                 gain, rawd = res
-                sounds[nk] = {'h': sha(dk, 10), 'src': src_h, 'dur': duration(ff, dk), 'pv': PV_T, 'gain': gain, 'raw': rawd}
+                sounds[nk] = {'h': sha(dk, 10), 'src': src_h, 'dur': duration(ff, dk), 'pv': pv_of(ev), 'gain': gain, 'raw': rawd}
                 if sg:
                     sounds[nk]['seg'] = [round(sg[0], 3), round(sg[1], 3)]
                 if kb != base:
