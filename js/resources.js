@@ -333,11 +333,18 @@ function ftTool(mode,cx0,cz0,R,h0){const m=1,S=FT_CS*FT_S,c0x=Math.floor((cx0-R-
     if(mode==='path'){const w=sstep(R,R*.4,d),dh=clamp((h0-h)*w,-.4,.4);if(Math.abs(dh)>.002)h+=dh;if(d<R*.65)md+=.4*sstep(R*.65,R*.2,d);}
     else if(mode==='raise'){const w=sstep(R,R*.25,d);if(Math.hypot(x-P.pos.x,z-P.pos.z)>.9)h=Math.min(b0+3,h+.3*w);md-=w;}
     else if(mode==='dig'){const w=sstep(R,R*.25,d);h=Math.max(b0-3,h-.3*w);md-=w;}
-    else if(mode==='restore'){md-=sstep(R,R*.25,d);}
+    else if(mode==='restore'){md-=2*sstep(R,R*.5,d);}   // v2.78 kuokan oikea: väri ja kasvillisuus takaisin kerralla (lähes koko säteeltä)
     md=clamp(md,0,1);if(md<.01)md=0;if(Math.abs(h-b0)<.005)h=b0;
     for(const q of L){const kk=(GZ-q.cz*S)*FT_NV+(GX-q.cx*S);q.h[kk]=h;q.mud[kk]=md;dirty.add(q);}
     if(!(GX%FT_S)&&!(GZ%FT_S)){const ck=(GZ/FT_S)*HN+GX/FT_S;terraSetVertex(ck,h);mudSet(ck,md);}}   // karkea kärki samassa kohdassa
   for(const q of dirty){ftGeo(q);ftColors(q);}return true;}
+/* v2.78 multaisuus pisteessä: tarkka 1 m laikku, jos sellainen on (lapion polku, kuokan palautus), muuten lähin karkea kärki. Ruoho (rebuildGrass)
+   käyttää tätä, joten polku poistaa ja kuokan oikea palauttaa kasvillisuuden täsmälleen muokatulta alueelta. */
+function mudAt(x,z){const GX=(x+HALF)/FT_HS,GZ=(z+HALF)/FT_HS;
+  if(FT_ANY){const S=FT_CS*FT_S,cx=Math.floor(GX/S),cz=Math.floor(GZ/S);if(cx>=0&&cz>=0&&cx<FT_CN&&cz<FT_CN){const pi=FT_IDX[cz*FT_CN+cx];
+    if(pi){const p=FT_P[pi-1],lx=clamp(GX-cx*S,0,S-1e-4),lz=clamp(GZ-cz*S,0,S-1e-4),i=lx|0,j=lz|0,fx=lx-i,fz=lz-j,k=j*FT_NV+i,M=p.mud;
+      return lerp(lerp(M[k],M[k+1],fx),lerp(M[k+FT_NV],M[k+FT_NV+1],fx),fz);}}}
+  const gi=Math.round((x+HALF)/GS),gj=Math.round((z+HALF)/GS);return gi<0||gj<0||gi>=HN||gj>=HN?0:MUD[gj*HN+gi];}
 function ftList(){const o=[];for(const p of FT_P){const e=[];for(let k=0;k<p.h.length;k++)if(Math.abs(p.h[k]-p.h0[k])>=.005||p.mud[k]>0)e.push([k,+p.h[k].toFixed(3),+p.mud[k].toFixed(2)]);if(e.length)o.push([p.cx,p.cz,e]);}return o;}
 function ftApply(list){for(const [cx,cz,e] of list||[]){const p=ftEnsure(cx,cz);if(!p)continue;for(const [k,h,m] of e){if(k>=0&&k<p.h.length){p.h[k]=h;p.mud[k]=m;}}ftGeo(p);ftColors(p);}
   for(const n of nodes)syncNodeY(n);}
@@ -427,7 +434,7 @@ function rebuildGrass(){let lv=+(SET.grass??1);grassDirty=false;if(AUTO.fx>=2)lv
   let n=0;const i0=Math.floor((cx-R)/C),i1=Math.ceil((cx+R)/C),j0=Math.floor((cz-R)/C),j1=Math.ceil((cz+R)/C);
   for(let j=j0;j<=j1&&n<N-6;j++)for(let i=i0;i<=i1&&n<N-6;i++){const ox=(i+grassHash(i,j))*C,oz=(j+grassHash(j+7919,i-104729))*C;if((ox-cx)**2+(oz-cz)**2>R*R)continue;
     const gi=Math.round((ox+HALF)/GS),gj=Math.round((oz+HALF)/GS);if(gi<0||gj<0||gi>=HN||gj>=HN)continue;const k=gj*HN+gi,bi=TBIOME[k];if(bi===255)continue;const D=GRASS_DEF[bi];
-    const pv=vnoise(ox*.06+13,oz*.06-7)*.7+vnoise(ox*.23,oz*.23)*.3,patch=sstep(.45,.65,pv);if(patch<=0||grassHash(i*3+1,j*5+2)>D[0]*patch*.6||MUD[k]>.22)continue;
+    const pv=vnoise(ox*.06+13,oz*.06-7)*.7+vnoise(ox*.23,oz*.23)*.3,patch=sstep(.45,.65,pv);if(patch<=0||grassHash(i*3+1,j*5+2)>D[0]*patch*.6||mudAt(ox,oz)>.22)continue;
     const nt=3+Math.floor(grassHash(i+11,j-13)*4);
     for(let t=0;t<nt;t++){const a=grassHash(i*7+t,j*3-t)*TAU,d=Math.sqrt(grassHash(i-t,j+t*5))*.5,x=ox+Math.cos(a)*d,z=oz+Math.sin(a)*d,y=terrainH(x,z);if(y<.35)continue;
       if(t===0&&(Math.abs(terrainH(x+.8,z)-y)>.9||pointBlocked(x,y+.3,z)||siteBlockedG(x,z)))break;

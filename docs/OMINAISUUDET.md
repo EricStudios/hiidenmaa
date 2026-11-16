@@ -67,6 +67,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   levänneenä + 0,6/s.
 - **Syöminen:** ruoka lisää kylläisyyttä ja terveyttä (`heal` 3/s). **Ähky (vatsakipu) vain, jos kylläisyys on jo ≥ 99 ja syö silti** (v2.00: täyteen syöty = 100, laskee vasta 60 s:n jälkeen)
   (52 s: kävely −10 %, kestävyys hitaammin, kramppi vie 12 kestävyyttä 8–14 s välein). Raaka liha: 45 % pahoinvointi (40 s).
+- **Lihat (v2.80):** pienriistan liha (jänis, kettu, metso, porsas; yleinen) → paistettuna kylläisyys 40 / terveys 15; riistanliha (peura, poro, karju, emakko; epätavallinen) → 55 / 25; suurriistan liha (hirvi, karhu, hiidenkarhu, hiidenhirvi; harvinainen) → 80 / 40 + kestävyys 30. Kypsyminen: pieni 7–10 s, riista 9–14 s, suuri 14–19 s. Nuotiolla: Lihakeitto (taso 2) 70 / 35 / 20, Juhla-ateria (taso 4) 100 / 70 / 50 + voima, varras 65 / 40 + voima, paistettu sieni 24 / 10.
 - **Tilat** (repun Tilat-osio, hiirellä lisätiedot ja ajastin): märkä (60 s, kuivuu 5× nopeammin tulella), kylmä (−7 % nopeus, −10 % isku,
   −40 % kestävyyden palautus), nälkä / nälkäinen, pahoinvointi, vatsakipu, ylikuormitus, levännyt (12 s tulen ja katon alla →
   360 s, kestävyys +45 %), voimistunut, lämmin, suojassa, hiipii.
@@ -86,7 +87,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Aluevartijat (v0.97):** vartioalue 30–32 m; rajalla vartija jää seisomaan ja taistelemaan 1–10 s ennen paluuta, palaa jahtiin jos pelaaja tulee alueelle.
   **v1.09:** paluu kävellen (kalmo 30 m ≈ 21 s), paranee paluun aikana 1 %/s; pelaaja alle 8 m päässä keskeyttää paluun (myös alueen
   ulkopuolella) ja vartija taistelee niin kauan kuin pelaaja on alle 8 m päässä; sen jälkeen uusi 1–10 s ajastin ja paluu.
-- **Kuokka ja lapio (v0.96):** kuokka vasen nostaa maata 0,3 m (perusväri), oikea palauttaa maan värin; lapio vasen kaivaa 0,3 m kuopan (enint. 3 m), oikea tekee ruskean polun.
+- **Kuokka ja lapio (v0.96):** kuokka vasen nostaa maata 0,3 m (perusväri), oikea palauttaa maan värin ja kasvillisuuden (v2.78: ruoho seuraa tarkkaa 1 m verkkoa `mudAt`, palautus kerralla lähes koko säteeltä); lapio vasen kaivaa 0,3 m kuopan (enint. 3 m), oikea tekee ruskean polun.
 - **Tietoikkuna (v0.94):** Shift pohjassa ja hiiri esineen päällä (reppu, arkku, valmistus) → esineen tiedot kursorin vieressä.
 - **Hautakasa (v0.93):** ei katoa koskaan; jos kaikki ei mahdu reppuun, avautuu arkkuikkunaksi, tyhjänä vajoaa maahan.
 - **Kuolema:** koko reppu jää hautakasaan (valomajakka lähellä, pääkallo kartalla), herätys sängyltä tai rannalta. Kasaa ei voi poimia,
@@ -361,8 +362,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 
 ## Kuolema (v2.73)
 - Hahmo kaatuu painovoimalla iskun suuntaan maan tasalle, veri leviää kehon alle, ja kamera nousee yläviistoon. Hautakasa ei näy kuolinkamerassa.
-- Kuolinruutu kertoo syyn (taistelu ja tappajan nimi, hukkuminen, palaminen, putoaminen, kaatuva puu, nälkä, tyhjyys), vinkin ja tilastot.
-- Herätessä ruumis jää maahan 60 s ja maatuu 30 s:ssa.
+- Kuolinruutu kertoo syyn (taistelu ja tappajan nimi, hukkuminen, palaminen, putoaminen, kaatuva puu, nälkä, tyhjyys) ja tilastot.
+- **v2.77 vinkki vain tarvittaessa:** vinkkilaatikko näkyy vain ensimmäisellä kuolemalla tuleen, tyhjyyteen tai hukkumalla (asioita, joita ei voi arvata), pomon armosäännön laskurissa, tai kun kaadut samalle asialle (sama syy ja sama olento) 3 kertaa putkeen.
+- **Ensimmäinen uni (v2.79):** kun nukut ensimmäisen yön sängyssä (katon alla), saat saavutuksen Hyvät yöunet ja näet unen, joka kertoo Kalmanummen ja Hautakummun suunnan; Hautakumpu merkitään karttaan.
+- Herätessä ruumis alkaa heti hiipua: vajoaa hieman ja haalistuu 12 s:ssa, verilammikko samassa tahdissa (v2.78; ennen 60 s + 30 s).
+- Verilammikko (v2.78) seuraa maaston muotoja: leviää kehon alta 6 s, valuu alarinteeseen pidemmälle kuin ylärinteeseen, ei nouse jyrkkää ylämäkeä, pysähtyy jyrkänteen reunalle, veteen ja seinään; reunat pehmeät, pinta kiiltää märkänä.
 - Tyhjyyteen (maailman tai ulottuvuuden alle) pudonnut kuolee 1 s:n kuluttua; tavarat jäävät viimeiseen turvalliseen kohtaan.
 - Sateessa kasteltava pelaaja ei syty tuleen; sammumisen jälkeen 6 s ennen kuin voi syttyä uudelleen.
 
@@ -607,7 +611,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Siirtymä latausnäyttöön: riimukehä piirtyy, keskellä riimut tavaavat HIIDENMAA, sulautuvat sinetiksi joka leimahtaa (paineaalto, kipinät).
 - Suorituskykytesti valitsee kaikista 8 tasosta (Ultra, kun indeksi ≥ 140) ja huomioi tasaantumisnopeuden ja tasaisuuden.
 - AFK-eleet: heilunta, pään rapsutus, kädet levälleen; siirtymän lopussa sininen ᚺ ja kaartuva riimurivi.
-- Kaatuva puu: osumasta lyhyt sivuilmoitus (väistä sivuun); jos puu tappaa, kuolinruudussa vihje.
+- Kaatuva puu: osumasta lyhyt sivuilmoitus (väistä sivuun); kuolinruudun vihje vain, jos puu kaatuu päälle 3 kertaa putkeen (v2.77).
 - Ensikäynnin aloitusjaksoa ja suorituskykytestiä ei voi ohittaa; merkintä tallentuu vasta jakson lopussa. Palaava kävijä voi ohittaa otsikon.
 - Suorituskykytestin aikana (ei tulosruudussa) yläreunassa kerrotaan, että testi on heikompia koneita varten ja grafiikan voi nostaa itse (Asetukset › Grafiikka).
 - Näppäinlistassa myös kaikki kiinteät näppäimet (I, Q repussa, Enter, ohitus, DEV-näppäimet).
@@ -627,6 +631,18 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.85 kilpi:** torjunnan pito kuluttaa kestävyyttä 1/s (ei palaudu pidon aikana). Kun kestävyys loppuu, kilpi laskeutuu ja tulee ilmoitus; uudelleen nostettavissa, kun kestävyyttä on 20.
+- **v2.84 tulen ääni:** nuotiot, grillinuotiot, käynnissä oleva sulatusuuni, soihdut ja luolien liekit rätisevät (palamisääni); enintään kaksi lähintä soi kerralla, nuotio kovimmin. Sammuneen sulatusuunin suu on musta.
+- **v2.84 pelottavat eläimet** (hiidenkarhu, hiidenhirvi, kalmasusi): jos et ole nukkunut sängyssä kahteen yöhön, yksi tulee varmasti seuraavana yönä; muuten 10 % todennäköisyys yössä.
+- **v2.83 kodin lämpö:** toimii myös seinän vieressä ja pienessä 1×1-mökissä; yksittäinen tarkistus ei enää hiivuta; Lämmin koti estää kylmettymisen ja kuivattaa kuten nuotio; lämmönlähde lasketaan, kun sen ja pelaajan välissä ei ole seinää.
+- **v2.83 valikko:** päävalikossa ja tauolla pelin äänet häipyvät ja palaavat jatkettaessa (silmukat jatkuvat samasta kohdasta).
+- **v2.83 kiviversiot:** Kivimuuri (paaluaidan kiviversio) ja Kivinen soihtupylväs (seisovan soihdun kiviversio) Kivi-välilehdellä. Kiviarkussa 18 ja kivitynnyrissä 14 paikkaa (puuversioissa 16 ja 12); laajennuksia 2 × +8 → enintään 34 / 30.
+- **v2.82 seinäsoihtu:** kohdistuu G:n tilan mukaan – ruudukko: seinäosan keskelle soihtukorkeudelle, puoli: neljännekset, 1 m: metrin välein, 3D: 0,25 m, reuna: seinäosan reunaan, vapaa: mihin tähtäät.
+- **v2.82:** uusi kertavinkki: jos rakentaminen tuntuu hankalalta, paina G (esim. G: vapaa, jatko). Vinkit näytetään pelaajalle vain kerran kaikkien maailmojen yli; opastus ja vinkit vain maailmoissa, joissa opastus on valittu (oletuksena vain ensimmäinen maailma, jos opastusta ei ole käyty).
+- **v2.81:** sääänet (sade, myrsky, tuuli, lumi, sumu, ukkonen, salama) 60 % hiljempaa, jotta muut äänet kuuluvat.
+- **v2.80:** sydämen syke on yksi jatkuva silmukka (ei ala alusta), voimakkuus ja tahti muuttuvat pehmeästi, loppuu 3 s jälkeen 2,5 s häivytyksellä; tiedosto kokonaisena.
+- **v2.79:** susien ulvonta kuuluu yhtä kauas kuin muiden eläinten ääntely (36 m); kaukaista yöulvontaa ilman sutta ei enää ole. Sää- ja tunnelmaäänet 20 % hiljempaa.
+- **v2.76:** hengästys ei ala alusta: kun kestävyys palautuu, sama ääni hiljenee vähitellen (0 % täysi → 30 % hiljaa) ja voimistuu taas, jos kestävyys loppuu; loppuu vasta, kun kestävyys on ollut yli 30 % 4 s (häivytys 2,5 s, sen jälkeen vähintään 1 s tauko ennen uutta). Tiedosto toistuu kokonaisena (ei leikkausta).
 - **v2.75:** liukusäätimen napsu vielä 20 % hiljempaa ja tasaisempi sävel; esiasetussäätimessä napsu kuuluu vain, kun taso vaihtuu.
 - **v2.73:** liukusäätimen napsu 40 % hiljempaa, askeleet 30 % hiljempaa, hengästys 20 % hiljempaa; äänimerkki häipyy 2 s:ssa ja napautus aloittaa intron heti.
 - **v2.72:** nopeat toiminto- ja käyttöliittymä-äänet alkavat heti (3 ms, ennen 20 ms); hengästys on käyttäjän uusi ääni saumattomana silmukkana.

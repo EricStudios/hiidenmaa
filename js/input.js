@@ -58,7 +58,9 @@ let dragLook=null;
 canvas.addEventListener('mousedown',e=>{
   audio();if(actx&&actx.state!=='running')actx.resume();
   if(state!=='play')return;
-  if(!locked&&!lockFailed){requestLock(true);return;}
+  /* v2.80: lukituksen pyyntö ei enää niele painallusta jousella ja lähiaseilla (ennen ensimmäinen painallus esim. kuoleman tai valikon jälkeen
+     vain lukitsi hiiren, eikä jousi alkanut latautua). Vasara ja lapio/kuokka eivät toimi tällä painalluksella (ei vahinkorakentamista). */
+  if(!locked&&!lockFailed){requestLock(true);const cw=curWeapon();if(e.button!==0||cw.cat==='hammer'||cw.cat==='shovel'||P.dead)return;}
   if(e.button===0){mouseL=true;dragLook={x:e.clientX,y:e.clientY,moved:false};onPrimary();}
   if(e.button===2){mouseR=true;onSecondary();}
 });

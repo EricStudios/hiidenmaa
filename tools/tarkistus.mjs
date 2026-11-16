@@ -493,7 +493,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     finally{msg=om;[wRain,shelterCache,P.burnT,P.igniteCd,P.hp,P.maxHp,,P.inWater,P.rainHitT]=sv;P.pos.copy(sv[6]);}return res;});
   t('v2.73 kuolema: syyn mukainen kuolinruutu (otsikko, selostus, vinkki, tilastot, pääkallo), kaatuminen maahan, hautakasa piilossa, ruumis maatuu, tyhjyys 1 s',()=>{
     const a=!!$('#deadT')&&!!$('#deadC')&&!!$('#deadStats')&&!!$('#deadS .deadSkull')&&!!$('#deadTip')&&['mob','boss','drown','fire','fall','tree','hunger','void','hit'].every(k=>DEATH_INFO[k]&&DEATH_INFO[k].t);
-    const b=VOID_T===1&&/voidTick/.test(updatePlayer.toString())&&/P\.safe/.test(playerDie.toString())&&/hid:true/.test(playerDie.toString())&&/!g\.hid/.test(updateStations.toString())&&CORPSE_HOLD===60&&CORPSE_ROT===30;
+    const b=VOID_T===1&&/voidTick/.test(updatePlayer.toString())&&/P\.safe/.test(playerDie.toString())&&/hid:true/.test(playerDie.toString())&&/!g\.hid/.test(updateStations.toString())&&CORPSE_HOLD===0&&CORPSE_ROT===12;
     const c=/deathCam/.test(updateCamera.toString())&&/deathTick/.test(frame.toString())&&/P\.push=/.test(hurtPlayer.toString())&&/lastMob/.test(mobHurtP.toString())&&/fallT/.test(updatePlayer.toString());
     const sv=[P.voidDeath,P.ashDeath,P.lastFire,P.deathCause,P.fallT,P.lastMob,P.hunger];let d;
     try{P.voidDeath=false;P.ashDeath=false;P.lastFire=-99;P.deathCause=null;P.fallT=-99;P.lastMob={n:'Testi',type:'susi',boss:false,t:playTime};d=deathCauseOf(false).k==='mob';P.lastMob=null;P.fallT=playTime;d=d&&deathCauseOf(false).k==='fall';P.fallT=-99;
@@ -510,6 +510,82 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const sv=explored.slice();explored.fill(0);const px=P.pos.x,pz=P.pos.z,inD=P.inDun;P.inDun=false;exploreTick(SPAWN_EXP);const n1=explored.reduce((a,v)=>a+v,0);explored.fill(0);exploreTick();const n0=explored.reduce((a,v)=>a+v,0);explored.set(sv);P.inDun=inD;
     const b=SPAWN_EXP>3&&n1>n0*1.6&&/exploreTick\(SPAWN_EXP\)/.test(newGame.toString());
     return a&&b||`virhe ${a}${b} ${n0}/${n1}`;});
+  t('v2.76 hengästys ei ala alusta: kestävyyden noustessa (alle 30 %) sama silmukka hiljenee ja voimistuu taas 0 %:ssa, pysähtyy vasta 4 s yli 30 %; häivytys 2,5 s + 1 s tauko ennen uutta; tiedosto kokonaisena',()=>{
+    const orig=plSnd,origL=plLoop,sv=[P.stam,P.hp],st=state,S=PLV.st,L=[];let starts=0,on=false,lastV=0;
+    plSnd=()=>1;plLoop=(k,g,ev,o,v)=>{if(k!=='heng')return;if(o&&!on)starts++;on=!!o;if(o)lastV=v;};
+    try{state='play';S.heng=false;S.hCd=0;P.hp=100;const M=maxStam(),run=(stam,t)=>{for(let i=0;i<t*30;i++){P.stam=stam;plBody(1/30);}};
+      run(0,1);const v0=lastV;run(M*.2,3);const v1=lastV,on1=on;run(0,1);const v2=lastV;run(M*.5,2);const on2=on;run(0,.5);run(M*.6,5);const on3=on;run(0,2);const st3=starts,on4=on;run(0,1.2);const on5=on;
+      const M2=manJ()['p/keho/hengastys_0'],ok=PL_WHOLE.has('hengastys')&&/PL_WHOLE\.has\(ev\)/.test(orig.toString())&&HENG_KEEP===4&&HENG_FADE===2.5&&HENG_CD===1&&!!M2&&/w1/.test(M2.pv)&&st3===1&&!on4&&on5&&starts===2&&on1&&on2&&!on3&&v0>HENG_V*.95&&v1<v0*.5&&v2>v0*.9;
+      return ok||`starts ${st3}/${starts} on4 ${on4} on5 ${on5} M ${M2&&M2.pv} v ${v0.toFixed(2)}/${v1.toFixed(2)}/${v2.toFixed(2)} on ${on1}${on2}${on3}`;}
+    finally{plSnd=orig;plLoop=origL;[P.stam,P.hp]=sv;state=st;S.heng=false;S.hCd=0;}});
+  t('v2.77 kuolinruudun vinkki vain tarvittaessa: tuli/tyhjyys/hukkuminen ensimmäisellä kerralla, pomon armosääntö, tai sama syy 3 kertaa putkeen',()=>{
+    const sv=[flags.dStreak,flags.dTip];let r;
+    try{flags.dStreak=null;flags.dTip={};const m={k:'mob',n:'Susi',type:'susi'},h={k:'mob',n:'Hiisi',type:'hiisi'},f={k:'fire'};
+      const a1=deathTipPick(m,''),a2=deathTipPick(m,''),a3=deathTipPick(m,''),a4=deathTipPick(h,''),b1=deathTipPick(f,''),b2=deathTipPick({k:'void'},''),b3=deathTipPick({k:'void'},''),c1=deathTipPick({k:'boss',type:'vartija'},'ARMO');
+      r=!a1&&!a2&&a3&&a3.st===3&&!a4&&b1&&!b1.st&&b2&&!b3&&c1&&c1.h==='ARMO'&&DT_STREAK===3&&!!$('#deadTipBox')&&/deathTipPick/.test(deathScreen.toString())||`${!!a1}${!!a2}${a3&&a3.st}${!!a4}${!!b1}${!!b2}${!!b3}${c1&&c1.h}`;}
+    finally{[flags.dStreak,flags.dTip]=sv;}return r;});
+  t('v2.78 verilammikko maaston mukaan (kärjet maassa, alarinteeseen pidemmälle), ruumis hiipuu heti herätessä 12 s, kuokan oikea palauttaa ruohon (mudAt)',()=>{
+    let x=0,z=0,sl=0;for(let r=5;r<220&&sl<.3;r+=3)for(let a=0;a<24;a++){const px=P.pos.x+Math.cos(a)*r,pz=P.pos.z+Math.sin(a)*r,h=terrainH(px,pz),e=.5,hx=(terrainH(px+e,pz)-terrainH(px-e,pz))/(2*e),hz=(terrainH(px,pz+e)-terrainH(px,pz-e))/(2*e),g=Math.hypot(hx,hz);
+      if(h>1&&g>.3&&g<.6&&!pointBlocked(px,h+.5,pz)){x=px;z=pz;sl=g;break;}}
+    if(!sl)return 'rinnettä ei löytynyt';
+    const sp=bloodPool(x,terrainH(x,z),z,1.5,0x5a0808,false);for(let i=0;i<70;i++)updateSplats(.1);
+    const pos=sp.m.geometry.attributes.position.array;let off=0;for(let v=0;v<pos.length;v+=3)off=Math.max(off,Math.abs(pos[v+1]-groundY(pos[v],pos[v+2],pos[v+1]-.025,false)-.025));
+    const e=.5,hx=(terrainH(x+e,z)-terrainH(x-e,z))/(2*e),hz=(terrainH(x,z+e)-terrainH(x,z-e))/(2*e),R=sp.pool.reach;let dn=0,up=0;
+    for(let a=0;a<POOL_SEG;a++){const an=a/POOL_SEG*TAU,d=-(Math.cos(an)*hx+Math.sin(an)*hz)/Math.hypot(hx,hz);if(d>.8)dn=Math.max(dn,R[a]);if(d<-.8)up=Math.max(up,R[a]);}
+    sp.life=sp.t;updateSplats(.01);
+    const a=off<.06&&dn>up&&sp.pool.k>.99&&sp.m.geometry.attributes.color.itemSize===4;
+    const b=CORPSE_HOLD===0&&CORPSE_ROT===12&&/c\.pool\.fk=op/.test(corpseTick.toString())&&/bloodPool\(/.test(updatePlayerDeath.toString());
+    const c=typeof mudAt==='function'&&/mudAt\(ox,oz\)/.test(rebuildGrass.toString())&&/kasvillisuuden/.test(ITEMS.kuokka.d)&&/kasvillisuuden/.test(TIPS.find(t=>t.id==='lapio').d());
+    return a&&b&&c||`virhe ${a}${b}${c} off ${off.toFixed(3)} dn ${dn.toFixed(2)} up ${up.toFixed(2)}`;});
+  t('v2.79 susien ulvonnan kantama = muiden eläinten ääntely (36 m), ei kaukaista yöulvontaa; ensimmäinen uni sängyssä vihjaa Kalmanummen ja Hautakummun; sää ja tunnelma −20 %',()=>{
+    const a=Math.abs(CRE_FAR_R*creRK('susi','idle',1)-CRE_IDLE_R)<1e-9&&WOLF_FAR_AMB===false&&VOL_BASE.amb===.56;
+    const sv=[flags.dream,flags.disc.barrow,flags.cnt&&flags.cnt.nights];let r;
+    try{flags.dream=0;delete flags.disc.barrow;const n0=$('#msgs').children.length;dreamHint();const el=[...$('#msgs').children].slice(n0).map(e=>e.textContent).join(' ');
+      const b=/Kalmanummi/.test(el)&&/Hautakum/.test(el)&&!!flags.disc.barrow&&/bump\('nights'\)/.test(sleepAt.toString())&&/dreamHint/.test(sleepAt.toString())&&/cnt\('nights'\)/.test(ACH.find(x=>x.id==='unet').pr.toString());
+      r=a&&b||`virhe ${a}${b} ${el.slice(0,80)}`;}
+    finally{flags.dream=sv[0];if(!sv[1])delete flags.disc.barrow;}return r;});
+  t('v2.80 jousi alkaa latautua lukituksen pyynnön painalluksesta, opastuksessa C pakollinen, sydämen syke jatkuva ja kokonaisena, kolme lihatyyppiä ja lisää paistoruokia',()=>{
+    const a=/cw\.cat==='hammer'\|\|cw\.cat==='shovel'/.test(String(canvas.onmousedown||''))||true;   // kuuntelija addEventListener – tarkistetaan toiminnallisesti alla
+    const sv=[locked,lockFailed,P.drawing,flags.ammo];let bow=false;
+    try{invAdd('jousi',1);invAdd('nuolet',5);const s=inv.find(x=>x&&x.id==='jousi');const was=s.eq;if(!s.eq)toggleEquip(s);locked=false;lockFailed=false;
+      canvas.dispatchEvent(new MouseEvent('mousedown',{button:0,bubbles:true}));bow=P.drawing===true;dispatchEvent(new MouseEvent('mouseup',{button:0,bubbles:true}));P.drawing=false;if(!was)toggleEquip(s);invRemove('jousi',1);invRemove('nuolet',5);}
+    finally{locked=sv[0];lockFailed=sv[1];P.drawing=false;}
+    const b=TUT_MOVE_DONE.includes('crouch')&&/BIND\[a\]\)TUT\.mv\[a\]=1/.test(tutKey.toString())&&PL_WHOLE.has('sydan')&&SYD_FADE===2.5&&SYD_KEEP===3&&/S\.sk/.test(plBody.toString())&&manJ()['p/keho/sydan_0'].pv==='9w1';
+    const c=['pienliha','liha','suurliha'].every(id=>ITEMS[id]&&ITEMS[id].food.raw&&COOKABLE[id]&&ITEMS[COOKABLE[id]].food)&&ITEMS.pienpaisti.food.h<ITEMS.paisti.food.h&&ITEMS.paisti.food.h<ITEMS.suurpaisti.food.h&&ITEMS.paisti.food.h>=55
+      &&itemRarity({id:'suurpaisti'})==='rare'&&itemRarity({id:'paisti'})==='unc'&&itemRarity({id:'pienpaisti'})==='com'&&!!RECIPE_BY.lihakeitto&&!!RECIPE_BY.juhla
+      &&MOBDEF.janis.drops.some(d=>d[0]==='pienliha')&&MOBDEF.hirvi.drops.some(d=>d[0]==='suurliha')&&MOBDEF.karhu.drops.some(d=>d[0]==='suurliha')&&MOBDEF.peura.drops.some(d=>d[0]==='liha');
+    return bow&&b&&c||`virhe jousi ${bow} ${b} ${c}`;});
+  t('v2.81 sääänet −60 % (sade, tihku, myrsky, tuuli, lumi, sumu, ukkonen, salama), tunnelma/luonto/vedenalainen ennallaan',()=>
+    WEATHER_K===.4&&Math.abs(AMB_V.sade-.32)<1e-9&&Math.abs(AMB_V.myrsky-.4)<1e-9&&Math.abs(AMB_V.tuuli-.28)<1e-9&&AMB_V.tunnelma===.75&&AMB_V.luonto===.35&&AMB_V.vedenalla===.8&&VOL_BASE.amb===.56||'arvot väärin');
+  t('v2.82 rakennusvinkki G (vapaa, jatko) kertavinkkinä, seinäsoihtu kohdistuu G:n tilan mukaan; nähdyt vinkit muistetaan kaikkien maailmojen yli; ei vinkkejä ilman opastusta',()=>{
+    const T=TIPS.find(x=>x.id==='rakennusG');if(!T)return 'vinkki puuttuu';const txt=T.d();
+    const a=/vapaa/.test(txt)&&/jatko/.test(txt)&&txt.includes(keyLabel(BIND.snap));
+    const b=/tipSeenG\(\)/.test(tipsTick.toString())&&/tipSeenSet\(T\.id\)/.test(tipsTick.toString())&&/flags\.tut/.test(tipsTick.toString())&&/hiidenmaa_tipseen/.test(tutOnNewWorld.toString());
+    const sv=localStorage.getItem('hiidenmaa_tipseen');let c;
+    try{localStorage.setItem('hiidenmaa_tipseen','{}');tipSeenSet('testi');c=tipSeenG().testi===1;}finally{if(sv===null)localStorage.removeItem('hiidenmaa_tipseen');else localStorage.setItem('hiidenmaa_tipseen',sv);}
+    const W={t:'seina',x:0,y:0,z:0,rot:0,f:0},Bw=unionBox(worldBoxes('seina',0,0,0,0,0)),thinZ=Bw.maxZ-Bw.minZ<Bw.maxX-Bw.minX,n=thinZ?{x:0,y:0,z:-1}:{x:-1,y:0,z:0};
+    const pt={x:thinZ?.73:Bw.minX,y:Bw.minY+1.13,z:thinZ?Bw.minZ:.73},rr=((Math.round(Math.atan2(n.x,n.z)/(Math.PI/4))%8)+8)%8,P0=m=>wallMountSnap({piece:W,n,pt},rr,m);
+    const g=P0('ruudukko'),v=P0('vapaa'),e=P0('reuna'),d=/wallMountSnap\(hit,rot,mode0\)/.test(updateGhost.toString())&&Math.abs((thinZ?g.x:g.z))<1e-6&&Math.abs((thinZ?v.x:v.z)-.73)<1e-6&&Math.abs(thinZ?e.x:e.z)>.9&&Math.abs(g.y-v.y)>.05;
+    return a&&b&&c&&d||`virhe ${a}${b}${c} soihtu ${d}`;});
+  t('v2.83 kodin lämpö: seinän vieressä ja 1×1-mökissä toimii, ohut ovi ei vuoda, hystereesi, Lämmin koti lämmittää; valikossa pelin äänet häipyvät; kivimuuri ja kivinen soihtupylväs; kivisäiliöt +2 paikkaa',()=>{
+    const a=HOME_PAD===.08&&/homeEdge\(dist,ox,oz\)/.test(homeScan.toString())&&/H\.miss/.test(homeTick.toString())&&/homeLos/.test(homeHeat.toString())&&/warmHome/.test(survival.toString());
+    const b=typeof gameSndTick==='function'&&/gameSndTick/.test(frame.toString())&&/SBUS\.m/.test(sndBus.toString())&&/o\.menu/.test(mSnd.toString());
+    let c=true;if(actx){sndBus(actx);const st=state;state='paused';gameSndTick();const off=SBUS.on===false;state='play';gameSndTick();c=off&&SBUS.on===true;state=st;}
+    const d=!!PIECES.kiviaita&&PIECES.kiviaita.base==='aita'&&PIECES.kiviaita.stone&&!!PIECES.kivisoihtu&&PIECES.kivisoihtu.base==='soihtuteline'&&isTorch('kivisoihtu')&&isTorch('seinasoihtu')&&!isTorch('aita')&&pieceBoxes('kivisoihtu').length>0&&PIECES.kiviarkku.store===PIECES.arkku.store+2&&PIECES.kivitynnyri.store===PIECES.tynnyri.store+2;
+    return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
+  t('v2.84 tulen ääni valonlähteille (palaminen, enintään 2, nuotio kovin), sammuneen sulatusuunin suu musta, pelottavat: 2 yötä valvottu = varmasti, muuten 10 %',()=>{
+    const a=FIRE_MAX===2&&FIRE_V.nuotio>=Math.max(FIRE_V.grilli,FIRE_V.sulatin,FIRE_V.soihtu)&&fireKind('nuotio')==='nuotio'&&fireKind('kivisoihtu')==='soihtu'&&fireKind('seinasoihtu')==='soihtu'&&fireKind('sulatin')==='sulatin'&&fireKind('seina')===null
+      &&/fireSndTick\(dt\)/.test(tgTick.toString())&&/v\.loop&&!v\.stat/.test(tgTick.toString())&&/'palaminen','yhteiset'/.test(fireSndTick.toString());
+    const b=/SMELT_DARK/.test(updateStations.toString())&&SMELT_DARK.color.getHex()<0x202020;
+    const c=SCARY_MISS===2&&SCARY_CH===.1&&/SCARY_MISS\?1:SCARY_CH/.test(nightRoll.toString())&&/\(flags\.missN\|0\)\+1/.test(nightRoll.toString());
+    return a&&b&&c||`virhe ${a}${b}${c}`;});
+  t('v2.85 kilven pito kuluttaa kestävyyttä 1/s (ei palaudu pidon aikana), 0:ssa kilpi laskeutuu + ilmoitus kerran, uudelleen vasta 20 kestävyydellä',()=>{
+    const g=window.__game,sv=[state,mouseR,P.stam,P.shTired,P.atk],om=msg;let msgs=0,r;msg=(t)=>{if(/uupunut/.test(t))msgs++;};
+    try{state='play';P.atk=null;for(const m of [...mobs])mobRemove(m);P.stam=50;P.shTired=false;mouseR=true;for(let i=0;i<60;i++)g.update(1/30);const s1=P.stam;   // 2 s pitoa
+      const a=Math.abs(50-s1-2)<.5&&P.blocking;P.stam=1.5;for(let i=0;i<60;i++)g.update(1/30);const b=!P.blocking&&P.shTired&&msgs===1;
+      for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
+      r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
+    finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;
@@ -532,7 +608,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     return a&&b||`virhe tila ${a} etäisyys ${b}`;});
   t('v2.57 siirtoääni vain valmiissa siirrossa (ei valinnassa/raahauksen alussa), valittu ruutu ei kasva (ei transformia), arkun ohjerivi kiinteä, ulvonta −30 % kuuluvuus ja voimakkuus (päivällä kuuluvuus lisäksi −40 %), puun narina pienissä puissa korkeampi',()=>{
     const pd=dayT;dayT=.5;const day=wolfHowlRK();dayT=.95;const night=wolfHowlRK();dayT=pd;
-    const a=Math.abs(night-.85*.7)<1e-9&&Math.abs(day-.85*.7*.6)<1e-9&&WOLF_HOWL_V===.7&&/WOLF_HOWL_V:1\)/.test(creSnd.toString())&&/\*WOLF_HOWL_R\*SND_DIST_K,x=/.test(farHowl.toString());
+    const a=Math.abs(night-CRE_IDLE_R/CRE_FAR_R)<1e-9&&Math.abs(day-night)<1e-9&&WOLF_HOWL_V===.7   /* v2.79: kantama = muiden eläinten ääntely */&&/WOLF_HOWL_V:1\)/.test(creSnd.toString())&&/\*WOLF_HOWL_R\*SND_DIST_K,x=/.test(farHowl.toString());
     const sel=[...document.styleSheets].flatMap(ss=>{try{return [...ss.cssRules];}catch(e){return [];}}).find(r=>r.name==='selPulse');
     const b=!!sel&&!/transform|scale/.test(sel.cssText);
     const h=document.getElementById('chestHint'),c=!!h&&getComputedStyle(h).height!=='auto'&&getComputedStyle(h).overflow==='hidden';
@@ -962,8 +1038,8 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const tick=s=>{for(let i=0;i<s*30;i++){P.pos.set(cx,y+.02,cz);P.vel.set(0,0,0);homeTick(1/30);}};HOME.heatT=0;HOME.heatOff=99;HOME.linger=0;tick(1);const a=HOME.inside&&HOME.lvl===1&&homeHealRate()===.5&&Math.abs(homeHungerK()-.7)<1e-9;
       const tr=put('soihtuteline',cx+1.2,cz+1.2,0);tr.data.burn=600;tick(6);const b=HOME.lvl===2&&homeHealRate()===1&&homeHungerK()===.5;
       D.data.open=true;tick(21);const c=HOME.grey&&HOME.lvl===0&&effects().some(e=>e.key==='koti_off');D.data.open=false;tick(1);const d=HOME.lvl===2&&!HOME.grey;
-      removePiece(N);made.splice(made.indexOf(N),1);N=put('ikkunaseina',cx+G/2,cz+G,0);scene.updateMatrixWorld(true);tick(1);const e=!HOME.inside;
-      P.pos.set(cx,y,cz-G-5);homeTick(1/30);const f=HOME.lvl>0&&HOME.k<1;for(let i=0;i<30*21;i++){P.pos.set(cx,y,cz-G-5);homeTick(1/30);}const g=HOME.lvl===0;
+      removePiece(N);made.splice(made.indexOf(N),1);N=put('ikkunaseina',cx+G/2,cz+G,0);scene.updateMatrixWorld(true);tick(1.5);const e=!HOME.inside;   /* v2.83 hystereesi: 2 tarkistusta */
+      for(let i=0;i<45;i++){P.pos.set(cx,y,cz-G-5);homeTick(1/30);}const f=HOME.lvl>0&&HOME.k<1;for(let i=0;i<30*21;i++){P.pos.set(cx,y,cz-G-5);homeTick(1/30);}const g=HOME.lvl===0;
       const h=/HOME\.lvl===2\?\.2:HOME\.lvl===1\?\.1:0/.test(sleepAt.toString())&&!/P\.hp=maxHp\(\)/.test(sleepAt.toString());
       res=a&&b&&c&&d&&e&&f&&g&&h||`virhe mukava ${a} lämmin ${b} ovi ${c}/${d} aukko ${e} hiipuu ${f}/${g} uni ${h}`;}
     finally{msg=om;for(const q of made)if(pieces.includes(q))removePiece(q);P.pos.copy(p0);P.hunger=hu;HOME.lvl=0;HOME.linger=0;HOME.inside=false;}return res;});

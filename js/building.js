@@ -126,6 +126,21 @@ function ladderWall(t,hit,pose,free){const T=hit.piece;if(!T||JFAM(t)!=='lad'||M
   const B=unionBox(worldBoxes(T.t,T.x,T.y,T.z,T.rot,T.f||0)),ax=Math.abs(hit.n.x)>Math.abs(hit.n.z),s=Math.sign(ax?hit.n.x:hit.n.z)||1,ht=ax?(B.maxX-B.minX)/2:(B.maxZ-B.minZ)/2;
   if((ax?(B.maxZ-B.minZ):(B.maxX-B.minX))<.8||B.maxY-B.minY<1.5)return null;const off=ht+.06+ladRun(pose),cx=(B.minX+B.maxX)/2,cz=(B.minZ+B.maxZ)/2;
   const rot=ax?(s>0?2:6):(s>0?0:4),along=free?(ax?hit.pt.z:hit.pt.x):(ax?cz:cx);return{x:ax?cx+s*off:along,z:ax?along:cz+s*off,y:B.minY,rot};}
+/* v2.82 SEINÄSOIHDUN KOHDISTUS G:N MUKAAN (käyttäjä): seinäpinnalla paikka liikkuu vain seinän suuntaisesti (t) ja pystyyn.
+   ruudukko/jatko: seinäosan keskelle soihtukorkeudelle (hc = alareuna + 60 % korkeudesta, 0,8–1,9 m); puoli: neljännekset + 0,5 m korkeus
+   seinän alareunasta; 1 m: maailman 1 m ruudukko seinää pitkin + 0,5 m korkeus; 3D: 0,25 m molemmat; reuna: lähin reuna (0,2 m sisään),
+   korkeus hc; vapaa: tähtäyspiste (ennen aina). Paikka pysyy seinäosan sisällä. y = soihdun kiinnityskohta − 0,35 (kuten ennen). */
+function wallMountSnap(hit,rot,mode){const a=rot*Math.PI/4,nx=Math.sin(a),nz=Math.cos(a),tx=Math.cos(a),tz=-Math.sin(a),T=hit.piece;
+  const B=unionBox(worldBoxes(T.t,T.x,T.y,T.z,T.rot,T.f||0)),cx=(B.minX+B.maxX)/2,cz=(B.minZ+B.maxZ)/2,H=B.maxY-B.minY;
+  const half=Math.max(.05,Math.abs(tx)*(B.maxX-B.minX)/2+Math.abs(tz)*(B.maxZ-B.minZ)/2-.15),sh=(hit.pt.x-cx)*tx+(hit.pt.z-cz)*tz,hc=B.minY+clamp(H*.6,.8,1.9);
+  let sv=sh,yv=hit.pt.y;
+  if(mode==='ruudukko'||mode==='jatko'){sv=0;yv=hc;}
+  else if(mode==='puoli'){const q=G/4;sv=Math.round(sh/q)*q;yv=B.minY+Math.round((hit.pt.y-B.minY)/.5)*.5;}
+  else if(mode==='1 m'){const w=cx*tx+cz*tz,abs=w+sh;sv=Math.round(abs)-w;yv=Math.round(hit.pt.y*2)/2;}
+  else if(mode==='3D'){sv=Math.round(sh*4)/4;yv=Math.round(hit.pt.y*4)/4;}
+  else if(mode==='reuna'){sv=sh<0?-half:half;yv=hc;}
+  sv=clamp(sv,-half,half);yv=clamp(yv,B.minY+.45,B.maxY-.1);
+  return {x:hit.pt.x+tx*(sv-sh)+nx*.02,z:hit.pt.z+tz*(sv-sh)+nz*.02,y:yv-.35};}
 function updateGhost(){
   if(!ghost){updateGrid(false);return;}const hit=buildRaycast();
   if(!hit||dist2(hit.pt.x,hit.pt.z,P.pos.x,P.pos.z)>9*9){ghost.visible=false;ghostPos=null;updateGrid(false);return;}
@@ -137,7 +152,7 @@ function updateGhost(){
   const baseY=hit.n.y>.6?hit.pt.y:(hit.piece?hit.piece.y:hit.pt.y);
   const gcell=a=>{const v=a==='x'?hx:hz,o=a==='x'?ox:oz;return m1?r1(v):hf?half(v,o):cell(v,o);};
   // v1.41: seinäsoihtu kiinnittyy osuman pystypintaan (normaali → kierto 45° portaissa), muuten paikka ei kelpaa
-  if(def.wallMount){const okW=hit.piece&&Math.abs(hit.n.y)<.5;if(okW){rot=((Math.round(Math.atan2(hit.n.x,hit.n.z)/(Math.PI/4))%8)+8)%8;x=hit.pt.x+hit.n.x*.02;z=hit.pt.z+hit.n.z*.02;y=hit.pt.y-.35;}else{x=hx;z=hz;y=hit.pt.y;}
+  if(def.wallMount){const okW=hit.piece&&Math.abs(hit.n.y)<.5;if(okW){rot=((Math.round(Math.atan2(hit.n.x,hit.n.z)/(Math.PI/4))%8)+8)%8;const wp=wallMountSnap(hit,rot,mode0);x=wp.x;z=wp.z;y=wp.y;}else{x=hx;z=hz;y=hit.pt.y;}
     ghost.position.set(x,y,z);ghost.rotation.y=rot*Math.PI/4;ghostPos={x,y,z};ghostRot=rot;ghostOk=okW&&validPlace(t,x,y,z,rot,0);if(!okW)lastInvalid='Seinäsoihtu kiinnitetään seinään – tähtää seinään.';
     const mw=ghostOk?MAT.ghostOk:MAT.ghostBad;ghost.traverse(o=>{if(o.isMesh)o.material=mw;});updateGrid(false);return;}
   // v2.13 jatko (tikkaat, portaat): kohteen vaihtuessa kopioidaan alemman suunta ja kulma

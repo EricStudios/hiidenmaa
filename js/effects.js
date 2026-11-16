@@ -25,8 +25,36 @@ function splat(x,y,z,r,color,life,op=.85,nx,nz){if(!(r>0))return null;
   const mt=new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
   const m=new THREE.Mesh(_spGeo,mt);if(nx||nz){m.rotation.set(0,Math.atan2(nx,nz),Math.random()*TAU);m.position.set(x+nx*.03,y,z+nz*.03);}else{const n=slopeN(x,z,y);if(n){m.quaternion.setFromUnitVectors(_zAx,n);m.rotateZ(Math.random()*TAU);m.position.set(x+n.x*.03,y+n.y*.03,z+n.z*.03);}else{m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*TAU;m.position.set(x,y+.025,z);}}m.scale.set(r*(.8+Math.random()*.5),r*(.6+Math.random()*.5),1);m.renderOrder=1;scene.add(m);
   const s={m,t:0,life,op,r0:m.scale.x,r1:m.scale.y,grow:.35};splats.push(s);while(splats.length>140){const o=splats.shift();scene.remove(o.m);o.m.material.dispose();}return s;}
-function updateSplats(dt){for(let i=splats.length-1;i>=0;i--){const s=splats[i];s.t+=dt;if(s.flow)updateFlow(s,dt);const g=Math.min(1,s.t/s.grow);s.m.scale.set(s.r0*(.4+.6*g),s.r1*(.4+.6*g),1);
-  s.m.material.opacity=s.op*Math.min(1,s.t*6)*Math.min(1,(s.life-s.t)/2.5);if(s.t>=s.life){scene.remove(s.m);s.m.material.dispose();splats.splice(i,1);}}}
+function updateSplats(dt){for(let i=splats.length-1;i>=0;i--){const s=splats[i];s.t+=dt;if(s.flow)updateFlow(s,dt);
+  if(s.pool){if(s.t<s.grow+.1){const k=1-(1-Math.min(1,s.t/s.grow))**2;if(Math.abs(k-s.pool.k)>.004){s.pool.k=k;poolShape(s,k);}}}
+  else{const g=Math.min(1,s.t/s.grow);s.m.scale.set(s.r0*(.4+.6*g),s.r1*(.4+.6*g),1);}
+  s.m.material.opacity=s.op*Math.min(1,s.t*6)*Math.min(1,(s.life-s.t)/2.5)*(s.fk??1);   /* v2.78 fk: ruumiin mukana hiipuminen */if(s.t>=s.life){scene.remove(s.m);s.m.material.dispose();splats.splice(i,1);}}}
+/* v2.78 KUOLEMAN VERILAMMIKKO MAASTON MUKAAN (käyttäjä: lammikko leijui rinteessä litteänä kiekkona). Säteittäinen verkko (POOL_SEG suuntaa ×
+   POOL_RING rengasta), jonka jokainen kärki istuu maahan (groundY: maasto, rakennuksen lattia, luolaston lattia). Jokaiseen suuntaan veri valuu
+   askelin (0,1 m): alarinteeseen pidemmälle, ylärinteeseen lyhyemmin; pysähtyy jyrkkään nousuun (> 0,08 m / 0,1 m), jyrkänteen reunalle
+   (pudotus > 0,3 m), veteen tai seinään. Reuna epätasainen (kohina + naapurisuuntien tasoitus) ja pehmeä (uloin rengas läpinäkyvä, RGBA-värit).
+   Kiiltävä märkä pinta (MeshStandard, roughness .3). Kasvaa POOL_GROW s hidastuen. */
+const POOL_SEG=36,POOL_RING=7,POOL_GROW=6;
+function bloodPool(x,y,z,r,color,dun){const hC=groundY(x,z,y,dun),e=.5;let dx=0,dz=0,sl=0;
+  if(!dun){const hx=(terrainH(x+e,z)-terrainH(x-e,z))/(2*e),hz=(terrainH(x,z+e)-terrainH(x,z-e))/(2*e);sl=Math.hypot(hx,hz);if(sl>.02){dx=-hx/sl;dz=-hz/sl;}}
+  const ph1=Math.random()*TAU,ph2=Math.random()*TAU,raw=new Float32Array(POOL_SEG),reach=new Float32Array(POOL_SEG),sk=Math.min(1,sl*1.5);
+  for(let a=0;a<POOL_SEG;a++){const an=a/POOL_SEG*TAU,ux=Math.cos(an),uz=Math.sin(an),nz=.8+.18*Math.sin(an*3+ph1)+.12*Math.sin(an*5+ph2)+.1*(Math.random()-.5),down=ux*dx+uz*dz;
+    const tgt=r*nz*(1+1.2*Math.max(0,down)*sk-.5*Math.max(0,-down)*sk);let st=0,hp=hC;
+    for(let d=.1;d<=tgt+1e-6;d+=.1){const px=x+ux*d,pz=z+uz*d,h=groundY(px,pz,hp,dun);if(h-hp>.08||hp-h>.3||(!dun&&h<.05)||pointBlocked(px,h+.12,pz))break;st=d;hp=h;}
+    raw[a]=Math.max(.15,st);}
+  for(let a=0;a<POOL_SEG;a++)reach[a]=Math.min(raw[a],(raw[(a+POOL_SEG-1)%POOL_SEG]+2*raw[a]+raw[(a+1)%POOL_SEG])/4+.05);   // tasoitus, ei yli esteen
+  const nv=1+POOL_SEG*POOL_RING,pos=new Float32Array(nv*3),col=new Float32Array(nv*4),idx=[];
+  for(let v=0;v<nv;v++){const ri=v?Math.floor((v-1)/POOL_SEG)+1:0,b=lerp(.62,1,ri/POOL_RING);col[v*4]=col[v*4+1]=col[v*4+2]=b;col[v*4+3]=ri===POOL_RING?0:ri===POOL_RING-1?.7:1;}
+  for(let a=0;a<POOL_SEG;a++){const a1=(a+1)%POOL_SEG;idx.push(0,1+a1,1+a);for(let ri=1;ri<POOL_RING;ri++){const p0=1+(ri-1)*POOL_SEG,p1=1+ri*POOL_SEG;idx.push(p0+a,p0+a1,p1+a,p0+a1,p1+a1,p1+a);}}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,4));g.setIndex(idx);
+  const mt=new THREE.MeshStandardMaterial({color,roughness:.3,metalness:.05,vertexColors:true,transparent:true,opacity:0,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+  const m=new THREE.Mesh(g,mt);m.renderOrder=1;m.receiveShadow=true;scene.add(m);
+  const sp={m,t:0,life:1e9,op:.93,grow:POOL_GROW,r0:1,r1:1,pool:{x,z,hC,dun,reach,k:-1}};splats.push(sp);poolShape(sp,.02);return sp;}
+function poolShape(s,k){const Q=s.pool,pos=s.m.geometry.attributes.position.array;pos[0]=Q.x;pos[1]=Q.hC+.025;pos[2]=Q.z;
+  for(let a=0;a<POOL_SEG;a++){const an=a/POOL_SEG*TAU,ux=Math.cos(an),uz=Math.sin(an);let hp=Q.hC;
+    for(let ri=1;ri<=POOL_RING;ri++){const d=Q.reach[a]*ri/POOL_RING*Math.max(.02,k),px=Q.x+ux*d,pz=Q.z+uz*d,h=groundY(px,pz,hp,Q.dun),v=(1+(ri-1)*POOL_SEG+a)*3;hp=h;
+      pos[v]=px;pos[v+1]=h+.025;pos[v+2]=pz;}}
+  s.m.geometry.attributes.position.needsUpdate=true;s.m.geometry.computeVertexNormals();s.m.geometry.computeBoundingSphere();}
 const groundY=(x,z,y,dun)=>dun?DUN.y:Math.max(-1,groundAt(x,z,.2,(y??terrainH(x,z))+.6));
 // size ≈ olennon koko (säde), dmg = vahinko
 // v1.39 (lista 4, extra 1): veren fysiikka (SET.bloodFx, High+ ja Ultra): pisarat lentävät lyönnin suuntaan (hx,hz), putoavat ja jäävät
@@ -356,7 +384,7 @@ let pDeath=null;
    asettuu maan tasalle (myös ilmasta pudoten ja rinteessä: pää lepää maassa). Raajat valahtavat, pieni pomppu. Verilammikko leviää kehon alta
    (näkyy kuolinkamerassa, camera.js deathCam). Herätessä ruumis jää maahan (corpses): 60 s, sitten vajoaa ja haalistuu 30 s. Tyhjyyteen pudotessa
    (D.void) ruutu pimenee eikä ruumista jää. Vedessä ja tulessa entiset haarat (vajoaminen, tuhkakasa – kasa maatuu kuten ruumis). */
-const DEATH_G=9.8,DEATH_L=1.05,DEATH_BACK=.13,CORPSE_HOLD=60,CORPSE_ROT=30,CORPSE_MAX=3,corpses=[];
+const DEATH_G=9.8,DEATH_L=1.05,DEATH_BACK=.13,CORPSE_HOLD=0,CORPSE_ROT=12,CORPSE_MAX=3,corpses=[];
 function startPlayerDeath(cause){const ash=!!P.ashDeath||(playTime-(P.lastFire||-99)<1.2);P.ashDeath=false;if(P.fireFx){fig.g.remove(P.fireFx);P.fireFx=null;}P.burnT=0;
   const f=fig,yaw=f.g.rotation.y,fx=Math.sin(yaw),fz=Math.cos(yaw),pu=P.push&&playTime-P.push.t<1.2?P.push:null;let s,side,w0;
   if(pu){const fw=pu.x*fx+pu.z*fz,lat=pu.x*fz-pu.z*fx;s=fw>=0?1:-1;side=clamp(lat,-1,1)*.35;w0=.8+1.6*(pu.s||.4);}else{s=Math.random()<.6?1:-1;side=(Math.random()-.5)*.4;w0=.45;}
@@ -387,8 +415,8 @@ function updatePlayerDeath(dt){const D=pDeath;if(!D)return;D.t+=dt;const t=D.t,f
     if(t<2.5&&Math.random()<dt*6)smokePuff(P.pos.x,P.pos.y+.6,P.pos.z,1.4,.15);
     if(t>1.5&&!D.pile){f.g.visible=false;const gy=groundY(P.pos.x,P.pos.z,P.pos.y,P.inDun);const am=new THREE.MeshStandardMaterial({color:0x3a3633,roughness:1});const p=new THREE.Mesh(new THREE.ConeGeometry(.55,.4,9),am);p.position.set(P.pos.x,gy+.15,P.pos.z);scene.add(p);D.pile=p;D.gy=gy;burst(P.pos.x,gy+.3,P.pos.z,0x3a3633,14,3);}
     if(D.pile){const s=Math.min(1,(t-1.5)/8);D.pile.position.y=D.gy+.15-s*.55;}}
-  else if(!D.pool&&D.rest){D.pool=true;const bk=+(SET.blood??1);if(bk){const sp=splat(D.c.x,groundY(D.c.x,D.c.z,D.y,dun),D.c.z,1.3*Math.sqrt(bk)*(SET.bloodFx?1.15:1),BLEED_C.blood[0],1e9,.9);
-    if(sp){sp.grow=4.5;D.poolS=sp;}poolFlow(sp,D.c.x,D.c.z,BLEED_C.blood[0]);}}}   // lammikko leviää 4,5 s kehon alta; häviää ruumiin mukana
+  else if(!D.pool&&D.rest){D.pool=true;const bk=+(SET.blood??1);if(bk){const sp=bloodPool(D.c.x,D.y,D.c.z,1.3*Math.sqrt(bk)*(SET.bloodFx?1.15:1),BLEED_C.blood[0],dun);   /* v2.78 maaston mukainen lammikko */
+    if(sp)D.poolS=sp;poolFlow(sp,D.c.x,D.c.z,BLEED_C.blood[0]);}}}   // lammikko leviää 6 s kehon alta maastoa pitkin; hiipuu ruumiin mukana
 // kuolinkameran tummuus reunoilta (0–1)
 function deathVig(o){let el=document.getElementById('deathVig');if(!el){el=document.createElement('div');el.id='deathVig';document.body.appendChild(el);}if(el._o!==o){el._o=o;el.style.opacity=o.toFixed(3);}}
 const _pAshMat=new THREE.MeshStandardMaterial({color:0x111010,roughness:1,emissive:0x000000});
@@ -399,11 +427,11 @@ function endPlayerDeath(){const D=pDeath;pDeath=null;deathVig(0);if(!D)return;
   while(corpses.length>CORPSE_MAX)corpseRemove(corpses[0]);
   fig.g.visible=true;fig.g.rotation.order='XYZ';fig.g.rotation.x=0;fig.g.rotation.z=0;}
 function corpseRemove(c){const i=corpses.indexOf(c);if(i>=0)corpses.splice(i,1);scene.remove(c.o);if(c.mats)for(const m of c.mats)m.dispose();if(c.pile){c.o.geometry.dispose();c.o.material.dispose();}if(c.pool)c.pool.life=Math.min(c.pool.life,c.pool.t+.5);}
-// ruumis: CORPSE_HOLD s paikallaan, sitten vajoaa 0,6 m ja haalistuu CORPSE_ROT s:ssa (kuten maatuvat tukit); verilammikko haalistuu samalla
+// ruumis: v2.78 alkaa hiipua heti, kun pelaaja herää (CORPSE_HOLD 0): vajoaa 0,4 m ja haalistuu CORPSE_ROT 12 s:ssa; verilammikko hiipuu samassa tahdissa (fk)
 function corpseTick(dt){for(const c of [...corpses]){c.t+=dt;if(c.t<CORPSE_HOLD)continue;const k=Math.min(1,(c.t-CORPSE_HOLD)/CORPSE_ROT);
-  if(!c.mats&&!c.pile){c.mats=[];c.o.traverse(o=>{if(o.isMesh&&o.material){o.material=o.material.clone();o.material.transparent=true;c.mats.push(o.material);}});if(c.pool)c.pool.life=c.pool.t+CORPSE_ROT+2.5;}
+  if(!c.mats&&!c.pile){c.mats=[];c.o.traverse(o=>{if(o.isMesh&&o.material){o.material=o.material.clone();o.material.transparent=true;c.mats.push(o.material);}});if(c.pool)c.pool.life=c.pool.t+CORPSE_ROT+.5;}
   if(c.pile&&!c.mats){c.mats=[];c.o.material.transparent=true;}
-  c.o.position.y=c.y0-.6*k;const op=1-k;if(c.mats)for(const m of c.mats)m.opacity=op;if(c.pile)c.o.material.opacity=op;
+  const kk=sstep(0,1,k);c.o.position.y=c.y0-.4*kk;const op=1-kk;if(c.mats)for(const m of c.mats)m.opacity=op;if(c.pile)c.o.material.opacity=op;if(c.pool)c.pool.fk=op;
   if(k>=1)corpseRemove(c);}}
 // Viiltävä isku (SET.bloodFx): pitkä punainen viilto mobin pintaan, ja mobista tippuu pisaroita 5 s.
 function addSlash(m){if(!SET.bloodFx||!(+(SET.blood??1))||(m.slashes|0)>=5)return;const kind=bleedKind(m.type);if(kind!=='blood'&&kind!=='sap')return;

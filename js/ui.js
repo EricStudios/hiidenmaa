@@ -89,7 +89,7 @@ function showAmmo(dur,small){const e=$('#ammoT');if(!e)return;const am=typeof am
 /* v1.77: pikapaikan valinnassa esineen nimi valitun ruudun yläpuolelle ~1 s + häivytys. Väri harvinaisuuden mukaan: arvoesine / harvinainen
    = kulta, valmistustaso ≥ 6 = sininen, taso ≥ 3 tai laatu ≥ 2 = vihreä, muut vaaleat. Yksi elementti → vaihdettaessa vanha nimi pois heti. */
 let hnSel=-1;
-function itemRarity(s){const id=s.id,r=RECIPE_BY[id],lv=r&&r.lvl||0;return isValuable(id)?'leg':ITEMS[id].potion?'rare':lv>=6?'rare':(lv>=3||(s.q||1)>=2)?'unc':'com';}
+function itemRarity(s){const id=s.id,r=RECIPE_BY[id],lv=r&&r.lvl||0;return isValuable(id)?'leg':ITEMS[id].potion?'rare':ITEMS[id].rar?ITEMS[id].rar:lv>=6?'rare':(lv>=3||(s.q||1)>=2)?'unc':'com';}
 function showHotName(i){const e=$('#hotName'),s=inv[i],sl=document.querySelectorAll('#hotbar .slot')[i];if(!e)return;e.className='';if(!s||!sl)return;
   const r=sl.getBoundingClientRect();e.textContent=ITEMS[s.id].n+((s.q||1)>1?' ★'.repeat(s.q-1):'');e.style.left=((r.left+r.width/2)/hudK())+'px';void e.offsetWidth;   /* v2.63 HUD-skaala */e.className='on r_'+itemRarity(s);}
 function updateHUD(dt){
@@ -451,7 +451,7 @@ function itemProps(s,q){const d=ITEMS[s.id],o=[],f1=v=>v.toFixed(1).replace('.',
   // v1.23 (kohta 15): nuolten tiedot
   if(AMMO_STATS[s.id]){const a=AMMO_STATS[s.id],r=v=>v===1?'normaali':(v>1?'+':'−')+Math.round(Math.abs(v-1)*100)+' %';
     o.push(['Lentonopeus',r(a.spd)],['Kaaren pudotus',r(a.grav)],['Vahinko',r(a.dmg)],['Tuulen vaikutus',a.wind<1?'puolet':'normaali']);if(a.fire)o.push(['Sytyttää','5–10 s, 5 terveyttä/s (sade sammuttaa)']);}
-  if(d.cat==='shovel')o.push(...(s.id==='kuokka'?[['Vasen','nostaa maata 0,3 m'],['Oikea','palauttaa maan värin']]:[['Vasen','kaivaa kuoppaa 0,3 m'],['Oikea','ruskea polku']]),['Kestävyyttä / käyttö','6']);
+  if(d.cat==='shovel')o.push(...(s.id==='kuokka'?[['Vasen','nostaa maata 0,3 m'],['Oikea','palauttaa maan värin ja kasvillisuuden']]:[['Vasen','kaivaa kuoppaa 0,3 m'],['Oikea','ruskea polku']]),['Kestävyyttä / käyttö','6']);
   if(d.cat==='armor'){const a=d.arm*(1+.2*(q-1));o.push(['Suoja',a.toFixed(0)],['Vahinko pienenee',pc(1-20/(20+a))]);if(d.warm)o.push(['Lämmin','kyllä']);}
   if(AMMO.includes(s.id))o.push(['Ammus',flags.ammo===s.id?'valittu':ammoId()===s.id?'käytössä (automaattinen)':flags.ammo?'ei käytössä':'automaattinen: heikoimmasta parhaaseen']);
   if(s.id==='soihtu'){const m=TORCH_T*(1+.5*(q-1));o.push(['Palamisaika (max)',mss(m)]);if(q===(s.q||1))o.push(['Jäljellä',`${mss(Math.max(0,Math.min(m,s.fuel??m)))} (${Math.round(Math.max(0,(s.fuel??m))/m*100)} %)`],['Tila',s.lit===false?'sammunut':'palaa kun pidät kädessä']);}

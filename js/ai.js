@@ -9,7 +9,7 @@ const _hitl=[];
 // Tulenarat viholliset: palava nuotio/grilli (7 m), seisova soihtu (5 m) ja pelaajan kädessä oleva soihtu (6 m; ei luolastossa). Lista päivittyy 0,4 s välein.
 let fireSrc=[],fireT=0;
 function refreshFire(dt){fireT-=dt;if(fireT>0)return;fireT=.4;fireSrc.length=0;
-  for(const p of pieces){if(isFirePiece(p.t)&&fireLit(p))fireSrc.push({x:p.x,z:p.z,r:7});else if((p.t==='soihtuteline'||p.t==='seinasoihtu')&&p.data.burn>0)fireSrc.push({x:p.x,z:p.z,r:5});}
+  for(const p of pieces){if(isFirePiece(p.t)&&fireLit(p))fireSrc.push({x:p.x,z:p.z,r:7});else if(isTorch(p.t)&&p.data.burn>0)fireSrc.push({x:p.x,z:p.z,r:5});}
   if(torchLit()&&!P.inDun)fireSrc.push({x:P.pos.x,z:P.pos.z,r:6,torch:1});}
 // Lähin avaus (ovi tai ikkuna), jonka mobi voi hajottaa päästäkseen pelaajan luo.
 function nearestOpening(m){let best=null,bd=1e9;for(const p of pieces){const b=bt(p.t);if((b!=='ovi'&&b!=='ikkunaseina')||PIECES[p.t].mobProof||(b==='ovi'&&p.data.open))continue;
@@ -169,7 +169,7 @@ function temperAI(m,dt,dx,dz,dist,hurt,night){const d=m.def,t=d.temper;
   const see=m.los&&dist<(d.aggro||12);
   if(t==='elk'){if(dist>15)m.rolled=0;if(dist<6&&!m.rolled&&m.los){m.rolled=1;if(Math.random()<.35)anger('Hirvi suuttuu ja ryntää päin!');else startFlee(m,dx,dz);}}
   else if(t==='lynx'){if(night&&P.hp<maxHp()*.5&&see)anger('Ilves vaanii heikentynyttä saalista!');else if(dist<10&&m.los&&m.state!=='flee')startFlee(m,dx,dz);}
-  else if(t==='ahma'){if(see&&invCount('liha')>0)anger('Ahma haistaa lihan ja hyökkää!');}
+  else if(t==='ahma'){if(see&&(invCount('liha')+invCount('pienliha')+invCount('suurliha'))>0)anger('Ahma haistaa lihan ja hyökkää!');}
   else if(t==='bear'){if(see&&dist<8)anger('Karhu hyökkää!');else if(m.los&&dist<14&&playTime-(m.growlT||-99)>12){m.growlT=playTime;sfx('roar',.55,.7);msg('Karhu murisee varoittavasti – pysy kaukana!','warn');m.state='idle';m.wander=null;m.yaw=Math.atan2(dx,dz);}}
   else if(t==='sow'){if(mobs.some(k=>k.mom===m&&!k.dead&&dist2(k.pos.x,k.pos.z,P.pos.x,P.pos.z)<49))anger('Emakko puolustaa porsaitaan!');}
   return false;}
@@ -188,15 +188,17 @@ function stalkAI(m,dt,dx,dz,dist,hurt){const d=m.def;
   return false;}
 const SCARY={aarni:['hiidenkarhu','hiidenhirvi'],forest:['hiidenkarhu','kalmasusi'],moor:['hiidenhirvi','kalmasusi'],tunturi:['kalmasusi'],rakka:['kalmasusi'],suo:['suonakki']};
 // Yöllä pieni todennäköisyys (0,8 % / 2,5 s yritys ≈ kerran 5 minuutissa) spawnata pelottava 40–60 m päähän, enintään yksi kerrallaan.
-// v1.33 (lista 3, kohta 12): yön pelottava. Kerran yössä (satunnaisena hetkenä) arvotaan: vuorilla 20 %, muualla 10 %. Jos pelaaja ei
-// nukkunut edellistä yötä, tulee varmasti. Syntyy 20–30 m päähän ja hyökkää heti, nopeus (4,6 + 8) / 2 × 1,05 ≈ 6,6 m/s.
+// v1.33 (lista 3, kohta 12): yön pelottava. Kerran yössä (satunnaisena hetkenä) arvotaan – v2.84: 10 %; jos 2 yötä nukkumatta, tulee varmasti. Syntyy 20–30 m päähän ja hyökkää heti, nopeus (4,6 + 8) / 2 × 1,05 ≈ 6,6 m/s.
 // Nukkuessa yö ohitetaan, joten silloin ei synny. Yön tunniste nightId(): ilta kuuluu päivään dayN, aamuyö edelliseen.
 const SCARY_SPD=6.6,MOUNT_ZONES={mountain:1,tunturi:1,rakka:1};
 function nightId(){return dayT>.5?dayN:dayN-1;}
-function nightRoll(){if(!isNight()){if(flags.nCur!=null){flags.missN=flags.sleptN===flags.nCur?0:1;flags.nCur=null;}return;}
+/* v2.84 (käyttäjä) PELOTTAVAT ELÄINVARIANTIT: flags.missN = peräkkäiset yöt ilman unta sängyssä. Jos pelaaja ei ole nukkunut SCARY_MISS 2 yöhön,
+   pelottava tulee varmasti seuraavana yönä (laskuri nollautuu, kun se tulee); muuten öisin SCARY_CH 10 % (ennen vuorilla 20 %, valvottu yö 100 %). */
+const SCARY_MISS=2,SCARY_CH=.1;
+function nightRoll(){if(!isNight()){if(flags.nCur!=null){flags.missN=flags.sleptN===flags.nCur?0:Math.min(9,(flags.missN|0)+1);flags.nCur=null;}return;}
   const n=nightId();if(flags.nCur!==n){flags.nCur=n;flags.nRollAt=.15+Math.random()*.6;flags.nRolled=0;}
   if(flags.nRolled||P.dead||P.inDun)return;const into=dayT>.5?(dayT-.79)/.42:(dayT+.21)/.42;if(into<flags.nRollAt)return;
-  flags.nRolled=1;const ch=flags.missN?1:MOUNT_ZONES[P.zone]?.2:.1;if(Math.random()>=ch)return;
+  flags.nRolled=1;const ch=(flags.missN|0)>=SCARY_MISS?1:SCARY_CH;if(Math.random()>=ch)return;
   if(spawnScary(true))flags.missN=0;}
 function spawnScary(hunt){if(mobs.some(o=>o.def.stalk&&!o.dead))return false;
   for(let t=0;t<8;t++){const a=Math.random()*TAU,dd=hunt?20+Math.random()*10:40+Math.random()*20;let x=P.pos.x+Math.sin(a)*dd,z=P.pos.z+Math.cos(a)*dd;const h=terrainH(x,z);if(h<.5)continue;
@@ -605,9 +607,9 @@ function updateStations(dt){
       if(lit){const u=p.fl||(p.fl={cur:1,target:1,t:Math.random()*.2}),s=flick(u,dt);f[0].scale.set(.9+s*.12,.7+s*.45,.9+s*.12);f[1].scale.set(1,.8+s*.35,1);d.burn+=dt;
         if(dist2(p.x,p.z,P.pos.x,P.pos.z)<35*35){if(Math.random()<dt*3.2)emitEmber(p.x+(Math.random()-.5)*.4,p.y+.7,p.z+(Math.random()-.5)*.4,'spark');if(Math.random()<dt*.9)emitEmber(p.x+(Math.random()-.5)*.2,p.y+1.1,p.z+(Math.random()-.5)*.2,'smoke');}if(d.burn>=90){d.burn=0;d.fuel--;}for(const c of d.cook)c.t+=dt;}
       const fm=p.mesh.userData.food;if(fm)for(let i=0;i<4;i++){const c=d.cook[i],m=fm[i];m.visible=!!c;if(c){const r=c.t/c.need;m.material.color.setHex(r<1?(r<.6?0xc9554e:0xb06a42):r<2?0x7a4524:0x15110f);}}}
-    if(p.t==='soihtuteline'||p.t==='seinasoihtu'){const f=p.mesh.userData.flame,on=p.data.burn>0;f[0].visible=f[1].visible=on;if(on){p.data.burn=Math.max(0,p.data.burn-dt);const u=p.fl||(p.fl={cur:1,target:1,t:Math.random()*.2}),s=flick(u,dt);f[0].scale.set(.9+s*.15,.7+s*.5,.9+s*.15);f[1].scale.set(1,.8+s*.4,1);
+    if(isTorch(p.t)){const f=p.mesh.userData.flame,on=p.data.burn>0;f[0].visible=f[1].visible=on;if(on){p.data.burn=Math.max(0,p.data.burn-dt);const u=p.fl||(p.fl={cur:1,target:1,t:Math.random()*.2}),s=flick(u,dt);f[0].scale.set(.9+s*.15,.7+s*.5,.9+s*.15);f[1].scale.set(1,.8+s*.4,1);
         if(dist2(p.x,p.z,P.pos.x,P.pos.z)<30*30){if(Math.random()<dt*1.8)emitEmber(p.x+(Math.random()-.5)*.15,p.y+1.9,p.z+(Math.random()-.5)*.15,'spark');if(Math.random()<dt*.4)emitEmber(p.x,p.y+2,p.z,'smoke');}}}
-    if(p.t==='sulatin'){const D=p.data,met=D.ore>0||D.iore>0,sand=(D.sand||0)>=2,run=(met||sand)&&D.wood>0;p.mesh.userData.glow.visible=run;
+    if(p.t==='sulatin'){const D=p.data,met=D.ore>0||D.iore>0,sand=(D.sand||0)>=2,run=(met||sand)&&D.wood>0;{const gl=p.mesh.userData.glow;gl.visible=true;const mt=run?MAT.flame:SMELT_DARK;if(gl.material!==mt)gl.material=mt;}   /* v2.84 sammuneena tulisuu musta (ennen katosi → umpinainen kivikasa) */
       if(run){if(!met)D.job='sand';else if(!sand)D.job='met';else if(!D.job)D.job='met';   // v2.07: malmit ja hiekka vuorotellen
         D.t+=dt;if(D.job==='sand'){if(D.t>=GLASS_T){D.t=0;D.wood--;D.sand-=2;D.glass=(D.glass||0)+1;D.job=met?'met':'sand';}}
         else{const iron=D.ore<=0;if(D.t>=(iron?10:7)){D.t=0;D.wood--;if(iron){D.iore--;D.idone++;}else{D.ore--;D.done++;}D.job=sand?'sand':'met';}}}}

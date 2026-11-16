@@ -16,6 +16,7 @@ function ladderReach(p,pos,zc){const a=p.rot*Math.PI/4,tx=p.x+zc*Math.sin(a),tz=
 const _qh=new THREE.Quaternion(),_qf=new THREE.Quaternion(),_qd=new THREE.Quaternion(),_qt=new THREE.Quaternion(),_eb=new THREE.Euler();
 let torchFl=null,torchBarT=0,torchIgn=0,shDark=0;const torchPh=[Math.random()*TAU,Math.random()*TAU];
 const OVER_STAM=5;   // v2.67 ylikuorman kestävyyskulutus (/s)
+const SHIELD_STAM=1,SHIELD_REST=20;   // v2.85 kilven pito 1/s, uupuneena nosto vasta 20 kestävyydellä
 function updatePlayer(dt){
   if(P.dead)return;updatePlayerBurn(dt);if(P.dead)return;
   P.invul=Math.max(0,P.invul-dt);P.stagger=Math.max(0,P.stagger-dt);P.hurtFlash=Math.max(0,P.hurtFlash-dt);
@@ -24,6 +25,7 @@ function updatePlayer(dt){
   let mx=0,mz=0;if(state==='play'&&P.stagger<=0){if(kd('fwd'))mx+=1;if(kd('back'))mx-=1;if(kd('right'))mz+=1;if(kd('left'))mz-=1;}
   let dx=fwd.x*mx+right.x*mz,dz=fwd.z*mx+right.z*mz;const dl=Math.hypot(dx,dz);if(dl>0){dx/=dl;dz/=dl;}
   P.blocking=state==='play'&&mouseR&&w.cat!=='hammer'&&w.cat!=='bow'&&w.cat!=='shovel'&&P.stam>0&&!P.atk;
+  if(P.shTired){if(P.stam>=SHIELD_REST)P.shTired=false;else P.blocking=false;}   // v2.85 uupunut: kilpeä ei voi nostaa ennen kuin kestävyyttä on SHIELD_REST
   // v1.39 (lista 4, kohta 18): rikkinäisellä kilvellä ei voi torjua (kilpi on selässä kunnes ehjä)
   {const sh0=equipped('shield');if(P.blocking&&sh0&&sh0.shBrk!=null&&!shieldOk(sh0)){P.blocking=false;if(playTime-(P.shMsgT||-9)>1.5){P.shMsgT=playTime;const r=Math.max(0,SHIELD_FIX-(playTime-sh0.shBrk));msg(`Kilpi on rikki (${Math.floor(r/60)}:${String(Math.floor(r%60)).padStart(2,'0')})`,'warn');}}}
   const armor=equipped('armor');
@@ -53,6 +55,9 @@ function updatePlayer(dt){
    else{P.underT=0;P.drownT=Math.max(0,(P.drownT||0)-dt*2);}}
   // stamina regen
   if(over&&!P.dead){P.stam=Math.max(0,P.stam-OVER_STAM*dt);P.stamDelay=Math.max(P.stamDelay,.3);}   /* v2.67 ylikuorma: kestävyys laskee 5/s ja pysyy 0:ssa, ei palaudu ennen kuin kuorma on alle rajan */
+  /* v2.85 (käyttäjä) KILVEN PITO kuluttaa kestävyyttä SHIELD_STAM 1/s eikä kestävyys palaudu pidon aikana. Kestävyys 0 → kilpi laskeutuu, ilmoitus
+     kerran ("uupunut, kilpi on raskas"); uudelleen vasta, kun kestävyyttä on SHIELD_REST 20 (P.shTired). */
+  if(P.blocking&&!devOn('stam')&&!P.buffs.sisu){P.stam-=SHIELD_STAM*dt;P.stamDelay=Math.max(P.stamDelay,.4);if(P.stam<=0){P.stam=0;P.blocking=false;P.shTired=true;msg('Olet uupunut – kilpi on liian raskas pidettäväksi.','warn');}}
   P.stamDelay-=dt;if(P.stamDelay<=0&&!P.swUp){let r=22*P.fx.stamRegen*(P.swim?.25:1);P.stam=Math.min(maxStam(),P.stam+r*dt);}
   if(P.blocking&&P.stam<=0)P.blocking=false;
   P.stam=Math.max(0,P.stam);if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu
@@ -209,7 +214,7 @@ function updatePlayer(dt){
       else if(ts.fuel<=0){ts.fuel=0;ts.lit=false;msg('Soihtusi paloi loppuun! Avaa reppu (Tab) ja napsauta soihtua – sieltä voit lisätä siihen pihkaa. Sen jälkeen sytytä se toisen liekin avulla.','warn');invDirty=true;}}
     else if(ts.fuel>0){// v1.41 (lista 4, kohdat 21–22): uudelleensytytys alle 2,5 m nuotiosta, soihtutelineestä, seinäsoihdusta tai
       // ulottuvuuden/Hautakummun soihdusta; heti viesti "Pysy paikallasi hetki…", 1–1,5 s paikallaan → syttyy (liike nollaa).
-      let near=false;const R2=2.5*2.5;for(const p of pieces){if(isFirePiece(p.t)?fireLit(p):(p.t==='soihtuteline'||p.t==='seinasoihtu')&&p.data.burn>0){if(dist2(p.x,p.z,P.pos.x,P.pos.z)<R2&&Math.abs((p.y||0)-P.pos.y)<3){near=true;break;}}}
+      let near=false;const R2=2.5*2.5;for(const p of pieces){if(isFirePiece(p.t)?fireLit(p):isTorch(p.t)&&p.data.burn>0){if(dist2(p.x,p.z,P.pos.x,P.pos.z)<R2&&Math.abs((p.y||0)-P.pos.y)<3){near=true;break;}}}
       if(!near&&P.inDun){const dim=curDim();for(const f of FLAMES)if(f.dim===dim&&dist2(f.x,f.z,P.pos.x,P.pos.z)<R2&&Math.abs(f.y-P.pos.y-1.5)<2.5){near=true;break;}}
       const still=Math.hypot(P.vel.x,P.vel.z)<.6;
       if(near&&!P.inWater&&!(wRain>.5&&!shelterCache&&!P.inDun)){if(torchIgn<=0){msg('Pysy paikallasi hetki – soihtu syttyy…');P.ignNeed=1+Math.random()*.5;}if(still)torchIgn+=dt;else torchIgn=Math.max(.001,torchIgn-dt);if(torchIgn>=(P.ignNeed||1.2)){ts.lit=true;torchIgn=0;msg('Sytytit soihdun!','loot');sfx('pickup');}}else torchIgn=0;}
@@ -372,11 +377,20 @@ const DEATH_INFO={
   hunger:{t:'Nälkä vei voimasi',c:'Kylläisyys loppui, ja terveys hupeni vähitellen.',tip:()=>'Syö ajoissa: marjat ja sienet auttavat hetken, kypsennetty liha ja varras pitkään. Kylläisyys näkyy terveyden alla – syö, ennen kuin se loppuu.'},
   void:{t:'Katosit tyhjyyteen',c:'Putosit maailman reunan yli pimeyteen.',tip:()=>'Tyhjyys nielee kaiken, mikä sinne putoaa – tavarasi kuitenkin jäivät hautakasaan kohtaan, jossa seisoit viimeksi tukevasti. Jos huomaat jääväsi seinän sisään, peräänny samaa reittiä takaisin.'},
   hit:{t:'Kaaduit',c:'Vammat kävivät liian raskaiksi.',tip:()=>'Torju kilvellä (hiiren oikea) ja pidä terveys yllä syömällä. Lepää tulen ääressä katon alla, niin saat Levännyt-tilan.'}};
+/* v2.77 VINKKI VAIN TARVITTAESSA (käyttäjä): kuolinruudussa ei enää vinkkiä joka kerta. Yksi vinkkilaatikko näytetään vain, kun
+   (1) tilanteesta ei voisi mitenkään tietää, miten toimia: ensimmäinen kuolema tuleen, tyhjyyteen tai hukkumalla (DT_UNKNOWN, flags.dTip),
+   sekä pomon armosääntö (bTip); tai (2) pelaaja on kaatunut samalle asialle (sama syy ja sama olento) DT_STREAK kertaa putkeen (flags.dStreak). */
+const DT_UNKNOWN={fire:1,void:1,drown:1},DT_STREAK=3;
+function deathTipPick(cause,bTip){const I=DEATH_INFO[cause.k]||DEATH_INFO.hit,key=cause.k+':'+(cause.type||''),S=flags.dStreak&&flags.dStreak.k===key?flags.dStreak:{k:key,n:0};
+  S.n++;flags.dStreak=S;flags.dTip=flags.dTip||{};
+  if(S.n>=DT_STREAK)return {h:(bTip?bTip+'<br>':'')+I.tip(cause),st:S.n};
+  if(DT_UNKNOWN[cause.k]&&!flags.dTip[cause.k]){flags.dTip[cause.k]=1;return {h:(bTip?bTip+'<br>':'')+I.tip(cause)};}
+  return bTip?{h:bTip}:null;}
 const fmtLife=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h} h ${m} min`:m?`${m} min ${s%60} s`:`${s} s`;};
 function deathScreen(cause,bTip,hadItems){const I=DEATH_INFO[cause.k]||DEATH_INFO.hit;
   $('#deadT').textContent=I.t;$('#deadC').textContent=typeof I.c==='function'?I.c(cause):I.c;
   const g=P.graveAt;$('#deadG').textContent=!hadItems?'Sinulla ei ollut tavaroita mukana.':cause.k==='void'?'Tavarasi ovat hautakasassa kohdassa, jossa seisoit viimeksi tukevasti. Kasa näkyy kartalla.':cause.k==='drown'?'Tavarasi ovat hautakasassa lähimmällä rannalla. Kasa näkyy kartalla.':'Tavarasi jäivät hautakasaan kuolinpaikalle. Hae ne takaisin – kasa näkyy kartalla.';
-  const dt=$('#deadTip');if(dt){dt.hidden=false;dt.innerHTML=(bTip?bTip+'<br>':'')+I.tip(cause);}   // deadTip: vinkkilaatikko (v1.70 → v2.73)
+  {const tp=deathTipPick(cause,bTip),dt=$('#deadTip'),bx=$('#deadTipBox');if(dt){dt.hidden=!tp;dt.innerHTML=tp?tp.h:'';}if(bx){bx.hidden=!tp;const hd=bx.querySelector('.dtHead');if(hd)hd.textContent=tp&&tp.st?`Vinkki – kaaduit samalla tavalla ${tp.st} kertaa putkeen`:'Vinkki';}}
   const life=playTime-(P.lifeStart??0);$('#deadStats').innerHTML=`<span><b>${fmtLife(life)}</b>elossa</span><span><b>${dayN}</b>päivä</span><span><b>${P.deaths}</b>${P.deaths===1?'kuolema':'kuolemaa'}</span><span><b>${P.kills||0}</b>kaatoa</span>`;}
 /* v2.18: lähin rantapiste (maata vähintään 0,5 m vedenpinnan yläpuolella) hautakasalle, kun kuolee vedessä: renkaat 1,5 m välein ulospäin. */
 function shorePoint(x,z){for(let r=1.5;r<700;r+=1.5){const n=Math.max(10,Math.round(r*1.2));let best=null,bh=1e9;
@@ -404,6 +418,15 @@ function respawn(){if(!P.dead||state!=='dead')return;endPlayerDeath();for(const 
    if(n)P.respawnCleared=n;}
   fig.g.rotation.x=0;P.vy=0;state='play';requestLock();msg('Heräät uudelleen. Hae tavarasi hautakasasta.');{const bk=P.bossKill;if(bk&&bk.c===bk.mn)setTimeout(()=>msg(`${bk.n} on uupunut: olet kaatunut sille ${bk.c} kertaa, eikä se enää palauta terveyttään.`,'warn'),1200);}   // v2.55 armon ilmoitus
 }
+/* v2.79 ENSIMMÄINEN UNI (käyttäjä: pelaajalle vihje Kalmanummesta ja Hautakummusta jo alussa): ensimmäisen sängyssä nukutun yön jälkeen
+   (bump('nights') → saavutus Hyvät yöunet) pelaaja näkee unen, joka kertoo nummen ja Hautakummun suunnan nukkumapaikasta (ei kiinteitä
+   ilmansuuntia, dirIn) ja merkitsee Hautakummun karttaan. Kerran per maailma (flags.dream). */
+function dreamHint(){if(P.dead)return;const mx=MAP.moor[0]*WS,mz=MAP.moor[1]*WS,a=Math.atan2(mx-P.pos.x,-(mz-P.pos.z)),md=DIRS_IN[((Math.round(a/(Math.PI/4))%8)+8)%8];
+  const B=LOC.barrow,near=Math.hypot(B.x-mx,B.z-mz)<90,bd=dirIn('barrow',P.pos);
+  showLore('Outo uni',`Näit unta harmaasta nummesta kaukana ${md}. Usva lepäsi kivien yllä, ja kalmot kulkivat siellä yön pimeydessä – Kalmanummi. `+
+    (near?`Nummen laidalla kohosi vanha Hautakumpu, ${bd}. `:`Unessa näit myös vanhan Hautakummun, ${bd}. `)+
+    `Sen syvyyksissä ylimys kantaa sinettiä, jota Routaportti odottaa. Herätessäsi tiedät: sinne ei mennä ilman kunnon asetta, soihtua ja ruokaa.`);
+  if(!flags.disc.barrow){flags.disc.barrow=1;setTimeout(()=>msg(`${LOC.barrow.name} merkittiin karttaan.`,'loot'),900);}}
 function sleepAt(p){
   P.spawn={x:p.x,z:p.z};msg('Herätyspaikka asetettu.','loot');
   if(!isNight())return;
@@ -411,5 +434,5 @@ function sleepAt(p){
   if(!sheltered(p.x,p.y,p.z)){msg('Sänky tarvitsee katon yläpuolelleen.','warn');return;}
   if(mobs.some(m=>!m.dead&&m.def.ai==='hostile'&&dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)<20*20)){msg('Et voi nukkua, vihollisia on lähellä.','warn');return;}
   const sh=HOME.inside&&!HOME.grey?(HOME.lvl===2?.2:HOME.lvl===1?.1:0):0;   // v2.09: nukkuminen parantaa vain kodin lämmössä (+10 % / +20 %), ei enää täyteen
-  fadeTo(()=>{flags.sleptN=nightId();dayT=.23;dayN++;P.buffs.levannyt=420;P.hunger=Math.max(20,P.hunger-15);const h0=P.hp;P.hp=Math.min(maxHp(),P.hp+maxHp()*sh);if(P.hp>h0+.5)setTimeout(()=>msg(`Nukuit ${sh>=.2?'lämpimässä kodissa':'mukavassa lämmössä'}: terveys +${Math.round(P.hp-h0)}.`,'loot'),900);for(const m of [...mobs])if(m.def.ai==='hostile'&&!m.dun)mobRemove(m);const gr=regrowForest();saveGame(true);msg(`Päivä ${dayN} alkaa.`+(gr.planted+gr.revived?' Metsä on kasvanut yön aikana.':''));});
+  fadeTo(()=>{flags.sleptN=nightId();bump('nights');if(!flags.dream){flags.dream=1;setTimeout(dreamHint,3200);}dayT=.23;dayN++;P.buffs.levannyt=420;P.hunger=Math.max(20,P.hunger-15);const h0=P.hp;P.hp=Math.min(maxHp(),P.hp+maxHp()*sh);if(P.hp>h0+.5)setTimeout(()=>msg(`Nukuit ${sh>=.2?'lämpimässä kodissa':'mukavassa lämmössä'}: terveys +${Math.round(P.hp-h0)}.`,'loot'),900);for(const m of [...mobs])if(m.def.ai==='hostile'&&!m.dun)mobRemove(m);const gr=regrowForest();saveGame(true);msg(`Päivä ${dayN} alkaa.`+(gr.planted+gr.revived?' Metsä on kasvanut yön aikana.':''));});
 }

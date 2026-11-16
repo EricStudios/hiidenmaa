@@ -492,6 +492,28 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   **Sääntö:** kun muutat trimmausta, vertaa vanha ja uusi tiedosto (alku, sisällön pituus, äänekkyys) kaikille muuttuneille – mittaa selaimella
   (decodeAudioData), ei pelkästään ffmpeg:llä. Ääntelyihin (PV) ei kosketa ilman kuuntelua.
 
+## 67. Hengästyssilmukka alkoi alusta ja oli lyhennetty (v2.76)
+- Oire: juoksu pohjassa hengästys alkoi koko ajan alusta; valmis silmukka oli 2,29 s, vaikka käyttäjän saumaton tiedosto on 2,68 s.
+- Syy: (1) `plBody` pysäytti silmukan heti kestävyyden noustessa yli 30 % ja aloitti uuden 0 %:ssa; (2) `process_sounds.py` käsitteli silmukan
+  'act'-tilassa: hiljaisuus leikattiin päistä (−48 dB) ja sauma ristihäivytettiin (0,25 s pois).
+- Ratkaisu: yksi jatkuva silmukka, jonka voimakkuus seuraa kestävyyttä; pysähtyy vasta 4 s yli 30 % (+ häivytys 2,5 s ja 1 s tauko).
+  Työkalussa `WHOLE_LOOP` (ei leikkausta eikä ristihäivytystä), pelissä `PL_WHOLE` (ei `tgLoopPts`-rajausta).
+  **Sääntö:** käyttäjän valmiiksi saumattomaksi tekemä silmukka → lisää `WHOLE_LOOP`- ja `PL_WHOLE`-joukkoon; tarkista selaimella, että purettu pituus = raaka.
+
+## 68. Kuoleman verilammikko leijui rinteessä ilmassa (v2.78)
+- Oire: mäen harjalla tai rinteessä kuollessa iso litteä punainen kiekko törrötti ilmassa maan yläpuolella (käyttäjän kuvakaappaus).
+- Syy: lammikko oli yksi tasainen `splat`-kiekko (säde ~1,5 m), joka kallistettiin keskipisteen rinteen mukaan; kaareva tai taittuva maasto jäi alle.
+- Ratkaisu: `bloodPool`/`poolShape` (effects.js) – säteittäinen verkko, jonka jokainen kärki asetetaan maahan `groundY`:llä; valuminen suunnittain.
+  **Sääntö:** yli ~0,5 m maahan tuleva kuvio tehdään maastoa seuraavana verkkona, ei yhtenä tasona. Tarkistus v2.78 mittaa kärkien etäisyyden maasta.
+
+## 69. Kodin lämpö "hiipui" sisällä ja katosi seinän vieressä (v2.83)
+- Oire: Mukava lämpötila / Lämmin koti vaihtui tilaan "hiipuu", vaikka pelaaja oli suljetussa talossa; seinän vieressä (< 1 m) ja 1×1-mökissä ei toiminut.
+- Syy: (1) `homeScan` tarkisti katon ±1 m pelaajasta → seinän vieressä piste oli talon ulkopuolella; (2) säde eteni 0,15 m askelin ja hyppäsi vinossa
+  ohuen osan yli (ovilevy 0,12 m) → talo näytti avoimelta; (3) yksi epäonnistunut tarkistus riitti.
+- Ratkaisu (environment.js): katto tarkistetaan vain talon sisältä (`homeEdge` − 0,35 m), `HOME_PAD` 0,08 m laajentaa laatikoita säteelle,
+  hystereesi `H.miss` (2 tarkistusta), lämmönlähteen näköyhteys `homeLos`. **Testaa** oikealla talolla: lattia 0,25 m välein + pisteet ulkopuolella.
+  Uusia ohuita osia lisättäessä (< 0,15 m) tarkista, ettei säde hyppää niiden yli.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`

@@ -39,7 +39,7 @@ const ACH=[
   {id:'selviytyja',n:'Selviytyjä',d:'Selviä 5 päivää.',pr:()=>[Math.min(5,dayN-1),5],b:{hp:3}},
   {id:'tutkija',n:'Tutkimusmatkailija',d:'Löydä 6 paikkaa.',pr:()=>[Object.keys(flags.disc||{}).length,6],b:{spd:1}},
   {id:'nuolimestari',n:'Nuolimestari',d:'Ammu 30 nuolta.',pr:()=>[cnt('shots'),30],b:{stam:5}},
-  {id:'unet',n:'Hyvät yöunet',d:'Nuku sängyssä.',pr:()=>[cnt('slept'),1],b:{stam:5}},
+  {id:'unet',n:'Hyvät yöunet',d:'Nuku yö sängyssä (katon alla). Ensimmäinen uni kertoo jotain tärkeää.',pr:()=>[Math.max(cnt('nights'),flags.dream?1:0),1],b:{stam:5}},   // v2.79 vain onnistunut uni (ennen jo yritys)
   {id:'vartija',n:'Kalmanvartijan voittaja',d:'Voita Kalmanvartija.',pr:()=>[flags.boss?1:0,1],b:{hp:5,stam:5}},
 ];
 const BON={hp:0,stam:0,w:0,spd:0};
@@ -66,7 +66,7 @@ const GOALS=[
   {id:'nuotio',t:'Sytytä nuotio',d:'Rakenna nuotio (kiveä ja puuta) ja lisää siihen puuta E:llä.',xp:10,ok:()=>anyP(p=>isFirePiece(p.t)&&fireLit(p))},
   {id:'lepo',t:'Lepää tulen ääressä',d:'Seiso nuotion ja katon alla noin 12 sekuntia, niin saat Levännyt-tilan.',xp:15,ok:()=>flags.rested||P.buffs.levannyt},
   {id:'marjat',t:'Poimi kolme kasvia',d:'Marjat ja sienet kasvavat metsissä. Paina E niiden luona.',xp:10,ok:()=>cnt('picked')>=3},
-  {id:'paista',t:'Metsästä ja paista lihaa',d:'Peurat pakenevat – hiivi lähelle tai käytä keihästä tai jousta. Paista liha nuotiolla (E) ja ota se ajoissa.',xp:20,ok:()=>invCount('paisti')||invCount('varras')||flags.ate||cnt('cooked')>0},
+  {id:'paista',t:'Metsästä ja paista lihaa',d:'Peurat pakenevat – hiivi lähelle tai käytä keihästä tai jousta. Paista liha nuotiolla (E) ja ota se ajoissa. Pienriista kypsyy nopeimmin, suurriista (hirvi, karhu) täyttää parhaiten.',xp:20,ok:()=>invCount('paisti')||invCount('pienpaisti')||invCount('suurpaisti')||invCount('varras')||flags.ate||cnt('cooked')>0},
   {id:'sanky',t:'Rakenna sänky',d:'Sänky (puuta ja nahkaa) asettaa herätyspaikan ja antaa nukkua yöllä.',xp:15,ok:()=>anyP(p=>p.t==='sanky')},
   {id:'arkku',t:'Rakenna arkku',d:'Arkku säilyttää tavaroita. Sitä voi laajentaa kehitysnapista.',xp:10,ok:()=>anyP(p=>PIECES[p.t].store)},
   {id:'kupari',t:'Etsi kuparia',d:'Valmista piikivihakku työpenkillä (taso 2; piikiveä löytyy rannoilta) ja louhi oransseja kupariesiintymiä metsissä ja vuorten juurella.',xp:20,ok:()=>invCount('malmi')||invCount('kupari')||anyP(p=>p.t==='ahjo')},

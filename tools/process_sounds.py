@@ -45,7 +45,7 @@ NOISE_FIX = {'askel_kivi_2': 'afftdn=nr=30:nf=-40:tn=1,agate=threshold=0.1:ratio
 NOISE_EV = {'askel_kivi'}
 # v2.67 pilkottavat pitkät nauhoitukset (käyttäjä): hytinä ja palamisen kipu → useita versioita, peli arpoo (ei samaa kahdesti peräkkäin)
 SPLIT_EV = {'hytina': dict(k=8, gap=.9, seg_max=2.5), 'kipu_tuli': dict(k=8, gap=.7, seg_max=1.6)}
-_pv0 = lambda ev: f'{PV_T}t3' if ev in TIGHT_EV else f'{PV_T}n2' if ev in NOISE_EV else f'{PV_T}s1' if ev in SPLIT_EV else PV_T
+_pv0 = lambda ev: f'{PV_T}w1' if ev in WHOLE_LOOP else f'{PV_T}t3' if ev in TIGHT_EV else f'{PV_T}n2' if ev in NOISE_EV else f'{PV_T}s1' if ev in SPLIT_EV else PV_T
 # v2.72 nopeat kertaäänet: alkuun jää 3 ms hiljaisuutta (ennen 20 ms) → kaikki kertaäänet käsitellään kerran uudelleen (q1); silmukat ja musiikki ennallaan
 QUICK_SKIP = lambda ev: ev in MUSIC_EV or ev in LOOP_EV or ev in ACT_EV or ev in AMB_LOOPS or ev in ('sydan', 'hengastys')
 pv_of = lambda ev: _pv0(ev) if QUICK_SKIP(ev) else f'{_pv0(ev)}q5'   # q2 tarkka kestomittaus, q4 askeleet −48 dB (−38 dB siirsi pitkän suonauhoituksen pätkiä), q5 alun pehmennys 3 ms   # tiukan trimmauksen ja kohinakorjauksen äänet käsitellään kerran uudelleen
@@ -355,7 +355,7 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
         if nfix:   # v2.67 tiedostokohtainen kohinanpoisto + portti (NOISE_FIX)
             pre += nfix + ','
         trim_t = 'atrim=start=0.015,asetpts=PTS-STARTPTS,' + trim.replace('-48dB', '-42dB') if kind in TIGHT_EV else trim   # v2.66 valikkoefektit: loppu tiukemmin (viimeiset 15 ms = mahdollinen loppunapsahdus pois, häntä −42 dB)
-        r = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + ('highpass=f=40' if loop and mode != 'act' else f'highpass=f=40,{trim},areverse,{trim_t},areverse'),
+        r = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + ('highpass=f=40' if (loop and mode != 'act') or kind in WHOLE_LOOP else f'highpass=f=40,{trim},areverse,{trim_t},areverse'),
                 '-ac', AC, '-ar', '44100', '-c:a', 'pcm_s16le', w1])
         if r.returncode != 0 or not os.path.exists(w1):
             return r.stderr.strip()[-300:] or 'tuntematon virhe', None
@@ -377,7 +377,9 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
             if r.returncode == 0 and os.path.exists(w1b):
                 w1 = w1b
                 d = duration(ff, w1)
-        if loop:
+        if loop and kind in WHOLE_LOOP:   # v2.76 kokonaisena: sellaisenaan seuraavaan vaiheeseen
+            shutil.copyfile(w1, w2)
+        elif loop:
             L = min(d, LONG_LOOP.get(kind, 20.0) if mode == 'act' else 6.0)   # v2.61 sää- ja tunnelmasilmukat 60 s
             xf = min(0.25, L * 0.15)
             r = run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', w1, '-i', w1, '-filter_complex',
@@ -608,6 +610,7 @@ HIT_FI = {'raapaisu': ('kynnet raapaisevat (ilves, karhut, Suonäkki)', 'claw sc
 LOOP_EV = {'palaminen'}   # v2.22: silmukat – ei hiljaisuuden leikkausta eikä häivytyksiä; sauma ristihäivytetään (saumaton silmukka)
 # v2.23: toimintosilmukat (käyttäjän pyyntö): pitkä raaka saa olla pitkä – käsitellään saumattomaksi silmukaksi (enintään 20 s); peli soittaa
 # sitä niin kauan kuin eläin tekee toimintoa (syö, tonkii, nuuhkii) ja pysäyttää pehmeästi, kun toiminto loppuu
+WHOLE_LOOP = {'hengastys', 'sydan'}   # v2.76 silmukka kokonaisena (käyttäjä): ei hiljaisuuden leikkausta eikä sauman ristihäivytystä – koko tiedosto toistuu sellaisenaan
 ACT_EV = {'syominen_laidun', 'syominen_tonkiminen', 'syominen_rouskutus', 'syominen_nakerrus', 'nuuhkiminen', 'juominen', 'sydan'}   # v2.24 juominen, v2.25 pelaajan sydämen syke (silmukka)
 def step_like(ev):
     """v2.23: askelmaiset äänet – kohinanpoisto, vain ensimmäinen tapahtuma (yksi askel), pitkästä nauhoituksesta useita pätkiä."""

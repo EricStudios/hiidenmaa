@@ -30,14 +30,14 @@ const TUT_STEPS=[
   {t:'Päävalikko',d:()=>`${kL('menu')} avaa päävalikon (tauko, asetukset, tallennus) ja sulkee avoimet ikkunat. <b>Vältä Esciä</b>: selain vapauttaa silloin hiiren. Kaikki näppäimet löydät: Asetukset › Näppäimet › Kaikki toiminnot.`,next:1},
   {t:'Liikkuminen',move:1,d:()=>`Nyt peli käynnistyy! Napsauta ruutua, niin voit kääntää kameraa hiirellä.<div class="tutChk">${['fwd','left','back','right'].map(a=>`<span data-mv="${a}">${kL(a)}</span>`).join('')}<span data-mv="run">${kL('run')} juokse</span><span data-mv="jump">${kL('jump')} hyppää</span><span data-mv="crouch">${kL('crouch')} kyykky</span></div>`},
 ];
-const TUT_MOVE_DONE=['fwd','left','back','right','run','jump'];
+const TUT_MOVE_DONE=['fwd','left','back','right','run','jump','crouch'];   // v2.80 kyykky (C) pakollinen kuten muut
 const tutOn=()=>TUT.on;
 // opastuksen oletus uuden maailman valinnassa: ensimmäinen maailma koskaan (ei tallennuksia eikä läpikäytyä opastusta) tai asetus päällä
 function tutDefault(){let done=false;try{done=localStorage.getItem('hiidenmaa_tutdone')==='1';}catch(e){}return !!SET.tutNext||(!done&&!slotMeta().some(Boolean));}
 function tutChoose(on){try{sessionStorage.setItem('hiidenmaa_tutgo',on?'1':'0');}catch(e){}}
 // kutsutaan uuden maailman newGame()-kutsun jälkeen (main.js, molemmat polut): opastus alkaa alkulennon jälkeen (endIntro → tutMaybeStart)
 function tutOnNewWorld(){let go=null;try{go=sessionStorage.getItem('hiidenmaa_tutgo');sessionStorage.removeItem('hiidenmaa_tutgo');}catch(e){}
-  if(go===null)go=tutDefault()?'1':'0';if(go==='1'){flags.tut=1;flags.tips={};TUT.pending=true;}}
+  if(go===null)go=tutDefault()?'1':'0';if(go==='1'){if(SET.tutNext)try{localStorage.removeItem('hiidenmaa_tipseen');}catch(e){}flags.tut=1;flags.tips={};TUT.pending=true;}}   // v2.82 pyydetty uudelleen → vinkit alusta
 function tutMaybeStart(){if(!TUT.pending||TUT.on)return;const ld=document.getElementById('loadScr');
   if((ld&&!ld.classList.contains('out')&&getComputedStyle(ld).display!=='none')||state!=='play'){setTimeout(tutMaybeStart,400);return;}   // odota latausnäytön ja alkulennon loppu
   TUT.pending=false;tutStart();}
@@ -67,6 +67,7 @@ function tutEnd(skipped){TUT.on=false;TUT.hold=false;TUT.pending=false;if(TUT.el
 function tutKey(e){if(!TUT.on)return false;const S=TUT_STEPS[TUT.i],c=e.code;if(!S)return false;
   if(!$('#keyDlg').hidden)return false;
   if((c==='Enter'||c==='NumpadEnter')&&S.next){e.preventDefault();tutNext();return true;}
+  if(S.move&&state==='play'){for(const a of TUT_MOVE_DONE)if(a!=='run'&&c===BIND[a])TUT.mv[a]=1;}   // v2.80 nopea napautus (hyppy, kyykky) kirjautuu heti painalluksesta
   if(!TUT.hold)return false;
   const ok=(S.keys||[]).some(a=>BIND[a]===c||(a==='inv'&&c==='KeyI'&&BIND.inv==='Tab')||(a==='digits'&&/^Digit[1-8]$/.test(c)));if(ok&&/^Digit[1-8]$/.test(c))TUT.dig=true;
   if(c===BIND.menu&&!openPanel)return true;   // P ilman avointa ikkunaa avaisi päävalikon kesken opastuksen
@@ -77,9 +78,9 @@ function tutHoldUpdate(dt){updateCamera(dt);updateHUD(dt);}
 function tutTick(dt){
   if(TUT.on){const S=TUT_STEPS[TUT.i];if(!S){tutEnd(false);return;}if(TUT.el)TUT.el.hidden=state!=='play'&&state!=='ui';
     if(S.ok&&S.ok()){TUT.i++;if(TUT.i>=TUT_STEPS.length)tutEnd(false);else tutShow();return;}   // heti (nopea painallus ei jumita vaihetta)
-    if(S.move&&state==='play'){TUT.t+=dt;for(const a of [...TUT_MOVE_DONE,'crouch'])if(kd(a)&&(a!=='run'||Math.hypot(P.vel.x,P.vel.z)>.5))TUT.mv[a]=1;
+    if(S.move&&state==='play'){TUT.t+=dt;for(const a of TUT_MOVE_DONE)if(kd(a)&&(a!=='run'||Math.hypot(P.vel.x,P.vel.z)>.5))TUT.mv[a]=1;
       for(const sp of TUT.el.querySelectorAll('[data-mv]'))sp.classList.toggle('ok',!!TUT.mv[sp.dataset.mv]);
-      if(TUT_MOVE_DONE.every(a=>TUT.mv[a])||(TUT.t>40&&Object.keys(TUT.mv).length>=3)){tutEnd(false);return;}}
+      if(TUT_MOVE_DONE.every(a=>TUT.mv[a])||(TUT.t>90&&Object.keys(TUT.mv).length>=5)){tutEnd(false);return;}}
     TUT.pl=(TUT.pl||0)-dt;if(TUT.pl<=0){TUT.pl=.25;tutPlace();}return;}
   tipsTick(dt);}
 
@@ -87,8 +88,9 @@ function tutTick(dt){
 // Kun asia tulee ensimmäisen kerran vastaan, ruudun yläosaan tulee vinkki 10 s (yksi kerrallaan, väli vähintään 6 s). flags.tips[id] = näytetty.
 const TIPS=[
   {id:'vasara',c:()=>{const w=equipped('weapon');return w&&w.id==='vasara';},d:()=>`Rakentaminen: ${kL('build')} tai hiiren oikea avaa rakennusvalikon, hiiren vasen asettaa. ${kL('rot')} kääntää (Shift = asento), ${kL('snap')}/${kL('vsnap')} kohdistus, ${kL('up')}/${kL('down')} nosta/laske, ${kL('remove')} pura, ${kL('repair')} korjaa. Työpisteet tarvitsevat työpenkin lähelleen.`},
+  {id:'rakennusG',c:()=>{const w=equipped('weapon');return w&&w.id==='vasara'&&cnt('built')>=3;},d:()=>`Rakentaminen tuntuu hankalalta? Paina ${kL('snap')} vaihtaaksesi kohdistusta (ruudukko → 1 m → puoli → 3D → vapaa → reuna → jatko). Esim. <b>${kL('snap')}: vapaa</b> asettaa osan juuri sinne, minne katsot, ja <b>jatko</b> jatkaa portaita ja tikkaita edellisestä.`},   // v2.82 käyttäjän pyyntö
   {id:'jousi',c:()=>{const w=equipped('weapon');return w&&ITEMS[w.id].cat==='bow';},d:()=>`Jousi: pidä hiiren vasen pohjassa ja päästä irti. Kyykyssä (${kL('crouch')}) näet tarkan tähtäimen ja lentoradan. Nuolet ovat repussa.`},
-  {id:'lapio',c:()=>{const w=equipped('weapon');return w&&(w.id==='lapio'||w.id==='kuokka');},d:()=>`Lapio: hiiren vasen kaivaa, oikea tekee polun. Kuokka: vasen nostaa maata, oikea palauttaa maaston.`},
+  {id:'lapio',c:()=>{const w=equipped('weapon');return w&&(w.id==='lapio'||w.id==='kuokka');},d:()=>`Lapio: hiiren vasen kaivaa, oikea tekee polun. Kuokka: vasen nostaa maata, oikea palauttaa maan värin ja kasvillisuuden (esim. polun kohdalle).`},
   {id:'kirves',c:()=>{const w=equipped('weapon');return w&&ITEMS[w.id].chop;},d:()=>`Kirves kaataa puita (hiiren vasen). Kaatuneesta puusta jää tukki – lyö sitä, niin saat puuta.`},
   {id:'uinti',c:()=>P.swim,d:()=>`Uidessa ${kL('jump')} on veto pintaan (kuluttaa kestävyyttä). Veden alla happi loppuu – nouse ajoissa.`},
   {id:'yo',c:()=>typeof isNight==='function'&&isNight()&&!P.inDun,d:()=>`Yö laskeutuu: sudet ja hiidet liikkuvat. Rakenna suoja ja nuotio – katon alla tulen ääressä lepäät. Sängyssä (${kL('interact')}) voit nukkua yön yli.`},
@@ -98,9 +100,14 @@ const TIPS=[
   {id:'ulottuvuus',c:()=>P.inDun&&!!P.realm,d:()=>`Ulottuvuudessa portti vie takaisin saarelle. Pomo herää, kun astut sen kammioon – varaa ruokaa ja parannusjuomia.`},
   {id:'taso',c:()=>playerLevel()>=2,d:()=>`Uusi taso! ${kL('prog')} näyttää, mitä sait ja mitä seuraavat tasot avaavat.`},
 ];
+/* v2.82 VINKIT KERRAN PELAAJALLE (käyttäjä): nähty vinkki muistetaan kaikkien maailmojen yli (localStorage hiidenmaa_tipseen), joten opastuksen
+   jo käynyt pelaaja ei näe samoja vinkkejä uudessa opastusmaailmassa. Asetus "Opastus seuraavassa uudessa maailmassa" tyhjentää muistin (tutOnNewWorld).
+   Maailmassa ilman opastusta (flags.tut puuttuu tai ohitettu) vinkkejä ei näytetä lainkaan. */
+function tipSeenG(){try{return JSON.parse(localStorage.getItem('hiidenmaa_tipseen')||'{}')||{};}catch(e){return {};}}
+function tipSeenSet(id){const o=tipSeenG();o[id]=1;try{localStorage.setItem('hiidenmaa_tipseen',JSON.stringify(o));}catch(e){}}
 function tipsTick(dt){if(!flags||!flags.tut||state!=='play'||P.dead)return;flags.tips=flags.tips||{};const el=tipEl();
   if(TUT.tipT>0){TUT.tipT-=dt;if(TUT.tipT<=0)el.classList.remove('on');return;}
   TUT.tipCd-=dt;if(TUT.tipCd>0)return;TUT.tipCd=.5;
-  for(const T of TIPS){if(flags.tips[T.id])continue;let ok=false;try{ok=T.c();}catch(e){}if(!ok)continue;flags.tips[T.id]=1;
+  const G=tipSeenG();for(const T of TIPS){if(flags.tips[T.id])continue;if(G[T.id]){flags.tips[T.id]=1;continue;}let ok=false;try{ok=T.c();}catch(e){}if(!ok)continue;flags.tips[T.id]=1;tipSeenSet(T.id);
     el.querySelector('.tipD').innerHTML=T.d();el.classList.add('on');TUT.tipT=10;TUT.tipCd=6;if(typeof mSnd==='function')mSnd('napit','hover');return;}}
 function tipEl(){if(TUT.tipEl)return TUT.tipEl;const d=document.createElement('div');d.id='tutTip';d.innerHTML='<b>Vinkki</b><span class="tipD"></span>';document.body.appendChild(d);TUT.tipEl=d;return d;}
