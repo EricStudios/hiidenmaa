@@ -18,8 +18,8 @@ function iSnd(g,ev,common){const o={pre:'i',cat:'notif'};return mSnd(g,ev,o)||(c
 /* v2.67 (käyttäjä): ilmoitusääni vain pitkistä (MSG_LONG merkkiä) tai erityisistä viesteistä (MSG_SPECIAL: löydöt, tehtävät, pomot) – tai mistä
    tahansa viestistä, kun on ollut hiljaista (ei pelaajan toimintaääntä MSG_QUIET s). Ei koskaan päällekkäin pelaajan toimintaäänen kanssa
    (hakkaaminen, lyönnit, käyttö …; askeleet eivät estä): jos toimintaääni soi juuri (MSG_BUSY s), pitkä/erityinen odottaa enintään MSG_WAIT s. */
-const MSG_LONG=40,MSG_QUIET=1.5,MSG_BUSY=.8,MSG_WAIT=1.6,MSG_SPECIAL=new Set(['loot','boss','quest']);
-function msgSnd(txt,cls,w){const t=performance.now()/1000;if(SET.notifSnd===false||t-msgSndT<MSG_SND_GAP||t<msgQuietT)return;const act=typeof plActT!=='undefined'?plActT:-9;
+const MSG_GAIN=/^\s*\+/,MSG_LONG=40,MSG_QUIET=1.5,MSG_BUSY=.8,MSG_WAIT=1.6,MSG_SPECIAL=new Set(['loot','boss','quest']);
+function msgSnd(txt,cls,w){const t=performance.now()/1000;if(SET.notifSnd===false||t-msgSndT<MSG_SND_GAP||t<msgQuietT)return;if(MSG_GAIN.test(txt||''))return;   /* v2.69 poiminnat ja XP (+…) ilman ilmoitusääntä */const act=typeof plActT!=='undefined'?plActT:-9;
   const big=(txt||'').length>=MSG_LONG||MSG_SPECIAL.has(cls);if(!big&&t-act<MSG_QUIET)return;
   if(t-act<MSG_BUSY){if((w||0)<MSG_WAIT)setTimeout(()=>msgSnd(txt,cls,(w||0)+.4),400);return;}msgSndT=t;iSnd('ilmoitukset','ilmoitus');}
 function biomeSnd(z){msgQuietT=performance.now()/1000+.4;if(SET.biomeSnd===false)return;iSnd('biomit','biomi_'+(BIO_SND[z]||z),'biomi_yhteinen');}

@@ -341,9 +341,9 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
 /* v1.75: "Näytä kaikki toiminnot" – ponnahdusikkuna, jossa kaikki näppäimiin ja hiireen liitetyt toiminnot tilanteittain. Näytetään
    oletusnäppäimet; jos pelaaja on vaihtanut näppäimen, perässä "nyt: X". Rivi: [toiminnon id tai null, oletusnäppäin, kuvaus]. */
 const ALL_KEYS=[
-  ['Pelatessa',[['fwd',0,'liiku eteen'],['back',0,'liiku taakse'],['left',0,'liiku vasemmalle'],['right',0,'liiku oikealle'],['run',0,'juokse (pohjassa)'],['jump',0,'hyppää / kiipeä ylös'],
+  ['Pelatessa',[['fwd',0,'liiku eteen'],['back',0,'liiku taakse (tikkailla alas)'],['left',0,'liiku vasemmalle'],['right',0,'liiku oikealle'],['run',0,'juokse (pohjassa, kuluttaa kestävyyttä; ylikuormassa ei voi juosta)'],['jump',0,'hyppää · tikkailla ylös · uidessa vedolla pintaan (kuluttaa kestävyyttä)'],
     ['crouch',0,'kyykky / hiipiminen (jousella kyykyssä tarkka tähtäin)'],['interact',0,'poimi, avaa, puhu, nuku, käytä'],[null,'Hiiren vasen','isku; jousella pidä pohjassa = jännitä, päästä = ammu'],
-    [null,'Hiiren oikea','torju kilvellä (pohjassa)'],[null,'1–8','valitse pikapaikka; ruoka syödään, varuste otetaan käteen'],[null,'Hiiren rulla','kameran zoom (tai pikapaikat, Asetukset › Ohjaus)'],
+    [null,'Hiiren oikea','torju kilvellä (pohjassa) · lapio ja kuokka: ks. alla'],[null,'1–8','valitse pikapaikka; ruoka syödään, varuste otetaan käteen'],[null,'Hiiren rulla','kameran zoom (tai pikapaikat, Asetukset › Ohjaus)'],
     ['up',0,'pudota valitusta pikapaikasta 1 (Shift = koko pino)'],['remove',0,'pura katsottu rakennusosa (jousta jännittäessä: tähtäimen vilkkuminen päälle/pois)'],['repair',0,'korjaa katsottu rakennusosa'],
     ['hud',0,'tehtävä ja tavoite näkyviin / piiloon'],['minizoom',0,'minikartan zoom'],[null,'Esc','vapauttaa hiiren (selain) – käytä mieluummin P:tä']]],
   ['Rakentaessa (vasara kädessä)',[['build',0,'rakennusvalikko'],[null,'Hiiren vasen','aseta rakennusosa'],[null,'Hiiren oikea','rakennusvalikko'],['rot',0,'käännä osaa'],[null,'Shift + R','osan asento / kaltevuus'],
@@ -351,7 +351,7 @@ const ALL_KEYS=[
   ['Lapio ja kuokka',[[null,'Hiiren vasen','lapio: kaiva · kuokka: nosta maata'],[null,'Hiiren oikea','lapio: tee polku · kuokka: palauta maasto']]],
   ['Valikot ja paneelit',[['menu',0,'päävalikko / sulje avoin paneeli'],['inv',0,'reppu ja valmistus'],[null,'I','reppu (vaihtoehto)'],['map',0,'kartta'],['prog',0,'taso, saavutukset, tavoitteet'],['log',0,'viimeiset ilmoitukset'],
     ['interact',0,'sulje avoin paneeli']]],
-  ['Repussa ja arkussa',[[null,'Hiiren vasen','valitse / siirrä esine toiseen ruutuun, raahaa'],[null,'Hiiren oikea','ota puolet pinosta'],[null,'Shift + hiiren oikea','kohderuudussa: slider – valitse siirrettävä määrä (1–9 siirtää heti, napsautus ohi puolittaa)'],[null,'Q / Shift + Q','pudota hiiren alla oleva tai valittu esine (Shift = koko pino)'],
+  ['Repussa ja arkussa',[[null,'Hiiren vasen','valitse / siirrä esine toiseen ruutuun, raahaa'],[null,'Hiiren oikea','ota puolet pinosta'],[null,'Shift + hiiren oikea','kohderuudussa: slider – valitse siirrettävä määrä (1–9 siirtää heti, napsautus ohi puolittaa)'],[null,'Q / Shift + Q','pudota hiiren alla oleva tai valittu esine (Shift = koko pino)'],[null,'Nuolet / Enter','siirtoslider: säädä määrää / vahvista'],
     [null,'Kirjoita','haku (valmistus- ja rakennusvalikko)'],[null,'Enter (haussa)','valmista ensimmäinen osuma / lopeta kirjoitus'],[null,'Esc (haussa)','tyhjennä haku'],[null,'Shift (pohjassa)','esineen lisätiedot vihjeessä']]],
   ['Päävalikossa',[[null,'P / Esc','takaisin päänäkymään'],[null,'Enter','vahvista maailman nimi']]],
   ['Erikoistilanteet',[[null,'Enter','herää uudelleen kaaduttua'],[null,'Mikä tahansa','ohita uuden maailman alkulento / avausotsikko (ei ensikäynnin esittelyä)']]],

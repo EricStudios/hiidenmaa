@@ -7,6 +7,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ---
 
 ## 1. Maailma
+- **v2.69 seed:** jokaisella maailmalla oma seed (näkyy maailmalistassa). Seed määrää porttien, raunioiden, arkkukivien, riimukivien (paitsi rannan
+  aloituskiven), Avaimen kätkijän, leirien, kiviröykkiöiden, kylttien ja kasvillisuuden paikat; saaren muoto, aloitusranta, Hautakumpu ja Kalmankehä
+  pysyvät kartan mukaan. Vanhat maailmat (ennen v2.69) säilyttävät vanhat paikat. Ulottuvuudet arvotaan maailmakohtaisesti.
 
 - **Vihollisten syntyminen (v0.83):** yöllä 90 % 55–85 m päähän (vaeltavat), 10 % 20–30 m päähän puun/kiven taakse; aarnimetsä vetää
   vihollisia (yöllä tahti 1,5 s, raja 18). Päivällä enintään 2 vihollista (aarnimetsässä 3) ja vain korpimetsässä, suolla, kankaalla,
@@ -349,6 +352,12 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Minikartta:** 3 zoomia (60 / 35 / 110 m, N tai napsautus), taso näkyy alareunassa.
 - **Ilmoitukset:** näkyvät pituuden mukaan pidempään, piiloon valikoissa; L näyttää 10 viimeisintä (v1.18; ennen T).
 - **Tehtävä ja tavoite piiloon (v1.18):** T kiertää: molemmat → vain tehtävä → vain tavoite → ei kumpaakaan; piilotettuna pieni vihje, valinta muistetaan.
+
+## Tasot (v2.70)
+- Taso 1–20 (XP tasolta n seuraavalle 50 + 30n). Palkinnot: HP +10 (taso 3 ja 5), +15 (10 ja 15), +20 (20) = 130 HP tasolla 20; kestävyys +5
+  (4, 8, 12, 16); muilla tasoilla kantokyky +5. Reseptit: 2 piikivityökalut, kilpi, keihäs, nahkavaatteet, varras, jousi + puunuolet; 3 nuolet ja
+  kupariaseet/-työkalut; 4 kuparipanssari, kuparikilpi, karhuhaarniska; 5 rautakirves ja -hakku; 6 rautamiekka; 7 rautakilpi ja -panssari;
+  10 hiidenjousi, 12 hiidenmiekka, 14 hiidenpanssari. J-paneeli näyttää jokaisen tason palkinnon. Poiminnat ja XP-viestit eivät soita ilmoitusääntä.
 
 ## 15. Asetukset ja näppäimet (settings.js)
 - **v2.68 suorituskykymerkit:** jokaisen grafiikka-asetuksen perässä väripallo nykyisen valinnan vaikutuksesta suorituskykyyn (vihreä pieni,

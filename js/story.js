@@ -131,7 +131,7 @@ function updateStory(dt){
 // onnistuu) ja sänky sisällä, istuintukki ja säkki (löydetty säiliö). Paikka valitaan kasvillisuuden sijoittelun JÄLKEEN puista ja kivistä
 // vapaalta tasaiselta maalta (≥ 60 m muista paikoista), joten maiseman numerointi ja vanhat tallennukset eivät muutu. Rakennelmat ovat
 // tavallisia rakennusosia (tallentuvat, `flags.camps` = luotu); vanhaan tallennukseen ne luodaan latauksessa.
-const CAMPS=(function(){const r=mulberry32(97531+MAP_ID*7919),out=[],n=1+(r()<.5?1:0),tmp=[];
+const CAMPS=(function(){const r=mulberry32(seedMix(97531+MAP_ID*7919)),out=[],n=1+(r()<.5?1:0),tmp=[];
   // ensin tiukat ehdot (niitty/koivikko/metsä/kangas, tasainen, 60 m muista paikoista), jos ei löydy, väljemmät (vuoriset kartat)
   for(let t=0;t<8000&&out.length<n;t++){const loose=t>=4000,x=(r()-.5)*HALF*1.6,z=(r()-.5)*HALF*1.6,h=terrainH(x,z);if(h<2||h>(loose?30:18))continue;
     const b=biomeAt(x,z,h);if(!(loose?['meadow','koivu','forest','kangas','tunturi','suo','aarni','mountain']:['meadow','koivu','forest','kangas']).includes(b))continue;
@@ -161,7 +161,7 @@ function ensureCamps(){if(flags.camps)return;flags.camps=1;
 // Perinteiset avoimet kivikasat, joissa arkku näkyy (v0.98:n tyyli): kivirengas kahdella vastakkaisella kulkuaukolla, matala laatta ja arkku
 // keskellä. 2 per kartta, sijoitus kasvillisuuden jälkeen (kuten leirit) → ei muuta maisemaa eikä tallennuksia. Saalis vaatimattomampi kuin
 // arkkukivilinnakkeissa. LOC.kiviN = "Kiviröykkiö" (löytyy 30 m:stä, merkki kartalle).
-const STASHES=(function(){const r=mulberry32(24680+MAP_ID*104729),out=[],tmp=[];
+const STASHES=(function(){const r=mulberry32(seedMix(24680+MAP_ID*104729)),out=[],tmp=[];
   for(let t=0;t<8000&&out.length<2;t++){const loose=t>=4000,x=(r()-.5)*HALF*1.6,z=(r()-.5)*HALF*1.6,h=terrainH(x,z);if(h<1.5||h>(loose?30:22))continue;
     const b=biomeAt(x,z,h);if(['sea','beach','peak'].includes(b))continue;
     let flat=true;for(const [ox,oz] of [[4,0],[-4,0],[0,4],[0,-4]])if(Math.abs(terrainH(x+ox,z+oz)-h)>(loose?1.2:.8))flat=false;if(!flat)continue;
@@ -243,7 +243,7 @@ function valuableCensus(dt){censusT-=dt;if(censusT>0||state!=='play')return;cens
 // Kaksi puukylttiä tienvarressa; teksti luetaan läheltä (E). Kryptinen vihje: 1) Jääavaimen arkun suunta, 2) kiviröykkiön suunta.
 const SUNDIR=['pohjantähden alle','aamuruskon ja pohjan väliin','auringon nousuun','aamupäivän aurinkoon','keskipäivän aurinkoon','iltapäivän varjoihin','auringon laskuun','illan ja pohjan väliin'];
 function poeticDir(from,to){const a=Math.atan2(to.x-from.x,-(to.z-from.z));return SUNDIR[((Math.round(a/(Math.PI/4))%8)+8)%8];}
-const SIGNS=(function(){const r=mulberry32(4242+MAP_ID*7717),out=[];
+const SIGNS=(function(){const r=mulberry32(seedMix(4242+MAP_ID*7717)),out=[];
   for(let t=0;t<6000&&out.length<2;t++){const a=r()*TAU,d=50+r()*(out.length?170:90),x=LOC.spawn.x+Math.sin(a)*d,z=LOC.spawn.z+Math.cos(a)*d,h=terrainH(x,z);
     if(h<1.5||h>26||Math.abs(x)>HALF*.9||Math.abs(z)>HALF*.9)continue;let far=true;for(const k in LOC)if(dist2(x,z,LOC[k].x,LOC[k].z)<25*25){far=false;break;}
     for(const s of out)if(dist2(x,z,s.x,s.z)<80*80)far=false;if(!far)continue;out.push({x,z,y:h,i:out.length});}
@@ -263,13 +263,16 @@ const SIGNS=(function(){const r=mulberry32(4242+MAP_ID*7717),out=[];
 // edistymisestä on kulunut KEEPER_T s (15 min), vihje tarkentuu (taso 2) ja tulee ilmoitus. Sijainti valitaan kasvillisuuden jälkeen
 // (kuten leirit) → maisema ja vanhat tallennukset eivät muutu. Kartalle ei koskaan merkitä avaimen arkkua.
 const KEEPER_T=900;
-(function(){const tmp=[];let best=null,bs=-1e9;
-  for(let iz=-40;iz<=40;iz++)for(let ix=-40;ix<=40;ix++){const x=ix*HALF*.85/40,z=iz*HALF*.85/40,h=terrainH(x,z);if(h<12)continue;
+(function(){const tmp=[];let best=null,bs=-1e9,cand=[];
+  const scan=R=>{cand=[];best=null;bs=-1e9;for(let iz=-40;iz<=40;iz++)for(let ix=-40;ix<=40;ix++){const x=ix*HALF*.85/40,z=iz*HALF*.85/40,h=terrainH(x,z);if(h<12)continue;
     let lo=h,hi=h;for(let a=0;a<8;a++){const hh=terrainH(x+Math.cos(a*.785)*4,z+Math.sin(a*.785)*4);lo=Math.min(lo,hh);hi=Math.max(hi,hh);}
-    const sl=hi-lo;if(sl>3.2)continue;let far=true;for(const k in LOC){const L=LOC[k];if(dist2(x,z,L.x,L.z)<40*40){far=false;break;}}if(!far)continue;
+    const sl=hi-lo;if(sl>3.2)continue;let far=true;for(const k in LOC){const L=LOC[k];if(dist2(x,z,L.x,L.z)<R*R){far=false;break;}}if(!far)continue;
     nodesNear(x,z,4.5,tmp);if(tmp.some(o=>o.alive&&(o.def.kind==='tree'||o.def.kind==='rock')))continue;
-    const sc=h-sl*4;if(sc>bs){bs=sc;best={x,z};}}
-  if(!best){let hb=-1e9;for(let iz=-30;iz<=30;iz++)for(let ix=-30;ix<=30;ix++){const x=ix*HALF*.8/30,z=iz*HALF*.8/30,h=terrainH(x,z);if(h>hb){hb=h;best={x,z};}}}
+    const sc=h-sl*4;cand.push({x,z,sc});if(sc>bs){bs=sc;best={x,z};}}};
+  scan(40);if(SEED&&!cand.length)scan(24);   // v2.69 seed: pieni vuori (saaret) → lähemmäs muita paikkoja, ei kuitenkaan päälle
+  if(SEED&&cand.length){const r=mulberry32(seedMix(7331+MAP_ID*13)),top=cand.filter(c=>c.sc>=bs-(cand.filter(q=>q.sc>=bs-9).length<4?16:9));const c=top[Math.floor(r()*top.length)];best={x:c.x,z:c.z};}   // v2.69 seed: yksi korkeimmista paikoista
+  if(!best){let hb=-1e9;for(let iz=-30;iz<=30;iz++)for(let ix=-30;ix<=30;ix++){const x=ix*HALF*.8/30,z=iz*HALF*.8/30,h=terrainH(x,z);
+    if(SEED){let ok=true;for(const k in LOC)if(dist2(x,z,LOC[k].x,LOC[k].z)<18*18){ok=false;break;}if(!ok)continue;}if(h>hb){hb=h;best={x,z};}}}
   LOC.runeK={x:best.x,z:best.z,name:'Avaimen kätkijä',kind:'keeper'};})();
 // malli: tumma 4 m kivipaasi hehkuvine riimuineen, viisi pienempää kiveä kehänä, leijuva kristalli ja violetti valo
 const KEEPER={fx:null};

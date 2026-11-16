@@ -12,9 +12,14 @@ function bump(k,n=1){fixFlags();flags.cnt[k]=(flags.cnt[k]||0)+n;}
 function lvlInfo(){if(devOn('lvl'))return{L:LVL_MAX,xp:0,need:0};// DEV: korkein taso
   let xp=flags.xp||0,L=1;while(L<LVL_MAX&&xp>=needXp(L)){xp-=needXp(L);L++;}return{L,xp,need:L>=LVL_MAX?0:needXp(L)};}
 const playerLevel=()=>lvlInfo().L;
+/* v2.70 TASOPALKINNOT (käyttäjä: "Tasainen"): joka tasolla jotain, HP harvoin. HP +10 (3, 5), +15 (10, 15), +20 (20) = +70 → 130;
+   kestävyys +5 (4, 8, 12, 16) = +20; muilla tasoilla kantokyky +5 (10 tasoa = +50). Lisäksi reseptit (RECIPES lvl). */
+const LVL_REW={3:{hp:10},4:{stam:5},5:{hp:10},8:{stam:5},10:{hp:15},12:{stam:5},15:{hp:15},16:{stam:5},20:{hp:20}},LVL_W=5;
+const lvlRew=L=>L<2?{}:LVL_REW[L]||{w:LVL_W};
+function lvlBon(L){const o={hp:0,stam:0,w:0};for(let i=2;i<=(L||playerLevel());i++){const r=lvlRew(i);for(const k in r)o[k]+=r[k];}return o;}
 function addXp(n,why){if(!n||P.dead)return;fixFlags();const b=playerLevel(),h0=maxHp();flags.xp+=n;const a=playerLevel();if(maxHp()>h0)P.hp+=maxHp()-h0;   /* v1.20: terveyslisä heti */
   if(n>=10&&why)msg(`+${n} XP · ${why}`,'xp');
-  if(a>b){sfx('craft');msg(`Taso ${a}!`,'loot');const un=RECIPES.filter(r=>r.lvl>b&&r.lvl<=a).map(r=>ITEMS[r.id].n);if(un.length)msg(`Uusia ohjeita: ${un.join(', ')}`,'loot');}}
+  if(a>b){sfx('craft');recalcMaxW();const rw=[];for(let i=b+1;i<=a;i++){const r=lvlRew(i);for(const k in r)rw.push(bonText({[k]:r[k]}));}msg(`Taso ${a}!${rw.length?' '+rw.join(', '):''}`,'loot');const un=RECIPES.filter(r=>r.lvl>b&&r.lvl<=a).map(r=>ITEMS[r.id].n);if(un.length)msg(`Uusia ohjeita: ${un.join(', ')}`,'loot');}}
 function xpFirst(key,n,why){fixFlags();if(flags.first[key])return;flags.first[key]=1;addXp(n,why);}
 const recipeOpen=r=>!r.lvl||playerLevel()>=r.lvl;
 
@@ -38,7 +43,7 @@ const ACH=[
   {id:'vartija',n:'Kalmanvartijan voittaja',d:'Voita Kalmanvartija.',pr:()=>[flags.boss?1:0,1],b:{hp:5,stam:5}},
 ];
 const BON={hp:0,stam:0,w:0,spd:0};
-function recalcMaxW(){MAXW=160+40*P.packLv+BON.w;}
+function recalcMaxW(){MAXW=160+40*P.packLv+BON.w+lvlBon().w;}   // v2.70 + tasojen kantokyky
 function recalcBon(){fixFlags();BON.hp=BON.stam=BON.w=BON.spd=0;for(const a of ACH)if(flags.ach[a.id])for(const k in a.b)BON[k]+=a.b[k];recalcMaxW();}
 const bonText=b=>Object.entries(b).map(([k,v])=>({hp:`+${v} enimmäisterveys`,stam:`+${v} enimmäiskestävyys`,w:`+${v} kantokyky`,spd:`+${v} % nopeus`}[k])).join(', ');
 function checkAch(){fixFlags();let any=false;
@@ -64,17 +69,17 @@ const GOALS=[
   {id:'paista',t:'Metsästä ja paista lihaa',d:'Peurat pakenevat – hiivi lähelle tai käytä keihästä tai jousta. Paista liha nuotiolla (E) ja ota se ajoissa.',xp:20,ok:()=>invCount('paisti')||invCount('varras')||flags.ate||cnt('cooked')>0},
   {id:'sanky',t:'Rakenna sänky',d:'Sänky (puuta ja nahkaa) asettaa herätyspaikan ja antaa nukkua yöllä.',xp:15,ok:()=>anyP(p=>p.t==='sanky')},
   {id:'arkku',t:'Rakenna arkku',d:'Arkku säilyttää tavaroita. Sitä voi laajentaa kehitysnapista.',xp:10,ok:()=>anyP(p=>PIECES[p.t].store)},
-  {id:'kupari',t:'Etsi kuparia',d:'Valmista piikivihakku työpenkillä (piikiveä löytyy rannoilta) ja louhi oransseja kupariesiintymiä metsissä ja vuorten juurella.',xp:20,ok:()=>invCount('malmi')||invCount('kupari')||anyP(p=>p.t==='ahjo')},
+  {id:'kupari',t:'Etsi kuparia',d:'Valmista piikivihakku työpenkillä (taso 2; piikiveä löytyy rannoilta) ja louhi oransseja kupariesiintymiä metsissä ja vuorten juurella.',xp:20,ok:()=>invCount('malmi')||invCount('kupari')||anyP(p=>p.t==='ahjo')},
   {id:'sulata',t:'Sulata ja takoa',d:'Rakenna sulatusuuni, sulata malmi kupariksi ja rakenna ahjo.',xp:30,ok:()=>anyP(p=>p.t==='ahjo')},
-  {id:'varusta',t:'Varustaudu',d:'Takoa kuparimiekka tai kuparipanssari ahjolla. Nuija on hyvä kalmoja vastaan.',xp:30,ok:()=>invCount('miekka')||invCount('kuparipanssari')||invCount('kuparikilpi')},
+  {id:'varusta',t:'Varustaudu',d:'Takoa kuparimiekka (taso 3) tai kuparipanssari (taso 4) ahjolla. Nuija on hyvä kalmoja vastaan.',xp:30,ok:()=>invCount('miekka')||invCount('kuparipanssari')||invCount('kuparikilpi')},
   {id:'vihut',t:'Kaada kymmenen vihollista',d:'Kaikki kaadetut eläimet ja viholliset lasketaan.',xp:20,ok:()=>cnt('kills')>=10},
   {id:'jousi',t:'Ammu jousella',d:'Valmista jousi ja nuolia. Pidä hiiren vasenta pohjassa ja päästä irti.',xp:15,ok:()=>cnt('shots')>=5},
   {id:'laajenna',t:'Laajenna reppua',d:'Repun vieressä on päivityspainike (nahkaa ja puuta).',xp:20,ok:()=>P.packLv>=1},
   {id:'kivirak',t:'Rakenna kivestä',d:'Kiviseinät, kivilattiat ja kivikatot kestävät paljon. Kivikatot ovat omassa välilehdessään.',xp:15,ok:()=>anyP(isStone)},
   {id:'grilli',t:'Rakenna grillinuotio',d:'Grillitelineessä on neljä paikkaa ruoalle. Ota ruoka ajoissa – ylipaistettu muuttuu hiileksi.',xp:20,ok:()=>anyP(p=>p.t==='grilli')},
-  {id:'rauta',t:'Löydä rautaa',d:'Rautasuonet ovat vuoristossa. Tarvitset kuparihakun.',xp:30,ok:()=>flags.seen&&(flags.seen.rautamalmi||flags.seen.rauta)},
+  {id:'rauta',t:'Löydä rautaa',d:'Rautasuonet ovat korkealla vuoristossa. Tarvitset kuparihakun (taso 3). Rautatyökalut aukeavat tasolla 5.',xp:30,ok:()=>flags.seen&&(flags.seen.rautamalmi||flags.seen.rauta)},
   // v1.34 (lista 3, kohta 8): ulottuvuudet ennen Kalmanvartijaa; alttari vaatii kolme Kalmankruunun sirpaletta (ei enää hiidenkiviä).
-  {id:'routa',t:'Avaa Routaportti',get d(){return `Routaportti on ${dirIn('portal1')} tuntureilla. Etsi Jääavain saaren vanhoista arkuista – portti antaa vihjeen.`;},xp:40,ok:()=>!portalLocked('portal1')||!!fo('rb').portal1},
+  {id:'routa',t:'Avaa Routaportti',get d(){return `Routaportti on ${dirIn('portal1')} tuntureilla. Siinä on kaksi lukkoa: Kalmon sinetti (Hautakummun ylimys, ${dirIn('barrow')}) ja Jääavain (jostain saaren vanhasta arkusta). Avaimen kätkijä vuorella neuvoo.`;},xp:40,ok:()=>!portalLocked('portal1')||!!fo('rb').portal1},
   {id:'jaatar',t:'Kukista Jäätär',d:'Routaluolan perimmäisessä kammiossa. Hän kantaa luuavainta.',xp:50,ok:()=>!!fo('rb').portal1},
   {id:'kalmaherra',t:'Kukista Kalmaherra',get d(){return `Kalmankammion portti on ${dirIn('portal2')}. Luuavain avaa sen.`;},xp:60,ok:()=>!!fo('rb').portal2},
   {id:'aarnihirvio',t:'Kukista Aarnihirviö',get d(){return `Aarnihaudan portti on ${dirIn('portal3')}. Aarniavain avaa sen.`;},xp:70,ok:()=>!!fo('rb').portal3},
@@ -103,4 +108,7 @@ function renderProg(){const li=lvlInfo(),el=$('#progP');
   el.querySelector('#progBody').innerHTML=`<div class="lv"><b>Taso ${li.L}</b><span class="num note">${li.need?`${li.xp} / ${li.need} XP`:'huipputaso'}</span><div class="track"><i style="width:${li.need?li.xp/li.need*100:100}%"></i></div></div>
   <div class="cols"><div><h3>Saavutukset ${done}/${ACH.length}</h3>${ACH.map(a=>{const ok=!!flags.ach[a.id],[c,m]=a.pr();return `<div class="ach ${ok?'ok':''}"><b>${ok?'✔ ':''}${a.n}</b><span>${a.d} ${ok?'':`(${Math.min(c,m)}/${m})`}</span><em>${bonText(a.b)}</em></div>`;}).join('')}</div>
   <div><h3>Tavoitteet</h3>${GOALS.map((g,i)=>`<div class="ach ${i<flags.goal?'ok':i===flags.goal?'cur':'fut'}"><b>${i<flags.goal?'✔ ':i===flags.goal?'▶ ':''}${g.t}</b>${i===flags.goal?`<span>${g.d}</span>`:''}</div>`).join('')}
-  <h3 style="margin-top:12px">Taso avaa</h3>${RECIPES.filter(r=>r.lvl).map(r=>`<div class="ach ${playerLevel()>=r.lvl?'ok':'fut'}"><b>Taso ${r.lvl}: ${ITEMS[r.id].n}${ITEMS[r.id].rare?' ★':''}</b></div>`).join('')}</div></div>`;}
+  <h3 style="margin-top:12px">Taso avaa</h3>${lvlUnlockRows()}</div></div>`;}
+// v2.70 tasoittain: palkinto + aukeavat reseptit
+function lvlUnlockRows(){const L=playerLevel(),o=[];for(let i=2;i<=LVL_MAX;i++){const rs=RECIPES.filter(r=>r.lvl===i).map(r=>ITEMS[r.id].n+(ITEMS[r.id].rare?' ★':'')),rw=bonText(lvlRew(i));
+  o.push(`<div class="ach ${L>=i?'ok':'fut'}"><b>${L>=i?'✔ ':''}Taso ${i}</b><span>${[rw,...rs].filter(Boolean).join(' · ')}</span></div>`);}return o.join('');}

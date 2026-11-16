@@ -40,7 +40,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 | --- | --- |
 | `js/boot.js` | (ladataan `index.html`:ssä ennen muita) aloitusjakso, suorituskykytesti omassa näkymässä (`__boot`), pelin skriptien lataus listasta `window.__GJS` (uusi tiedosto lisätään SINNE) |
 | `js/core.js` | `DEV` (oletus pois, `localStorage.hiidenmaa_devon` / `?dev=1`, kytkin Asetukset › Ohjaus; Ä = DEV-valikko (Näkymätön `DEVF.unseen`), Ö = olennot ja pomot `renderDevM`, Å = esineet `renderDevI`/`DEV_PICKS`, täpät `DEVF`), `$`, `clamp`, `lerp`, `sstep`, kohina (`fbm`, `ridge`), `mulberry32` |
-| `js/world.js` | `WS` (skaala), `MAPS`/`MAP`/`MAP_ID` (6 karttaa), `dirIn`, `HALF`, `LOC` (+ arvotut `SITE_DEFS`-paikat), `AARNI`, `DUN`, `heightFn`, `biomeAt`, `zoneAt`, `BIOMES` (nimet + ominaisuudet), `terrainH`, merenpohja `SEA_FLOOR`, meren raja `seaBorder`, ylämäen hidastus `uphillK`, hautakummun kohouma `barrowMound`, tarkat maanmuokkauslaikut `FT_*`/`ftH` (v2.65, laikut resources.js `ftEnsure`/`ftTool`) |
+| `js/world.js` | `WS` (skaala), `MAPS`/`MAP`/`MAP_ID` (6 karttaa), maailman seed `SEED`/`seedMix` (v2.69, 0 = vanhat paikat; siirtyvät kartan paikat `SITE_MOVE`/`sitePrefOk`), `dirIn`, `HALF`, `LOC` (+ arvotut `SITE_DEFS`-paikat), `AARNI`, `DUN`, `heightFn`, `biomeAt`, `zoneAt`, `BIOMES` (nimet + ominaisuudet), `terrainH`, merenpohja `SEA_FLOOR`, meren raja `seaBorder`, ylämäen hidastus `uphillK`, hautakummun kohouma `barrowMound`, tarkat maanmuokkauslaikut `FT_*`/`ftH` (v2.65, laikut resources.js `ftEnsure`/`ftTool`) |
 | `js/render.js` | renderer, scene, camera, valot, näytön auringonsäteet ja linssiheijastus (`RAYS`/`drawRays`, `#raysC`, `SET.flare`, päivä `raysDay`, peitto `raysPeek`, peitto suunnittain `RAYS.dir`/`rayOcc`, voimakkuus `RAYS_A`), pilvien varjostus `cloudShade`, terävät soihtuvarjot `torchSharpOn`/`torchShadowApply`, säteiden taustaluku `RPK`/`raysEval`, varjon vaalennus varjostimessa `hmLift`/`SUN_SH_BASE`, Ultran pehmeä pilvimatto `deckSoftSet`, tekstuurit, `MAT`, `mat()`, `bx()`, maasto (väri `terrCol`, tiheämpi väritys `TFINE`/`terrFineSet`, biomien sekoitus `blendApply`/`TSOFT`, laikkumaski `FTM`/`terrHook`), vesi (varjostin `WATER_U`, syvyyskartta `WATER_DEP`/`waterDepSet`, aallot `WV`/`waveAt`, verkko `waterGeo`, low poly / realistinen `waterApply`), taivas, sade |
 | `js/collision.js` | törmäysruudukko: `addBox`, `addCircle`, `groundAt` (ympyrälattia `ground`/`gr`/`dr`: kivet, tynnyrit, muurin harja), `collideXZ`, `pointBlocked` (`lw` = muuri estää näön), `STEPUP` |
 | `js/items.js` | `ITEMS`, `RECIPES`, `RECIPE_BY`, `icon(id)` (canvas-kuvakkeet) |
@@ -64,7 +64,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 | `js/ai.js` | vihollisten tekoäly (luonteet `per`, `temperAI`, `stalkAI`), pomon hyökkäykset, `SPAWN`-taulukot, `spawnScary`, jousikalmot `archerAI`, auringossa palaminen `sunBurnAI` (nummella ei `MOOR_UNDEAD`, `moorFightBlock`), emakon perhe `famPlan`/`famStep`/`orphanPiglets`, syöminen `eatPlan`/`eatStep`, juominen `drinkOk`/`drinkSpot`/`drinkPlan`/`drinkStep`, pää alas `headDown`, karhun syöksy `bearLunge`/`bearLungePose`, osuma `mobHurtP`, voitto/rauha `bossVictory`/`peaceRefill`, työpisteiden päivitys |
 | `js/camera.js` | kolmannen persoonan kamera |
 | `js/ui.js` | HUD, viestit, paneelit, kartta; esineiden siirto/raahaus (`slotUX`, `#ghostIt`), tehtävän/tavoitteen piilotus (`applyHudMode`), terveyspalkkirivit (`HP_ROW`); kyykkytähtäin `updDropRet` (tyylit `AIM_ST`, ohjeet `aimHint`), pikapaikan pudotus `dropHot`, aluebannerien jono `zoneQ`; nuoliteksti `showAmmo`, pikapaikan nimi `showHotName`/`itemRarity`; pomopalkki `bossBarTick` (teemat `BB_T`); olentojen palkit `updateMobBars` (näkyvyys `BAR_*`, `barSeen`); repun palkit paikallaan `invBarsTick`/`slotBar` (ei ajastettua `invDirty`:ä, KORJAUKSET 57), siirtoslider `splitOpen`/`SPL` (`#splitDlg`, oma rata – VC ei liikuta `<input type=range>`:a), osamäärän siirto `moveCount`. |
-| `js/progress.js` | `bump`, XP ja taso (`lvlInfo`), saavutukset (`ACH`, `BON`), `GOALS`, edistymispaneeli (J) |
+| `js/progress.js` | `bump`, XP ja taso (`lvlInfo`, v2.70 palkinnot `LVL_REW`/`lvlBon`), saavutukset (`ACH`, `BON`), `GOALS`, edistymispaneeli (J) |
 | `js/save.js` | `serialize`, `loadData`, `saveGame`, `SKEY`, tallennuspaikat (`SLOTS`, `slotKey`, `slotMeta`, `curSlot`) |
 | `js/menubg.js` | valikon animoidut taustakuvat (`MBG_SCENES` 21 kpl, `mbgFrame`, `mbgShow`); valikossa ei piirretä 3D:tä; valikon partikkelit `MFX`/`mfxFrame` (laji taustan mukaan), SVG-logo `buildLogo`, 7 teemaa `LOGO_T`, arvonta `logoRandom` |
 | `js/main.js` | valikko, pääsilmukka `frame()`, mukautuva laatu, testirajapinta `window.__game`; valikon taustakameran kierros (`menuCam`, `buildMenuSpots`), automaattisäätö (`autoQuality`), FPS (`updateFps`); valikon näkymät `setMenuView`/`menuBack` (`#menu[data-view]`), intro `startIntro`/`introCam` (uusi maailma `worldLoad`, tallennuksen jatko latausnäytöllä `saveLoad`, pilvet `introCloudsMake`/`introVeil`), suorituskykytesti `perf*`, taukotila `pauseRun`, DEV-suorituskykymittari `perfTick`. Latausnäyttö on `index.html`:ssä (`__ldSet`/`__ldDone`/`__ldShow`, `__ldAfter`), samoin ensikäynnin aloitusjakso `#splash` (`__splashOn`). |
@@ -73,7 +73,8 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 
 - Metrit ja sekunnit. Maailma on noin −350…350 m (`HALF`), suunniteltu yksikkökoordinaatteihin ja skaalattu
   `WS`=1,75. Luolasto on erillinen tila kohdassa `DUN` (pelaaja siellä kun `P.inDun`).
-- Kartta valitaan ennen skriptien latausta (`localStorage['hiidenmaa_map']`); vaihto = sivun uudelleenlataus.
+- Kartta ja seed valitaan ennen skriptien latausta (`localStorage['hiidenmaa_map']`, `['hiidenmaa_seed']`); vaihto = sivun uudelleenlataus (`switchMap`).
+  Satunnaisuus, joka riippuu maailmasta, kulkee `mulberry32(seedMix(…))`:n kautta. Seed-testi: `tools/seedtest.mjs`.
 - Tarinateksteihin ei kirjoiteta kiinteitä ilmansuuntia: käytä `dirIn`/`dirText`, koska paikat ovat eri kartoilla eri suunnissa.
 - Pelaaja: pituus 1,8 m, säde 0,38 m, kävely 4,6 m/s, juoksu 8 m/s, askelnousu `STEPUP` 0,55 m.
 - Rakennusosien mitat tulevat vakioista `G`, `WH`, `DOOR_W`, `DOOR_H`, `STEP_N` (`js/pieces.js`).
@@ -129,7 +130,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 
 - Tallennus: 5 maailmaa. Paikka 0 = `hiidenmaa_save_v1`, paikat 1–4 = `hiidenmaa_save_v1_1`…`_4`, lista `hiidenmaa_slots` (`slotMeta`,
   `curSlot`). Lisäksi valikossa on tallennuskoodi. Automaattitallennus 2 min välein.
-- Tallennusmuoto nyt `v` 11 (v2.65: `ft` = tarkat maanmuokkauslaikut). Kun tallennusmuoto muuttuu, nosta `serialize()`:n `v`-numeroa ja käsittele vanha versio
+- Tallennusmuoto nyt `v` 12 (v2.69: `seed`; v2.65: `ft` = tarkat maanmuokkauslaikut). Kun tallennusmuoto muuttuu, nosta `serialize()`:n `v`-numeroa ja käsittele vanha versio
   `loadData()`:ssa. Kirjaa muutos kehitysmuistioon.
 
 ## Testaus

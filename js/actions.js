@@ -229,9 +229,9 @@ function drink(s){const d=ITEMS[s.id],p=d.potion;
   burst(P.pos.x,P.pos.y+1.2,P.pos.z,new THREE.Color(d.c).getHex(),10,2);
   s.n--;if(s.n<=0)inv[inv.indexOf(s)]=null;invDirty=true;sfx('eat',1.5,.8);plSnd('kaytto','juominen');msg(`Joit: ${d.n}`,'loot');}
 // v1.20 (lista 2, kohta 12): perusterveys kasvaa tasoilla 2–5: 60 / 70 / 80 / 90 / 100 (+ saavutukset ja voima päälle)
-function lvlHp(){return Math.min(4,Math.max(0,lvlInfo().L-1))*10;}
+function lvlHp(){return lvlBon().hp;}   // v2.70 tasopalkinnot (progress.js LVL_REW)
 function maxHp(){return 60+lvlHp()+(P.buffs.voima?15:0)+BON.hp;}
-function maxStam(){return 100+(P.buffs.voima?25:0)+BON.stam;}
+function maxStam(){return 100+(P.buffs.voima?25:0)+BON.stam+lvlBon().stam;}
 
 /* ---------------- INTERACTION ---------------- */
 let lookTarget=null;
