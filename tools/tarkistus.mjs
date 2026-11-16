@@ -579,6 +579,13 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const b=/SMELT_DARK/.test(updateStations.toString())&&SMELT_DARK.color.getHex()<0x202020;
     const c=SCARY_MISS===2&&SCARY_CH===.1&&/SCARY_MISS\?1:SCARY_CH/.test(nightRoll.toString())&&/\(flags\.missN\|0\)\+1/.test(nightRoll.toString());
     return a&&b&&c||`virhe ${a}${b}${c}`;});
+  t('v2.85 kilven pito kuluttaa kestävyyttä 1/s (ei palaudu pidon aikana), 0:ssa kilpi laskeutuu + ilmoitus kerran, uudelleen vasta 20 kestävyydellä',()=>{
+    const g=window.__game,sv=[state,mouseR,P.stam,P.shTired,P.atk],om=msg;let msgs=0,r;msg=(t)=>{if(/uupunut/.test(t))msgs++;};
+    try{state='play';P.atk=null;for(const m of [...mobs])mobRemove(m);P.stam=50;P.shTired=false;mouseR=true;for(let i=0;i<60;i++)g.update(1/30);const s1=P.stam;   // 2 s pitoa
+      const a=Math.abs(50-s1-2)<.5&&P.blocking;P.stam=1.5;for(let i=0;i<60;i++)g.update(1/30);const b=!P.blocking&&P.shTired&&msgs===1;
+      for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
+      r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
+    finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;

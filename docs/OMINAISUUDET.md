@@ -631,6 +631,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.85 kilpi:** torjunnan pito kuluttaa kestävyyttä 1/s (ei palaudu pidon aikana). Kun kestävyys loppuu, kilpi laskeutuu ja tulee ilmoitus; uudelleen nostettavissa, kun kestävyyttä on 20.
 - **v2.84 tulen ääni:** nuotiot, grillinuotiot, käynnissä oleva sulatusuuni, soihdut ja luolien liekit rätisevät (palamisääni); enintään kaksi lähintä soi kerralla, nuotio kovimmin. Sammuneen sulatusuunin suu on musta.
 - **v2.84 pelottavat eläimet** (hiidenkarhu, hiidenhirvi, kalmasusi): jos et ole nukkunut sängyssä kahteen yöhön, yksi tulee varmasti seuraavana yönä; muuten 10 % todennäköisyys yössä.
 - **v2.83 kodin lämpö:** toimii myös seinän vieressä ja pienessä 1×1-mökissä; yksittäinen tarkistus ei enää hiivuta; Lämmin koti estää kylmettymisen ja kuivattaa kuten nuotio; lämmönlähde lasketaan, kun sen ja pelaajan välissä ei ole seinää.

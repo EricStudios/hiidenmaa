@@ -16,6 +16,7 @@ function ladderReach(p,pos,zc){const a=p.rot*Math.PI/4,tx=p.x+zc*Math.sin(a),tz=
 const _qh=new THREE.Quaternion(),_qf=new THREE.Quaternion(),_qd=new THREE.Quaternion(),_qt=new THREE.Quaternion(),_eb=new THREE.Euler();
 let torchFl=null,torchBarT=0,torchIgn=0,shDark=0;const torchPh=[Math.random()*TAU,Math.random()*TAU];
 const OVER_STAM=5;   // v2.67 ylikuorman kestävyyskulutus (/s)
+const SHIELD_STAM=1,SHIELD_REST=20;   // v2.85 kilven pito 1/s, uupuneena nosto vasta 20 kestävyydellä
 function updatePlayer(dt){
   if(P.dead)return;updatePlayerBurn(dt);if(P.dead)return;
   P.invul=Math.max(0,P.invul-dt);P.stagger=Math.max(0,P.stagger-dt);P.hurtFlash=Math.max(0,P.hurtFlash-dt);
@@ -24,6 +25,7 @@ function updatePlayer(dt){
   let mx=0,mz=0;if(state==='play'&&P.stagger<=0){if(kd('fwd'))mx+=1;if(kd('back'))mx-=1;if(kd('right'))mz+=1;if(kd('left'))mz-=1;}
   let dx=fwd.x*mx+right.x*mz,dz=fwd.z*mx+right.z*mz;const dl=Math.hypot(dx,dz);if(dl>0){dx/=dl;dz/=dl;}
   P.blocking=state==='play'&&mouseR&&w.cat!=='hammer'&&w.cat!=='bow'&&w.cat!=='shovel'&&P.stam>0&&!P.atk;
+  if(P.shTired){if(P.stam>=SHIELD_REST)P.shTired=false;else P.blocking=false;}   // v2.85 uupunut: kilpeä ei voi nostaa ennen kuin kestävyyttä on SHIELD_REST
   // v1.39 (lista 4, kohta 18): rikkinäisellä kilvellä ei voi torjua (kilpi on selässä kunnes ehjä)
   {const sh0=equipped('shield');if(P.blocking&&sh0&&sh0.shBrk!=null&&!shieldOk(sh0)){P.blocking=false;if(playTime-(P.shMsgT||-9)>1.5){P.shMsgT=playTime;const r=Math.max(0,SHIELD_FIX-(playTime-sh0.shBrk));msg(`Kilpi on rikki (${Math.floor(r/60)}:${String(Math.floor(r%60)).padStart(2,'0')})`,'warn');}}}
   const armor=equipped('armor');
@@ -53,6 +55,9 @@ function updatePlayer(dt){
    else{P.underT=0;P.drownT=Math.max(0,(P.drownT||0)-dt*2);}}
   // stamina regen
   if(over&&!P.dead){P.stam=Math.max(0,P.stam-OVER_STAM*dt);P.stamDelay=Math.max(P.stamDelay,.3);}   /* v2.67 ylikuorma: kestävyys laskee 5/s ja pysyy 0:ssa, ei palaudu ennen kuin kuorma on alle rajan */
+  /* v2.85 (käyttäjä) KILVEN PITO kuluttaa kestävyyttä SHIELD_STAM 1/s eikä kestävyys palaudu pidon aikana. Kestävyys 0 → kilpi laskeutuu, ilmoitus
+     kerran ("uupunut, kilpi on raskas"); uudelleen vasta, kun kestävyyttä on SHIELD_REST 20 (P.shTired). */
+  if(P.blocking&&!devOn('stam')&&!P.buffs.sisu){P.stam-=SHIELD_STAM*dt;P.stamDelay=Math.max(P.stamDelay,.4);if(P.stam<=0){P.stam=0;P.blocking=false;P.shTired=true;msg('Olet uupunut – kilpi on liian raskas pidettäväksi.','warn');}}
   P.stamDelay-=dt;if(P.stamDelay<=0&&!P.swUp){let r=22*P.fx.stamRegen*(P.swim?.25:1);P.stam=Math.min(maxStam(),P.stam+r*dt);}
   if(P.blocking&&P.stam<=0)P.blocking=false;
   P.stam=Math.max(0,P.stam);if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu
