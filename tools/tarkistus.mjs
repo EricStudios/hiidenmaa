@@ -573,6 +573,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     let c=true;if(actx){sndBus(actx);const st=state;state='paused';gameSndTick();const off=SBUS.on===false;state='play';gameSndTick();c=off&&SBUS.on===true;state=st;}
     const d=!!PIECES.kiviaita&&PIECES.kiviaita.base==='aita'&&PIECES.kiviaita.stone&&!!PIECES.kivisoihtu&&PIECES.kivisoihtu.base==='soihtuteline'&&isTorch('kivisoihtu')&&isTorch('seinasoihtu')&&!isTorch('aita')&&pieceBoxes('kivisoihtu').length>0&&PIECES.kiviarkku.store===PIECES.arkku.store+2&&PIECES.kivitynnyri.store===PIECES.tynnyri.store+2;
     return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
+  t('v2.84 tulen ääni valonlähteille (palaminen, enintään 2, nuotio kovin), sammuneen sulatusuunin suu musta, pelottavat: 2 yötä valvottu = varmasti, muuten 10 %',()=>{
+    const a=FIRE_MAX===2&&FIRE_V.nuotio>=Math.max(FIRE_V.grilli,FIRE_V.sulatin,FIRE_V.soihtu)&&fireKind('nuotio')==='nuotio'&&fireKind('kivisoihtu')==='soihtu'&&fireKind('seinasoihtu')==='soihtu'&&fireKind('sulatin')==='sulatin'&&fireKind('seina')===null
+      &&/fireSndTick\(dt\)/.test(tgTick.toString())&&/v\.loop&&!v\.stat/.test(tgTick.toString())&&/'palaminen','yhteiset'/.test(fireSndTick.toString());
+    const b=/SMELT_DARK/.test(updateStations.toString())&&SMELT_DARK.color.getHex()<0x202020;
+    const c=SCARY_MISS===2&&SCARY_CH===.1&&/SCARY_MISS\?1:SCARY_CH/.test(nightRoll.toString())&&/\(flags\.missN\|0\)\+1/.test(nightRoll.toString());
+    return a&&b&&c||`virhe ${a}${b}${c}`;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;

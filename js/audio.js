@@ -308,9 +308,22 @@ function tgStep(m,g,d,spd){const sf=tgSurface(m,g),run=spd>(m.def.walk||1.5)*1.4
   if(!m.dun&&playTime-(m.puT??-9)>=2&&plBush(m.pos.x,m.pos.z,(m.def.r||.5)*.6)){m.puT=playTime;tgSnd(m,'kahina',{g:'yhteiset',p:tgSize(m),v:.8});}   // v2.25 pensaan läpi (2 s välein)   // v2.21: hiljempaa (0,8 → 0,45), enintään 2 s välein
   if(run&&!m.dun&&TG_RUSTLE[biomeHere(m.pos.x,m.pos.z)]&&Math.random()<.35&&playTime-(m.khT??-9)>.7){m.khT=playTime;tgSnd(m,'kahina',{g:'yhteiset',p:tgSize(m),v:.8});}
   if(TG_BOSS.has(g)&&d<15)shake(.12*(1-d/15));}
-function tgTick(dt){if(!CRE.ok||state!=='play')return;
+/* v2.84 TULEN ÄÄNI VALONLÄHTEILLE (käyttäjä): nuotio, grillinuotio, käynnissä oleva sulatusuuni, soihdut (seisova, kivinen pylväs, seinäsoihtu)
+   ja Hautakummun/ulottuvuuksien liekit (FLAMES, sama tila curDim) soittavat olentojen palamisäänen (t/yhteiset/palaminen) 3D-silmukkana. Enintään FIRE_MAX 2 yhtä aikaa: lähimmät
+   (etäisyys / √voimakkuus), kuuluvuus FIRE_R. Nuotio kovin (FIRE_V). Valinta 0,5 s välein; poistuva lähde häipyy (tgStop). */
+const FIRE_MAX=2,FIRE_V={nuotio:.9,grilli:.8,sulatin:.55,soihtu:.35,liekki:.35},FIRE_R={nuotio:24,grilli:22,sulatin:16,soihtu:12,liekki:12},FSND={t:0,v:[]};
+function fireKind(t){return isFirePiece(t)?(t==='grilli'?'grilli':'nuotio'):isTorch(t)?'soihtu':t==='sulatin'?'sulatin':null;}
+function fireSndTick(dt){FSND.t-=dt;if(FSND.t>0)return;FSND.t=.5;const C=[];
+  if(!P.inDun){for(const p of pieces){const k=fireKind(p.t);if(!k)continue;const on=k==='nuotio'||k==='grilli'?fireLit(p):!!(p.light&&p.light.on());if(!on)continue;
+      const d=Math.sqrt(dist2(p.x,p.z,P.pos.x,P.pos.z));if(d<FIRE_R[k]&&Math.abs((p.y||0)-P.pos.y)<12)C.push({key:p,x:p.x,y:(p.y||0)+(k==='soihtu'?1.4:.5),z:p.z,k,d,dun:false});}}
+  else if(typeof FLAMES!=='undefined'){const dm=curDim();for(const f of FLAMES){if(f.dim!==dm)continue;const d=Math.sqrt(dist2(f.x,f.z,P.pos.x,P.pos.z));if(d<FIRE_R.liekki)C.push({key:f,x:f.x,y:f.y,z:f.z,k:'liekki',d,dun:true,realm:P.realm||undefined});}}
+  C.sort((a,b)=>a.d/Math.sqrt(FIRE_V[a.k])-b.d/Math.sqrt(FIRE_V[b.k]));const sel=C.slice(0,FIRE_MAX);
+  for(const e of FSND.v.slice())if(!sel.some(c=>c.key===e.key)||!e.h.loop){tgStop(e.h);FSND.v.splice(FSND.v.indexOf(e),1);}
+  for(const c of sel){if(FSND.v.some(e=>e.key===c.key))continue;const pos={x:c.x,y:c.y,z:c.z},m={pos,dun:c.dun,realm:c.realm,type:'_tuli',def:{r:.5}};
+    const h=tgPlay(m,'palaminen','yhteiset',{loop:1,rnd:1,v:FIRE_V[c.k],p:c.k==='soihtu'||c.k==='liekki'?1.12:c.k==='sulatin'?.85:1,pos},false);if(h&&h.src){h.stat=1;FSND.v.push({key:c.key,h});}}}
+function tgTick(dt){if(!CRE.ok||state!=='play')return;fireSndTick(dt);
   for(const v of TGV.v.slice()){const m=v.m;if(m&&!creSpaceOk(m)){tgStop(v);continue;}   // v2.58
-    if(v.loop&&(!mobs.includes(m)||(m.dead&&v.ev!=='palaminen'))){tgStop(v);continue;}if(v.fixed)continue;crePos(v.pn,m.pos.x,m.pos.y+.3,m.pos.z);if(actx)creDistFx(v,Math.sqrt(dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)));}
+    if(v.loop&&!v.stat&&(!mobs.includes(m)||(m.dead&&v.ev!=='palaminen'))){tgStop(v);continue;}if(v.fixed)continue;crePos(v.pn,m.pos.x,m.pos.y+.3,m.pos.z);if(actx)creDistFx(v,Math.sqrt(dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)));}
   const C=[];
   for(const m of mobs){const g=TG[m.type];if(!g||m.menu||!creSpaceOk(m))continue;const d2=dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z);
     // palaminen: rätinä silmukkana niin kauan kuin olento palaa (myös tuhkaksi palaessa 2 s)

@@ -631,6 +631,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.84 tulen ääni:** nuotiot, grillinuotiot, käynnissä oleva sulatusuuni, soihdut ja luolien liekit rätisevät (palamisääni); enintään kaksi lähintä soi kerralla, nuotio kovimmin. Sammuneen sulatusuunin suu on musta.
+- **v2.84 pelottavat eläimet** (hiidenkarhu, hiidenhirvi, kalmasusi): jos et ole nukkunut sängyssä kahteen yöhön, yksi tulee varmasti seuraavana yönä; muuten 10 % todennäköisyys yössä.
 - **v2.83 kodin lämpö:** toimii myös seinän vieressä ja pienessä 1×1-mökissä; yksittäinen tarkistus ei enää hiivuta; Lämmin koti estää kylmettymisen ja kuivattaa kuten nuotio; lämmönlähde lasketaan, kun sen ja pelaajan välissä ei ole seinää.
 - **v2.83 valikko:** päävalikossa ja tauolla pelin äänet häipyvät ja palaavat jatkettaessa (silmukat jatkuvat samasta kohdasta).
 - **v2.83 kiviversiot:** Kivimuuri (paaluaidan kiviversio) ja Kivinen soihtupylväs (seisovan soihdun kiviversio) Kivi-välilehdellä. Kiviarkussa 18 ja kivitynnyrissä 14 paikkaa (puuversioissa 16 ja 12); laajennuksia 2 × +8 → enintään 34 / 30.

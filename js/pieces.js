@@ -81,6 +81,7 @@ const PIECES={
   kiviharjakatto:{n:'Kiviharjakatto',req:{kivi:5},hp:340,snap:'cell',cat:'kivikatot',roof:1,base:'harjakatto',stone:1},
 };
 const bt=t=>PIECES[t]&&PIECES[t].base||t;
+const SMELT_DARK=new THREE.MeshStandardMaterial({color:0x0c0908,roughness:1});   // v2.84 sammuneen sulatusuunin tulisuu
 const isTorch=t=>bt(t)==='soihtuteline'||t==='seinasoihtu';   // v2.83 seisova soihtu, kivinen soihtupylväs ja seinäsoihtu
 const DET=m=>{m.userData.detail=true;return m;}; // yksityiskohtameshit (asetus: rakennusten yksityiskohdat)
 const isFirePiece=t=>t==='nuotio'||t==='grilli';
