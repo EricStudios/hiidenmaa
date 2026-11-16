@@ -39,7 +39,7 @@ function loadData(s){
   else if(q.inDun){P.inDun=false;const L=LOC.barrow;P.pos.set(L.x+12.5,terrainH(L.x+12.5,L.z),L.z);}
   if(oldWorld){P.pos.set(LOC.spawn.x,terrainH(LOC.spawn.x,LOC.spawn.z),LOC.spawn.z);P.spawn=null;}
   if(s.cam){camYaw=s.cam[0];camPitch=s.cam[1];}
-  P.packLv=q.packLv||0;migrateProgress();inv=(s.inv||[]).slice(0,invN());while(inv.length<invN())inv.push(null);
+  P.packLv=q.packLv||0;P.lifeStart=playTime;P.safe=null;migrateProgress();inv=(s.inv||[]).slice(0,invN());while(inv.length<invN())inv.push(null);
   if(!oldWorld){
     applyTerra(s.terra||[]);applyMud(s.mud||[]);ftApply(s.ft||[]);   // v2.65 tarkat laikut (vanhassa tallennuksessa ei ole)
     for(const p of s.pieces||[])addPiece(p.t,p.x,p.y,p.z,(s.v||1)<7?p.r*2:p.r,p.hp,p.d,p.f||0);
@@ -67,7 +67,7 @@ function resetWorld(){endPlayerDeath();for(const s of [...splats]){scene.remove(
 }
 function newGame(){
   resetWorld();playTime=0;dayT=.28;dayN=1;weather={cur:'selkea',until:240};flags={disc:{},runes:{},ruins:{},sarc:[0,0,0],boss:0,goal:0,won:0,seen:{},xp:0,cnt:{},ach:{},first:{},gv:3,qv:2,bio:{meadow:1}};zoneQuiet=true;
-  P.packLv=0;recalcBon();inv=new Array(32).fill(null);P.pos.set(LOC.spawn.x,terrainH(LOC.spawn.x,LOC.spawn.z),LOC.spawn.z);P.hp=maxHp();P.stam=100;P.hunger=80;P.underT=P.drownT=0;P.subm=false;P.buffs={};P.spawn=null;P.deaths=0;P.kills=0;P.inDun=false;P.realm=null;P.spawnProt=0;P.dead=false;P.heal=0;P.wetT=0;
+  P.packLv=0;P.lifeStart=0;P.safe=null;recalcBon();inv=new Array(32).fill(null);P.pos.set(LOC.spawn.x,terrainH(LOC.spawn.x,LOC.spawn.z),LOC.spawn.z);P.hp=maxHp();P.stam=100;P.hunger=80;P.underT=P.drownT=0;P.subm=false;P.buffs={};P.spawn=null;P.deaths=0;P.kills=0;P.inDun=false;P.realm=null;P.spawnProt=0;P.dead=false;P.heal=0;P.wetT=0;
   camYaw=Math.PI*1.1;camPitch=.3;P.yaw=camYaw+Math.PI;fig.g.rotation.x=0;resetFog();invDirty=true;updateGear();goalShown=-1;planLoot(false);
   // start with a few mobs around
   ensureCamps();syncChests();   // v0.99 hylätyt leirit

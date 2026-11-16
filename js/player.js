@@ -81,9 +81,10 @@ function updatePlayer(dt){
   P.pos.y+=P.vy*dt;
   const ceil=nc?1e9:ceilingAt(P.pos.x,P.pos.z,.38,feet+1.8);if(P.vy>0&&P.pos.y+1.8>ceil){P.pos.y=ceil-1.8;P.vy=0;}
   const g=nc?(P.inDun?DUN.y:terrainH(P.pos.x,P.pos.z)):groundAt(P.pos.x,P.pos.z,.38,feet);
-  if(P.pos.y<=g+.02&&P.vy<=0){if(!P.onGround&&P.vy<-4)P.landT=.25;if(!P.onGround&&P.vy<-15&&!P.flying){const fd=(-P.vy-15)*6;P.hp-=fd;floatText('-'+Math.round(fd),P.pos.x,P.pos.y+2,P.pos.z,'#e0614f');if(P.hp<=0)playerDie();}P.pos.y=g;P.vy=0;P.onGround=true;}
+  if(P.pos.y<=g+.02&&P.vy<=0){if(!P.onGround&&P.vy<-4)P.landT=.25;if(!P.onGround&&P.vy<-15&&!P.flying){const fd=(-P.vy-15)*6;P.hp-=fd;P.fallT=playTime;floatText('-'+Math.round(fd),P.pos.x,P.pos.y+2,P.pos.z,'#e0614f');if(P.hp<=0)playerDie();}P.pos.y=g;P.vy=0;P.onGround=true;}
   else if(P.pos.y>g+.3)P.onGround=false;
   if(P.pos.y<g&&P.vy<=0)P.pos.y=g;
+  voidTick(dt);if(P.dead)return;   // v2.73 tyhjyys
   // world bounds
   if(!P.inDun){const R=Math.hypot(P.pos.x,P.pos.z),RM=seaBorder(P.pos.x,P.pos.z);if(R>RM){P.pos.x*=RM/R;P.pos.z*=RM/R;if(playTime-(P.edgeMsg||-99)>12){P.edgeMsg=playTime;msg('Avomeri on liian vaarallinen – käänny takaisin.','warn');}}}   // v2.18: raja 3× kauempana rannasta
   // facing
@@ -312,9 +313,20 @@ function bowAimFig(F,hm,k,yaw,o){const b=hm.userData.bow;F.g.updateMatrixWorld(t
   _gp.set(0,0,b.ar.position.z+.02);hm.localToWorld(_gp);armIK(F.armR,F.elbowR,_gp,k,_poleBow);}
 function bowAim(hm,k){bowAimFig(fig,hm,k,P.yaw,fig.g.position);}
 
+/* v2.73 TYHJYYS: maailman alle (maasto/merenpohja − 6 m) tai ulottuvuuden lattian alle (DUN.y − 4 m) pudonnut kuolee, kun on ollut siellä 1 s
+   (lyhyet bugit eivät tapa). Samalla muistetaan viimeinen turvallinen kohta (P.safe) hautakasalle: maassa tai lattialla (ei laatikon, katon tai muurin
+   päällä), ei veden alla, ja 0,7 m ympäriltä vapaata (ei seinän sisässä). */
+const VOID_T=1,VOID_DUN=4,VOID_WORLD=6,SAFE_DT=.4;
+function voidTick(dt){if(P.flying||devOn('noclip')){P.voidT=0;return;}
+  const lim=P.inDun?DUN.y-VOID_DUN:Math.min(terrainH(P.pos.x,P.pos.z),SEA_FLOOR)-VOID_WORLD;
+  if(P.pos.y<lim){P.voidT=(P.voidT||0)+dt;if(P.voidT>=VOID_T&&!P.dead){P.voidDeath=true;P.hp=0;playerDie();}return;}
+  P.voidT=0;P.safeT=(P.safeT||0)-dt;if(P.safeT>0||!P.onGround||P.swim)return;P.safeT=SAFE_DT;
+  const base=P.inDun?DUN.y:terrainH(P.pos.x,P.pos.z);if(Math.abs(P.pos.y-base)>.35||(!P.inDun&&base<water.position.y+.2))return;
+  for(let a=0;a<6;a++){const x=P.pos.x+Math.cos(a*1.047)*.7,z=P.pos.z+Math.sin(a*1.047)*.7;if(pointBlocked(x,P.pos.y+1,z))return;}
+  P.safe={x:P.pos.x,y:P.pos.y,z:P.pos.z,dim:curDim()};}
 function lerpAngle(a,b,t){let d=((b-a+Math.PI)%TAU+TAU)%TAU-Math.PI;return a+d*t;}
 function playerDie(){if(state==='paused'||state==='intro'){P.hp=Math.max(P.hp,1);return;}
-  if(devOn('god')){P.hp=Math.max(1,P.hp);return;}   // DEV: kuolemattomuus
+  if(devOn('god')&&!P.voidDeath){P.hp=Math.max(1,P.hp);return;}   // DEV: kuolemattomuus (tyhjyys tappaa silti)
   if(P.dead)return;P.dead=true;P.deaths++;P.hp=0;sfx('die');
   /* v1.81: pomokuolemat. Tappaja = lähin elossa oleva pomo ≤ 45 m (sama tila: maailma/ulottuvuus). flags.bossDeaths[tyyppi] tallentuu pelin
      mukana; 3. kuolemasta alkaen se pomo ei enää palauta terveyttään (bossTired, ai.js). */
@@ -322,13 +334,50 @@ function playerDie(){if(state==='paused'||state==='intro'){P.hp=Math.max(P.hp,1)
    if(kb){const B=flags.bossDeaths||(flags.bossDeaths={});B[kb.type]=(B[kb.type]||0)+1;P.bossKill={n:kb.def.n,c:B[kb.type],t:kb.type,mn:bossMercyN(kb.type)};}else P.bossKill=null;}
   const items=inv.filter(Boolean).map(s=>({id:s.id,n:s.n,q:s.q}));inv=new Array(invN()).fill(null);invDirty=true;updateGear();setBuildSel(null);
   const wd=!P.inDun&&(P.swim||P.pos.y+1.62<water.position.y);P.waterDeath=wd;   // v2.18: hukkuminen / kuolema vedessä
-  if(items.length){let gx=P.pos.x,gz=P.pos.z,y=P.inDun?DUN.y:terrainH(gx,gz);if(!P.inDun&&y<.2){const sp=shorePoint(gx,gz);if(sp){gx=sp.x;gz=sp.z;y=sp.y;}}makeGrave({x:gx,y,z:gz,items});}
-  startPlayerDeath();   // v1.37: kaatumis-/tuhka-animaatio (effects.js)
-  /* v1.70: kuolinsyyn vihje kuolinruudussa (nyt: kaatuva puu) */
+  const cause=deathCauseOf(wd);
+  /* v2.73 hautakasa ei näy kuolinkamerassa (g.hid, näkyviin herätessä). Tyhjyydessä kasa viimeiseen turvalliseen kohtaan (P.safe: lattialla/maassa, ei seinän
+     sisällä eikä laatikon päällä); jos sellaista ei ole tässä tilassa, ulottuvuuden sisäänkäynnille tai aloituspaikalle. */
+  if(items.length){let gx=P.pos.x,gz=P.pos.z,y=P.inDun?DUN.y:terrainH(gx,gz),dim=curDim();
+    if(cause.k==='void'){const S=P.safe&&P.safe.dim===dim?P.safe:null;if(S){gx=S.x;gz=S.z;y=S.y;}else if(P.inDun&&P.realm&&typeof ensureRealm==='function'){const R=ensureRealm(P.realm);gx=R.entry.x+.6;gz=R.entry.z;y=DUN.y;}else{gx=LOC.spawn.x;gz=LOC.spawn.z;y=terrainH(gx,gz);dim='world';}}
+    else if(!P.inDun&&y<.2){const sp=shorePoint(gx,gz);if(sp){gx=sp.x;gz=sp.z;y=sp.y;}}
+    makeGrave({x:gx,y,z:gz,items,dim,hid:true});P.graveAt={x:gx,z:gz,dim};}else P.graveAt=null;
+  startPlayerDeath(cause.k);   // v1.37 / v2.73: kaatuminen (effects.js)
   const bk=P.bossKill,bTip=bk?(bk.c>=bk.mn?`<b>${bk.n} on voittanut sinut ${bk.c} kertaa.</b> Se ei enää palauta terveyttään – jatka siitä, mihin jäit!`:`<b>${bk.n} kaatoi sinut (${bk.c}/${bk.mn}).</b> Jos kaadut sille ${bk.mn} kertaa, se ei enää palauta terveyttään.`):'';
-  const tip=bTip||{drown:'<b>Hukuit.</b> Syvässä vedessä pidä välilyönti pohjassa – se pitää sinut pinnalla, mutta kuluttaa kestävyyttä. Ilman sitä vajoat, ja veden alla terveys alkaa laskea sekunnin kuluttua. Tavarasi ovat hautakasassa lähimmällä rannalla.',tree:'<b>Puu kaatui päällesi.</b> Ole ensi kerralla varovainen: kun puu alkaa narista ja kallistua, astu nopeasti sivuun – älä jää sen kaatumissuuntaan. Myös myrskytuuli ja pedot voivat kaataa puita.'}[P.deathCause];P.bossKill=null;P.deathCause=null;
-  closeAllForDeath();setTimeout(()=>{closeAllForDeath();if(!P.dead)return;state='dead';releaseLock();const dt=$('#deadTip');if(dt){dt.hidden=!tip;dt.innerHTML=tip||'';}$('#deadS').hidden=false;$('#hud').hidden=true;},wd?3800:1400);   // v2.18: vedessä veltto vajoaminen ja ruudun tummuminen ennen kuolinruutua
+  P.bossKill=null;P.deathCause=null;P.voidDeath=false;
+  closeAllForDeath();setTimeout(()=>{closeAllForDeath();if(!P.dead)return;state='dead';releaseLock();deathScreen(cause,bTip,items.length>0);$('#deadS').hidden=false;$('#hud').hidden=true;},wd?3800:cause.k==='void'?1700:3200);   // v2.18 vedessä vajoaminen; v2.73 kaatuminen ja kamera ehtivät näkyä
 }
+/* v2.73 KUOLINSYY: tyhjyys, tuli, kaatuva puu, putoaminen, viimeksi osunut olento (≤ 4 s, mobHurtP) tai lähin vihamielinen ≤ 12 m (pomojen iskut,
+   ammukset), hukkuminen, nälkä, muu. */
+function deathCauseOf(wd){
+  if(P.voidDeath)return {k:'void'};
+  if(P.ashDeath||playTime-(P.lastFire||-99)<1.2)return {k:'fire'};
+  if(P.deathCause==='tree')return {k:'tree'};
+  if(playTime-(P.fallT??-99)<.3)return {k:'fall'};
+  const lm=P.lastMob&&playTime-P.lastMob.t<4?P.lastMob:null;if(lm)return {k:lm.boss?'boss':'mob',n:lm.n,type:lm.type};
+  if(wd)return {k:'drown'};
+  {let best=null,bd=12*12;for(const m of mobs){if(m.dead||!!m.dun!==!!P.inDun||!(m.def.ai==='hostile'||m.def.ai==='boss'||m.def.ai==='rboss'||m.angry))continue;const d=dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z);if(d<bd){bd=d;best=m;}}
+   if(best)return {k:best.def.ai==='boss'||best.def.ai==='rboss'?'boss':'mob',n:best.def.n,type:best.type};}
+  if(P.hunger<=0)return {k:'hunger'};
+  return {k:'hit'};}
+const WEAK_N={blunt:'murskaavat aseet (nuija)',pierce:'pistävät aseet (keihäs, nuolet)',slash:'viiltävät aseet (miekka, kirves)',fire:'tuli (tulinuolet)'};
+function mobTip(type){const d=MOBDEF[type];if(!d)return '';const w=d.weak||{},hi=Object.keys(w).filter(k=>w[k]>1&&WEAK_N[k]),lo=Object.keys(w).filter(k=>w[k]<1&&WEAK_N[k]);
+  return (hi.length?`${d.n} on heikko: ${hi.map(k=>WEAK_N[k]).join(', ')}. `:'')+(lo.length?`Se kestää hyvin: ${lo.map(k=>WEAK_N[k]).join(', ')}. `:'');}
+const DEATH_INFO={
+  mob:{t:'Kaaduit taistelussa',c:o=>`${o.n} kaatoi sinut.`,tip:o=>`${mobTip(o.type)}Torju iskut kilvellä (hiiren oikea), peräänny ajoissa, kun terveys vähenee, ja syö ennen taistelua – parempi panssari vähentää vahinkoa paljon.`},
+  boss:{t:'Kaaduit taistelussa',c:o=>`${o.n} oli tällä kertaa vahvempi.`,tip:o=>`${mobTip(o.type)}Opettele iskujen ajoitus: väistä isoja lyöntejä sivuun ja torju pienet. Ota mukaan ruokaa ja parannusjuomia, ja käytä parasta varustusta.`},
+  drown:{t:'Hukuit',c:'Happi loppui veden alla.',tip:()=>'Syvässä vedessä paina välilyöntiä – jokainen veto nostaa pintaan, mutta kuluttaa kestävyyttä. Veden alla terveys alkaa laskea sekunnin kuluttua. Ui rantaan ennen kuin kestävyys loppuu.'},
+  fire:{t:'Paloit',c:'Liekit nielaisivat sinut.',tip:()=>'Kun syttyt, juokse veteen tai sateeseen – ne sammuttavat liekit heti. Älä seiso nuotion päällä, ja pidä etäisyyttä palaviin olentoihin.'},
+  fall:{t:'Putosit',c:'Putosit liian korkealta.',tip:()=>'Yli noin 11 metrin pudotus satuttaa, ja mitä korkeammalta putoat, sitä enemmän. Laskeudu rinteitä tai tikkaita pitkin – veteen putoaminen ei satuta.'},
+  tree:{t:'Puu kaatui päällesi',c:'Kaatuva runko osui suoraan sinuun.',tip:()=>'Kun puu alkaa narista ja kallistua, astu nopeasti sivuun – älä jää sen kaatumissuuntaan. Myös myrskytuuli ja pedot voivat kaataa puita.'},
+  hunger:{t:'Nälkä vei voimasi',c:'Kylläisyys loppui, ja terveys hupeni vähitellen.',tip:()=>'Syö ajoissa: marjat ja sienet auttavat hetken, kypsennetty liha ja varras pitkään. Kylläisyys näkyy terveyden alla – syö, ennen kuin se loppuu.'},
+  void:{t:'Katosit tyhjyyteen',c:'Putosit maailman reunan yli pimeyteen.',tip:()=>'Tyhjyys nielee kaiken, mikä sinne putoaa – tavarasi kuitenkin jäivät hautakasaan kohtaan, jossa seisoit viimeksi tukevasti. Jos huomaat jääväsi seinän sisään, peräänny samaa reittiä takaisin.'},
+  hit:{t:'Kaaduit',c:'Vammat kävivät liian raskaiksi.',tip:()=>'Torju kilvellä (hiiren oikea) ja pidä terveys yllä syömällä. Lepää tulen ääressä katon alla, niin saat Levännyt-tilan.'}};
+const fmtLife=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h} h ${m} min`:m?`${m} min ${s%60} s`:`${s} s`;};
+function deathScreen(cause,bTip,hadItems){const I=DEATH_INFO[cause.k]||DEATH_INFO.hit;
+  $('#deadT').textContent=I.t;$('#deadC').textContent=typeof I.c==='function'?I.c(cause):I.c;
+  const g=P.graveAt;$('#deadG').textContent=!hadItems?'Sinulla ei ollut tavaroita mukana.':cause.k==='void'?'Tavarasi ovat hautakasassa kohdassa, jossa seisoit viimeksi tukevasti. Kasa näkyy kartalla.':cause.k==='drown'?'Tavarasi ovat hautakasassa lähimmällä rannalla. Kasa näkyy kartalla.':'Tavarasi jäivät hautakasaan kuolinpaikalle. Hae ne takaisin – kasa näkyy kartalla.';
+  const dt=$('#deadTip');if(dt){dt.hidden=false;dt.innerHTML=(bTip?bTip+'<br>':'')+I.tip(cause);}   // deadTip: vinkkilaatikko (v1.70 → v2.73)
+  const life=playTime-(P.lifeStart??0);$('#deadStats').innerHTML=`<span><b>${fmtLife(life)}</b>elossa</span><span><b>${dayN}</b>päivä</span><span><b>${P.deaths}</b>${P.deaths===1?'kuolema':'kuolemaa'}</span><span><b>${P.kills||0}</b>kaatoa</span>`;}
 /* v2.18: lähin rantapiste (maata vähintään 0,5 m vedenpinnan yläpuolella) hautakasalle, kun kuolee vedessä: renkaat 1,5 m välein ulospäin. */
 function shorePoint(x,z){for(let r=1.5;r<700;r+=1.5){const n=Math.max(10,Math.round(r*1.2));let best=null,bh=1e9;
     for(let i=0;i<n;i++){const a=i/n*TAU,px=x+Math.sin(a)*r,pz=z+Math.cos(a)*r,h=terrainH(px,pz);if(h>=.5&&h<bh&&Math.hypot(px,pz)<seaBorder(px,pz)){bh=h;best={x:px,y:h,z:pz};}}
@@ -337,13 +386,13 @@ function shorePoint(x,z){for(let r=1.5;r<700;r+=1.5){const n=Math.max(10,Math.ro
 function makeGrave(g){const m=new THREE.Group();m.add(bx(1,.5,1,mat(0x6a6862),0,.25,0),bx(.5,1.2,.2,mat(0x8f8d86),0,.9,-.3));
   const bm=new THREE.MeshBasicMaterial({color:0x8fffee,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide});
   const beam=new THREE.Mesh(new THREE.CylinderGeometry(.06,.3,8,8,1,true),bm);beam.position.y=4.4;m.add(beam);g.beam=beam;
-  g.dim=g.dim||curDim();m.position.set(g.x,g.y,g.z);scene.add(m);g.mesh=m;g.light={x:g.x,y:g.y+1.4,z:g.z,c:0x8fffee,i:1.1,dun:g.dim!=='world',on:()=>(g.dim||'world')===curDim()};lightSources.push(g.light);graves.push(g);}
+  g.dim=g.dim||curDim();m.position.set(g.x,g.y,g.z);m.visible=!g.hid;scene.add(m);g.mesh=m;g.light={x:g.x,y:g.y+1.4,z:g.z,c:0x8fffee,i:1.1,dun:g.dim!=='world',on:()=>!g.hid&&(g.dim||'world')===curDim()};   /* v2.73 hid: ei näy kuolinkamerassa */lightSources.push(g.light);graves.push(g);}
 function graveVanish(g){const m=g.mesh;removeGrave(g,true);let t=0;burst(g.x,g.y+.4,g.z,0x6a5a44,18,4);sfx('crumble',.8,.6);
   fx.push({obj:m,t:0,update:(f,dt)=>{t+=dt;m.position.y=g.y-t*.9;m.rotation.z=Math.sin(t*9)*.05*(1-t/1.6);if(Math.random()<dt*14)burst(g.x+(Math.random()-.5),g.y+.1,g.z+(Math.random()-.5),0x5a4a36,2,2);return t>1.6;}});}
 function removeGrave(g,keepMesh){if(!keepMesh)scene.remove(g.mesh);const i=graves.indexOf(g);if(i>=0)graves.splice(i,1);const j=lightSources.indexOf(g.light);if(j>=0)lightSources.splice(j,1);}
 // v0.80: kuollessa kaikki valikot (reppu, kartta, arkku, DEV, päävalikko, asetukset, näppäinikkuna) suljetaan – vain kuoleman ruutu jää.
 function closeAllForDeath(){if(openPanel)closePanels(false,true);if(state==='paused'||state==='ui')state='play';for(const id of ['#menu','#settings','#keyDlg'])if($(id))$(id).hidden=true;mouseL=mouseR=false;P.drawing=false;}
-function respawn(){if(!P.dead||state!=='dead')return;endPlayerDeath();
+function respawn(){if(!P.dead||state!=='dead')return;endPlayerDeath();for(const g of graves)if(g.hid){g.hid=false;if(g.mesh)g.mesh.visible=true;}P.lifeStart=playTime;P.voidT=0;P.lastMob=null;   /* v2.73 */
   $('#deadS').hidden=true;$('#hud').hidden=false;P.dead=false;P.kbx=P.kbz=0;P.underT=P.drownT=0;P.swim=P.subm=false;P.hp=maxHp()*.6;P.stam=maxStam();P.hunger=Math.max(P.hunger,40);P.buffs={};P.wetT=0;
   if(P.inDun){P.inDun=false;P.realm=null;for(const m of [...mobs])if(m.dun)mobRemove(m);}
   const bed=pieces.find(p=>p.t==='sanky'&&P.spawn&&p.x===P.spawn.x&&p.z===P.spawn.z);

@@ -6,7 +6,20 @@
 let shakeAmt=0;function shake(a){shakeAmt=Math.max(shakeAmt,a);}
 let camD=null,camTY=null; // pehmennetty kameraetäisyys ja kohteen korkeus
 const _camDir=new V3();   // v2.41: uudelleenkäytettävä suunta (ei uutta oliota joka ruutu)
+/* v2.73 KUOLINKAMERA: kaatumisen ajan (0,9 s) kamera pysyy paikallaan ja kääntyy kohti kehoa, sitten nousee hitaasti yläviistoon (3,2 m, 3,6 m
+   ylös; luolastossa matalammalle) ja kiertää 0,1 rad/s – keho ja leviävä verilammikko näkyvät. Este → kamera lähemmäs. Tyhjyydessä kamera jää paikalleen. */
+const _dcL=new THREE.Vector3();
+function deathCam(dt){const D=pDeath,c=D.c;
+  if(!D.cam){D.cam={a:Math.atan2(camera.position.x-c.x,camera.position.z-c.z),hd:Math.max(1.6,Math.hypot(camera.position.x-c.x,camera.position.z-c.z)),h:camera.position.y-c.y};_dcL.set(c.x,c.y,c.z);}
+  if(D.void){camera.lookAt(_dcL);return;}
+  const t=D.t,k=sstep(.9,4.5,t),C=D.cam,a=C.a+Math.max(0,t-.9)*.1;let hd=lerp(C.hd,3.2,k),h=lerp(C.h,P.inDun?2.2:3.6,k);
+  for(let i=0;i<10;i++){const x=c.x+Math.sin(a)*hd,y=c.y+h,z=c.z+Math.cos(a)*hd;if(!pointBlocked(x,y,z)&&(P.inDun||y>terrainH(x,z)+.4))break;hd=Math.max(.8,hd*.8);h=Math.max(.6,h*.85);}
+  camera.position.set(c.x+Math.sin(a)*hd,c.y+h,c.z+Math.cos(a)*hd);
+  if(!P.inDun){const th=terrainH(camera.position.x,camera.position.z)+.35;if(camera.position.y<th)camera.position.y=th;}
+  _dcL.lerp(_tmpV.set(c.x,c.y,c.z),Math.min(1,dt*4));camera.lookAt(_dcL);
+  camera.fov=lerp(camera.fov,65,dt*4);camera.updateProjectionMatrix();if(!D.ash||!D.pile)fig.g.visible=!(D.void&&t>1);}
 function updateCamera(dt){
+  if(typeof pDeath!=='undefined'&&pDeath&&!pDeath.water&&pDeath.c){deathCam(dt);return;}   // v2.73
   /* v2.18: kun pelaaja on kokonaan veden alla (P.subm), kamera liukuu pehmeästi lähimpään zoomiin (2,2 m) ja palaa, kun pää nousee pinnalle */
   P.uwZoomK=lerp(P.uwZoomK||0,P.subm&&!P.inDun?1:0,Math.min(1,dt*2.2));
   const aim=P.drawing;const dist=lerp(aim?2.4:camDist,2.2,P.uwZoomK);

@@ -251,7 +251,7 @@ function famStep(m,dt,dist){const F=m.fam,sow=F.sow;
   if(F.k==='root'&&!moving)headDown(m);   // v2.24: tonkiessa kärsä maahan asti
   animMob(m,dt);if(!moving||F.k==='nuzzle'&&m===sow)m.f.head.rotation.x+=hd;if(hop)m.f.g.position.y+=hop;return true;}
 // v2.16: olennon isku osuu pelaajaan → osumaääni (purema/kynsi/isku), vain jos vahinko meni läpi (ei torjuttu)
-function mobHurtP(m,dmg,x,z){const h=P.hp;hurtPlayer(dmg,x,z);if(P.hp<h||P.dead)tgHit(TG_HIT[m.type]||'isku',P.pos.x,P.pos.y+1.1,P.pos.z,clamp(tgSize(m),.85,1.15));}   // v2.22: osumat/-kansion kategoria
+function mobHurtP(m,dmg,x,z){const h=P.hp;P.lastMob={n:m.def.n,type:m.type,boss:m.def.ai==='boss'||m.def.ai==='rboss',t:playTime};hurtPlayer(dmg,x,z);   /* v2.73 kuolinsyy */if(P.hp<h||P.dead)tgHit(TG_HIT[m.type]||'isku',P.pos.x,P.pos.y+1.1,P.pos.z,clamp(tgSize(m),.85,1.15));}   // v2.22: osumat/-kansion kategoria
 /* v2.16 SYÖMINEN (TG_EAT, audio.js): rauhallinen eläin (ei vihainen, pelaaja yli 12 m, ei osumaa 10 s:iin) pysähtyy 20–50 s välein (55 %) syömään 3–6 s:
    pää alhaalla nyökkien, syömisääni lajin tavan mukaan (laidun, tonkiminen, rouskutus, nakerrus) – v2.23 silmukkana syömisen ajan. Pelaaja lähelle tai osuma keskeyttää. */
 function eatPlan(m,dt,dist){if(m.state!=='idle'||m.angry||m.fam||m.drink||m.born!==undefined||(dist<12&&!devOn('unseen'))||playTime-m.lastHit<10)return;
@@ -612,7 +612,7 @@ function updateStations(dt){
         D.t+=dt;if(D.job==='sand'){if(D.t>=GLASS_T){D.t=0;D.wood--;D.sand-=2;D.glass=(D.glass||0)+1;D.job=met?'met':'sand';}}
         else{const iron=D.ore<=0;if(D.t>=(iron?10:7)){D.t=0;D.wood--;if(iron){D.iore--;D.idone++;}else{D.ore--;D.done++;}D.job=sand?'sand':'met';}}}}
   }
-  for(const g of graves){const same=(g.dim||'world')===curDim(),near=same&&dist2(g.x,g.z,P.pos.x,P.pos.z)<50*50;g.mesh.visible=same;g.beam.visible=near;   // v1.33 (kohta 13): majakka myös ulottuvuuksissa, hauta näkyy vain omassa tilassaan
+  for(const g of graves){const same=(g.dim||'world')===curDim()&&!g.hid,near=same&&dist2(g.x,g.z,P.pos.x,P.pos.z)<50*50;g.mesh.visible=same;g.beam.visible=near;   /* v2.73 hid: piilossa kuolinkamerassa */   // v1.33 (kohta 13): majakka myös ulottuvuuksissa, hauta näkyy vain omassa tilassaan
     if(near)g.beam.material.opacity=.28+Math.sin(playTime*3)*.1;}
   for(let i=0;i<LIGHTS.length;i++){const l=LIGHTS[i];{const s=l.userData.src;if(s&&s.move)l.position.set(s.x,s.y,s.z);}   /* v1.23 liikkuvat valot (tulinuoli, palava mob) */
     const u=l.userData.fl||(l.userData.fl={cur:1,target:1,t:Math.random()*.2});{const s=l.userData.src;if(s&&s.fade!==false&&l.userData.base)l.userData.base=s.i*1.15;}l.intensity=!l.userData.base?0:l.userData.base*flick(u,dt)*(.95+Math.sin(playTime*(7+i*1.7)+i*3)*.05);}
