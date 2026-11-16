@@ -555,6 +555,8 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       &&itemRarity({id:'suurpaisti'})==='rare'&&itemRarity({id:'paisti'})==='unc'&&itemRarity({id:'pienpaisti'})==='com'&&!!RECIPE_BY.lihakeitto&&!!RECIPE_BY.juhla
       &&MOBDEF.janis.drops.some(d=>d[0]==='pienliha')&&MOBDEF.hirvi.drops.some(d=>d[0]==='suurliha')&&MOBDEF.karhu.drops.some(d=>d[0]==='suurliha')&&MOBDEF.peura.drops.some(d=>d[0]==='liha');
     return bow&&b&&c||`virhe jousi ${bow} ${b} ${c}`;});
+  t('v2.81 sääänet −60 % (sade, tihku, myrsky, tuuli, lumi, sumu, ukkonen, salama), tunnelma/luonto/vedenalainen ennallaan',()=>
+    WEATHER_K===.4&&Math.abs(AMB_V.sade-.32)<1e-9&&Math.abs(AMB_V.myrsky-.4)<1e-9&&Math.abs(AMB_V.tuuli-.28)<1e-9&&AMB_V.tunnelma===.75&&AMB_V.luonto===.35&&AMB_V.vedenalla===.8&&VOL_BASE.amb===.56||'arvot väärin');
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;

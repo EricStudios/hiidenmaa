@@ -631,6 +631,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.81:** sääänet (sade, myrsky, tuuli, lumi, sumu, ukkonen, salama) 60 % hiljempaa, jotta muut äänet kuuluvat.
 - **v2.80:** sydämen syke on yksi jatkuva silmukka (ei ala alusta), voimakkuus ja tahti muuttuvat pehmeästi, loppuu 3 s jälkeen 2,5 s häivytyksellä; tiedosto kokonaisena.
 - **v2.79:** susien ulvonta kuuluu yhtä kauas kuin muiden eläinten ääntely (36 m); kaukaista yöulvontaa ilman sutta ei enää ole. Sää- ja tunnelmaäänet 20 % hiljempaa.
 - **v2.76:** hengästys ei ala alusta: kun kestävyys palautuu, sama ääni hiljenee vähitellen (0 % täysi → 30 % hiljaa) ja voimistuu taas, jos kestävyys loppuu; loppuu vasta, kun kestävyys on ollut yli 30 % 4 s (häivytys 2,5 s, sen jälkeen vähintään 1 s tauko ennen uutta). Tiedosto toistuu kokonaisena (ei leikkausta).

@@ -480,7 +480,10 @@ function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('syda
    Pelin ulkopuolella (valikko, tauko, kuolema) silmukat häivytetään pois. Puuttuva ääni = hiljaisuus. */
 const AMB={L:{},rndT:15,gain:null,ld:0,thT:-1,thV:1,place:null,hold:0,duck:1,nat:{}};
 const AMB_FADE=2.5,AMB_RND_MIN=10,AMB_RND_MAX=40,AMB_RND_V=.8;
-const AMB_V={sade:.8,tihku:.6,myrsky:1,tuuli:.7,lumi:.5,sumu:.5,ukkonen:.75,salama:1,tunnelma:.75,vedenalla:.8,luonto:.35};
+/* v2.81 (käyttäjä: muut äänet eivät kuulu sään alta) SÄÄÄÄNET −60 % (WEATHER_K .4): sade, tihku, myrsky, tuuli, lumi, sumu, ukkonen, salama.
+   Tunnelma, luonto ja vedenalainen ennallaan. Lisäksi koko taustaäänitaso −20 % (v2.79, VOL_BASE.amb). */
+const WEATHER_K=.4;
+const AMB_V={sade:.8*WEATHER_K,tihku:.6*WEATHER_K,myrsky:1*WEATHER_K,tuuli:.7*WEATHER_K,lumi:.5*WEATHER_K,sumu:.5*WEATHER_K,ukkonen:.75*WEATHER_K,salama:1*WEATHER_K,tunnelma:.75,vedenalla:.8,luonto:.35};
 const AMB_REALM={portal1:'routaluola',portal2:'kalmankammio',portal3:'aarnihauta'};
 /* v2.67 (käyttäjä): siirtymät ja silmukat. Jokaisesta silmukasta arvotaan yksi versio, kun se alkaa (sää alkaa, paikkaan tullaan), ja vain sitä
    loopataan, kunnes se loppuu. Sää vaihtuu: vanha hiipuu ja uusi voimistuu AMB_FADE 2,5 s. Paikka vaihtuu (maailma ↔ Hautakumpu ↔ ulottuvuus):
