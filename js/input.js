@@ -23,6 +23,7 @@ addEventListener('keydown',e=>{
   if(state!=='play'&&state!=='ui')return;
   if(e.repeat)return;
   const c=e.code;
+  if(typeof tutKey==='function'&&tutKey(e))return;   // v2.71 opastus: Enter = jatka, pysäytyksessä vain vaiheen näppäimet
   if(DEV&&c==='Quote'){togglePanel('dev');return;}// DEV: Ä avaa/sulkee kehitysvalikon
   if(DEV&&(c==='Semicolon'||e.key==='ö'||e.key==='Ö')){togglePanel('devm');return;}
   if(DEV&&(c==='BracketLeft'||e.key==='å'||e.key==='Å')){togglePanel('devi');return;}   // v2.00 DEV: Å avaa esinevalikon (pikavalinnat + haku)   // v1.91 DEV: Ö avaa olento- ja pomovalikon
@@ -77,7 +78,7 @@ canvas.addEventListener('wheel',e=>{if(state!=='play')return;
   else if(!P.subm)camDist=clamp(camDist+Math.sign(e.deltaY)*.6,2.2,10);},{passive:true});   // v2.18: veden alla zoomi lukittu lähimpään
 let lockFails=0;
 function lockFail(fromClick){if(!fromClick)return;lockFails++;if(lockFails>=2&&!lockFailed){lockFailed=true;msg('Hiiren lukitus ei ole käytössä: käännä kameraa vetämällä hiirellä.','warn');}}
-function requestLock(fromClick){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>lockFail(fromClick));}catch(e){lockFail(fromClick);}}
+function requestLock(fromClick){if(typeof TUT!=='undefined'&&TUT.hold)return;   /* v2.71 opastuksen pysäytyksessä hiiri vapaana (kortin napit) */try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>lockFail(fromClick));}catch(e){lockFail(fromClick);}}
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;if(locked)lockFails=0;vcSync();if(!locked&&state==='play'&&!openPanel&&performance.now()-panelClosedAt<600)requestLock();   /* v1.36: yritetään heti takaisin */if(!locked&&state==='play'&&!openPanel&&!suppressPause&&performance.now()-panelClosedAt>600)pauseGame();suppressPause=false;});
 document.addEventListener('pointerlockerror',()=>{});
 let suppressPause=false,panelClosedAt=-9999,pausedAt=-9999;

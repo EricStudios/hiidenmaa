@@ -474,6 +474,14 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const c=Object.entries(R).every(([k,v])=>RECIPE_BY[k].lvl===v)&&Math.max(...RECIPES.filter(r=>!ITEMS[r.id].rare&&!/^hiiden/.test(r.id)).map(r=>r.lvl||1))<=7;
     const d=/Taso 20/.test(lvlUnlockRows())&&/lvlBon/.test(String(maxStam))&&/lvlBon/.test(String(recalcMaxW));
     return a&&c&&d||`virhe ${a}${c}${d}`;});
+  t('v2.71 opastus: oma pysäytys (ei DEV freeze), vaiheet näppäimillä, ohitus varmistaa, liikkuminen viimeisenä, valinta uudessa maailmassa ja asetuksissa, kertavinkit',()=>{
+    const a=TUT_STEPS.length>=15&&TUT_STEPS[TUT_STEPS.length-1].move&&TIPS.length>=8&&SET_DEF.tutNext===false&&SET_PAGES.ctl.includes('tutNext')&&/newTut/.test(String(renderWorlds))&&/tutOnNewWorld/.test(String(startNewGame));
+    const b=/TUT\.hold\)\{tutHoldUpdate/.test(String(update))&&!/devOn|DEVF/.test(String(tutHoldUpdate)+String(tutTick)+String(tutStart))&&/TUT\.hold\)return/.test(String(requestLock))&&/tutKey/.test(document.body.innerHTML+String(tutKey))&&/tutSkipAsk/.test(String(tutBuild));
+    const sv={pt:playTime,td:localStorage.getItem('hiidenmaa_tutdone'),tn:SET.tutNext,ft:flags.tut};let c,d;
+    try{tutStart();const pt=playTime;for(let i=0;i<5;i++)update(1/30);c=playTime===pt&&TUT.hold&&TUT.on;
+      while(TUT.on&&!TUT_STEPS[TUT.i].move)TUT.i++;tutShow();for(let i=0;i<3;i++)update(1/30);d=!TUT.hold&&playTime>pt;tutEnd(true);d=d&&!TUT.on&&localStorage.getItem('hiidenmaa_tutdone')==='1';}
+    finally{TUT.on=TUT.hold=false;if(TUT.el)TUT.el.hidden=true;if(sv.td===null)localStorage.removeItem('hiidenmaa_tutdone');SET.tutNext=sv.tn;flags.tut=sv.ft;}
+    return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());

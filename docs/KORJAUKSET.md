@@ -476,6 +476,13 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   ja vanha vapautetaan vasta vaihdossa. Tarkistusrivi v2.68 (8× säilyy). **Sääntö:** taustalla uudelleen laskettava näkyvä resurssi vaihdetaan
   vasta valmiina, ei nollata alussa.
 
+## 65. Uuden elementin CSS-luokka törmäsi pelin yleiseen luokkaan (v2.71, kehityksen aikana)
+- Oire: opastuksen kortti oli repun vaiheessa puoliksi ruudun ulkopuolella.
+- Syy: `#tut` sai luokan `panel`, ja pelin yleinen `.panel`-tyyli (paneelien sijainti ja transform) koski sitä → `position:fixed`-kortin
+  sijoittelu laskettiin `#tut`:n suhteen.
+- Ratkaisu: omat etuliitteelliset luokat (`tPanel`, `tMove`). **Sääntö:** uuden käyttöliittymäosan luokille oma etuliite; tarkista
+  `grep -n "^\.<luokka>\|[ ,]\.<luokka>[{ ,:]" css/style.css` ennen yleisen nimen (panel, on, open, hidden, active…) käyttöä.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`

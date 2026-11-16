@@ -359,6 +359,14 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   kupariaseet/-työkalut; 4 kuparipanssari, kuparikilpi, karhuhaarniska; 5 rautakirves ja -hakku; 6 rautamiekka; 7 rautakilpi ja -panssari;
   10 hiidenjousi, 12 hiidenmiekka, 14 hiidenpanssari. J-paneeli näyttää jokaisen tason palkinnon. Poiminnat ja XP-viestit eivät soita ilmoitusääntä.
 
+## Opastus (v2.71)
+- Uuden maailman luonnissa valinta "Opastus uuden maailman alkuun" (oletuksena päällä ensimmäisessä maailmassa; Asetukset › Ohjaus › Opastus seuraavassa
+  uudessa maailmassa). Alkulennon jälkeen peli pysähtyy: kortit ja korostus esittelevät palkit, pikapaikat, minikartan, tehtävän ja tavoitteen (T),
+  repun ja valmistuksen (Tab), kartan (M), tason (J), ilmoitukset (L), toiminnot (E, hiiri, B) ja päävalikon (P). Paneelit avataan ja suljetaan itse,
+  muut kortit Enterillä. Viimeisenä liikkuminen: peli käynnistyy, ja opastus päättyy, kun olet liikkunut, juossut ja hypännyt. Ohitus kysyy varmistuksen.
+- Kertavinkit (opastuksen maailmassa): kun asia tulee ensimmäisen kerran vastaan (vasara, jousi, lapio, kirves, uinti, yö, ylikuorma, vähäinen terveys,
+  Hautakumpu, ulottuvuus, ensimmäinen taso), ruudun yläosaan tulee 10 s vinkki.
+
 ## 15. Asetukset ja näppäimet (settings.js)
 - **v2.68 suorituskykymerkit:** jokaisen grafiikka-asetuksen perässä väripallo nykyisen valinnan vaikutuksesta suorituskykyyn (vihreä pieni,
   keltainen kohtalainen, oranssi suuri, punainen erittäin suuri) ja vihje hiiren alla. **Biomien sekoitus** on Grafiikka-sivulla ja esiasetuksissa

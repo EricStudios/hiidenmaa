@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'2.70';
+:root{--css-v:'2.71';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -909,3 +909,32 @@ button:focus,select:focus{outline:none}
   font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:#f3ead6;background:rgba(18,14,10,.95);border:1px solid currentColor;pointer-events:none}
 .pf:hover .pfTip,.pf.vh .pfTip{display:block}
 #menu.seeThru .mView .pf .pfTip{background:rgba(18,14,10,.95)!important}
+
+/* v2.71 opastus (tutorial.js): kortti, korostusrengas, liikkumisen tarkistuslista, kertavinkit, uuden maailman valinta */
+#tut{position:fixed;inset:0;z-index:58;pointer-events:none}
+#tut .tutRing{position:fixed;border:2px solid #f0c060;border-radius:10px;box-shadow:0 0 0 3px rgba(240,192,96,.25),0 0 22px rgba(240,192,96,.55),inset 0 0 18px rgba(240,192,96,.25);animation:tutPulse 1.6s ease-in-out infinite;transition:left .25s,top .25s,width .25s,height .25s}
+@keyframes tutPulse{0%,100%{box-shadow:0 0 0 3px rgba(240,192,96,.2),0 0 16px rgba(240,192,96,.45)}50%{box-shadow:0 0 0 7px rgba(240,192,96,.12),0 0 30px rgba(240,192,96,.7)}}
+#tut .tutCard{position:fixed;transform:translateX(-50%);width:min(440px,calc(100vw - 24px));pointer-events:auto;padding:14px 16px 12px;border-radius:8px;
+  background:linear-gradient(180deg,rgba(34,27,19,.97),rgba(22,18,13,.97));border:1px solid #b88a3c;box-shadow:0 10px 30px rgba(0,0,0,.6);color:#efe4cc;font-size:15px;line-height:1.45}
+#tut .tutCard.up::before,#tut .tutCard.dn::after{content:'';position:absolute;left:50%;margin-left:-9px;border:9px solid transparent}
+#tut .tutCard.up::before{top:-18px;border-bottom-color:#b88a3c}#tut .tutCard.dn::after{bottom:-18px;border-top-color:#b88a3c}
+#tut .tutHead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+#tut .tutT{font-family:'Uncial Antiqua',serif;font-size:19px;color:#f0c060;font-weight:400}
+#tut .tutN{font-size:12px;color:#b9a989;white-space:nowrap}
+#tut .tutK{display:block;margin-top:6px;font-size:13px;color:#cdbf9f}
+#tut kbd,#tutTip kbd{display:inline-block;min-width:1.4em;padding:0 5px;border:1px solid #8c7448;border-bottom-width:2px;border-radius:4px;background:#2b2318;color:#f6e7c4;font:700 13px/1.5 'Alegreya Sans',sans-serif;text-align:center}
+#tut .tutBtns{display:flex;justify-content:space-between;gap:8px;margin-top:10px}
+#tut .tutBtns .btn{font-size:13px;padding:5px 10px}
+#tut .tutChk{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#tut .tutChk span{padding:3px 6px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(240,214,168,.2);font-size:13px;transition:background .2s}
+#tut .tutChk span.ok{background:rgba(110,180,90,.3);border-color:#7cc06a}
+#tut .tutChk span.ok::after{content:' ✔';color:#a8e090}
+#tut.tMove .tutCard{top:12%!important;bottom:auto!important;left:50%!important}
+#tut.tMove .tutRing{display:none}
+#tutTip{position:fixed;left:50%;top:14%;transform:translate(-50%,-8px);z-index:55;max-width:min(520px,calc(100vw - 24px));padding:9px 14px;border-radius:7px;pointer-events:none;
+  background:rgba(24,19,13,.92);border:1px solid #b88a3c;color:#efe4cc;font-size:14px;line-height:1.4;opacity:0;transition:opacity .4s,transform .4s}
+#tutTip.on{opacity:1;transform:translate(-50%,0)}
+#tutTip b{display:block;font-family:'Uncial Antiqua',serif;font-weight:400;color:#f0c060;font-size:14px;margin-bottom:2px}
+.wTut{display:flex;align-items:center;gap:8px;font-size:14px;color:#e8dcc0;margin:4px 0 6px;cursor:pointer}
+.wTut input{width:16px;height:16px;accent-color:#c89a4a}
+#menu .wNew .wTut{flex-basis:100%;order:3;margin:0;align-self:center}
