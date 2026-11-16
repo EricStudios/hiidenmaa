@@ -371,7 +371,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   uudessa maailmassa). Alkulennon jälkeen peli pysähtyy: kortit ja korostus esittelevät palkit, pikapaikat, minikartan, tehtävän ja tavoitteen (T),
   repun ja valmistuksen (Tab), kartan (M), tason (J), ilmoitukset (L), toiminnot (E, hiiri, B) ja päävalikon (P). Paneelit avataan ja suljetaan itse,
   muut kortit Enterillä. Viimeisenä liikkuminen: peli käynnistyy, ja opastus päättyy, kun olet liikkunut, juossut ja hypännyt. Ohitus kysyy varmistuksen.
-- Kertavinkit (opastuksen maailmassa): kun asia tulee ensimmäisen kerran vastaan (vasara, jousi, lapio, kirves, uinti, yö, ylikuorma, vähäinen terveys,
+- v2.74: pikapaikat (1–8) ja minikartan zoom (N) kokeillaan itse; uuden maailman alussa kartalla paljastuu aloituspaikalta 30 % isompi ympyrä.
+- Kertavinkit (opastuksen maailmassa, eivät pysäytä peliä): kun asia tulee ensimmäisen kerran vastaan (vasara, jousi, lapio, kirves, uinti, yö, ylikuorma, vähäinen terveys,
   Hautakumpu, ulottuvuus, ensimmäinen taso), ruudun yläosaan tulee 10 s vinkki.
 
 ## 15. Asetukset ja näppäimet (settings.js)

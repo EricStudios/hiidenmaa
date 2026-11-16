@@ -504,6 +504,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const sv=JSON.stringify(SET);let b;try{SET.torchSharp=true;applyPreset(0);SET.torchSharp=true;const lo=pfLvlRel('torchSharp');applyPreset(7);SET.torchSharp=true;const hi=pfLvlRel('torchSharp');SET.shUltra='sharp';const sh=pfLvl('shUltra');
       b=lo===3&&hi===1&&sh===3&&/tasolla/.test(pfDot('torchSharp'))||`lo ${lo} hi ${hi} sh ${sh}`;}finally{Object.assign(SET,JSON.parse(sv));applyGfx();}
     return a&&b===true||`virhe ${a} ${b}`;});
+  t('v2.74 opastus: pikapaikat (1–8) ja minikartta (N) kokeillaan itse, N ei esty; aloituspaikalta 30 % isompi paljastettu ympyrä',()=>{
+    const hb=TUT_STEPS.find(x=>x.el==='#hotbar'&&x.keys&&x.keys.includes('digits')),mm=TUT_STEPS.find(x=>x.keys&&x.keys.includes('minizoom'));
+    const a=!!hb&&!hb.next&&!!mm&&!mm.next&&/Digit\[1-8\]/.test(tutKey.toString())&&/kaikki on opeteltu/.test(TUT_STEPS[0].d());
+    const sv=explored.slice();explored.fill(0);const px=P.pos.x,pz=P.pos.z,inD=P.inDun;P.inDun=false;exploreTick(SPAWN_EXP);const n1=explored.reduce((a,v)=>a+v,0);explored.fill(0);exploreTick();const n0=explored.reduce((a,v)=>a+v,0);explored.set(sv);P.inDun=inD;
+    const b=SPAWN_EXP>3&&n1>n0*1.6&&/exploreTick\(SPAWN_EXP\)/.test(newGame.toString());
+    return a&&b||`virhe ${a}${b} ${n0}/${n1}`;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
