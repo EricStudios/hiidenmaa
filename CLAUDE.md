@@ -117,7 +117,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 
 - Kaikki automaattiset grafiikkasäädöt kulkevat `autoOn()`:n kautta (Extra › `noAuto` sammuttaa ne); uusi automaattinen säätö → tarkista `SET.noAuto`.
 - Oletuksena pois olevat, vain käsin laitettavat (raskaat) asetukset kuuluvat Extra-grafiikka-välilehdelle (`SET_PAGES.xgfx`, rivi `xRow()`; ei esiasetuksiin).
-- Uusi asetus: lisää `SET_DEF`:iin (oletus = nykyinen ulkoasu), sivun avainlistaan `SET_PAGES` ja riviksi `setRow()`:lla
+- Uusi asetus: lisää `SET_DEF`:iin (oletus = nykyinen ulkoasu), sivun avainlistaan `SET_PAGES`, grafiikka-asetukselle suorituskykytaso `PFK`:hon (v2.68 väripallo) ja riviksi `setRow()`:lla
   (oletusmerkintä ja sivun palautus tulevat automaattisesti). Ota käyttöön `applyGfx()`:ssa.
 
 ## Etenemisketju

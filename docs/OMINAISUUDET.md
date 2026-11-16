@@ -351,6 +351,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Tehtävä ja tavoite piiloon (v1.18):** T kiertää: molemmat → vain tehtävä → vain tavoite → ei kumpaakaan; piilotettuna pieni vihje, valinta muistetaan.
 
 ## 15. Asetukset ja näppäimet (settings.js)
+- **v2.68 suorituskykymerkit:** jokaisen grafiikka-asetuksen perässä väripallo nykyisen valinnan vaikutuksesta suorituskykyyn (vihreä pieni,
+  keltainen kohtalainen, oranssi suuri, punainen erittäin suuri) ja vihje hiiren alla. **Biomien sekoitus** on Grafiikka-sivulla ja esiasetuksissa
+  (Low/Low+ pois, Medium-…Medium+ normaali, High/High+ vahva, Ultra erittäin vahva). Sekoituksen vaihto ei enää poista tarkempaa väritystä (4×/8×).
 - **v2.63:** Grafiikka › Tiheämpi maaston väritys (High+ ja Ultra: värit 1 m välein, värineliöt eivät erotu). Extra-grafiikka › Maaston väritys
   tarkemmaksi (4× / 8× / 16×) ja Pehmeä rantaveden väri. Ohjaus › HUD › HUD:n koko 60–150 % (oletus 100 %; koko pelin HUD, osat kasvavat
   reunoiltaan, yli 100 % rajoittuu näytön koon mukaan, ettei mikään mene päällekkäin).

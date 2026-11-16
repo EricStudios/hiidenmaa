@@ -398,8 +398,8 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const s=serialize(),d=s.v===11&&s.ft.length>0;const hc=terrainH(cx,cz);loadData(JSON.parse(JSON.stringify(s)));const e=Math.abs(terrainH(cx,cz)-hc)<.002&&FT_P.length>0;
       r=a&&b&&c&&d&&e||`virhe muokkaus ${a} saumat ${b} (${gap.toFixed(3)}) maski ${c} tallennus ${d} lataus ${e}`;}finally{loadData(sv);}
     return r;});
-  t('v2.65 biomien sekoitus: oletus Normaali (Extra), pehmeät pinnat sekoittuvat, kivikko ja vuoren juuri eivät; 8× väritys kysyy varmistuksen, 16× pois',()=>{
-    const a=SET_DEF.biomeBlend===1&&SET_PAGES.xgfx.includes('biomeBlend')&&!SET_PAGES.gfx.includes('biomeBlend')&&TBLEND_HARD.has('mountain')&&TBLEND_HARD.has('rakka');
+  t('v2.65 biomien sekoitus: oletus Normaali (v2.68 Grafiikka-sivu), pehmeät pinnat sekoittuvat, kivikko ja vuoren juuri eivät; 8× väritys kysyy varmistuksen, 16× pois',()=>{
+    const a=SET_DEF.biomeBlend===1&&SET_PAGES.gfx.includes('biomeBlend')&&!SET_PAGES.xgfx.includes('biomeBlend')&&   /* v2.68: Grafiikka-sivulle ja esiasetuksiin */TBLEND_HARD.has('mountain')&&TBLEND_HARD.has('rakka');
     let hard=-1,soft=-1;for(let i=HN*5;i<TSOFT.length-HN*5;i+=7){if(hard<0&&!TSOFT[i]&&TCOL_RAW[i*3]>0)hard=i;if(soft<0&&TSOFT[i]&&TSOFT[i+1]&&TSOFT[i-1]&&TSOFT[i+HN])soft=i;if(hard>=0&&soft>=0)break;}
     const pv=SET.biomeBlend;blendApply(0);const raw=terrainColors[soft*3];blendApply(3);const b=Math.abs(terrainColors[hard*3]-TCOL_RAW[hard*3])<1e-6;blendApply(+pv||0);
     const src=renderSettings.toString()+'';const c=!/\['16','16×'/.test(src)&&/terrFineX'&&v==='8'/.test(src)&&/oletko varma/.test(src);
@@ -449,6 +449,20 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       r=a&&b&&c&&d&&MSG_LONG===40&&MSG_BUSY===.8||`virhe ${a}${b}${c}${d}`;}finally{iSnd=oi;[plActT,msgSndT,msgQuietT,SET.notifSnd]=sv;}return r;});
   t('v2.67 nappien hover/klikkaus: oma säädin Äänet ja musiikki -sivulla, perustaso −20 %',()=>{const src=String(mSnd);
     return BTN_BASE===.8&&SET_DEF.btnVol===1&&SET_PAGES.snd.includes('btnVol')&&/napit'\?BTN_BASE\*\(SET\.btnVol/.test(src)||'btnVol/BTN_BASE puuttuu';});
+  t('v2.68 biomien sekoitus esiasetuksissa (Low/Low+ 0, Medium-…Medium+ 1, High/High+ 2, Ultra 3), käsin muutos = Custom',()=>{const sv=JSON.stringify(SET);let r;
+    try{const m=PRESETS.map(p=>p.biomeBlend).join('');Object.assign(SET,PRESETS[7]);const u=presetIdx()===7;SET.biomeBlend=1;const c=presetIdx()===-1;Object.assign(SET,PRESETS[3]);const d=presetIdx()===3&&+SET.biomeBlend===SET_DEF.biomeBlend;
+      r=m==='00111223'&&u&&c&&d||`virhe ${m} ${u}${c}${d}`;}finally{Object.assign(SET,JSON.parse(sv));}return r;});
+  t('v2.68 suorituskykymerkit: väripallo + vihje jokaisella grafiikka-asetuksella, taso nykyisen valinnan mukaan',()=>{const o=setTab,L=[];let r;
+    try{for(const tb of ['gfx','xgfx']){setTab=tb;renderSettings();const rows=[...$('#setBody').querySelectorAll('.setRow')],no=rows.filter(x=>!x.querySelector('.pf')).map(x=>x.querySelector('label').textContent);
+        if(no.length)L.push(tb+': '+no.join(', '));if(!$('#setBody').querySelector('.pf .pfTip')||!/vaikutus suorituskykyyn/.test($('#setBody').querySelector('.pfTip').textContent))L.push(tb+': vihje puuttuu');}
+      const a=pfLvl('res','native')===3&&pfLvl('res',.55)===0&&pfLvl('grass',2)===2&&pfLvl('shadow','low')===1&&pfLvl('waterMega',true)===3&&pfLvl('biomeBlend',3)===0&&pfLvl('shUltra','wide')===3;
+      const kk=[...SET_PAGES.gfx,...SET_PAGES.xgfx].filter(k=>!(k in PFK));if(kk.length)L.push('ei tasoa: '+kk.join(','));if(!a)L.push('tasot väärin');
+      r=!L.length||L.join(' | ');}finally{setTab=o;renderSettings();}return r;});
+  t('v2.68 8× väritys säilyy biomien sekoitusta vaihdettaessa (vanha tekstuuri näkyy, kunnes uusi valmis)',()=>{const sv={F:TFINE.F,tex:TFINE.tex,done:TFINE.done,busy:TFINE.busy,data:TFINE.data,N:TFINE.N,f:TFINE.u.uFine.value,d:TFINE.u.uDet.value,w:TFINE.want,t:TFINE.u.tFine.value},bl=blendLvl;let r;
+    try{const dum=new THREE.DataTexture(new Uint8Array(4),1,1);Object.assign(TFINE,{F:4,tex:dum,done:true,busy:false,want:8});TFINE.u.uFine.value=1;TFINE.u.uDet.value=4;
+      blendApply(bl===2?1:2);const a=TFINE.u.uFine.value===1&&TFINE.u.uDet.value===4&&TFINE.tex===dum&&TFINE.busy&&TFINE.F===4;
+      TFINE.tok++;r=a||`virhe uFine=${TFINE.u.uFine.value} tex=${TFINE.tex===dum} busy=${TFINE.busy}`;}
+    finally{TFINE.tok++;Object.assign(TFINE,{F:sv.F,tex:sv.tex,done:sv.done,busy:sv.busy,data:sv.data,N:sv.N,want:sv.w});TFINE.u.uFine.value=sv.f;TFINE.u.uDet.value=sv.d;TFINE.u.tFine.value=sv.t;blendLvl=-1;blendApply(bl);}return r;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
