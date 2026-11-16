@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='2.71';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='2.75';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -291,6 +291,7 @@ function frame(now){
   try{
     if(state==='play'||state==='ui')update(dt);
     if(typeof tutTick==='function')tutTick(dt);   // v2.71 opastus ja kertavinkit
+    if(state==='dead')deathTick(dt);   // v2.73 kaatuminen, verilammikko ja kuolinkamera jatkuvat kuolinruudun takana
     else if(state==='menu'&&MENU_V2_OFF)menuCamOld(dt);
     else if(state==='menu'){uwOverlayOff();   /* v2.18: vedenalainen sävy ja hukkumisreunat eivät jää valikon päälle (KORJAUKSET 47: ei omaksi if-riviksi ketjun keskelle) */
       if(SET.menuBg==='3d'){mbgShow(false);menuCam(Math.min(.25,raw));}else{mbgFrame(now);skip3d=true;}}   // v1.25: kuvat = ei 3D-piirtoa valikossa   // v1.25: kuvat = ei 3D-piirtoa valikossa

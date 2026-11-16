@@ -137,8 +137,10 @@ const sldHTML=(id,min,max,step,v)=>`<div class="sld" id="${id}" data-min="${min}
 let sldDrag=null;
 function sldSet(el,v){const mn=+el.dataset.min,mx=+el.dataset.max,st=+el.dataset.step||1;v=clamp(Math.round((v-mn)/st)*st+mn,mn,mx);el.dataset.v=v;const k=(v-mn)/(mx-mn)*100;el.querySelector('b').style.width=k+'%';el.querySelector('s').style.left=k+'%';return v;}
 function sldFromX(el,x){const r=el.getBoundingClientRect(),mn=+el.dataset.min,mx=+el.dataset.max;return sldSet(el,mn+clamp((x-r.left)/r.width,0,1)*(mx-mn));}
-function bindSld(id,onInput,onChange){const el=document.getElementById(id);if(!el)return;el.onmousedown=e=>{e.preventDefault();e.stopPropagation();sldDrag={el,onInput,onChange};onInput&&onInput(sldFromX(el,e.clientX));};}
-addEventListener('mousemove',e=>{if(sldDrag){const v=sldFromX(sldDrag.el,e.clientX);sldDrag.onInput&&sldDrag.onInput(v);if(e.movementX||sldDrag.lx!==undefined&&e.clientX!==sldDrag.lx)mSliderMove();sldDrag.lx=e.clientX;}});   // v2.51 naputus vain liikkuessa
+/* v2.75 portaittainen säädin (≤ SLD_SNAP_N askelta, esim. esiasetus 8 tasoa): naputus vain arvon vaihtuessa; tiheät säätimet (äänenvoimakkuus ym.) naputtavat liikkeestä kuten ennen */
+const SLD_SNAP_N=12,sldSnap=el=>(+el.dataset.max-+el.dataset.min)/(+el.dataset.step||1)<=SLD_SNAP_N;
+function bindSld(id,onInput,onChange){const el=document.getElementById(id);if(!el)return;el.onmousedown=e=>{e.preventDefault();e.stopPropagation();const v0=+el.dataset.v;sldDrag={el,onInput,onChange,lv:v0};const v=sldFromX(el,e.clientX);if(sldSnap(el)&&v!==v0){sldDrag.lv=v;mSliderStep();}onInput&&onInput(v);};}
+addEventListener('mousemove',e=>{if(sldDrag){const v=sldFromX(sldDrag.el,e.clientX);sldDrag.onInput&&sldDrag.onInput(v);if(sldSnap(sldDrag.el)){if(v!==sldDrag.lv){sldDrag.lv=v;mSliderStep();}}else if(e.movementX||sldDrag.lx!==undefined&&e.clientX!==sldDrag.lx)mSliderMove();sldDrag.lx=e.clientX;}});   // v2.51 naputus vain liikkuessa
 addEventListener('mouseup',()=>{if(sldDrag){const d=sldDrag;sldDrag=null;d.onChange&&d.onChange(+d.el.dataset.v);}});
 const tglHTML=(id,on,extra='')=>`<button type="button" class="tgl${on?' on':''}" id="${id}" ${extra}><i></i><span>${on?'Päällä':'Pois'}</span></button>`;
 // Napsautuksen jälkeen nappi tai valikko ei jää fokukseen (näppäimet menevät peliin); tekstikenttään palatessa vanha teksti valitaan.
@@ -164,13 +166,18 @@ const PFK={menuBg:v=>v==='3d'?2:0,res:v=>v==='native'?3:pfT(v,[.7,1]),autoAll:()
   drop3d:()=>0,bldDetail:v=>pfB(v)?1:0,shadow:v=>v==='high'?2:v==='low'?1:0,sunRes:v=>pfT(v,[2048,4096]),shDist:v=>pfT(v,[80,140]),shRate:v=>v==='fast'?2:v==='normal'?1:0,
   autoQ:()=>0,ptShadow:v=>pfB(v)?2:0,ptRes:v=>pfT(v,[384,1024]),terrLod:v=>pfB(v)?0:1,mergeSt:v=>pfB(v)?0:1,shFar:v=>pfB(v)?0:1,treeLod:v=>+v===0?2:pfT(v,[80,140]),
   shOpt:v=>pfB(v)?0:1,shLod:v=>+v===0?2:pfT(v,[55]),
-  noAuto:v=>pfB(v)?1:0,shUltra:v=>v==='sharp'?2:v==='soft'||v==='wide'?3:0,torchSharp:v=>pfB(v)?2:0,waterHQ:v=>pfB(v)?2:0,waterMega:v=>pfB(v)?3:0,
+  noAuto:v=>pfB(v)?1:0,shUltra:v=>v==='off'||!v?0:3,torchSharp:v=>pfB(v)?2:0,waterHQ:v=>pfB(v)?2:0,waterMega:v=>pfB(v)?3:0,
   shoreSpray:v=>pfB(v)?1:0,waterSmooth:()=>0,smokeUltra:v=>pfB(v)?2:0,terrFineX:v=>pfT(v,[4,8])};
 const PF_X={autoAll:'keventää peliä tarvittaessa',autoRes:'keventää peliä tarvittaessa',autoDist:'keventää peliä tarvittaessa',autoFx:'keventää peliä tarvittaessa',autoQ:'keventää peliä tarvittaessa',
   biomeBlend:'lasketaan kerran, ei hidasta peliä',terrFine:'lasketaan taustalla kerran + yksi tekstuuri',terrFineX:'lasketaan taustalla kerran + iso tekstuuri',
   noAuto:'peli ei kevennä itseään nykiessä',res:'vaikuttaa eniten näytönohjaimen kuormaan'};
 function pfLvl(k,v){const f=PFK[k];return f?clamp(f(v===undefined?SET[k]:v)|0,0,3):-1;}
-function pfDot(k){const l=pfLvl(k);if(l<0)return '';const t=PF_N[l]+' vaikutus suorituskykyyn'+(PF_X[k]?' – '+PF_X[k]:'');
+/* v2.73 Extra-asetukset suhteessa esiasetukseen (käyttäjä): päällä oleva extra on Low/Low+-tasolla yhden pykälän raskaampi, High+/Ultralla yhden
+   kevyempi (vähintään kohtalainen); vihje kertoo tason ja kuinka paljon kuvataajuus laskee. */
+const PF_FPS=['ei juuri vaikutusta kuvataajuuteen','laskee kuvataajuutta hieman','laskee kuvataajuutta selvästi','laskee kuvataajuutta paljon'];
+function pfLvlRel(k){let l=pfLvl(k);if(l<=0||!SET_PAGES.xgfx.includes(k))return l;const i=presetIdx();if(i>=0&&i<=1)l++;else if(i>=6)l--;return clamp(l,1,3);}
+function pfDot(k){const x=SET_PAGES.xgfx.includes(k),l=x?pfLvlRel(k):pfLvl(k);if(l<0)return '';const pi=x?presetIdx():-1;
+  const t=PF_N[l]+' vaikutus suorituskykyyn'+(x&&l>0?` (${pi<0?'Custom':PRESET_N[pi]}-tasolla) – ${PF_FPS[l]}`:'')+(PF_X[k]?' – '+PF_X[k]:'');
   return ` <span class="pf ${PF_C[l]}" data-pf="${l}" aria-label="${t}"><i></i><b class="pfTip">${t}</b></span>`;}
 const setRow=(label,key,opts,note='')=>row(label+pfDot(key)+(isDef(key)?' <span class="defTag">oletus</span>':''),opts?optSel('s_'+key,opts,SET[key],SET_DEF[key]):tglHTML('s_'+key,!!SET[key]),note);
 function bindSet(keys){for(const k of keys){const el=$('#s_'+k);if(!el||el.type==='range')continue;if(el.classList.contains('tgl')){el.onclick=()=>{SET[k]=!SET[k];saveSet();applyGfx();renderSettings();};continue;}el.onchange=()=>{const d=SET_DEF[k];SET[k]=el.type==='checkbox'?el.checked:typeof d==='boolean'?el.value==='true':(typeof d==='number'&&el.value!=='native'?+el.value:el.value);saveSet();applyGfx();renderSettings();};}}

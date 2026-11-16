@@ -3,7 +3,7 @@
    vasta sitten latausnäyttö ja pelin skriptit. Ennen jakso pyöri pelin latauksen päällä, jolloin häivytykset pätkivät. Pelin skriptit
    esiladataan taustalla (<link rel=preload>) ja ajetaan yksi kerrallaan pienellä tauolla, jotta riimut ehtivät syttyä näkyvästi.
    Välilyönti, Enter tai napsautus ohittaa koko jakson (ja testin) ja vie suoraan latausnäyttöön. */
-window.__BJV='2.71';
+window.__BJV='2.75';
 (function(){
   var Q=location.search,wd=!!navigator.webdriver;
   function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
@@ -106,11 +106,14 @@ window.__BJV='2.71';
     get state(){return {ctx:MU.ctx,want:MU.ctx,playing:!!MU.cur,track:MU.cur&&MU.cur.key,gap:!!MU.tm,pend:!!MU.pend};},
     C:MUC,_mu:MU,_bs:BS};
   function hintIco(on){return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/>'+(on?'<path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>')+'</svg>';}
+  /* v2.73: merkki häipyy 2 s:n (SND_HINT_MIN) jälkeen, jos ei napautettu (äänet aukeavat silti myöhemmästä painalluksesta); napautus: "Äänet päällä"
+     hetken ja häivytys heti, ja odottava aloitusjakso / HIIDENMAA-otsikko alkaa saman tien (BS.onUnlock). Avaava napautus ei ohita jaksoa – vasta seuraava. */
+  function hintFade(h,ms){setTimeout(function(){h.classList.add('out');setTimeout(function(){if(h.parentNode)h.parentNode.removeChild(h);},900);},ms);}
   function hintShow(){var h=document.createElement('div');h.id='sndHint';h.innerHTML=hintIco(false)+'<span>Napauta näyttöä kuullaksesi äänet</span>';document.body.appendChild(h);BS.hint=h;BS.shown=performance.now();
-    requestAnimationFrame(function(){h.classList.add('in');});}
+    requestAnimationFrame(function(){h.classList.add('in');});BS.hintT=setTimeout(function(){if(!BS.unlocked&&BS.hint===h){BS.hint=null;hintFade(h,0);}},SND_HINT_MIN);}
   function unlock(e){if(BS.unlocked||!BS.ac)return;BS.ac.resume().then(function(){if(BS.ac.state!=='running')return;BS.unlocked=true;muTry();
-      removeEventListener('mousedown',unlock,true);removeEventListener('keydown',unlock,true);removeEventListener('touchstart',unlock,true);var h=BS.hint;if(!h)return;
-      h.innerHTML=hintIco(true)+'<span>Äänet päällä</span>';h.classList.add('onS');setTimeout(function(){h.classList.add('out');setTimeout(function(){if(h.parentNode)h.parentNode.removeChild(h);},900);},Math.max(1100,SND_HINT_MIN-(performance.now()-BS.shown)));}).catch(function(){});
+      removeEventListener('mousedown',unlock,true);removeEventListener('keydown',unlock,true);removeEventListener('touchstart',unlock,true);if(BS.onUnlock)BS.onUnlock();clearTimeout(BS.hintT);var h=BS.hint;if(!h)return;BS.hint=null;
+      h.innerHTML=hintIco(true)+'<span>Äänet päällä</span>';h.classList.add('onS');hintFade(h,600);}).catch(function(){});
     if(window.__splashOn||(typeof state!=='undefined'&&state==='intro')){e.stopImmediatePropagation();e.stopPropagation();}}   // avaava painallus ei ohita jaksoa/introa
   if(sndLocked){addEventListener('mousedown',unlock,true);addEventListener('keydown',unlock,true);addEventListener('touchstart',unlock,{capture:true,passive:true});
     if(document.body)hintShow();else document.addEventListener('DOMContentLoaded',hintShow);}
@@ -226,6 +229,7 @@ window.__BJV='2.71';
     else if(pf&&pf.g&&pf.end){/* tulos jo tallennettu */}
     end();}
   addEventListener('keydown',skip,true);addEventListener('mousedown',skip,true);addEventListener('touchstart',skip,{capture:true,passive:false});
-  setTimeout(next,700+(sndLocked?SND_DELAY:0));   // v2.52: 2 s aikaa avata äänet ennen jaksoa
+  var seqT=setTimeout(next,700+(sndLocked?SND_DELAY:0));   // v2.52: 2 s aikaa avata äänet ennen jaksoa
+  BS.onUnlock=function(){if(i<0&&!over){clearTimeout(seqT);seqT=setTimeout(next,250);}};   // v2.73 napautus → jakso alkaa heti
   window.__boot={needSplash:needSplash,needPerf:needPerf,needTitle:needTitle,PERF_T:PERF_T,RES_T:RES_T,perfLevel:perfLevel,perfRun:perfRun,skip:function(){skip({type:'mousedown',stopPropagation:function(){}});}};
 })();

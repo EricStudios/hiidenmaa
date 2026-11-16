@@ -483,6 +483,15 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Ratkaisu: omat etuliitteelliset luokat (`tPanel`, `tMove`). **Sääntö:** uuden käyttöliittymäosan luokille oma etuliite; tarkista
   `grep -n "^\.<luokka>\|[ ,]\.<luokka>[{ ,:]" css/style.css` ennen yleisen nimen (panel, on, open, hidden, active…) käyttöä.
 
+## 66. Äänityökalu: lyhyet äänet hylättiin tai katkesivat (kestomittaus), ja jokaisen äänen alussa oli 20 ms tyhjää (v2.72)
+- Oire: nopeat äänet (isku, askel, klikkaus) alkoivat pelissä ~20 ms myöhässä; kun alku tiukennettiin, hover hylättiin ("käytännössä hiljaa") ja
+  ilmoitus/puolitus lyhenivät puoleen.
+- Syy: `silenceremove … start_silence=0.02` jätti 20 ms hiljaisuutta; `duration()` luki kestoa ffmpeg:n `time=`-rivistä, joka antaa hyvin lyhyelle
+  WAV:lle 0 tai pyöristää (20 ms hiljaisuus oli peittänyt virheen).
+- Ratkaisu (tools/process_sounds.py): kertaäänille `start_silence=0.003` ja alun pehmennys 3 ms; `duration()` lukee WAV:n `wave`-moduulilla.
+  **Sääntö:** kun muutat trimmausta, vertaa vanha ja uusi tiedosto (alku, sisällön pituus, äänekkyys) kaikille muuttuneille – mittaa selaimella
+  (decodeAudioData), ei pelkästään ffmpeg:llä. Ääntelyihin (PV) ei kosketa ilman kuuntelua.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`

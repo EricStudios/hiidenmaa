@@ -296,8 +296,9 @@ function tgSurface(m,g){if(m.dun)return m.realm==='portal1'?'jaa':m.realm==='por
   if(m.pos.y>th+.15){gridQuery(x,z,.1,_cl);for(const c of _cl){if(c.t!=='b'||c.off)continue;if(x>=c.minX&&x<=c.maxX&&z>=c.minZ&&z<=c.maxZ&&Math.abs(c.maxY-m.pos.y)<.35){const o=c.owner;return o&&o.t&&PIECES[o.t]?(PIECES[o.t].stone?'kivi':'puu'):'kivi';}}}
   const dep=water.position.y-th;if(dep>.05)return dep>(TG_BIG.has(g)?1.1:g.startsWith('kevyet')?.3:.6)?'uinti':'kahlaus';
   const b=biomeAt(x,z,th);return b==='beach'?'hiekka':b==='mountain'||b==='rakka'?'kivi':b==='peak'?'lumi':b==='suo'?'suo':b==='aarni'?'pusikko':'ruoho';}
-function tgStep(m,g,d,spd){const sf=tgSurface(m,g),run=spd>(m.def.walk||1.5)*1.4,sb=.55+.45*clamp(spd/(m.def.run||4),0,1),sv=sb*(.82+Math.random()*.18);   /* v2.23: askelten voimakkuus vaihtelee luonnollisesti */tgSnd(m,'askel_'+sf,sf==='pusikko'?{v:sb*.91*(1+(Math.random()*2-1)*.1),p:1+(Math.random()*2-1)*.09}:{v:sv});   /* v2.27 Aarnimetsän askel ±10 %, sävel ±9 % */
-  {const ly=TG_STEP_LAYER[g];if(ly&&sf!=='uinti'&&!(ly==='tomistys'&&sf==='kahlaus'))tgPlay(m,ly,g,{v:ly==='kalina'?.7:sv},true);}   // v2.21: tömistys / kalina askeleen päälle
+const TG_STEP_K=.7;   // v2.73 olentojen askeleet ja askelkerrokset −30 %
+function tgStep(m,g,d,spd){const sf=tgSurface(m,g),run=spd>(m.def.walk||1.5)*1.4,sb=(.55+.45*clamp(spd/(m.def.run||4),0,1))*TG_STEP_K,sv=sb*(.82+Math.random()*.18);   /* v2.23: askelten voimakkuus vaihtelee luonnollisesti */tgSnd(m,'askel_'+sf,sf==='pusikko'?{v:sb*.91*(1+(Math.random()*2-1)*.1),p:1+(Math.random()*2-1)*.09}:{v:sv});   /* v2.27 Aarnimetsän askel ±10 %, sävel ±9 % */
+  {const ly=TG_STEP_LAYER[g];if(ly&&sf!=='uinti'&&!(ly==='tomistys'&&sf==='kahlaus'))tgPlay(m,ly,g,{v:ly==='kalina'?.7*TG_STEP_K:sv},true);}   // v2.21: tömistys / kalina askeleen päälle
   if(playTime-(m.okT??-9)>=2&&!m.dun&&plNodeAt('oksa',m.pos.x,m.pos.z,(m.def.r||.5)*.5)){m.okT=playTime;tgSnd(m,'oksa',{v:.7});}   // v2.27 astuu oksan päälle
   else if(sf==='pusikko'&&Math.random()<.12&&playTime-(m.okT??-9)>=2){m.okT=playTime;tgSnd(m,'oksa',{v:.18});}   // v2.27 satunnaisesti tosi hiljaa (ennen 0,45)
   if(!m.dun&&playTime-(m.puT??-9)>=2&&plBush(m.pos.x,m.pos.z,(m.def.r||.5)*.6)){m.puT=playTime;tgSnd(m,'kahina',{g:'yhteiset',p:tgSize(m),v:.8});}   // v2.25 pensaan läpi (2 s välein)   // v2.21: hiljempaa (0,8 → 0,45), enintään 2 s välein
@@ -338,7 +339,7 @@ const PLV={v:[],last:{},loaded:0,gain:null,ph:null,wet:0,og:1,vy0:0,loops:{},lpR
    hover = uusi nappi/valinta hiiren alle, klikkaus = painallus, Extra-grafiikan valinta (.uo) = extra_paalle / extra_pois (oletusarvo = puinen),
    naputus = liukusäädintä liikutetaan (toistuu MSND.tickDt välein hiljaa, MSND.tickV), ultra = Ultra-esiasetus asetetaan (settings.js). */
 const MENU_SEL='#menu,#settings,#keyDlg,#deadS,#winS',MENU_BTN='button,select,.tgl,input[type=checkbox],.world';
-const MSND={gain:null,last:{},hov:null,loaded:0,clickT:-1e9,moveT:-1,tickT:0,tickDt:.055,tickV:.35,raf:0};
+const MSND={gain:null,last:{},hov:null,loaded:0,clickT:-1e9,moveT:-1,tickT:0,tickDt:.055,tickV:.168,tickPj:.02,raf:0};
 function mRes(g,ev,pre){if(!CRE.man)return null;if(CRE.idxOf!==CRE.man)creIndex();return CRE.idx[`${pre||'m'}/${g}/${ev}`]||null;}
 function mLoad(){if(MSND.loaded||!CRE.ok)return;MSND.loaded=1;for(const n in CRE.man)if(n.startsWith('m/')||n.startsWith('i/'))creBuf(n);}   // v2.53 myös ilmoitukset (i/)
 const BTN_BASE=.8;   // v2.67: hover- ja klikkausäänien perustaso (−20 %)
@@ -357,7 +358,9 @@ function mWake(){audio();if(actx&&actx.state!=='running')actx.resume();creInit()
 // liukusäädin: kutsutaan hiiren liikkuessa vedon aikana → naputus toistuu tiheästi niin kauan kuin liike jatkuu (80 ms tauko = hiljaa)
 function mSliderMove(){MSND.moveT=performance.now();if(!MSND.raf)MSND.raf=requestAnimationFrame(mSliderTick);}
 function mSliderTick(){const t=performance.now();if(t-MSND.moveT>80||typeof sldDrag==='undefined'||!sldDrag){MSND.raf=0;return;}
-  if(t-MSND.tickT>=MSND.tickDt*1000){MSND.tickT=t;mSnd('liukusaatimet','naputus',{v:MSND.tickV,pj:.06});}MSND.raf=requestAnimationFrame(mSliderTick);}
+  if(t-MSND.tickT>=MSND.tickDt*1000){MSND.tickT=t;mSnd('liukusaatimet','naputus',{v:MSND.tickV,pj:MSND.tickPj});}MSND.raf=requestAnimationFrame(mSliderTick);}
+// v2.75 portaittainen liukusäädin (esiasetus): naputus vain, kun arvo oikeasti vaihtuu (ei hiiren liikkeestä)
+function mSliderStep(){mSnd('liukusaatimet','naputus',{v:MSND.tickV,pj:MSND.tickPj});}
 document.addEventListener('mouseover',e=>{const b=e.target&&e.target.closest&&e.target.closest(MENU_BTN);if(!b||b===MSND.hov)return;MSND.hov=b;if(b.disabled||!mInMenu(b)||performance.now()-MSND.clickT<350)return;mSnd('napit','hover');},true);   /* klikkauksen jälkeen sivu piirtyy uudelleen → ei tuplaääntä */
 /* VC (virtuaalinen osoitin) lähettää mouse-tapahtumia, ei pointer-tapahtumia → kuunnellaan mouse* */document.addEventListener('mouseout',e=>{const b=MSND.hov;if(b&&!(e.relatedTarget&&b.contains(e.relatedTarget)))MSND.hov=null;},true);
 document.addEventListener('mousedown',()=>mWake(),true);document.addEventListener('keydown',()=>mWake(),true);
@@ -410,7 +413,7 @@ function plTick(dt){plBody(dt);if(state!=='play'||P.dead||P.flying){PLV.ph=null;
     if(pu&&Math.random()<.07&&playTime-PLV.bushT>=2){PLV.bushT=playTime;plSnd('askeleet','puska',{v:.9});}}}
 /* v2.25 PENSAAT (käyttäjä): pelaaja kävelee pensaan läpi → heti pusikkoaskel + puska-ääni (täysi voimakkuus), enintään 2 s välein (PLV.bushT);
    Aarnimetsässä lisäksi satunnaisesti (14 % askelista) oksa tai puska samalla 2 s tauolla. Pelaajan askeleet 20 % hiljempaa (PL_STEP_V). */
-const PL_STEP_V=.8,_plN=[];
+const PL_STEP_V=.56,_plN=[];   // v2.73 askeleet −30 % (ennen .8)
 const PL_PICK=()=>({v:.55,p:1.1*(1+(Math.random()*2-1)*.2),lp:2400});   // v2.31 poiminta: hiljempaa 0,55, hieman kimeämpi (×1,1), sävel ±20 % (+ yleinen ±5 %), tumma alipäästö 2,4 kHz
 function plBush(x,z,r){nodesNear(x,z,2.2,_plN);for(const n of _plN)if(n.type==='pensas'&&Math.hypot(n.x-x,n.z-z)<.9*n.s+r)return true;return false;}
 // v2.27: maassa oleva kohde (esim. oksa, joka ei ole kerätty) jalkojen alla (säde 0,45 × koko + r)
@@ -422,7 +425,7 @@ function plNodeAt(type,x,z,r){nodesNear(x,z,1.5,_plN);for(const n of _plN)if(n.t
    noustessa (yli 2 s sukelluksessa); hytinä palellessa 20–35 s välein; vatsan kurina nälkäisenä (alle 20) 40–70 s välein; pahoinvointi
    alkaessa ja 15 s välein; kylläinen kun syöt itsesi täyteen; lämmin kun pääset palelemasta lämpöön; levännyt kun levon vaikutus alkaa.
    Mahakipu soi ähkyn kouristuksessa (environment.js). PLV.st muistaa edelliset tilat (siirtymät). */
-const PL_SCARY_R=35,HENG_END=.3,HENG_FADE=1.5,FALL_ANKLE=.25;
+const HENG_V=.64,PL_SCARY_R=35,HENG_END=.3,HENG_FADE=1.5,FALL_ANKLE=.25;
 function plOverMoving(){return typeof MAXW!=='undefined'&&!devOn('weight')&&invWeight()>MAXW&&Math.hypot(P.vel.x,P.vel.z)>.6&&!P.swim;}
 function plCd(k,t){if(playTime<(PLV.cd[k]||0))return false;PLV.cd[k]=playTime+t;return true;}
 function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('sydan',null,null,false);plLoop('heng',null,null,false,0,1,HENG_FADE);S.heng=false;return;}
@@ -441,7 +444,7 @@ function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('syda
   plLoop('sydan','keho','sydan',k>0,.35+.65*k,.9+.35*k);
   // tilat (siirtymät)
   // v2.67 hengästys silmukkana: alkaa kun kestävyys loppuu (0 %) tai liikutaan ylikuormassa; loppuu kun kestävyys yli HENG_END (30 %) eikä liikuta ylikuormassa
-  {const ovm=plOverMoving();if(!S.heng&&(P.stam<1||ovm))S.heng=true;else if(S.heng&&P.stam>maxStam()*HENG_END&&!ovm)S.heng=false;plLoop('heng','keho','hengastys',S.heng,.8,1,HENG_FADE);}S.stam=P.stam;
+  {const ovm=plOverMoving();if(!S.heng&&(P.stam<1||ovm))S.heng=true;else if(S.heng&&P.stam>maxStam()*HENG_END&&!ovm)S.heng=false;plLoop('heng','keho','hengastys',S.heng,HENG_V,1,HENG_FADE);}S.stam=P.stam;
   // v2.67 vesi: pää pinnan alle (sukellus) ja pinnalle (pinnalle; pitkän sukelluksen jälkeen myös haukkoo henkeä)
   const und=(P.underT||0)>0;if(und&&!S.under&&!P.dead)plSnd('vesi','sukellus');if(!und&&S.under>0&&!P.dead){plSnd('vesi','pinnalle');if(S.under>2)plSnd('keho','haukkoo_henkea');}S.under=und?P.underT:0;
   if(P.cold){S.coldT=(S.coldT||0)+dt;if(S.coldT>4&&plCd('hyt',20+Math.random()*15))plSnd('keho','hytina');}

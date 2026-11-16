@@ -12,10 +12,10 @@ const TUT={on:false,hold:false,i:0,pending:false,el:null,ring:null,tipEl:null,ti
 const kL=a=>`<kbd>${keyLabel(BIND[a])}</kbd>`,kX=s=>`<kbd>${s}</kbd>`;
 // vaiheet: t otsikko, d teksti (funktio → näppäimet nykyisistä sidonnoista), el korostettava osa, next = Enter/Jatka, ok = ehto, keys = sallitut toiminnot
 const TUT_STEPS=[
-  {t:'Tervetuloa Hiidenmaahan!',d:()=>`Tämä lyhyt opastus esittelee ruudun osat ja tärkeimmät näppäimet. Peli on pysähdyksissä, kunnes opettelet viimeisenä liikkumisen.<br><span class="tutK">Jatka: ${kX('Enter')} tai Jatka-nappi</span>`,next:1},
+  {t:'Tervetuloa Hiidenmaahan!',d:()=>`Käydään yhdessä läpi ruudun osat ja tärkeimmät näppäimet – useimpia pääset kokeilemaan itse. Maailma odottaa pysähdyksissä, kunnes kaikki on opeteltu, joten kiirettä ei ole.<br><span class="tutK">Jatka: ${kX('Enter')} tai Jatka-nappi</span>`,next:1},
   {t:'Terveys, kestävyys ja nälkä',el:'#bars',d:()=>`Ylimpänä <b>terveys</b>, sitten <b>kestävyys</b> (juoksu, hypyt, lyönnit, uinti) ja <b>kylläisyys</b>. Syö kypsää ruokaa ja lepää tulen ääressä katon alla, niin palkit pysyvät täysinä. Alla näkyvät tilavaikutukset.`,next:1},
-  {t:'Pikapaikat ja kantokyky',el:'#hotbar',d:()=>`Repun alarivi on pikapaikkoja: valitse ${kX('1')}–${kX('8')}. Ruoka syödään, työkalu tai ase otetaan käteen. ${kL('up')} pudottaa valitusta paikasta. Paino ja kantokyky näkyvät vieressä – ylikuormassa et voi juosta.`,next:1},
-  {t:'Minikartta ja kello',el:'#topright',d:()=>`Minikartta näyttää ympäristön ja tuulen suunnan, kello vuorokauden ajan (yöllä on vaarallisempaa). ${kL('minizoom')} vaihtaa minikartan zoomia.`,next:1},
+  {t:'Pikapaikat ja kantokyky',el:'#hotbar',d:()=>`Repun alarivi on pikapaikkoja: ruoka syödään ja työkalu tai ase otetaan käteen. ${kL('up')} pudottaa valitusta paikasta. Paino ja kantokyky näkyvät vieressä – ylikuormassa et voi juosta.<br><b>Kokeile:</b> paina jotain numeroa ${kX('1')}–${kX('8')}.`,ok:()=>TUT.dig,keys:['digits']},   // v2.74 interaktiivinen
+  {t:'Minikartta ja kello',el:'#topright',d:()=>`Minikartta näyttää ympäristön ja tuulen suunnan, kello vuorokauden ajan (yöllä on vaarallisempaa).<br><b>Kokeile:</b> paina ${kL('minizoom')} – minikartan zoom vaihtuu.`,ok:()=>typeof miniZ!=='undefined'&&miniZ!==TUT.mz0,keys:['minizoom']},   // v2.74 interaktiivinen (ennen N oli estetty)
   {t:'Tarina ja tavoite',el:'#quest',alt:'#goal',d:()=>`Oikealla on tarinan tehtävä, vasemmalla seuraava tavoite – ne neuvovat aina eteenpäin. Kokeile: paina ${kL('hud')}, niin ne piiloutuvat.`,ok:()=>(SET.hudMode|0)!==TUT.hud0,keys:['hud']},
   {t:'Tarina ja tavoite',el:'#quest',alt:'#goal',d:()=>`Hyvä! Paina ${kL('hud')} uudelleen, kunnes molemmat näkyvät taas.`,ok:()=>(SET.hudMode|0)===0,keys:['hud']},
   {t:'Reppu ja valmistus',el:'#hotbar',d:()=>`Paina ${kL('inv')} avataksesi repun.`,ok:()=>openPanel==='inv',keys:['inv']},
@@ -47,7 +47,7 @@ function tutBuild(){if(TUT.el)return;const d=document.createElement('div');d.id=
   d.querySelector('[data-tut="next"]').onclick=()=>tutNext();d.querySelector('[data-tut="skip"]').onclick=()=>tutSkipAsk();}
 function tutShow(){const S=TUT_STEPS[TUT.i],d=TUT.el;if(!S||!d)return;d.hidden=false;d.classList.toggle('tPanel',!!S.panel);d.classList.toggle('tMove',!!S.move);
   d.querySelector('.tutT').textContent=S.t;d.querySelector('.tutN').textContent=`${TUT.i+1} / ${TUT_STEPS.length}`;d.querySelector('.tutD').innerHTML=S.d();
-  d.querySelector('[data-tut="next"]').hidden=!S.next;if(S.el&&S.el==='#quest')TUT.hud0=SET.hudMode|0;
+  d.querySelector('[data-tut="next"]').hidden=!S.next;if(S.el&&S.el==='#quest')TUT.hud0=SET.hudMode|0;TUT.mz0=typeof miniZ!=='undefined'?miniZ:0;TUT.dig=false;
   if(S.move){TUT.hold=false;TUT.t=0;if(typeof mSnd==='function')mSnd('napit','klikkaus');}tutPlace();}
 function tutPlace(){const S=TUT_STEPS[TUT.i],d=TUT.el;if(!S||!d)return;const card=d.querySelector('.tutCard'),R=TUT.ring;let el=S.el?$(S.el):null;
   if(el&&(el.hidden||!el.getClientRects().length||getComputedStyle(el).display==='none')&&S.alt)el=$(S.alt);
@@ -68,7 +68,7 @@ function tutKey(e){if(!TUT.on)return false;const S=TUT_STEPS[TUT.i],c=e.code;if(
   if(!$('#keyDlg').hidden)return false;
   if((c==='Enter'||c==='NumpadEnter')&&S.next){e.preventDefault();tutNext();return true;}
   if(!TUT.hold)return false;
-  const ok=(S.keys||[]).some(a=>BIND[a]===c||(a==='inv'&&c==='KeyI'&&BIND.inv==='Tab'));
+  const ok=(S.keys||[]).some(a=>BIND[a]===c||(a==='inv'&&c==='KeyI'&&BIND.inv==='Tab')||(a==='digits'&&/^Digit[1-8]$/.test(c)));if(ok&&/^Digit[1-8]$/.test(c))TUT.dig=true;
   if(c===BIND.menu&&!openPanel)return true;   // P ilman avointa ikkunaa avaisi päävalikon kesken opastuksen
   if(c==='Tab')e.preventDefault();return !ok;}
 // pysäytetyn pelin päivitys (main.js update): vain kamera, HUD ja korostuksen paikka – maailma, olennot, nälkä ja aika seis

@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'2.71';
+:root{--css-v:'2.75';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -938,3 +938,17 @@ button:focus,select:focus{outline:none}
 .wTut{display:flex;align-items:center;gap:8px;font-size:14px;color:#e8dcc0;margin:4px 0 6px;cursor:pointer}
 .wTut input{width:16px;height:16px;accent-color:#c89a4a}
 #menu .wNew .wTut{flex-basis:100%;order:3;margin:0;align-self:center}
+
+/* v2.73 kuolinruutu: pääkallo, syyn mukainen otsikko ja selostus, vinkkilaatikko, tilastot; kuolinkameran tummuva reuna */
+#deadS{background:radial-gradient(ellipse at 50% 45%,rgba(10,8,6,.55) 0%,rgba(10,8,6,.82) 70%)}
+#deadS .deadSkull{width:68px;height:68px;color:#d9cdb4;opacity:.92;filter:drop-shadow(0 4px 14px rgba(0,0,0,.7));animation:deadSk 1.2s ease-out both}
+@keyframes deadSk{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:.92;transform:none}}
+#deadS .deadCause{margin:-6px 0 0;font:600 19px/1.4 var(--font-b);color:#f0e2c4;text-shadow:0 2px 6px #000}
+#deadS .lede{margin:0}
+#deadS .deadTipBox{max-width:560px;width:100%;margin:2px auto 0;padding:10px 14px 12px;border:1px solid rgba(232,164,74,.45);border-left:3px solid #e8a44a;border-radius:4px;background:rgba(40,24,10,.6);text-align:left}
+#deadS .deadTipBox .dtHead{display:block;font:400 15px var(--font-h,'Uncial Antiqua',serif);color:#ffb35a;margin-bottom:3px}
+#deadS .deadTipBox .deadTip{max-width:none;margin:0;padding:0;border:0;background:none}
+#deadS .deadStats{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin:4px 0 8px;color:#cdbf9f;font-size:13px}
+#deadS .deadStats span{display:flex;flex-direction:column;align-items:center;min-width:64px}
+#deadS .deadStats b{font:700 20px/1.2 var(--font-b);color:#f3e6c8}
+#deathVig{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 35%,rgba(8,4,3,.85) 100%),rgba(0,0,0,.25);transition:opacity .3s linear}

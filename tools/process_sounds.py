@@ -45,9 +45,12 @@ NOISE_FIX = {'askel_kivi_2': 'afftdn=nr=30:nf=-40:tn=1,agate=threshold=0.1:ratio
 NOISE_EV = {'askel_kivi'}
 # v2.67 pilkottavat pitkät nauhoitukset (käyttäjä): hytinä ja palamisen kipu → useita versioita, peli arpoo (ei samaa kahdesti peräkkäin)
 SPLIT_EV = {'hytina': dict(k=8, gap=.9, seg_max=2.5), 'kipu_tuli': dict(k=8, gap=.7, seg_max=1.6)}
-pv_of = lambda ev: f'{PV_T}t3' if ev in TIGHT_EV else f'{PV_T}n2' if ev in NOISE_EV else f'{PV_T}s1' if ev in SPLIT_EV else PV_T   # tiukan trimmauksen ja kohinakorjauksen äänet käsitellään kerran uudelleen
+_pv0 = lambda ev: f'{PV_T}t3' if ev in TIGHT_EV else f'{PV_T}n2' if ev in NOISE_EV else f'{PV_T}s1' if ev in SPLIT_EV else PV_T
+# v2.72 nopeat kertaäänet: alkuun jää 3 ms hiljaisuutta (ennen 20 ms) → kaikki kertaäänet käsitellään kerran uudelleen (q1); silmukat ja musiikki ennallaan
+QUICK_SKIP = lambda ev: ev in MUSIC_EV or ev in LOOP_EV or ev in ACT_EV or ev in AMB_LOOPS or ev in ('sydan', 'hengastys')
+pv_of = lambda ev: _pv0(ev) if QUICK_SKIP(ev) else f'{_pv0(ev)}q5'   # q2 tarkka kestomittaus, q4 askeleet −48 dB (−38 dB siirsi pitkän suonauhoituksen pätkiä), q5 alun pehmennys 3 ms   # tiukan trimmauksen ja kohinakorjauksen äänet käsitellään kerran uudelleen
 PV_T = 9   # v2.30 poiminta lyhyemmäksi; v2.29 puun kaatumisnarina täyspitkäksi (peli katkaisee maahan osuessa); toimintoäänten käsittelyversio: v2.22 huippunormalisointi + saumattomat silmukat; v2.23 askeltila, pätkät, paras kohta, toimintosilmukat; v2.27 pusikkoaskel lyhyemmäksi
-PV = 4                                                # käsittelyn versio: vaihtuessa kaikki äänet käsitellään uudestaan
+PV = 4                                                # (v2.72: ääntelyt jätettiin ennalleen – uusi huippunormalisointi jätti hiljaisen raa'an kohinan alkuun, esim. hiisi_hurt_2 +0,5 s) käsittelyn versio: vaihtuessa kaikki äänet käsitellään uudestaan
 
 
 def variants_of(ai, kind):
@@ -195,6 +198,13 @@ def peak_db(ff, inp):
     return float(m.group(1)) if m else None
 
 def duration(ff, path):
+    if path.endswith('.wav'):   # v2.72 välitiedosto tarkasti (ffmpeg:n time= antoi hyvin lyhyelle 0 → hover hylättiin hiljaisena)
+        try:
+            import wave
+            with wave.open(path) as w:
+                return round(w.getnframes() / float(w.getframerate()), 4)
+        except Exception:
+            pass
     r = subprocess.run([ff, '-hide_banner', '-i', path, '-f', 'null', '-'], capture_output=True, text=True)
     t = re.findall(r'time=(\d+):(\d+):([\d.]+)', r.stderr)
     if not t:
@@ -326,7 +336,9 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
     boss = ai in BOSS_DB or big
     cap = cap_b if boss else cap_n
     target += 0 if prof else BOSS_DB.get(ai, 0)
-    trim = 'silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.02'
+    # v2.72: kertaäänen alkuun 3 ms (ennen 20 ms: ääni alkoi pelissä 20 ms myöhässä); pilkotuissa pätkissä (SPLIT_EV) hiljainen hengitys alusta pois (-38 dB)
+    quick = not loop and mode != 'act' and kind not in MUSIC_EV
+    trim = f"silenceremove=start_periods=1:start_threshold={'-38dB' if seg and kind in SPLIT_EV else '-48dB'}:start_silence={0.003 if quick else 0.02}"
     inp = (['-f', fmt] if fmt and fmt != 'mp4' else []) + ['-i', src]
     if seg:   # v2.23: pätkä pitkästä raa'asta (askeleet)
         inp = inp + ['-ss', f'{seg[0]:.3f}', '-t', f'{seg[1]:.3f}']
@@ -354,7 +366,7 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
                       '-ac', AC, '-ar', '44100', '-c:a', 'pcm_s16le', w1])
             if r2.returncode == 0:
                 d = duration(ff, w1)
-        if d < 0.015:   # v2.50: 0,05 → 0,015 s (lyhyt käyttöliittymän naksahdus, esim. sulje.mp3 ~0,04 s, hylättiin hiljaisena)
+        if d < (0.004 if kind in TIGHT_EV else 0.015):   # v2.72 UI-naksahdus voi olla vain muutama ms (hover); v2.50: 0,05 → 0,015 s (lyhyt käyttöliittymän naksahdus, esim. sulje.mp3 ~0,04 s, hylättiin hiljaisena)
             return 'ääni on käytännössä hiljaa', None
         # 2b) v2.22 silmukka: ei häivytyksiä; loppu ristihäivytetään alkuun (pituus enintään 6 s, sauma xf), jolloin silmukka on saumaton
         # v2.23: pitkästä kertaäänestä (huitaisu, lentoonlähtö …) voimakkain kohta eikä alku
@@ -391,7 +403,7 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
         f = min(max(fade, 0.6) if cut and L > cap else fade, L * 0.5)
         if not loop:
             r = run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', w1, '-af',
-                     f'atrim=duration={L:.3f},afade=t=in:d=0.006,afade=t=out:st={max(L - f, 0):.3f}:d={f:.3f}:curve={fcurve}', '-c:a', 'pcm_s16le', w2])
+                     f'atrim=duration={L:.3f},afade=t=in:d={0.003 if quick else 0.006},afade=t=out:st={max(L - f, 0):.3f}:d={f:.3f}:curve={fcurve}', '-c:a', 'pcm_s16le', w2])
             if r.returncode != 0:
                 return r.stderr.strip()[-300:], None
         # 3) äänekkyyden mittaus → vahvistus tavoitteeseen (−24…+24 dB) + alimiter (katto −1 dBFS)

@@ -359,12 +359,20 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   kupariaseet/-työkalut; 4 kuparipanssari, kuparikilpi, karhuhaarniska; 5 rautakirves ja -hakku; 6 rautamiekka; 7 rautakilpi ja -panssari;
   10 hiidenjousi, 12 hiidenmiekka, 14 hiidenpanssari. J-paneeli näyttää jokaisen tason palkinnon. Poiminnat ja XP-viestit eivät soita ilmoitusääntä.
 
+## Kuolema (v2.73)
+- Hahmo kaatuu painovoimalla iskun suuntaan maan tasalle, veri leviää kehon alle, ja kamera nousee yläviistoon. Hautakasa ei näy kuolinkamerassa.
+- Kuolinruutu kertoo syyn (taistelu ja tappajan nimi, hukkuminen, palaminen, putoaminen, kaatuva puu, nälkä, tyhjyys), vinkin ja tilastot.
+- Herätessä ruumis jää maahan 60 s ja maatuu 30 s:ssa.
+- Tyhjyyteen (maailman tai ulottuvuuden alle) pudonnut kuolee 1 s:n kuluttua; tavarat jäävät viimeiseen turvalliseen kohtaan.
+- Sateessa kasteltava pelaaja ei syty tuleen; sammumisen jälkeen 6 s ennen kuin voi syttyä uudelleen.
+
 ## Opastus (v2.71)
 - Uuden maailman luonnissa valinta "Opastus uuden maailman alkuun" (oletuksena päällä ensimmäisessä maailmassa; Asetukset › Ohjaus › Opastus seuraavassa
   uudessa maailmassa). Alkulennon jälkeen peli pysähtyy: kortit ja korostus esittelevät palkit, pikapaikat, minikartan, tehtävän ja tavoitteen (T),
   repun ja valmistuksen (Tab), kartan (M), tason (J), ilmoitukset (L), toiminnot (E, hiiri, B) ja päävalikon (P). Paneelit avataan ja suljetaan itse,
   muut kortit Enterillä. Viimeisenä liikkuminen: peli käynnistyy, ja opastus päättyy, kun olet liikkunut, juossut ja hypännyt. Ohitus kysyy varmistuksen.
-- Kertavinkit (opastuksen maailmassa): kun asia tulee ensimmäisen kerran vastaan (vasara, jousi, lapio, kirves, uinti, yö, ylikuorma, vähäinen terveys,
+- v2.74: pikapaikat (1–8) ja minikartan zoom (N) kokeillaan itse; uuden maailman alussa kartalla paljastuu aloituspaikalta 30 % isompi ympyrä.
+- Kertavinkit (opastuksen maailmassa, eivät pysäytä peliä): kun asia tulee ensimmäisen kerran vastaan (vasara, jousi, lapio, kirves, uinti, yö, ylikuorma, vähäinen terveys,
   Hautakumpu, ulottuvuus, ensimmäinen taso), ruudun yläosaan tulee 10 s vinkki.
 
 ## 15. Asetukset ja näppäimet (settings.js)
@@ -619,6 +627,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.75:** liukusäätimen napsu vielä 20 % hiljempaa ja tasaisempi sävel; esiasetussäätimessä napsu kuuluu vain, kun taso vaihtuu.
+- **v2.73:** liukusäätimen napsu 40 % hiljempaa, askeleet 30 % hiljempaa, hengästys 20 % hiljempaa; äänimerkki häipyy 2 s:ssa ja napautus aloittaa intron heti.
+- **v2.72:** nopeat toiminto- ja käyttöliittymä-äänet alkavat heti (3 ms, ennen 20 ms); hengästys on käyttäjän uusi ääni saumattomana silmukkana.
 - **v2.67 silmukat ja tunnelma:** jokainen silmukka pitää yhden arvotun version; sää ristihäivyttää 2,5 s; siirtyessä maailman ja ulottuvuuden
   välillä vanhat loppuvat 0,3 s ja uudet alkavat 1 s kuluttua; tauolla kaikki hiljenevät 1 s. Myrskyssä myrsky + ukkosen taustasilmukka, salaman
   jälkeen 0–3 s salama-ääni. Veden alla oma silmukka (0,5 s) ja kaikki pelin äänet vaimeina (ei musiikki eikä valikot).

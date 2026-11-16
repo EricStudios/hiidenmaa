@@ -153,7 +153,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('v1.67 riimusiirtymä: kehä, 24 riimua, HIIDENMAA-riimut, sinetti, paineaalto',()=>!document.getElementById('splash')||(document.querySelectorAll('#splash .stRing .rn text').length===24&&document.querySelectorAll('#splash .stCyc span').length===9&&!!$('#splash .stWave')&&!$('#splash .spRing'))||'puuttuu');
   t('v1.68 hengitys, AFK-animaatio (3 s), pieni kävelykeinunta',()=>{const g=window.__game,st=state;state='play';for(const k in keys)keys[k]=false;P.vel.set(0,0,0);for(let i=0;i<130;i++)g.update(1/30);const ok=P.afkK>.5&&P.idleK>.9;state=st;return ok||'afk '+P.afkK;});
   t('v1.69 testin tasot Low–Ultra (indeksi 140 → Ultra), sininen ᚺ + kaartuva riimurivi, AFK-eleet ilman värinää',()=>{const L=window.__boot.perfLevel;return L(10)===0&&L(45)===3&&L(139)===6&&L(140)===7&&(!document.getElementById('splash')||!!$('#splash .stFin .h'))||'tasot '+[L(10),L(45),L(140)];});
-  t('v1.70 kaatuvan puun vihje: sivuilmoitus osumasta, kuolinruudun vihje',()=>!!$('#deadTip')&&/deathCause='tree'/.test(crushPlayer.toString())&&/Väistä sivuun/.test(crushPlayer.toString())&&/deadTip/.test(playerDie.toString())||'puuttuu');
+  t('v1.70 kaatuvan puun vihje: sivuilmoitus osumasta, kuolinruudun vihje',()=>!!$('#deadTip')&&/deathCause='tree'/.test(crushPlayer.toString())&&/Väistä sivuun/.test(crushPlayer.toString())&&/deadTip/.test(deathScreen.toString())&&!!DEATH_INFO.tree||'puuttuu');
   t('v1.71 ensikäynnin jaksoa ei voi ohittaa, merkintä vasta lopussa',()=>{const x=new XMLHttpRequest();x.open('GET','js/boot.js?t='+Date.now(),false);x.send();const n=(x.responseText.match(/if\(needSplash\)lsSet\('hiidenmaa_intro','1'\)/g)||[]).length;return /function skip\(e\)\{if\(needSplash\)return;/.test(x.responseText)&&n===1&&/function end\(\)\{[^\n]*if\(needSplash\)lsSet\('hiidenmaa_intro','1'\)/.test(x.responseText)||'puuttuu';});
   t('v1.72 suorituskykytestin yläilmoitus (heikommat koneet, voi nostaa itse)',()=>!document.getElementById('splash')||/heikompia koneita/.test($('#splash .ppTop').textContent)||'puuttuu');
   t('v1.74 näppäinlistan kiinteät (I, Q repussa, Enter, mikä tahansa, DEV) ja hartiat/kaulus',()=>{const o=setTab;setTab='keys';renderSettings();const t=$('#setBody').textContent;setTab=o;renderSettings();return /reppu \(myös/.test(t)&&/herää uudelleen/.test(t)&&/repussa/.test(t)||'puuttuu';});
@@ -482,6 +482,43 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       while(TUT.on&&!TUT_STEPS[TUT.i].move)TUT.i++;tutShow();for(let i=0;i<3;i++)update(1/30);d=!TUT.hold&&playTime>pt;tutEnd(true);d=d&&!TUT.on&&localStorage.getItem('hiidenmaa_tutdone')==='1';}
     finally{TUT.on=TUT.hold=false;if(TUT.el)TUT.el.hidden=true;if(sv.td===null)localStorage.removeItem('hiidenmaa_tutdone');SET.tutNext=sv.tn;flags.tut=sv.ft;}
     return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
+  t('v2.73 tuli ja sade: kevyessäkään sateessa ei syty, märkyys muistetaan 2 s, sammumisen jälkeen 6 s jäähy, ei ilmoitusspämmiä',()=>{let msgs=0;const om=msg;msg=()=>{msgs++;};const sv=[wRain,shelterCache,P.burnT,P.igniteCd,P.hp,P.maxHp,P.pos.clone(),P.inWater,P.rainHitT];let res;
+    try{const x=P.pos.x+3,z=P.pos.z,fp=addPiece('nuotio',x,terrainH(x,z),z,0);fp.data.fuel=5;P.pos.set(x,terrainH(x,z)+.01,z);P.hp=P.maxHp=1e5;
+      const run=sec=>{let ign=0,prev=P.burnT>0;for(let i=0;i<sec*30;i++){playTime+=1/30;updatePlayerBurn(1/30);const b=P.burnT>0;if(b&&!prev)ign++;prev=b;}return ign;};
+      shelterCache=false;P.inWater=false;wRain=.2;P.burnT=0;P.igniteCd=0;const a=run(8)===0;   /* kevyt sade */
+      let flips=0;for(let i=0;i<20;i++){shelterCache=i%2===0;wRain=1;flips+=run(.5);}const b=flips<=1;   /* katon reuna: suoja vaihtelee → ei kierrettä */
+      shelterCache=true;wRain=0;P.rainHitT=-99;P.burnT=0;P.igniteCd=0;run(.5);shelterCache=false;wRain=1;run(.5);const cd=P.igniteCd-playTime;wRain=0;shelterCache=true;
+      const c=cd>4&&run(3)===0&&run(5)===1;msgs=0;for(let i=0;i<6;i++){wRain=i%2;run(2);}const d=msgs<=2;removePiece(fp);
+      res=a&&b&&c&&d&&RAIN_WET<.2&&FIRE_CD===6||`virhe ${a}${b}${c}${d} flips ${flips} cd ${cd&&cd.toFixed(1)}`;}
+    finally{msg=om;[wRain,shelterCache,P.burnT,P.igniteCd,P.hp,P.maxHp,,P.inWater,P.rainHitT]=sv;P.pos.copy(sv[6]);}return res;});
+  t('v2.73 kuolema: syyn mukainen kuolinruutu (otsikko, selostus, vinkki, tilastot, pääkallo), kaatuminen maahan, hautakasa piilossa, ruumis maatuu, tyhjyys 1 s',()=>{
+    const a=!!$('#deadT')&&!!$('#deadC')&&!!$('#deadStats')&&!!$('#deadS .deadSkull')&&!!$('#deadTip')&&['mob','boss','drown','fire','fall','tree','hunger','void','hit'].every(k=>DEATH_INFO[k]&&DEATH_INFO[k].t);
+    const b=VOID_T===1&&/voidTick/.test(updatePlayer.toString())&&/P\.safe/.test(playerDie.toString())&&/hid:true/.test(playerDie.toString())&&/!g\.hid/.test(updateStations.toString())&&CORPSE_HOLD===60&&CORPSE_ROT===30;
+    const c=/deathCam/.test(updateCamera.toString())&&/deathTick/.test(frame.toString())&&/P\.push=/.test(hurtPlayer.toString())&&/lastMob/.test(mobHurtP.toString())&&/fallT/.test(updatePlayer.toString());
+    const sv=[P.voidDeath,P.ashDeath,P.lastFire,P.deathCause,P.fallT,P.lastMob,P.hunger];let d;
+    try{P.voidDeath=false;P.ashDeath=false;P.lastFire=-99;P.deathCause=null;P.fallT=-99;P.lastMob={n:'Testi',type:'susi',boss:false,t:playTime};d=deathCauseOf(false).k==='mob';P.lastMob=null;P.fallT=playTime;d=d&&deathCauseOf(false).k==='fall';P.fallT=-99;
+      d=d&&deathCauseOf(true).k==='drown';P.voidDeath=true;d=d&&deathCauseOf(false).k==='void';}finally{[P.voidDeath,P.ashDeath,P.lastFire,P.deathCause,P.fallT,P.lastMob,P.hunger]=sv;}
+    return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
+  t('v2.73 äänet ja merkit: sliderin napsu −40 %, askeleet −30 %, hengästys −20 %, äänimerkki häipyy 2 s, Extra-asetusten pallo suhteessa esiasetukseen',()=>{
+    const a=MSND.tickV===.168&&PL_STEP_V===.56&&TG_STEP_K===.7&&HENG_V===.64&&/TG_STEP_K/.test(tgStep.toString());
+    const sv=JSON.stringify(SET);let b;try{SET.torchSharp=true;applyPreset(0);SET.torchSharp=true;const lo=pfLvlRel('torchSharp');applyPreset(7);SET.torchSharp=true;const hi=pfLvlRel('torchSharp');SET.shUltra='sharp';const sh=pfLvl('shUltra');
+      b=lo===3&&hi===1&&sh===3&&/tasolla/.test(pfDot('torchSharp'))||`lo ${lo} hi ${hi} sh ${sh}`;}finally{Object.assign(SET,JSON.parse(sv));applyGfx();}
+    return a&&b===true||`virhe ${a} ${b}`;});
+  t('v2.74 opastus: pikapaikat (1–8) ja minikartta (N) kokeillaan itse, N ei esty; aloituspaikalta 30 % isompi paljastettu ympyrä',()=>{
+    const hb=TUT_STEPS.find(x=>x.el==='#hotbar'&&x.keys&&x.keys.includes('digits')),mm=TUT_STEPS.find(x=>x.keys&&x.keys.includes('minizoom'));
+    const a=!!hb&&!hb.next&&!!mm&&!mm.next&&/Digit\[1-8\]/.test(tutKey.toString())&&/kaikki on opeteltu/.test(TUT_STEPS[0].d());
+    const sv=explored.slice();explored.fill(0);const px=P.pos.x,pz=P.pos.z,inD=P.inDun;P.inDun=false;exploreTick(SPAWN_EXP);const n1=explored.reduce((a,v)=>a+v,0);explored.fill(0);exploreTick();const n0=explored.reduce((a,v)=>a+v,0);explored.set(sv);P.inDun=inD;
+    const b=SPAWN_EXP>3&&n1>n0*1.6&&/exploreTick\(SPAWN_EXP\)/.test(newGame.toString());
+    return a&&b||`virhe ${a}${b} ${n0}/${n1}`;});
+  t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
+    const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
+    try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;
+      el.dispatchEvent(new MouseEvent('mousedown',{clientX:X(3),bubbles:true}));const a=L.length===0;   /* sama arvo: ei ääntä */
+      for(const dx of [1,2,3,-1,-2])dispatchEvent(new MouseEvent('mousemove',{clientX:X(3)+dx,movementX:dx}));const b=L.length===0;   /* liike saman arvon sisällä: ei ääntä */
+      dispatchEvent(new MouseEvent('mousemove',{clientX:X(5),movementX:40}));dispatchEvent(new MouseEvent('mousemove',{clientX:X(5)+2,movementX:2}));const c=L.length===1;
+      dispatchEvent(new MouseEvent('mouseup'));
+      r=a&&b&&c&&MSND.tickV===.168&&MSND.tickPj===.02&&L[0]===.02&&sldSnap($('#tSld'))&&!sldSnap($('#tSld2'))||`virhe ${a}${b}${c} ${L.length}`;}
+    finally{mSnd=om;box.remove();sldDrag=null;}return r;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());
@@ -765,7 +802,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     try{P.pos.set(B.x,terrainH(B.x,B.z),B.z);P.onGround=true;P.swim=false;P.inDun=false;P.vel.set(3,0,0);PLV.bushT=-9;PLV.ph=null;plTick(1/30);const n1=calls.filter(c=>c==='askeleet/puska').length;plTick(1/30);
       var n2=calls.filter(c=>c==='askeleet/puska').length,b=n1===1&&n2===1&&calls.includes('askeleet/askel_pusikko');}
     finally{plSnd=orig;CRE.ok=ok0;P.pos.copy(sv[0]);P.onGround=sv[1];P.vel.copy(sv[2]);P.swim=sv[3];P.inDun=sv[4];}
-    const c=PL_STEP_V===.8&&/o\.pj\?\?\.05/.test(plSnd.toString())&&/plBush\(m\.pos\.x/.test(tgStep.toString())&&/'puska',\{v:\.9\}/.test(plTick.toString());
+    const c=PL_STEP_V===.56&&/o\.pj\?\?\.05/.test(plSnd.toString())&&/plBush\(m\.pos\.x/.test(tgStep.toString())&&/'puska',\{v:\.9\}/.test(plTick.toString());
     return a&&b&&c||`virhe pensas ${a} ääni ${b} (${calls.join(',')}) muut ${c}`;});
   t('v2.26 terveyspalkit: vain suora katse; vahingoittunut myös 10 % ympärillä; vahingon jälkeen 5 s; ei jos tosi kaukana ja piilossa',()=>{
     for(const q of [...mobs])mobRemove(q);const cp=camera.position.clone(),cq=camera.quaternion.clone(),pp=P.pos.clone(),bs=barSeen,L=LOC.spawn,x=L.x+30,z=L.z+30;
@@ -1055,8 +1092,8 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     try{const x=P.pos.x+3,z=P.pos.z,fp=addPiece('nuotio',x,terrainH(x,z),z,0);fp.data.fuel=5;P.pos.set(x,terrainH(x,z)+.01,z);P.hp=P.maxHp=1e5;
       const run=sec=>{let ign=0,prev=P.burnT>0;for(let i=0;i<sec*30;i++){playTime+=1/30;updatePlayerBurn(1/30);const b=P.burnT>0;if(b&&!prev)ign++;prev=b;}return ign;};
       wRain=1;shelterCache=false;P.burnT=0;P.igniteCd=0;msgs=0;const a=run(10)===0&&msgs===0;
-      wRain=0;const b=run(1)===1&&P.burnT>0;wRain=1;msgs=0;const c=run(10)===0&&P.burnT===0&&msgs===0;
-      shelterCache=true;P.burnT=0;P.igniteCd=0;const d=run(1)===1&&P.burnT>0;P.inWater=true;run(.2);const e=!(P.burnT>0);P.inWater=false;
+      wRain=0;const b=run(3)===1&&P.burnT>0;wRain=1;msgs=0;const c=run(10)===0&&P.burnT===0&&msgs<=1;   /* v2.73: sateen muisti 2 s, yksi sammumisilmoitus */
+      shelterCache=true;P.burnT=0;P.igniteCd=0;P.rainHitT=-99;const d=run(1)===1&&P.burnT>0;P.inWater=true;run(.2);const e=!(P.burnT>0);P.inWater=false;
       shelterCache=false;const m=spawnMob('susi',P.pos.x+20,P.pos.z+20);m.burnT=0;igniteMob(m);const f=!(m.burnT>0);wRain=0;igniteMob(m);const g=m.burnT>0;
       wRain=1;m.shU=0;m.shd=false;updateBurn(m,.03);const h=!(m.burnT>0)&&m.igniteCd>playTime;mobRemove(m);removePiece(fp);res=a&&b&&c&&d&&e&&f&&g&&h||`virhe ${a}${b}${c}${d}${e}${f}${g}${h}`;}
     finally{msg=om;[wRain,shelterCache,P.burnT,P.igniteCd,P.hp,P.maxHp,,P.inWater]=sv;P.pos.copy(sv[6]);}
