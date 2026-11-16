@@ -14,7 +14,7 @@
 13,🗺️ Uusi alue löydetty,biomi_routahuiput,⬜ puuttuu,lisää: biomi_routahuiput.mp3,uusi alue löydetty: Routahuiput (oma ääni; puuttuessa biomi_yhteinen),"discovery chime, routahuiput"
 14,🗺️ Uusi alue löydetty,biomi_hietaranta,⬜ puuttuu,lisää: biomi_hietaranta.mp3,uusi alue löydetty: Hietaranta (oma ääni; puuttuessa biomi_yhteinen),"discovery chime, hietaranta"
 15,🗺️ Uusi alue löydetty,biomi_meri,⬜ puuttuu,lisää: biomi_meri.mp3,uusi alue löydetty: Meri (oma ääni; puuttuessa biomi_yhteinen),"discovery chime, meri"
-16,🌀 Ulottuvuuteen saapuminen,ulottuvuus_yhteinen,⬜ puuttuu,lisää: ulottuvuus_yhteinen.mp3,"saavut ulottuvuuteen ensimmäistä kertaa (ulottuvuuden banneri) – soi, jos ulottuvuudella ei ole omaa ääntä","dark realm reveal, ominous magic boom"
+16,🌀 Ulottuvuuteen saapuminen,ulottuvuus_yhteinen,✅ valmis (1),ulottuvuus_yhteinen,"saavut ulottuvuuteen ensimmäistä kertaa (ulottuvuuden banneri) – soi, jos ulottuvuudella ei ole omaa ääntä","dark realm reveal, ominous magic boom"
 17,🌀 Ulottuvuuteen saapuminen,ulottuvuus_routaluola,⬜ puuttuu,lisää: ulottuvuus_routaluola.mp3,saavut ulottuvuuteen Routaluola (oma ääni; puuttuessa ulottuvuus_yhteinen),"realm reveal, routaluola"
 18,🌀 Ulottuvuuteen saapuminen,ulottuvuus_kalmankammio,⬜ puuttuu,lisää: ulottuvuus_kalmankammio.mp3,saavut ulottuvuuteen Kalmankammio (oma ääni; puuttuessa ulottuvuus_yhteinen),"realm reveal, kalmankammio"
 19,🌀 Ulottuvuuteen saapuminen,ulottuvuus_aarnihauta,✅ valmis (1),ulottuvuus_aarnihauta,saavut ulottuvuuteen Aarnihauta (oma ääni; puuttuessa ulottuvuus_yhteinen),"realm reveal, aarnihauta"

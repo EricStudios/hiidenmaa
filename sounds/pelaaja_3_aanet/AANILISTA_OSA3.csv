@@ -1,19 +1,20 @@
 ﻿Nro,Ryhmä,Ääni (tiedostonimi),Tila,Tiedostot nyt,Milloin soi,Hakusanat (englanniksi)
-1,🩸 Kipu ja kuolema,kipu,⬜ puuttuu,lisää: kipu.mp3,saat osuman (tavallinen),"male hurt grunt, pain"
-2,🩸 Kipu ja kuolema,kipu_kova,⬜ puuttuu,lisää: kipu_kova.mp3,kova osuma (yli 20 % terveydestä),male heavy pain scream
-3,🩸 Kipu ja kuolema,kipu_tuli,⬜ puuttuu,lisää: kipu_tuli.mp3,"palat (toistuu noin 1,6 s välein)",burning pain scream
-4,🩸 Kipu ja kuolema,kipu_hukkuminen,⬜ puuttuu,lisää: kipu_hukkuminen.mp3,hukkut veden alla (toistuu),"drowning gurgle, underwater choke"
-5,🩸 Kipu ja kuolema,kipu_nalka,⬜ puuttuu,lisää: kipu_nalka.mp3,nälkä vie terveyttä (toistuu harvoin),"weak groan, starving"
-6,🩸 Kipu ja kuolema,kipu_putoaminen,⬜ puuttuu,lisää: kipu_putoaminen.mp3,putoat korkealta,"fall damage grunt, landing pain"
-7,🩸 Kipu ja kuolema,kuolema,⬜ puuttuu,lisää: kuolema.mp3,kuolet,"male death scream, dying"
-8,🩸 Kipu ja kuolema,kuolema_hukkuminen,⬜ puuttuu,lisää: kuolema_hukkuminen.mp3,hukut,"drowning death, last breath underwater"
-9,💓 Keho ja tila,sydan,⬜ puuttuu,lisää: sydan.mp3,"sydämen syke: vähäinen terveys tai iso paha olento lähellä (silmukka, kiihtyy)","heartbeat loop, heart pounding"
-10,💓 Keho ja tila,hengastys,⬜ puuttuu,lisää: hengastys.mp3,kestävyys loppuu (väsynyt),"heavy breathing, out of breath panting"
-11,💓 Keho ja tila,haukkoo_henkea,⬜ puuttuu,lisää: haukkoo_henkea.mp3,nouset pintaan pitkän sukelluksen jälkeen,"gasp for air, surface breath"
-12,💓 Keho ja tila,hytina,⬜ puuttuu,lisää: hytina.mp3,palelet (märkä tai kylmä yö),"shivering cold, teeth chattering"
-13,💓 Keho ja tila,vatsa_kurisee,⬜ puuttuu,lisää: vatsa_kurisee.mp3,olet nälkäinen,"stomach growl, hungry"
-14,💓 Keho ja tila,mahakipu,⬜ puuttuu,lisää: mahakipu.mp3,vatsakipu (ähky) – kouristus,stomach ache groan
-15,💓 Keho ja tila,pahoinvointi,⬜ puuttuu,lisää: pahoinvointi.mp3,pahoinvointi,"nausea, retching"
-16,💓 Keho ja tila,kylla,⬜ puuttuu,lisää: kylla.mp3,söit itsesi täyteen,"satisfied sigh, content after meal"
-17,💓 Keho ja tila,lammin,⬜ puuttuu,lisää: lammin.mp3,pääset lämpimään (nuotio tai lämmin koti),"relieved sigh, warm comfort"
-18,💓 Keho ja tila,levannyt,⬜ puuttuu,lisää: levannyt.mp3,olet levännyt (levon vaikutus alkaa),"refreshed stretch, relaxed exhale"
+1,🩸 Kipu ja kuolema,kipu,✅ valmis (1),kipu,saat osuman (tavallinen),"male hurt grunt, pain"
+2,🩸 Kipu ja kuolema,kipu_kova,✅ valmis (2),"kipu_kova, kipu_kova_1",kova osuma (yli 20 % terveydestä),male heavy pain scream
+3,🩸 Kipu ja kuolema,kipu_tuli,✅ valmis (1),kipu_tuli (+2 pätkää),"palat (toistuu noin 1,6 s välein)",burning pain scream
+4,🩸 Kipu ja kuolema,kipu_hukkuminen,✅ valmis (1),kipu_hukkuminen,hukkut veden alla (toistuu),"drowning gurgle, underwater choke"
+5,🩸 Kipu ja kuolema,kipu_nalka,✅ valmis (1),kipu_nalka,nälkä vie terveyttä (toistuu harvoin),"weak groan, starving"
+6,🩸 Kipu ja kuolema,kipu_putoaminen,✅ valmis (1),kipu_putoaminen,putoat korkealta,"fall damage grunt, landing pain"
+7,🩸 Kipu ja kuolema,nilkka,⬜ puuttuu,lisää: nilkka.mp3,iso putoamisvahinko (yli 25 % terveydestä): nilkka nurin (v2.67),"ankle twist crack, sprained ankle pain"
+8,🩸 Kipu ja kuolema,kuolema,✅ valmis (3),"kuolema, kuolema_1, kuolema_2",kuolet,"male death scream, dying"
+9,🩸 Kipu ja kuolema,kuolema_hukkuminen,✅ valmis (1),kuolema_hukkuminen,hukut,"drowning death, last breath underwater"
+10,💓 Keho ja tila,sydan,✅ valmis (1),sydan,"sydämen syke: vähäinen terveys tai iso paha olento lähellä (silmukka, kiihtyy)","heartbeat loop, heart pounding"
+11,💓 Keho ja tila,hengastys,✅ valmis (1),hengastys,SILMUKKA: kestävyys loppuu (0 %) → soi kunnes yli 30 %; myös ylikuormassa liikkuessa,"heavy breathing, out of breath panting loop"
+12,💓 Keho ja tila,haukkoo_henkea,✅ valmis (1),haukkoo_henkea,nouset pintaan pitkän sukelluksen jälkeen,"gasp for air, surface breath"
+13,💓 Keho ja tila,hytina,✅ valmis (1),hytina (+4 pätkää),palelet (märkä tai kylmä yö),"shivering cold, teeth chattering"
+14,💓 Keho ja tila,vatsa_kurisee,✅ valmis (1),vatsa_kurisee,olet nälkäinen,"stomach growl, hungry"
+15,💓 Keho ja tila,mahakipu,✅ valmis (1),mahakipu,vatsakipu (ähky) – kouristus,stomach ache groan
+16,💓 Keho ja tila,pahoinvointi,✅ valmis (2),"pahoinvointi, pahoinvointi_1",pahoinvointi,"nausea, retching"
+17,💓 Keho ja tila,kylla,✅ valmis (1),kylla,söit itsesi täyteen,"satisfied sigh, content after meal"
+18,💓 Keho ja tila,lammin,✅ valmis (1),lammin,pääset lämpimään (nuotio tai lämmin koti),"relieved sigh, warm comfort"
+19,💓 Keho ja tila,levannyt,✅ valmis (1),levannyt,olet levännyt (levon vaikutus alkaa),"refreshed stretch, relaxed exhale"
