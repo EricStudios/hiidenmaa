@@ -278,10 +278,13 @@ function doorInWay(p){const r=(P.r||.38)+.05,y0=P.pos.y,y1=P.pos.y+1.8;for(const
 function setDoor(p,open,dir,inst){const lf=p.mesh.userData.leaf;if(!open&&!inst&&p.data.open&&doorInWay(p))return false;
   if(dir)p.data.dir=dir;p.data.open=open;const a1=open?(p.data.dir||1)*Math.PI/2*.95:0;markShadowDirty();
   if(inst||!lf){if(lf)lf.rotation.y=a1;p._da=null;DOOR_ANIM.delete(p);for(const c of p.cols)if(c.door)c.off=open;return true;}
-  p._da={a0:lf.rotation.y,a1,t:0,open};DOOR_ANIM.add(p);if(open)for(const c of p.cols)if(c.door)c.off=true;return true;}
+  p._da={a0:lf.rotation.y,a1,t:0,open};DOOR_ANIM.add(p);if(open)for(const c of p.cols)if(c.door)c.off=true;doorSnd(p,open?'ovi_avaus':null,true);return true;}
+/* v2.86 OVEN ÄÄNET (pelaaja_2_toiminnot/kaytto): avatessa ovi_avaus heti, sarana narisee (ovi_narina) kääntymisen ajan avatessa ja sulkiessa,
+   ovi_kiinni kun sulkemisanimaatio loppuu (doorTick). Ääni oven kohdalta (3D). */
+function doorSnd(p,ev,creak){if(typeof plSnd!=='function')return;const q={x:p.x,y:(p.y||0)+1.1,z:p.z};if(ev)plSnd('kaytto',ev,{pos:q});if(creak)plSnd('kaytto','ovi_narina',{pos:q,v:.8});}
 function doorTick(dt){if(!DOOR_ANIM.size)return;for(const p of DOOR_ANIM){const d=p._da,lf=p.mesh&&p.mesh.userData.leaf;
     if(!d||!lf||!pieces.includes(p)){DOOR_ANIM.delete(p);continue;}d.t+=dt;const k=Math.min(1,d.t/DOOR_T);lf.rotation.y=d.a0+(d.a1-d.a0)*doorEase(k);shDirty=true;bldDirty=true;
-    if(k>=1){DOOR_ANIM.delete(p);p._da=null;if(!d.open)for(const c of p.cols)if(c.door)c.off=false;markShadowDirty();}}}
+    if(k>=1){DOOR_ANIM.delete(p);p._da=null;if(!d.open){for(const c of p.cols)if(c.door)c.off=false;doorSnd(p,'ovi_kiinni',false);}markShadowDirty();}}}
 function nearPiece(t,x,z,r){for(const p of pieces)if(p.t===t&&dist2(p.x,p.z,x,z)<r*r)return p;return null;}
 
 /* ---------------- v2.41 KAUKAISTEN RAKENNUSTEN YHDISTÄMINEN (SET.mergeSt) ----------------

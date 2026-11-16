@@ -3,7 +3,7 @@
    vasta sitten latausnäyttö ja pelin skriptit. Ennen jakso pyöri pelin latauksen päällä, jolloin häivytykset pätkivät. Pelin skriptit
    esiladataan taustalla (<link rel=preload>) ja ajetaan yksi kerrallaan pienellä tauolla, jotta riimut ehtivät syttyä näkyvästi.
    Välilyönti, Enter tai napsautus ohittaa koko jakson (ja testin) ja vie suoraan latausnäyttöön. */
-window.__BJV='2.85';
+window.__BJV='2.86';
 (function(){
   var Q=location.search,wd=!!navigator.webdriver;
   function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
@@ -62,11 +62,13 @@ window.__BJV='2.85';
        'boss' = pomotaistelu: alkaa heti, toistuu taistelun ajan; taistelun päättyessä häivytys ja maailman säännöt.
      Häivytykset (käyttäjä): vanha hiljenee MUC.OUT 2,5 s, sitten uusi tulee sisään MUC.IN 2,5 s (valikossa uusi alkaa ilman fade iniä).
      Puuttuva kappale = hiljaisuus. Taso bsVolK('music') (__mus.apply). */
-  var MUC={OUT:2.5,IN:2.5,GAP_MIN:20,GAP_MAX:40,JOIN_MIN:10,JOIN_MAX:40,SIL_MIN:50,SIL_MAX:120,SWITCH_P:.8,BOSS_GAP:1.5};   // ajat (s) ja todennäköisyys; testit voivat lyhentää
+  var MUC={OUT:2.5,IN:2.5,GAP_MIN:20,GAP_MAX:40,JOIN_MIN:10,JOIN_MAX:40,SIL_MIN:50,SIL_MAX:120,SWITCH_P:.8,BOSS_GAP:1.5,VB_GAP:2};   // v2.86 VB_GAP: viimeisen pomon puolivälin kappale alkaa uudelleen 2 s tauon jälkeen   // ajat (s) ja todennäköisyys; testit voivat lyhentää
   var MU={ctx:null,cur:null,tm:0,tok:0,last:{},m1:false,hold:0,pend:null};
   var muRnd=function(a,b){return a+Math.random()*(b-a);};
-  function muType(c){return !c?null:c==='valikko'||c==='tauko'?'menu':c==='boss'?'boss':c.charAt(0)==='w'?'bio':'dun';}
-  function muKeys(c){if(!BS.man)return [];var pre=c==='valikko'?(MU.m1?'mu/valikko/menu2_':'mu/valikko/menu1_'):c==='tauko'?'mu/valikko/menu2_':c==='boss'?'mu/ulottuvuudet/pomotaistelu_':
+  /* v2.86 'vboss' = viimeinen pomo alle puolet terveydestä (vartija_puolivali, silmukkana VB_GAP tauolla); 'vend' = viimeinen pomo kuolee
+     (vartija_kuolema, kerran loppuun – main.js musicCtx pitää kontekstin, kunnes kappale on soinut). */
+  function muType(c){return !c?null:c==='valikko'||c==='tauko'?'menu':c==='boss'||c==='vboss'?'boss':c==='vend'?'once':c.charAt(0)==='w'?'bio':'dun';}
+  function muKeys(c){if(!BS.man)return [];var pre=c==='valikko'?(MU.m1?'mu/valikko/menu2_':'mu/valikko/menu1_'):c==='tauko'?'mu/valikko/menu2_':c==='boss'?'mu/ulottuvuudet/pomotaistelu_':c==='vboss'?'mu/ulottuvuudet/vartija_puolivali_':c==='vend'?'mu/ulottuvuudet/vartija_kuolema_':
       c.charAt(0)==='w'?'mu/biomit/'+c.slice(2)+'_':'mu/ulottuvuudet/'+c.slice(2)+'_',L=[],k;
     for(k in BS.man)if(k.indexOf(pre)===0)L.push(k);if(!L.length&&c==='valikko'&&!MU.m1){MU.m1=true;return muKeys(c);}return L;}
   function muVol(){return bsVolK('music');}
@@ -77,7 +79,7 @@ window.__BJV='2.85';
   // seuraava kappale nykyiselle kontekstille (fi = fade in s); lukossa / puuttuva → odottaa (MU.pend), muTry yrittää uudelleen
   function muStart(fi){var c=MU.ctx,ac=BS.ac;if(!c||MU.cur)return false;MU.pend={fi:fi};if(!ac||ac.state!=='running'||!BS.man)return false;
     if(muType(c)==='dun'&&Date.now()<MU.hold){muLater((MU.hold-Date.now())/1000,function(){muStart(fi);});return false;}
-    var L=muKeys(c);if(!L.length){MU.pend=null;if(muType(c)!=='menu'&&muType(c)!=='boss')muLater(muRnd(MUC.SIL_MIN,MUC.SIL_MAX),function(){muStart(MUC.IN);});return false;}
+    var L=muKeys(c);if(!L.length){MU.pend=null;if(muType(c)!=='menu'&&muType(c)!=='boss'&&muType(c)!=='once')muLater(muRnd(MUC.SIL_MIN,MUC.SIL_MAX),function(){muStart(MUC.IN);});return false;}
     var lk=c+(c==='valikko'&&!MU.m1?'1':'');if(L.length>1&&MU.last[lk])L=L.filter(function(x){return x!==MU.last[lk];});var key=L[Math.random()*L.length|0],e=BS.man[key];MU.last[lk]=key;
     if(c==='valikko'&&!MU.m1&&key.indexOf('mu/valikko/menu1_')===0)MU.m1=true;
     var el=new Audio();el.preload='auto';el.src='sounds/'+e.f+'?h='+e.h;var h={el:el,key:key,ctx:c,done:false};
@@ -89,7 +91,8 @@ window.__BJV='2.85';
   // kappale loppui luonnollisesti
   function muAfter(c){if(MU.ctx!==c)return;var t=muType(c);
     if(t==='menu')muLater(muRnd(MUC.GAP_MIN,MUC.GAP_MAX),function(){muStart(.05);});
-    else if(t==='boss')muLater(MUC.BOSS_GAP,function(){muStart(MUC.IN);});
+    else if(t==='boss')muLater(c==='vboss'?MUC.VB_GAP:MUC.BOSS_GAP,function(){muStart(c==='vboss'?.05:MUC.IN);});
+    else if(t==='once')return;   // v2.86 kuolemamusiikki: kerran
     else muLater(muRnd(MUC.SIL_MIN,MUC.SIL_MAX),function(){muStart(MUC.IN);});}
   // vanha ulos MUC.OUT, sitten uusi sisään MUC.IN
   function muSwap(fi){var h=MU.cur;MU.cur=null;if(h){muKill(h,MUC.OUT);muLater(MUC.OUT,function(){muStart(fi);});}else{muClear();muStart(fi);}}
@@ -103,6 +106,7 @@ window.__BJV='2.85';
   function muTry(){if(MU.pend&&!MU.cur&&!MU.tm)muStart(MU.pend.fi);}
   window.__mus={set:muSet,want:function(c){muSet(c);},stop:function(f){muSet(null,f);},hold:function(ms){MU.hold=Math.max(MU.hold,Date.now()+ms);},
     apply:function(){var h=MU.cur;if(h&&!h.done)muFade(h,muVol(),.08);},
+    has:function(p){if(!BS.man)return false;for(var k in BS.man)if(k.indexOf(p)===0)return true;return false;},   // v2.86
     get state(){return {ctx:MU.ctx,want:MU.ctx,playing:!!MU.cur,track:MU.cur&&MU.cur.key,gap:!!MU.tm,pend:!!MU.pend};},
     C:MUC,_mu:MU,_bs:BS};
   function hintIco(on){return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/>'+(on?'<path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>')+'</svg>';}

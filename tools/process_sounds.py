@@ -44,8 +44,12 @@ NOISE_GATE = 'afftdn=nr=30:nf=-40:tn=1,agate=threshold=0.05:ratio=8:attack=0.5:r
 NOISE_FIX = {'askel_kivi_2': 'afftdn=nr=30:nf=-40:tn=1,agate=threshold=0.1:ratio=10:attack=0.5:release=30:range=0.01', 'askel_kivi_1': NOISE_GATE}   # kivi_2: suhinaa enemmän → tiukempi portti
 NOISE_EV = {'askel_kivi'}
 # v2.67 pilkottavat pitkät nauhoitukset (käyttäjä): hytinä ja palamisen kipu → useita versioita, peli arpoo (ei samaa kahdesti peräkkäin)
-SPLIT_EV = {'hytina': dict(k=8, gap=.9, seg_max=2.5), 'kipu_tuli': dict(k=8, gap=.7, seg_max=1.6)}
-_pv0 = lambda ev: f'{PV_T}w1' if ev in WHOLE_LOOP else f'{PV_T}t3' if ev in TIGHT_EV else f'{PV_T}n2' if ev in NOISE_EV else f'{PV_T}s1' if ev in SPLIT_EV else PV_T
+SPLIT_EV = {'hytina': dict(k=8, gap=.9, seg_max=2.5), 'kipu_tuli': dict(k=8, gap=.7, seg_max=1.6),
+            'heinasirkat': dict(k=14, gap=.25, seg_max=.42, win=.025, pre=3)}   # v2.86 yksittäiset siritykset (~0,25 s, 0,45 s välein) – peli soittaa omassa rytmissään
+PEAK_EV = {'heinasirkat': -9.0}   # v2.86 huippu dBFS (tasainen taso kaikille pätkille)
+CHUNK_EV = {'puiden_humina': dict(n=6, ln=22.0)}   # v2.86 pitkästä humina-nauhoituksesta tasavälein n pätkää (ln s) – peli soittaa hiljaa reiluin häivytyksin
+NOCUT_EV = {'salama', 'tausta_myrsky'}   # v2.86 salaman kaiku saa jäädä kokonaan: ei loppuleikkausta eikä pituusrajaa; alusta vain lähes hiljainen osa (−60 dB)
+_pv0 = lambda ev: f'{PV_T}pk2' if ev in PEAK_EV else f'{PV_T}nc1' if ev in NOCUT_EV else f'{PV_T}c1' if ev in CHUNK_EV else f'{PV_T}w1' if ev in WHOLE_LOOP else f'{PV_T}t3' if ev in TIGHT_EV else f'{PV_T}n2' if ev in NOISE_EV else f'{PV_T}s1' if ev in SPLIT_EV else PV_T
 # v2.72 nopeat kertaäänet: alkuun jää 3 ms hiljaisuutta (ennen 20 ms) → kaikki kertaäänet käsitellään kerran uudelleen (q1); silmukat ja musiikki ennallaan
 QUICK_SKIP = lambda ev: ev in MUSIC_EV or ev in LOOP_EV or ev in ACT_EV or ev in AMB_LOOPS or ev in ('sydan', 'hengastys')
 pv_of = lambda ev: _pv0(ev) if QUICK_SKIP(ev) else f'{_pv0(ev)}q5'   # q2 tarkka kestomittaus, q4 askeleet −48 dB (−38 dB siirsi pitkän suonauhoituksen pätkiä), q5 alun pehmennys 3 ms   # tiukan trimmauksen ja kohinakorjauksen äänet käsitellään kerran uudelleen
@@ -296,7 +300,7 @@ def best_start(ff, wav, cap, win=0.02):
             best, bi = s, i
     return max(0.0, bi * win - 0.03)
 
-def step_segments(ff, src, k=5, win=0.01, gap=0.35, seg_max=1.2):
+def step_segments(ff, src, k=5, win=0.01, gap=0.35, seg_max=1.2, pre=8):   # v2.86 pre: hiljaisten ikkunoiden määrä ennen nousua (sirkat: lyhyet tauot)
     """v2.23: pitkästä askelnauhoituksesta k voimakkainta erillistä askelta (nousu kynnyksen yli ≥ 80 ms hiljaisemman jälkeen, väli ≥ gap).
     Palauttaa [(alku, pituus)], voimakkain ensin."""
     with tempfile.TemporaryDirectory() as td:
@@ -309,8 +313,8 @@ def step_segments(ff, src, k=5, win=0.01, gap=0.35, seg_max=1.2):
     floor, peak = srt[len(srt) // 5], srt[-1]
     thr = max(floor + 12, peak - 30)
     ons = []
-    for i in range(8, len(lv)):
-        if lv[i] >= thr and max(lv[i - 8:i]) < thr - 6:
+    for i in range(pre, len(lv)):
+        if lv[i] >= thr and max(lv[i - pre:i]) < thr - 6:
             ons.append((max(lv[i:i + 15]), i * win))
     ons.sort(reverse=True)
     pick = []
@@ -355,7 +359,8 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
         if nfix:   # v2.67 tiedostokohtainen kohinanpoisto + portti (NOISE_FIX)
             pre += nfix + ','
         trim_t = 'atrim=start=0.015,asetpts=PTS-STARTPTS,' + trim.replace('-48dB', '-42dB') if kind in TIGHT_EV else trim   # v2.66 valikkoefektit: loppu tiukemmin (viimeiset 15 ms = mahdollinen loppunapsahdus pois, häntä −42 dB)
-        r = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + ('highpass=f=40' if (loop and mode != 'act') or kind in WHOLE_LOOP else f'highpass=f=40,{trim},areverse,{trim_t},areverse'),
+        nocut = kind in NOCUT_EV
+        r = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + ('highpass=f=40' if (loop and mode != 'act') or kind in WHOLE_LOOP else 'highpass=f=40,silenceremove=start_periods=1:start_threshold=-60dB:start_silence=0.01' if nocut else 'highpass=f=40' if kind in PEAK_EV else f'highpass=f=40,{trim},areverse,{trim_t},areverse'),
                 '-ac', AC, '-ar', '44100', '-c:a', 'pcm_s16le', w1])
         if r.returncode != 0 or not os.path.exists(w1):
             return r.stderr.strip()[-300:] or 'tuntematon virhe', None
@@ -389,6 +394,8 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
             if r.returncode != 0:
                 return r.stderr.strip()[-300:], None
         # 2) pituuden yläraja + häivytykset (ei klikkausta alussa, pehmeä loppu)
+        if nocut:   # v2.86 salama: koko kaiku säilyy
+            cap = max(cap, d)
         L = min(d, cap)
         cut = d > cap
         if mode == 'step':   # v2.23: yksi askel – ensimmäisen tapahtuman loppuun (ei toista askelta tai jälkikohinaa)
@@ -411,6 +418,9 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
         # 3) äänekkyyden mittaus → vahvistus tavoitteeseen (−24…+24 dB) + alimiter (katto −1 dBFS)
         lu = loudness(ff, w2)
         gain = 0.0 if lu is None else max(-24.0, min(24.0, target - lu))
+        if kind in PEAK_EV:   # v2.86 hyvin lyhyet pätkät (sirkat): huipputason mukaan – LUFS-mittaus ei toimi alle 0,4 s:n pätkille
+            pk2 = peak_db(ff, ['-i', w2])
+            gain = 0.0 if pk2 is None else max(-24.0, min(24.0, PEAK_EV[kind] - pk2))
         r = run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', w2, '-af', f'volume={gain:.2f}dB,alimiter=limit=0.89:attack=2:release=60:level=disabled',
                  '-ac', AC, '-ar', '44100', '-c:a', 'libmp3lame', '-b:a', BR, '-id3v2_version', '0', tmp])
         if r.returncode != 0 or not os.path.exists(tmp) or os.path.getsize(tmp) < 200:
@@ -610,7 +620,7 @@ HIT_FI = {'raapaisu': ('kynnet raapaisevat (ilves, karhut, Suonäkki)', 'claw sc
 LOOP_EV = {'palaminen'}   # v2.22: silmukat – ei hiljaisuuden leikkausta eikä häivytyksiä; sauma ristihäivytetään (saumaton silmukka)
 # v2.23: toimintosilmukat (käyttäjän pyyntö): pitkä raaka saa olla pitkä – käsitellään saumattomaksi silmukaksi (enintään 20 s); peli soittaa
 # sitä niin kauan kuin eläin tekee toimintoa (syö, tonkii, nuuhkii) ja pysäyttää pehmeästi, kun toiminto loppuu
-WHOLE_LOOP = {'hengastys', 'sydan'}   # v2.76 silmukka kokonaisena (käyttäjä): ei hiljaisuuden leikkausta eikä sauman ristihäivytystä – koko tiedosto toistuu sellaisenaan
+WHOLE_LOOP = {'hengastys', 'sydan', 'linnunlaulu'}   # v2.86 linnunlaulu kokonaisena (10 min: peli soittaa suoratoistona)   # v2.76 silmukka kokonaisena (käyttäjä): ei hiljaisuuden leikkausta eikä sauman ristihäivytystä – koko tiedosto toistuu sellaisenaan
 ACT_EV = {'syominen_laidun', 'syominen_tonkiminen', 'syominen_rouskutus', 'syominen_nakerrus', 'nuuhkiminen', 'juominen', 'sydan'}   # v2.24 juominen, v2.25 pelaajan sydämen syke (silmukka)
 def step_like(ev):
     """v2.23: askelmaiset äänet – kohinanpoisto, vain ensimmäinen tapahtuma (yksi askel), pitkästä nauhoituksesta useita pätkiä."""
@@ -761,6 +771,9 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
         ('kaytto', 'Keräily ja käyttö', '🎒', [('poiminta', 'poimit esineen maasta tai kasvista', 'item pickup, pick up'),
                                               ('arkku_auki', 'avaat arkun tai hautakasan', 'chest open, wooden lid creak'),
                                               ('arkku_kiinni', 'suljet oman (rakentamasi) arkun', 'chest close, wooden lid shut'),
+                                              ('ovi_avaus', 'avaat oven – soi heti painalluksesta (salpa, ensimmäinen nytkähdys)', 'wooden door open, latch click'),
+                                              ('ovi_narina', 'oven sarana narisee kääntymisen ajan (animaatio 0,6 s) – avatessa ja sulkiessa', 'door hinge creak, wooden door creak'),
+                                              ('ovi_kiinni', 'ovi sulkeutuu – soi kun sulkemisanimaatio loppuu ja ovi osuu karmiin', 'wooden door close, door shut thud'),
                                               ('syominen', 'syöt ruokaa', 'eating food, chewing bite'),
                                               ('juominen', 'juot juoman', 'drinking potion, gulp')]),
         ('valikot', 'Valikot', '📜', [('reppu', 'avaat tai suljet repun (Tab) – sama ääni molempiin', 'backpack open, leather bag'),
@@ -839,7 +852,7 @@ BIO_FI = [('meadow', 'rantaniitty', 'Rantaniitty'), ('koivu', 'koivulehto', 'Koi
           ('kangas', 'jakalakangas', 'Jäkäläkangas'), ('aarni', 'aarnimetsa', 'Aarnimetsä'), ('moor', 'kalmanummi', 'Kalmanummi'), ('tunturi', 'tunturikangas', 'Tunturikangas'),
           ('rakka', 'rakka', 'Rakka'), ('mountain', 'kivivuori', 'Kivivuori'), ('peak', 'routahuiput', 'Routahuiput'), ('beach', 'hietaranta', 'Hietaranta'), ('sea', 'meri', 'Meri')]
 REALM_FI = [('portal1', 'routaluola', 'Routaluola'), ('portal2', 'kalmankammio', 'Kalmankammio'), ('portal3', 'aarnihauta', 'Aarnihauta')]
-MUSIC_EV = {'menu1', 'menu2', 'hautakumpu', 'pomotaistelu'} | {fi for _, fi, _ in BIO_FI} | {fi for _, fi, _ in REALM_FI}   # v2.66 stereo, parempi laatu
+MUSIC_EV = {'menu1', 'menu2', 'hautakumpu', 'pomotaistelu', 'vartija_puolivali', 'vartija_kuolema'} | {fi for _, fi, _ in BIO_FI} | {fi for _, fi, _ in REALM_FI}   # v2.66 stereo, parempi laatu
 AMB_PL = REALM_FI + [('barrow', 'hautakumpu', 'Hautakumpu')]
 NAT_BIO = [('korpimetsa', 'Korpimetsä'), ('koivulehto', 'Koivulehto'), ('aarnimetsa', 'Aarnimetsä'), ('upposuo', 'Upposuo'), ('kalmanummi', 'Kalmanummi'), ('rantaniitty', 'Rantaniitty')]   # v2.67 biomien sivuäänet (käyttäjä: metsäiset + niitty)   # v2.61 tunnelmaäänien paikat
 X_PARTS = [   # (kansio, etuliite, listan nimi, otsikko, ryhmät)
@@ -850,7 +863,9 @@ X_PARTS = [   # (kansio, etuliite, listan nimi, otsikko, ryhmät)
         ('biomit', 'Biomien musiikki', '🗺️', [(fi, f'maailmassa: {nm} – alkaa 10–40 s pelin alusta, kappaleiden välissä 50 s – 2 min hiljaisuutta; versiot {fi}_1 …', 'ambient nordic exploration music, ' + nm.lower()) for _, fi, nm in BIO_FI]),
         ('ulottuvuudet', 'Ulottuvuudet, Hautakumpu ja pomotaistelu', '🌀', [(fi, f'{nm}: alkaa sisään astuessa (häivytys), välissä 50 s – 2 min hiljaisuutta', 'dark dungeon ambient music, ' + nm.lower()) for _, fi, nm in REALM_FI]
          + [('hautakumpu', 'Hautakummun luolasto: alkaa sisään astuessa (häivytys)', 'dark barrow crypt ambient music'),
-            ('pomotaistelu', 'pomotaistelu (Jäätär, Kalmaherra, Aarnihirviö, Kalmanvartija): alkaa pomon herätessä, loppuu häivyttäen taistelun päättyessä', 'epic boss battle music, nordic drums choir')])]),
+            ('pomotaistelu', 'pomotaistelu (Jäätär, Kalmaherra, Aarnihirviö, Kalmanvartija): alkaa pomon herätessä, loppuu häivyttäen taistelun päättyessä', 'epic boss battle music, nordic drums choir'),
+            ('vartija_puolivali', 'viimeinen pomo (Kalmanvartija) alle puolet terveydestä: soi kuolemaan asti tai kunnes taistelu keskeytyy; kappaleen loputtua alkaa uudelleen 2 s tauon jälkeen', 'epic final boss battle music, intense choir drums climax'),
+            ('vartija_kuolema', 'viimeinen pomo (Kalmanvartija) alkaa kuolla: soi kerran alusta loppuun (ei katkea, vaikka kuolema-animaatio loppuu)', 'triumphant victory music, epic finale nordic choir')])]),
     ('ilmoitukset', 'i', 'AANILISTA_ILMOITUKSET.csv', 'Ilmoitukset ja löydöt', [
         ('ilmoitukset', 'Ilmoitukset', '💬', [('ilmoitus', 'viesti tai ilmoitus ruudulle (vasen reuna); enintään 0,35 s välein', 'ui notification soft, message pop')]),
         ('biomit', 'Uusi alue löydetty', '🗺️', [('biomi_yhteinen', 'uusi alue löydetty (aluebanneri) – soi, jos alueella ei ole omaa ääntä', 'discovery chime, new area found, mystical reveal')]
@@ -872,13 +887,15 @@ X_PARTS = [   # (kansio, etuliite, listan nimi, otsikko, ryhmät)
         ('luonto', 'Luonnon äänet (maailmassa)', '🐦', [('linnunlaulu', 'SILMUKKA, satunnaiset jaksot: päivällä, tyyni tai heikko tuuli, ei sadetta, ei vuorilla', 'birdsong forest morning loop, gentle'),
                                                 ('heinasirkat', 'SILMUKKA, satunnaiset jaksot: yöllä, ei sadetta eikä lunta, ei vuorilla tai tuntureilla', 'crickets night loop, summer night'),
                                                 ('puiden_humina', 'SILMUKKA, satunnaiset jaksot: metsissä tuulisella säällä (lehvistön kohina)', 'wind through trees leaves rustle loop')]),
+        ('ranta', 'Ranta (maailmassa)', '🌊', [('aallot_rauhallinen', 'SILMUKKA: rauhalliset aallot lyövät rantaan – soi rannan lähellä tyynellä tai heikolla tuulella (kamera veden alla: 20 %)', 'calm waves lapping shore loop, gentle surf'),
+                                             ('aallot_kovat', 'SILMUKKA: kovat aallot lyövät rantaan – tuulisella säällä ja myrskyssä rannan lähellä (kamera veden alla: 20 %)', 'big waves crashing on shore loop, rough surf')]),
         ('biomit', 'Biomien sivuäänet (hiljaa taustalla)', '🌲', [(f'{fi}_{t}', f'SILMUKKA, satunnaiset jaksot: {nm} – {"päivällä" if t == "paiva" else "yöllä"} (lajien hiljaiset äänet)', f'quiet ambient wildlife loop, {nm.lower()} {"day" if t == "paiva" else "night"}')
                                                               for fi, nm in NAT_BIO for t in ('paiva', 'yo')]),
         ('satunnaiset', 'Satunnaiset tunnelmaäänet', '🎲', [('satunnainen_yhteinen', 'kertaääni 10–40 s välein ulottuvuuksissa ja Hautakummussa – soi, jos paikalla ei ole omaa ääntä', 'eerie distant sound, dungeon creak, distant moan')]
          + [(f'satunnainen_{fi}', f'kertaääni 10–40 s välein: {nm} (oma; puuttuessa satunnainen_yhteinen)', 'eerie distant sound, ' + nm.lower()) for _, fi, nm in AMB_PL])]),
 ]
 AMB_LOOPS = {'sade', 'tihku', 'myrsky', 'tuuli', 'lumi', 'sumu', 'ukkonen', 'tunnelma_vedenalla'} | {f'tunnelma_{fi}' for _, fi, _ in AMB_PL}
-AMB_LOOPS |= {'linnunlaulu', 'heinasirkat', 'puiden_humina'} | {f'{fi}_{t}' for fi, _ in NAT_BIO for t in ('paiva', 'yo')}   # v2.67 luonto ja biomien sivuäänet   # v2.67 ukkonen ja vedenalainen silmukoiksi
+AMB_LOOPS |= {'linnunlaulu', 'aallot_rauhallinen', 'aallot_kovat'} | {f'{fi}_{t}' for fi, _ in NAT_BIO for t in ('paiva', 'yo')}   # v2.86 heinäsirkat ja puiden humina pätkiksi (SPLIT_EV / CHUNK_EV), ranta silmukoiksi   # v2.67 luonto ja biomien sivuäänet   # v2.67 ukkonen ja vedenalainen silmukoiksi
 X_ACT = {'saa_ja_tunnelma': AMB_LOOPS}   # v2.61 silmukat (saumaton sauma, ei hiljaisuuden leikkausta)
 LONG_LOOP = {e: 60.0 for e in AMB_LOOPS}   # v2.61 silmukan enimmäispituus (muuten 20 s)
 LONG_LOOP['tunnelma_vedenalla'] = 170.0   # v2.67 käyttäjän valmis 2 min 40 s silmukka kokonaan
@@ -893,12 +910,13 @@ for _proj, _pre, _list, _tit, _grs in X_PARTS:
                    'allowed': (lambda by: (lambda g: list(by[g][4])))(_by), 'xlsx': 'menu'})
 T_PROF.update({e: (900.0, 900.0, 1.5, -20) for e in MUSIC_EV})   # v2.66 musiikki
 T_PROF.update({'ilmoitus': (.8, .8, .1, -25),
-               'tausta_leiri': (4.0, 4.0, .5, -28), 'tausta_myrsky': (5.0, 5.0, .8, -26), 'tausta_ahjo': (3.0, 3.0, .4, -28)})
+               'tausta_leiri': (900.0, 900.0, 1.0, -28), 'tausta_myrsky': (900.0, 900.0, .05, -26), 'tausta_ahjo': (3.0, 3.0, .4, -28)})   # v2.86 leiri kokonaisena (suoratoisto), myrsky ilman leikkausta
 T_PROF.update({e: (3.0, 3.0, .5, -21) for e in ['biomi_yhteinen'] + [f'biomi_{fi}' for _, fi, _ in BIO_FI]})
 T_PROF.update({e: (15.0, 15.0, 3.0, -20) for e in ['ulottuvuus_yhteinen'] + [f'ulottuvuus_{fi}' for _, fi, _ in REALM_FI]})   # v2.66: 4 → 15 s (käyttäjän ääni hiipuu luonnollisesti ~15 s)
 T_PROF.update({e: (60.0, 60.0, .3, -24) for e in AMB_LOOPS})   # v2.61 sää- ja tunnelmasilmukat
 T_PROF['tunnelma_vedenalla'] = (170.0, 170.0, .3, -24)
-T_PROF.update({'salama': (6.0, 6.0, .8, -17)})   # v2.67 salaman isku (kertaääni)
+T_PROF.update({'salama': (900.0, 900.0, .05, -17)})   # v2.86 ei rajaa (kaiku kokonaan), loppuun vain 50 ms naksahduksen esto
+T_PROF.update({'heinasirkat': (.6, .6, .03, -26), 'puiden_humina': (24.0, 24.0, 3.0, -26)})   # v2.86 pätkät   # v2.67 salaman isku (kertaääni)
 T_PROF.update({e: (50.0, 50.0, 1.5, -26) for e in ['satunnainen_yhteinen'] + [f'satunnainen_{fi}' for _, fi, _ in AMB_PL]})   # v2.67: 6 → 50 s (käyttäjän valmiit pitkät äänet kokonaan)
 T_PROF.update({'studio': (4.0, 4.0, .6, -20), 'otsikko': (4.5, 4.5, .7, -19), 'riimusiirtyma': (5.0, 5.0, .8, -19), 'lataus_valmis': (2.5, 2.5, .5, -21),
                'tuuli': (20.0, 20.0, .3, -25), 'linnut': (20.0, 20.0, .3, -27), 'pilvet_wuush': (3.0, 3.0, .5, -21), 'kamera_laskeutuu': (3.0, 3.0, .5, -21),
@@ -1068,7 +1086,17 @@ def process_toiminnot(ff, init, old, C=None):
         mode = 'act' if ev in C.get('act', ACT_EV) else 'step' if step_like(ev) else None if ev in LOOP_EV else 'best'   # v2.28: pelaajalla silmukka vain sydän (ei juominen)
         # v2.23: pitkä askelnauhoitus (yli 3 s) → useita askelpätkiä: voimakkain = _n, muut _n01, _n02 … (peli arpoo kaikista)
         jobs = [(base, None)]
-        if mode == 'step' or ev in SPLIT_EV:   # v2.67 SPLIT_EV: pitkä nauhoitus, jossa monta ääntä peräkkäin → erilliset pätkät
+        if ev in CHUNK_EV:   # v2.86 tasavälein pätkät (jatkuva ääni, ei selviä tapahtumia)
+            prev = [k for k in old if k.startswith(f'{PRE}/{g}/{ev}_') and old[k].get('src') == src_h and old[k].get('pv') == pv_of(ev)]
+            if prev and all(os.path.exists(os.path.join(odir(g), k.split('/')[2] + '.mp3')) for k in prev):
+                jobs = [(k.split('/')[2], old[k].get('seg')) for k in sorted(prev, key=natkey)]
+            else:
+                cf, dd = CHUNK_EV[ev], duration(ff, p)
+                n, ln = cf['n'], min(cf['ln'], dd)
+                sts = [0.0] if n < 2 or dd <= ln else [i * (dd - ln) / (n - 1) for i in range(n)]
+                num = int(mm.group(2)) or 99
+                jobs = [(base, (sts[0], ln))] + [(f'{ev}_{num * 100 + i}', (t0, ln)) for i, t0 in enumerate(sts[1:], 1)]
+        elif mode == 'step' or ev in SPLIT_EV:   # v2.67 SPLIT_EV: pitkä nauhoitus, jossa monta ääntä peräkkäin → erilliset pätkät
             prev = [k for k in old if k.startswith(f'{PRE}/{g}/{ev}_') and old[k].get('src') == src_h and old[k].get('pv') == pv_of(ev)]
             if prev and all(os.path.exists(os.path.join(odir(g), k.split('/')[2] + '.mp3')) for k in prev):
                 jobs = [(k.split('/')[2], old[k].get('seg')) for k in sorted(prev, key=natkey)]

@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='2.85';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='2.86';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -86,7 +86,16 @@ const PAUSE_MUSIC_T=15,MUS_BIO_T=4,MUS_REALM={portal1:'routaluola',portal2:'kalm
 const MUSB={cur:null,cand:null,t:0};
 function musicBiome(dt){const b=(typeof BIO_SND!=='undefined'&&BIO_SND[biomeHere(P.pos.x,P.pos.z)])||'rantaniitty';
   if(!MUSB.cur){MUSB.cur=b;return b;}if(b===MUSB.cur){MUSB.cand=null;return b;}if(b!==MUSB.cand){MUSB.cand=b;MUSB.t=0;}MUSB.t+=dt;if(MUSB.t>=MUS_BIO_T){MUSB.cur=b;MUSB.cand=null;}return MUSB.cur;}
-function musicCtx(dt){if(typeof BB!=='undefined'&&BB.m&&!BB.m.dead&&!P.dead)return 'boss';
+/* v2.86 VIIMEISEN POMON MUSIIKKI (Kalmanvartija, tyyppi 'vartija'): alle puolet terveydestä → 'vboss' (vartija_puolivali) kuolemaan asti tai kunnes
+   taistelu keskeytyy (pomopalkki poistuu, pelaaja kuolee); kun pomo alkaa kuolla → 'vend' (vartija_kuolema) soi kerran loppuun (enintään 10 min;
+   jos kappale ei ala 8 s:ssa, palataan normaaliin). Puuttuva kappale = vanha käytös (pomotaistelu). */
+const MUS_FB={m:null,vd:null};
+function musicCtx(dt){const M=window.__mus,has=p=>!!(M&&M.has&&M.has(p));
+  if(typeof BB!=='undefined'&&BB.m&&BB.m.type==='vartija')MUS_FB.m=BB.m;
+  {const fb=MUS_FB.m;if(fb&&fb.dead){MUS_FB.m=null;if(!MUS_FB.vd&&has('mu/ulottuvuudet/vartija_kuolema_'))MUS_FB.vd={t:playTime,seen:false};}else if(fb&&!mobs.includes(fb))MUS_FB.m=null;}
+  if(MUS_FB.vd){const V=MUS_FB.vd,st=M.state;if(st.track&&st.track.indexOf('vartija_kuolema')>=0)V.seen=true;else if(V.seen&&!st.playing)V.done=true;
+    if(!V.done&&playTime-V.t<600&&(V.seen||playTime-V.t<8))return 'vend';MUS_FB.vd=null;}
+  if(typeof BB!=='undefined'&&BB.m&&!BB.m.dead&&!P.dead)return BB.m.type==='vartija'&&BB.m.hp<=BB.m.maxHp*.5&&has('mu/ulottuvuudet/vartija_puolivali_')?'vboss':'boss';
   if(P.inDun)return 'd:'+(P.realm?MUS_REALM[P.realm]||'hautakumpu':'hautakumpu');return 'w:'+musicBiome(dt);}
 let musT=performance.now();
 function musicTick(){const M=window.__mus;if(!M||!M.set)return;const now=performance.now(),dt=Math.min(.5,(now-musT)/1000);musT=now;const c=M.state.ctx;

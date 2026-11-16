@@ -275,7 +275,7 @@ MBG_SCENES.push(
     const ax=W*.6,ay=H*.84,T=t%1.6,arm=T<1.1?-1.9*Math.min(1,T/1.1):-1.9+1.9*Math.min(1,(T-1.1)/.15);
     g.save();g.translate(ax-70*u,ay);g.fillStyle='#050405';g.fillRect(-12*u,-90*u,24*u,60*u);g.fillRect(-10*u,-32*u,8*u,32*u);g.fillRect(2*u,-32*u,8*u,32*u);g.beginPath();g.arc(0,-100*u,11*u,0,TAU);g.fill();
     g.translate(8*u,-82*u);g.rotate(arm+1.4);g.fillRect(0,-3*u,46*u,6*u);g.fillRect(40*u,-11*u,14*u,22*u);g.restore();
-    if(T>1.24&&!s.hit){s.hit=1;s.fl2=.25;for(let k=0;k<26;k++)(s.sp||(s.sp=[])).push({x:ax-10*u,y:ay-36*u,vx:(Math.random()-.4)*260*u,vy:(-80-Math.random()*200)*u,l:.6+Math.random()*.6});}if(T<1.2)s.hit=0;
+    if(T>1.24&&!s.hit){s.hit=1;MBG.ahjoHit=1;s.fl2=.25;for(let k=0;k<26;k++)(s.sp||(s.sp=[])).push({x:ax-10*u,y:ay-36*u,vx:(Math.random()-.4)*260*u,vy:(-80-Math.random()*200)*u,l:.6+Math.random()*.6});}if(T<1.2)s.hit=0;
     s.fl2=Math.max(0,(s.fl2||0)-dt);g.save();g.globalCompositeOperation='lighter';if(s.fl2>0)mbgRadial(g,ax-10*u,ay-36*u,120*u,[[0,`rgba(255,220,150,${s.fl2*2})`],[1,'rgba(0,0,0,0)']]);
     if(s.sp)for(let i=s.sp.length-1;i>=0;i--){const q=s.sp[i];q.l-=dt;q.vy+=400*u*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;if(q.l<=0){s.sp.splice(i,1);continue;}g.fillStyle=`rgba(255,${180+q.l*60|0},80,${Math.min(1,q.l*2)})`;g.fillRect(q.x,q.y,2.4*u,2.4*u);}g.restore();
     mbgParts(g,s,dt,P=>{if(Math.random()<dt*3)P.push({x:fx+(Math.random()-.5)*20*u,y:fy-210*u,vx:12*u,vy:-16*u,l:6,r:10*u});},q=>{q.r+=6*u*dt;g.fillStyle=`rgba(120,110,110,${.16*Math.min(1,q.l/3)})`;g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.fill();});}}
@@ -292,10 +292,20 @@ function mbgSet(i,keepT){mbgSize();MBG.i=i;const S=MBG_SCENES[i],u=Math.min(MBG.
 function mbgNext(){let j=MBG.i;while(j===MBG.i)j=(Math.random()*MBG_SCENES.length)|0;return j;}
 /* v2.53 TAUSTAKUVIEN ÄÄNET (menu_2_efektit/taustat): kolmessa eloisassa kuvassa satunnainen hiljainen ääni MBG_SND_MIN–MAX s välein
    (ensimmäinen 2–6 s kuvan vaihtumisesta), taso Taustaäänet (cat 'amb') × MBG_SND_V. Versiot _1, _2 … arvotaan. */
+/* v2.86 (käyttäjä): Öinen leiri = pitkä nuotioääni koko kuvan ajan (satunnaisesta kohdasta, häivytys) + satunnaisesti muutama hiljainen
+   heinäsirkan siritys (MBG_CR_MIN–MAX s välein); Ahjo yöllä = alasimen isku kuvan iskun tahdissa (MBG.ahjoHit, 75 % iskuista), kaukainen
+   (alipäästö) ja kaikuva; Myrsky = satunnainen 2,5–6 s pätkä myrskyäänestä kaukaa 5–14 s välein. Kaikki hyvin hiljaa. Asetus Äänet ›
+   "Päävalikon taustakuvien äänet" (SET.menuBgSnd) mykistää. Taso Taustaäänet. */
 const MBG_SND={'Öinen leiri':'tausta_leiri','Myrsky':'tausta_myrsky','Ahjo yöllä':'tausta_ahjo'},MBG_SND_MIN=5,MBG_SND_MAX=14,MBG_SND_V=.7;
-function mbgSndTick(dt){const S=MBG_SCENES[MBG.i],ev=S&&MBG_SND[S.n];if(!ev||MBG.sndI!==MBG.i){MBG.sndI=MBG.i;MBG.sndT=2+Math.random()*4;if(!ev)return;}
-  MBG.sndT-=dt;if(MBG.sndT>0)return;MBG.sndT=MBG_SND_MIN+Math.random()*(MBG_SND_MAX-MBG_SND_MIN);if(typeof mSnd==='function')mSnd('taustat',ev,{cat:'amb',v:MBG_SND_V,menu:1});}
-function mbgShow(on){mbgInit();if(on===MBG.shown)return;MBG.shown=on;MBG.cv.style.display=on?'block':'none';if(on&&MBG.i<0)mbgSet((Math.random()*MBG_SCENES.length)|0);   /* v1.31: aina arvottu (ennen avauksessa Öinen leiri) */MBG.last=performance.now();}
+const MBG_LEIRI_V=.35,MBG_AHJO_V=.22,MBG_MYR_V=.3,MBG_CR_V=.1,MBG_CR_MIN=2,MBG_CR_MAX=7;
+function mbgSndStop(){if(MBG.leiri){if(typeof mbgLongStop==='function')mbgLongStop(MBG.leiri,1);MBG.leiri=null;}}
+function mbgSndTick(dt){const S=MBG_SCENES[MBG.i],n=S&&S.n;if(MBG.sndI!==MBG.i){MBG.sndI=MBG.i;mbgSndStop();MBG.sndT=1+Math.random()*3;MBG.crT=2+Math.random()*3;MBG.ahjoHit=0;}
+  if(typeof mbgVoice!=='function'||(typeof SET!=='undefined'&&SET.menuBgSnd===false)||!MBG_SND[n]){mbgSndStop();return;}
+  if(n==='Öinen leiri'){if(!MBG.leiri){MBG.lrT=(MBG.lrT||0)-dt;if(MBG.lrT<=0){MBG.lrT=2;MBG.leiri=mbgLong('taustat','tausta_leiri',MBG_LEIRI_V);}}
+    MBG.crT-=dt;if(MBG.crT<=0){MBG.crT=MBG_CR_MIN+Math.random()*(MBG_CR_MAX-MBG_CR_MIN);mbgChirps(2+(Math.random()*5|0),MBG_CR_V);}}
+  else if(n==='Ahjo yöllä'){if(MBG.ahjoHit){MBG.ahjoHit=0;if(Math.random()<.75)mbgVoice('taustat','tausta_ahjo',{v:MBG_AHJO_V,lp:1700+Math.random()*900,echo:.32,p:.94+Math.random()*.1});}}
+  else if(n==='Myrsky'){MBG.sndT-=dt;if(MBG.sndT<=0){MBG.sndT=MBG_SND_MIN+Math.random()*(MBG_SND_MAX-MBG_SND_MIN);mbgVoice('taustat','tausta_myrsky',{v:MBG_MYR_V,lp:700+Math.random()*900,echo:.25,off:Math.random()*6,len:2.5+Math.random()*3.5,p:.9+Math.random()*.15});}}}
+function mbgShow(on){mbgInit();if(on===MBG.shown)return;MBG.shown=on;if(!on)mbgSndStop();MBG.cv.style.display=on?'block':'none';if(on&&MBG.i<0)mbgSet((Math.random()*MBG_SCENES.length)|0);   /* v1.31: aina arvottu (ennen avauksessa Öinen leiri) */MBG.last=performance.now();}
 function mbgFrame(now){mbgShow(true);const raw=Math.min(.25,(now-MBG.last)/1000);MBG.acc+=raw;MBG.last=now;if(MBG.acc<1/MBG_FPS)return;const dt=MBG.acc;MBG.acc=0;mbgSndTick(dt);
   MBG.t+=dt;if(MBG.t>MBG_T)mbgSet(mbgNext());
   const g=MBG.g,W=MBG.W,H=MBG.H,S=MBG_SCENES[MBG.i];g.globalAlpha=1;g.globalCompositeOperation='source-over';g.drawImage(MBG.st,0,0);

@@ -107,7 +107,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
   Peli lukee vain `sounds/manifest.json`:n käsitellyt äänet. Uusi olento → aja `--init` (tekee sen paikkamerkit).
 - **Äänierä (uudet äänet):** noudata kehitysmuistion "Äänierän rutiini" (pull → `process_sounds.py` → lue HUOM-rivit → muistio, versio, `tarkistus.mjs` → PR). Pelkkä äänidata ei vaadi
   `full157`-ajoa. Rutiiniin riittää Sonnet/medium; uusi äänikoodi vaatii enemmän ajattelua.
-- Työkalu trimmaa ja tasaa äänekkyyden lajeittain (`PROFIILI`); käyttäjän saumaton silmukka kokonaisena: `WHOLE_LOOP` (työkalu) + `PL_WHOLE` (audio.js, KORJAUKSET 67); kuolemaääniä 1 paikka (rboss) / 2 muilla. Aarnihirviö on varaäänien 💎 (`VARAANI`).
+- Työkalu trimmaa ja tasaa äänekkyyden lajeittain (`PROFIILI`); v2.86 pätkät `SPLIT_EV`/`CHUNK_EV`, huipputasaus `PEAK_EV`, ei leikkausta `NOCUT_EV`, pitkät (yli 60 s) suoratoistona `sndStream`; käyttäjän saumaton silmukka kokonaisena: `WHOLE_LOOP` (työkalu) + `PL_WHOLE` (audio.js, KORJAUKSET 67); kuolemaääniä 1 paikka (rboss) / 2 muilla. Aarnihirviö on varaäänien 💎 (`VARAANI`).
   Pomot (effects.js): nukkuva piilossa `bossHide`, herätys 8 s `bossRisePose`/`bossWakeRoar` (tila `rise`), ryntäys `bossChargePose`,
   kuolema 12 s + maatuminen `bossDeathAnim`/`bossDeathEnd`, silmät `bossEyes`, etusijavalot `pri` + `BOSS_GLOW`.
   Pomohuone `R.room` + `inBossRoom` (dungeons.js) laukaisee herätyksen; DEV-siirrot `devTpBossRoom`/`devTpPortal`, ääriviiva `devRoomOutline`,

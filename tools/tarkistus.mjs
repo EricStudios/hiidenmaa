@@ -586,6 +586,19 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.86 äänierä: sirkat pätkinä omassa rytmissä, linnunlaulu 10 min suoratoistona, humina pätkinä, salama kokonaan, oven äänet, ranta-aallot, viimeisen pomon musiikit, valikkotaustat + mykistys',()=>{
+    const M=manJ(),ks=Object.keys(M),n=p=>ks.filter(k=>k.startsWith(p));
+    const a=n('a/luonto/heinasirkat_').length>=5&&n('a/luonto/heinasirkat_').every(k=>M[k].dur<.5)&&n('a/luonto/puiden_humina_').length>=5&&n('a/luonto/puiden_humina_').every(k=>M[k].dur>15&&M[k].dur<25)
+      &&M['a/luonto/linnunlaulu_0'].dur>600&&M['a/saa/salama_2'].dur>60&&M['m/taustat/tausta_leiri_0'].dur>100&&sndLong('a/luonto/linnunlaulu_0')&&!sndLong('a/luonto/linnunlaulu_1');
+    const b=/doorSnd\(p,open\?'ovi_avaus'/.test(setDoor.toString())&&/'ovi_kiinni'/.test(doorTick.toString())&&/ovi_narina/.test(doorSnd.toString())
+      &&/ranta\/aallot_rauhallinen/.test(ambTargets.toString())&&/CAM_UW>0\?\.2:1/.test(ambTargets.toString())&&typeof cricketTick==='function'&&typeof humTick==='function'&&AMB_ALIAS['luonto/linnunlaulu']&&BIRD_DAY===420;
+    let c;{const sv=[P.pos.x,P.pos.z,P.inDun];P.inDun=false;P.pos.x=LOC.spawn.x;P.pos.z=LOC.spawn.z;let best=0;for(let a=0;a<8&&!best;a++){const dx=Math.cos(a*.785),dz=Math.sin(a*.785);let r=10;while(r<HALF&&terrainH(dx*r,dz*r)>water.position.y)r+=2;if(r>=HALF)continue;P.pos.x=dx*(r-6);P.pos.z=dz*(r-6);AMB.shT=0;best=shoreK(1);}   /* rantaviiva: keskeltä ulospäin veteen asti, 6 m maalle */
+      P.pos.x=0;P.pos.z=0;AMB.shT=0;const far=(()=>{let mn=1;for(const [x,z] of [[LOC.barrow.x,LOC.barrow.z],[LOC.circle.x,LOC.circle.z]]){P.pos.x=x;P.pos.z=z;AMB.shT=0;mn=Math.min(mn,shoreK(1));}return mn;})();
+      [P.pos.x,P.pos.z,P.inDun]=sv;AMB.shT=0;c=best>0&&far<1;}
+    let d;{const sv=[BB.m,window.__mus.has,MUS_FB.m,MUS_FB.vd];try{window.__mus.has=()=>true;BB.m={type:'vartija',hp:800,maxHp:900,dead:false};const c1=musicCtx(0);BB.m.hp=400;const c2=musicCtx(0);
+      BB.m.dead=true;mobs.push(BB.m);const c3=musicCtx(0);mobs.pop();d=c1==='boss'&&c2==='vboss'&&c3==='vend'&&/vboss/.test(String(window.__mus.state&&1))!==null;}finally{BB.m=sv[0];window.__mus.has=sv[1];MUS_FB.m=sv[2];MUS_FB.vd=sv[3];}}
+    const e=SET_DEF.menuBgSnd===true&&SET_PAGES.snd.includes('menuBgSnd')&&typeof mbgVoice==='function'&&typeof mbgLong==='function'&&/MBG\.ahjoHit/.test(mbgSndTick.toString())&&/menuBgSnd===false/.test(mbgSndTick.toString());
+    return a&&b&&c&&d&&e||`virhe data ${a} koodi ${b} ranta ${c} musiikki ${d} valikko ${e}`;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;
@@ -645,7 +658,9 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       b=!!M&&!!M.C&&M.C.GAP_MIN===20&&M.C.GAP_MAX===40&&PAUSE_MUSIC_T===15&&/__mus\.stop\(\)/.test(startPlay.toString())&&/set\('tauko'\)/.test(musicTick.toString());   /* v2.66 uusi soitin */
       window.mSnd=(g,e,x)=>{L.push(e+':'+(x&&x.cat));return e==='ilmoitus'||e.endsWith('_yhteinen');};msgSndT=-9;msgQuietT=-9;msgSnd();msgSnd();biomeSnd('aarni');msgSnd();realmSnd('portal1');
       c=L.join()==='ilmoitus:notif,biomi_aarnimetsa:notif,biomi_yhteinen:notif,ulottuvuus_routaluola:notif,ulottuvuus_yhteinen:notif';L.length=0;
-      const pi=MBG.i;MBG.i=MBG_SCENES.findIndex(x=>x.n==='Ahjo yöllä');mbgSndTick(.1);mbgSndTick(20);MBG.i=MBG_SCENES.findIndex(x=>x.n==='Lumisade');mbgSndTick(.1);mbgSndTick(30);MBG.i=pi;d=L.join()==='tausta_ahjo:amb';}
+      const pi=MBG.i,ov=window.mbgVoice;window.mbgVoice=(g,e,x)=>{L.push(e+':v');return true;};   /* v2.86: alasin iskun tahdissa (mbgVoice) */
+      try{MBG.i=MBG_SCENES.findIndex(x=>x.n==='Ahjo yöllä');mbgSndTick(.1);for(let i=0;i<12;i++){MBG.ahjoHit=1;mbgSndTick(.1);}MBG.i=MBG_SCENES.findIndex(x=>x.n==='Lumisade');mbgSndTick(.1);mbgSndTick(30);}finally{MBG.i=pi;window.mbgVoice=ov;}
+      d=L.length>=4&&L.every(x=>x==='tausta_ahjo:v');}
     finally{Object.assign(SET,o);window.mSnd=om;msgSndT=-9;msgQuietT=-9;}
     return a&&b&&c&&d||`virhe asetukset ${a} musiikki ${b} ilmoitukset ${c} taustat ${d} [${L}]`;});
   t('v2.52 menu 2: äänten avaus (kaiutinmerkki, 2 s viive), aloitusjakson ja latauksen äänet, intron tuuli/linnut/wuush/syöksy + hiipuminen, varmistus',()=>{

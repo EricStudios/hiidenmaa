@@ -1,6 +1,227 @@
 {
  "v": 3,
  "sounds": {
+  "a/luonto/heinasirkat_0": {
+   "h": "b53db2a319",
+   "src": "4e66001f7f92",
+   "dur": 0.23,
+   "pv": "9pk2q5",
+   "gain": 1.6,
+   "raw": 0.24,
+   "seg": [
+    1.255,
+    0.24
+   ],
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/heinasirkat_0.mp3"
+  },
+  "a/luonto/heinasirkat_9901": {
+   "h": "a00dad0a5a",
+   "src": "4e66001f7f92",
+   "dur": 0.23,
+   "pv": "9pk2q5",
+   "gain": -8.0,
+   "raw": 0.24,
+   "seg": [
+    1.005,
+    0.24
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/heinasirkat_9901.mp3"
+  },
+  "a/luonto/heinasirkat_9902": {
+   "h": "bc5f4c2cae",
+   "src": "4e66001f7f92",
+   "dur": 0.23,
+   "pv": "9pk2q5",
+   "gain": -7.1,
+   "raw": 0.24,
+   "seg": [
+    1.505,
+    0.24
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/heinasirkat_9902.mp3"
+  },
+  "a/luonto/heinasirkat_9903": {
+   "h": "675ee06538",
+   "src": "4e66001f7f92",
+   "dur": 0.23,
+   "pv": "9pk2q5",
+   "gain": -4.0,
+   "raw": 0.24,
+   "seg": [
+    0.255,
+    0.24
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/heinasirkat_9903.mp3"
+  },
+  "a/luonto/heinasirkat_9904": {
+   "h": "71d8836b6c",
+   "src": "4e66001f7f92",
+   "dur": 0.41,
+   "pv": "9pk2q5",
+   "gain": -7.8,
+   "raw": 0.44,
+   "seg": [
+    2.28,
+    0.44
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/heinasirkat_9904.mp3"
+  },
+  "a/luonto/heinasirkat_9905": {
+   "h": "e3ac86337d",
+   "src": "4e66001f7f92",
+   "dur": 0.23,
+   "pv": "9pk2q5",
+   "gain": 19.5,
+   "raw": 0.24,
+   "seg": [
+    0.755,
+    0.24
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/heinasirkat_9905.mp3"
+  },
+  "a/luonto/heinasirkat_9906": {
+   "h": "ee47e3e9ff",
+   "src": "4e66001f7f92",
+   "dur": 0.23,
+   "pv": "9pk2q5",
+   "gain": -8.1,
+   "raw": 0.24,
+   "seg": [
+    0.505,
+    0.24
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/heinasirkat_9906.mp3"
+  },
+  "a/luonto/heinasirkat_9907": {
+   "h": "7c7a1d4323",
+   "src": "4e66001f7f92",
+   "dur": 0.41,
+   "pv": "9pk2q5",
+   "gain": -7.3,
+   "raw": 0.44,
+   "seg": [
+    1.755,
+    0.44
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/heinasirkat_9907.mp3"
+  },
+  "a/luonto/linnunlaulu_0": {
+   "h": "ff872d1f58",
+   "src": "654e5d3ea609",
+   "dur": 636.29,
+   "pv": "9w1",
+   "gain": 2.6,
+   "raw": 636.31,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/linnunlaulu_0.mp3"
+  },
+  "a/luonto/linnunlaulu_1": {
+   "h": "7523a9f8f4",
+   "src": "3cdfb5092e11",
+   "dur": 22.41,
+   "pv": "9w1",
+   "gain": -4.4,
+   "raw": 22.44,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/linnunlaulu_1.mp3"
+  },
+  "a/luonto/linnunlaulu_2": {
+   "h": "85d889a672",
+   "src": "35e4324af12c",
+   "dur": 109.01,
+   "pv": "9w1",
+   "gain": -7.0,
+   "raw": 109.03,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/linnunlaulu_2.mp3"
+  },
+  "a/luonto/puiden_humina_0": {
+   "h": "f28c34d8e6",
+   "src": "e7f2b405f5c5",
+   "dur": 21.99,
+   "pv": "9c1q5",
+   "gain": -8.0,
+   "raw": 22.0,
+   "seg": [
+    0.0,
+    22.0
+   ],
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/puiden_humina_0.mp3"
+  },
+  "a/luonto/puiden_humina_9901": {
+   "h": "26735770d6",
+   "src": "e7f2b405f5c5",
+   "dur": 21.99,
+   "pv": "9c1q5",
+   "gain": -7.9,
+   "raw": 22.0,
+   "seg": [
+    25.18,
+    22.0
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/puiden_humina_9901.mp3"
+  },
+  "a/luonto/puiden_humina_9902": {
+   "h": "3f5973bb7e",
+   "src": "e7f2b405f5c5",
+   "dur": 21.99,
+   "pv": "9c1q5",
+   "gain": -6.3,
+   "raw": 22.0,
+   "seg": [
+    50.36,
+    22.0
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/puiden_humina_9902.mp3"
+  },
+  "a/luonto/puiden_humina_9903": {
+   "h": "552fd01865",
+   "src": "e7f2b405f5c5",
+   "dur": 21.99,
+   "pv": "9c1q5",
+   "gain": -3.3,
+   "raw": 22.0,
+   "seg": [
+    75.54,
+    22.0
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/puiden_humina_9903.mp3"
+  },
+  "a/luonto/puiden_humina_9904": {
+   "h": "3a953164dd",
+   "src": "e7f2b405f5c5",
+   "dur": 21.99,
+   "pv": "9c1q5",
+   "gain": -3.3,
+   "raw": 22.0,
+   "seg": [
+    100.72,
+    22.0
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/puiden_humina_9904.mp3"
+  },
+  "a/luonto/puiden_humina_9905": {
+   "h": "cd3178401a",
+   "src": "e7f2b405f5c5",
+   "dur": 20.4,
+   "pv": "9c1q5",
+   "gain": -6.4,
+   "raw": 20.43,
+   "seg": [
+    125.9,
+    22.0
+   ],
+   "part": 1,
+   "f": "saa_ja_tunnelma/valmiit/luonto_valmis/puiden_humina_9905.mp3"
+  },
   "a/saa/lumi_0": {
    "h": "a5041e4d7e",
    "src": "6a0595408676",
@@ -36,6 +257,33 @@
    "gain": -4.3,
    "raw": 6.45,
    "f": "saa_ja_tunnelma/valmiit/saa_valmis/sade_0.mp3"
+  },
+  "a/saa/salama_0": {
+   "h": "a12438a062",
+   "src": "06e2264161b2",
+   "dur": 11.02,
+   "pv": "9nc1q5",
+   "gain": 4.9,
+   "raw": 11.03,
+   "f": "saa_ja_tunnelma/valmiit/saa_valmis/salama_0.mp3"
+  },
+  "a/saa/salama_1": {
+   "h": "96ba902ce8",
+   "src": "bbbbd534757d",
+   "dur": 15.8,
+   "pv": "9nc1q5",
+   "gain": 6.6,
+   "raw": 15.81,
+   "f": "saa_ja_tunnelma/valmiit/saa_valmis/salama_1.mp3"
+  },
+  "a/saa/salama_2": {
+   "h": "37a2c342af",
+   "src": "efac014acbf3",
+   "dur": 61.31,
+   "pv": "9nc1q5",
+   "gain": 7.6,
+   "raw": 61.32,
+   "f": "saa_ja_tunnelma/valmiit/saa_valmis/salama_2.mp3"
   },
   "a/saa/tihku_0": {
    "h": "1722a85413",
@@ -135,6 +383,15 @@
    "gain": -7.3,
    "raw": 4.12,
    "f": "saa_ja_tunnelma/valmiit/satunnaiset_valmis/satunnainen_routaluola_1.mp3"
+  },
+  "a/satunnaiset/satunnainen_routaluola_2": {
+   "h": "c706911b8f",
+   "src": "d5afcc56ba1d",
+   "dur": 18.36,
+   "pv": "9q5",
+   "gain": -4.8,
+   "raw": 18.38,
+   "f": "saa_ja_tunnelma/valmiit/satunnaiset_valmis/satunnainen_routaluola_2.mp3"
   },
   "a/tunnelma/tunnelma_aarnihauta_0": {
    "h": "e560e9ada4",
@@ -790,6 +1047,15 @@
    "raw": 1.62,
    "f": "olennot_aanet/valmiit/kivivartija_idle_1.mp3"
   },
+  "m/aloitus/riimusiirtyma_0": {
+   "h": "f6d1a9cf75",
+   "src": "61b130ca7173",
+   "dur": 4.99,
+   "pv": "9q5",
+   "gain": -3.9,
+   "raw": 6.24,
+   "f": "menu_2_efektit/valmiit/aloitus_valmis/riimusiirtyma_0.mp3"
+  },
   "m/esiasetus/ultra_0": {
    "h": "1e740fea0e",
    "src": "1d27a593e553",
@@ -817,6 +1083,15 @@
    "raw": 0.05,
    "f": "menu_1_valikko/valmiit/extra_valmis/extra_pois_0.mp3"
   },
+  "m/lataus/lataus_valmis_0": {
+   "h": "51d1fc2125",
+   "src": "59018a6ce4c4",
+   "dur": 2.48,
+   "pv": "9q5",
+   "gain": 0.8,
+   "raw": 3.18,
+   "f": "menu_2_efektit/valmiit/lataus_valmis/lataus_valmis_0.mp3"
+  },
   "m/liukusaatimet/naputus_0": {
    "h": "02c3a59256",
    "src": "21cccfc3f508",
@@ -843,6 +1118,69 @@
    "gain": 16.4,
    "raw": 0.08,
    "f": "menu_1_valikko/valmiit/napit_valmis/klikkaus_0.mp3"
+  },
+  "m/taustat/tausta_ahjo_0": {
+   "h": "a790f60844",
+   "src": "ddaee94c6195",
+   "dur": 0.44,
+   "pv": "9q5",
+   "gain": -11.8,
+   "raw": 0.47,
+   "f": "menu_2_efektit/valmiit/taustat_valmis/tausta_ahjo_0.mp3"
+  },
+  "m/taustat/tausta_leiri_0": {
+   "h": "54399f9837",
+   "src": "3060b84f3ce4",
+   "dur": 135.99,
+   "pv": "9q5",
+   "gain": 14.2,
+   "raw": 136.0,
+   "f": "menu_2_efektit/valmiit/taustat_valmis/tausta_leiri_0.mp3"
+  },
+  "m/taustat/tausta_myrsky_0": {
+   "h": "a95d3ed9fa",
+   "src": "06e2264161b2",
+   "dur": 11.02,
+   "pv": "9nc1q5",
+   "gain": -4.1,
+   "raw": 11.03,
+   "f": "menu_2_efektit/valmiit/taustat_valmis/tausta_myrsky_0.mp3"
+  },
+  "m/uusi_maailma/kamera_laskeutuu_0": {
+   "h": "aa9d8c7e07",
+   "src": "b6782729fb73",
+   "dur": 0.52,
+   "pv": "9q5",
+   "gain": -4.2,
+   "raw": 0.53,
+   "f": "menu_2_efektit/valmiit/uusi_maailma_valmis/kamera_laskeutuu_0.mp3"
+  },
+  "m/uusi_maailma/linnut_0": {
+   "h": "6fde30c997",
+   "src": "1c4953fc5813",
+   "dur": 19.74,
+   "pv": "9q5",
+   "gain": 1.9,
+   "raw": 26.18,
+   "f": "menu_2_efektit/valmiit/uusi_maailma_valmis/linnut_0.mp3"
+  },
+  "m/uusi_maailma/pilvet_wuush_0": {
+   "h": "04c666595f",
+   "src": "bf7498460ede",
+   "dur": 2.97,
+   "pv": "9q5",
+   "gain": 4.7,
+   "raw": 3.09,
+   "f": "menu_2_efektit/valmiit/uusi_maailma_valmis/pilvet_wuush_0.mp3"
+  },
+  "m/uusi_maailma/tuuli_0": {
+   "h": "a46843c90e",
+   "src": "144e2259cdb3",
+   "dur": 11.75,
+   "pv": 9,
+   "gain": -6.7,
+   "raw": 12.03,
+   "f": "menu_2_efektit/valmiit/uusi_maailma_valmis/tuuli_0.mp3"
   },
   "metso_death_1": {
    "h": "d20d4192c3",
@@ -908,6 +1246,15 @@
    "raw": 2.27,
    "far": 1,
    "f": "olennot_aanet/valmiit/metso_idle_3.mp3"
+  },
+  "p/askeleet/alastulo_0": {
+   "h": "b8866b2eac",
+   "src": "f9ccdb800381",
+   "dur": 0.26,
+   "pv": "9q5",
+   "gain": -8.3,
+   "raw": 0.28,
+   "f": "pelaaja_1_liike/valmiit/askeleet_valmis/alastulo_0.mp3"
   },
   "p/askeleet/askel_hiekka_1": {
    "h": "8b7e6ce9a6",
@@ -1167,6 +1514,15 @@
    "raw": 1.15,
    "f": "pelaaja_1_liike/valmiit/askeleet_valmis/puska_1.mp3"
   },
+  "p/askeleet/putoaminen_tomahdys_0": {
+   "h": "851d22600d",
+   "src": "c2f45e5b5e07",
+   "dur": 0.52,
+   "pv": "9q5",
+   "gain": 1.0,
+   "raw": 0.53,
+   "f": "pelaaja_1_liike/valmiit/askeleet_valmis/putoaminen_tomahdys_0.mp3"
+  },
   "p/jousi/laukaus_0": {
    "h": "079f47aa49",
    "src": "a16f4291fb72",
@@ -1211,6 +1567,15 @@
    "gain": 0.6,
    "raw": 0.71,
    "f": "pelaaja_2_toiminnot/valmiit/kaytto_valmis/arkku_auki_2.mp3"
+  },
+  "p/kaytto/arkku_kiinni_0": {
+   "h": "f581ae3839",
+   "src": "1288e7776d8e",
+   "dur": 1.17,
+   "pv": "9q5",
+   "gain": -3.6,
+   "raw": 1.4,
+   "f": "pelaaja_2_toiminnot/valmiit/kaytto_valmis/arkku_kiinni_0.mp3"
   },
   "p/kaytto/juominen_0": {
    "h": "6427a38382",
@@ -1530,12 +1895,12 @@
    "f": "pelaaja_3_aanet/valmiit/kipu_valmis/kuolema_1.mp3"
   },
   "p/kipu/kuolema_2": {
-   "h": "2bc1589ce8",
-   "src": "c225559fca95",
-   "dur": 2.97,
+   "h": "c1555db715",
+   "src": "bfeab623cdb2",
+   "dur": 0.96,
    "pv": "9q5",
-   "gain": 1.7,
-   "raw": 5.37,
+   "gain": -9.0,
+   "raw": 0.98,
    "f": "pelaaja_3_aanet/valmiit/kipu_valmis/kuolema_2.mp3"
   },
   "p/kipu/kuolema_hukkuminen_0": {
@@ -1546,6 +1911,15 @@
    "gain": 10.2,
    "raw": 0.54,
    "f": "pelaaja_3_aanet/valmiit/kipu_valmis/kuolema_hukkuminen_0.mp3"
+  },
+  "p/kipu/nilkka_0": {
+   "h": "5aa657a0fb",
+   "src": "36adf2dee4a5",
+   "dur": 0.57,
+   "pv": "9q5",
+   "gain": 3.7,
+   "raw": 0.58,
+   "f": "pelaaja_3_aanet/valmiit/kipu_valmis/nilkka_0.mp3"
   },
   "p/lyonnit/huitaisu_0": {
    "h": "640e2830e3",
@@ -1948,6 +2322,24 @@
    "gain": -3.1,
    "raw": 1.14,
    "f": "pelaaja_1_liike/valmiit/vesi_valmis/loiskahdus_2.mp3"
+  },
+  "p/vesi/sukellus_0": {
+   "h": "cf0d32ace1",
+   "src": "f569d07eebc7",
+   "dur": 0.94,
+   "pv": "9q5",
+   "gain": -6.1,
+   "raw": 0.96,
+   "f": "pelaaja_1_liike/valmiit/vesi_valmis/sukellus_0.mp3"
+  },
+  "p/vesi/sukellus_1": {
+   "h": "4b7ebb0dc6",
+   "src": "21cbdfec6a6c",
+   "dur": 1.12,
+   "pv": "9q5",
+   "gain": -6.0,
+   "raw": 1.14,
+   "f": "pelaaja_1_liike/valmiit/vesi_valmis/sukellus_1.mp3"
   },
   "susi_aggro_1": {
    "h": "2cb79ce8f0",
