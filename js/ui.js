@@ -15,12 +15,18 @@ const MSG_SND_GAP=.35,BIO_SND={meadow:'rantaniitty',koivu:'koivulehto',forest:'k
   tunturi:'tunturikangas',rakka:'rakka',mountain:'kivivuori',peak:'routahuiput',beach:'hietaranta',sea:'meri'},REALM_SND={portal1:'routaluola',portal2:'kalmankammio',portal3:'aarnihauta'};
 let msgSndT=-9,msgQuietT=-9;
 function iSnd(g,ev,common){const o={pre:'i',cat:'notif'};return mSnd(g,ev,o)||(common?mSnd(g,common,o):false);}
-function msgSnd(){const t=performance.now()/1000;if(SET.notifSnd===false||t-msgSndT<MSG_SND_GAP||t<msgQuietT)return;msgSndT=t;iSnd('ilmoitukset','ilmoitus');}
+/* v2.67 (käyttäjä): ilmoitusääni vain pitkistä (MSG_LONG merkkiä) tai erityisistä viesteistä (MSG_SPECIAL: löydöt, tehtävät, pomot) – tai mistä
+   tahansa viestistä, kun on ollut hiljaista (ei pelaajan toimintaääntä MSG_QUIET s). Ei koskaan päällekkäin pelaajan toimintaäänen kanssa
+   (hakkaaminen, lyönnit, käyttö …; askeleet eivät estä): jos toimintaääni soi juuri (MSG_BUSY s), pitkä/erityinen odottaa enintään MSG_WAIT s. */
+const MSG_GAIN=/^\s*\+/,MSG_LONG=40,MSG_QUIET=1.5,MSG_BUSY=.8,MSG_WAIT=1.6,MSG_SPECIAL=new Set(['loot','boss','quest']);
+function msgSnd(txt,cls,w){const t=performance.now()/1000;if(SET.notifSnd===false||t-msgSndT<MSG_SND_GAP||t<msgQuietT)return;if(MSG_GAIN.test(txt||''))return;   /* v2.69 poiminnat ja XP (+…) ilman ilmoitusääntä */const act=typeof plActT!=='undefined'?plActT:-9;
+  const big=(txt||'').length>=MSG_LONG||MSG_SPECIAL.has(cls);if(!big&&t-act<MSG_QUIET)return;
+  if(t-act<MSG_BUSY){if((w||0)<MSG_WAIT)setTimeout(()=>msgSnd(txt,cls,(w||0)+.4),400);return;}msgSndT=t;iSnd('ilmoitukset','ilmoitus');}
 function biomeSnd(z){msgQuietT=performance.now()/1000+.4;if(SET.biomeSnd===false)return;iSnd('biomit','biomi_'+(BIO_SND[z]||z),'biomi_yhteinen');}
 function realmSnd(id){msgQuietT=performance.now()/1000+.4;if(SET.realmSnd===false)return;const h=iSnd('ulottuvuudet','ulottuvuus_'+(REALM_SND[id]||id),'ulottuvuus_yhteinen');
   if(h&&h.src&&h.src.buffer&&window.__mus&&window.__mus.hold)window.__mus.hold(Math.min(MUS_HOLD_MAX,h.src.buffer.duration*.8)*1000);}   // v2.66 saapumisääni ensin, ulottuvuuden musiikki sen jälkeen
 const MUS_HOLD_MAX=12;
-function msg(t,cls=''){msgLog.push({t,cls,at:playTime});msgSnd();if(msgLog.length>10)msgLog.shift();const el=$('#msgs');const d=document.createElement('div');d.textContent=t;if(cls)d.className=cls;el.appendChild(d);d._life=clamp(3+t.length*.07,4,13);msgEls.push(d);while(msgEls.length>7){const o=msgEls.shift();o.remove();}}
+function msg(t,cls=''){msgLog.push({t,cls,at:playTime});msgSnd(t,cls);if(msgLog.length>10)msgLog.shift();const el=$('#msgs');const d=document.createElement('div');d.textContent=t;if(cls)d.className=cls;el.appendChild(d);d._life=clamp(3+t.length*.07,4,13);msgEls.push(d);while(msgEls.length>7){const o=msgEls.shift();o.remove();}}
 function updateMsgs(dt){for(let i=msgEls.length-1;i>=0;i--){const d=msgEls[i];d._life-=dt;if(d._life<1)d.style.opacity=Math.max(0,d._life);if(d._life<=0){d.remove();msgEls.splice(i,1);}}}
 const floaters=[];
 function floatText(t,x,y,z,color){const el=document.createElement('div');el.className='floater';el.textContent=t;el.style.color=color||'#eee';$('#floaters').appendChild(el);floaters.push({el,p:new V3(x,y,z),t:0});if(floaters.length>24){const o=floaters.shift();o.el.remove();}}
@@ -111,7 +117,7 @@ function updateHUD(dt){
   if(((playTime*10)|0)%10===0)for(const x of inv)if(x&&x.shBrk!=null){if(shieldOk(x)===true)invDirty=true;else invBarDirty=true;}   /* v2.46: palkki paikallaan */   // v1.33: rikkinäisen kilven korjautuminen ja palkki
   const w=curWeapon();
   if(w.cat==='hammer'){const bh=$('#buildhint');bh.hidden=false;const h=buildSel?`<b>${PIECES[buildSel].n}</b> · ${reqText(PIECES[buildSel].req)} · <span class="kb">Hiiri V</span>rakenna <span class="kb">R</span>käännä 45° <span class="kb">Shift+R</span>asento <span class="kb">G</span>kohdistus: ${SNAP_NAMES[snapMode]}${JK.tgt&&ghost&&ghost.visible?` · <b style="color:var(--frost)">Jatko</b>: ${JK.desc}`:''} <span class="kb">X</span>pura <span class="kb">F</span>korjaa <span class="kb">B</span>valikko`+(ghost&&ghost.visible&&!ghostOk&&lastInvalid?` · <span style="color:var(--bad)">${lastInvalid}</span>`:''):`<span class="kb">B</span> tai hiiren oikea: valitse rakennus`;if(bh._h!==h){bh._h=h;bh.innerHTML=h;}}else $('#buildhint').hidden=true;
-  $('#lockhint').hidden=!(state==='play'&&!locked&&!lockFailed&&!P.dead);
+  $('#lockhint').hidden=!(state==='play'&&!locked&&!lockFailed&&!P.dead&&!(typeof TUT!=='undefined'&&TUT.hold));
   const hp=$('.bar.hp'),st=$('.bar.st'),hu=$('.bar.hu');
   hp.firstChild.style.width=(P.hp/maxHp()*100)+'%';hp.lastChild.textContent=`TERVEYS ${Math.ceil(P.hp)}/${maxHp()}`;hp.classList.toggle('low',P.hp<maxHp()*.25);
   st.firstChild.style.width=(P.stam/maxStam()*100)+'%';st.lastChild.textContent=`KESTÄVYYS ${Math.floor(P.stam)}`;

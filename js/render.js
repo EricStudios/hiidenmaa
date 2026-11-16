@@ -177,7 +177,7 @@ function blendApply(lv){lv=clamp(lv|0,0,3);if(lv===blendLvl)return;blendLvl=lv;c
   terrainColors.set(out);TFINE.base=out.slice();
   if(typeof TCOL0!=='undefined'){TCOL0.set(out);for(let i=0;i<MUD.length;i++)if(MUD[i]>0)mudSet(i,MUD[i]);if(FT_P.length)ftRecolor();}
   terrainMesh.geometry.attributes.color.needsUpdate=true;if(typeof grassDirty!=='undefined')grassDirty=true;
-  if(TFINE.F&&(TFINE.done||TFINE.busy)){const F=TFINE.F;TFINE.F=0;TFINE.done=false;TFINE.busy=false;terrFineBuild(F);}}
+  if(TFINE.F&&(TFINE.done||TFINE.busy)){TFINE.re=true;terrFineBuild(TFINE.F);}}   /* v2.68: uudelleenlaskenta, vanha väritys näkyy kunnes uusi valmis */
 const TFINE={F:0,want:0,N:0,tex:null,data:null,row:0,done:false,busy:false,base:terrainColors.slice(),
   u:{tFine:{value:null},uFine:{value:0},uFN:{value:1},uFS:{value:1},uDet:{value:0}}};
 // v2.65 tarkan maanmuokkauksen maski: karkeaa maastoa ei piirretä lohkoissa, joilla on oma tarkka laikku (FT_IDX); laikkujen materiaali ilman maskia
@@ -201,11 +201,13 @@ function terrFineRows(ms){const F=TFINE.F,N=TFINE.N,D=TFINE.data,B=TFINE.base,hs
           :v(ix+1,iz+1,k)+(1-fx)*(v(ix,iz+1,k)-v(ix+1,iz+1,k))+(1-fz)*(v(ix+1,iz,k)-v(ix+1,iz+1,k));
         D[o+k]=Math.round(clamp((c[k]-c0)*dk*2+.5,0,1)*255);}D[o+3]=255;}}   /* v2.65 dk: sekoitus heikentää eroa pehmeillä pinnoilla */
   return TFINE.row>=N;}
-function terrFineBuild(F){if(TFINE.F===F&&(TFINE.done||TFINE.busy))return;TFINE.F=F;TFINE.N=GN*F+1;TFINE.row=0;TFINE.done=false;TFINE.u.uFine.value=0;
-  if(TFINE.tex){TFINE.tex.dispose();TFINE.tex=null;}TFINE.data=new Uint8Array(TFINE.N*TFINE.N*4);const tok=TFINE.tok=(TFINE.tok|0)+1;TFINE.busy=true;
-  const step=()=>{if(tok!==TFINE.tok)return;if(terrFineRows(12)){const N=TFINE.N,t=TFINE.tex=new THREE.DataTexture(TFINE.data,N,N,THREE.RGBAFormat,THREE.UnsignedByteType);
+/* v2.68 kaksoispuskuri: biomien sekoituksen vaihto (TFINE.re) laskee saman tason uudelleen niin, että vanha tekstuuri (myös 8×:n hieno vaihtelu uDet)
+   pysyy näkyvissä, kunnes uusi on valmis – ennen väritys katosi koko laskennan ajaksi (4×/8×: useita sekunteja). */
+function terrFineBuild(F){const re=TFINE.re;TFINE.re=false;if(!re&&TFINE.F===F&&(TFINE.done||TFINE.busy))return;const keep=re&&TFINE.F===F&&!!TFINE.tex;
+  TFINE.F=F;TFINE.N=GN*F+1;TFINE.row=0;TFINE.done=false;if(!keep){TFINE.u.uFine.value=0;if(TFINE.tex){TFINE.tex.dispose();TFINE.tex=null;}}TFINE.data=new Uint8Array(TFINE.N*TFINE.N*4);const tok=TFINE.tok=(TFINE.tok|0)+1;TFINE.busy=true;
+  const step=()=>{if(tok!==TFINE.tok)return;if(terrFineRows(12)){const N=TFINE.N,old=TFINE.tex,t=TFINE.tex=new THREE.DataTexture(TFINE.data,N,N,THREE.RGBAFormat,THREE.UnsignedByteType);
       t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.needsUpdate=true;
-      TFINE.u.tFine.value=t;TFINE.u.uFN.value=N;TFINE.u.uFS.value=GS/F;TFINE.done=true;TFINE.busy=false;terrFineSet(TFINE.want);return;}setTimeout(step,0);};step();}
+      TFINE.u.tFine.value=t;if(old&&old!==t)old.dispose();TFINE.u.uFN.value=N;TFINE.u.uFS.value=GS/F;TFINE.done=true;TFINE.busy=false;terrFineSet(TFINE.want);return;}setTimeout(step,0);};step();}
 // level: 0 = pois, 2, 4, 8 (8 käyttää 4×-tekstuuria + hienoa vaihtelua; 16× poistettu v2.65)
 function terrFineSet(level){level=+level||0;TFINE.want=level;if(!level){TFINE.u.uFine.value=0;return;}const F=level>=4?4:2;
   if(TFINE.F!==F||!(TFINE.done||TFINE.busy)){terrFineBuild(F);return;}if(!TFINE.done)return;

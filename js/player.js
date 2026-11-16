@@ -15,6 +15,7 @@ function ladderReach(p,pos,zc){const a=p.rot*Math.PI/4,tx=p.x+zc*Math.sin(a),tz=
   return true;}
 const _qh=new THREE.Quaternion(),_qf=new THREE.Quaternion(),_qd=new THREE.Quaternion(),_qt=new THREE.Quaternion(),_eb=new THREE.Euler();
 let torchFl=null,torchBarT=0,torchIgn=0,shDark=0;const torchPh=[Math.random()*TAU,Math.random()*TAU];
+const OVER_STAM=5;   // v2.67 ylikuorman kestävyyskulutus (/s)
 function updatePlayer(dt){
   if(P.dead)return;updatePlayerBurn(dt);if(P.dead)return;
   P.invul=Math.max(0,P.invul-dt);P.stagger=Math.max(0,P.stagger-dt);P.hurtFlash=Math.max(0,P.hurtFlash-dt);
@@ -51,6 +52,7 @@ function updatePlayer(dt){
    if(under){P.underT=(P.underT||0)+dt;if(P.underT>1){P.drownT=(P.drownT||0)+dt;if(!devOn('god')){P.hp-=10*dt;P.deathCause='drown';if(P.hp<=0){P.hp=0;playerDie();}}}}
    else{P.underT=0;P.drownT=Math.max(0,(P.drownT||0)-dt*2);}}
   // stamina regen
+  if(over&&!P.dead){P.stam=Math.max(0,P.stam-OVER_STAM*dt);P.stamDelay=Math.max(P.stamDelay,.3);}   /* v2.67 ylikuorma: kestävyys laskee 5/s ja pysyy 0:ssa, ei palaudu ennen kuin kuorma on alle rajan */
   P.stamDelay-=dt;if(P.stamDelay<=0&&!P.swUp){let r=22*P.fx.stamRegen*(P.swim?.25:1);P.stam=Math.min(maxStam(),P.stam+r*dt);}
   if(P.blocking&&P.stam<=0)P.blocking=false;
   P.stam=Math.max(0,P.stam);if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu

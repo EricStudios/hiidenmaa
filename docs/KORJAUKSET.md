@@ -468,6 +468,21 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Ratkaisu: arvo funktion sisään. **Sääntö:** funktio, jota kutsutaan ylimmän tason koodista, saa käyttää vain YLEMPÄNÄ määriteltyjä vakioita
   (funktiot nousevat, `const`/`let` eivät). Testaa aina `newGame()` selaimessa muutoksen jälkeen.
 
+## 64. Tarkempi maaston väritys (4×/8×) katosi biomien sekoitusta vaihdettaessa (v2.68)
+- Oire: Extra › maaston väritys 8× päällä; kun biomien sekoitusta muutti, tarkka väritys ja 8×:n hieno vaihtelu hävisivät (pitkäksi aikaa).
+- Syy: `blendApply` laski tarkan värityksen tekstuurin uudelleen (`terrFineBuild`), joka nollasi heti `uFine`:n ja hävitti vanhan tekstuurin.
+  4×-tekstuuri (1401 × 1401) lasketaan taustalla 12 ms paloissa → väritys oli poissa koko laskennan ajan (hitaalla koneella kymmeniä sekunteja).
+- Ratkaisu (render.js): kaksoispuskuri – `TFINE.re` = saman tason uudelleenlaskenta; vanha tekstuuri ja `uFine`/`uDet` pysyvät, kunnes uusi on valmis,
+  ja vanha vapautetaan vasta vaihdossa. Tarkistusrivi v2.68 (8× säilyy). **Sääntö:** taustalla uudelleen laskettava näkyvä resurssi vaihdetaan
+  vasta valmiina, ei nollata alussa.
+
+## 65. Uuden elementin CSS-luokka törmäsi pelin yleiseen luokkaan (v2.71, kehityksen aikana)
+- Oire: opastuksen kortti oli repun vaiheessa puoliksi ruudun ulkopuolella.
+- Syy: `#tut` sai luokan `panel`, ja pelin yleinen `.panel`-tyyli (paneelien sijainti ja transform) koski sitä → `position:fixed`-kortin
+  sijoittelu laskettiin `#tut`:n suhteen.
+- Ratkaisu: omat etuliitteelliset luokat (`tPanel`, `tMove`). **Sääntö:** uuden käyttöliittymäosan luokille oma etuliite; tarkista
+  `grep -n "^\.<luokka>\|[ ,]\.<luokka>[{ ,:]" css/style.css` ennen yleisen nimen (panel, on, open, hidden, active…) käyttöä.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`

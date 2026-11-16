@@ -17,7 +17,7 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
 - **PR #35 (v2.28–v2.49) ja #36 (muistiinpanot) on yhdistetty. PR #37 (v2.50–v2.56, lista 7 kokonaan + sarvien varaääni + Kalmanvartija 10 + puolituksen korjaus + äänet ja ikkunat v2.57–v2.58 + latausnäyttö v2.59) odottaa yhdistämistä.**
   Lista 7: ks. Ideajono › "Lista 7" (kaikki kohdat tehty; uudet äänet paikkamerkkeinä). **Lista 8 tehty v2.60–v2.62 (Ideajono › "Lista 8").** Avoimet: Ideajono › "Avoimet havainnot".
-- **Versio 2.66** (v2.66 musiikki music/-kansioon + uusi soitin, valikkoefektit; v2.65 tarkka maanmuokkaus + biomien sekoitus, v2.64 silmäpainike grafiikkasivuille, v2.60 ovi + äänirajat, v2.61 sää- ja tunnelmaäänet, v2.62 kaksi lukkoa + Avaimen kätkijä + 9 hiidenkiveä, v2.63 nummi, väritys, kivet, arkut, muuri, HUD), haara `claude/hiidenmaa-survival-game-fmxt0m` (jatkettu mainista). **PR #25** (v1.38–v1.83), **#27** (v1.84–v1.95) ja **#28** (v1.96–v2.10) on **yhdistetty**. **#29** (v2.11–v2.15) on **yhdistetty**. **#30** (v2.16: kivivartija, ääniprojektien kansiot, toimintoäänet B1) on **yhdistetty**. v2.17 (pomojen toimintokansio, ryntäysäänet, vesi sammuttaa, sade sammuttaa nuotion) ja v2.18 (vesiuudistus: uinti, hukkuminen, vesivarjostin, vedenalaiset efektit, K pois) PR #31:ssä; v2.19 korjaa valikon 3D-piirron (KORJAUKSET 47); v2.20 Extra-grafiikka, low poly -vesi, rantaroiskeet, ylämäen hidastus, kohteet rinteen mukaan. **PR #31 (v2.17–v2.20) on yhdistetty.** **PR #32 (v2.21) on yhdistetty.** **PR #33 (v2.22) on yhdistetty.** v2.23 (toimintoäänierä 2, kivivartijan äänet, toimintosilmukat, tarkistustyökalun korjaus) ja v2.24 (äänitasot, juominen, pää alas, pelaajan toimintoäänet) ja v2.25 (sudet hiljemmaksi, Aarnipuun törmäys, karhun syöksy, pelaajan äänet osat 1–3) ja v2.26 (pensasäänet, askeleet −20 %, terveyspalkkien näkyvyys) ja v2.27 (Aarnimetsän askel, oksat) – **PR #34 (v2.23–v2.27) on yhdistetty.** v2.28 (pelaajan äänierä osa 2: 22 ääntä, puun tömähdys, reppu kiinni, arkun sulkeminen) ja v2.29 (narinan ajoitus, siirto- ja puolitusäänet, Shift-siirtoslider) ja v2.30 (sliderin korjaukset, poimintaääni) ja v2.31 (poimintaäänen sävy) ja v2.32 (valitse + oikea klikkaus puolittaa myös hiiren lukituksessa) ja v2.33 (valinta säilyy pienessä liikkeessä, avointen biomien vaaleammat varjot) ja v2.34 (metsien varjot 20 % vaaleammat, vuorokauden vaihtelu ±15 %) ja v2.35 (näytön auringonsäteet, linssiheijastus) ja v2.36 (säteiden ajoitus, päiväkohtaisuus, peitto) ja v2.37 (säteet takaisin koko päiväksi) ja v2.38 (pyöreä auringon hehku, pilvien syvyys, kovat/pehmeät säteet) ja v2.39 (pienempi auringon hehku) ja v2.40 (elävät säteet, peitto suunnittain) ja v2.41 (suorituskykyoptimoinnit: puiden LOD, varjomallit, rakennusten yhdistäminen) ja v2.42 (low poly -sävytys säilyy varjojen vaalennuksessa) ja v2.43 (hautakummun kieleke, savujen optimointi, liekit pystyyn) ja v2.44 (satunnainen pilvimatto) ja v2.45 (terävät soihtuvarjot Extra-grafiikkaan) ja v2.46 (repun vilkkuminen/puolitus, pilvet, hukkumisen tarkistus) ja v2.47 (pilvipäivät, pilvimatto 50 %, heijastuksen päivävaihtelu, pilvet ylemmäs) PR #35:ssä. Käyttäjä tekee seuraavaksi ehkä ketulle omat äänet. Aiemmin #27: äänierä A (v1.84–v1.86: äänet, Aarnihirviön äänet pääääneksi, kaiku ulottuvuuksiin). **JATKA TÄSTÄ (äänet):** käyttäjä lisää olentojen ääniä erissä → noudata "Äänierän rutiini"; v2.11 HUOM: `aarnihirvio_chase_2` ja `karhu_hurt_1` ovat sama tiedosto; isot vahvistukset (raaka hiljainen): `kalmo_chase_1` +24, `susi_hurt_2` +23,7 (raaka 7,5 s ulvonta osumapaikassa → 0,18 s, väärä paikka?), `metso_hurt_1/2`, `hiisi_death_1` (+12…14 dB). Puuttuvat ketjun alut (🎯): `hiidenkarhu_chase`, `hiidenhirvi_chase`. Aiempi:
+- **Versio 2.71** (v2.71 interaktiivinen opastus + kertavinkit; v2.70 tasopalkinnot, reseptit aiemmin, tavoitetekstit, näppäinsivu; v2.69 maailman seed: paikat ja kasvillisuus seedin mukaan, poiminnat ilman ilmoitusääntä; v2.68 biomien sekoitus esiasetuksiin + Grafiikka-sivulle, 8× väritys säilyy, suorituskykypallot; v2.67 äänierä: silmukat ja häivytykset, hengästys + ylikuorma, luonto- ja biomiäänet, vedenalainen vaimennus, salama, putoamis- ja vesiäänet, ilmoitusäänen sääntö, nappien säädin; v2.66 musiikki music/-kansioon + uusi soitin, valikkoefektit; v2.65 tarkka maanmuokkaus + biomien sekoitus, v2.64 silmäpainike grafiikkasivuille, v2.60 ovi + äänirajat, v2.61 sää- ja tunnelmaäänet, v2.62 kaksi lukkoa + Avaimen kätkijä + 9 hiidenkiveä, v2.63 nummi, väritys, kivet, arkut, muuri, HUD), haara `claude/hiidenmaa-survival-game-fmxt0m` (jatkettu mainista). **PR #25** (v1.38–v1.83), **#27** (v1.84–v1.95) ja **#28** (v1.96–v2.10) on **yhdistetty**. **#29** (v2.11–v2.15) on **yhdistetty**. **#30** (v2.16: kivivartija, ääniprojektien kansiot, toimintoäänet B1) on **yhdistetty**. v2.17 (pomojen toimintokansio, ryntäysäänet, vesi sammuttaa, sade sammuttaa nuotion) ja v2.18 (vesiuudistus: uinti, hukkuminen, vesivarjostin, vedenalaiset efektit, K pois) PR #31:ssä; v2.19 korjaa valikon 3D-piirron (KORJAUKSET 47); v2.20 Extra-grafiikka, low poly -vesi, rantaroiskeet, ylämäen hidastus, kohteet rinteen mukaan. **PR #31 (v2.17–v2.20) on yhdistetty.** **PR #32 (v2.21) on yhdistetty.** **PR #33 (v2.22) on yhdistetty.** v2.23 (toimintoäänierä 2, kivivartijan äänet, toimintosilmukat, tarkistustyökalun korjaus) ja v2.24 (äänitasot, juominen, pää alas, pelaajan toimintoäänet) ja v2.25 (sudet hiljemmaksi, Aarnipuun törmäys, karhun syöksy, pelaajan äänet osat 1–3) ja v2.26 (pensasäänet, askeleet −20 %, terveyspalkkien näkyvyys) ja v2.27 (Aarnimetsän askel, oksat) – **PR #34 (v2.23–v2.27) on yhdistetty.** v2.28 (pelaajan äänierä osa 2: 22 ääntä, puun tömähdys, reppu kiinni, arkun sulkeminen) ja v2.29 (narinan ajoitus, siirto- ja puolitusäänet, Shift-siirtoslider) ja v2.30 (sliderin korjaukset, poimintaääni) ja v2.31 (poimintaäänen sävy) ja v2.32 (valitse + oikea klikkaus puolittaa myös hiiren lukituksessa) ja v2.33 (valinta säilyy pienessä liikkeessä, avointen biomien vaaleammat varjot) ja v2.34 (metsien varjot 20 % vaaleammat, vuorokauden vaihtelu ±15 %) ja v2.35 (näytön auringonsäteet, linssiheijastus) ja v2.36 (säteiden ajoitus, päiväkohtaisuus, peitto) ja v2.37 (säteet takaisin koko päiväksi) ja v2.38 (pyöreä auringon hehku, pilvien syvyys, kovat/pehmeät säteet) ja v2.39 (pienempi auringon hehku) ja v2.40 (elävät säteet, peitto suunnittain) ja v2.41 (suorituskykyoptimoinnit: puiden LOD, varjomallit, rakennusten yhdistäminen) ja v2.42 (low poly -sävytys säilyy varjojen vaalennuksessa) ja v2.43 (hautakummun kieleke, savujen optimointi, liekit pystyyn) ja v2.44 (satunnainen pilvimatto) ja v2.45 (terävät soihtuvarjot Extra-grafiikkaan) ja v2.46 (repun vilkkuminen/puolitus, pilvet, hukkumisen tarkistus) ja v2.47 (pilvipäivät, pilvimatto 50 %, heijastuksen päivävaihtelu, pilvet ylemmäs) PR #35:ssä. Käyttäjä tekee seuraavaksi ehkä ketulle omat äänet. Aiemmin #27: äänierä A (v1.84–v1.86: äänet, Aarnihirviön äänet pääääneksi, kaiku ulottuvuuksiin). **JATKA TÄSTÄ (äänet):** käyttäjä lisää olentojen ääniä erissä → noudata "Äänierän rutiini"; v2.11 HUOM: `aarnihirvio_chase_2` ja `karhu_hurt_1` ovat sama tiedosto; isot vahvistukset (raaka hiljainen): `kalmo_chase_1` +24, `susi_hurt_2` +23,7 (raaka 7,5 s ulvonta osumapaikassa → 0,18 s, väärä paikka?), `metso_hurt_1/2`, `hiisi_death_1` (+12…14 dB). Puuttuvat ketjun alut (🎯): `hiidenkarhu_chase`, `hiidenhirvi_chase`. Aiempi:
   `main` = v1.37. Kaikki käyttäjän pyynnöt tehty: päivityslistat 4 (v1.39–v1.44), 5 (v1.49–v1.52) ja 6 (v1.53–v1.57) sekä valikon ja
   logon uudistukset (v1.45–v1.48). Seuraava työ: uusi lista käyttäjältä.
 - **Koko pelin tarkistus v1.57** (6 karttaa, päivä/yö, kaikki 22 vihollistyyppiä, 3 ulottuvuutta + pomot, Hautakumpu, tallennus/lataus,
@@ -335,6 +335,96 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
   sarakkeen rivi `lainaavat: …` (suorat ensin, ketjun kautta tulevat "via X"). Selite taulukoiden alussa. Nykyiset (v1.95): 💎 susi (6), aarnihirviö (4),
   hirvi (3), karju (2), kalmo (1), karhu (1), sammalhiisi (1); ⭐ peura, kettu, ilves, kalmanvartija (1 kukin); kalmon ylimys ja hiidenhirvi vain lainaavat.
   Metsolla ei ole varaääntä (ei merkkiä, ei lainaa).
+
+### v2.71 (interaktiivinen opastus ja kertavinkit – käyttäjän pyyntö ja vastaukset)
+- **Uusi tiedosto `js/tutorial.js`** (ladataan progress.js:n jälkeen). Opastus uuden maailman alkuun: valinta uuden maailman luonnissa (`#newTut`,
+  oletuksena päällä vain ensimmäisessä maailmassa koskaan: ei tallennuksia eikä `hiidenmaa_tutdone`) tai kun Asetukset › Ohjaus › "Opastus seuraavassa
+  uudessa maailmassa" (`SET.tutNext`) on päällä. Valinta kulkee uudelleenlatauksen yli `sessionStorage.hiidenmaa_tutgo` → `tutOnNewWorld()` (molemmat newGame-polut).
+- **Pysäytys omalla tilalla** (käyttäjä: ei saa riippua DEV-pysäytyksestä): `update()` alussa `TUT.hold` → `tutHoldUpdate` (vain kamera ja HUD). Aika, olennot,
+  nälkä ja sää seis. Hiiri vapaana (kortin napit; `requestLock` ei lukitse pysäytyksessä, `#lockhint` piilossa).
+- **17 vaihetta** (`TUT_STEPS`): tervetuloa → palkit → pikapaikat ja kantokyky → minikartta ja kello → tehtävä/tavoite (T piilottaa ja palauttaa) → reppu (Tab auki,
+  selitys, kiinni) → kartta (M) → taso ja saavutukset (J) → ilmoitukset (L) → toiminnot (E, hiiri, B) → päävalikko (P, älä Esc) → **liikkuminen viimeisenä**:
+  peli käynnistyy, tarkistuslista W A S D, juoksu, hyppy (kyykky vapaaehtoinen) → valmis (tai 40 s ja 3 liikettä). Korostusrengas ruudun osan ympärillä,
+  kortti viereen nuolella; paneelivaiheissa kortti alhaalla keskellä. Näppäimet nykyisistä sidonnoista. Pysäytyksessä vain vaiheen näppäimet toimivat
+  (`tutKey`, input.js), Enter = jatka. **Ohita opastus** kysyy varmistuksen (`tutSkipAsk`); ohitus = ei kertavinkkejä. Opastus alkaa vasta latausnäytön ja
+  alkulennon jälkeen (`tutMaybeStart` endIntrossa).
+- **Kertavinkit** (`TIPS`, opastuksen maailmassa `flags.tut`, näytetyt `flags.tips`): vasara (rakennusnäppäimet), jousi, lapio/kuokka, kirves, uinti,
+  ensimmäinen yö, ylikuorma, terveys vähissä, Hautakumpu, ulottuvuus, ensimmäinen taso. 10 s ruudun yläosassa, väli ≥ 6 s.
+- Kaikki toiminnot -sivu: Enter = opastus: jatka.
+- Testattu headless: kaikki vaiheet näppäimillä (peliaika pysyi samana koko pysäytyksen), liikkuminen päättää, vasaravinkki näkyy; kuvat. Korjattu kehityksessä:
+  luokka `panel` törmäsi pelin `.panel`-tyyliin (KORJAUKSET 65) ja vaiheen 0,25 s viive jumitti nopean T-painalluksen.
+- Tarkistusrivi v2.71.
+
+### v2.70 (tasopalkinnot, reseptien tasot, tavoitetekstit, kaikki toiminnot -sivu – käyttäjän pyyntö ja vastaukset)
+- **Tasopalkinnot** (progress.js `LVL_REW`/`lvlRew`/`lvlBon`, käyttäjä: "Tasainen", ei liian vahva, HP harvoin): HP +10 (taso 3, 5), +15 (10, 15), +20 (20)
+  = +70 → 130 (ennen +40 jo tasolla 5 → 100); kestävyys +5 (4, 8, 12, 16) = +20; muilla tasoilla kantokyky +5 (`LVL_W`, 10 tasoa = +50 → max 335
+  repun ja saavutusten kanssa). `maxHp` (`lvlHp`), `maxStam`, `recalcMaxW` käyttävät `lvlBon`:ia; tason noustessa ilmoitus kertoo palkinnon.
+  Vanhoissa tallennuksissa tasojen 2–5 HP pienenee (40 → 20 tasolla 5) – tasapainomuutos.
+- **Reseptien tasot** (käyttäjä: perusasiat nopeasti, vahvat loppupäässä): 2 jousi + puunuolet (ent. 3); 3 nuolet, tulinuolet, sulkanuolet (ent. 4),
+  kuparimiekka, -kirves, -hakku (ent. 4); 4 kuparipanssari (ent. 5), kuparikilpi, karhuhaarniska; 5 rautakirves ja -hakku (ent. 6); 6 rautamiekka (ent. 7);
+  7 rautakilpi, rautapanssari (ent. 8); 10/12/14 hiidenjousi/-miekka/-panssari ennallaan. Kaikki tavalliset auki tasolla 7 (930 XP).
+- **XP-käyrä ennallaan** (`needXp` 50 + 30n, taso 20 = 6 650 XP): arvio koko pelistä ≈ 6 700 XP (tavoitteet ~770, tehtävät 16 × 60, saavutukset ~500,
+  pomot 171/259/377/1 128, muut kaadot ~900, arkut ja ensimmäiset rakennukset/valmistukset ~600) → taso 20 lopussa, taso 7 alkupelin jälkeen.
+- **J-paneeli › Taso avaa:** jokainen taso 2–20 palkintoineen ja resepteineen (`lvlUnlockRows`).
+- **Tavoitetekstit ajan tasalle:** Routaportti (kaksi lukkoa: Kalmon sinetti Hautakummun ylimykseltä + Jääavain arkusta, Avaimen kätkijä neuvoo),
+  kupari/varustus/rauta kertovat tarvittavan tason. Tehtävät (QUESTS), riimukivet, kyltit ja esineiden kuvaukset tarkistettu: ajan tasalla v2.62:sta.
+- **Kaikki toiminnot -sivu:** tikkailla alas/ylös, uintiveto, juoksun kestävyys/ylikuorma, siirtosliderin nuolet ja Enter.
+- Tarkistusrivit: v2.70 tasopalkinnot ja reseptit; v1.20-rivi päivitetty (taso 5 = +20).
+
+### v2.69 (maailman seed, poiminnat ilman ilmoitusääntä – käyttäjän pyyntö ja vastaukset)
+- **Seed** (world.js `SEED`/`seedMix`/`newSeed`, `SEED_MAX` 999 999): löytöpaikat ja kasvillisuus seedin mukaan, saaren muoto, aloituspaikka, rannan
+  riimukivi (rune1), Hautakumpu ja Kalmankehä kartan mukaan (käyttäjä). Seedin mukaan: portit, rauniot (myös kartan 3 nimettyä omissa teemoissaan
+  `SITE_MOVE`/`sitePrefOk`: Metsäraunio metsässä, Vuoriraunio vuorella, Rantaraunio rannalla, Nummen laita nummen reunalla, Tunturin juuri vuoren
+  juurella; varalla kartan oma paikka), arkkukivet, riimukivet A–F, Avaimen kätkijä (yksi korkeimmista paikoista), leirit, kiviröykkiöt, kyltit, puut/kivet/
+  malmit (`rng` + metsiköt/aukeat `vegDens`). Ulottuvuudet olivat jo maailmakohtaisia (`fo('rs')`).
+- **SEED 0 = vanhat kiinteät paikat** → vanhat tallennukset ennallaan; vanha pelaaja (tallennuksia) aloittaa seedillä 0 ilman turhaa latausta.
+- **Lataus** (main.js): seed valitaan ennen skriptejä (`localStorage.hiidenmaa_seed`), uusi maailma = uusi seed + satunnainen kartta → `switchMap(id,'new',null,seed)`;
+  jatkaminen vaihtaa seedin (`playSave`). Ensikäynnillä ladattu maailma on tuore (`hiidenmaa_fresh`, `worldFresh`) → ensimmäinen maailma ilman latausta.
+- **Tallennus v12:** `seed`; maailmalistassa "seed 12345". DEV päällä: uuden maailman seed-kenttä (`#newSeed`).
+- **Riimukivien suunnat:** tekstit laskevat suunnan kiven omasta paikasta (`dirText`), joten ne pitävät paikkansa siirtyneinäkin; testattu.
+- **Testit:** `tools/seedtest.mjs` (uusi): 6 karttaa × 6 seediä – paikat maalla, erillään (≥ 20 m), teemapaikoilla, eri seed = eri paikat, tekstit ehjät;
+  ulottuvuudet 3 × 60 satunnaista: reitti sisäänkäynniltä pomohuoneeseen aina; ketju ensikäynti → uusi maailma (lataus) → jatko (lataus takaisin, samat paikat).
+  `tarkistus.mjs` ajaa nyt seedillä 0 (toistettava; satunnainen kasvillisuus kaatoi jousitestin). Kalmansaarilla tunturin juuren kivi voi jäädä kartan paikalleen (ahdas saari).
+- **Poiminnat ja XP ilman ilmoitusääntä** (ui.js `MSG_GAIN`: "+"-alkuiset viestit).
+- Tarkistusrivi v2.69.
+
+### v2.68 (grafiikka: biomien sekoitus esiasetuksiin, 8× väritys säilyy, suorituskykymerkit – käyttäjän pyyntö ja vastaukset)
+- **Biomien sekoitus Grafiikka-sivulle** (Luonto, Tiheämpi maaston väritys -rivin alle; pois Extra-grafiikasta) ja **esiasetuksiin**:
+  Low 0, Low+ 0, Medium- 1, Medium 1, Medium+ 1, High 2, High+ 2, Ultra 3. Päätös (käyttäjä: "päätä itse"): sekoitus lasketaan kerran (~2 M
+  laskutoimitusta), ei maksa ruutua kohden → ei syytä pudottaa suorituskyvyn takia; matalimmat pitävät terävän low poly -ilmeen, ylemmät pehmeämmän.
+  Käsin muutos tekee esiasetuksesta Customin (kuten muutkin). Kertasiirto `SET._v` 7: tallenne, joka vastaa esiasetusta sekoitusta lukuun ottamatta, saa sen arvon.
+- **8× väritys säilyy** sekoitusta vaihdettaessa (KORJAUKSET 64): `terrFineBuild` kaksoispuskuroi (`TFINE.re`), vanha tekstuuri näkyy kunnes uusi valmis.
+- **Suorituskykymerkit** (settings.js `PFK`/`pfLvl`/`pfDot`, css `.pf`): jokaisen Grafiikka- ja Extra-grafiikka-asetuksen nimen perässä väripallo
+  nykyisen valinnan vaikutuksesta: vihreä = pieni, keltainen = kohtalainen, oranssi = suuri, punainen = erittäin suuri; hiiren alla vihje
+  "Suuri vaikutus suorituskykyyn" (+ lisätieto `PF_X`, esim. automaattisäädöt "keventää peliä tarvittaessa"). Vihje näkyy myös virtuaalisella
+  osoittimella (`.vh`). Tasot: 3D-resoluutio Terävä 3 / Normaali 2 / 70–85 % 1 / ≤55 % 0; piirtoetäisyys 120 m 1, 210 m 2, 400 m 3; ruoho = taso;
+  varjot Hyvät 2 / Kevyet 1; tulien varjot 2; Mega-aallot 3; erittäin tarkat varjot terävä 2, muut 3; keventävät asetukset päällä 0, pois 1.
+- Uusi asetus grafiikkasivuille → lisää taso `PFK`:hon (tarkistusrivi v2.68 huomaa puuttuvan).
+- Tarkistusrivit: v2.68 sekoitus esiasetuksissa, suorituskykymerkit, 8× säilyy; v2.65-rivi päivitetty (Grafiikka-sivu).
+
+### v2.67 (äänierä: kohina, pätkät, silmukat, luonto, vesi, ilmoitusääni, nappien säädin – käyttäjän pyynnöt ja vastaukset)
+- **Kiviaskelten kohina:** pahin `askel_kivi_2`, sitten `askel_kivi_1` – oma `NOISE_FIX` (afftdn + agate; kivi_2 kynnys 0,1). Molemmat ~−72 dB iskun ympärillä.
+- **Pätkiksi** (`SPLIT_EV`, `step_segments` → versiot `_99xx`): hytinä 21 s → 5 versiota, kipu_tuli 10 s → 3. `satunnainen_aarnihauta` ei pilkota.
+- **Uudet silmukat:** hengästys (`keho`), ukkonen = myrskyn taustasilmukka (myrsky + ukkonen yhdessä), `tunnelma_vedenalla` (häivytys 0,5 s).
+  Uusi kertaääni `salama` 0–3 s salaman jälkeen (lähellä 0,05–0,3 s, täysi taso; kaukana hiljempi `clamp(1.1−d·0.2, .45, 1)`).
+- **Silmukoiden säännöt (audio.js `AMB`):** silmukan alkaessa arvotaan yksi versio, joka pysyy; sään vaihtuessa ristihäivytys 2,5 s; paikan vaihtuessa
+  (maailma ↔ ulottuvuus/Hautakumpu) vanhat loppuvat 0,3 s (`AMB_CUT`) ja uudet alkavat 1 s kuluttua (`AMB_HOLD`); tauolla kaikki hiljenevät 1 s
+  (`AMB.duck`) ja palaavat jatkettaessa; valikossa pois.
+- **Hengästys:** silmukka alkaa, kun kestävyys on 0, ja loppuu yli 30 %:ssa (`HENG_END`); ylikuormassa liikkuessa soi myös (häivytys 1,5 s pysähtyessä).
+  **Ylikuorma kuluttaa kestävyyttä 5/s** (`OVER_STAM`, player.js) ja pitää sen 0:ssa, kunnes kuorma alittaa rajan.
+- **Ulottuvuuksien idle:** tavallisten olentojen idle vain alle 15 m päästä ja yksi koko ulottuvuudessa 40 s välein (`realmIdleOk`); pomoja ei rajoiteta.
+- **Puun kaatuminen:** narina ja tömähdys −50 % kuuluvuus (`TREE_RK`, plSnd `rk`) kaikille kaatuville puille.
+- **Uudet paikkamerkit:** `putoaminen_tomahdys` (jokainen vahingoittava putoaminen), `nilkka` (putoamisvahinko yli 25 % HP:sta, `FALL_ANKLE`),
+  `sukellus` (pää veden alle), `pinnalle` (pää pintaan; yli 2 s veden alla myös haukkoo henkeä); luonto `linnunlaulu`, `heinasirkat`, `puiden_humina`;
+  biomien sivuäänet `korpimetsa`, `koivulehto`, `aarnimetsa`, `upposuo`, `kalmanummi`, `rantaniitty` × `_paiva`/`_yo` (`NAT_BIO`).
+- **Luonto ja biomit:** satunnaisina jaksoina 30 s – 2 min (`NAT_LEN`), tauko 60–240 s, ensimmäinen 15–90 s; häivytys 6–10 s; hiljaa taustalla (35 %).
+  Linnut päivällä ilman sadetta, heinäsirkat yöllä lämpimässä, humina tuulella; biomin ääni oman biomin mukaan päivä/yö.
+- **Veden alla vaimeat (`sndBus`, lowpass 650 Hz, ×0,7):** olennot, pelaaja, sää, tunnelma ja ilmoitukset; musiikki ja valikot eivät.
+- **Ilmoitusääni (ui.js `msgSnd`):** soi pitkissä (≥ 40 merkkiä) ja erityisissä (löytö, pomo, tehtävä) viesteissä tai kun on ollut hiljaista
+  (pelaajan toimintaäänestä yli 1,5 s); ei koskaan päällekkäin toimintoäänen kanssa (alle 0,8 s → odottaa enint. 1,6 s). `plActT` = viimeisin toimintoääni.
+- **Nappien säädin:** Äänet ja musiikki › Napit (hover ja klikkaus) `SET.btnVol` 0–150 %; perustaso −20 % (`BTN_BASE` .8).
+- HUOM: `tunnelma_hautakumpu` ja `tunnelma_kalmankammio` ovat sama tiedosto (käyttäjälle tiedoksi).
+- Tarkistusrivit: v2.67 äänet, silmukat, luonto, hengästys/ylikuorma, idle/puu/vedenalainen, ilmoitusääni, napit; v2.61-rivi: valikossa tyhjä.
 
 ### v2.66 (käyttäjän äänet: valikkoefektit tarkasti, musiikki omaan pääkansioon ja uusi soitin – käyttäjän pyyntö ja vastaukset)
 - **Uudet äänet (8):** valikko hover, klikkaus, naputus, Ultra, Extra päälle/pois; ilmoitus; Aarnihaudan saapumisääni.

@@ -5,7 +5,7 @@
 const NTILT={rock:1,pick:1,deco:.8},_gtU=new THREE.Vector3(0,1,0),_gtN=new THREE.Vector3(),_gtQ=new THREE.Quaternion();
 
 /* ---------------- SCENERY (resource nodes) ---------------- */
-const rng=mulberry32(20261003);
+const rng=mulberry32(seedMix(20261003));   // v2.69 kasvillisuus maailman seedin mukaan (SEED 0 = vanha)
 const NODE={
   kuusi:{kind:'tree',hp:30,drops:[['puu',3,5],['pihka',0,1]],r:.38,respawn:1500},
   koivu:{kind:'tree',hp:24,drops:[['puu',3,4]],r:.3,respawn:1500},
@@ -110,6 +110,9 @@ let nodeIdN=0;
 const CHN=10,CHS=HALF*2/CHN,CHUNK_IMS=[];
 const VIS_R={tree:130,rock:110,pick:60,deco:55}; // näkyvyysetäisyys lajeittain (sumu peittää kauempana)
 function chunkOf(x,z){return clamp(Math.floor((z+HALF)/CHS),0,CHN-1)*CHN+clamp(Math.floor((x+HALF)/CHS),0,CHN-1);}
+/* v2.69 seedin kasvillisuustiheys: pehmeä kohina (metsiköt ja aukeat) kertoo puiden todennäköisyyden 0,55–1,45; SEED 0 → 1 (vanha). */
+const VEG_O=SEED?[(SEED%997)*1.37+11,(SEED%613)*2.11-7]:null;
+function vegDens(x,z){return VEG_O?.55+.9*fbm(x*.018+VEG_O[0],z*.018+VEG_O[1],2):1;}
 (function placeNodes(){
   const tmp={};for(const k in NGEO)tmp[k]=[];
   const add=(type,x,z,s=1,rot)=>{const y=terrainH(x,z);tmp[type].push({type,x,z,y,s,rot:rot??rng()*TAU});};
@@ -117,7 +120,7 @@ function chunkOf(x,z){return clamp(Math.floor((z+HALF)/CHS),0,CHN-1)*CHN+clamp(M
   const E=HALF-4;
   for(let x=-E;x<E;x+=3.6)for(let z=-E;z<E;z+=3.6){
     const px=x+(rng()-.5)*3,pz=z+(rng()-.5)*3,h=terrainH(px,pz);if(h<.8)continue;if(!clear(px,pz))continue;
-    const b=biomeAt(px,pz,h),r=rng();
+    const b=biomeAt(px,pz,h),r=rng()/vegDens(px,pz);   /* v2.69 seedin metsiköt ja aukeat */
     if(b==='forest'){if(r<.6)add(rng()<.8?'kuusi':'koivu',px,pz,treeS());if(rng()<.04)add('pensas',px+(rng()-.5)*2.5,pz+(rng()-.5)*2.5,.6+rng()*.5);}
     else if(b==='aarni'){if(r<.085)add('aarnipuu',px,pz,.8+rng()*.35);else if(r<.14)add('kuusi',px,pz,.6+rng()*.4);if(rng()<.55)add('pensas',px+(rng()-.5)*2.5,pz+(rng()-.5)*2.5,.7+rng()*.7);}
     else if(b==='meadow'){if(r<.035)add('koivu',px,pz,treeS());}
@@ -152,7 +155,7 @@ function chunkOf(x,z){return clamp(Math.floor((z+HALF)/CHS),0,CHN-1)*CHN+clamp(M
   for(let i=0;i<14;i++){const a=rng()*TAU,d=7+rng()*14;add(i%2?'oksa':'kivikasa',S0.x+Math.cos(a)*d,S0.z+Math.sin(a)*d);}
   for(let i=0;i<4;i++){const a=rng()*TAU,d=12+rng()*12;add('marjat',S0.x+Math.cos(a)*d,S0.z+Math.sin(a)*d);}
   // v2.07: hiekkakasat rannoille, 5–10 per kartta (oma satunnaislähde ja viimeisinä → muiden solmujen id:t ja sijainnit eivät muutu)
-  {const rs=mulberry32(4242+MAP_ID*97),want=5+Math.floor(rs()*6),pts=[];
+  {const rs=mulberry32(seedMix(4242+MAP_ID*97)),want=5+Math.floor(rs()*6),pts=[];
    for(let i=0;i<60000&&pts.length<want;i++){const px=(rs()-.5)*AR,pz=(rs()-.5)*AR,h=terrainH(px,pz);if(h<.15||h>1.05||biomeAt(px,pz,h)!=='beach'||!clear(px,pz))continue;
      if(pts.some(q=>dist2(q[0],q[1],px,pz)<60*60))continue;pts.push([px,pz]);add('hiekkakasa',px,pz,1.2+rs()*.35);}}
   // Instanssit jaetaan CHN×CHN ruutuun: jokaisella oma rajauspallo, joten näkymättömät ruudut karsitaan.

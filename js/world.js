@@ -39,6 +39,17 @@ const MAPS=[
 ];
 const MAP_ID=(()=>{try{const v=+localStorage.getItem('hiidenmaa_map');return v>=0&&v<MAPS.length?v|0:0;}catch(e){return 0;}})();
 const MAP=MAPS[MAP_ID];
+/* v2.69 MAAILMAN SEED: löytöpaikat (portit, rauniot, arkkukivet, riimukivet paitsi rannan aloituskivi, Avaimen kätkijä, leirit, kiviröykkiöt,
+   kyltit) ja kasvillisuus arvotaan seedin mukaan; saaren muoto, aloituspaikka, Hautakumpu ja Kalmankehä pysyvät kartan mukaan. Seed valitaan
+   ennen skriptien latausta (localStorage hiidenmaa_seed, kuten kartta) → vaihto = sivun uudelleenlataus (main.js switchMap). SEED 0 = vanhat
+   kiinteät paikat (tallennukset ennen v2.69). Ensikäynnillä arvotaan heti uusi seed ja maailma merkitään tuoreeksi (hiidenmaa_fresh), jolloin
+   ensimmäinen uusi maailma alkaa ilman uudelleenlatausta. */
+const SEED_MAX=999999,newSeed=()=>1+Math.floor(Math.random()*SEED_MAX);
+const SEED=(()=>{try{const raw=localStorage.getItem('hiidenmaa_seed');if(raw===null&&/"name"/.test(localStorage.getItem('hiidenmaa_slots')||'')){localStorage.setItem('hiidenmaa_seed','0');return 0;}   /* vanha pelaaja: tallennukset ovat seed 0:ssa → ei turhaa uudelleenlatausta */
+  if(raw===null){const v=newSeed();localStorage.setItem('hiidenmaa_seed',String(v));localStorage.setItem('hiidenmaa_fresh',MAP_ID+':'+v);return v;}
+  const v=+raw;return v>0&&v<=SEED_MAX?v|0:0;}catch(e){return 0;}})();
+// seedin sekoitus satunnaislukujen siemeneen: SEED 0 palauttaa alkuperäisen (vanhat tallennukset pysyvät ennallaan)
+function seedMix(a){return SEED?(Math.imul((a^Math.imul(SEED,0x9E3779B1))>>>0,2654435761)^SEED)>>>0:a;}
 const LOC={};
 for(const k in MAP.loc){const [u,v]=MAP.loc[k];LOC[k]={x:u*WS,z:v*WS};}
 // Ilmansuunta paikkaan k (oletuksena aloituspaikasta) olosijassa, esim. "lounaassa". Pohjoinen = −z.
@@ -161,6 +172,16 @@ function seaBorder(x,z){const a=Math.atan2(x,z),f=((a/(Math.PI*2))*360+360)%360,
 /* ---------------- LÖYTÖPAIKAT: portaalit, rauniot, arkkukivet, lisäriimukivet ---------------- */
 // Sijainnit arvotaan kartan mukaan (sama joka kerta samalla kartalla), maasto tasoitetaan ja paikat lisätään LOC:iin,
 // jolloin metsä ja kivet väistävät niitä (resources.js) ja kartta osaa näyttää ne löydettyään.
+const SITE_MOVE=['ruinF','ruinM','ruinC','rune2','rune3'],SITE_MOVE_PREF={ruinF:'forestR',ruinM:'mountain',ruinC:'coast',rune2:'moorEdge',rune3:'mtnFoot'};
+// v2.69 seedillä siirrettävien paikkojen teemaehto
+function sitePrefOk(pref,x,z,h){const b=biomeAt(x,z,h),mH=MAP.mtnH||23;
+  if(pref==='forestR')return b==='forest'||b==='koivu';
+  if(pref==='mountain')return b==='mountain'||b==='tunturi'||b==='rakka';
+  if(pref==='coast'){if(h>6)return false;for(let a=0;a<8;a++)if(terrainH(x+Math.cos(a*.785)*30,z+Math.sin(a*.785)*30)<-.4)return true;return false;}
+  const near=(r,f)=>{for(let a=0;a<12;a++){const xx=x+Math.cos(a*.524)*r,zz=z+Math.sin(a*.524)*r,hh=terrainH(xx,zz);if(f(biomeAt(xx,zz,hh),hh))return true;}return false;};
+  if(pref==='moorEdge')return b==='moor'?near(26,bb=>bb!=='moor'):near(24,bb=>bb==='moor');   // nummen laidalla (kummalla puolella tahansa)
+  if(pref==='mtnFoot')return b!=='mountain'&&b!=='rakka'&&h>4&&near(42,(bb,hh)=>bb==='mountain'||bb==='rakka'||hh>mH-4);   // tunturin juurella
+  return true;}
 const SITE_DEFS=[
   {k:'portal1',kind:'portal',name:'Routaportti',pref:'mountain'},
   {k:'portal2',kind:'portal',name:'Kalmankammion portti',pref:'moor'},
@@ -172,25 +193,31 @@ const SITE_DEFS=[
   {k:'runeD',kind:'rune',name:'Riimukivi'},{k:'runeE',kind:'rune',name:'Riimukivi'},{k:'runeF',kind:'rune',name:'Riimukivi'},
 ];
 (function(){
-  const rg=mulberry32(9001+MAP_ID*77),S0=LOC.spawn;
+  const rg=mulberry32(seedMix(9001+MAP_ID*77)),S0=LOC.spawn;
   const flatten=(x,z,r,h)=>{const R=r+10;for(let iz=Math.max(0,Math.floor((z-R+HALF)/GS));iz<=Math.min(GN,Math.ceil((z+R+HALF)/GS));iz++)for(let ix=Math.max(0,Math.floor((x-R+HALF)/GS));ix<=Math.min(GN,Math.ceil((x+R+HALF)/GS));ix++){
     const d=Math.hypot(-HALF+ix*GS-x,-HALF+iz*GS-z),t=sstep(R,r,d);if(t>0){const i=iz*HN+ix;HGT[i]=lerp(HGT[i],h,t);HGT0[i]=HGT[i];}}};
-  for(const D of SITE_DEFS){
+  /* v2.69: seedillä myös kartan nimetyt rauniot ja riimukivet 2–3 omille teemapaikoilleen (rannan aloituskivi rune1 pysyy). Vanha paikka varalla. */
+  const DEFS=SEED?[...SITE_MOVE.map(k=>({k,kind:/^rune/.test(k)?'rune':'ruin',name:LOC[k].name,move:1,pref:SITE_MOVE_PREF[k]})),...SITE_DEFS]:SITE_DEFS;
+  const OLD={};if(SEED)for(const k of SITE_MOVE){OLD[k]=LOC[k];delete LOC[k];}
+  for(const D of DEFS){
     const rune=D.kind==='rune',minOther=rune?42:68,minSpawn=rune?(D.k==='runeA'?32:60):75;let best=null;
     for(let t=0;t<6000&&!best;t++){
       const x=(rg()*2-1)*HALF*.78,z=(rg()*2-1)*HALF*.78,h=terrainH(x,z);
+      if(D.move&&t<4500&&!sitePrefOk(D.pref,x,z,h))continue;   /* v2.69 teemapaikka (metsä, vuori, ranta, nummen laita, tunturin juuri) */
       if(h<2.2||h>(D.pref==='mountain'&&t<2500?60:22))continue;
       if(Math.hypot(x-S0.x,z-S0.z)<minSpawn||(D.k==='runeA'&&Math.hypot(x-S0.x,z-S0.z)>110))continue;
-      let bad=false;for(const k in LOC){const L=LOC[k],m=(k==='spawn'||k==='barrow'||k==='circle')?Math.max(minOther,k==='spawn'?minSpawn:75):minOther;const mm=D.pref==='mountain'&&!L.kind&&/^(ruin|rune)/.test(k)?30:(L.kind==='rune'&&!rune?55:m);if(Math.hypot(x-L.x,z-L.z)<mm){bad=true;break;}}
+      let bad=false;for(const k in LOC){const L=LOC[k],m=(k==='spawn'||k==='barrow'||k==='circle')?Math.max(minOther,k==='spawn'?minSpawn:(D.move&&rune?40:75)):minOther;const mm=D.pref==='mountain'&&!L.kind&&/^(ruin|rune)/.test(k)?30:(L.kind==='rune'&&!rune?55:m);if(Math.hypot(x-L.x,z-L.z)<mm){bad=true;break;}}
       if(bad)continue;
       let lo=h,hi=h;for(let a=0;a<8;a++){const hh=terrainH(x+Math.cos(a*.785)*8,z+Math.sin(a*.785)*8);lo=Math.min(lo,hh);hi=Math.max(hi,hh);}
       if(lo<1.3||hi-lo>(D.pref==="mountain"&&t<2500?10:(t<4000?4.5:7)))continue;
-      if(D.pref&&t<2500){const b=biomeAt(x,z,h);if(b!==D.pref)continue;}
+      if(D.pref&&!D.move&&t<2500){const b=biomeAt(x,z,h);if(b!==D.pref)continue;}
       best={x,z};
     }
+    if(!best&&D.move)best={x:OLD[D.k].x,z:OLD[D.k].z};   // v2.69 varalla kartan oma paikka
     if(!best){const a=rg()*TAU;best={x:S0.x+Math.cos(a)*150,z:S0.z+Math.sin(a)*150};}
     const h=Math.max(2.2,terrainH(best.x,best.z));
     if(!rune)flatten(best.x,best.z,D.kind==='portal'?9:8,h);
+    if(D.move){LOC[D.k]=Object.assign(OLD[D.k],{x:best.x,z:best.z});continue;}   // v2.69 nimetty kartan paikka (ei kind-kenttää, kuten ennen)
     LOC[D.k]={x:best.x,z:best.z,name:D.name,kind:D.kind,ax:rg()<.5?'x':'z'};
   }
 })();

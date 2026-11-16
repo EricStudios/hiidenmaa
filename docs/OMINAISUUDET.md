@@ -7,6 +7,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ---
 
 ## 1. Maailma
+- **v2.69 seed:** jokaisella maailmalla oma seed (näkyy maailmalistassa). Seed määrää porttien, raunioiden, arkkukivien, riimukivien (paitsi rannan
+  aloituskiven), Avaimen kätkijän, leirien, kiviröykkiöiden, kylttien ja kasvillisuuden paikat; saaren muoto, aloitusranta, Hautakumpu ja Kalmankehä
+  pysyvät kartan mukaan. Vanhat maailmat (ennen v2.69) säilyttävät vanhat paikat. Ulottuvuudet arvotaan maailmakohtaisesti.
 
 - **Vihollisten syntyminen (v0.83):** yöllä 90 % 55–85 m päähän (vaeltavat), 10 % 20–30 m päähän puun/kiven taakse; aarnimetsä vetää
   vihollisia (yöllä tahti 1,5 s, raja 18). Päivällä enintään 2 vihollista (aarnimetsässä 3) ja vain korpimetsässä, suolla, kankaalla,
@@ -350,7 +353,24 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Ilmoitukset:** näkyvät pituuden mukaan pidempään, piiloon valikoissa; L näyttää 10 viimeisintä (v1.18; ennen T).
 - **Tehtävä ja tavoite piiloon (v1.18):** T kiertää: molemmat → vain tehtävä → vain tavoite → ei kumpaakaan; piilotettuna pieni vihje, valinta muistetaan.
 
+## Tasot (v2.70)
+- Taso 1–20 (XP tasolta n seuraavalle 50 + 30n). Palkinnot: HP +10 (taso 3 ja 5), +15 (10 ja 15), +20 (20) = 130 HP tasolla 20; kestävyys +5
+  (4, 8, 12, 16); muilla tasoilla kantokyky +5. Reseptit: 2 piikivityökalut, kilpi, keihäs, nahkavaatteet, varras, jousi + puunuolet; 3 nuolet ja
+  kupariaseet/-työkalut; 4 kuparipanssari, kuparikilpi, karhuhaarniska; 5 rautakirves ja -hakku; 6 rautamiekka; 7 rautakilpi ja -panssari;
+  10 hiidenjousi, 12 hiidenmiekka, 14 hiidenpanssari. J-paneeli näyttää jokaisen tason palkinnon. Poiminnat ja XP-viestit eivät soita ilmoitusääntä.
+
+## Opastus (v2.71)
+- Uuden maailman luonnissa valinta "Opastus uuden maailman alkuun" (oletuksena päällä ensimmäisessä maailmassa; Asetukset › Ohjaus › Opastus seuraavassa
+  uudessa maailmassa). Alkulennon jälkeen peli pysähtyy: kortit ja korostus esittelevät palkit, pikapaikat, minikartan, tehtävän ja tavoitteen (T),
+  repun ja valmistuksen (Tab), kartan (M), tason (J), ilmoitukset (L), toiminnot (E, hiiri, B) ja päävalikon (P). Paneelit avataan ja suljetaan itse,
+  muut kortit Enterillä. Viimeisenä liikkuminen: peli käynnistyy, ja opastus päättyy, kun olet liikkunut, juossut ja hypännyt. Ohitus kysyy varmistuksen.
+- Kertavinkit (opastuksen maailmassa): kun asia tulee ensimmäisen kerran vastaan (vasara, jousi, lapio, kirves, uinti, yö, ylikuorma, vähäinen terveys,
+  Hautakumpu, ulottuvuus, ensimmäinen taso), ruudun yläosaan tulee 10 s vinkki.
+
 ## 15. Asetukset ja näppäimet (settings.js)
+- **v2.68 suorituskykymerkit:** jokaisen grafiikka-asetuksen perässä väripallo nykyisen valinnan vaikutuksesta suorituskykyyn (vihreä pieni,
+  keltainen kohtalainen, oranssi suuri, punainen erittäin suuri) ja vihje hiiren alla. **Biomien sekoitus** on Grafiikka-sivulla ja esiasetuksissa
+  (Low/Low+ pois, Medium-…Medium+ normaali, High/High+ vahva, Ultra erittäin vahva). Sekoituksen vaihto ei enää poista tarkempaa väritystä (4×/8×).
 - **v2.63:** Grafiikka › Tiheämpi maaston väritys (High+ ja Ultra: värit 1 m välein, värineliöt eivät erotu). Extra-grafiikka › Maaston väritys
   tarkemmaksi (4× / 8× / 16×) ja Pehmeä rantaveden väri. Ohjaus › HUD › HUD:n koko 60–150 % (oletus 100 %; koko pelin HUD, osat kasvavat
   reunoiltaan, yli 100 % rajoittuu näytön koon mukaan, ettei mikään mene päällekkäin).
@@ -489,7 +509,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   Maailmassa biomin kappale 10–40 s liittymisestä, kappaleiden välissä 50 s – 2 min hiljaisuutta; biomia vaihdettaessa kappale vaihtuu 80 %
   todennäköisyydellä uuden biomin kappaleeseen (20 %: loppuu). Ulottuvuuksissa, Hautakummussa ja pomotaistelussa oma kappale heti. Häivytys 2,5 s + 2,5 s.
 - **v2.53:** valikkomusiikki (aloitusjakson logosta päävalikkoon, häipyy peliin liityttäessä; taukovalikossa 15 s jälkeen); uusi
-  asetussivu **Äänet ja musiikki** (master, mykistykset, 6 säädintä 0–150 %, ilmoitus-/alue-/ulottuvuusäänten valinnat); ilmoitus-,
+  asetussivu **Äänet ja musiikki** (master, mykistykset, 7 säädintä 0–150 % (v2.67 + napit), ilmoitus-/alue-/ulottuvuusäänten valinnat); ilmoitus-,
   alueen löytö- ja ulottuvuusäänet; kolmen valikkotaustan satunnaiset hiljaiset äänet (kun äänet on lisätty).
 - **v2.52:** jos selain estää äänet, alareunassa näkyy kaiutinmerkki ja "Napauta näyttöä kuullaksesi äänet" (jakso alkaa 2 s
   myöhemmin; napautus ei ohita jaksoa); äänet aloitusjaksoon, latausnäytön loppuun, uuden maailman introon (tuuli, linnut, pilvien
@@ -599,6 +619,16 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.67 silmukat ja tunnelma:** jokainen silmukka pitää yhden arvotun version; sää ristihäivyttää 2,5 s; siirtyessä maailman ja ulottuvuuden
+  välillä vanhat loppuvat 0,3 s ja uudet alkavat 1 s kuluttua; tauolla kaikki hiljenevät 1 s. Myrskyssä myrsky + ukkosen taustasilmukka, salaman
+  jälkeen 0–3 s salama-ääni. Veden alla oma silmukka (0,5 s) ja kaikki pelin äänet vaimeina (ei musiikki eikä valikot).
+  Luonto (linnunlaulu päivällä, heinäsirkat yöllä, puiden humina tuulella) ja biomien sivuäänet (korpi, koivulehto, aarnimetsä, upposuo,
+  kalmanummi, rantaniitty, päivä/yö) soivat satunnaisina 30 s – 2 min jaksoina hiljaa taustalla.
+- **v2.67 pelaaja:** hengästys silmukkana kestävyyden ollessa 0 → yli 30 %, ja ylikuormassa liikkuessa; ylikuorma kuluttaa kestävyyttä 5/s.
+  Putoamisvahingossa tömähdys, yli 25 % HP:sta myös nilkka-ääni; pää veden alle = sukellus, pintaan = pinnalle (yli 2 s → haukkoo henkeä).
+  Kaatuvan puun narina ja tömähdys kuuluvat puolet lyhyemmälle. Ulottuvuuksissa tavallisen olennon idle vain alle 15 m, yksi 40 s välein.
+- **v2.67 ilmoitusääni:** pitkät ja erityiset viestit tai hiljaisuus; ei päällekkäin pelaajan toimintoäänten kanssa.
+  Asetuksissa oma säädin Napit (hover ja klikkaus), perustaso 20 % hiljempi.
 - **v2.61 sää ja tunnelma** (`sounds/saa_ja_tunnelma/`, käyttäjän äänet): maailmassa sään silmukat (sade, tihku, myrsky, tuuli, lumisade vuorilla,
   sumu) voimistuvat ja hiipuvat sään mukana (ristihäivytys 2,5 s), sisällä vaimeampina, veden alla hiljaa; ukkonen jyrähtää salaman jälkeen.
   Ulottuvuuksissa ja Hautakummussa oma tunnelmasilmukka ja 10–40 s välein satunnainen tunnelmaääni (puuttuessa yhteinen). Taso Taustaäänet.

@@ -6,7 +6,7 @@ const { chromium } = await import(process.env.PW||'/opt/node22/lib/node_modules/
 const THREE_JS=process.env.THREE;
 const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--use-gl=swiftshader','--enable-unsafe-swiftshader']});
 const p=await b.newPage({viewport:{width:1000,height:650}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' @ '+(e.stack||'').split('\n')[1]));
-await p.addInitScript(()=>{Element.prototype.requestPointerLock=function(){};localStorage.setItem('hiidenmaa_map','0');});
+await p.addInitScript(()=>{Element.prototype.requestPointerLock=function(){};localStorage.setItem('hiidenmaa_map','0');localStorage.setItem('hiidenmaa_seed','0');});   // v2.69: toistettava (seed 0 = kiinteät paikat); seedit: tools/seedtest.mjs
 await p.route('**/three.min.js',r=>THREE_JS?r.fulfill({path:THREE_JS,contentType:'application/javascript',headers:{'Access-Control-Allow-Origin':'*'}}):r.continue());
 await p.route('**/fonts.googleapis.com/**',r=>r.abort());
 await p.goto('http://localhost:8977/index.html');await p.waitForFunction('window.__game',null,{timeout:120000});
@@ -102,8 +102,8 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('v1.17 täysi reppu, ulottuvuuskohtainen katoaminen, ryntäys 10 s, maahaniskun lataus',()=>typeof curDim==='function'&&BOSS_CHARGE_GAP===10&&typeof slamArms==='function'&&/BOSS_CHARGE_GAP/.test(realmBossAI.toString())&&/invRemove\(d\.item,c-left\)/.test(interact.toString())&&/d\.dim/.test(updateDrops.toString())||'puuttuu');
   t('v1.18 T piilottaa tehtävän/tavoitteen (4 tilaa), loki L',()=>BIND_DEF.hud==='KeyT'&&BIND_DEF.log==='KeyL'&&typeof applyHudMode==='function'&&'hudMode' in SET_DEF||'näppäimet/tila puuttuu');
   t('v1.19 kaatuva puu osuu pelaajaan ja mobeihin (ei kaatajaan), myrskyn suunta, taipuminen',()=>typeof treeHit==='function'&&/fallTree\(n,undefined,true\)/.test(doMeleeHit.toString())&&/src/.test(crushPlayer.toString())&&/Math\.atan2\(WIND\.x,WIND\.z\)/.test(stormFellTree.toString())&&/3\.4\*Math\.pow/.test(updateWind.toString())||'puuttuu');
-  t('v1.20 terveys tasoilla 60→100, kartan tekstivarjo ja ohuet pilvet',()=>{const o=lvlInfo;lvlInfo=()=>({L:5,xp:0,need:1});const h5=lvlHp();lvlInfo=()=>({L:1,xp:0,need:1});const h1=lvlHp();lvlInfo=o;
-    return h5===40&&h1===0&&/shadowBlur/.test(mapMarkers.toString())&&/globalAlpha=\.2/.test(drawBigMap.toString())||'puuttuu';});
+  t('v1.20 terveys tasoilla (v2.70: taso 5 = +20, taso 20 = +70), kartan tekstivarjo ja ohuet pilvet',()=>{const o=lvlInfo;lvlInfo=()=>({L:5,xp:0,need:1});const h5=lvlHp();lvlInfo=()=>({L:1,xp:0,need:1});const h1=lvlHp();lvlInfo=o;
+    return h5===20&&h1===0&&/shadowBlur/.test(mapMarkers.toString())&&/globalAlpha=\.2/.test(drawBigMap.toString())||'puuttuu';});
   t('v1.21 terveyspalkit: 100 hp / rivi, enint. 5, toinen kerros',()=>HP_ROW===100&&HP_ROWS===5&&document.querySelectorAll('.mobbar .r').length===40&&!!document.querySelector('.mobbar .r i.b')||'palkit puuttuvat');
   t('v1.22 jousen veto: jänne pään oikealla puolella, kahva edessä keskellä',()=>{if(typeof bowAim!=='function')return 'bowAim puuttuu';const s0=inv.slice(),y0=P.yaw;inv=new Array(invN()).fill(null);invAdd('jousi',1);toggleEquip(inv[0]);updateGear();
     P.drawing=true;P.drawK=1;P.bowDraw=1;bowAim(heldMesh,1);const b=heldMesh.userData.bow,o=fig.g.position,fx=Math.sin(P.yaw),fz=Math.cos(P.yaw),w=z=>{const q=heldMesh.localToWorld(new THREE.Vector3(0,0,z));const dx=q.x-o.x,dz=q.z-o.z;return[dx*fx+dz*fz,dx*fz-dz*fx];};
@@ -322,7 +322,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       weather.cur='myrsky';wRain=1.4;T=ambTargets();const b=T['saa/myrsky']>0&&!T['saa/sade']&&T['saa/tuuli']===undefined;
       indoorK=1;const c=Math.abs(ambTargets()['saa/myrsky']-AMB_V.myrsky*.45)<1e-6;indoorK=0;weather.cur='tuuli';wRain=0;WIND.spd=14;const e=Math.abs(ambTargets()['saa/tuuli']-AMB_V.tuuli)<1e-6;
       P.inDun=true;P.realm='portal2';T=ambTargets();const f=Object.keys(T).join()==='tunnelma/tunnelma_kalmankammio';P.realm=null;const g=!!ambTargets()['tunnelma/tunnelma_hautakumpu'];
-      const st=state;state='paused';const h=Object.keys(ambTargets()).length===0;state=st;
+      const st=state;state='menu';const h=Object.keys(ambTargets()).length===0;state=st;   /* v2.67: tauolla silmukat jatkuvat hiljennettyinä (AMB.duck), valikossa pois */
       const src=ambTick.toString(),i2=/satunnainen_yhteinen/.test(src)&&AMB_RND_MIN===10&&AMB_RND_MAX===40&&/volK\('amb'\)/.test(src)&&/ambThunder\(/.test(updateEnvironment.toString())&&/ambTick\(raw\)/.test(frame.toString());
       r=a&&b&&c&&e&&f&&g&&h&&i2||`virhe ${a}${b}${c}${e}${f}${g}${h}${i2}`;}
     finally{[weather.cur,wRain,wSnow,wFog,WIND.spd,P.inDun,P.realm,indoorK]=sv;}return r;});
@@ -395,11 +395,11 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const a=FT_P.length>n0&&FT_ANY&&Math.abs(b0-terrainH(cx,cz)-.3)<.02&&Math.abs(bh-terrainH(cx+.5,cz+.5)-.3*sstep(2.6,.65,Math.hypot(.5,.5)))<.03;
       let gap=0;for(const q of FT_P)for(let t=0;t<=16;t++)for(const [gx,gz] of [[q.cx*8+t/2,q.cz*8],[q.cx*8,q.cz*8+t/2]]){const x=-HALF+gx*GS,z=-HALF+gz*GS;gap=Math.max(gap,Math.abs(terrainH(x+.005,z+.005)-terrainH(x-.005,z-.005)));}
       const b=gap<.02,c=FTM.d[(FT_P[0].cz*FT_CN+FT_P[0].cx)*4]===255&&/discard/.test(terrainMesh.material.onBeforeCompile.toString()+terrHook.toString());
-      const s=serialize(),d=s.v===11&&s.ft.length>0;const hc=terrainH(cx,cz);loadData(JSON.parse(JSON.stringify(s)));const e=Math.abs(terrainH(cx,cz)-hc)<.002&&FT_P.length>0;
+      const s=serialize(),d=s.v>=11&&s.ft.length>0;const hc=terrainH(cx,cz);loadData(JSON.parse(JSON.stringify(s)));const e=Math.abs(terrainH(cx,cz)-hc)<.002&&FT_P.length>0;
       r=a&&b&&c&&d&&e||`virhe muokkaus ${a} saumat ${b} (${gap.toFixed(3)}) maski ${c} tallennus ${d} lataus ${e}`;}finally{loadData(sv);}
     return r;});
-  t('v2.65 biomien sekoitus: oletus Normaali (Extra), pehmeät pinnat sekoittuvat, kivikko ja vuoren juuri eivät; 8× väritys kysyy varmistuksen, 16× pois',()=>{
-    const a=SET_DEF.biomeBlend===1&&SET_PAGES.xgfx.includes('biomeBlend')&&!SET_PAGES.gfx.includes('biomeBlend')&&TBLEND_HARD.has('mountain')&&TBLEND_HARD.has('rakka');
+  t('v2.65 biomien sekoitus: oletus Normaali (v2.68 Grafiikka-sivu), pehmeät pinnat sekoittuvat, kivikko ja vuoren juuri eivät; 8× väritys kysyy varmistuksen, 16× pois',()=>{
+    const a=SET_DEF.biomeBlend===1&&SET_PAGES.gfx.includes('biomeBlend')&&!SET_PAGES.xgfx.includes('biomeBlend')&&   /* v2.68: Grafiikka-sivulle ja esiasetuksiin */TBLEND_HARD.has('mountain')&&TBLEND_HARD.has('rakka');
     let hard=-1,soft=-1;for(let i=HN*5;i<TSOFT.length-HN*5;i+=7){if(hard<0&&!TSOFT[i]&&TCOL_RAW[i*3]>0)hard=i;if(soft<0&&TSOFT[i]&&TSOFT[i+1]&&TSOFT[i-1]&&TSOFT[i+HN])soft=i;if(hard>=0&&soft>=0)break;}
     const pv=SET.biomeBlend;blendApply(0);const raw=terrainColors[soft*3];blendApply(3);const b=Math.abs(terrainColors[hard*3]-TCOL_RAW[hard*3])<1e-6;blendApply(+pv||0);
     const src=renderSettings.toString()+'';const c=!/\['16','16×'/.test(src)&&/terrFineX'&&v==='8'/.test(src)&&/oletko varma/.test(src);
@@ -416,6 +416,72 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const src=M.set.toString(),b=/SWITCH_P/.test(src)&&/JOIN_MIN/.test(src)&&/SIL_MIN/.test(src);
     const d1=musicCtx.toString(),c=/'boss'/.test(d1)&&/'d:'/.test(d1)&&/'w:'/.test(d1)&&MUS_BIO_T===4&&MUS_REALM.portal1==='routaluola'&&/hold/.test(realmSnd.toString());
     const ok=(async()=>1)();return a&&b&&c||`virhe ajat ${a} säännöt ${b} konteksti ${c}`;});
+  t('v2.67 äänet: kiviaskelten kohina, hytinä/kipu_tuli pätkinä, hengästys/ukkonen/vedenalainen silmukoina, uudet paikkamerkit',()=>{const M=manJ();
+    const a=['p/keho/hytina_0','p/keho/hytina_9901','p/kipu/kipu_tuli_0','p/kipu/kipu_tuli_9901','a/saa/ukkonen_0','a/tunnelma/tunnelma_vedenalla_0'].every(k=>M[k]);
+    const b=M['p/askeleet/askel_kivi_2']&&M['p/askeleet/askel_kivi_2'].dur<=.2;   /* suhinahäntä pois */
+    return a&&b||`virhe pätkät/silmukat ${a} kivi_2 ${b}`;});
+  t('v2.67 silmukat: yksi versio, sää 2,5 s, paikan vaihto 0,3 s + 1 s, tauko hiljentää 1 s, vedenalainen 0,5 s, myrsky + ukkonen, salama 0–3 s',()=>{
+    const a=AMB_FADE===2.5&&AMB_CUT===.3&&AMB_HOLD===1&&AMB_DUCK===1&&AMB_UW_FADE===.5;const src=ambTick.toString();
+    const b=/AMB\.place/.test(src)&&/ambStop\(AMB\.L\[k\]\.h,AMB_CUT\)/.test(src)&&/AMB\.duck/.test(src)&&/'salama'/.test(src)&&/sndBus/.test(ambStart.toString());
+    const sv=[weather.cur,wRain,P.inDun,CAM_UW];let r;try{weather.cur='myrsky';wRain=1.4;P.inDun=false;CAM_UW=0;const T=ambTargets(0);const c=T['saa/myrsky']>0&&T['saa/ukkonen']>0;
+      CAM_UW=1;const d=ambTargets(0)['tunnelma/tunnelma_vedenalla']>0;const e=/\.05\+Math\.random\(\)\*\.25:\.5\+Math\.random\(\)\*2\.5/.test(updateEnvironment.toString());
+      r=a&&b&&c&&d&&e||`virhe ${a}${b}${c}${d}${e}`;}finally{[weather.cur,wRain,P.inDun,CAM_UW]=sv;}return r;});
+  t('v2.67 luonto (linnunlaulu, heinäsirkat, puiden humina) ja biomien sivuäänet satunnaisina jaksoina, hiljaa',()=>{
+    const a=AMB_V.luonto===.35&&NAT_LEN[0]===30&&NAT_LEN[1]===120&&Object.keys(NAT_BIO).length===6&&NAT_NOBIRD.has('mountain')&&NAT_TREES.has('forest');
+    const sv=JSON.stringify(AMB.nat);AMB.nat={};let on=0;for(let i=0;i<400;i++)if(natEp('x',true,1)>0)on++;const b=on>20&&on<400;AMB.nat=JSON.parse(sv);
+    return a&&b||`virhe ${a} ${on}`;});
+  t('v2.67 hengästys silmukkana (0 % → yli 30 %, ylikuormassa liikkuessa), ylikuorma kuluttaa kestävyyttä 5/s',()=>{
+    const a=HENG_END===.3&&OVER_STAM===5&&/plLoop\('heng'/.test(plBody.toString())&&/OVER_STAM\*dt/.test(updatePlayer.toString())&&typeof plOverMoving==='function';
+    const b=/'sukellus'/.test(plBody.toString())&&/'pinnalle'/.test(plBody.toString())&&/'putoaminen_tomahdys'/.test(plBody.toString())&&/'nilkka'/.test(plBody.toString())&&FALL_ANKLE===.25;
+    return a&&b||`virhe ${a}${b}`;});
+  t('v2.67 ulottuvuuksissa idle vain alle 15 m ja yksi 40 s välein; puun narina ja tömähdys −50 % kuuluvuus; veden alla kaikki pelin äänet vaimeat',()=>{
+    const a=REALM_IDLE_R===15&&REALM_IDLE_GAP===40;const m={dun:1,realm:'portal1',def:{ai:'hostile'},pos:{x:P.pos.x+5,z:P.pos.z}};const sv=realmIdleT;realmIdleT=-1e9;
+    const b=realmIdleOk(m)&&!realmIdleOk(m);realmIdleT=-1e9;m.pos.x=P.pos.x+30;const c=!realmIdleOk(m);realmIdleT=sv;
+    const d=TREE_RK===.5;
+    const e=UW_LP===650&&/sndBus\(a\)/.test(creSnd.toString())&&/sndBus\(a\)/.test(plSnd.toString())&&typeof uwAudioTick==='function';
+    return a&&b&&c&&d&&e||`virhe ${a}${b}${c}${d}${e}`;});
+  t('v2.67 ilmoitusääni: pitkät ja erityiset viestit tai hiljaisuus, ei päällekkäin pelaajan toimintaäänen kanssa',()=>{const L=[],oi=iSnd,sv=[plActT,msgSndT,msgQuietT,SET.notifSnd];let r;
+    try{iSnd=(g,e)=>{L.push(e);return 1;};SET.notifSnd=true;msgQuietT=0;const now=performance.now()/1000;
+      plActT=now;msgSndT=-9;msgSnd('Puu kaatui.','');const a=L.length===0;   /* lyhyt viesti toiminnan aikana: ei ääntä */
+      plActT=now-5;msgSndT=-9;msgSnd('Puu kaatui.','');const b=L.length===1;   /* hiljaista: ääni */
+      plActT=now-1;msgSndT=-9;msgSnd('Lyhyt','');const c=L.length===1;   /* 1 s toiminnasta, lyhyt: ei */
+      plActT=now-1;msgSndT=-9;msgSnd('Löysit paikan','loot');const d=L.length===2;   /* erityinen: ääni (toiminnasta yli 0,8 s) */
+      r=a&&b&&c&&d&&MSG_LONG===40&&MSG_BUSY===.8||`virhe ${a}${b}${c}${d}`;}finally{iSnd=oi;[plActT,msgSndT,msgQuietT,SET.notifSnd]=sv;}return r;});
+  t('v2.67 nappien hover/klikkaus: oma säädin Äänet ja musiikki -sivulla, perustaso −20 %',()=>{const src=String(mSnd);
+    return BTN_BASE===.8&&SET_DEF.btnVol===1&&SET_PAGES.snd.includes('btnVol')&&/napit'\?BTN_BASE\*\(SET\.btnVol/.test(src)||'btnVol/BTN_BASE puuttuu';});
+  t('v2.68 biomien sekoitus esiasetuksissa (Low/Low+ 0, Medium-…Medium+ 1, High/High+ 2, Ultra 3), käsin muutos = Custom',()=>{const sv=JSON.stringify(SET);let r;
+    try{const m=PRESETS.map(p=>p.biomeBlend).join('');Object.assign(SET,PRESETS[7]);const u=presetIdx()===7;SET.biomeBlend=1;const c=presetIdx()===-1;Object.assign(SET,PRESETS[3]);const d=presetIdx()===3&&+SET.biomeBlend===SET_DEF.biomeBlend;
+      r=m==='00111223'&&u&&c&&d||`virhe ${m} ${u}${c}${d}`;}finally{Object.assign(SET,JSON.parse(sv));}return r;});
+  t('v2.68 suorituskykymerkit: väripallo + vihje jokaisella grafiikka-asetuksella, taso nykyisen valinnan mukaan',()=>{const o=setTab,L=[];let r;
+    try{for(const tb of ['gfx','xgfx']){setTab=tb;renderSettings();const rows=[...$('#setBody').querySelectorAll('.setRow')],no=rows.filter(x=>!x.querySelector('.pf')).map(x=>x.querySelector('label').textContent);
+        if(no.length)L.push(tb+': '+no.join(', '));if(!$('#setBody').querySelector('.pf .pfTip')||!/vaikutus suorituskykyyn/.test($('#setBody').querySelector('.pfTip').textContent))L.push(tb+': vihje puuttuu');}
+      const a=pfLvl('res','native')===3&&pfLvl('res',.55)===0&&pfLvl('grass',2)===2&&pfLvl('shadow','low')===1&&pfLvl('waterMega',true)===3&&pfLvl('biomeBlend',3)===0&&pfLvl('shUltra','wide')===3;
+      const kk=[...SET_PAGES.gfx,...SET_PAGES.xgfx].filter(k=>!(k in PFK));if(kk.length)L.push('ei tasoa: '+kk.join(','));if(!a)L.push('tasot väärin');
+      r=!L.length||L.join(' | ');}finally{setTab=o;renderSettings();}return r;});
+  t('v2.68 8× väritys säilyy biomien sekoitusta vaihdettaessa (vanha tekstuuri näkyy, kunnes uusi valmis)',()=>{const sv={F:TFINE.F,tex:TFINE.tex,done:TFINE.done,busy:TFINE.busy,data:TFINE.data,N:TFINE.N,f:TFINE.u.uFine.value,d:TFINE.u.uDet.value,w:TFINE.want,t:TFINE.u.tFine.value},bl=blendLvl;let r;
+    try{const dum=new THREE.DataTexture(new Uint8Array(4),1,1);Object.assign(TFINE,{F:4,tex:dum,done:true,busy:false,want:8});TFINE.u.uFine.value=1;TFINE.u.uDet.value=4;
+      blendApply(bl===2?1:2);const a=TFINE.u.uFine.value===1&&TFINE.u.uDet.value===4&&TFINE.tex===dum&&TFINE.busy&&TFINE.F===4;
+      TFINE.tok++;r=a||`virhe uFine=${TFINE.u.uFine.value} tex=${TFINE.tex===dum} busy=${TFINE.busy}`;}
+    finally{TFINE.tok++;Object.assign(TFINE,{F:sv.F,tex:sv.tex,done:sv.done,busy:sv.busy,data:sv.data,N:sv.N,want:sv.w});TFINE.u.uFine.value=sv.f;TFINE.u.uDet.value=sv.d;TFINE.u.tFine.value=sv.t;blendLvl=-1;blendApply(bl);}return r;});
+  t('v2.69 maailman seed: paikat ja kasvillisuus seedin mukaan, seed tallennukseen (v12), vanhat tallennukset seed 0, poiminnat ilman ilmoitusääntä',()=>{
+    const S=serialize(),a=S.v===12&&S.seed===SEED&&typeof seedMix==='function'&&(SEED?seedMix(5)!==5:seedMix(5)===5)&&SITE_MOVE.every(k=>LOC[k])&&typeof sitePrefOk==='function'&&typeof worldFresh==='function'&&typeof vegDens==='function';
+    const b=/s\.seed\|0/.test(String(playSave))&&/seed/.test(String(switchMap))&&/o\.seed/.test(String(startNewGame));
+    const L=[],oi=iSnd,sv=[plActT,msgSndT,msgQuietT,SET.notifSnd];let c;try{iSnd=(g,e)=>{L.push(e);return 1;};SET.notifSnd=true;msgQuietT=0;plActT=-99;msgSndT=-99;msgSnd('+3 Puu','loot');msgSnd('+25 XP · Löytö','xp');c=L.length===0;}finally{iSnd=oi;[plActT,msgSndT,msgQuietT,SET.notifSnd]=sv;}
+    return a&&b&&c||`virhe ${a}${b}${c}`;});
+  t('v2.70 tasopalkinnot (HP 3/5/10/15/20, kestävyys 4/8/12/16, muuten kantokyky +5) ja reseptit aiemmin',()=>{const B=lvlBon(20),b5=lvlBon(5);
+    const a=B.hp===70&&B.stam===20&&B.w===50&&b5.hp===20&&b5.stam===5&&b5.w===5&&lvlBon(1).hp===0;
+    const R={jousi:2,puunuolet:2,miekka:3,kuparihakku:3,kuparipanssari:4,rautakirves:5,rautamiekka:6,rautapanssari:7,hiidenjousi:10,hiidenmiekka:12,hiidenpanssari:14};
+    const c=Object.entries(R).every(([k,v])=>RECIPE_BY[k].lvl===v)&&Math.max(...RECIPES.filter(r=>!ITEMS[r.id].rare&&!/^hiiden/.test(r.id)).map(r=>r.lvl||1))<=7;
+    const d=/Taso 20/.test(lvlUnlockRows())&&/lvlBon/.test(String(maxStam))&&/lvlBon/.test(String(recalcMaxW));
+    return a&&c&&d||`virhe ${a}${c}${d}`;});
+  t('v2.71 opastus: oma pysäytys (ei DEV freeze), vaiheet näppäimillä, ohitus varmistaa, liikkuminen viimeisenä, valinta uudessa maailmassa ja asetuksissa, kertavinkit',()=>{
+    const a=TUT_STEPS.length>=15&&TUT_STEPS[TUT_STEPS.length-1].move&&TIPS.length>=8&&SET_DEF.tutNext===false&&SET_PAGES.ctl.includes('tutNext')&&/newTut/.test(String(renderWorlds))&&/tutOnNewWorld/.test(String(startNewGame));
+    const b=/TUT\.hold\)\{tutHoldUpdate/.test(String(update))&&!/devOn|DEVF/.test(String(tutHoldUpdate)+String(tutTick)+String(tutStart))&&/TUT\.hold\)return/.test(String(requestLock))&&/tutKey/.test(document.body.innerHTML+String(tutKey))&&/tutSkipAsk/.test(String(tutBuild));
+    const sv={pt:playTime,td:localStorage.getItem('hiidenmaa_tutdone'),tn:SET.tutNext,ft:flags.tut};let c,d;
+    try{tutStart();const pt=playTime;for(let i=0;i<5;i++)update(1/30);c=playTime===pt&&TUT.hold&&TUT.on;
+      while(TUT.on&&!TUT_STEPS[TUT.i].move)TUT.i++;tutShow();for(let i=0;i<3;i++)update(1/30);d=!TUT.hold&&playTime>pt;tutEnd(true);d=d&&!TUT.on&&localStorage.getItem('hiidenmaa_tutdone')==='1';}
+    finally{TUT.on=TUT.hold=false;if(TUT.el)TUT.el.hidden=true;if(sv.td===null)localStorage.removeItem('hiidenmaa_tutdone');SET.tutNext=sv.tn;flags.tut=sv.ft;}
+    return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
   t('v2.59 tallennuksen jatkaminen latausnäytöllä (riimukivi → leimahdus → häivytys peliin), latausnäytön ääni vain myöhemmissä latauksissa tai asetuksella aina',()=>{
     const a=/saveLoad\(s,welcome\)/.test(playSave.toString())&&/__ldShow\('Maailma herää…'\)/.test(saveLoad.toString())&&/__ldDone\(\)/.test(saveLoad.toString())&&/spawnProt/.test(saveLoad.toString())&&SAVE_LD_FRAMES===20;
     const d=window.__ldDone.toString(),b=/s\.dataset\.later\|\|window\.__ldSndOnce\|\|\(typeof SET!=='undefined'&&SET\.ldSnd\)/.test(d)&&/dataset\.later='1'/.test(window.__ldShow.toString());

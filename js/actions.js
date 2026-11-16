@@ -80,7 +80,7 @@ function doMeleeHit(w){
   const n=best;
   if(n.def.kind==='tree'||n.def.kind==='log'){if(!w.chop){if(!hitMob){msg('Tarvitset kirveen kaataaksesi puun.','warn');sfx('hit');plSnd('osumat','ei_tehoa');}return;}
     const tier=n.isLog?n.tier:(n.def.tier||1);if(w.chop<tier){if(!hitMob){msg('Tarvitset vahvemman kirveen.','warn');sfx('hit');plSnd('osumat','ei_tehoa');}return;}
-    n.hp-=(5+w.chop*4)*(1+.25*((w.q||1)-1));sfx(n.hp<=0?(n.isLog?'logBreak':'chopFinal'):n.isLog?'chopLog':'chop');shake(.08);{const q={x:n.isLog?P.pos.x+fx:n.x,y:n.y+1,z:n.isLog?P.pos.z+fz:n.z};plSnd('osumat','osuma_puu',{pos:q});if(n.hp<=0)plSnd('osumat',n.isLog?'tukki_hajoaa':'puu_kaatuu',n.isLog?{pos:q}:{pos:q,until:fallDur(n),fit:1,p:creakP(n)});}   /* v2.25 */
+    n.hp-=(5+w.chop*4)*(1+.25*((w.q||1)-1));sfx(n.hp<=0?(n.isLog?'logBreak':'chopFinal'):n.isLog?'chopLog':'chop');shake(.08);{const q={x:n.isLog?P.pos.x+fx:n.x,y:n.y+1,z:n.isLog?P.pos.z+fz:n.z};plSnd('osumat','osuma_puu',{pos:q});if(n.hp<=0)plSnd('osumat',n.isLog?'tukki_hajoaa':'puu_kaatuu',n.isLog?{pos:q}:{pos:q,until:fallDur(n),fit:1,p:creakP(n),rk:TREE_RK});   /* v2.67 narina −50 % kuuluvuus */}   /* v2.25 */
     if(n.isLog)chopLog(n);else burst(n.x,n.y+1.2,n.z,0x8a5a32,5,3);
     if(n.hp<=0){if(n.isLog){removeLog(n);const c=Math.max(1,Math.round(rint(rng,3,4)*n.s));for(let j=0;j<c;j++){const t=(j+.5)/c;spawnDrop(n.dropId,1,n.ax+(n.bx-n.ax)*t,n.y+.8,n.az+(n.bz-n.az)*t);}burst(n.x,n.y+.4,n.z,0x6b4527,12,4);}
       else{killNode(n);fallTree(n,undefined,true);bump('trees');}}}
@@ -229,9 +229,9 @@ function drink(s){const d=ITEMS[s.id],p=d.potion;
   burst(P.pos.x,P.pos.y+1.2,P.pos.z,new THREE.Color(d.c).getHex(),10,2);
   s.n--;if(s.n<=0)inv[inv.indexOf(s)]=null;invDirty=true;sfx('eat',1.5,.8);plSnd('kaytto','juominen');msg(`Joit: ${d.n}`,'loot');}
 // v1.20 (lista 2, kohta 12): perusterveys kasvaa tasoilla 2–5: 60 / 70 / 80 / 90 / 100 (+ saavutukset ja voima päälle)
-function lvlHp(){return Math.min(4,Math.max(0,lvlInfo().L-1))*10;}
+function lvlHp(){return lvlBon().hp;}   // v2.70 tasopalkinnot (progress.js LVL_REW)
 function maxHp(){return 60+lvlHp()+(P.buffs.voima?15:0)+BON.hp;}
-function maxStam(){return 100+(P.buffs.voima?25:0)+BON.stam;}
+function maxStam(){return 100+(P.buffs.voima?25:0)+BON.stam+lvlBon().stam;}
 
 /* ---------------- INTERACTION ---------------- */
 let lookTarget=null;
