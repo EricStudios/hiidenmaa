@@ -89,7 +89,7 @@ function showAmmo(dur,small){const e=$('#ammoT');if(!e)return;const am=typeof am
 /* v1.77: pikapaikan valinnassa esineen nimi valitun ruudun yläpuolelle ~1 s + häivytys. Väri harvinaisuuden mukaan: arvoesine / harvinainen
    = kulta, valmistustaso ≥ 6 = sininen, taso ≥ 3 tai laatu ≥ 2 = vihreä, muut vaaleat. Yksi elementti → vaihdettaessa vanha nimi pois heti. */
 let hnSel=-1;
-function itemRarity(s){const id=s.id,r=RECIPE_BY[id],lv=r&&r.lvl||0;return isValuable(id)?'leg':ITEMS[id].potion?'rare':lv>=6?'rare':(lv>=3||(s.q||1)>=2)?'unc':'com';}
+function itemRarity(s){const id=s.id,r=RECIPE_BY[id],lv=r&&r.lvl||0;return isValuable(id)?'leg':ITEMS[id].potion?'rare':ITEMS[id].rar?ITEMS[id].rar:lv>=6?'rare':(lv>=3||(s.q||1)>=2)?'unc':'com';}
 function showHotName(i){const e=$('#hotName'),s=inv[i],sl=document.querySelectorAll('#hotbar .slot')[i];if(!e)return;e.className='';if(!s||!sl)return;
   const r=sl.getBoundingClientRect();e.textContent=ITEMS[s.id].n+((s.q||1)>1?' ★'.repeat(s.q-1):'');e.style.left=((r.left+r.width/2)/hudK())+'px';void e.offsetWidth;   /* v2.63 HUD-skaala */e.className='on r_'+itemRarity(s);}
 function updateHUD(dt){

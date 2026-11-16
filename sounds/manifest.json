@@ -1399,12 +1399,12 @@
    "f": "pelaaja_3_aanet/valmiit/keho_valmis/pahoinvointi_1.mp3"
   },
   "p/keho/sydan_0": {
-   "h": "d726cfad10",
+   "h": "57a6b875b5",
    "src": "8978c89b10b9",
-   "dur": 8.17,
-   "pv": 9,
-   "gain": 3.0,
-   "raw": 8.45,
+   "dur": 8.49,
+   "pv": "9w1",
+   "gain": 2.9,
+   "raw": 8.5,
    "f": "pelaaja_3_aanet/valmiit/keho_valmis/sydan_0.mp3"
   },
   "p/keho/vatsa_kurisee_0": {

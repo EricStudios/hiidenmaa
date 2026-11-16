@@ -67,6 +67,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   levänneenä + 0,6/s.
 - **Syöminen:** ruoka lisää kylläisyyttä ja terveyttä (`heal` 3/s). **Ähky (vatsakipu) vain, jos kylläisyys on jo ≥ 99 ja syö silti** (v2.00: täyteen syöty = 100, laskee vasta 60 s:n jälkeen)
   (52 s: kävely −10 %, kestävyys hitaammin, kramppi vie 12 kestävyyttä 8–14 s välein). Raaka liha: 45 % pahoinvointi (40 s).
+- **Lihat (v2.80):** pienriistan liha (jänis, kettu, metso, porsas; yleinen) → paistettuna kylläisyys 40 / terveys 15; riistanliha (peura, poro, karju, emakko; epätavallinen) → 55 / 25; suurriistan liha (hirvi, karhu, hiidenkarhu, hiidenhirvi; harvinainen) → 80 / 40 + kestävyys 30. Kypsyminen: pieni 7–10 s, riista 9–14 s, suuri 14–19 s. Nuotiolla: Lihakeitto (taso 2) 70 / 35 / 20, Juhla-ateria (taso 4) 100 / 70 / 50 + voima, varras 65 / 40 + voima, paistettu sieni 24 / 10.
 - **Tilat** (repun Tilat-osio, hiirellä lisätiedot ja ajastin): märkä (60 s, kuivuu 5× nopeammin tulella), kylmä (−7 % nopeus, −10 % isku,
   −40 % kestävyyden palautus), nälkä / nälkäinen, pahoinvointi, vatsakipu, ylikuormitus, levännyt (12 s tulen ja katon alla →
   360 s, kestävyys +45 %), voimistunut, lämmin, suojassa, hiipii.
@@ -630,6 +631,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.80:** sydämen syke on yksi jatkuva silmukka (ei ala alusta), voimakkuus ja tahti muuttuvat pehmeästi, loppuu 3 s jälkeen 2,5 s häivytyksellä; tiedosto kokonaisena.
 - **v2.79:** susien ulvonta kuuluu yhtä kauas kuin muiden eläinten ääntely (36 m); kaukaista yöulvontaa ilman sutta ei enää ole. Sää- ja tunnelmaäänet 20 % hiljempaa.
 - **v2.76:** hengästys ei ala alusta: kun kestävyys palautuu, sama ääni hiljenee vähitellen (0 % täysi → 30 % hiljaa) ja voimistuu taas, jos kestävyys loppuu; loppuu vasta, kun kestävyys on ollut yli 30 % 4 s (häivytys 2,5 s, sen jälkeen vähintään 1 s tauko ennen uutta). Tiedosto toistuu kokonaisena (ei leikkausta).
 - **v2.75:** liukusäätimen napsu vielä 20 % hiljempaa ja tasaisempi sävel; esiasetussäätimessä napsu kuuluu vain, kun taso vaihtuu.

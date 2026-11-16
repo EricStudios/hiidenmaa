@@ -429,12 +429,13 @@ function plNodeAt(type,x,z,r){nodesNear(x,z,1.5,_plN);for(const n of _plN)if(n.t
    noustessa (yli 2 s sukelluksessa); hytinä palellessa 20–35 s välein; vatsan kurina nälkäisenä (alle 20) 40–70 s välein; pahoinvointi
    alkaessa ja 15 s välein; kylläinen kun syöt itsesi täyteen; lämmin kun pääset palelemasta lämpöön; levännyt kun levon vaikutus alkaa.
    Mahakipu soi ähkyn kouristuksessa (environment.js). PLV.st muistaa edelliset tilat (siirtymät). */
-const PL_WHOLE=new Set(['hengastys']);
+const PL_WHOLE=new Set(['hengastys','sydan']);   // v2.80 myös sydämen syke kokonaisena
+const SYD_UP=.8,SYD_DOWN=.2,SYD_KEEP=3,SYD_FADE=2.5;
 const HENG_V=.64,HENG_KEEP=4,HENG_UP=1.5,HENG_DOWN=.35,PL_SCARY_R=35,HENG_END=.3,HENG_FADE=2.5,HENG_CD=1,FALL_ANKLE=.25;
 function plOverMoving(){return typeof MAXW!=='undefined'&&!devOn('weight')&&invWeight()>MAXW&&Math.hypot(P.vel.x,P.vel.z)>.6&&!P.swim;}
 function plCd(k,t){if(playTime<(PLV.cd[k]||0))return false;PLV.cd[k]=playTime+t;return true;}
-function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('sydan',null,null,false);plLoop('heng',null,null,false,0,1,HENG_FADE);if(S.heng)S.hCd=HENG_FADE+HENG_CD;S.heng=false;return;}
-  if(P.dead){if(!S.dead){S.dead=1;plLoop('sydan',null,null,false);plSnd('kipu',P.deathCause==='drown'||P.waterDeath||(typeof pDeath!=='undefined'&&pDeath&&pDeath.water)?'kuolema_hukkuminen':'kuolema')||plSnd('kipu','kuolema');   /* v2.46: pDeath.water – syy ja lippu nollautuvat ennen tätä (KORJAUKSET 57) */}PLV.hp0=null;return;}S.dead=0;
+function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('sydan',null,null,false,0,1,SYD_FADE);if(S.syd)S.sCd=SYD_FADE+1;S.syd=false;S.sk=0;plLoop('heng',null,null,false,0,1,HENG_FADE);if(S.heng)S.hCd=HENG_FADE+HENG_CD;S.heng=false;return;}
+  if(P.dead){if(!S.dead){S.dead=1;plLoop('sydan',null,null,false,0,1,1.2);S.syd=false;S.sk=0;plSnd('kipu',P.deathCause==='drown'||P.waterDeath||(typeof pDeath!=='undefined'&&pDeath&&pDeath.water)?'kuolema_hukkuminen':'kuolema')||plSnd('kipu','kuolema');   /* v2.46: pDeath.water – syy ja lippu nollautuvat ennen tätä (KORJAUKSET 57) */}PLV.hp0=null;return;}S.dead=0;
   // kipu: terveyden lasku
   const hp=P.hp,mx=maxHp();if(PLV.hp0!==null&&hp<PLV.hp0-.01){const d=PLV.hp0-hp;
     if(P.burnT>0&&d<2){if(plCd('tuli',1.6))plSnd('kipu','kipu_tuli')||plSnd('kipu','kipu');}
@@ -446,7 +447,13 @@ function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('syda
   // sydämen syke
   let k=hp<mx*.3?clamp((mx*.3-hp)/(mx*.3),.25,1):0;
   if(!P.inDun)for(const m of mobs){if(m.dead||!m.def.stalk||m.def.ai==='boss'||m.def.ai==='rboss')continue;const dd=Math.sqrt(dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z));if(dd<PL_SCARY_R)k=Math.max(k,clamp(1.15-dd/PL_SCARY_R,.3,1));}
-  plLoop('sydan','keho','sydan',k>0,.35+.65*k,.9+.35*k);
+  /* v2.80 SYDÄMEN SYKE TASAISEMMAKSI (käyttäjä): sama silmukka jatkuu (ei alusta joka kerta, kun terveys tai uhka ylittää rajan). Voimakkuus ja
+     tahti seuraavat pehmennettyä arvoa S.sk (nousu SYD_UP/s, lasku SYD_DOWN/s); hiljaisimmillaan ääni lähestyy nollaa. Silmukka pysähtyy vasta,
+     kun syytä ei ole ollut SYD_KEEP s ja ääni on jo hiljaa; häivytys SYD_FADE s ja sen jälkeen vähintään 1 s tauko. Tiedosto kokonaisena (PL_WHOLE). */
+  S.sk=S.sk||0;S.sk=k>S.sk?Math.min(k,S.sk+dt*SYD_UP):Math.max(k,S.sk-dt*SYD_DOWN);S.sCd=Math.max(0,(S.sCd||0)-dt);
+  if(!S.syd&&k>0&&!S.sCd){S.syd=true;S.sOff=0;}
+  if(S.syd){if(k<=0){S.sOff=(S.sOff||0)+dt;if(S.sOff>=SYD_KEEP&&S.sk<.05){S.syd=false;S.sCd=SYD_FADE+1;}}else S.sOff=0;}
+  plLoop('sydan','keho','sydan',S.syd,(.35*Math.min(1,S.sk/.25)+.65*S.sk)||.001,.92+.26*S.sk,SYD_FADE);
   // tilat (siirtymät)
   // v2.67 hengästys silmukkana: alkaa kun kestävyys loppuu (0 %) tai liikutaan ylikuormassa; loppuu kun kestävyys yli HENG_END (30 %) eikä liikuta ylikuormassa
   /* v2.76 hengästys yhtenä jatkuvana silmukkana (käyttäjä): alkaa, kun kestävyys on 0 % (tai ylikuormassa liikkuessa). Kestävyyden palautuessa

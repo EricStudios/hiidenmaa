@@ -30,7 +30,7 @@ const TUT_STEPS=[
   {t:'Päävalikko',d:()=>`${kL('menu')} avaa päävalikon (tauko, asetukset, tallennus) ja sulkee avoimet ikkunat. <b>Vältä Esciä</b>: selain vapauttaa silloin hiiren. Kaikki näppäimet löydät: Asetukset › Näppäimet › Kaikki toiminnot.`,next:1},
   {t:'Liikkuminen',move:1,d:()=>`Nyt peli käynnistyy! Napsauta ruutua, niin voit kääntää kameraa hiirellä.<div class="tutChk">${['fwd','left','back','right'].map(a=>`<span data-mv="${a}">${kL(a)}</span>`).join('')}<span data-mv="run">${kL('run')} juokse</span><span data-mv="jump">${kL('jump')} hyppää</span><span data-mv="crouch">${kL('crouch')} kyykky</span></div>`},
 ];
-const TUT_MOVE_DONE=['fwd','left','back','right','run','jump'];
+const TUT_MOVE_DONE=['fwd','left','back','right','run','jump','crouch'];   // v2.80 kyykky (C) pakollinen kuten muut
 const tutOn=()=>TUT.on;
 // opastuksen oletus uuden maailman valinnassa: ensimmäinen maailma koskaan (ei tallennuksia eikä läpikäytyä opastusta) tai asetus päällä
 function tutDefault(){let done=false;try{done=localStorage.getItem('hiidenmaa_tutdone')==='1';}catch(e){}return !!SET.tutNext||(!done&&!slotMeta().some(Boolean));}
@@ -77,9 +77,9 @@ function tutHoldUpdate(dt){updateCamera(dt);updateHUD(dt);}
 function tutTick(dt){
   if(TUT.on){const S=TUT_STEPS[TUT.i];if(!S){tutEnd(false);return;}if(TUT.el)TUT.el.hidden=state!=='play'&&state!=='ui';
     if(S.ok&&S.ok()){TUT.i++;if(TUT.i>=TUT_STEPS.length)tutEnd(false);else tutShow();return;}   // heti (nopea painallus ei jumita vaihetta)
-    if(S.move&&state==='play'){TUT.t+=dt;for(const a of [...TUT_MOVE_DONE,'crouch'])if(kd(a)&&(a!=='run'||Math.hypot(P.vel.x,P.vel.z)>.5))TUT.mv[a]=1;
+    if(S.move&&state==='play'){TUT.t+=dt;for(const a of TUT_MOVE_DONE)if(kd(a)&&(a!=='run'||Math.hypot(P.vel.x,P.vel.z)>.5))TUT.mv[a]=1;
       for(const sp of TUT.el.querySelectorAll('[data-mv]'))sp.classList.toggle('ok',!!TUT.mv[sp.dataset.mv]);
-      if(TUT_MOVE_DONE.every(a=>TUT.mv[a])||(TUT.t>40&&Object.keys(TUT.mv).length>=3)){tutEnd(false);return;}}
+      if(TUT_MOVE_DONE.every(a=>TUT.mv[a])||(TUT.t>90&&Object.keys(TUT.mv).length>=5)){tutEnd(false);return;}}
     TUT.pl=(TUT.pl||0)-dt;if(TUT.pl<=0){TUT.pl=.25;tutPlace();}return;}
   tipsTick(dt);}
 

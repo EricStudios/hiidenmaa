@@ -22,16 +22,24 @@ const ITEMS={
   hiidenkivi:{n:'Hiidenkivi',w:2,s:10,c:'#7fd6cc',d:'Harvinainen, sisältä hehkuva kivi – siitä taotaan hiidenaseita ja -panssari. Saarelle on kätketty yhdeksän.'},
   kruunusirpale:{n:'Kalmankruunun sirpale',w:1,s:5,c:'#9aff7a',d:'Murtuneen kruunun hehkuva palanen Aarnihaudan syvyyksistä. Kalmankehän alttari kaipaa kolmea. (Harvinainen)'},
   sydan:{n:'Vartijan sydän',w:3,s:1,c:'#5fe6d9',d:'Kivinen sydän, joka sykkii vielä hiljaa. Voittosi merkki.'},
-  liha:{n:'Raaka liha',w:1,s:20,c:'#c9554e',food:{h:6,raw:true},d:'Paista nuotiolla. Raakana vatsa voi kääntyä.'},
-  paisti:{n:'Paistettu liha',w:1,s:20,c:'#8d4b2b',food:{h:30,hp:22},d:'Täyttävää ja lämmintä.'},
+  /* v2.80 KOLME LIHATYYPPIÄ (käyttäjä): harvinaisuus = saaliin vaarallisuus ja koko. Paistettuna merkittävästi enemmän kylläisyyttä (ennen 30),
+     harvinaisempi liha täyttää enemmän. rar = harvinaisuusväri (itemRarity, ui.js). */
+  pienliha:{n:'Raaka pienriistan liha',w:.5,s:30,c:'#d06a5e',food:{h:4,raw:true},d:'Jäniksestä, ketusta, metsosta tai porsaasta. Paista nuotiolla – nopein kypsentää.'},
+  liha:{n:'Raaka riistanliha',w:1,s:20,c:'#c9554e',food:{h:6,raw:true},rar:'unc',d:'Peurasta, porosta tai villikarjusta. Paista nuotiolla. Raakana vatsa voi kääntyä.'},
+  suurliha:{n:'Raaka suurriistan liha',w:1.5,s:15,c:'#a83a36',food:{h:8,raw:true},rar:'rare',d:'Hirvestä tai karhusta. Paistuu hitaasti, mutta täyttää parhaiten. (Harvinainen)'},
+  pienpaisti:{n:'Paistettu pienriista',w:.5,s:30,c:'#9a5a36',food:{h:40,hp:15},d:'Pientä mutta täyttävää.'},
+  paisti:{n:'Paistettu riistanliha',w:1,s:20,c:'#8d4b2b',food:{h:55,hp:25},rar:'unc',d:'Täyttävää ja lämmintä.'},
+  suurpaisti:{n:'Paistettu suurriistan liha',w:1.5,s:15,c:'#6e3520',food:{h:80,hp:40,st:30},rar:'rare',d:'Mehevä ja voimia antava. (Harvinainen)'},
+  lihakeitto:{n:'Lihakeitto',w:1,s:10,c:'#a8743e',food:{h:70,hp:35,st:20},rar:'unc',d:'Pienriistaa ja sieniä padassa – lämmittää pitkään.'},
+  juhla:{n:'Juhla-ateria',w:2,s:5,c:'#c08a3a',food:{h:100,hp:70,st:50,buff:'voima'},rar:'rare',d:'Suurriistaa, riistaa, sieniä ja marjoja. Täyttää vatsan ja antaa voimaa viideksi minuutiksi. (Harvinainen)'},
   marjat:{n:'Puolukat',w:.2,s:50,c:'#c82a3c',food:{h:8,st:20},d:'Hapanta virkistystä.'},
   sieni:{n:'Herkkutatti',w:.3,s:30,c:'#c8a26b',food:{h:10,hp:6},d:'Metsän pohjalta.'},
-  varras:{n:'Metsästäjän varras',w:1,s:10,c:'#b06c3a',food:{h:45,hp:35,buff:'voima'},d:'Lihaa, sieniä ja marjoja. Antaa voimaa viideksi minuutiksi.'},
+  varras:{n:'Metsästäjän varras',w:1,s:10,c:'#b06c3a',food:{h:65,hp:40,buff:'voima'},rar:'unc',d:'Lihaa, sieniä ja marjoja. Antaa voimaa viideksi minuutiksi.'},
   /* v2.00 juomat: löytyvät vain arkuista (10 % / juoma / arkku ensimmäisellä avauksella). Juodaan pikapaikasta kuten ruoka (drink, actions.js). */
   parannusjuoma:{n:'Parannusjuoma',w:.4,s:5,c:'#d8323c',potion:{full:1},d:'Punainen juoma. Palauttaa terveyden heti täyteen.'},
   elpymisjuoma:{n:'Elpymisjuoma',w:.4,s:5,c:'#3fbf5a',potion:{regen:60},d:'Vihreä juoma. Palauttaa 1 terveyttä sekunnissa minuutin ajan.'},
   sisujuoma:{n:'Sisujuoma',w:.4,s:5,c:'#3f7fe0',potion:{sisu:1},d:'Sininen juoma. Kylläisyys pysyy täynnä 5 minuuttia ja kestävyys 30 sekuntia.'},
-  sienipaisti:{n:'Paistettu sieni',w:.3,s:30,c:'#9b6a3a',food:{h:18,hp:10},d:'Nuotiolla kypsennetty herkkutatti.'},
+  sienipaisti:{n:'Paistettu sieni',w:.3,s:30,c:'#9b6a3a',food:{h:24,hp:10},d:'Nuotiolla kypsennetty herkkutatti.'},
   hiili:{n:'Puuhiili',w:.5,s:50,c:'#2a2623',fuel:10,d:'Palaa kymmenen kertaa pidempään kuin puu. Nuotioon, sulatusuuniin ja seisoviin soihtuihin. Syntyy ylipaistetusta ruoasta tai nuotiolla puusta.'},
   hiekka:{n:'Hiekka',w:.5,s:50,c:'#d8c38c',d:'Rannan hiekkaa. Sulatusuunissa 2 hiekkaa → 1 lasi.'},
   lasi:{n:'Lasi',w:.4,s:20,c:'#a9d6e6',d:'Sulatettua hiekkaa. Lasi-ikkunoihin.'},
@@ -87,6 +95,8 @@ const RECIPES=[
   {id:'tulinuolet',st:'tyopenkki',req:{puu:2,piikivi:2,pihka:1},n:15,lvl:3},
   {id:'nahkavaatteet',st:'tyopenkki',req:{nahka:8},lvl:2},
   {id:'varras',st:'nuotio',req:{paisti:1,sieni:2,marjat:3},lvl:2},
+  {id:'lihakeitto',st:'nuotio',req:{pienpaisti:2,sieni:2},lvl:2},   // v2.80
+  {id:'juhla',st:'nuotio',req:{suurpaisti:1,paisti:1,sieni:2,marjat:3},lvl:4},
   {id:'miekka',st:'ahjo',req:{kupari:6,puu:2,nahka:2},lvl:3},
   {id:'piikivikirves',st:'tyopenkki',req:{puu:3,piikivi:3,nahka:1},lvl:2},   // v1.53
   {id:'kuparikirves',st:'ahjo',req:{kupari:4,puu:3},lvl:3},
@@ -140,7 +150,10 @@ function icon(id){
       g.fillStyle='rgba(210,235,240,.6)';g.fillRect(20,11,8,10);g.strokeStyle='#3a4a50';g.lineWidth=1.5;g.strokeRect(20,11,8,10);g.fillStyle='#8a5a32';g.fillRect(19,6,10,6);g.strokeStyle='#4a2e18';g.strokeRect(19,6,10,6);
       line(17,24,15,32,2.5,'rgba(255,255,255,.75)');circ(30,33,1.6,'rgba(255,255,255,.6)');break;}
     case 'sydan':circ(18,20,9,'#5fe6d9');circ(30,20,9,'#5fe6d9');poly([[10,24],[38,24],[24,40]],'#5fe6d9');circ(20,18,3,'#d8fffb');break;
-    case 'liha':case 'paisti':circ(28,22,12,d.c,'#4a2216');line(18,32,9,41,5,'#e7e1cf');circ(8,42,3.5,'#e7e1cf');if(id==='paisti')line(22,18,34,24,2,'#c47a4a');break;
+    case 'liha':case 'paisti':case 'suurliha':case 'suurpaisti':{const k=id[0]==='s'?1.2:1;circ(28,22,12*k,d.c,'#4a2216');line(18,32,9,41,5,'#e7e1cf');circ(8,42,3.5,'#e7e1cf');if(id.endsWith('paisti'))line(22,18,34,24,2,'#c47a4a');break;}
+    case 'pienliha':case 'pienpaisti':circ(30,20,8,d.c,'#4a2216');line(24,26,12,40,3.5,'#e7e1cf');circ(11,41,3,'#e7e1cf');if(id==='pienpaisti')line(26,17,34,21,2,'#c47a4a');break;
+    case 'lihakeitto':circ(24,30,15,'#5a4636','#2a1e16');circ(24,27,11,d.c,'#6a4a26');circ(19,25,3,'#8d4b2b');circ(28,29,3,'#c8a26b');line(36,16,42,6,2.5,'#c9b48a');break;
+    case 'juhla':circ(24,30,17,'#d8d0bc','#8a8070');circ(20,27,8,'#6e3520','#3a1a10');circ(30,30,6,'#8d4b2b','#4a2216');circ(28,22,3,'#c82a3c');circ(32,24,3,'#c82a3c');circ(16,34,3.5,'#c8a26b');break;
     case 'marjat':[[18,20],[28,18],[22,29],[32,28],[15,31]].forEach(p=>circ(p[0],p[1],6,'#c82a3c','#6a1220'));line(22,8,24,16,2,'#5a7a2a');break;
     case 'sieni':g.fillStyle='#efe6d2';g.fillRect(20,24,8,16);poly([[8,26],[14,12],[24,8],[34,12],[40,26]],'#9b6a3a','#5e3b1f');break;
     case 'varras':line(8,40,40,8,2.5,'#c9b48a');[[16,32,'#8d4b2b'],[24,24,'#c8a26b'],[32,16,'#8d4b2b']].forEach(p=>circ(p[0],p[1],5.5,p[2]));circ(20,28,3,'#c82a3c');break;

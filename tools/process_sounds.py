@@ -610,7 +610,7 @@ HIT_FI = {'raapaisu': ('kynnet raapaisevat (ilves, karhut, Suonäkki)', 'claw sc
 LOOP_EV = {'palaminen'}   # v2.22: silmukat – ei hiljaisuuden leikkausta eikä häivytyksiä; sauma ristihäivytetään (saumaton silmukka)
 # v2.23: toimintosilmukat (käyttäjän pyyntö): pitkä raaka saa olla pitkä – käsitellään saumattomaksi silmukaksi (enintään 20 s); peli soittaa
 # sitä niin kauan kuin eläin tekee toimintoa (syö, tonkii, nuuhkii) ja pysäyttää pehmeästi, kun toiminto loppuu
-WHOLE_LOOP = {'hengastys'}   # v2.76 silmukka kokonaisena (käyttäjä): ei hiljaisuuden leikkausta eikä sauman ristihäivytystä – koko tiedosto toistuu sellaisenaan
+WHOLE_LOOP = {'hengastys', 'sydan'}   # v2.76 silmukka kokonaisena (käyttäjä): ei hiljaisuuden leikkausta eikä sauman ristihäivytystä – koko tiedosto toistuu sellaisenaan
 ACT_EV = {'syominen_laidun', 'syominen_tonkiminen', 'syominen_rouskutus', 'syominen_nakerrus', 'nuuhkiminen', 'juominen', 'sydan'}   # v2.24 juominen, v2.25 pelaajan sydämen syke (silmukka)
 def step_like(ev):
     """v2.23: askelmaiset äänet – kohinanpoisto, vain ensimmäinen tapahtuma (yksi askel), pitkästä nauhoituksesta useita pätkiä."""

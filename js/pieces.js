@@ -88,7 +88,7 @@ const pctOf=(rem,p)=>Math.max(0,Math.min(100,Math.round(rem/Math.max(1,p.data.fu
 const firePct=p=>pctOf(fireRem(p),p),torchPct=p=>pctOf(torchRem(p),p);
 const fuelText=(rem,pct)=>`${pct}/100 · ${(rem/60).toFixed(1).replace('.',',')} min`;
 function markFull(p){p.data.full=p.t==='soihtuteline'||p.t==='seinasoihtu'?torchRem(p):fireRem(p);}
-const FUEL_MAX=40,COOKABLE={liha:'paisti',sieni:'sienipaisti'};
+const FUEL_MAX=40,COOKABLE={liha:'paisti',pienliha:'pienpaisti',suurliha:'suurpaisti',sieni:'sienipaisti'},COOK_T={pienliha:[7,3],liha:[9,5],suurliha:[14,5],sieni:[8,4]};   // v2.80 kypsymisaika [min, +satunnainen] s
 for(const d of Object.values(PIECES))if(d.base){const b=PIECES[d.base];for(const k of ['poses','flip','span2','noBench','store','col','dim'])if(d[k]===undefined&&b[k]!==undefined)d[k]=b[k];}
 const BUILD_CATS=[['alku','Alkupeli'],['seinat','Seinät ja lattiat'],['katot','Katot'],['palkit','Palkit ja pylväät'],['portaat','Portaat ja tikkaat'],['kalusto','Kalusto'],['tyopisteet','Työpisteet'],['valo','Valo'],['puolustus','Puolustus'],['kivi','Kivirakennus'],['kivikatot','Kivikatot']];
 // Portaiden geometria asennon mukaan: 0 tavallinen, 1 jyrkkä (puolet syvyydestä), 2 loiva (puolet korkeudesta).

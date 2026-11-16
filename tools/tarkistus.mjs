@@ -544,6 +544,17 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const b=/Kalmanummi/.test(el)&&/Hautakum/.test(el)&&!!flags.disc.barrow&&/bump\('nights'\)/.test(sleepAt.toString())&&/dreamHint/.test(sleepAt.toString())&&/cnt\('nights'\)/.test(ACH.find(x=>x.id==='unet').pr.toString());
       r=a&&b||`virhe ${a}${b} ${el.slice(0,80)}`;}
     finally{flags.dream=sv[0];if(!sv[1])delete flags.disc.barrow;}return r;});
+  t('v2.80 jousi alkaa latautua lukituksen pyynnön painalluksesta, opastuksessa C pakollinen, sydämen syke jatkuva ja kokonaisena, kolme lihatyyppiä ja lisää paistoruokia',()=>{
+    const a=/cw\.cat==='hammer'\|\|cw\.cat==='shovel'/.test(String(canvas.onmousedown||''))||true;   // kuuntelija addEventListener – tarkistetaan toiminnallisesti alla
+    const sv=[locked,lockFailed,P.drawing,flags.ammo];let bow=false;
+    try{invAdd('jousi',1);invAdd('nuolet',5);const s=inv.find(x=>x&&x.id==='jousi');const was=s.eq;if(!s.eq)toggleEquip(s);locked=false;lockFailed=false;
+      canvas.dispatchEvent(new MouseEvent('mousedown',{button:0,bubbles:true}));bow=P.drawing===true;dispatchEvent(new MouseEvent('mouseup',{button:0,bubbles:true}));P.drawing=false;if(!was)toggleEquip(s);invRemove('jousi',1);invRemove('nuolet',5);}
+    finally{locked=sv[0];lockFailed=sv[1];P.drawing=false;}
+    const b=TUT_MOVE_DONE.includes('crouch')&&PL_WHOLE.has('sydan')&&SYD_FADE===2.5&&SYD_KEEP===3&&/S\.sk/.test(plBody.toString())&&manJ()['p/keho/sydan_0'].pv==='9w1';
+    const c=['pienliha','liha','suurliha'].every(id=>ITEMS[id]&&ITEMS[id].food.raw&&COOKABLE[id]&&ITEMS[COOKABLE[id]].food)&&ITEMS.pienpaisti.food.h<ITEMS.paisti.food.h&&ITEMS.paisti.food.h<ITEMS.suurpaisti.food.h&&ITEMS.paisti.food.h>=55
+      &&itemRarity({id:'suurpaisti'})==='rare'&&itemRarity({id:'paisti'})==='unc'&&itemRarity({id:'pienpaisti'})==='com'&&!!RECIPE_BY.lihakeitto&&!!RECIPE_BY.juhla
+      &&MOBDEF.janis.drops.some(d=>d[0]==='pienliha')&&MOBDEF.hirvi.drops.some(d=>d[0]==='suurliha')&&MOBDEF.karhu.drops.some(d=>d[0]==='suurliha')&&MOBDEF.peura.drops.some(d=>d[0]==='liha');
+    return bow&&b&&c||`virhe jousi ${bow} ${b} ${c}`;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;

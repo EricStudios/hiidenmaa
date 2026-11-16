@@ -169,7 +169,7 @@ function temperAI(m,dt,dx,dz,dist,hurt,night){const d=m.def,t=d.temper;
   const see=m.los&&dist<(d.aggro||12);
   if(t==='elk'){if(dist>15)m.rolled=0;if(dist<6&&!m.rolled&&m.los){m.rolled=1;if(Math.random()<.35)anger('Hirvi suuttuu ja ryntää päin!');else startFlee(m,dx,dz);}}
   else if(t==='lynx'){if(night&&P.hp<maxHp()*.5&&see)anger('Ilves vaanii heikentynyttä saalista!');else if(dist<10&&m.los&&m.state!=='flee')startFlee(m,dx,dz);}
-  else if(t==='ahma'){if(see&&invCount('liha')>0)anger('Ahma haistaa lihan ja hyökkää!');}
+  else if(t==='ahma'){if(see&&(invCount('liha')+invCount('pienliha')+invCount('suurliha'))>0)anger('Ahma haistaa lihan ja hyökkää!');}
   else if(t==='bear'){if(see&&dist<8)anger('Karhu hyökkää!');else if(m.los&&dist<14&&playTime-(m.growlT||-99)>12){m.growlT=playTime;sfx('roar',.55,.7);msg('Karhu murisee varoittavasti – pysy kaukana!','warn');m.state='idle';m.wander=null;m.yaw=Math.atan2(dx,dz);}}
   else if(t==='sow'){if(mobs.some(k=>k.mom===m&&!k.dead&&dist2(k.pos.x,k.pos.z,P.pos.x,P.pos.z)<49))anger('Emakko puolustaa porsaitaan!');}
   return false;}

@@ -217,7 +217,7 @@ function eat(s){const f=ITEMS[s.id].food;
   if(P.hunger>=99&&!f.raw&&!f.buff){P.buffs.vatsakipu=52;msg('Söit vaikka olit jo täynnä – vatsaa kivistää.','warn');}
   P.hunger=Math.min(100,P.hunger+f.h);if(P.hunger>=99.5){P.hunger=100;P.buffs.taysi=60;}   /* v2.00: täyteen syöty = 100, ja ensimmäinen pudotus vasta 60 s:n kuluttua */
   if(f.hp)P.heal+=f.hp;if(f.st)P.stam=Math.min(maxStam(),P.stam+f.st);
-  if(f.raw&&Math.random()<.45){P.buffs.pahoinvointi=40;msg('Raaka liha kääntää vatsaa.','warn');}
+  if(f.raw&&Math.random()<.45){P.buffs.pahoinvointi=40;msg('Raaka liha kääntää vatsaa.','warn');}   // kaikki raa'at lihat (v2.80)
   if(f.buff)P.buffs[f.buff]=300;if(!f.raw)flags.ate=1;
   s.n--;if(s.n<=0)inv[inv.indexOf(s)]=null;invDirty=true;sfx('eat');plSnd('kaytto','syominen');msg(`Söit: ${ITEMS[s.id].n}`);
 }
@@ -286,7 +286,7 @@ function fireInteract(p){const cap=p.t==='grilli'?4:3,d=p.data;
   if(done.length){for(const c of done){const burnt=c.t>=c.need*2;giveOrDrop(burnt?'hiili':COOKABLE[c.id],1,p.x,p.y+.8,p.z);if(!burnt)bump('cooked');}d.cook=d.cook.filter(c=>c.t<c.need);sfx('pickup');return;}
   const raw=Object.keys(COOKABLE).find(id=>invCount(id)>0);
   if(d.out&&d.fuel>0){if(fireRainOut(p)){msg('Kova sade sammuttaisi tulen heti – suojaa nuotio katolla.','warn');return;}d.out=0;d.wetT=0;msg('Sytytit nuotion uudelleen.');sfx('build');return;}   // v2.17
-  if(raw&&fireLit(p)&&d.cook.length<cap){invRemove(raw,1);d.cook.push({id:raw,t:0,need:9+Math.random()*5});msg(`${ITEMS[raw].n} paistuu… (ota ajoissa, muuten palaa hiileksi)`);sfx('craft');return;}
+  if(raw&&fireLit(p)&&d.cook.length<cap){invRemove(raw,1);const ct=COOK_T[raw]||[9,5];d.cook.push({id:raw,t:0,need:ct[0]+Math.random()*ct[1]});msg(`${ITEMS[raw].n} paistuu… (ota ajoissa, muuten palaa hiileksi)`);sfx('craft');return;}
   if(firePct(p)>50){msg(`Tulessa on jo tarpeeksi polttoainetta (${firePct(p)} %).`);return;}
   if(invCount('puu')>0){invRemove('puu',1);d.fuel++;d.out=0;markFull(p);sfx('build');return;}
   if(d.fuel<=FUEL_MAX-10&&invCount('hiili')>0){invRemove('hiili',1);d.fuel+=10;markFull(p);msg('Hiili palaa pitkään.');sfx('build');return;}
