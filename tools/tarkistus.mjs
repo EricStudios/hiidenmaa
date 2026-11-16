@@ -557,6 +557,16 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     return bow&&b&&c||`virhe jousi ${bow} ${b} ${c}`;});
   t('v2.81 sääänet −60 % (sade, tihku, myrsky, tuuli, lumi, sumu, ukkonen, salama), tunnelma/luonto/vedenalainen ennallaan',()=>
     WEATHER_K===.4&&Math.abs(AMB_V.sade-.32)<1e-9&&Math.abs(AMB_V.myrsky-.4)<1e-9&&Math.abs(AMB_V.tuuli-.28)<1e-9&&AMB_V.tunnelma===.75&&AMB_V.luonto===.35&&AMB_V.vedenalla===.8&&VOL_BASE.amb===.56||'arvot väärin');
+  t('v2.82 rakennusvinkki G (vapaa, jatko) kertavinkkinä, seinäsoihtu kohdistuu G:n tilan mukaan; nähdyt vinkit muistetaan kaikkien maailmojen yli; ei vinkkejä ilman opastusta',()=>{
+    const T=TIPS.find(x=>x.id==='rakennusG');if(!T)return 'vinkki puuttuu';const txt=T.d();
+    const a=/vapaa/.test(txt)&&/jatko/.test(txt)&&txt.includes(keyLabel(BIND.snap));
+    const b=/tipSeenG\(\)/.test(tipsTick.toString())&&/tipSeenSet\(T\.id\)/.test(tipsTick.toString())&&/flags\.tut/.test(tipsTick.toString())&&/hiidenmaa_tipseen/.test(tutOnNewWorld.toString());
+    const sv=localStorage.getItem('hiidenmaa_tipseen');let c;
+    try{localStorage.setItem('hiidenmaa_tipseen','{}');tipSeenSet('testi');c=tipSeenG().testi===1;}finally{if(sv===null)localStorage.removeItem('hiidenmaa_tipseen');else localStorage.setItem('hiidenmaa_tipseen',sv);}
+    const W={t:'seina',x:0,y:0,z:0,rot:0,f:0},Bw=unionBox(worldBoxes('seina',0,0,0,0,0)),thinZ=Bw.maxZ-Bw.minZ<Bw.maxX-Bw.minX,n=thinZ?{x:0,y:0,z:-1}:{x:-1,y:0,z:0};
+    const pt={x:thinZ?.73:Bw.minX,y:Bw.minY+1.13,z:thinZ?Bw.minZ:.73},rr=((Math.round(Math.atan2(n.x,n.z)/(Math.PI/4))%8)+8)%8,P0=m=>wallMountSnap({piece:W,n,pt},rr,m);
+    const g=P0('ruudukko'),v=P0('vapaa'),e=P0('reuna'),d=/wallMountSnap\(hit,rot,mode0\)/.test(updateGhost.toString())&&Math.abs((thinZ?g.x:g.z))<1e-6&&Math.abs((thinZ?v.x:v.z)-.73)<1e-6&&Math.abs(thinZ?e.x:e.z)>.9&&Math.abs(g.y-v.y)>.05;
+    return a&&b&&c&&d||`virhe ${a}${b}${c} soihtu ${d}`;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;

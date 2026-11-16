@@ -631,6 +631,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.82 seinäsoihtu:** kohdistuu G:n tilan mukaan – ruudukko: seinäosan keskelle soihtukorkeudelle, puoli: neljännekset, 1 m: metrin välein, 3D: 0,25 m, reuna: seinäosan reunaan, vapaa: mihin tähtäät.
+- **v2.82:** uusi kertavinkki: jos rakentaminen tuntuu hankalalta, paina G (esim. G: vapaa, jatko). Vinkit näytetään pelaajalle vain kerran kaikkien maailmojen yli; opastus ja vinkit vain maailmoissa, joissa opastus on valittu (oletuksena vain ensimmäinen maailma, jos opastusta ei ole käyty).
 - **v2.81:** sääänet (sade, myrsky, tuuli, lumi, sumu, ukkonen, salama) 60 % hiljempaa, jotta muut äänet kuuluvat.
 - **v2.80:** sydämen syke on yksi jatkuva silmukka (ei ala alusta), voimakkuus ja tahti muuttuvat pehmeästi, loppuu 3 s jälkeen 2,5 s häivytyksellä; tiedosto kokonaisena.
 - **v2.79:** susien ulvonta kuuluu yhtä kauas kuin muiden eläinten ääntely (36 m); kaukaista yöulvontaa ilman sutta ei enää ole. Sää- ja tunnelmaäänet 20 % hiljempaa.

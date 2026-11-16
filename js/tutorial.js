@@ -37,7 +37,7 @@ function tutDefault(){let done=false;try{done=localStorage.getItem('hiidenmaa_tu
 function tutChoose(on){try{sessionStorage.setItem('hiidenmaa_tutgo',on?'1':'0');}catch(e){}}
 // kutsutaan uuden maailman newGame()-kutsun jälkeen (main.js, molemmat polut): opastus alkaa alkulennon jälkeen (endIntro → tutMaybeStart)
 function tutOnNewWorld(){let go=null;try{go=sessionStorage.getItem('hiidenmaa_tutgo');sessionStorage.removeItem('hiidenmaa_tutgo');}catch(e){}
-  if(go===null)go=tutDefault()?'1':'0';if(go==='1'){flags.tut=1;flags.tips={};TUT.pending=true;}}
+  if(go===null)go=tutDefault()?'1':'0';if(go==='1'){if(SET.tutNext)try{localStorage.removeItem('hiidenmaa_tipseen');}catch(e){}flags.tut=1;flags.tips={};TUT.pending=true;}}   // v2.82 pyydetty uudelleen → vinkit alusta
 function tutMaybeStart(){if(!TUT.pending||TUT.on)return;const ld=document.getElementById('loadScr');
   if((ld&&!ld.classList.contains('out')&&getComputedStyle(ld).display!=='none')||state!=='play'){setTimeout(tutMaybeStart,400);return;}   // odota latausnäytön ja alkulennon loppu
   TUT.pending=false;tutStart();}
@@ -88,6 +88,7 @@ function tutTick(dt){
 // Kun asia tulee ensimmäisen kerran vastaan, ruudun yläosaan tulee vinkki 10 s (yksi kerrallaan, väli vähintään 6 s). flags.tips[id] = näytetty.
 const TIPS=[
   {id:'vasara',c:()=>{const w=equipped('weapon');return w&&w.id==='vasara';},d:()=>`Rakentaminen: ${kL('build')} tai hiiren oikea avaa rakennusvalikon, hiiren vasen asettaa. ${kL('rot')} kääntää (Shift = asento), ${kL('snap')}/${kL('vsnap')} kohdistus, ${kL('up')}/${kL('down')} nosta/laske, ${kL('remove')} pura, ${kL('repair')} korjaa. Työpisteet tarvitsevat työpenkin lähelleen.`},
+  {id:'rakennusG',c:()=>{const w=equipped('weapon');return w&&w.id==='vasara'&&cnt('built')>=3;},d:()=>`Rakentaminen tuntuu hankalalta? Paina ${kL('snap')} vaihtaaksesi kohdistusta (ruudukko → 1 m → puoli → 3D → vapaa → reuna → jatko). Esim. <b>${kL('snap')}: vapaa</b> asettaa osan juuri sinne, minne katsot, ja <b>jatko</b> jatkaa portaita ja tikkaita edellisestä.`},   // v2.82 käyttäjän pyyntö
   {id:'jousi',c:()=>{const w=equipped('weapon');return w&&ITEMS[w.id].cat==='bow';},d:()=>`Jousi: pidä hiiren vasen pohjassa ja päästä irti. Kyykyssä (${kL('crouch')}) näet tarkan tähtäimen ja lentoradan. Nuolet ovat repussa.`},
   {id:'lapio',c:()=>{const w=equipped('weapon');return w&&(w.id==='lapio'||w.id==='kuokka');},d:()=>`Lapio: hiiren vasen kaivaa, oikea tekee polun. Kuokka: vasen nostaa maata, oikea palauttaa maan värin ja kasvillisuuden (esim. polun kohdalle).`},
   {id:'kirves',c:()=>{const w=equipped('weapon');return w&&ITEMS[w.id].chop;},d:()=>`Kirves kaataa puita (hiiren vasen). Kaatuneesta puusta jää tukki – lyö sitä, niin saat puuta.`},
@@ -99,9 +100,14 @@ const TIPS=[
   {id:'ulottuvuus',c:()=>P.inDun&&!!P.realm,d:()=>`Ulottuvuudessa portti vie takaisin saarelle. Pomo herää, kun astut sen kammioon – varaa ruokaa ja parannusjuomia.`},
   {id:'taso',c:()=>playerLevel()>=2,d:()=>`Uusi taso! ${kL('prog')} näyttää, mitä sait ja mitä seuraavat tasot avaavat.`},
 ];
+/* v2.82 VINKIT KERRAN PELAAJALLE (käyttäjä): nähty vinkki muistetaan kaikkien maailmojen yli (localStorage hiidenmaa_tipseen), joten opastuksen
+   jo käynyt pelaaja ei näe samoja vinkkejä uudessa opastusmaailmassa. Asetus "Opastus seuraavassa uudessa maailmassa" tyhjentää muistin (tutOnNewWorld).
+   Maailmassa ilman opastusta (flags.tut puuttuu tai ohitettu) vinkkejä ei näytetä lainkaan. */
+function tipSeenG(){try{return JSON.parse(localStorage.getItem('hiidenmaa_tipseen')||'{}')||{};}catch(e){return {};}}
+function tipSeenSet(id){const o=tipSeenG();o[id]=1;try{localStorage.setItem('hiidenmaa_tipseen',JSON.stringify(o));}catch(e){}}
 function tipsTick(dt){if(!flags||!flags.tut||state!=='play'||P.dead)return;flags.tips=flags.tips||{};const el=tipEl();
   if(TUT.tipT>0){TUT.tipT-=dt;if(TUT.tipT<=0)el.classList.remove('on');return;}
   TUT.tipCd-=dt;if(TUT.tipCd>0)return;TUT.tipCd=.5;
-  for(const T of TIPS){if(flags.tips[T.id])continue;let ok=false;try{ok=T.c();}catch(e){}if(!ok)continue;flags.tips[T.id]=1;
+  const G=tipSeenG();for(const T of TIPS){if(flags.tips[T.id])continue;if(G[T.id]){flags.tips[T.id]=1;continue;}let ok=false;try{ok=T.c();}catch(e){}if(!ok)continue;flags.tips[T.id]=1;tipSeenSet(T.id);
     el.querySelector('.tipD').innerHTML=T.d();el.classList.add('on');TUT.tipT=10;TUT.tipCd=6;if(typeof mSnd==='function')mSnd('napit','hover');return;}}
 function tipEl(){if(TUT.tipEl)return TUT.tipEl;const d=document.createElement('div');d.id='tutTip';d.innerHTML='<b>Vinkki</b><span class="tipD"></span>';document.body.appendChild(d);TUT.tipEl=d;return d;}
