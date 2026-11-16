@@ -251,14 +251,22 @@ function calcFx(){const f=P.fx,b=P.buffs;f.speed=1;f.dmg=1;f.stamRegen=1;f.hpReg
    sitten tehoste harmaantuu ("Ovesi on auki"), sulkiessa palaa heti. Lähde sammuu → 30 s ajastin → takaisin Mukavaksi. Ulos lähtiessä taso säilyy 20 s ja hiipuu.
    Nukkuminen (sleepAt): +10 % / +20 % enimmäisterveydestä (muualla ei paranna). */
 const HOME={lvl:0,k:1,inside:false,grey:false,doorT:0,heatT:0,heatOff:99,linger:0,lvlL:0,dist:null,chk:0},HOME_DIRS=16,HOME_R=15;
-function homeHit(x,y,z,closedDoors){if(y<terrainH(x,z))return 2;const a=CG.get(ck(Math.floor(x/CELL),Math.floor(z/CELL)));if(!a)return false;
-  for(const c of a){if(c.off&&!(closedDoors&&c.door))continue;if(!(c.owner&&c.owner.t&&PIECES[c.owner.t]))continue;   /* vain rakennusosat (ei puut, kivet, rauniot) */if(c.t==='b'){if(x>=c.minX&&x<=c.maxX&&z>=c.minZ&&z<=c.maxZ&&y>=c.minY&&y<=c.maxY)return true;}   /* sisältävä: seinäpalojen saumat */else if(y>c.minY&&y<c.maxY&&(x-c.x)**2+(z-c.z)**2<c.r*c.r)return true;}return false;}
+/* v2.83 HOME_PAD: laatikot laajennetaan 0,08 m vaakasuunnassa – säde etenee 0,15 m askelin ja hyppäsi vinossa ohuen osan yli (ovilevy 0,12 m, lasi)
+   → talo näytti avoimelta ja vaikutus "hiipui" sisällä. wallOnly: vain seinät, ovet ja ikkunat (lämmönlähteen näköyhteys, huonekalut eivät estä). */
+const HOME_PAD=.08;
+function homeHit(x,y,z,closedDoors,wallOnly){if(!wallOnly&&y<terrainH(x,z))return 2;const a=CG.get(ck(Math.floor(x/CELL),Math.floor(z/CELL)));if(!a)return false;const e=HOME_PAD;
+  for(const c of a){if(c.off&&!(closedDoors&&c.door))continue;if(!(c.owner&&c.owner.t&&PIECES[c.owner.t]))continue;   /* vain rakennusosat (ei puut, kivet, rauniot) */if(wallOnly&&PIECES[c.owner.t].snap!=='wall')continue;
+    if(c.t==='b'){if(x>=c.minX-e&&x<=c.maxX+e&&z>=c.minZ-e&&z<=c.maxZ+e&&y>=c.minY&&y<=c.maxY)return true;}   /* sisältävä: seinäpalojen saumat */else if(y>c.minY&&y<c.maxY&&(x-c.x)**2+(z-c.z)**2<(c.r+e)**2)return true;}return false;}
+// v2.83 lämmönlähteen näköyhteys: pelaajasta lähteeseen 1 m korkeudella ei seinää, ovea tai ikkunaseinää välissä (suljetut ovet estävät)
+function homeLos(px,pz,py,qx,qz){const dx=qx-px,dz=qz-pz,L=Math.hypot(dx,dz);for(let t=.3;t<L-.35;t+=.1){if(homeHit(px+dx/L*t,py+1,pz+dz/L*t,true,true))return false;}return true;}
 function homeScan(closedDoors){const x0=P.pos.x,z0=P.pos.z,y0=P.pos.y,dist=[];
   for(let i=0;i<HOME_DIRS;i++){const a=i/HOME_DIRS*TAU+.031,dx=Math.cos(a),dz=Math.sin(a);let dmin=HOME_R;   // pieni kulmasiirto: säde ei kulje saumaa pitkin
     for(const h of [.6,1.5,2.2]){let hit=null,ter=false;for(let t=.3;t<HOME_R;t+=.15){const r=homeHit(x0+dx*t,y0+h,z0+dz*t,closedDoors);if(r){hit=t;ter=r===2;break;}}if(hit===null)return null;if(ter&&hit>6)return null;if(h===1.5)dmin=hit;}dist.push(dmin);}   // maasto kelpaa seinäksi vain lähellä (rinteeseen rakennettu talo)
-  for(const [ox,oz] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]])if(!sheltered(x0+ox,y0,z0+oz))return null;return dist;}
-function homeHeat(dist){for(const p of pieces){const fire=isFirePiece(p.t)&&fireLit(p),torch=(p.t==='soihtuteline'||p.t==='seinasoihtu')&&p.data.burn>0;if(!fire&&!torch)continue;
-    const dx=p.x-P.pos.x,dz=p.z-P.pos.z,d=Math.hypot(dx,dz);if(d>HOME_R||Math.abs((p.y||0)-P.pos.y)>3)continue;if(d<homeEdge(dist,dx,dz)-.05)return true;}return false;}
+  /* v2.83 katto tarkistetaan enintään 1 m joka suuntaan, mutta vain talon sisältä (seinään matka − 0,35 m): ennen seinän vieressä (< 1 m)
+     piste oli seinän ulkopuolella → talo ei tunnistunut, ja 1×1-mökki toimi vain aivan keskellä. */
+  if(!sheltered(x0,y0,z0))return null;for(const [ox,oz] of [[1,0],[-1,0],[0,1],[0,-1]]){const o=Math.min(1,homeEdge(dist,ox,oz)-.35);if(o>.1&&!sheltered(x0+ox*o,y0,z0+oz*o))return null;}return dist;}
+function homeHeat(dist){for(const p of pieces){const fire=isFirePiece(p.t)&&fireLit(p),torch=isTorch(p.t)&&p.data.burn>0;if(!fire&&!torch)continue;
+    const dx=p.x-P.pos.x,dz=p.z-P.pos.z,d=Math.hypot(dx,dz);if(d>HOME_R||Math.abs((p.y||0)-P.pos.y)>3)continue;if(d<homeEdge(dist,dx,dz)-.05||(d<homeEdge(dist,dx,dz)+.6&&homeLos(P.pos.x,P.pos.z,P.pos.y,p.x,p.z)))return true;}return false;}   // v2.83 + näköyhteys (huonekalu ei peitä lähdettä)
 // talon reunan etäisyys suunnassa (viereisten säteiden suurin – esine itse voi katkaista yhden säteen)
 function homeEdge(dist,dx,dz){const i=Math.round(((Math.atan2(dz,dx)-.031+TAU)%TAU)/TAU*HOME_DIRS)%HOME_DIRS,n=HOME_DIRS;return Math.max(dist[(i+n-1)%n],dist[i],dist[(i+1)%n]);}
 // osa talon reunalla (aukkoikkuna tai ovi): keskipiste lähellä reunan etäisyyttä
@@ -267,13 +275,14 @@ function homeTick(dt){const H=HOME;H.chk-=dt;
   if(H.chk<=0){H.chk=.5;let closed=null;if(!P.inDun&&pieces.some(p=>dist2(p.x,p.z,P.pos.x,P.pos.z)<HOME_R*HOME_R))closed=homeScan(true);
     // aukkoikkuna reunalla → ei suljettu; avoin ovi reunalla → "ovi auki" (säteet voivat ohittaa kapean aukon, siksi erillinen tarkistus)
     let hole=false,door=false;if(closed)for(const p of pieces){const b=bt(p.t);if(b==='ikkunaseina'&&!PIECES[p.t].glass&&homeOnEdge(p,closed))hole=true;else if(b==='ovi'&&p.data.open&&homeOnEdge(p,closed))door=true;}
-    H.inside=!!closed&&!hole;H.doorOpen=H.inside&&door;H.dist=closed;H.heatNow=H.inside&&homeHeat(closed);}
+    const ok=!!closed&&!hole;H.miss=ok?0:(H.miss||0)+1;   // v2.83 hystereesi: talo "avoin" vasta 2 peräkkäisellä tarkistuksella (1 s) – yksittäinen huti ei hiivuta
+    if(ok||H.miss>=2||!H.inside){H.inside=ok;H.doorOpen=ok&&door;H.dist=closed;H.heatNow=ok&&homeHeat(closed);}}
   if(H.inside){H.doorT=H.doorOpen?H.doorT+dt:0;const active=!H.doorOpen||H.doorT<20;H.grey=!active;
     if(H.heatNow&&active){H.heatT+=dt;H.heatOff=0;}else{H.heatOff+=dt;if(H.heatOff>=30)H.heatT=0;}
     const lvl=active?(H.heatT>=5&&H.heatOff<30?2:1):0;if(lvl&&H.lvl!==lvl)msg(lvl===2?'Lämmin koti: talo on suljettu ja lämmönlähde palaa.':'Mukava lämpötila: talo on suljettu.','loot');
     if(!active&&H.lvl&&!H.greyMsg){H.greyMsg=1;msg('Ovesi on auki – kodin lämpö karkaa. Sulje ovi.','warn');}if(active)H.greyMsg=0;
     H.lvl=lvl;H.k=1;if(lvl){H.linger=20;H.lvlL=lvl;}H.lastLvl=lvl||H.lastLvl;}
-  else{H.grey=false;H.doorT=0;H.heatOff=99;H.heatT=0;if(H.linger>0){H.linger=Math.max(0,H.linger-dt);H.lvl=H.lvlL;H.k=H.linger/20;if(H.linger<=0)H.lvl=0;}else{H.lvl=0;H.k=1;}}}
+  else{H.grey=false;H.doorT=0;H.heatOff+=dt;if(H.linger>0){H.linger=Math.max(0,H.linger-dt);H.lvl=H.lvlL;H.k=H.linger/20;if(H.linger<=0)H.lvl=0;}else{H.lvl=0;H.k=1;}if(H.linger<=0){H.heatOff=99;H.heatT=0;}}}   // v2.83: lämpölaskuri säilyy hiipumisen ajan (lyhyt katkos ei nollaa 5 s:n odotusta)
 function homeHealRate(){return HOME.lvl===2?1*HOME.k:HOME.lvl===1?.5*HOME.k:0;}
 function homeHungerK(){const m=HOME.lvl===2?.5:HOME.lvl===1?.7:1;return 1-(1-m)*HOME.k;}
 function fmtT(t){return t>=60?`${Math.ceil(t/60)} min`:`${Math.ceil(t)} s`;}
@@ -283,10 +292,11 @@ function survival(dt){
   homeTick(dt);   // v2.09 kodin lämpö
   const raining=wRain>.5&&!P.inDun;
   if(raining&&!shelterCache)P.wetT=60;if(P.inWater)P.wetT=60;
-  if(P.wetT>0)P.wetT-=dt*(fireCache?5:1);
+  const warmHome=HOME.lvl===2&&HOME.inside&&!HOME.grey;   // v2.83 Lämmin koti lämmittää ja kuivattaa kuten nuotio
+  if(P.wetT>0)P.wetT-=dt*(fireCache||warmHome?5:1);
   const armor=equipped('armor');
   const snowing=wSnow>.5&&P.pos.y>10&&!P.inDun&&!shelterCache;
-  const cold=!fireCache&&((P.wetT>0)||snowing||(isNight()&&!P.inDun&&!(armor&&ITEMS[armor.id].warm)&&!shelterCache));
+  const cold=!fireCache&&!warmHome&&((P.wetT>0)||snowing||(isNight()&&!P.inDun&&!(armor&&ITEMS[armor.id].warm)&&!shelterCache));
   P.cold=cold;
   if(fireCache&&shelterCache){P.restT+=dt;if(P.restT>12&&!P.buffs.levannyt){P.buffs.levannyt=360;flags.rested=1;msg('Olet levännyt. Kestävyys palautuu nopeammin.','loot');}}else P.restT=0;
   for(const k in P.buffs){P.buffs[k]-=dt;if(P.buffs[k]<=0)delete P.buffs[k];}

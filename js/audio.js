@@ -352,7 +352,7 @@ function mSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;mLoad();const L0
   const key=g+'/'+ev;let pick=L;if(pick.length>1&&MSND.last[key])pick=pick.filter(x=>x!==MSND.last[key]);const name=pick[Math.random()*pick.length|0];MSND.last[key]=name;
   if(!MSND.gain){MSND.gain=a.createGain();MSND.gain.connect(a.destination);}MSND.gain.gain.value=1;   /* v2.53: taso äänikohtaisesti (kategoria o.cat) */
   const src=a.createBufferSource();src.buffer=CRE.buf[name];src.playbackRate.value=(o.p||1)*(1+(Math.random()*2-1)*(o.pj??.03));
-  const gn=a.createGain(),v0=(o.v??1)*vol,h={src,g:gn,done:false,cat:o.cat||'ui',v:o.v??1};src.connect(gn);gn.connect(o.cat==='notif'||o.cat==='amb'?sndBus(a):MSND.gain);   /* v2.67 pelin äänet vedenalaisen väylän kautta */src.onended=()=>{h.done=true;try{gn.disconnect();}catch(e){}};
+  const gn=a.createGain(),v0=(o.v??1)*vol,h={src,g:gn,done:false,cat:o.cat||'ui',v:o.v??1};src.connect(gn);gn.connect((o.cat==='notif'||o.cat==='amb')&&!o.menu?sndBus(a):MSND.gain);   /* v2.83 o.menu: valikon/alkulennon taustaäänet eivät mykisty valikossa */   /* v2.67 pelin äänet vedenalaisen väylän kautta */src.onended=()=>{h.done=true;try{gn.disconnect();}catch(e){}};
   if(o.loop){src.loop=true;const lp=tgLoopPts(src.buffer);src.loopStart=lp[0];src.loopEnd=lp[1];gn.gain.setValueAtTime(0,a.currentTime);gn.gain.linearRampToValueAtTime(v0,a.currentTime+.15);}   /* 0,15 s vain naksahduksen esto, ei fade in */
   else gn.gain.value=v0;src.start();return h;}   // v2.52: palauttaa kahvan (mStop)
 // v2.52 äänen pysäytys häivyttäen (f s): silmukat (tuuli, linnut) ja kesken jäävät kertaäänet (intro ohitetaan)
@@ -548,7 +548,13 @@ function ambTick(dt){const a=actx;if(!a||a.state!=='running'||!soundOn||!CRE.ok)
    Kun kamera on veden alla (CAM_UW > 0): diskantti leikataan (UW_LP Hz) ja taso UW_G; siirtymä 0,3 s. Olennot, pelaaja, sää, tunnelma ja
    ilmoitukset (mSnd cat notif/amb) kulkevat väylän kautta. */
 const SBUS={f:null,g:null,uw:false},UW_LP=650,UW_G=.7;
-function sndBus(a){if(!SBUS.f){SBUS.f=a.createBiquadFilter();SBUS.f.type='lowpass';SBUS.f.frequency.value=22000;SBUS.f.Q.value=.7;SBUS.g=a.createGain();SBUS.f.connect(SBUS.g);SBUS.g.connect(a.destination);}return SBUS.f;}
+function sndBus(a){if(!SBUS.f){SBUS.f=a.createBiquadFilter();SBUS.f.type='lowpass';SBUS.f.frequency.value=22000;SBUS.f.Q.value=.7;SBUS.g=a.createGain();SBUS.m=a.createGain();SBUS.f.connect(SBUS.g);SBUS.g.connect(SBUS.m);SBUS.m.connect(a.destination);}return SBUS.f;}
+/* v2.83 VALIKOSSA PELIN ÄÄNET HÄIPYVÄT (käyttäjä: sydämen syke kuului päävalikkoon). Kaikki pelin äänet (olennot, toiminnot, pelaaja ja sen
+   silmukat, sää ja tunnelma, ilmoitukset) kulkevat väylän SBUS kautta → SBUS.m häivyttää ne ~0,8 s:ssa, kun valikko tai tauko on auki
+   (state 'menu'/'paused'), ja palauttaa ~0,6 s:ssa, kun peli jatkuu. Silmukat jatkavat hiljaa samasta kohdasta. Valikon napit (MSND) ja musiikki
+   eivät kulje tätä kautta. Kutsu: main.js frame() joka ruutu. */
+function gameSndTick(){const a=actx;if(!a||!SBUS.m)return;const on=state!=='menu'&&state!=='paused';if(on===SBUS.on)return;SBUS.on=on;
+  const t=a.currentTime;SBUS.m.gain.cancelScheduledValues(t);SBUS.m.gain.setValueAtTime(SBUS.m.gain.value,t);SBUS.m.gain.setTargetAtTime(on?1:0,t,on?.15:.2);}
 function uwAudioTick(){const a=actx;if(!a||!SBUS.f)return;const uw=typeof CAM_UW!=='undefined'&&CAM_UW>0&&!P.inDun&&(state==='play'||state==='ui'||state==='paused');if(uw===SBUS.uw)return;SBUS.uw=uw;
   const t=a.currentTime;SBUS.f.frequency.cancelScheduledValues(t);SBUS.f.frequency.setTargetAtTime(uw?UW_LP:22000,t,.1);SBUS.g.gain.setTargetAtTime(uw?UW_G:1,t,.1);}
 creInit();   // v2.52: manifesti ja valikko-/introäänet heti (maailman intro sivun uudelleenlatauksen jälkeen)

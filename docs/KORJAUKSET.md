@@ -506,6 +506,14 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Ratkaisu: `bloodPool`/`poolShape` (effects.js) – säteittäinen verkko, jonka jokainen kärki asetetaan maahan `groundY`:llä; valuminen suunnittain.
   **Sääntö:** yli ~0,5 m maahan tuleva kuvio tehdään maastoa seuraavana verkkona, ei yhtenä tasona. Tarkistus v2.78 mittaa kärkien etäisyyden maasta.
 
+## 69. Kodin lämpö "hiipui" sisällä ja katosi seinän vieressä (v2.83)
+- Oire: Mukava lämpötila / Lämmin koti vaihtui tilaan "hiipuu", vaikka pelaaja oli suljetussa talossa; seinän vieressä (< 1 m) ja 1×1-mökissä ei toiminut.
+- Syy: (1) `homeScan` tarkisti katon ±1 m pelaajasta → seinän vieressä piste oli talon ulkopuolella; (2) säde eteni 0,15 m askelin ja hyppäsi vinossa
+  ohuen osan yli (ovilevy 0,12 m) → talo näytti avoimelta; (3) yksi epäonnistunut tarkistus riitti.
+- Ratkaisu (environment.js): katto tarkistetaan vain talon sisältä (`homeEdge` − 0,35 m), `HOME_PAD` 0,08 m laajentaa laatikoita säteelle,
+  hystereesi `H.miss` (2 tarkistusta), lämmönlähteen näköyhteys `homeLos`. **Testaa** oikealla talolla: lattia 0,25 m välein + pisteet ulkopuolella.
+  Uusia ohuita osia lisättäessä (< 0,15 m) tarkista, ettei säde hyppää niiden yli.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`

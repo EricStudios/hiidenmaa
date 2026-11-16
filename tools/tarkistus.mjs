@@ -567,6 +567,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const pt={x:thinZ?.73:Bw.minX,y:Bw.minY+1.13,z:thinZ?Bw.minZ:.73},rr=((Math.round(Math.atan2(n.x,n.z)/(Math.PI/4))%8)+8)%8,P0=m=>wallMountSnap({piece:W,n,pt},rr,m);
     const g=P0('ruudukko'),v=P0('vapaa'),e=P0('reuna'),d=/wallMountSnap\(hit,rot,mode0\)/.test(updateGhost.toString())&&Math.abs((thinZ?g.x:g.z))<1e-6&&Math.abs((thinZ?v.x:v.z)-.73)<1e-6&&Math.abs(thinZ?e.x:e.z)>.9&&Math.abs(g.y-v.y)>.05;
     return a&&b&&c&&d||`virhe ${a}${b}${c} soihtu ${d}`;});
+  t('v2.83 kodin lämpö: seinän vieressä ja 1×1-mökissä toimii, ohut ovi ei vuoda, hystereesi, Lämmin koti lämmittää; valikossa pelin äänet häipyvät; kivimuuri ja kivinen soihtupylväs; kivisäiliöt +2 paikkaa',()=>{
+    const a=HOME_PAD===.08&&/homeEdge\(dist,ox,oz\)/.test(homeScan.toString())&&/H\.miss/.test(homeTick.toString())&&/homeLos/.test(homeHeat.toString())&&/warmHome/.test(survival.toString());
+    const b=typeof gameSndTick==='function'&&/gameSndTick/.test(frame.toString())&&/SBUS\.m/.test(sndBus.toString())&&/o\.menu/.test(mSnd.toString());
+    let c=true;if(actx){sndBus(actx);const st=state;state='paused';gameSndTick();const off=SBUS.on===false;state='play';gameSndTick();c=off&&SBUS.on===true;state=st;}
+    const d=!!PIECES.kiviaita&&PIECES.kiviaita.base==='aita'&&PIECES.kiviaita.stone&&!!PIECES.kivisoihtu&&PIECES.kivisoihtu.base==='soihtuteline'&&isTorch('kivisoihtu')&&isTorch('seinasoihtu')&&!isTorch('aita')&&pieceBoxes('kivisoihtu').length>0&&PIECES.kiviarkku.store===PIECES.arkku.store+2&&PIECES.kivitynnyri.store===PIECES.tynnyri.store+2;
+    return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;
@@ -1019,8 +1025,8 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const tick=s=>{for(let i=0;i<s*30;i++){P.pos.set(cx,y+.02,cz);P.vel.set(0,0,0);homeTick(1/30);}};HOME.heatT=0;HOME.heatOff=99;HOME.linger=0;tick(1);const a=HOME.inside&&HOME.lvl===1&&homeHealRate()===.5&&Math.abs(homeHungerK()-.7)<1e-9;
       const tr=put('soihtuteline',cx+1.2,cz+1.2,0);tr.data.burn=600;tick(6);const b=HOME.lvl===2&&homeHealRate()===1&&homeHungerK()===.5;
       D.data.open=true;tick(21);const c=HOME.grey&&HOME.lvl===0&&effects().some(e=>e.key==='koti_off');D.data.open=false;tick(1);const d=HOME.lvl===2&&!HOME.grey;
-      removePiece(N);made.splice(made.indexOf(N),1);N=put('ikkunaseina',cx+G/2,cz+G,0);scene.updateMatrixWorld(true);tick(1);const e=!HOME.inside;
-      P.pos.set(cx,y,cz-G-5);homeTick(1/30);const f=HOME.lvl>0&&HOME.k<1;for(let i=0;i<30*21;i++){P.pos.set(cx,y,cz-G-5);homeTick(1/30);}const g=HOME.lvl===0;
+      removePiece(N);made.splice(made.indexOf(N),1);N=put('ikkunaseina',cx+G/2,cz+G,0);scene.updateMatrixWorld(true);tick(1.5);const e=!HOME.inside;   /* v2.83 hystereesi: 2 tarkistusta */
+      for(let i=0;i<45;i++){P.pos.set(cx,y,cz-G-5);homeTick(1/30);}const f=HOME.lvl>0&&HOME.k<1;for(let i=0;i<30*21;i++){P.pos.set(cx,y,cz-G-5);homeTick(1/30);}const g=HOME.lvl===0;
       const h=/HOME\.lvl===2\?\.2:HOME\.lvl===1\?\.1:0/.test(sleepAt.toString())&&!/P\.hp=maxHp\(\)/.test(sleepAt.toString());
       res=a&&b&&c&&d&&e&&f&&g&&h||`virhe mukava ${a} lämmin ${b} ovi ${c}/${d} aukko ${e} hiipuu ${f}/${g} uni ${h}`;}
     finally{msg=om;for(const q of made)if(pieces.includes(q))removePiece(q);P.pos.copy(p0);P.hunger=hu;HOME.lvl=0;HOME.linger=0;HOME.inside=false;}return res;});

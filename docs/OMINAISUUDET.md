@@ -631,6 +631,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.83 kodin lämpö:** toimii myös seinän vieressä ja pienessä 1×1-mökissä; yksittäinen tarkistus ei enää hiivuta; Lämmin koti estää kylmettymisen ja kuivattaa kuten nuotio; lämmönlähde lasketaan, kun sen ja pelaajan välissä ei ole seinää.
+- **v2.83 valikko:** päävalikossa ja tauolla pelin äänet häipyvät ja palaavat jatkettaessa (silmukat jatkuvat samasta kohdasta).
+- **v2.83 kiviversiot:** Kivimuuri (paaluaidan kiviversio) ja Kivinen soihtupylväs (seisovan soihdun kiviversio) Kivi-välilehdellä. Kiviarkussa 18 ja kivitynnyrissä 14 paikkaa (puuversioissa 16 ja 12); laajennuksia 2 × +8 → enintään 34 / 30.
 - **v2.82 seinäsoihtu:** kohdistuu G:n tilan mukaan – ruudukko: seinäosan keskelle soihtukorkeudelle, puoli: neljännekset, 1 m: metrin välein, 3D: 0,25 m, reuna: seinäosan reunaan, vapaa: mihin tähtäät.
 - **v2.82:** uusi kertavinkki: jos rakentaminen tuntuu hankalalta, paina G (esim. G: vapaa, jatko). Vinkit näytetään pelaajalle vain kerran kaikkien maailmojen yli; opastus ja vinkit vain maailmoissa, joissa opastus on valittu (oletuksena vain ensimmäinen maailma, jos opastusta ei ole käyty).
 - **v2.81:** sääänet (sade, myrsky, tuuli, lumi, sumu, ukkonen, salama) 60 % hiljempaa, jotta muut äänet kuuluvat.

@@ -71,13 +71,17 @@ const PIECES={
   kivipylvas_pitka:{n:'Pitkä kivipylväs',req:{kivi:4},hp:400,snap:'free',cat:'kivi',base:'pylvas_pitka',stone:1},
   kivivinoseina:{n:'Kivivinoseinä',req:{kivi:2},hp:250,snap:'wall',cat:'kivi',base:'vinoseina',stone:1,flip:1},
   kivikolmio:{n:'Kivinen päätykolmio',req:{kivi:2},hp:250,snap:'wall',cat:'kivi',base:'kolmio',stone:1,flip:1},
-  kiviarkku:{n:'Kiviarkku',req:{kivi:8},hp:300,snap:'free',cat:'kivi',base:'arkku',stone:1},
-  kivitynnyri:{n:'Kivitynnyri',req:{kivi:5},hp:250,snap:'free',cat:'kivi',base:'tynnyri',stone:1},
+  kiviarkku:{n:'Kiviarkku',req:{kivi:8},hp:300,snap:'free',cat:'kivi',base:'arkku',stone:1,store:18},   // v2.83 kiviversio +2 paikkaa (arkku 16)
+  kivitynnyri:{n:'Kivitynnyri',req:{kivi:5},hp:250,snap:'free',cat:'kivi',base:'tynnyri',stone:1,store:14},   // v2.83 +2 (tynnyri 12)
+  // v2.83 (käyttäjä): kiviversiot myös aidasta ja seisovasta soihdusta (kalusteiden kiviarkku ja kivitynnyri olivat jo)
+  kiviaita:{n:'Kivimuuri',req:{kivi:6},hp:600,snap:'wall',cat:'kivi',base:'aita',stone:1,mobProof:1},
+  kivisoihtu:{n:'Kivinen soihtupylväs',req:{kivi:3,pihka:1},hp:200,snap:'free',cat:'kivi',base:'soihtuteline',stone:1},
   kivikatto:{n:'Kivikatto',req:{kivi:4},hp:300,snap:'cell',cat:'kivikatot',roof:1,base:'katto',stone:1},
   kivikatto_loiva:{n:'Loiva kivikatto',req:{kivi:4},hp:300,snap:'cell',cat:'kivikatot',roof:1,base:'katto_loiva',stone:1},
   kiviharjakatto:{n:'Kiviharjakatto',req:{kivi:5},hp:340,snap:'cell',cat:'kivikatot',roof:1,base:'harjakatto',stone:1},
 };
 const bt=t=>PIECES[t]&&PIECES[t].base||t;
+const isTorch=t=>bt(t)==='soihtuteline'||t==='seinasoihtu';   // v2.83 seisova soihtu, kivinen soihtupylväs ja seinäsoihtu
 const DET=m=>{m.userData.detail=true;return m;}; // yksityiskohtameshit (asetus: rakennusten yksityiskohdat)
 const isFirePiece=t=>t==='nuotio'||t==='grilli';
 const fireLit=p=>p.data.fuel>0&&!p.data.out;   // v2.17: nuotio palaa (polttoainetta ja ei sateen sammuttama)
@@ -87,7 +91,7 @@ const fireRem=p=>Math.max(0,p.data.fuel*90-p.data.burn),torchRem=p=>Math.max(0,p
 const pctOf=(rem,p)=>Math.max(0,Math.min(100,Math.round(rem/Math.max(1,p.data.full||rem||1)*100)));
 const firePct=p=>pctOf(fireRem(p),p),torchPct=p=>pctOf(torchRem(p),p);
 const fuelText=(rem,pct)=>`${pct}/100 · ${(rem/60).toFixed(1).replace('.',',')} min`;
-function markFull(p){p.data.full=p.t==='soihtuteline'||p.t==='seinasoihtu'?torchRem(p):fireRem(p);}
+function markFull(p){p.data.full=isTorch(p.t)?torchRem(p):fireRem(p);}
 const FUEL_MAX=40,COOKABLE={liha:'paisti',pienliha:'pienpaisti',suurliha:'suurpaisti',sieni:'sienipaisti'},COOK_T={pienliha:[7,3],liha:[9,5],suurliha:[14,5],sieni:[8,4]};   // v2.80 kypsymisaika [min, +satunnainen] s
 for(const d of Object.values(PIECES))if(d.base){const b=PIECES[d.base];for(const k of ['poses','flip','span2','noBench','store','col','dim'])if(d[k]===undefined&&b[k]!==undefined)d[k]=b[k];}
 const BUILD_CATS=[['alku','Alkupeli'],['seinat','Seinät ja lattiat'],['katot','Katot'],['palkit','Palkit ja pylväät'],['portaat','Portaat ja tikkaat'],['kalusto','Kalusto'],['tyopisteet','Työpisteet'],['valo','Valo'],['puolustus','Puolustus'],['kivi','Kivirakennus'],['kivikatot','Kivikatot']];
@@ -166,7 +170,7 @@ function buildPieceMesh(t,f=0){
         const fm=def.stone?MAT.stone:MAT.wood;g.add(bxw(.05,y1-y0,.07,fm,0,(y0+y1)/2,0),bxw(ww,.05,.07,fm,0,(y0+y1)/2,0));}
       break;}
     case 'kiviseina':g.add(bxw(G+.02,WH,.36,MAT.stone,0,WH/2,0));break;
-    case 'aita':{const n=9;for(let i=0;i<n;i++){const x=-G/2+.12+i*(G-.24)/(n-1);g.add(bxw(.18,1.5,.18,MAT.wood,x,.75,0));const tip=new THREE.Mesh(new THREE.ConeGeometry(.12,.35,4),MAT.wood);tip.position.set(x,1.65,0);tip.castShadow=true;g.add(tip);}g.add(bxw(G,.14,.24,MAT.wood,0,.7,.08));break;}
+    case 'aita':{if(def.stone){g.add(bxw(G,1.45,.4,W,0,.725,0));for(let i=0;i<5;i++)g.add(bxw(.32,.14,.44,W,-G/2+.25+i*(G-.5)/4,1.52,0));break;}   /* v2.83 kivimuuri: muuri + harjakivet */const n=9;for(let i=0;i<n;i++){const x=-G/2+.12+i*(G-.24)/(n-1);g.add(bxw(.18,1.5,.18,MAT.wood,x,.75,0));const tip=new THREE.Mesh(new THREE.ConeGeometry(.12,.35,4),MAT.wood);tip.position.set(x,1.65,0);tip.castShadow=true;g.add(tip);}g.add(bxw(G,.14,.24,MAT.wood,0,.7,.08));break;}
     case 'ovi':{const pw=(G-DOOR_W)/2,px=DOOR_W/2+pw/2,DW=def.stone?W:MAT.doorwood;g.add(bxw(pw,WH,.22,DW,-px,WH/2,0),bxw(pw,WH,.22,DW,px,WH/2,0),bxw(G,WH-DOOR_H,.22,DW,0,(DOOR_H+WH)/2,0));
       const piv=new THREE.Group();piv.position.set(-DOOR_W/2,0,0);piv.add(bxw(DOOR_W,DOOR_H-.05,.1,def.iron?IRON_MAT:MAT.doorwood,DOOR_W/2,(DOOR_H-.05)/2,0));
       if(def.iron){const rv=mat(0x2a2d31);for(const yy of [.3,1.05,1.8])piv.add(DET(bx(DOOR_W-.06,.07,.13,rv,DOOR_W/2,yy,0)));for(const xx of [.12,DOOR_W-.12])for(const yy of [.3,1.05,1.8])for(const sd of[-1,1])piv.add(DET(bx(.05,.05,.03,rv,xx,yy,sd*.075)));}   // v2.07 rautaovi: vanteet ja niitit
@@ -204,13 +208,13 @@ function buildPieceMesh(t,f=0){
     case 'arkku':g.add(makeChest('wood',1,.7,.65));break;   // v1.41 lankut, rautavanteet, niitit, lukonreikä
     case 'tynnyri':{const b=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,1,12),W);b.position.y=.5;g.add(b);const mid=new THREE.Mesh(new THREE.CylinderGeometry(.46,.46,.9,12),W);mid.position.y=.5;g.add(mid);
       for(const y of[.18,.82]){const r=new THREE.Mesh(new THREE.CylinderGeometry(.47,.47,.07,12),mat(0x3a3a3a));r.position.y=y;g.add(DET(r));}break;}
-    case 'soihtuteline':{g.add(bxw(.12,1.6,.12,MAT.wood,0,.8,0));const fa=bx(.2,.25,.2,MAT.flame,0,1.7,0,false),fb=bx(.1,.12,.1,MAT.flame2,0,1.84,0,false);g.add(fa,fb);g.userData.flame=[fa,fb];break;}
+    case 'soihtuteline':{if(def.stone)g.add(bxw(.34,.3,.34,W,0,.15,0),bxw(.22,1.25,.22,W,0,.9,0),bxw(.3,.1,.3,W,0,1.55,0));else g.add(bxw(.12,1.6,.12,MAT.wood,0,.8,0));   /* v2.83 kivinen soihtupylväs */const fa=bx(.2,.25,.2,MAT.flame,0,1.7,0,false),fb=bx(.1,.12,.1,MAT.flame2,0,1.84,0,false);g.add(fa,fb);g.userData.flame=[fa,fb];break;}
     case 'seinasoihtu':{const ir=mat(0x3a3a3a,{metalness:.6,roughness:.5});g.add(bx(.22,.34,.04,ir,0,0,.02),bx(.06,.06,.3,ir,0,-.05,.17),bx(.16,.05,.16,ir,0,.02,.3));
       const st=bx(.08,.55,.08,MAT.wood,0,.22,.32);st.rotation.x=.22;g.add(st);const fa=bx(.2,.25,.2,MAT.flame,0,.58,.4,false),fb=bx(.1,.12,.1,MAT.flame2,0,.72,.41,false);g.add(fa,fb);g.userData.flame=[fa,fb];break;}
   }
   g.traverse(m=>{if(m.isMesh){m.castShadow=m.castShadow!==false;m.receiveShadow=true;}});
   // Tulipaikan omat osat eivät varjosta omaa valoaan
-  if(isFirePiece(t)||t==='soihtuteline'||t==='seinasoihtu')g.traverse(m=>{if(m.isMesh)m.castShadow=false;});
+  if(isFirePiece(t)||isTorch(t))g.traverse(m=>{if(m.isMesh)m.castShadow=false;});
   return g;
 }
 let pieces=[]; const pieceRoots=[];
@@ -254,7 +258,7 @@ function addPiece(t,x,y,z,rot,hp,data,f=0){
   if(isFirePiece(t)){p.data.fuel=p.data.fuel??4;p.data.burn=p.data.burn??0;if(!p.data.full)p.data.full=Math.max(90,fireRem(p));p.data.cook=(p.data.cook||[]).map(c=>typeof c==='number'?{id:'liha',t:0,need:10}:c);lightSources.push(p.light={x,y:y+.8,z,c:0xff8c3a,i:2,on:()=>fireLit(p),piece:p});}
   // Seisova soihtu palaa p.data.burn sekuntia (5 min aluksi; puu nollaa 10 min, hiili 30 min).
   if(t==='seinasoihtu'){p.data.burn=p.data.burn??900;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);const a=(p.rot||0)*Math.PI/4;lightSources.push(p.light={x:x+Math.sin(a)*.45,y:y+.7,z:z+Math.cos(a)*.45,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
-  if(t==='soihtuteline'){p.data.burn=p.data.burn??300;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);lightSources.push(p.light={x,y:y+1.8,z,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
+  if(bt(t)==='soihtuteline'){p.data.burn=p.data.burn??300;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);lightSources.push(p.light={x,y:y+1.8,z,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
   if(t==='sulatin'){p.data.ore=p.data.ore||0;p.data.iore=p.data.iore||0;p.data.wood=p.data.wood||0;p.data.done=p.data.done||0;p.data.idone=p.data.idone||0;p.data.sand=p.data.sand||0;p.data.glass=p.data.glass||0;p.data.t=0;lightSources.push(p.light={x,y:y+.6,z,c:0xff7a2a,i:1.2,on:()=>(p.data.ore>0||p.data.iore>0||p.data.sand>=2)&&p.data.wood>0,piece:p});}
   if(t==='tyopenkki')p.ring=makeBenchRing(x,z,y<DUN.y+5&&y>DUN.y-5&&Math.abs(y-terrainH(x,z))>3?y:null);
   if(def.store){p.data.lv=p.data.lv||0;p.data.items=p.data.items||[];while(p.data.items.length<storeSlots(p))p.data.items.push(null);}
