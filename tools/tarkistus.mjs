@@ -493,7 +493,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     finally{msg=om;[wRain,shelterCache,P.burnT,P.igniteCd,P.hp,P.maxHp,,P.inWater,P.rainHitT]=sv;P.pos.copy(sv[6]);}return res;});
   t('v2.73 kuolema: syyn mukainen kuolinruutu (otsikko, selostus, vinkki, tilastot, pääkallo), kaatuminen maahan, hautakasa piilossa, ruumis maatuu, tyhjyys 1 s',()=>{
     const a=!!$('#deadT')&&!!$('#deadC')&&!!$('#deadStats')&&!!$('#deadS .deadSkull')&&!!$('#deadTip')&&['mob','boss','drown','fire','fall','tree','hunger','void','hit'].every(k=>DEATH_INFO[k]&&DEATH_INFO[k].t);
-    const b=VOID_T===1&&/voidTick/.test(updatePlayer.toString())&&/P\.safe/.test(playerDie.toString())&&/hid:true/.test(playerDie.toString())&&/!g\.hid/.test(updateStations.toString())&&CORPSE_HOLD===60&&CORPSE_ROT===30;
+    const b=VOID_T===1&&/voidTick/.test(updatePlayer.toString())&&/P\.safe/.test(playerDie.toString())&&/hid:true/.test(playerDie.toString())&&/!g\.hid/.test(updateStations.toString())&&CORPSE_HOLD===0&&CORPSE_ROT===12;
     const c=/deathCam/.test(updateCamera.toString())&&/deathTick/.test(frame.toString())&&/P\.push=/.test(hurtPlayer.toString())&&/lastMob/.test(mobHurtP.toString())&&/fallT/.test(updatePlayer.toString());
     const sv=[P.voidDeath,P.ashDeath,P.lastFire,P.deathCause,P.fallT,P.lastMob,P.hunger];let d;
     try{P.voidDeath=false;P.ashDeath=false;P.lastFire=-99;P.deathCause=null;P.fallT=-99;P.lastMob={n:'Testi',type:'susi',boss:false,t:playTime};d=deathCauseOf(false).k==='mob';P.lastMob=null;P.fallT=playTime;d=d&&deathCauseOf(false).k==='fall';P.fallT=-99;
@@ -524,6 +524,19 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const a1=deathTipPick(m,''),a2=deathTipPick(m,''),a3=deathTipPick(m,''),a4=deathTipPick(h,''),b1=deathTipPick(f,''),b2=deathTipPick({k:'void'},''),b3=deathTipPick({k:'void'},''),c1=deathTipPick({k:'boss',type:'vartija'},'ARMO');
       r=!a1&&!a2&&a3&&a3.st===3&&!a4&&b1&&!b1.st&&b2&&!b3&&c1&&c1.h==='ARMO'&&DT_STREAK===3&&!!$('#deadTipBox')&&/deathTipPick/.test(deathScreen.toString())||`${!!a1}${!!a2}${a3&&a3.st}${!!a4}${!!b1}${!!b2}${!!b3}${c1&&c1.h}`;}
     finally{[flags.dStreak,flags.dTip]=sv;}return r;});
+  t('v2.78 verilammikko maaston mukaan (kärjet maassa, alarinteeseen pidemmälle), ruumis hiipuu heti herätessä 12 s, kuokan oikea palauttaa ruohon (mudAt)',()=>{
+    let x=0,z=0,sl=0;for(let r=5;r<220&&sl<.3;r+=3)for(let a=0;a<24;a++){const px=P.pos.x+Math.cos(a)*r,pz=P.pos.z+Math.sin(a)*r,h=terrainH(px,pz),e=.5,hx=(terrainH(px+e,pz)-terrainH(px-e,pz))/(2*e),hz=(terrainH(px,pz+e)-terrainH(px,pz-e))/(2*e),g=Math.hypot(hx,hz);
+      if(h>1&&g>.3&&g<.6&&!pointBlocked(px,h+.5,pz)){x=px;z=pz;sl=g;break;}}
+    if(!sl)return 'rinnettä ei löytynyt';
+    const sp=bloodPool(x,terrainH(x,z),z,1.5,0x5a0808,false);for(let i=0;i<70;i++)updateSplats(.1);
+    const pos=sp.m.geometry.attributes.position.array;let off=0;for(let v=0;v<pos.length;v+=3)off=Math.max(off,Math.abs(pos[v+1]-groundY(pos[v],pos[v+2],pos[v+1]-.025,false)-.025));
+    const e=.5,hx=(terrainH(x+e,z)-terrainH(x-e,z))/(2*e),hz=(terrainH(x,z+e)-terrainH(x,z-e))/(2*e),R=sp.pool.reach;let dn=0,up=0;
+    for(let a=0;a<POOL_SEG;a++){const an=a/POOL_SEG*TAU,d=-(Math.cos(an)*hx+Math.sin(an)*hz)/Math.hypot(hx,hz);if(d>.8)dn=Math.max(dn,R[a]);if(d<-.8)up=Math.max(up,R[a]);}
+    sp.life=sp.t;updateSplats(.01);
+    const a=off<.06&&dn>up&&sp.pool.k>.99&&sp.m.geometry.attributes.color.itemSize===4;
+    const b=CORPSE_HOLD===0&&CORPSE_ROT===12&&/c\.pool\.fk=op/.test(corpseTick.toString())&&/bloodPool\(/.test(updatePlayerDeath.toString());
+    const c=typeof mudAt==='function'&&/mudAt\(ox,oz\)/.test(rebuildGrass.toString())&&/kasvillisuuden/.test(ITEMS.kuokka.d)&&/kasvillisuuden/.test(TIPS.find(t=>t.id==='lapio').d());
+    return a&&b&&c||`virhe ${a}${b}${c} off ${off.toFixed(3)} dn ${dn.toFixed(2)} up ${up.toFixed(2)}`;});
   t('v2.75 liukusäätimen napsu −20 % lisää, sävelvaihtelu pienempi; portaittainen säädin (esiasetus) napsuu vain arvon vaihtuessa',()=>{
     const L=[],om=mSnd,box=document.createElement('div');box.style.cssText='position:fixed;left:0;top:0;width:400px';box.innerHTML=sldHTML('tSld',0,7,1,3)+sldHTML('tSld2',0,1.5,.05,1);document.body.appendChild(box);let r;
     try{mSnd=(g,e,o)=>{L.push(o&&o.pj);return null;};bindSld('tSld',()=>{},()=>{});const el=$('#tSld'),R=el.getBoundingClientRect(),X=v=>R.left+R.width*v/7;

@@ -15,7 +15,7 @@ function onPrimary(){
 }
 // v0.96 (kohta 11) maanmuokkaustyökalut, vasen = ensisijainen, oikea = toissijainen (pohjassa pitäen toistuu 0,45 s välein, kestävyys −6):
 //  kuokka vasen: nostaa maata 0,3 m (keskellä eniten, enint. +3 m alkuperäisestä) ja palauttaa maan biomin perusvärin (multa pois)
-//  kuokka oikea: palauttaa vain maan alkuperäisen värin (ei korkeutta)
+//  kuokka oikea: palauttaa maan alkuperäisen värin ja kasvillisuuden (ruoho, mudAt), ei korkeutta (v2.78)
 //  lapio vasen: kaivaa kuoppaa 0,3 m (enint. −3 m), väri biomin perusväri; lapio oikea: ruskea polku (tasoittaa jalkojen korkeudelle + multa)
 let shovelCd=0;const _sh=[];
 function terraTool(mode){

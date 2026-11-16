@@ -86,7 +86,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Aluevartijat (v0.97):** vartioalue 30–32 m; rajalla vartija jää seisomaan ja taistelemaan 1–10 s ennen paluuta, palaa jahtiin jos pelaaja tulee alueelle.
   **v1.09:** paluu kävellen (kalmo 30 m ≈ 21 s), paranee paluun aikana 1 %/s; pelaaja alle 8 m päässä keskeyttää paluun (myös alueen
   ulkopuolella) ja vartija taistelee niin kauan kuin pelaaja on alle 8 m päässä; sen jälkeen uusi 1–10 s ajastin ja paluu.
-- **Kuokka ja lapio (v0.96):** kuokka vasen nostaa maata 0,3 m (perusväri), oikea palauttaa maan värin; lapio vasen kaivaa 0,3 m kuopan (enint. 3 m), oikea tekee ruskean polun.
+- **Kuokka ja lapio (v0.96):** kuokka vasen nostaa maata 0,3 m (perusväri), oikea palauttaa maan värin ja kasvillisuuden (v2.78: ruoho seuraa tarkkaa 1 m verkkoa `mudAt`, palautus kerralla lähes koko säteeltä); lapio vasen kaivaa 0,3 m kuopan (enint. 3 m), oikea tekee ruskean polun.
 - **Tietoikkuna (v0.94):** Shift pohjassa ja hiiri esineen päällä (reppu, arkku, valmistus) → esineen tiedot kursorin vieressä.
 - **Hautakasa (v0.93):** ei katoa koskaan; jos kaikki ei mahdu reppuun, avautuu arkkuikkunaksi, tyhjänä vajoaa maahan.
 - **Kuolema:** koko reppu jää hautakasaan (valomajakka lähellä, pääkallo kartalla), herätys sängyltä tai rannalta. Kasaa ei voi poimia,
@@ -363,7 +363,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Hahmo kaatuu painovoimalla iskun suuntaan maan tasalle, veri leviää kehon alle, ja kamera nousee yläviistoon. Hautakasa ei näy kuolinkamerassa.
 - Kuolinruutu kertoo syyn (taistelu ja tappajan nimi, hukkuminen, palaminen, putoaminen, kaatuva puu, nälkä, tyhjyys) ja tilastot.
 - **v2.77 vinkki vain tarvittaessa:** vinkkilaatikko näkyy vain ensimmäisellä kuolemalla tuleen, tyhjyyteen tai hukkumalla (asioita, joita ei voi arvata), pomon armosäännön laskurissa, tai kun kaadut samalle asialle (sama syy ja sama olento) 3 kertaa putkeen.
-- Herätessä ruumis jää maahan 60 s ja maatuu 30 s:ssa.
+- Herätessä ruumis alkaa heti hiipua: vajoaa hieman ja haalistuu 12 s:ssa, verilammikko samassa tahdissa (v2.78; ennen 60 s + 30 s).
+- Verilammikko (v2.78) seuraa maaston muotoja: leviää kehon alta 6 s, valuu alarinteeseen pidemmälle kuin ylärinteeseen, ei nouse jyrkkää ylämäkeä, pysähtyy jyrkänteen reunalle, veteen ja seinään; reunat pehmeät, pinta kiiltää märkänä.
 - Tyhjyyteen (maailman tai ulottuvuuden alle) pudonnut kuolee 1 s:n kuluttua; tavarat jäävät viimeiseen turvalliseen kohtaan.
 - Sateessa kasteltava pelaaja ei syty tuleen; sammumisen jälkeen 6 s ennen kuin voi syttyä uudelleen.
 

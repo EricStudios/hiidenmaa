@@ -500,6 +500,12 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   Työkalussa `WHOLE_LOOP` (ei leikkausta eikä ristihäivytystä), pelissä `PL_WHOLE` (ei `tgLoopPts`-rajausta).
   **Sääntö:** käyttäjän valmiiksi saumattomaksi tekemä silmukka → lisää `WHOLE_LOOP`- ja `PL_WHOLE`-joukkoon; tarkista selaimella, että purettu pituus = raaka.
 
+## 68. Kuoleman verilammikko leijui rinteessä ilmassa (v2.78)
+- Oire: mäen harjalla tai rinteessä kuollessa iso litteä punainen kiekko törrötti ilmassa maan yläpuolella (käyttäjän kuvakaappaus).
+- Syy: lammikko oli yksi tasainen `splat`-kiekko (säde ~1,5 m), joka kallistettiin keskipisteen rinteen mukaan; kaareva tai taittuva maasto jäi alle.
+- Ratkaisu: `bloodPool`/`poolShape` (effects.js) – säteittäinen verkko, jonka jokainen kärki asetetaan maahan `groundY`:llä; valuminen suunnittain.
+  **Sääntö:** yli ~0,5 m maahan tuleva kuvio tehdään maastoa seuraavana verkkona, ei yhtenä tasona. Tarkistus v2.78 mittaa kärkien etäisyyden maasta.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`

@@ -88,7 +88,7 @@ function tutTick(dt){
 const TIPS=[
   {id:'vasara',c:()=>{const w=equipped('weapon');return w&&w.id==='vasara';},d:()=>`Rakentaminen: ${kL('build')} tai hiiren oikea avaa rakennusvalikon, hiiren vasen asettaa. ${kL('rot')} kääntää (Shift = asento), ${kL('snap')}/${kL('vsnap')} kohdistus, ${kL('up')}/${kL('down')} nosta/laske, ${kL('remove')} pura, ${kL('repair')} korjaa. Työpisteet tarvitsevat työpenkin lähelleen.`},
   {id:'jousi',c:()=>{const w=equipped('weapon');return w&&ITEMS[w.id].cat==='bow';},d:()=>`Jousi: pidä hiiren vasen pohjassa ja päästä irti. Kyykyssä (${kL('crouch')}) näet tarkan tähtäimen ja lentoradan. Nuolet ovat repussa.`},
-  {id:'lapio',c:()=>{const w=equipped('weapon');return w&&(w.id==='lapio'||w.id==='kuokka');},d:()=>`Lapio: hiiren vasen kaivaa, oikea tekee polun. Kuokka: vasen nostaa maata, oikea palauttaa maaston.`},
+  {id:'lapio',c:()=>{const w=equipped('weapon');return w&&(w.id==='lapio'||w.id==='kuokka');},d:()=>`Lapio: hiiren vasen kaivaa, oikea tekee polun. Kuokka: vasen nostaa maata, oikea palauttaa maan värin ja kasvillisuuden (esim. polun kohdalle).`},
   {id:'kirves',c:()=>{const w=equipped('weapon');return w&&ITEMS[w.id].chop;},d:()=>`Kirves kaataa puita (hiiren vasen). Kaatuneesta puusta jää tukki – lyö sitä, niin saat puuta.`},
   {id:'uinti',c:()=>P.swim,d:()=>`Uidessa ${kL('jump')} on veto pintaan (kuluttaa kestävyyttä). Veden alla happi loppuu – nouse ajoissa.`},
   {id:'yo',c:()=>typeof isNight==='function'&&isNight()&&!P.inDun,d:()=>`Yö laskeutuu: sudet ja hiidet liikkuvat. Rakenna suoja ja nuotio – katon alla tulen ääressä lepäät. Sängyssä (${kL('interact')}) voit nukkua yön yli.`},
