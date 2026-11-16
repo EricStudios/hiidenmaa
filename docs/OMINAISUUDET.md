@@ -619,6 +619,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Veren fysiikka (pisarat lentävät ja jäävät maahan) on päällä Medium-esiasetuksesta ylöspäin.
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
+- **v2.72:** nopeat toiminto- ja käyttöliittymä-äänet alkavat heti (3 ms, ennen 20 ms); hengästys on käyttäjän uusi ääni saumattomana silmukkana.
 - **v2.67 silmukat ja tunnelma:** jokainen silmukka pitää yhden arvotun version; sää ristihäivyttää 2,5 s; siirtyessä maailman ja ulottuvuuden
   välillä vanhat loppuvat 0,3 s ja uudet alkavat 1 s kuluttua; tauolla kaikki hiljenevät 1 s. Myrskyssä myrsky + ukkosen taustasilmukka, salaman
   jälkeen 0–3 s salama-ääni. Veden alla oma silmukka (0,5 s) ja kaikki pelin äänet vaimeina (ei musiikki eikä valikot).
