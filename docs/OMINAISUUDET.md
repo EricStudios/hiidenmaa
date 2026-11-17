@@ -640,6 +640,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
 - **v2.86 luonnon äänet:** päivällä linnunlaulu soi koko päivän pehmeästi (pitkä nauhoitus), välillä muita lintuja; öisin heinäsirkat sirittävät omassa rytmissään kahdesta suunnasta; tuulisessa metsässä puiden humina kuuluu hiljaa pätkinä. Salamaniskujen kaiku kuuluu kokonaan.
 - **v2.86 ranta:** rannan lähellä aallot lyövät rantaan (tyynellä rauhalliset, tuulella ja myrskyssä kovat); kamera veden alla 20 %. v2.87 käyttäjän äänet: rauhalliset 40 s ja kovat 57 s silmukat, sauma häivytetään 3 s (`LOOP_XF`), ettei toistokohta kuulu.
+- **v2.97 pihka:** pihkapuun kellertävät valumat 10 % kirkkaammat; ensimmäisen puukon saamisesta 2 s:n kuluttua ohje pihkankeräyksestä (chat + vinkkilaatikko 14 s, kerran maailmaa kohti).
 - **v2.96 pihkakuvio:** kuvio, kulho ja naru liikkuvat puun mukana (huojunta, kaatuminen); kaatuneen puun tukkiin jää tumma läiskä kaiverruksen kohdalle. Urat himmeämmät. Kulho täyttyy puun koko pihkamäärän mukaan – kun kaikki on valunut, kulho on täynnä keltaista, hieman oranssia.
 - **v2.96 DEV-valikko:** kello, terveys, kylläisyys, sää, nopeudet ja kytkimet päivittyvät valikossa pelin mukana.
 - **v2.95 pihka kaadosta:** vain lajin suurimmasta neljänneksestä (kuusi, mänty, aarnipuu), enintään 1 pihka ja 25 %:n todennäköisyydellä.

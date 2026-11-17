@@ -586,6 +586,10 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.97 pihkavalumat 10 % kirkkaammat, ensimmäisestä puukosta ohje 2 s viiveellä (kerran maailmaa kohti)',()=>{const om=msg;const L=[];msg=t=>L.push(t);const f0=flags.knifeInfo,inv0=JSON.stringify(inv);let res;
+    try{delete flags.knifeInfo;RES.knifeT=undefined;invAdd('puukko',1);knifeInfoTick(1);const a=!flags.knifeInfo;knifeInfoTick(1.05);const b=!!flags.knifeInfo&&L.some(t=>/pihkaa/.test(t)&&/kellertäv/.test(t))&&TUT.tipEl&&TUT.tipEl.classList.contains('on');
+      const n=L.length;knifeInfoTick(5);const c=L.length===n;const d=RES_MAT.hint.color.getHex()===0xa9863e;res=a&&b&&c&&d||`virhe viive ${a} ohje ${b} kerran ${c} väri ${d}`;}
+    finally{msg=om;flags.knifeInfo=f0;const I=JSON.parse(inv0);for(let i=0;i<inv.length;i++)inv[i]=I[i]||null;invDirty=true;if(TUT.tipEl)TUT.tipEl.classList.remove('on');RES.tipT=0;}return res;});
   t('v2.96 pihkakuvio kaatuu puun mukana + tumma läiskä tukkiin, huojunta, kulho täyttyy puun pihkamäärän mukaan, DEV-valikon elävät arvot',()=>{
     const om=msg;msg=()=>{};let res,n=null;const R0=JSON.stringify(flags.resin||{}),L0=logs.length;
     try{n=nodes.filter(q=>isResinTree(q)&&q.s>=SMALL_TREE+.1).sort((a,b)=>Math.hypot(a.x-P.pos.x,a.z-P.pos.z)-Math.hypot(b.x-P.pos.x,b.z-P.pos.z))[0];
