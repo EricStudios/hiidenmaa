@@ -632,8 +632,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
 - **v2.86 luonnon äänet:** päivällä linnunlaulu soi koko päivän pehmeästi (pitkä nauhoitus), välillä muita lintuja; öisin heinäsirkat sirittävät omassa rytmissään kahdesta suunnasta; tuulisessa metsässä puiden humina kuuluu hiljaa pätkinä. Salamaniskujen kaiku kuuluu kokonaan.
-- **v2.86 ranta:** rannan lähellä aallot lyövät rantaan (tyynellä rauhalliset, tuulella ja myrskyssä kovat); kamera veden alla 20 %. (Ääni tulee käyttäjältä – paikkamerkki.)
-- **v2.86 ovi:** avatessa avausääni ja saranan narina, sulkiessa narina ja kiinni-ääni sulkemisen lopussa (paikkamerkit).
+- **v2.86 ranta:** rannan lähellä aallot lyövät rantaan (tyynellä rauhalliset, tuulella ja myrskyssä kovat); kamera veden alla 20 %. v2.87 käyttäjän äänet: rauhalliset 40 s ja kovat 57 s silmukat, sauma häivytetään 3 s (`LOOP_XF`), ettei toistokohta kuulu.
+- **v2.86 ovi:** avatessa avausääni ja saranan narina, sulkiessa narina ja kiinni-ääni sulkemisen lopussa. v2.87 käyttäjän äänet: narina on 0,85 s pätkä raakatiedoston keskeltä (ei alkuosaa, `MID_EV`) ja häipyy 0,25 s:ssa oven pysähtyessä (kääntyminen 0,6 s); avaus- ja kiinni-ääni alkavat suoraan kuuluvasta iskusta (`ATTACK_EV`, `attack_start`: 5 ms ikkunat ylipäästön jälkeen, 8 dB voimakkaimmasta). Kaksi narinaversiota arvotaan.
+- **v2.87 alastulo:** käyttäjän uusi alastuloääni (0,23 s).
 - **v2.86 viimeinen pomo:** Kalmanvartijan terveys alle puolet → oma kappale toistuu kuolemaan asti; kuollessa voittokappale soi kerran loppuun (paikkamerkit).
 - **v2.86 valikko:** taustakuvissa hiljaiset äänet (leirin nuotio ja sirkat, ahjon alasin iskun tahdissa, kaukainen myrsky); Äänet › "Päävalikon taustakuvien äänet" mykistää.
 - **v2.85 kilpi:** torjunnan pito kuluttaa kestävyyttä 1/s (ei palaudu pidon aikana). Kun kestävyys loppuu, kilpi laskeutuu ja tulee ilmoitus; uudelleen nostettavissa, kun kestävyyttä on 20.

@@ -586,6 +586,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.87 oven äänet: narina keskeltä (alle 1 s), avaus ja kiinni alkavat iskusta, ranta-aallot pitkällä saumalla',()=>{
+    const M=manJ(),g=k=>M[k]||{},n=['p/kaytto/ovi_narina_0','p/kaytto/ovi_narina_1'];
+    const a=n.every(k=>g(k).dur>.5&&g(k).dur<1&&g(k).seg&&g(k).seg[0]>.3);
+    const b=['p/kaytto/ovi_avaus_0','p/kaytto/ovi_kiinni_0'].every(k=>/at\d/.test(g(k).pv||''));
+    const c=['a/ranta/aallot_kovat_0','a/ranta/aallot_rauhallinen_0'].every(k=>/xf\d/.test(g(k).pv||'')&&g(k).dur>30);
+    return a&&b&&c||`virhe narina ${a} isku ${b} aallot ${c}`;});
   t('v2.86 äänierä: sirkat pätkinä omassa rytmissä, linnunlaulu 10 min suoratoistona, humina pätkinä, salama kokonaan, oven äänet, ranta-aallot, viimeisen pomon musiikit, valikkotaustat + mykistys',()=>{
     const M=manJ(),ks=Object.keys(M),n=p=>ks.filter(k=>k.startsWith(p));
     const a=n('a/luonto/heinasirkat_').length>=5&&n('a/luonto/heinasirkat_').every(k=>M[k].dur<.5)&&n('a/luonto/puiden_humina_').length>=5&&n('a/luonto/puiden_humina_').every(k=>M[k].dur>15&&M[k].dur<25)
