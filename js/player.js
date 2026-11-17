@@ -17,7 +17,7 @@ const _qh=new THREE.Quaternion(),_qf=new THREE.Quaternion(),_qd=new THREE.Quater
 let torchFl=null,torchBarT=0,torchIgn=0,shDark=0;const torchPh=[Math.random()*TAU,Math.random()*TAU];
 const OVER_STAM=5;   // v2.67 ylikuorman kestävyyskulutus (/s)
 const SHIELD_STAM=1,SHIELD_REST=20;   // v2.85 kilven pito 1/s, uupuneena nosto vasta 20 kestävyydellä
-const AFK_NOSTR_INSP=.3;   // v2.99 hakut, miekat ja vasara: rapsutuksen tilalla 30 % F-tarkastelu, 70 % hengitys ja pään pyörittely
+const AFK_NOSTR_INSP=.3;   // v2.99 esine oikeassa kädessä: rapsutuksen tilalla 30 % F-tarkastelu, 70 % hengitys ja pään pyörittely
 function updatePlayer(dt){
   if(P.dead)return;updatePlayerBurn(dt);if(P.dead)return;
   P.invul=Math.max(0,P.invul-dt);P.stagger=Math.max(0,P.stagger-dt);P.hurtFlash=Math.max(0,P.hurtFlash-dt);
@@ -147,9 +147,9 @@ function updatePlayer(dt){
   if(P.idleK>.01){tLz+=brth*.035;tRz-=brth*.035;
     if(aK>0){const sw2=Math.sin(aP*.7)*.1*aK;tLx+=sw2-.06*aK;tRx-=sw2+.06*aK;tLz+=.09*aK;tRz-=.09*aK;   // kädet hieman irti reisistä (ei armClear-värinää)
       const seg=Math.floor(aP/5.5),u=aP-seg*5.5-1.1,env=sstep(0,.8,u)*(1-sstep(2.6,3.4,u))*aK,g0=['sway','scratch','sway','stretch'][seg%4];let g=g0;
-      /* v2.99 käyttäjä: hakuilla, miekoilla ja vasaralla ei selän/pään rapsutusta (käsi kurottaa selän taakse, esine menisi vartalon läpi) –
+      /* v2.99 käyttäjä: millä tahansa esineellä oikeassa kädessä ei selän/pään rapsutusta – vain paljaalla kädellä koko AFK-animaatio (käsi kurottaa selän taakse, esine menisi vartalon läpi) –
          tilalle arvonta: AFK_NOSTR_INSP (30 %) F-tarkastelu, muuten (70 %) pelkkä hengitys ja pään pyörittely. Venyttely säilyy. Kerran jaksoa kohden (P.afkSeg). */
-      if(g0==='scratch'&&heldId&&(ITEMS[heldId].pick||/miekka/.test(heldId)||ITEMS[heldId].cat==='hammer')){g='sway';if(P.afkSeg!==seg){P.afkSeg=seg;if(Math.random()<AFK_NOSTR_INSP&&typeof inspectStart==='function')inspectStart(null,{afk:1});}}
+      if(g0==='scratch'&&heldId&&ITEMS[heldId].cat!=='bow'){   /* v2.99: mikä tahansa esine oikeassa kädessä (jousi on vasemmassa) */g='sway';if(P.afkSeg!==seg){P.afkSeg=seg;if(Math.random()<AFK_NOSTR_INSP&&typeof inspectStart==='function')inspectStart(null,{afk:1});}}
       if(env>0&&g==='scratch'){tRx=lerp(tRx,-2.75,env);tRz=lerp(tRz,-.55,env);eRo=lerp(-.2,-2.25+Math.sin(aP*11)*.12*sstep(.7,1,u)*(1-sstep(2.3,2.6,u)),env);}
       if(env>0&&g==='stretch'){const o=1.25*env;tLz+=o;tRz-=o;tLx=lerp(tLx,-.15,env);tRx=lerp(tRx,-.15,env);eLo=lerp(-.15,-.05,env);eRo=lerp(-.15,-.05,env);}}}
   const hold=mouseL&&state==='play';
