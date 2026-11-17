@@ -514,6 +514,12 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   hystereesi `H.miss` (2 tarkistusta), lämmönlähteen näköyhteys `homeLos`. **Testaa** oikealla talolla: lattia 0,25 m välein + pisteet ulkopuolella.
   Uusia ohuita osia lisättäessä (< 0,15 m) tarkista, ettei säde hyppää niiden yli.
 
+## 70. Hyvin lyhyiden pätkien äänekkyys heitteli (v2.86, kehityksen aikana)
+- Oire: heinäsirkan siritykset (~0,23 s) saivat vahvistuksen −15…+19 dB → osa kuului kovaa, osa ei lainkaan; lisäksi pätkän alun hiljaisuuden
+  leikkaus (−38 dB) söi osan sirityksestä.
+- Syy: LUFS-mittaus (`loudness`) vaatii yli 0,4 s ääntä; alku oli jo kohdistettu nousuun (`step_segments`), joten trimmaus oli turha.
+- Ratkaisu: `PEAK_EV` (tasaus huipun mukaan) ja ilman alun leikkausta. **Sääntö:** alle 0,5 s:n pätkille huipputasaus, ei LUFS.
+
 ## Herkät kohdat (lue ennen muokkausta)
 
 - **Rakennuskohdistus** (`building.js`): `SNAP_NAMES` (6 tilaa), `VNAMES` (H), `smartSnap`, `updateGrid`. Testit: `tools/tarkistus.mjs`

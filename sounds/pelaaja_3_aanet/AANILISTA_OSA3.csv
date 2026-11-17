@@ -5,7 +5,7 @@
 4,🩸 Kipu ja kuolema,kipu_hukkuminen,✅ valmis (1),kipu_hukkuminen,hukkut veden alla (toistuu),"drowning gurgle, underwater choke"
 5,🩸 Kipu ja kuolema,kipu_nalka,✅ valmis (1),kipu_nalka,nälkä vie terveyttä (toistuu harvoin),"weak groan, starving"
 6,🩸 Kipu ja kuolema,kipu_putoaminen,✅ valmis (1),kipu_putoaminen,putoat korkealta,"fall damage grunt, landing pain"
-7,🩸 Kipu ja kuolema,nilkka,⬜ puuttuu,lisää: nilkka.mp3,iso putoamisvahinko (yli 25 % terveydestä): nilkka nurin (v2.67),"ankle twist crack, sprained ankle pain"
+7,🩸 Kipu ja kuolema,nilkka,✅ valmis (1),nilkka,iso putoamisvahinko (yli 25 % terveydestä): nilkka nurin (v2.67),"ankle twist crack, sprained ankle pain"
 8,🩸 Kipu ja kuolema,kuolema,✅ valmis (3),"kuolema, kuolema_1, kuolema_2",kuolet,"male death scream, dying"
 9,🩸 Kipu ja kuolema,kuolema_hukkuminen,✅ valmis (1),kuolema_hukkuminen,hukut,"drowning death, last breath underwater"
 10,💓 Keho ja tila,sydan,✅ valmis (1),sydan,"sydämen syke: vähäinen terveys tai iso paha olento lähellä (silmukka, kiihtyy)","heartbeat loop, heart pounding"
