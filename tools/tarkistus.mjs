@@ -586,6 +586,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.89 latausnäytön ääni −20 %',()=>/BS_EVK\[ev\]/.test(String(window.__bootSnd))&&/lataus_valmis:\.8/.test(document.querySelector('script[src*="boot.js"]')?(()=>{const x=new XMLHttpRequest();x.open('GET',document.querySelector('script[src*="boot.js"]').src,false);x.send();return x.responseText;})():'')||'virhe');
   t('v2.88 kodin lämpö puuttuvalla seinällä naapurin vieressä, maanmuokkauksen sauma, kameran rako, oven kahvat ja äänet, raajojen törmäys',()=>{
     const made=[];const om=msg;msg=()=>{};let res;const p0=P.pos.clone();
     try{const cx=P.pos.x+90,cz=P.pos.z-60,y=terrainH(cx,cz)+.02,put=(t,x,z,r,yy)=>{const q=addPiece(t,x,yy===undefined?y:yy,z,r);made.push(q);return q;};

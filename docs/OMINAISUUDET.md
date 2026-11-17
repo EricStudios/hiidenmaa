@@ -639,6 +639,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
 - **v2.86 luonnon äänet:** päivällä linnunlaulu soi koko päivän pehmeästi (pitkä nauhoitus), välillä muita lintuja; öisin heinäsirkat sirittävät omassa rytmissään kahdesta suunnasta; tuulisessa metsässä puiden humina kuuluu hiljaa pätkinä. Salamaniskujen kaiku kuuluu kokonaan.
 - **v2.86 ranta:** rannan lähellä aallot lyövät rantaan (tyynellä rauhalliset, tuulella ja myrskyssä kovat); kamera veden alla 20 %. v2.87 käyttäjän äänet: rauhalliset 40 s ja kovat 57 s silmukat, sauma häivytetään 3 s (`LOOP_XF`), ettei toistokohta kuulu.
+- **v2.89 latausnäytön ääni:** riimujen leimahdusääni 20 % hiljaisempi (`BS_EVK`, boot.js).
 - **v2.88 ovet:** puuoven avausääni −30 %, muut oven äänet (narina, kiinni, rauta- ja kivioven avaus) −10 % (`DOOR_V`). Kahvat molemmin puolin aina näkyvissä (kilpi, varret, vetoripa; ennen yksityiskohta-asetuksen takana ja liian tummat).
 - **v2.86 ovi:** avatessa avausääni ja saranan narina, sulkiessa narina ja kiinni-ääni sulkemisen lopussa. v2.87 käyttäjän äänet: narina on 0,85 s pätkä raakatiedoston keskeltä (ei alkuosaa, `MID_EV`) ja häipyy 0,25 s:ssa oven pysähtyessä (kääntyminen 0,6 s); avaus- ja kiinni-ääni alkavat suoraan kuuluvasta iskusta (`ATTACK_EV`, `attack_start`: 5 ms ikkunat ylipäästön jälkeen, 8 dB voimakkaimmasta). Kaksi narinaversiota arvotaan.
 - **v2.87 alastulo:** käyttäjän uusi alastuloääni (0,23 s).
