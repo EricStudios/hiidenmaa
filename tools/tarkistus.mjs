@@ -29,7 +29,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('asetussivut (grafiikka + varjot väliotsikkona, ohjaus)',()=>SET_PAGES&&Object.keys(SET_PAGES).length>=2&&SET_PAGES.gfx.includes('shadow'));t('oletusasetukset SET_DEF',()=>Object.keys(SET_DEF).length>10);
   t('myrsky kaataa puita',()=>typeof stormFellTree==='function');t('puiden yöuusiutuminen 100 m',()=>typeof nightRegrow==='function');
   t('rakennusalue 15 m ei spawnia (nearBase)',()=>typeof nearBase==='function');t('koivun oksat TREE_BR',()=>!!TREE_BR.koivu);t('kaatuvan puun runko NGEO_FALL',()=>!!NGEO_FALL.koivu);
-  t('mobit −15 % MOB_SPD',()=>MOB_SPD===.85);t('soihtu 270 s (v2.91)',()=>TORCH_T===270);t('soihtu ★ torchMax',()=>torchMax({q:3})===540);
+  t('mobit −15 % MOB_SPD',()=>MOB_SPD===.85);t('soihtu 405 s (v2.94)',()=>TORCH_T===405);t('soihtu ★ torchMax',()=>torchMax({q:3})===810);
   t('auringon hehku',()=>!!sunGlow);t('kartan paljastus isExplored',()=>typeof isExplored==='function');t('minikartan zoom',()=>typeof cycleMiniZoom==='function');
   t('päivityksen esikatselu',()=>typeof upPreviewHTML==='function');t('ominaisuudet itemProps',()=>itemProps({id:'soihtu',n:1},1).length>2);
   t('ehdotukset + haku (rakenna)',()=>!!$('#buildSearch')&&typeof suggestBuilds==='function');t('ehdotukset + haku (valmistus)',()=>!!$('#craftSearch')&&typeof suggestCrafts==='function');
@@ -586,6 +586,11 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.94 polttoaineet 1,5× (soihdut pihka 4,5 min, nuotio puu 67,5 s), sulatusuuni 2 puuta / sulatus',()=>{const om=msg;msg=()=>{};const made=[];let res;
+    try{const x=P.pos.x+60,z=P.pos.z+60,y=terrainH(x,z),u=addPiece('sulatin',x,y,z,0);made.push(u);const D=u.data;D.ore=2;D.iore=0;D.sand=0;D.wood=3;D.t=0;D.done=0;D.job='met';
+      for(let i=0;i<30*8;i++)updateStations(1/30);const a=D.done===1&&D.wood===1;for(let i=0;i<30*8;i++)updateStations(1/30);const b=D.done===1&&D.ore===1;
+      const c=TORCH_FUEL.pihka===270&&TORCH_FUEL.puu===135&&TORCH_FUEL.hiili===1350&&FIRE_UNIT===67.5&&SMELT_WOOD===2;
+      res=a&&b&&c||`virhe sulatus ${a}/${b} (${D.done}, puu ${D.wood}) arvot ${c}`;}finally{for(const q of made)removePiece(q);msg=om;}return res;});
   t('v2.93 DEV pelin ajan nopeus: vain kello, nälkä, tulet, soihdut ja pihka nopeutuvat (ei liike)',()=>{const ot=timeSpd,d0=dayT,h0=P.hunger,pt0=playTime;let res;
     try{timeSpd=()=>30;const px=P.pos.x;update(1/30);const dd=dayT-d0,dp=playTime-pt0;res=Math.abs(dd-1/DAY_LEN)<1e-6&&Math.abs(dp-1/30)<1e-9&&/survival\(td\)/.test(update.toString())&&/updateStations\(td\)/.test(update.toString())&&/resinTick\(dt,td\)/.test(update.toString())&&/timeSpd\(\)/.test(updatePlayer.toString())&&/data-tspd/.test(renderDev.toString())&&DEVF.tspd===1||`virhe kello ${dd*DAY_LEN} playTime ${dp}`;}
     finally{timeSpd=ot;dayT=d0;P.hunger=h0;}return res;});
@@ -614,7 +619,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const d0=drops.length;n._storm=1;killNode(n);n._storm=0;const a5=drops.length-d0===3&&!flags.resin[n.id];reviveNode(n);
       P.buffs.vatsakipu=50;invAdd('vesikulho',1);const vk=inv.find(x=>x&&x.id==='vesikulho');toggleEquip(vk);bowlUse();const b0=P.buffs.vatsakipu;survival(.5);const a6=P.vatsaFast&&Math.abs((b0-P.buffs.vatsakipu)-2.5)<.05;delete P.buffs.vatsakipu;P.vatsaFast=false;
       const m=spawnMob('hiisi',P.pos.x+40,P.pos.z,{knife:1});const a7=m.def.range<1&&m.def.dmg===MOBDEF.hiisi.dmg*1.5&&m.def.knife&&!m.def.drops.some(d=>d[0]==='puukko');m.dead=true;scene.remove(m.f.g);mobs.splice(mobs.indexOf(m),1);
-      const a8=TORCH_FUEL.pihka===180&&TORCH_FUEL.puu===90&&FIRE_UNIT===45&&FIRE_FUEL.pihka===2&&TORCH_T===270&&ITEMS.puukko.dmg===ITEMS.rautamiekka.dmg&&ITEMS.puukko.range<1.5&&RECIPE_BY.naru.req.nahka===10&&ACH.some(a=>a.id==='pihka');
+      const a8=TORCH_FUEL.pihka===270&&TORCH_FUEL.puu===135&&FIRE_UNIT===67.5&&FIRE_FUEL.pihka===2&&TORCH_T===405&&ITEMS.puukko.dmg===ITEMS.rautamiekka.dmg&&ITEMS.puukko.range<1.5&&RECIPE_BY.naru.req.nahka===10&&ACH.some(a=>a.id==='pihka');
       res=a1&&a2&&a3&&a4&&a5&&a6&&a7&&a8||`virhe osuus ${pct.toFixed(3)}/${a1} kaiverrus ${c4}/${stop}/${e.c}/${a2} kulho ${a3} kertymä ${acc}/${a4} myrsky ${a5} vesi ${a6} hiisi ${a7} polttoaine ${a8}`;}
     finally{msg=om;P.carve=null;P.pos.copy(p0);P.vel.set(0,0,0);const I=JSON.parse(inv0);for(let i=0;i<inv.length;i++)inv[i]=I[i]||null;invDirty=true;updateGear();for(const d of drops.slice(dr0))removeDrop&&removeDrop(d);flags.resin=JSON.parse(R0);if(n&&!n.alive)reviveNode(n);}
     return res;});

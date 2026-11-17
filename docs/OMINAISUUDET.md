@@ -218,11 +218,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 
 ## 7. Tuli ja valo
 
-- **Polttoaineet (v2.91):** kaikki palavat samalla fysiikalla (pihka 2× puu, hiili 10× puu), soihdut pysyvät 2× pidempään samalla polttoaineella.
-- **Nuotio/grilli:** polttoaine ≤ 40 yksikköä (`FUEL_MAX`), yksikkö `FIRE_UNIT` 45 s (ennen 90 s): puu 1 = 45 s, pihka 2 = 90 s, hiili 10 = 7,5 min (`FIRE_FUEL`). Lisäys vain kun alle 50 %.
+- **Polttoaineet (v2.91, v2.94 ×1,5):** kaikki palavat samalla fysiikalla (pihka 2× puu, hiili 10× puu), soihdut pysyvät 2× pidempään samalla polttoaineella; v2.94 jokainen polttoaine lämmittää 1,5× kauemmin (`FUEL_K`).
+- **Nuotio/grilli:** polttoaine ≤ 40 yksikköä (`FUEL_MAX`), yksikkö `FIRE_UNIT` 67,5 s (v2.94): puu 1 = 67,5 s, pihka 2 = 2 min 15 s, hiili 10 = 11 min 15 s (`FIRE_FUEL`), täynnä 45 min. Lisäys vain kun alle 50 %.
   Grilli kypsentää 4 ruokaa kerrallaan (oma ajastin 9–14 s); 2× ajalla ruoka palaa hiileksi.
-- **Soihdut (seinäsoihtu, seisova soihtu, kivinen soihtupylväs), v2.91:** E lisää yhden: pihka 3 min, puu 1,5 min, hiili 15 min (`TORCH_FUEL`, järjestys pihka → puu → hiili), enintään 60 min (`TORCH_CAP`): seinäsoihtu tunnin = 20 pihkaa. Rakennettuna seinäsoihtu 15 min, seisova 5 min. Lyöminen sammuttaa tulen.
-- **Käsisoihtu:** palaa **270 s** (v2.91; ★2 405 s, ★3 540 s; juostessa 20 % nopeammin), pihka lisää 3 min; sade ja vesi sammuttavat; sytytys toisen liekin vieressä 2,5 s.
+- **Soihdut (seinäsoihtu, seisova soihtu, kivinen soihtupylväs), v2.91:** E lisää yhden: pihka 4,5 min, puu 2¼ min, hiili 22,5 min (v2.94 `TORCH_FUEL`, järjestys pihka → puu → hiili), enintään 60 min (`TORCH_CAP`): seinäsoihtu tunnin ≈ 13–14 pihkaa. Rakennettuna seinäsoihtu 22,5 min, seisova 7,5 min. Lyöminen sammuttaa tulen.
+- **Käsisoihtu:** palaa **405 s** (v2.94; ★2 607 s, ★3 810 s; juostessa 20 % nopeammin), pihka lisää 4,5 min; sade ja vesi sammuttavat; sytytys toisen liekin vieressä 2,5 s.
 - **Valot:** enintään 6 lähintä valonlähdettä kerralla (asetus), yhteisvalon katto (`LIGHT_CAP`), elävä välke.
 - **Varjot:** aurinko/kuu (varjokartta 2048, alue 55 m); lähimmän tulen varjot pimeällä (päivitys tiheä pelaajan ollessa 17 m sisällä, kerran
   poistuttaessa); käsisoihdun pieni varjo pimeällä.
@@ -640,6 +640,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
 - **v2.86 luonnon äänet:** päivällä linnunlaulu soi koko päivän pehmeästi (pitkä nauhoitus), välillä muita lintuja; öisin heinäsirkat sirittävät omassa rytmissään kahdesta suunnasta; tuulisessa metsässä puiden humina kuuluu hiljaa pätkinä. Salamaniskujen kaiku kuuluu kokonaan.
 - **v2.86 ranta:** rannan lähellä aallot lyövät rantaan (tyynellä rauhalliset, tuulella ja myrskyssä kovat); kamera veden alla 20 %. v2.87 käyttäjän äänet: rauhalliset 40 s ja kovat 57 s silmukat, sauma häivytetään 3 s (`LOOP_XF`), ettei toistokohta kuulu.
+- **v2.94 sulatusuuni:** jokainen sulatus (kupari, rauta, lasi) kuluttaa 2 puuta (`SMELT_WOOD`); hiili vastaa 10 puuta.
 - **v2.93 DEV-nopeudet (Ä):** Maailman nopeus 0,5–30× (koko peli) ja Pelin ajan nopeus 0,5–30× (vain kello, sää, nälkä ja tehosteet, tulet ja soihdut, ruoka, sulatus, pihka); molemmat palaavat 1×:ksi uudelleenlatauksessa.
 - **v2.92 resurssit:** puut antavat 10 % enemmän puuta (kaatuminen ja tukit, myös tervaspuu); kaadetusta puusta saa pihkaa 20 % harvemmin; oksia ja irtokiviä on maassa 20 % vähemmän.
 - **v2.91 puukko:** ahjo, 3 rautaa + 1 puu, taso 6. Vahinko kuin rautamiekka (34), kantama vain 1,2 m (miekka 2,7), nopea (0,3 s), kestävyys 5. Paranna tasolle 2–3 kuten muut aseet (+25 % vahinko/taso); taso 2 kaivertaa ja valuttaa pihkaa 10 %, taso 3 20 % nopeammin. Kuvauksessa ohjeet.

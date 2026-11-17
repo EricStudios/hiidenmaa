@@ -5,8 +5,8 @@
 /* ---------------- GAME STATE ---------------- */
 const P={pos:new V3(LOC.spawn.x,terrainH(LOC.spawn.x,LOC.spawn.z),LOC.spawn.z),vy:0,yaw:Math.PI,onGround:true,hp:60,stam:100,hunger:80,stamDelay:0,atk:null,blocking:false,bowDraw:0,drawing:false,heal:0,buffs:{},wetT:0,restT:0,inWater:false,dead:false,invul:0,stagger:0,walkPh:0,spawn:null,deaths:0,kills:0,hurtFlash:0,inDun:false,crouch:false,crouchK:0,packLv:0,fx:{speed:1,dmg:1,stamRegen:1,hpRegen:1},crampT:0};
 let inv=new Array(32).fill(null);
-// Käsisoihtu: palaa yhteensä TORCH_T s (v2.91 270 s) (juostessa 20 % nopeammin), sammuu sateessa, syttyy toisen liekin vieressä. Tila tallentuu esineeseen (fuel, lit).
-const TORCH_T=270; // käsisoihdun paloaika (s) tasolla ★1 (v2.91: puu 90 s + pihka 180 s); pihka lisää 180 s
+// Käsisoihtu: palaa yhteensä TORCH_T s (v2.94 405 s) (juostessa 20 % nopeammin), sammuu sateessa, syttyy toisen liekin vieressä. Tila tallentuu esineeseen (fuel, lit).
+const TORCH_T=405; // käsisoihdun paloaika (s) tasolla ★1 (v2.94: puu 135 s + pihka 270 s); pihka lisää TORCH_FUEL.pihka
 // Soihdun täysi paloaika ★-tason mukaan: +50 % per taso (★1 120 s, ★2 180 s, ★3 240 s).
 const torchMax=s=>TORCH_T*(1+.5*(((s&&s.q)||1)-1));
 function torchSlot(){const s=equipped('offhand');return s&&s.id==='soihtu'?s:null;}

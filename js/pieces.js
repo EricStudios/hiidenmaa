@@ -91,7 +91,9 @@ const fireLit=p=>p.data.fuel>0&&!p.data.out;   // v2.17: nuotio palaa (polttoain
 /* v2.91 POLTTOAINEET (käyttäjä): kaikki palavat samalla fysiikalla, soihdut pysyvät 2× pidempään samalla polttoaineella. Pihka 2× puuta parempi,
    hiili 10× puu. Soihdut: pihka 3 min (seinäsoihtu tunnin = 20 pihkaa), puu 1,5 min, hiili 15 min, enintään TORCH_CAP. Nuotio/grilli: yksikkö
    FIRE_UNIT 45 s (ennen 90 s): puu 1, pihka 2, hiili 10 yksikköä. */
-const FIRE_UNIT=45,FIRE_FUEL={puu:1,pihka:2,hiili:10},TORCH_FUEL={pihka:180,puu:90,hiili:900},TORCH_CAP=3600;
+/* v2.94 käyttäjä: jokainen polttoaine lämmittää 1,5× kauemmin (FUEL_K): soihdut pihka 4,5 min, puu 2¼ min, hiili 22,5 min; nuotio yksikkö 67,5 s.
+   Sulatusuuni kuluttaa 2 puuta (tai 1/5 hiiltä) per sulatus (SMELT_WOOD). */
+const FUEL_K=1.5,FIRE_UNIT=45*FUEL_K,FIRE_FUEL={puu:1,pihka:2,hiili:10},TORCH_FUEL={pihka:180*FUEL_K,puu:90*FUEL_K,hiili:900*FUEL_K},TORCH_CAP=3600,SMELT_WOOD=2;
 const fireRem=p=>Math.max(0,p.data.fuel*FIRE_UNIT-p.data.burn),torchRem=p=>Math.max(0,p.data.burn);
 const pctOf=(rem,p)=>Math.max(0,Math.min(100,Math.round(rem/Math.max(1,p.data.full||rem||1)*100)));
 const firePct=p=>pctOf(fireRem(p),p),torchPct=p=>pctOf(torchRem(p),p);
@@ -263,8 +265,8 @@ function addPiece(t,x,y,z,rot,hp,data,f=0){
   for(const b of worldBoxes(t,x,y,z,rot,f)){const c=addBox(b.minX,b.minY,b.minZ,b.maxX,b.maxY,b.maxZ,p);c.door=b.door;c.glass=b.glass;p.cols.push(c);}
   if(isFirePiece(t)){p.data.fuel=p.data.fuel??4;p.data.burn=p.data.burn??0;if(!p.data.full)p.data.full=Math.max(90,fireRem(p));p.data.cook=(p.data.cook||[]).map(c=>typeof c==='number'?{id:'liha',t:0,need:10}:c);lightSources.push(p.light={x,y:y+.8,z,c:0xff8c3a,i:2,on:()=>fireLit(p),piece:p});}
   // Seisova soihtu palaa p.data.burn sekuntia (5 min aluksi; puu nollaa 10 min, hiili 30 min).
-  if(t==='seinasoihtu'){p.data.burn=p.data.burn??900;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);const a=(p.rot||0)*Math.PI/4;lightSources.push(p.light={x:x+Math.sin(a)*.45,y:y+.7,z:z+Math.cos(a)*.45,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
-  if(bt(t)==='soihtuteline'){p.data.burn=p.data.burn??300;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);lightSources.push(p.light={x,y:y+1.8,z,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
+  if(t==='seinasoihtu'){p.data.burn=p.data.burn??900*FUEL_K;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);const a=(p.rot||0)*Math.PI/4;lightSources.push(p.light={x:x+Math.sin(a)*.45,y:y+.7,z:z+Math.cos(a)*.45,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
+  if(bt(t)==='soihtuteline'){p.data.burn=p.data.burn??300*FUEL_K;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);lightSources.push(p.light={x,y:y+1.8,z,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
   if(t==='sulatin'){p.data.ore=p.data.ore||0;p.data.iore=p.data.iore||0;p.data.wood=p.data.wood||0;p.data.done=p.data.done||0;p.data.idone=p.data.idone||0;p.data.sand=p.data.sand||0;p.data.glass=p.data.glass||0;p.data.t=0;lightSources.push(p.light={x,y:y+.6,z,c:0xff7a2a,i:1.2,on:()=>(p.data.ore>0||p.data.iore>0||p.data.sand>=2)&&p.data.wood>0,piece:p});}
   if(t==='tyopenkki')p.ring=makeBenchRing(x,z,y<DUN.y+5&&y>DUN.y-5&&Math.abs(y-terrainH(x,z))>3?y:null);
   if(def.store){p.data.lv=p.data.lv||0;p.data.items=p.data.items||[];while(p.data.items.length<storeSlots(p))p.data.items.push(null);}
