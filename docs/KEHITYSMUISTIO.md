@@ -378,8 +378,9 @@ tehty (v2.67, v2.86) – ei tehty uudelleen. Tehty nyt:
   perusasento palautetaan kuten oikean), hidastuu pehmeästi (ω ∝ (1−u)²), pompautus ja kiinniotto oikein päin. Puolet 5 %:n heitoista on
   kolmen korkean heiton sarja (`puukko_heitto3`, korkeudet arvotaan `I.R`). Jokaisesta heitosta huitaisuääni `p/lyonnit/huitaisu` 70 %
   (`INSP_THROW_V`, myös pyöräytysheittelyn jokainen 180° ja pullonpyörityksen pompautus).
-- **AFK hakut ja miekat** (käyttäjä): AFK-eleiden venyttely (kädet levälleen) jätetään pois, kun kädessä on hakku tai miekka (pitkä esine heiluisi
-  vartalon läpi); tilalle arvotaan kerran jaksoa kohden `AFK_NOSTR_INSP` 30 % F-tarkastelu, muuten 70 % pelkkä hengitys ja pään pyörittely (player.js).
+- **AFK hakut, miekat ja vasara** (käyttäjä, korjattu: rapsutus eikä venyttely): AFK-eleiden pään/selän rapsutus (oikea käsi kurottaa taakse) jätetään
+  pois, kun kädessä on hakku, miekka tai vasara; venyttely säilyy. Tilalle arvotaan kerran jaksoa kohden `AFK_NOSTR_INSP` 30 % F-tarkastelu, muuten 70 %
+  pelkkä hengitys ja pään pyörittely (player.js). Vasaralla tarkastelu sallitaan vain AFK:ssa (`inspectStart(null,{afk:1})`, F korjaa edelleen); vasara = raskas tyyppi.
 - **Viimeiset säädöt** (käyttäjä): pullonpyörityksessä puukko 7 cm kämmenen yläpuolella (`INSP_SPIN_UP`, ennen 4,5 cm – näytti olevan käden sisässä);
   pienten heittojen (pyöräytysheittely, pullonpyörityksen pompautus) huitaisuääni 40 % (`INSP_THROW_VS`, −60 %), isot heitot 70 % (`INSP_THROW_V`).
 - **F-vinkki** (käyttäjä): kun puukko otetaan käteen 10. kerran tutoriaalin ulkopuolella (`INSP_TIP_N`, `flags.knifeEqN`), kerran maailmaa kohti

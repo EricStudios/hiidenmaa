@@ -23,7 +23,7 @@ function inspectAfkTick(){const a=P.afkT||0;if(a<INSP_AFK0){INS.afk=null;return;
   if(!INS.afk)INS.afk={at:Math.random()<INSP_AFK_P?INSP_AFK0+(Math.random()<.5?.2:5+Math.random()*5):-1};
   const A=INS.afk;if(A.at>0&&a>=A.at){A.at=-1;if(heldId&&!P.insp&&state==='play')inspectStart(INSP_CLOSE[INSP_TYPE(heldId)]);}}
 const INSP_SND_T=2,INSP_SND_P=.3,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_KNIFE_BOTTLE=.001,INSP_THROW_V=.7,INSP_THROW_VS=.4,INSP_SPIN_UP=.07,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
-function INSP_TYPE(id){if(!id)return 'small';const d=ITEMS[id];if(!d)return 'small';if(id==='puukko')return 'knife';
+function INSP_TYPE(id){if(!id)return 'small';const d=ITEMS[id];if(!d)return 'small';if(id==='puukko')return 'knife';if(d.cat==='hammer')return 'heavy';
   if(/miekka/.test(id)||id==='keihas'||d.cat==='shovel')return 'long';if(d.chop||d.pick||id==='nuija')return 'heavy';return 'small';}
 const _ie=(a,b,k)=>a+(b-a)*k,_iv3=(a,b,k)=>[_ie(a[0],b[0],k),_ie(a[1],b[1],k),_ie(a[2],b[2],k)],_ism=x=>{x=clamp(x,0,1);return x*x*x*(x*(x*6-15)+10);};
 /* avainruudut: [aika, käden paikka, esineen suunta, kierto s, ote g] – välit smootherstepillä (pehmeä alku ja loppu) */
@@ -97,7 +97,7 @@ const _ispA=new THREE.Vector3(),_ispB=new THREE.Vector3(),_ispX=new THREE.Vector
 function inspectAnimsFor(type){return INSP_ANIMS.filter(a=>a.type===type||(type==='knife'&&a.type==='small'));}
 function _ipMix(a,b,w){if(!a)return b;return {p:_iv3(a.p,b.p,w),d:_iv3(a.d,b.d,w),s:_ie(a.s||0,b.s||0,w),g:_ie(a.g||0,b.g||0,w),fly:b.fly,spin:b.spin,L:b.L,lw:(b.lw||0)*w};}
 // F: vasara kädessä → korjaa (input.js); muuten tarkastelu. id = DEV-valinta, o.auto = uusi esine (ääni varmasti)
-function inspectStart(id,o={}){if(state!=='play'||P.dead||P.swim||P.atk||P.drawing||P.carve)return false;const w=equipped('weapon');if(w&&w.cat==='hammer')return false;if(heldId&&ITEMS[heldId].cat==='bow')return false;   // jousi on vasemmassa kädessä
+function inspectStart(id,o={}){if(state!=='play'||P.dead||P.swim||P.atk||P.drawing||P.carve)return false;const w=equipped('weapon');if(w&&w.cat==='hammer'&&!o.afk)return false;   /* vasara: F korjaa, AFK-tarkastelu sallittu */if(heldId&&ITEMS[heldId].cat==='bow')return false;   // jousi on vasemmassa kädessä
   if(INS.pose&&(INS.pose.fly||INS.pose.spin&&INS.pose.spin.w>.02))return false;   // puukko ilmassa: ei keskeytetä kesken heiton
   const type=INSP_TYPE(heldId);let a=id?INSP_ANIMS.find(x=>x.id===id):null;
   if(!a){const L=inspectAnimsFor(type).filter(x=>!x.rare&&(!P.insp||x.id!==P.insp.a.id)),r=Math.random();
