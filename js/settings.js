@@ -9,7 +9,7 @@ const ACTIONS=[
   ['run','Juokse','Liikkuminen','ShiftLeft'],['jump','Hyppää / kiipeä ylös','Liikkuminen','Space'],['crouch','Kyykky / hiipiminen','Liikkuminen','KeyC'],
   ['interact','Poimi, avaa, käytä','Toiminnot','KeyE'],
   ['build','Rakennusvalikko (vasara)','Rakentaminen','KeyB'],['rot','Käännä rakennetta (Shift = asento)','Rakentaminen','KeyR'],['snap','Sivuttaiskohdistus','Rakentaminen','KeyG'],['vsnap','Pystykohdistus','Rakentaminen','KeyH'],
-  ['up','Nosta haamua (rakentaessa) / pudota pikapaikasta (Shift = koko pino)','Rakentaminen','KeyQ'],['down','Laske haamua','Rakentaminen','KeyZ'],['remove','Pura','Rakentaminen','KeyX'],['repair','Korjaa','Rakentaminen','KeyF'],
+  ['up','Nosta haamua (rakentaessa) / pudota pikapaikasta (Shift = koko pino)','Rakentaminen','KeyQ'],['down','Laske haamua','Rakentaminen','KeyZ'],['remove','Pura','Rakentaminen','KeyX'],['repair','Korjaa (vasara) / tarkastele esinettä','Rakentaminen','KeyF'],
   ['menu','Päävalikko / sulje valikot','Valikot ja paneelit','KeyP'],['inv','Reppu ja valmistus','Valikot ja paneelit','Tab'],['map','Kartta','Valikot ja paneelit','KeyM'],['prog','Taso, saavutukset, tavoitteet','Valikot ja paneelit','KeyJ'],['log','Viimeiset ilmoitukset','Valikot ja paneelit','KeyL'],['hud','Tehtävä ja tavoite näkyviin / piiloon','Valikot ja paneelit','KeyT'],
   ['minizoom','Minikartan zoom','Näkymä','KeyN'],   // v2.18: K (koko näyttö) poistettu kokonaan
 ];
@@ -352,7 +352,7 @@ const ALL_KEYS=[
   ['Pelatessa',[['fwd',0,'liiku eteen'],['back',0,'liiku taakse (tikkailla alas)'],['left',0,'liiku vasemmalle'],['right',0,'liiku oikealle'],['run',0,'juokse (pohjassa, kuluttaa kestävyyttä; ylikuormassa ei voi juosta)'],['jump',0,'hyppää · tikkailla ylös · uidessa vedolla pintaan (kuluttaa kestävyyttä)'],
     ['crouch',0,'kyykky / hiipiminen (jousella kyykyssä tarkka tähtäin)'],['interact',0,'poimi, avaa, puhu, nuku, käytä'],[null,'Hiiren vasen','isku; jousella pidä pohjassa = jännitä, päästä = ammu'],
     [null,'Hiiren oikea','torju kilvellä (pohjassa) · lapio ja kuokka: ks. alla'],[null,'1–8','valitse pikapaikka; ruoka syödään, varuste otetaan käteen'],[null,'Hiiren rulla','kameran zoom (tai pikapaikat, Asetukset › Ohjaus)'],
-    ['up',0,'pudota valitusta pikapaikasta 1 (Shift = koko pino)'],['remove',0,'pura katsottu rakennusosa (jousta jännittäessä: tähtäimen vilkkuminen päälle/pois)'],['repair',0,'korjaa katsottu rakennusosa'],
+    ['up',0,'pudota valitusta pikapaikasta 1 (Shift = koko pino)'],['remove',0,'pura katsottu rakennusosa (jousta jännittäessä: tähtäimen vilkkuminen päälle/pois)'],['repair',0,'vasara kädessä: korjaa katsottu rakennusosa; muuten tarkastele oikean käden esinettä (pyörittely)'],
     ['hud',0,'tehtävä ja tavoite näkyviin / piiloon'],['minizoom',0,'minikartan zoom'],[null,'Esc','vapauttaa hiiren (selain) – käytä mieluummin P:tä']]],
   ['Rakentaessa (vasara kädessä)',[['build',0,'rakennusvalikko'],[null,'Hiiren vasen','aseta rakennusosa'],[null,'Hiiren oikea','rakennusvalikko'],['rot',0,'käännä osaa'],[null,'Shift + R','osan asento / kaltevuus'],
     ['snap',0,'sivuttaiskohdistus (tilat)'],['vsnap',0,'pystykohdistus'],['up',0,'nosta haamua'],['down',0,'laske haamua'],['remove',0,'pura'],['repair',0,'korjaa']]],

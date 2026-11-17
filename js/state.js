@@ -71,7 +71,7 @@ function invCount(id){let n=0;for(const s of inv)if(s&&s.id===id)n+=s.n;return n
 function invAdd(id,n,q=1){const d=ITEMS[id];if(!d)return n;
   if(d.s>1)for(const s of inv){if(n<=0)break;if(s&&s.id===id&&s.n<d.s){const k=Math.min(n,d.s-s.n);s.n+=k;n-=k;}}
   for(let i=0;i<inv.length&&n>0;i++){if(!inv[i]){const k=Math.min(n,d.s);inv[i]={id,n:k,q};n-=k;}}
-  if(!flags.seen[id])flags.seen[id]=1;
+  if(!flags.seen[id])flags.seen[id]=1;if(d.cat&&d.cat!=='armor'&&d.cat!=='offhand'&&d.cat!=='shield'&&d.cat!=='bow'&&playTime>5)P.newItem={id,t:playTime};   /* v2.98 uusi esine → AFK-tarkastelu (inspect.js) */
   invDirty=true;return n;}
 function invRemove(id,n){for(let i=inv.length-1;i>=0&&n>0;i--){const s=inv[i];if(s&&s.id===id){const k=Math.min(n,s.n);s.n-=k;n-=k;if(s.n<=0)inv[i]=null;}}invDirty=true;}
 // Mahtuvatko kaikki esineet reppuun (yhdistäminen pinoihin + vapaat paikat)? Ei muuta reppua.

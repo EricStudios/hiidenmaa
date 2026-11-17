@@ -63,7 +63,8 @@ function updateMobs(dt){
     const hostile=d.ai==='hostile'||(d.ai==='neutral'&&m.angry);
     const aggroR=(d.aggro||12)*(night?1.35:1)*(P.crouch?.5:1);
     // Näköyhteys (välimuistissa, tarkistus ~5 kertaa sekunnissa): ilman sitä ei aloiteta eikä jatketa jahtia.
-    m.losT=(m.losT||0)-dt;if(m.losT<=0){m.losT=.2+Math.random()*.1;m.los=dist<45&&!devOn('unseen')&&losClear(m.pos.x,mobEyeY(m),m.pos.z,P.pos.x,P.pos.y+1.3,P.pos.z,true);if(m.los&&m.state==='chase'){m.seenT=playTime;m.lastPX=P.pos.x;m.lastPZ=P.pos.z;}}   // v2.08: suljettu ovi estää näkemisen (lasi ei)
+    // v2.98 teltassa (P.inTent) olennot eivät näe pelaajaa kuin aivan vierestä (TENT_SEE), kuten seinien takaa
+    m.losT=(m.losT||0)-dt;if(m.losT<=0){m.losT=.2+Math.random()*.1;m.los=dist<45&&!devOn('unseen')&&!(P.inTent&&dist>TENT_SEE)&&losClear(m.pos.x,mobEyeY(m),m.pos.z,P.pos.x,P.pos.y+1.3,P.pos.z,true);if(m.los&&m.state==='chase'){m.seenT=playTime;m.lastPX=P.pos.x;m.lastPZ=P.pos.z;}}   // v2.08: suljettu ovi estää näkemisen (lasi ei)
     // v2.15 DEV Näkymätön: olennot eivät näe eivätkä kuule pelaajaa; jahti ja suuttumus loppuvat, ellei pelaaja ole lyönyt alle 10 s sitten
     if(devOn('unseen')&&playTime-(m.pHit??-99)>10){m.los=false;if(m.state==='chase'){m.state='idle';m.siege=null;m.thru=0;m.seenT=-99;m.wind=0;}m.angry=false;if(playTime-m.lastHit<10)m.lastHit=-99;}
     m.noLos=m.state==='chase'&&!m.los?(m.noLos||0)+dt:0;

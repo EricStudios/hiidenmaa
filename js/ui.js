@@ -152,7 +152,9 @@ function renderDev(){const B=$('#devBody');if(!B)return;const clk=()=>{const h=d
   <div class="devRow"><b>Kylläisyys <span id="devHuV">${Math.round(P.hunger)}</span></b>${sldHTML('devHu',0,100,1,Math.round(P.hunger))}</div>
   <div class="devRow"><b>Jumalvoimat</b><div class="devChk">${[['food','Ei nälkää'],['stam','Rajaton kestävyys'],['lvl','Korkein taso'],['weight','Ei painorajaa']].map(([k,n])=>`<label class="tglRow">${tglHTML('dv_'+k,!!DEVF[k],`data-dv="${k}"`)} ${n}</label>`).join('')}</div>
     <div class="devBtns"><button class="btn" data-dvall="1">Kaikki päälle</button><button class="btn" data-dvall="0">Kaikki pois</button></div></div>
-  <div class="devRow"><b>Kartta</b><div class="devBtns"><button class="btn" id="devMap">Paljasta kartta ja kohteet</button></div></div>`;
+  <div class="devRow"><b>Kartta</b><div class="devBtns"><button class="btn" id="devMap">Paljasta kartta ja kohteet</button></div></div>
+  <div class="devRow"><b>Tarkasteluanimaatiot (F)</b><div class="devBtns">${INSP_ANIMS.map(a=>`<button class="btn" data-insp="${a.id}">${a.n}</button>`).join('')}</div><small class="devNote">Käynnistyy 0,2 s kuluttua, kun valikko on suljettu. Toimii millä tahansa esineellä (ei vasara eikä jousi).</small></div>`;
+  B.querySelectorAll('[data-insp]').forEach(b=>b.onclick=()=>{const id=b.dataset.insp;closePanels();setTimeout(()=>{if(!inspectStart(id))msg('DEV: tarkastelu ei käynnisty (vasara tai jousi kädessä, uinti tai lyönti).','warn');},200);});   // v2.98
   B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{weather.cur=b.dataset.w;weather.until=playTime+600;renderDev();});
   B.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{dayT=+b.dataset.t;renderDev();});
   B.querySelectorAll('[data-spd]').forEach(b=>b.onclick=()=>{DEVF.spd=+b.dataset.spd;msg(`DEV: maailman nopeus ${String(DEVF.spd).replace('.',',')}×${DEVF.spd===1?' (normaali)':''}.`,'loot');renderDev();});   // v2.93
@@ -467,6 +469,11 @@ function itemProps(s,q){const d=ITEMS[s.id],o=[],f1=v=>v.toFixed(1).replace('.',
   if(AMMO_STATS[s.id]){const a=AMMO_STATS[s.id],r=v=>v===1?'normaali':(v>1?'+':'−')+Math.round(Math.abs(v-1)*100)+' %';
     o.push(['Lentonopeus',r(a.spd)],['Kaaren pudotus',r(a.grav)],['Vahinko',r(a.dmg)],['Tuulen vaikutus',a.wind<1?'puolet':'normaali']);if(a.fire)o.push(['Sytyttää','5–10 s, 5 terveyttä/s (sade sammuttaa)']);}
   if(d.cat==='shovel')o.push(...(s.id==='kuokka'?[['Vasen','nostaa maata 0,3 m'],['Oikea','palauttaa maan värin ja kasvillisuuden']]:[['Vasen','kaivaa kuoppaa 0,3 m'],['Oikea','ruskea polku']]),['Kestävyyttä / käyttö','6']);
+  // v2.98 pihkan keräys esinetiedoissa (resin.js)
+  if(s.id==='puukko')o.push(['Pihkan keräys','kaiverra pihkapuuhun kuvio (E rungon vieressä, '+CARVE_T+' s)'],['Pihkapuut','männyt ja kuuset, joiden kuoressa näkyy hieman kellertävää pihkaa (n. 3 % puista)'],['Pihkaa / puu','10–50 puun koon mukaan, kertyy noin tunnissa'],['Kaiverrus ja valuma',q>1?'+'+Math.round((resinFlowK(q)-1)*100)+' % nopeampi (★'+q+')':'normaali (★2 +10 %, ★3 +20 %)']);
+  if(s.id==='kulho')o.push(['Pihka','kiinnitä narulla kaiverrettuun pihkapuuhun (naru toisessa kädessä)'],['Vesi','täytä vedessä (vasen hiiri)']);
+  if(s.id==='vesikulho')o.push(['Vesi','vasen hiiri: juo (helpottaa vatsakipua) – jos palat, kaadat veden päällesi']);
+  if(s.id==='naru')o.push(['Käyttö','pidä toisessa kädessä, kun kiinnität kulhon pihkapuuhun']);
   if(d.cat==='armor'){const a=d.arm*(1+.2*(q-1));o.push(['Suoja',a.toFixed(0)],['Vahinko pienenee',pc(1-20/(20+a))]);if(d.warm)o.push(['Lämmin','kyllä']);}
   if(AMMO.includes(s.id))o.push(['Ammus',flags.ammo===s.id?'valittu':ammoId()===s.id?'käytössä (automaattinen)':flags.ammo?'ei käytössä':'automaattinen: heikoimmasta parhaaseen']);
   if(s.id==='soihtu'){const m=TORCH_T*(1+.5*(q-1));o.push(['Palamisaika (max)',mss(m)]);if(q===(s.q||1))o.push(['Jäljellä',`${mss(Math.max(0,Math.min(m,s.fuel??m)))} (${Math.round(Math.max(0,(s.fuel??m))/m*100)} %)`],['Tila',s.lit===false?'sammunut':'palaa kun pidät kädessä']);}

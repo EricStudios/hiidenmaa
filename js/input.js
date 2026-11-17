@@ -47,7 +47,7 @@ addEventListener('keydown',e=>{
     else if(c===BIND.up){if(isBuilding())liftBuild(1);else dropHot(e.shiftKey);}   // v1.57: pelissä Q pudottaa valitusta pikapaikasta 1, Shift+Q koko pinon
     else if(c===BIND.down){if(isBuilding())liftBuild(-1);else if(P.drawing&&bowCrouch())aimStyleNext();}   // v2.03: Z vaihtaa kyykkytähtäimen tyylin
     else if(c===BIND.remove){if(P.drawing&&!isBuilding())aimBlinkToggle();else removeLooked();}   // v2.04: jousta jännittäessä X = tähtäimen vilkkuminen
-    else if(c===BIND.repair)repairLooked();
+    else if(c===BIND.repair){const w=equipped('weapon');if(w&&w.cat==='hammer')repairLooked();else inspectStart();}   // v2.98 vasara kädessä = korjaus, muuten F-tarkastelu (inspect.js)
     else if(/^Digit[1-8]$/.test(c)){hotSel=+c.slice(5)-1;invDirty=true;useSlot(hotSel);}
   }
 });

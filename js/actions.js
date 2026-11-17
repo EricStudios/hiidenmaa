@@ -70,6 +70,7 @@ function doMeleeHit(w){
     if(d>w.range+.5||(d>.6&&(dx*fx+dz*fz)/d<.5))continue;if(isFirePiece(p.t)){p.data.fuel=0;p.data.burn=0;}else p.data.burn=0;
     burst(p.x,p.y+1,p.z,0x555555,10,3);sfx('hit');msg('Sammutit tulen.');return;}
   if(hitSpawner(w)&&w.pick)return;
+  if(w.chop&&!hitMob&&campPileHit(w,fx,fz))return;   // v2.98 hylätyn leirin halkopino (story.js)
   if(hitMob&&!w.chop&&!w.pick)return;
   const list=nodesNear(P.pos.x+fx*1.2,P.pos.z+fz*1.2,w.range+1.4,_nl);let best=null,bd=1e9;
   for(const n of list){if(n.def.kind==='pick'||n.def.kind==='deco')continue;
@@ -242,7 +243,7 @@ function findInteract(){
   const consider=(x,y,z,obj,maxD=3.2,look)=>{const pd=dist2(x,z,P.pos.x,P.pos.z);if(pd>maxD*maxD)return;if(Math.abs(y-P.pos.y)>3)return;
     _tmpV.set(x-ray.o.x,y-ray.o.y,z-ray.o.z);const t=_tmpV.dot(ray.d);if(t<0)return;const perp=_tmpV.lengthSq()-t*t;if(look&&Math.sqrt(Math.max(0,perp))>t*.27+.35)return;const sc=perp+pd*.08;if(sc<bs&&perp<2.2){bs=sc;best=obj;}};
   for(const n of nodesNear(P.pos.x,P.pos.z,3.4,_nl))if(n.def.kind==='pick')consider(n.x,n.y+.3,n.z,{kind:'node',n,label:'Poimi '+n.def.label});
-  for(const it of interactables)if(dist2(it.x,it.z,P.pos.x,P.pos.z)<it.r*it.r*1.6){if(it.look===undefined){const l=String(typeof it.label==='function'?it.label():it.label||'');it.look=/arkku|tynnyri|kirstu|säkki/i.test(l);}consider(it.x,it.y,it.z,{kind:'it',it},it.r,it.look);}
+  for(const it of interactables)if(dist2(it.x,it.z,P.pos.x,P.pos.z)<it.r*it.r*1.6&&!(it.off&&it.off())){if(it.look===undefined){const l=String(typeof it.label==='function'?it.label():it.label||'');it.look=/arkku|tynnyri|kirstu|säkki/i.test(l);}consider(it.x,it.y,it.z,{kind:'it',it},it.r,it.look);}
   for(const p of pieces){const l=pieceLabel(p);if(l&&dist2(p.x,p.z,P.pos.x,P.pos.z)<12)consider(p.x,p.y+.7,p.z,{kind:'piece',p,label:l},3,!!PIECES[p.t].store);}
   resinConsider(consider);   // v2.91 pihkapuut (vain aivan rungon vieressä)
   for(const g of graves)if((g.dim||'world')===curDim())consider(g.x,g.y+.5,g.z,{kind:'grave',g,label:fitsAll(g.items)?'Kerää tavarasi hautakasasta':'Reppuun ei mahdu kaikkea – tee tilaa'},3.2,true);
@@ -251,7 +252,7 @@ function findInteract(){
 function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLowerCase();if(bt(p.t)==='ovi')return p.data.open?'Sulje ovi':'Avaa ovi';switch(p.t){
   case 'tikkaat':case 'kivitikkaat':return 'Kiipeä: pidä W (alas S)';
   case 'ovi':return p.data.open?'Sulje ovi':'Avaa ovi';
-  case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=Object.keys(COOKABLE).some(id=>invCount(id)>0);return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&fireLit(p)&&p.data.cook.length<(p.t==='grilli'?4:3)?'Paista ruokaa':`Polttoainetta ${fuelText(fireRem(p),firePct(p))} – lisää`;}
+  case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=!p.data.camp&&Object.keys(COOKABLE).some(id=>invCount(id)>0);   /* v2.98 leirin nuotio: ei paistoa */return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&fireLit(p)&&p.data.cook.length<(p.t==='grilli'?4:3)?'Paista ruokaa':`Polttoainetta ${fuelText(fireRem(p),firePct(p))} – lisää`;}
   case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),torchPct(p))} – lisää`;
   case 'sanky':return isNight()?'Nuku':'Aseta herätyspaikka';
   case 'arkku':return 'Avaa arkku';
@@ -260,7 +261,7 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   case 'tyopenkki':return 'Käytä työpenkkiä';
   case 'ahjo':return 'Käytä ahjoa';
   default:return null;}}
-function interact(){
+function interact(){if(P.insp)inspectStop();
   if(P.dead)return;const t=lookTarget;if(!t){resinNoTarget();return;}
   if(t.kind==='resin'){resinInteract(t.n);return;}   // v2.91
   if(t.kind==='node'){const n=t.n,d=n.def;const c=rint(rng,d.n[0],d.n[1]);const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);return;}
@@ -286,7 +287,7 @@ function interact(){
 function fireInteract(p){const cap=p.t==='grilli'?4:3,d=p.data;
   const done=d.cook.filter(c=>c.t>=c.need);
   if(done.length){for(const c of done){const burnt=c.t>=c.need*2;giveOrDrop(burnt?'hiili':COOKABLE[c.id],1,p.x,p.y+.8,p.z);if(!burnt)bump('cooked');}d.cook=d.cook.filter(c=>c.t<c.need);sfx('pickup');return;}
-  const raw=Object.keys(COOKABLE).find(id=>invCount(id)>0);
+  const raw=!d.camp&&Object.keys(COOKABLE).find(id=>invCount(id)>0);   // v2.98 hylätyn leirin nuotio on tavallinen tuli (ei paistoa)
   if(d.out&&d.fuel>0){if(fireRainOut(p)){msg('Kova sade sammuttaisi tulen heti – suojaa nuotio katolla.','warn');return;}d.out=0;d.wetT=0;msg('Sytytit nuotion uudelleen.');sfx('build');return;}   // v2.17
   if(raw&&fireLit(p)&&d.cook.length<cap){invRemove(raw,1);const ct=COOK_T[raw]||[9,5];d.cook.push({id:raw,t:0,need:ct[0]+Math.random()*ct[1]});msg(`${ITEMS[raw].n} paistuu… (ota ajoissa, muuten palaa hiileksi)`);sfx('craft');return;}
   if(firePct(p)>50){msg(`Tulessa on jo tarpeeksi polttoainetta (${firePct(p)} %).`);return;}

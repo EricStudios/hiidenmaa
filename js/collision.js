@@ -20,9 +20,16 @@ function groundAt(x,z,r,feet){
     const cx=clamp(x,c.minX,c.maxX),cz=clamp(z,c.minZ,c.maxZ);if(dist2(x,z,cx,cz)<(r*.7)**2&&c.maxY>g)g=c.maxY;}
   return g;
 }
+/* v2.98 teltta: 'crouch'-laatikko on matala sisäkatto (seisova pelaaja ei mahdu, kyykyssä mahtuu). COL_CROUCH asetetaan pelaajan
+   törmäyksen ajaksi (player.js). tentCeil = onko pelaajan kohdalla tällainen katto (pakotettu kyykky, olennot eivät näe, ei hyppyä). */
+let COL_CROUCH=false;
+function tentCeil(x,z,feet){gridQuery(x,z,.4,_cl);for(const c of _cl)if(c.crouchOk&&x>c.minX-.05&&x<c.maxX+.05&&z>c.minZ-.05&&z<c.maxZ+.05&&c.minY>feet+.6&&c.minY<feet+1.85){
+    const o=c.owner;if(o&&o.t==='teltta'){const a=o.rot*Math.PI/4,dx=x-o.x,dz=z-o.z,lx=dx*Math.cos(a)-dz*Math.sin(a),lz=dx*Math.sin(a)+dz*Math.cos(a);if(Math.abs(lx)>TENT_IN+.05||Math.abs(lz)>TENT.L/2+.05)continue;}   // tarkka: teltan omissa koordinaateissa (vinossa laatikot ovat isompia)
+    return c;}return null;}
 function collideXZ(p,r,h,feet,hitList){
   gridQuery(p.x,p.z,r+1.5,_cl);
   for(const c of _cl){
+    if(c.crouchOk&&COL_CROUCH)continue;   // v2.98 teltan matala katto: kyykyssä mahtuu alle
     if(c.maxY<=feet+STEPUP||c.minY>=feet+h)continue;
     if(c.t==='c'){const dx=p.x-c.x,dz=p.z-c.z,d=Math.hypot(dx,dz),m=r+c.r;if(d<m&&d>1e-5){p.x+=dx/d*(m-d);p.z+=dz/d*(m-d);if(hitList)hitList.push(c);}}
     else{const cx=clamp(p.x,c.minX,c.maxX),cz=clamp(p.z,c.minZ,c.maxZ),dx=p.x-cx,dz=p.z-cz,d2=dx*dx+dz*dz;
@@ -31,7 +38,7 @@ function collideXZ(p,r,h,feet,hitList){
         else{const l=p.x-c.minX,rr=c.maxX-p.x,b=p.z-c.minZ,f=c.maxZ-p.z,mn=Math.min(l,rr,b,f);if(mn===l)p.x=c.minX-r;else if(mn===rr)p.x=c.maxX+r;else if(mn===b)p.z=c.minZ-r;else p.z=c.maxZ+r;}}}
   }
 }
-function ceilingAt(x,z,r,head){let m=Infinity;gridQuery(x,z,r,_cl);for(const c of _cl){if(c.t!=='b')continue;if(c.minY>=head-.3&&c.minY<m){const cx=clamp(x,c.minX,c.maxX),cz=clamp(z,c.minZ,c.maxZ);if(dist2(x,z,cx,cz)<r*r*.5)m=c.minY;}}return m;}
+function ceilingAt(x,z,r,head){let m=Infinity;gridQuery(x,z,r,_cl);for(const c of _cl){if(c.t!=='b'||c.crouchOk)continue;if(c.minY>=head-.3&&c.minY<m){const cx=clamp(x,c.minX,c.maxX),cz=clamp(z,c.minZ,c.maxZ);if(dist2(x,z,cx,cz)<r*r*.5)m=c.minY;}}return m;}
 // Näköyhteys pisteestä A pisteeseen B: ei rakenteita välissä (päiden .4 m ohitetaan).
 // doors=true: ovet (myös suljetut) estävät, esim. iskuissa. Ilman sitä ovet eivät estä näköyhteyttä.
 function losClear(ax,ay,az,bx,by,bz,doors){const dx=bx-ax,dy=by-ay,dz=bz-az,L=Math.hypot(dx,dy,dz);

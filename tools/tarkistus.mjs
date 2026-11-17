@@ -586,6 +586,26 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.98 F-tarkastelu: 11 animaatiota (3 tyyppiä + puukko), käsi IK + pää seuraa, keskeytys, uuden esineen AFK-tarkastelu, ääni f_ihmettely, DEV-lista',()=>{const om=msg;msg=()=>{};const inv0=JSON.stringify(inv),sv=[state,mouseL,P.atk,P.afkT,P.newItem];let res;
+    try{state='play';P.atk=null;mouseL=false;invAdd('puukko',1);const s=inv.find(x=>x&&x.id==='puukko');if(!s.eq)toggleEquip(s);updateGear();
+      const a=INSP_ANIMS.length>=11&&['long','heavy','small','knife'].every(t=>INSP_ANIMS.some(x=>x.type===t))&&INSP_ANIMS.some(x=>x.rare)&&INSP_TYPE('puukko')==='knife'&&INSP_TYPE('rautamiekka')==='long'&&INSP_TYPE('kirves')==='heavy'&&INSP_TYPE('kulho')==='small';
+      const b=inspectStart('puukko_pistot');for(let i=0;i<20;i++)g.update(1/30);const c=!!P.insp&&INS.k>.5&&Math.abs(fig.hand.quaternion.w)<.999;
+      mouseL=true;inspectTick(1/30);const d=!P.insp;mouseL=false;
+      const e=/f_ihmettely/.test(inspectTick.toString())&&/INSP_SND_P/.test(inspectTick.toString())&&INSP_SND_T===2&&INSP_SND_P===.3&&INSP_KNIFE_THROW===.05;
+      P.newItem={id:'puukko',t:playTime};P.afkT=5;inspectTick(1/30);const f=!!P.insp&&P.insp.auto;inspectStop();for(let i=0;i<30;i++)g.update(1/30);
+      const h=/inspectStart/.test(renderDev.toString())&&/data-insp/.test(renderDev.toString())&&/inspectPose/.test(updatePlayer.toString());
+      res=a&&b&&c&&d&&e&&f&&h||`virhe lista ${a} alku ${b} asento ${c} keskeytys ${d} ääni ${e} uusi ${f} kytkennät ${h}`;}
+    finally{msg=om;inspectStop();[state,mouseL,P.atk,P.afkT,P.newItem]=sv;const I=JSON.parse(inv0);for(let i=0;i<inv.length;i++)inv[i]=I[i]||null;invDirty=true;updateGear();}return res;});
+  t('v2.98 hylätty leiri: isompi kiinteä teltta (kyykyssä sisään, piilossa, suojassa), halkopino 20 puuta, kuivausteline, kiinteät esineet, nuotio ei paista; puukon tiedot repussa',()=>{
+    const c=CAMPS[0],tent=pieces.find(q=>q.t==='teltta'&&Math.hypot(q.x-c.x,q.z-c.z)<5);if(!tent)return 'ei telttaa';
+    const a=TENT.W>=3.2&&TENT.H>=2.6&&tent.cols.some(q=>q.crouchOk)&&tent.cols.filter(q=>!q.crouchOk).length>=4;
+    const fe=terrainH(tent.x,tent.z),p1=new THREE.Vector3(tent.x,fe,tent.z),p2=p1.clone();collideXZ(p1,.38,1.8,fe);COL_CROUCH=true;collideXZ(p2,.38,1.5,fe);COL_CROUCH=false;
+    const b=p1.distanceTo(new THREE.Vector3(tent.x,fe,tent.z))>.3&&!!tentCeil(tent.x,tent.z,fe);
+    const d=/TENT_SEE/.test(updateMobs.toString())&&/inTent/.test(updatePlayer.toString())&&/COL_CROUCH/.test(updatePlayer.toString());
+    const e=!!c.pile&&CAMP_PILE_WOOD===20&&typeof campPileHit==='function'&&/campPileHit/.test(doMeleeHit.toString())&&!!c.rack&&CAMP_RACK_LOOT.map(x=>x[0]).join()==='nahka,naru,nahkavaatteet';
+    const fire=pieces.find(q=>q.t==='nuotio'&&Math.hypot(q.x-c.x,q.z-c.z)<.6);const f=!!fire&&fire.data.camp===1&&/data\.camp/.test(pieceLabel.toString())&&/d\.camp/.test(fireInteract.toString());
+    const h=itemProps({id:'puukko'},1).some(x=>/Pihka/.test(x[0]))&&itemProps({id:'kulho'},1).some(x=>x[0]==='Pihka');
+    return a&&b&&d&&e&&f&&h||`virhe teltta ${a} kyykky ${b} piilo ${d} pino/teline ${e} nuotio ${f} tiedot ${h}`;});
   t('v2.97 pihkavalumat 10 % kirkkaammat, ensimmäisestä puukosta ohje 2 s viiveellä (kerran maailmaa kohti)',()=>{const om=msg;const L=[];msg=t=>L.push(t);const f0=flags.knifeInfo,inv0=JSON.stringify(inv);let res;
     try{delete flags.knifeInfo;RES.knifeT=undefined;invAdd('puukko',1);knifeInfoTick(1);const a=!flags.knifeInfo;knifeInfoTick(1.05);const b=!!flags.knifeInfo&&L.some(t=>/pihkaa/.test(t)&&/kellertäv/.test(t))&&TUT.tipEl&&TUT.tipEl.classList.contains('on');
       const n=L.length;knifeInfoTick(5);const c=L.length===n;const d=RES_MAT.hint.color.getHex()===0xa9863e;res=a&&b&&c&&d||`virhe viive ${a} ohje ${b} kerran ${c} väri ${d}`;}

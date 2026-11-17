@@ -117,7 +117,7 @@ function knifeInfoTick(dt){if(RES.tipT>0){RES.tipT-=dt;if(RES.tipT<=0&&TUT.tipEl
 /* ---------- kertyminen, kaatuminen ja hiipuminen ---------- */
 function resinTick(dt,td=dt){   // td = pelin ajan nopeus (kertymä ja hiipuminen), dt = kaiverrus
  if(RES.flagsRef!==flags){RES.flagsRef=flags;resinClearVis();_resNodeMap=null;}
-  resinEnsureG();carveTick(dt);knifeInfoTick(dt);
+  resinEnsureG();carveTick(dt);knifeInfoTick(dt);inspectTick(dt);
   const st=flags.resin;if(st)for(const id in st){const e=st[id];
     if(e.b&&(e.tot||0)<eCap(e)){const add=Math.min(eCap(e)-(e.tot||0),td*eCap(e)/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;}
     if((e.tot||0)>=eCap(e)&&!e.done){e.fade=Math.min(1,(e.fade||0)+td/RESIN_FADE);if(e.fade>=1)e.done=1;}}
