@@ -543,3 +543,9 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - **Kamera seinässä:** olkasiirtymä (0,55 m sivulle) vei kohdepisteen seinän sisään, kun pelaaja seisoi kylki seinää vasten, ja vähimmäisetäisyys 0,6 m pakotti kameran seinään.
   Korjaus: siirtymä lyhenee (`camSO`), kameran ympäristö tarkistetaan (`CAM_R`) ja lähin etäisyys 0,1 m (`CAM_MIN`).
 - **Tarkistusrivi, joka siirtää pelaajaa, palauttaa `P.pos`:n** – muuten seuraavat rivit (nuolet, jousen rata) ajetaan väärässä paikassa ja epäonnistuvat.
+
+## 72. Sade tuli seinistä läpi, lumi satoi katon läpi (v2.90)
+- Sadepisaran pysähtymiskorkeus laskettiin vain syntykohdasta, mutta tuuli siirtää pisaraa putoamisen aikana → pisara ajautui seinän läpi sisälle (pysähtyi vasta maahan).
+  Lumi tarkisti vain maaston. Korjaus: suojakartta `COVER` (environment.js) ja tarkistus joka ruudulla pisaran nykyisestä paikasta (molemmat päät). Uusi sademainen
+  efekti → käytä `coverH(x,z)`:ää, älä pelkkää syntykohdan korkeutta.
+

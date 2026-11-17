@@ -186,13 +186,13 @@ const RAIN_STOP=new Float32Array(900);let rainInit=false;
    alue ei näkyvästi seuraa kameraa), putoavat ja liikkuvat tuulen mukana; maahan osuttuaan palaavat ylös. Väri: pimeässä tummempi,
    Medium+ -tasolla lähellä olevat valot (myös pelaajan soihtu) värjäävät hiutaleet ja pisarat lämpimiksi (precipTint). */
 let snowInit=false;
-function updateSnow(dt){const g=snow.geometry,a=g.attributes.position.array,cx=camera.position.x,cy=camera.position.y,cz=camera.position.z,wv=WIND.spd*.32,wx=WIND.x*wv,wz=WIND.z*wv;
+function updateSnow(dt){coverTick(dt);const g=snow.geometry,a=g.attributes.position.array,cx=camera.position.x,cy=camera.position.y,cz=camera.position.z,wv=WIND.spd*.32,wx=WIND.x*wv,wz=WIND.z*wv;
   if(snow.position.lengthSq()>0)snow.position.set(0,0,0);
-  for(let i=0;i<a.length;i+=3){if(!snowInit){a[i]=cx+(Math.random()-.5)*50;a[i+1]=cy-6+Math.random()*26;a[i+2]=cz+(Math.random()-.5)*50;continue;}
+  for(let i=0;i<a.length;i+=3){if(!snowInit){a[i]=cx+(Math.random()-.5)*50;a[i+1]=cy-6+Math.random()*26;a[i+2]=cz+(Math.random()-.5)*50;const ch=coverH(a[i],a[i+2]);if(a[i+1]<ch)a[i+1]=ch+1+Math.random()*6;continue;}
     a[i+1]-=2.2*dt;a[i]+=(wx+Math.sin(playTime*.8+i)*.4)*dt;a[i+2]+=(wz+Math.cos(playTime*.7+i)*.25)*dt;
     // kääre: x/z pysyvät 50 m ruudussa pelaajan ympärillä (silmukka), y: maahan tai alueen alle → takaisin ylös
     let dx=a[i]-cx;if(dx>25)a[i]-=50;else if(dx<-25)a[i]+=50;let dz=a[i+2]-cz;if(dz>25)a[i+2]-=50;else if(dz<-25)a[i+2]+=50;
-    if(a[i+1]<cy-8||(a[i+1]<cy+2&&a[i+1]<terrainH(a[i],a[i+2]))){a[i+1]=cy+14+Math.random()*6;}}
+    if(a[i+1]<cy-8||(a[i+1]<cy+2&&a[i+1]<terrainH(a[i],a[i+2]))||a[i+1]<coverH(a[i],a[i+2])){a[i+1]=Math.max(cy+14+Math.random()*6,coverH(a[i],a[i+2])+1);}}   // v2.90 ei katon läpi
   snowInit=true;g.attributes.position.needsUpdate=true;precipTint(g,a,3,.95,.97,1);}
 function precipTint(g,a,stride,r0,g0,b0){const c=g.attributes.color.array,day=P.inDun?.15:Math.max(.12,lightK*(1-.35*wDark)),hi=(+SET.lights||6)>=4&&(+SET.particles)>=.5;   // Medium ja ylöspäin
   const L=hi?LIGHTS.filter(l=>l.intensity>.05):[];const lp=L.map(l=>[l.position.x,l.position.y,l.position.z,l.color.r,l.color.g,l.color.b,l.intensity]);
@@ -201,13 +201,25 @@ function precipTint(g,a,stride,r0,g0,b0){const c=g.attributes.color.array,day=P.
     for(const q of lp){const d2=(a[i]-q[0])**2+(a[i+1]-q[1])**2+(a[i+2]-q[2])**2;if(d2<64){const k=(1-d2/64)*.7*Math.min(1.5,q[6]);r+=q[3]*k;gg+=q[4]*k*.85;b+=q[5]*k*.55;}}
     for(let j=0;j<per;j++){const o=(v*per+j)*3;c[o]=Math.min(1,r);c[o+1]=Math.min(1,gg);c[o+2]=Math.min(1,b);}}
   g.attributes.color.needsUpdate=true;}
+/* v2.90 SUOJAKARTTA (käyttäjä: sadetta ei saa näkyä talon sisällä). Kameran ympärille 52 m alue 0,4 m ruuduin: jokaisen rakennusosan laatikon
+   korkein kohta (katto, seinän harja, ovenpäällys) laajennettuna COVER_PAD m (kattopalojen saumat). Sade- ja lumipisaran MOLEMMAT päät tarkistetaan
+   joka ruudulla: alle suojan korkeuden → pisara pysähtyy. Ennen pysähtymiskorkeus laskettiin vain syntykohdasta, ja tuuli kuljetti pisaraa putoamisen
+   aikana metrejä → seinän läpi sisälle; lumi pysähtyi vain maastoon. Kartta lasketaan uudelleen 0,5 s välein tai kun kamera siirtyy yli 6 m. */
+const COVER={cs:.4,n:130,x0:0,z0:0,h:new Float32Array(130*130),t:0,cx:1e9,cz:1e9,any:false},COVER_PAD=.2;
+function coverBuild(cx,cz){const C=COVER,n=C.n,cs=C.cs,h=C.h;C.x0=cx-n*cs/2;C.z0=cz-n*cs/2;C.cx=cx;C.cz=cz;h.fill(-1e9);C.any=false;const R=n*cs/2+2;
+  for(const p of pieces){if(Math.abs(p.x-cx)>R||Math.abs(p.z-cz)>R||!p.cols)continue;
+    for(const c of p.cols){if(c.off&&!c.door)continue;const i0=Math.max(0,Math.floor((c.minX-COVER_PAD-C.x0)/cs)),i1=Math.min(n-1,Math.floor((c.maxX+COVER_PAD-C.x0)/cs)),
+      j0=Math.max(0,Math.floor((c.minZ-COVER_PAD-C.z0)/cs)),j1=Math.min(n-1,Math.floor((c.maxZ+COVER_PAD-C.z0)/cs));if(i0>i1||j0>j1)continue;C.any=true;
+      for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=j*n+i;if(c.maxY>h[k])h[k]=c.maxY;}}}}
+function coverTick(dt){const C=COVER;C.t-=dt;const cx=camera.position.x,cz=camera.position.z;if(C.t<=0||Math.abs(cx-C.cx)>6||Math.abs(cz-C.cz)>6){C.t=.5;coverBuild(cx,cz);}}
+function coverH(x,z){const C=COVER;if(!C.any)return -1e9;const i=Math.floor((x-C.x0)/C.cs),j=Math.floor((z-C.z0)/C.cs);if(i<0||j<0||i>=C.n||j>=C.n)return -1e9;return C.h[j*C.n+i];}
 function roofTopAt(x,z){let h=terrainH(x,z);gridQuery(x,z,.15,_cl);for(const c of _cl)if(c.t==='b'&&c.owner&&c.owner.t&&c.maxY>h&&x>=c.minX&&x<=c.maxX&&z>=c.minZ&&z<=c.maxZ)h=c.maxY;return h;}
-function updateRain(dt){const a=rain.geometry.attributes.position.array,sp=26*(wRain>1.1?1.35:1),cx=camera.position.x,cy=camera.position.y,cz=camera.position.z;
+function updateRain(dt){coverTick(dt);const a=rain.geometry.attributes.position.array,sp=26*(wRain>1.1?1.35:1),cx=camera.position.x,cy=camera.position.y,cz=camera.position.z;
   if(rain.position.lengthSq()>0)rain.position.set(0,0,0);
   for(let i=0,k=0;i<a.length;i+=6,k++){
     if(rainInit){const dx=WIND.x*WIND.spd*.45*dt,dz=WIND.z*WIND.spd*.45*dt;a[i+1]-=sp*dt;a[i+4]-=sp*dt;a[i]+=dx;a[i+2]+=dz;a[i+3]+=dx;a[i+5]+=dz;}
     const out=Math.abs(a[i]-cx)>26||Math.abs(a[i+2]-cz)>26;
-    if(!rainInit||out||a[i+1]<RAIN_STOP[k]){const x=cx+(Math.random()-.5)*50,z=cz+(Math.random()-.5)*50,stop=roofTopAt(x,z),y=Math.max(cy+(rainInit&&!out?14+Math.random()*8:Math.random()*22-2),stop+.5+Math.random()*3);
+    if(!rainInit||out||a[i+1]<RAIN_STOP[k]||a[i+1]<coverH(a[i],a[i+2])||a[i+4]<coverH(a[i+3],a[i+5])){const x=cx+(Math.random()-.5)*50,z=cz+(Math.random()-.5)*50,stop=Math.max(roofTopAt(x,z),coverH(x,z)),y=Math.max(cy+(rainInit&&!out?14+Math.random()*8:Math.random()*22-2),stop+.5+Math.random()*3);
       const sl=.03+WIND.spd*.03;a[i]=x;a[i+1]=y;a[i+2]=z;a[i+3]=x-WIND.x*sl;a[i+4]=y+.7;a[i+5]=z-WIND.z*sl;RAIN_STOP[k]=stop;}}
   precipTint(rain.geometry,a,6,.67,.77,.85);   // v1.41: sade yöllä hyvin tumma, valot värjäävät
   rainInit=true;rain.geometry.attributes.position.needsUpdate=true;}

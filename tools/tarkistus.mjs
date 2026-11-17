@@ -586,6 +586,19 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.90 sade ja lumi eivät näy talon sisällä (tuulessa, kattojen saumat), ulkona sataa',()=>{
+    const om=msg;msg=()=>{};const made=[];const sv=[WIND.x,WIND.z,WIND.spd,wRain,camera.position.clone()];let res;
+    try{const cx=P.pos.x+60,cz=P.pos.z+40,y=terrainH(cx,cz)+.02,put=(t,x,z,r,yy)=>{const q=addPiece(t,x,yy===undefined?y:yy,z,r);made.push(q);return q;};
+      for(const k of [-.5,.5]){put('seina',cx+k*G,cz-G,0);put('seina',cx+k*G,cz+G,0);put('seina',cx-G,cz+k*G,2);put('seina',cx+G,cz+k*G,2);}
+      for(const [a,b] of [[-.5,-.5],[.5,-.5],[-.5,.5],[.5,.5]])put('katto',cx+a*G,cz+b*G,0,y+WH);COVER.t=0;
+      const inside=(x,yy,z)=>x>cx-G+.15&&x<cx+G-.15&&z>cz-G+.15&&z<cz+G-.15&&yy<y+WH&&yy>y-.5;let bad=0;
+      for(const [wx,wz,sp] of [[1,0,12],[0,1,12],[.7,.7,16]]){WIND.x=wx;WIND.z=wz;WIND.spd=sp;wRain=1.2;camera.position.set(cx+.3,y+1.6,cz-.2);
+        for(let f=0;f<90;f++){updateRain(1/30);const a=rain.geometry.attributes.position.array;for(let i=0;i<a.length;i+=6)if(inside(a[i],a[i+1],a[i+2])||inside(a[i+3],a[i+4],a[i+5]))bad++;}}
+      let sb=0;for(let f=0;f<90;f++){updateSnow(1/30);const a=snow.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3)if(inside(a[i],a[i+1],a[i+2]))sb++;}
+      camera.position.set(cx+20,y+1.6,cz+20);COVER.t=0;for(let f=0;f<60;f++)updateRain(1/30);const a=rain.geometry.attributes.position.array;let n=0;for(let i=0;i<a.length;i+=6)if(Math.abs(a[i]-cx-20)<10&&Math.abs(a[i+2]-cz-20)<10&&a[i+1]<y+4)n++;
+      res=bad===0&&sb===0&&n>20||`virhe sade sisällä ${bad} lumi ${sb} ulkona ${n}`;}
+    finally{for(const q of made)removePiece(q);msg=om;[WIND.x,WIND.z,WIND.spd,wRain]=sv;camera.position.copy(sv[4]);COVER.t=0;}
+    return res;});
   t('v2.89 latausnäytön ääni −20 %',()=>/BS_EVK\[ev\]/.test(String(window.__bootSnd))&&/lataus_valmis:\.8/.test(document.querySelector('script[src*="boot.js"]')?(()=>{const x=new XMLHttpRequest();x.open('GET',document.querySelector('script[src*="boot.js"]').src,false);x.send();return x.responseText;})():'')||'virhe');
   t('v2.88 kodin lämpö puuttuvalla seinällä naapurin vieressä, maanmuokkauksen sauma, kameran rako, oven kahvat ja äänet, raajojen törmäys',()=>{
     const made=[];const om=msg;msg=()=>{};let res;const p0=P.pos.clone();
