@@ -603,7 +603,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('arkku',/makeChest/.test(makeGrave.toString())&&typeof graveFx==='function');ck('nuoli',/miter/.test(windArrow.toString()));
     ck('chat',SET_DEF.chatScale===1&&/--chatK/.test(hudScaleApply.toString()));ck('säteet',SET_PAGES.gfx.includes('raysQ')&&typeof RQ_K!=='undefined');
     ck('linnut',BIRD_V===.85&&FALL_ANKLE===.15);
-    ck('puukkotemput',INSP_KNIFE_BOTTLE===.001&&INSP_THROW_V===.7&&INSP_ANIMS.some(x=>x.rare==='bottle')&&INSP_ANIMS.some(x=>x.rare==='throw3')&&/huitaisu/.test(inspectPose.toString())&&/inspectRestore/.test(updatePlayer.toString()));
+    ck('puukkotemput',INSP_KNIFE_BOTTLE===.001&&INSP_THROW_V===.7&&INSP_THROW_VS===.4&&INSP_SPIN_UP===.07&&INSP_ANIMS.some(x=>x.rare==='bottle')&&INSP_ANIMS.some(x=>x.rare==='throw3')&&/huitaisu/.test(inspectPose.toString())&&/inspectRestore/.test(updatePlayer.toString()));
     {const om=msg,L=[];msg=t=>L.push(t);const f0=[flags.fTip,flags.knifeEqN],h0=heldId,tu=TUT.on;try{TUT.on=false;delete flags.fTip;flags.knifeEqN=0;let n9=false;
       for(let i=1;i<=10;i++){heldId='puukko';inspectTipTick();if(i===9)n9=!flags.fTip;heldId=null;inspectTipTick();}
       ck('f-vinkki',INSP_TIP_N===10&&n9&&flags.fTip===1&&L.some(t=>/tutki esinettä/.test(t))&&TUT.tipEl&&/muillakin työkaluilla/.test(TUT.tipEl.textContent));}

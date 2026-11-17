@@ -22,7 +22,7 @@ const INSP_AFK0=3,INSP_AFK_P=.1,INSP_CLOSE={long:'pitka_tera',heavy:'raskas_tera
 function inspectAfkTick(){const a=P.afkT||0;if(a<INSP_AFK0){INS.afk=null;return;}
   if(!INS.afk)INS.afk={at:Math.random()<INSP_AFK_P?INSP_AFK0+(Math.random()<.5?.2:5+Math.random()*5):-1};
   const A=INS.afk;if(A.at>0&&a>=A.at){A.at=-1;if(heldId&&!P.insp&&state==='play')inspectStart(INSP_CLOSE[INSP_TYPE(heldId)]);}}
-const INSP_SND_T=2,INSP_SND_P=.3,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_KNIFE_BOTTLE=.001,INSP_THROW_V=.7,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
+const INSP_SND_T=2,INSP_SND_P=.3,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_KNIFE_BOTTLE=.001,INSP_THROW_V=.7,INSP_THROW_VS=.4,INSP_SPIN_UP=.07,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
 function INSP_TYPE(id){if(!id)return 'small';const d=ITEMS[id];if(!d)return 'small';if(id==='puukko')return 'knife';
   if(/miekka/.test(id)||id==='keihas'||d.cat==='shovel')return 'long';if(d.chop||d.pick||id==='nuija')return 'heavy';return 'small';}
 const _ie=(a,b,k)=>a+(b-a)*k,_iv3=(a,b,k)=>[_ie(a[0],b[0],k),_ie(a[1],b[1],k),_ie(a[2],b[2],k)],_ism=x=>{x=clamp(x,0,1);return x*x*x*(x*(x*6-15)+10);};
@@ -129,7 +129,7 @@ function inspectPose(dt){const I=P.insp;INS.u=clamp(INS.u+(I?dt/INSP_IN:-dt/INSP
   if(I){let pz=I.a.f(I.t,I.S,I.R);if(I.from){const w=_ism(I.t/INSP_XF);pz=_ipMix(I.from,pz,w);if(w>=1)I.from=null;}INS.pose=pz;}
   if(INS.k<=0||!INS.pose){if(!I){INS.pose=null;fig.hand.quaternion.identity();}if(INS.flew){_heldReset();INS.flew=false;}return;}
   const k=INS.k,pz=INS.pose;
-  {const fk=pz.fly?(pz.fly.n??0)+'|'+(I?I.a.id:''):pz.spin&&pz.spin.h>0?'pop|'+(I?I.a.id:''):null;if(fk&&fk!==INS.flyK&&I&&k>.5)plSnd('lyonnit','huitaisu',{v:INSP_THROW_V,p:1.1});INS.flyK=fk;}   // v2.99 huitaisuääni jokaisesta heitosta (−30 %)
+  {const fk=pz.fly?(pz.fly.n??0)+'|'+(I?I.a.id:''):pz.spin&&pz.spin.h>0?'pop|'+(I?I.a.id:''):null;if(fk&&fk!==INS.flyK&&I&&k>.5)plSnd('lyonnit','huitaisu',{v:I.a.rare==='flip'||I.a.rare==='bottle'?INSP_THROW_VS:INSP_THROW_V,p:1.1});   /* pienet heitot −60 %, isot −30 % */INS.flyK=fk;}   // v2.99 huitaisuääni jokaisesta heitosta (−30 %)
   INS.bq.copy(fig.armR.quaternion);INS.be=fig.elbowR.rotation.x;INS.saved=true;   // perusasento talteen (palautus seuraavan ruudun alussa)
   fig.g.updateMatrixWorld(true);armIK(fig.armR,fig.elbowR,fig.g.localToWorld(_ispA.set(pz.p[0],pz.p[1],pz.p[2])),k,_poleR);
   if(pz.L&&pz.lw>0){INS.bqL.copy(fig.armL.quaternion);INS.beL=fig.elbowL.rotation.x;INS.savedL=true;armIK(fig.armL,fig.elbowL,fig.g.localToWorld(_ispA.set(pz.L[0],pz.L[1],pz.L[2])),k*pz.lw);}   // v2.99 vasen käsi (pullonpyöritys)
@@ -144,7 +144,7 @@ function inspectPose(dt){const I=P.insp;INS.u=clamp(INS.u+(I?dt/INSP_IN:-dt/INSP
       _ispZ.set(0,0,1);_ispY.set(0,1,0);_ispX.set(1,0,0);_ispM.makeBasis(_ispX,_ispY,_ispZ);_ispQ.setFromRotationMatrix(_ispM).multiply(_ispQ2.setFromAxisAngle(_ispB.set(0,0,1),INSP_SFLAT));
       _ispQ.premultiply(_ispQ2.setFromAxisAngle(_ispB.set(0,1,0),sp.th));fig.g.getWorldQuaternion(_ispQ3);_ispQ.premultiply(_ispQ3).multiply(U.iq0);
       fig.hand.getWorldQuaternion(_ispQ2);_ispQ.premultiply(_ispQ2.invert());heldMesh.quaternion.copy(U.iq0).slerp(_ispQ,w);
-      fig.hand.getWorldPosition(_ispA);_ispB.set(0,1,0).applyQuaternion(_ispQ3);_ispA.addScaledVector(_ispB,.045+sp.h);
+      fig.hand.getWorldPosition(_ispA);_ispB.set(0,1,0).applyQuaternion(_ispQ3);_ispA.addScaledVector(_ispB,INSP_SPIN_UP+sp.h);
       _ispB.set(Math.sin(sp.th),0,Math.cos(sp.th)).applyQuaternion(_ispQ3);_ispA.addScaledVector(_ispB,-INSP_KMID);heldMesh.position.copy(U.ip0).lerp(fig.hand.worldToLocal(_ispA),w);INS.flew=true;}
     else{
     const ga=_iwr(pz.fly?pz.fly.a:pz.g||0)*k;   /* kierrokset pois → paluussa esine ei pyöri */if(ga||pz.fly||INS.flew){heldMesh.quaternion.copy(U.iq0).premultiply(_ispQ2.setFromAxisAngle(_ispB.set(1,0,0),ga));

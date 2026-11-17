@@ -378,6 +378,8 @@ tehty (v2.67, v2.86) – ei tehty uudelleen. Tehty nyt:
   perusasento palautetaan kuten oikean), hidastuu pehmeästi (ω ∝ (1−u)²), pompautus ja kiinniotto oikein päin. Puolet 5 %:n heitoista on
   kolmen korkean heiton sarja (`puukko_heitto3`, korkeudet arvotaan `I.R`). Jokaisesta heitosta huitaisuääni `p/lyonnit/huitaisu` 70 %
   (`INSP_THROW_V`, myös pyöräytysheittelyn jokainen 180° ja pullonpyörityksen pompautus).
+- **Viimeiset säädöt** (käyttäjä): pullonpyörityksessä puukko 7 cm kämmenen yläpuolella (`INSP_SPIN_UP`, ennen 4,5 cm – näytti olevan käden sisässä);
+  pienten heittojen (pyöräytysheittely, pullonpyörityksen pompautus) huitaisuääni 40 % (`INSP_THROW_VS`, −60 %), isot heitot 70 % (`INSP_THROW_V`).
 - **F-vinkki** (käyttäjä): kun puukko otetaan käteen 10. kerran tutoriaalin ulkopuolella (`INSP_TIP_N`, `flags.knifeEqN`), kerran maailmaa kohti
   ylävinkki + lyhyt chat-muistutus F-tarkastelusta, myös että se toimii muillakin työkaluilla ja aseilla (`inspectTipTick`, `flags.fTip`).
 - **Poistotarkastus ennen Mergeä:** main vs. haara – ylimmän tason nimet, ITEMS 72, PIECES 66, MOBDEF 26, RECIPES 37, ACH/GOALS 47, QUESTS 26, NODE 17,
