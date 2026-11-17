@@ -175,7 +175,8 @@ function buildPieceMesh(t,f=0){
     case 'ovi':{const pw=(G-DOOR_W)/2,px=DOOR_W/2+pw/2,DW=def.stone?W:MAT.doorwood;g.add(bxw(pw,WH,.22,DW,-px,WH/2,0),bxw(pw,WH,.22,DW,px,WH/2,0),bxw(G,WH-DOOR_H,.22,DW,0,(DOOR_H+WH)/2,0));
       const piv=new THREE.Group();piv.position.set(-DOOR_W/2,0,0);piv.add(bxw(DOOR_W,DOOR_H-.05,.1,def.iron?IRON_MAT:MAT.doorwood,DOOR_W/2,(DOOR_H-.05)/2,0));
       if(def.iron){const rv=mat(0x2a2d31);for(const yy of [.3,1.05,1.8])piv.add(DET(bx(DOOR_W-.06,.07,.13,rv,DOOR_W/2,yy,0)));for(const xx of [.12,DOOR_W-.12])for(const yy of [.3,1.05,1.8])for(const sd of[-1,1])piv.add(DET(bx(.05,.05,.03,rv,xx,yy,sd*.075)));}   // v2.07 rautaovi: vanteet ja niitit
-      const hm=mat(0x3a3a3a);for(const sd of[-1,1]){piv.add(DET(bx(.05,.05,.1,hm,DOOR_W-.2,1.05,sd*.08)),DET(bx(.2,.045,.045,hm,DOOR_W-.28,1.05,sd*.125)));}
+      /* v2.88 kahvat molemmin puolin AINA näkyviin (ennen DET = piilossa ilman rakennusten yksityiskohtia, ja tumma väri hukkui): kilpi, varret ja vetoripa */
+      const hm=mat(0x6e6152);for(const sd of[-1,1]){piv.add(bx(.09,.26,.02,hm,DOOR_W-.2,1.05,sd*.06),bx(.04,.04,.07,hm,DOOR_W-.2,1.15,sd*.095),bx(.04,.04,.07,hm,DOOR_W-.2,.95,sd*.095),bx(.045,.24,.04,hm,DOOR_W-.2,1.05,sd*.135));}
       g.add(piv);g.userData.leaf=piv;break;}
     case 'katto':g.add(roofSlope(G,G,true,def.stone));break;
     case 'katto_loiva':g.add(roofSlope(G,G/2,true,def.stone));break;
@@ -281,7 +282,10 @@ function setDoor(p,open,dir,inst){const lf=p.mesh.userData.leaf;if(!open&&!inst&
   p._da={a0:lf.rotation.y,a1,t:0,open};DOOR_ANIM.add(p);if(open)for(const c of p.cols)if(c.door)c.off=true;doorSnd(p,open?'ovi_avaus':null,true);return true;}
 /* v2.86 OVEN ÄÄNET (pelaaja_2_toiminnot/kaytto): avatessa ovi_avaus heti, sarana narisee (ovi_narina) kääntymisen ajan avatessa ja sulkiessa,
    ovi_kiinni kun sulkemisanimaatio loppuu (doorTick). Ääni oven kohdalta (3D). */
-function doorSnd(p,ev,creak){if(typeof plSnd!=='function')return;const q={x:p.x,y:(p.y||0)+1.1,z:p.z};if(ev)plSnd('kaytto',ev,{pos:q});if(creak)plSnd('kaytto','ovi_narina',{pos:q,v:.8});}
+/* v2.88 käyttäjä: puuoven avaus −30 %, muut oven äänet (narina, kiinni, rauta- ja kivioven avaus) −10 % */
+const DOOR_V={puuAvaus:.7,muut:.9};
+function doorSnd(p,ev,creak){if(typeof plSnd!=='function')return;const q={x:p.x,y:(p.y||0)+1.1,z:p.z};
+  if(ev)plSnd('kaytto',ev,{pos:q,v:ev==='ovi_avaus'&&p.t==='ovi'?DOOR_V.puuAvaus:DOOR_V.muut});if(creak)plSnd('kaytto','ovi_narina',{pos:q,v:.8*DOOR_V.muut});}
 function doorTick(dt){if(!DOOR_ANIM.size)return;for(const p of DOOR_ANIM){const d=p._da,lf=p.mesh&&p.mesh.userData.leaf;
     if(!d||!lf||!pieces.includes(p)){DOOR_ANIM.delete(p);continue;}d.t+=dt;const k=Math.min(1,d.t/DOOR_T);lf.rotation.y=d.a0+(d.a1-d.a0)*doorEase(k);shDirty=true;bldDirty=true;
     if(k>=1){DOOR_ANIM.delete(p);p._da=null;if(!d.open){for(const c of p.cols)if(c.door)c.off=false;doorSnd(p,'ovi_kiinni',false);}markShadowDirty();}}}

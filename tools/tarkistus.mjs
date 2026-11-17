@@ -586,6 +586,22 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.88 kodin lämpö puuttuvalla seinällä naapurin vieressä, maanmuokkauksen sauma, kameran rako, oven kahvat ja äänet, raajojen törmäys',()=>{
+    const made=[];const om=msg;msg=()=>{};let res;const p0=P.pos.clone();
+    try{const cx=P.pos.x+90,cz=P.pos.z-60,y=terrainH(cx,cz)+.02,put=(t,x,z,r,yy)=>{const q=addPiece(t,x,yy===undefined?y:yy,z,r);made.push(q);return q;};
+      put('ovi',cx-G/2,cz-G,0);put('seina',cx+G/2,cz-G,0);put('seina',cx-G/2,cz+G,0);put('seina',cx+G/2,cz+G,0);put('seina',cx-G,cz-G/2,2);put('seina',cx-G,cz+G/2,2);
+      const E1=put('seina',cx+G,cz-G/2,2),E2=put('seina',cx+G,cz+G/2,2);for(const [a,b] of [[-.5,-.5],[.5,-.5],[-.5,.5],[.5,.5]])put('katto',cx+a*G,cz+b*G,0,y+WH);
+      for(let k=-3;k<=3;k++)put('seina',cx+G*2.5,cz+k*G+G/2,2);scene.updateMatrixWorld(true);
+      const tick=s=>{for(let i=0;i<s*30;i++){P.pos.set(cx,y+.02,cz);P.vel.set(0,0,0);homeTick(1/30);}};HOME.linger=0;HOME.inside=false;tick(1.5);const a0=HOME.inside;
+      removePiece(E1);removePiece(E2);made.splice(made.indexOf(E1),1);made.splice(made.indexOf(E2),1);scene.updateMatrixWorld(true);tick(1.5);const a=a0&&!HOME.inside&&homeScan(true)===null;
+      const b=FT_SEAM>0&&/cf\.x<ee/.test(String(terrainMesh.material.onBeforeCompile));
+      const c=CAM_GAP>.15&&CAM_R>=.15&&CAM_TY_K<14&&/CAM_R/.test(updateCamera.toString())&&/camSO/.test(updateCamera.toString());
+      const D=put('ovi',cx+20,cz+20,0);const lf=D.mesh.userData.leaf;let hn=0;lf.traverse(o=>{if(o.isMesh&&!o.userData.detail&&o.material&&o.material.color&&o.material.color.getHex()===0x6e6152)hn++;});
+      const d=hn>=8&&DOOR_V.puuAvaus===.7&&DOOR_V.muut===.9&&/DOOR_V\.puuAvaus/.test(doorSnd.toString());
+      const e=/limbPush\(feet\)/.test(updatePlayer.toString())&&/limbCapture\(\)/.test(updatePlayer.toString())&&/armWorldClear/.test(updatePlayer.toString())&&typeof limbPen==='function';
+      res=a&&b&&c&&d&&e||`virhe koti ${a0}/${a} sauma ${b} kamera ${c} kahvat ${hn}/${d} raajat ${e}`;}
+    finally{for(const q of made)if(pieces.includes(q))removePiece(q);msg=om;HOME.inside=false;HOME.lvl=0;HOME.linger=0;P.pos.copy(p0);P.vel.set(0,0,0);}
+    return res;});
   t('v2.87 oven äänet: narina keskeltä (alle 1 s), avaus ja kiinni alkavat iskusta, ranta-aallot pitkällä saumalla',()=>{
     const M=manJ(),g=k=>M[k]||{},n=['p/kaytto/ovi_narina_0','p/kaytto/ovi_narina_1'];
     const a=n.every(k=>g(k).dur>.5&&g(k).dur<1&&g(k).seg&&g(k).seg[0]>.3);

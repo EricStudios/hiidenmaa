@@ -264,7 +264,12 @@ function homeScan(closedDoors){const x0=P.pos.x,z0=P.pos.z,y0=P.pos.y,dist=[];
     for(const h of [.6,1.5,2.2]){let hit=null,ter=false;for(let t=.3;t<HOME_R;t+=.15){const r=homeHit(x0+dx*t,y0+h,z0+dz*t,closedDoors);if(r){hit=t;ter=r===2;break;}}if(hit===null)return null;if(ter&&hit>6)return null;if(h===1.5)dmin=hit;}dist.push(dmin);}   // maasto kelpaa seinäksi vain lähellä (rinteeseen rakennettu talo)
   /* v2.83 katto tarkistetaan enintään 1 m joka suuntaan, mutta vain talon sisältä (seinään matka − 0,35 m): ennen seinän vieressä (< 1 m)
      piste oli seinän ulkopuolella → talo ei tunnistunut, ja 1×1-mökki toimi vain aivan keskellä. */
-  if(!sheltered(x0,y0,z0))return null;for(const [ox,oz] of [[1,0],[-1,0],[0,1],[0,-1]]){const o=Math.min(1,homeEdge(dist,ox,oz)-.35);if(o>.1&&!sheltered(x0+ox*o,y0,z0+oz*o))return null;}return dist;}
+  if(!sheltered(x0,y0,z0))return null;for(const [ox,oz] of [[1,0],[-1,0],[0,1],[0,-1]]){const o=Math.min(1,homeEdge(dist,ox,oz)-.35);if(o>.1&&!sheltered(x0+ox*o,y0,z0+oz*o))return null;}
+  /* v2.88 säteen reitti katon alla seinään asti: puuttuvan seinän kohdalta säde karkasi taivasalle ja osui kauempana toiseen rakennukseen,
+     aitaan tai rinteeseen → talo näytti suljetulta eikä lämpö hiipunut. Pisteet ~2 m välein, viimeinen 0,4 m ennen osumaa. */
+  for(let i=0;i<HOME_DIRS;i++){const a=i/HOME_DIRS*TAU+.031,dx=Math.cos(a),dz=Math.sin(a),L=dist[i]-.4,n=Math.max(1,Math.ceil(L/HOME_ROOF_STEP));
+    for(let k=1;k<=n;k++){const t=L*k/n;if(t>.5&&!sheltered(x0+dx*t,y0,z0+dz*t))return null;}}return dist;}
+const HOME_ROOF_STEP=2;
 function homeHeat(dist){for(const p of pieces){const fire=isFirePiece(p.t)&&fireLit(p),torch=isTorch(p.t)&&p.data.burn>0;if(!fire&&!torch)continue;
     const dx=p.x-P.pos.x,dz=p.z-P.pos.z,d=Math.hypot(dx,dz);if(d>HOME_R||Math.abs((p.y||0)-P.pos.y)>3)continue;if(d<homeEdge(dist,dx,dz)-.05||(d<homeEdge(dist,dx,dz)+.6&&homeLos(P.pos.x,P.pos.z,P.pos.y,p.x,p.z)))return true;}return false;}   // v2.83 + näköyhteys (huonekalu ei peitä lähdettä)
 // talon reunan etäisyys suunnassa (viereisten säteiden suurin – esine itse voi katkaista yhden säteen)

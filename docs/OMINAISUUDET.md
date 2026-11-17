@@ -57,7 +57,12 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Törmäys (collision.js):** laatikot ja ympyrät ruudukossa (`CELL` 8 m). Alle `STEPUP`-korkuiset esteet ylitetään askeltamalla.
   Katto pysäyttää hypyn (`ceilingAt`).
 - **Kestävyys:** palautuu 22/s viiveen jälkeen; juoksu −13/s.
-- **Kamera:** kolmas persoona, pehmeä liike, ei mene seinien tai maaston läpi; zoom hiiren rullalla (tai asetuksista).
+- **Kamera:** kolmas persoona, pehmeä liike, ei mene seinien tai maaston läpi; zoom hiiren rullalla (tai asetuksista). v2.88: rako esteisiin 0,22 m (`CAM_GAP`, ennen 0,1),
+  kameran ympäriltä tarkistetaan 0,2 m sivuille, ylös ja alas (`CAM_R`), olkasiirtymä lyhenee seinän vieressä (`camSO`), lähin etäisyys seinän ollessa aivan takana 0,1 m (`CAM_MIN`,
+  hahmo piilossa alle 1,2 m); korkeuden seuranta 10 % pehmeämpi (`CAM_TY_K` 12,6, ennen 14).
+- **Raajojen törmäys (v2.88):** pää (0,14 m), kädet ja kyynärpäät (0,06 m) ja polvet (0,08 m) ovat osa osumalaatikkoa: asennon jälkeen tallennetut paikat (`limbCapture`)
+  tarkistetaan seiniä, ovia, rakennusosia, kiviä ja puita vasten (`limbPen`) ja pelaaja työntyy ulos (`limbPush`, enintään 0,12 m/ruutu). Kyykyssä polvet pitävät pelaajan
+  ~0,6 m seinästä. Käsi lasketaan enintään 0,6 m päähän (`LIMB_ARM_R`); pidemmälle ojennettu käsi koukistuu ja laskeutuu (`armWorldClear`). Lyönti, hakkuu ja jousen veto eivät työnnä.
 - **Hahmo:** low-poly, kyynär- ja polvinivelet, kääntymisviive iskun alussa, kyykky polvet koukussa ja vaanimisasennossa,
   selässä yksi työkalu + kilpi (`backG`), kilven torjunta osoittaa eteenpäin.
 
@@ -136,6 +141,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   Hakukenttä hakee kaikista välilehdistä nimen osalla.
 - **Tietopaneeli (reppu, napsautus):** nimi isolla, kaikki ominaisuudet taulukkona (esim. soihtu: palamisaika max ja jäljellä).
 - **Päivitykset (★, reppu, arkku, tynnyri):** ensimmäinen painallus näyttää mitä muuttuu (nyt → uusi) ja hinnan; vasta **Päivitä nyt** päivittää.
+- **Kodin lämpö v2.88:** jokaisen 16 säteen reitti tarkistetaan katon alla seinään asti (~2 m välein, `HOME_ROOF_STEP`): puuttuvan seinän kohdalta karkaava säde ei enää kelpaa, vaikka se osuisi 15 m:n sisällä toiseen rakennukseen, aitaan tai rinteeseen.
 - **Kodin lämpö (v2.09):** kokonaan suljettu talo (seinät, katto, suljettu ovi, lasi-ikkunat – ei aukkoikkunoita) antaa tehosteen **Mukava lämpötila** (+0,5 terveyttä/s, nälkä kuluu 30 % hitaammin, nukkuessa +10 % terveyttä). Kun sisällä palaa nuotio, grillinuotio, seisova soihtu tai seinäsoihtu vähintään 5 s, tehoste on **Lämmin koti** (+1,0/s, nälkä −50 %, nukkuessa +20 %). Ovi saa olla auki 20 s, sitten tehoste harmaantuu; lämmönlähteen sammuttua Lämmin koti kestää 30 s; ulos lähtiessä tehoste hiipuu 20 s:ssa. Nukkuminen ei enää paranna täyteen.
 - **Viholliset ja talot (v2.08):** suljettu ovi estää näkemisen (ikkunoista ja lasista näkee). Vihollinen muistaa sinut 30 s; jos pakenet taloon, se hajottaa oven, jos se on heikompi kuin lähin seinä, muuten lähimmän seinän, ja tulee sisään. Saman lajin lauma 20 m:n päästä liittyy mukaan. Kun muisti loppuu, vihollinen poistuu murtokohdasta.
 - **Hiekka ja lasi (v2.07):** rannoilla harvinaisia hiekkakasoja (5–10 / kartta, uusiutuvat 20 min, 2–3 hiekkaa). Sulatusuunissa 2 hiekkaa → 1 lasi 15 s:ssa (enint. 20 hiekkaa, vuorotellen malmien kanssa).
@@ -633,6 +639,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
 - **v2.86 luonnon äänet:** päivällä linnunlaulu soi koko päivän pehmeästi (pitkä nauhoitus), välillä muita lintuja; öisin heinäsirkat sirittävät omassa rytmissään kahdesta suunnasta; tuulisessa metsässä puiden humina kuuluu hiljaa pätkinä. Salamaniskujen kaiku kuuluu kokonaan.
 - **v2.86 ranta:** rannan lähellä aallot lyövät rantaan (tyynellä rauhalliset, tuulella ja myrskyssä kovat); kamera veden alla 20 %. v2.87 käyttäjän äänet: rauhalliset 40 s ja kovat 57 s silmukat, sauma häivytetään 3 s (`LOOP_XF`), ettei toistokohta kuulu.
+- **v2.88 ovet:** puuoven avausääni −30 %, muut oven äänet (narina, kiinni, rauta- ja kivioven avaus) −10 % (`DOOR_V`). Kahvat molemmin puolin aina näkyvissä (kilpi, varret, vetoripa; ennen yksityiskohta-asetuksen takana ja liian tummat).
 - **v2.86 ovi:** avatessa avausääni ja saranan narina, sulkiessa narina ja kiinni-ääni sulkemisen lopussa. v2.87 käyttäjän äänet: narina on 0,85 s pätkä raakatiedoston keskeltä (ei alkuosaa, `MID_EV`) ja häipyy 0,25 s:ssa oven pysähtyessä (kääntyminen 0,6 s); avaus- ja kiinni-ääni alkavat suoraan kuuluvasta iskusta (`ATTACK_EV`, `attack_start`: 5 ms ikkunat ylipäästön jälkeen, 8 dB voimakkaimmasta). Kaksi narinaversiota arvotaan.
 - **v2.87 alastulo:** käyttäjän uusi alastuloääni (0,23 s).
 - **v2.86 viimeinen pomo:** Kalmanvartijan terveys alle puolet → oma kappale toistuu kuolemaan asti; kuollessa voittokappale soi kerran loppuun (paikkamerkit).

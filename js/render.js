@@ -181,10 +181,15 @@ function blendApply(lv){lv=clamp(lv|0,0,3);if(lv===blendLvl)return;blendLvl=lv;c
 const TFINE={F:0,want:0,N:0,tex:null,data:null,row:0,done:false,busy:false,base:terrainColors.slice(),
   u:{tFine:{value:null},uFine:{value:0},uFN:{value:1},uFS:{value:1},uDet:{value:0}}};
 // v2.65 tarkan maanmuokkauksen maski: karkeaa maastoa ei piirretä lohkoissa, joilla on oma tarkka laikku (FT_IDX); laikkujen materiaali ilman maskia
+/* v2.88 FT_SEAM: laikkuryhmän ulkoreunalla karkea maasto jää piirtoon FT_SEAM m:n kaistalta (päällekkäin laikun reunan kanssa, sama korkeus) –
+   ennen kahden verkon yhteiseen reunaan jäi pikselin aukkoja, joista taivas/sumu näkyi kellertävänä pisteviivana muokatun alueen ympärillä. */
+const FT_SEAM=.04;
 const FTM=(function(){const d=new Uint8Array(FT_CN*FT_CN*4),t=new THREE.DataTexture(d,FT_CN,FT_CN,THREE.RGBAFormat,THREE.UnsignedByteType);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return {d,t,u:{value:t}};})();
 function terrHook(mask){return sh=>{Object.assign(sh.uniforms,TFINE.u,{tFtMask:FTM.u,uFtOn:{value:mask?1:0}});
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec2 vTW;').replace('#include <begin_vertex>','#include <begin_vertex>\nvTW=position.xz;');
-  sh.fragmentShader=sh.fragmentShader.replace('void main() {',`void main() {\n  if(uFtOn>.5){vec2 cu=(floor((vTW+vec2(${HALF.toFixed(1)}))/${(GS*FT_CS).toFixed(4)})+.5)/${FT_CN.toFixed(1)};if(texture2D(tFtMask,cu).r>.5)discard;}`).replace('#include <common>','#include <common>\nuniform sampler2D tFine,tFtMask;uniform float uFine,uFN,uFS,uDet,uFtOn;varying vec2 vTW;\nfloat tfH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat tfN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(tfH(i),tfH(i+vec2(1,0)),f.x),mix(tfH(i+vec2(0,1)),tfH(i+vec2(1,1)),f.x),f.y);}')
+  sh.fragmentShader=sh.fragmentShader.replace('void main() {',`void main() {\n  if(uFtOn>.5){vec2 cc=(vTW+vec2(${HALF.toFixed(1)}))/${(GS*FT_CS).toFixed(4)},ci=floor(cc),cf=cc-ci;float ee=${(FT_SEAM/(GS*FT_CS)).toFixed(5)};if(texture2D(tFtMask,(ci+.5)/${FT_CN.toFixed(1)}).r>.5){bool kp=false;
+    if(cf.x<ee&&texture2D(tFtMask,(ci+vec2(-.5,.5))/${FT_CN.toFixed(1)}).r<.5)kp=true;if(cf.x>1.-ee&&texture2D(tFtMask,(ci+vec2(1.5,.5))/${FT_CN.toFixed(1)}).r<.5)kp=true;
+    if(cf.y<ee&&texture2D(tFtMask,(ci+vec2(.5,-.5))/${FT_CN.toFixed(1)}).r<.5)kp=true;if(cf.y>1.-ee&&texture2D(tFtMask,(ci+vec2(.5,1.5))/${FT_CN.toFixed(1)}).r<.5)kp=true;if(!kp)discard;}}`).replace('#include <common>','#include <common>\nuniform sampler2D tFine,tFtMask;uniform float uFine,uFN,uFS,uDet,uFtOn;varying vec2 vTW;\nfloat tfH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat tfN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(tfH(i),tfH(i+vec2(1,0)),f.x),mix(tfH(i+vec2(0,1)),tfH(i+vec2(1,1)),f.x),f.y);}')
     .replace('#include <color_fragment>',`#ifdef USE_COLOR
   vec3 tcol=vColor;if(uFine>.5){vec2 fu=((vTW+vec2(${HALF.toFixed(1)}))/uFS+.5)/uFN;tcol+=(texture2D(tFine,fu).rgb-.5)*.5;
     if(uDet>0.)tcol*=1.+(tfN(vTW*uDet)-.5)*.09+(tfN(vTW*uDet*2.3+17.)-.5)*.05;}

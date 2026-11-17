@@ -533,3 +533,13 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - **Maahan sijoittaminen** (`landmarks.js` `stoneCol`/`gmin`): mittaa maa nurkista, ei yhdestä pisteestä (KORJAUKSET 58).
 - **Kommentit** (KORJAUKSET 49, 62): `//` vain rivin loppuun; jokaisen muutoksen jälkeen `node --check` kaikille js-tiedostoille.
 - **Tallennus** (`save.js`): uudet liput `flags`-olioon (tallentuvat automaattisesti); muotomuutoksessa nosta `v`.
+
+## 71. Muokatun maan ympärillä pisteviiva, kodin lämpö ei hiipunut seinän puuttuessa, kamera seinän sisällä (v2.88)
+- **Pisteviiva:** maanmuokkauslaikkujen (`ftEnsure`) alueella karkea maasto `discard`ataan 8 m lohkoittain ja tarkka laikku piirretään tilalle. Kahden verkon yhteiseen
+  reunaan jäi rasteroinnissa pikselin aukkoja → tausta näkyi pisteviivana (yöllä/hämärässä kellertävä). Korjaus: lohkon reunalla, jos naapurilohkossa EI ole laikkua,
+  karkeaa maastoa ei poisteta `FT_SEAM` (0,04 m) kaistalta (päällekkäin samalla korkeudella) – `terrHook` render.js. Kahden laikun välissä poisto pysyy (muuten vanha pinta näkyisi kuopassa).
+- **Kodin lämpö:** säteet hyväksyivät minkä tahansa rakennusosan 15 m:n sisällä (ja maaston 6 m) → puuttuvan seinän kohdalta säde osui naapurirakennukseen ja talo pysyi
+  "suljettuna". Korjaus: säteen reitin on oltava katon alla seinään asti (`homeScan`, `HOME_ROOF_STEP`). Testi: talo + seinärivi 5 m päässä, poista yksi koko seinä → `HOME.inside` false.
+- **Kamera seinässä:** olkasiirtymä (0,55 m sivulle) vei kohdepisteen seinän sisään, kun pelaaja seisoi kylki seinää vasten, ja vähimmäisetäisyys 0,6 m pakotti kameran seinään.
+  Korjaus: siirtymä lyhenee (`camSO`), kameran ympäristö tarkistetaan (`CAM_R`) ja lähin etäisyys 0,1 m (`CAM_MIN`).
+- **Tarkistusrivi, joka siirtää pelaajaa, palauttaa `P.pos`:n** – muuten seuraavat rivit (nuolet, jousen rata) ajetaan väärässä paikassa ja epäonnistuvat.
