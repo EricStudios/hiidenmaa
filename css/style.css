@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'2.96';
+:root{--css-v:'2.99';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -50,7 +50,7 @@ button:focus-visible{outline:2px solid var(--frost);outline-offset:2px}
 #weight.over{color:var(--bad);font-weight:800}
 #prompt{position:absolute;left:50%;top:58%;transform:translateX(-50%);font-size:15px;font-weight:700;text-shadow:0 1px 3px #000;white-space:nowrap}
 #prompt kbd,.kb{display:inline-block;min-width:20px;padding:0 5px;margin-right:6px;border:1px solid var(--dim);border-radius:3px;font-family:var(--font-b);font-size:12px;line-height:18px;text-align:center;background:rgba(19,17,14,.7)}
-#msgs{position:absolute;left:16px;bottom:120px;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+#msgs{position:absolute;left:16px;bottom:120px;display:flex;flex-direction:column;gap:3px;align-items:flex-start;zoom:var(--chatK,1);max-width:min(46vw,640px)}   /* v2.99 koko asetuksista (Chatin ja ilmoitusten koko), pitkät rivit rivittyvät */
 #msgs div{font-size:14px;font-weight:600;background:rgba(19,17,14,.7);padding:3px 10px;border-radius:2px;transition:opacity .6s}
 #msgs div.loot{color:var(--frost)} #msgs div.warn{color:var(--ember)}
 #bossbar{position:absolute;left:50%;top:calc(22px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(520px,70vw);text-align:center}
@@ -954,3 +954,5 @@ button:focus,select:focus{outline:none}
 #deathVig{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 35%,rgba(8,4,3,.85) 100%),rgba(0,0,0,.25);transition:opacity .3s linear}
 /* v2.93 DEV-valikon selitysteksti (pelin ajan nopeus) */
 .devRow .devNote{display:block;width:100%;margin-top:4px;font-size:.82em;opacity:.72;line-height:1.3}
+
+.devInsp small{display:block;font-size:10.5px;opacity:.65;font-weight:600;margin-top:1px}   /* v2.99 DEV: tarkasteluanimaation vihje (mille esineelle) */

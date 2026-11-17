@@ -105,10 +105,21 @@ function carvePose(){if(!P.carve)return;const t=playTime*8.5,s=Math.sin(t);
   fig.armR.rotation.x=-1.12+.2*s;fig.armR.rotation.z=.18+.08*Math.sin(t*.5);fig.elbowR.rotation.x=-.75+.3*Math.sin(t+1);
   fig.armL.rotation.x=-1.25;fig.armL.rotation.z=-.1;fig.elbowL.rotation.x=-.35;}
 
+/* v2.97 ENSIMMÄINEN PUUKKO (käyttäjä): 2 s puukon saamisesta selkeä ohje pihkankeräyksestä – chattiin ja vinkkilaatikkoon (14 s). Kerran maailmaa
+   kohti (flags.knifeInfo); näkyy kaikille (ei vain opastusmaailmassa, toisin kuin TIPS). */
+const KNIFE_INFO_DELAY=2,KNIFE_INFO_SHOW=14;
+/* v2.99 käyttäjä: chattiin vain lyhyt muistutus (pitkä teksti meni pelinäkymän yli); täysi ohje ylävinkissä selkeinä vaiheina */
+const KNIFE_INFO_MSG='Puukolla voi kerätä pihkaa – katso ohje ylhäältä.';
+const KNIFE_INFO_TXT='<b>Sait puukon – nyt voit kerätä pihkaa!</b><br>1. Etsi mänty tai kuusi, jonka rungossa on <b>kellertäviä pihkavaluja</b> (vain osa puista).<br>2. Mene aivan kiinni runkoon ja paina <kbd>E</kbd> puukko kädessä → kaiverrat pihkakuvion.<br>3. Ota kulho käteen ja naru toiseen käteen, paina <kbd>E</kbd> → kulho kuvion alle. Pihka valuu kulhoon itsestään.';
+function knifeInfoTick(dt){if(RES.tipT>0){RES.tipT-=dt;if(RES.tipT<=0&&TUT.tipEl)TUT.tipEl.classList.remove('on');}
+  if(flags.knifeInfo||state!=='play'||P.dead)return;if(invCount('puukko')<=0){RES.knifeT=KNIFE_INFO_DELAY;return;}
+  RES.knifeT=(RES.knifeT??KNIFE_INFO_DELAY)-dt;if(RES.knifeT>0)return;flags.knifeInfo=1;msg(KNIFE_INFO_MSG,'loot');
+  const el=tipEl();el.querySelector('.tipD').innerHTML=KNIFE_INFO_TXT;el.classList.add('on');TUT.tipT=KNIFE_INFO_SHOW;RES.tipT=KNIFE_INFO_SHOW;if(typeof mSnd==='function')mSnd('napit','hover');}
+
 /* ---------- kertyminen, kaatuminen ja hiipuminen ---------- */
 function resinTick(dt,td=dt){   // td = pelin ajan nopeus (kertymä ja hiipuminen), dt = kaiverrus
  if(RES.flagsRef!==flags){RES.flagsRef=flags;resinClearVis();_resNodeMap=null;}
-  resinEnsureG();carveTick(dt);
+  resinEnsureG();carveTick(dt);knifeInfoTick(dt);inspectTick(dt);
   const st=flags.resin;if(st)for(const id in st){const e=st[id];
     if(e.b&&(e.tot||0)<eCap(e)){const add=Math.min(eCap(e)-(e.tot||0),td*eCap(e)/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;}
     if((e.tot||0)>=eCap(e)&&!e.done){e.fade=Math.min(1,(e.fade||0)+td/RESIN_FADE);if(e.fade>=1)e.done=1;}}
@@ -123,7 +134,8 @@ function resinKilled(n){const vv=RES.vis.get(n.id);if(vv){RES.vis.delete(n.id);}
   msg(`${n._storm?'Myrsky kaatoi pihkapuusi':'Pihkapuusi kaatui'} – kulho, naru${k>0?` ja ${k} pihkaa`:''} putosivat maahan.`,'warn');}
 
 /* ---------- ulkoasu ---------- */
-const RES_MAT={hint:mat(0x9a7a38),amber:mat(0xb8893c,{emissive:0x1a0f00}),bark:mat(0x8a5028),groove:mat(0xbf9e72),bowl:mat(0xa8743e),rope:mat(0xb09a6c),fill:mat(0xe8b23a,{emissive:0x2a1a00}),fillO:mat(0xd9802a,{emissive:0x241000})};   // v2.96 urat himmeämmät; kulhon pihka keltainen + oranssi
+const RES_MAT={hint:mat(0xa9863e),   // v2.97 pihkavalumat 10 % kirkkaammat (ennen 0x9a7a38)
+ amber:mat(0xb8893c,{emissive:0x1a0f00}),bark:mat(0x8a5028),groove:mat(0xbf9e72),bowl:mat(0xa8743e),rope:mat(0xb09a6c),fill:mat(0xe8b23a,{emissive:0x2a1a00}),fillO:mat(0xd9802a,{emissive:0x241000})};   // v2.96 urat himmeämmät; kulhon pihka keltainen + oranssi
 function resinClearVis(){for(const v of RES.vis.values())resinVisFree(v);RES.vis.clear();}
 function resinVisDrop(id){const v=RES.vis.get(+id);if(v){resinVisFree(v);RES.vis.delete(+id);}}
 function resinVisFree(v){scene.remove(v.g);v.g.traverse(o=>{if(o.isMesh){o.geometry.dispose();if(o.material.userData.own)o.material.dispose();}});}

@@ -549,3 +549,14 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   Lumi tarkisti vain maaston. Korjaus: suojakartta `COVER` (environment.js) ja tarkistus joka ruudulla pisaran nykyisestä paikasta (molemmat päät). Uusi sademainen
   efekti → käytä `coverH(x,z)`:ää, älä pelkkää syntykohdan korkeutta.
 
+
+## 73. F-tarkastelu nyki varsinkin paluussa lepoon; settings.js tyhjeni skriptissä (v2.99)
+- **Nykiminen:** `armIK` kirjoittaa käsivarren kvaternion, josta perusasennon `lerpAngle` (Euler-kulmat) jatkoi seuraavassa ruudussa → IK-tulos
+  "jäi" perusasennoksi ja paluussa kulmat kiepahtivat. Korjaus: `inspectRestore()` (player.js, ennen käsivarren lerpiä) palauttaa ennen IK:ta
+  tallennetun perusasennon (`INS.bq`, `INS.be`). Sekoitus aikapohjaiseksi (`INS.u` + smootherstep), F uudelleen = ristiinhäivytys (`INSP_XF`),
+  pää omalla pehmennyksellä. Mittari: käden kiihtyvyys ruuduittain (paluu tasainen, F-uudelleen 0,171 → 0,04). **Sääntö:** kun IK ohittaa
+  animoidun nivelen, tallenna ja palauta perusasento – älä anna IK:n tuloksen kulkeutua seuraavan ruudun lerpiin.
+- **Tyhjä tiedosto:** Python-apuskriptissä `open(p,'w').write(open(p).read())` avaa tiedoston kirjoitettavaksi (tyhjentää) ennen lukemista → koko
+  settings.js tyhjeni. Palautettiin gitistä ja muutokset tehtiin uudelleen. **Sääntö:** lue ensin muuttujaan, kirjoita sitten; tarkista `git diff --stat`.
+- **Kommentti rivin keskellä (KORJAUKSET 49) toistui kahdesti:** `// …` lisättiin rivin keskelle (render.js peittoluku, inspect.js ote) → rivin loppu
+  ei suorittunut. Tarkistus (`v2.23 ei koodia //-kommentin perässä`) huomasi ensimmäisen. Lisää välikommentit aina `/* */`-muodossa.

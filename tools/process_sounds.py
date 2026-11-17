@@ -792,7 +792,9 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
         ('rakentaminen', 'Rakentaminen ja valmistus', '🔨', [('asetus', 'rakennusosa asetetaan paikalleen', 'wood placement, hammer build'),
                                                            ('purku', 'purat oman rakennusosan', 'wood dismantle, deconstruct'),
                                                            ('korjaus', 'korjaat rakennusosan', 'hammer repair, nail hammering'),
-                                                           ('valmistus', 'valmistat tai parannat esineen', 'crafting sound, workbench craft')]),
+                                                           ('valmistus', 'valmistat tai parannat esineen', 'crafting sound, workbench craft'),
+                                                           ('ahjo_valmis', 'v2.99: esine valmistuu ahjolla (tilalla soi tavallinen valmistus, jos tiedostoa ei ole)', 'blacksmith anvil ding, forge craft complete'),
+                                                           ('sulatin_valmis', 'v2.99: sulatusuunista tulee valmis harkko tai lasi (3D, uunin kohdalta)', 'furnace done, metal ingot clink, smelting complete')]),
         ('kaytto', 'Keräily ja käyttö', '🎒', [('poiminta', 'poimit esineen maasta tai kasvista', 'item pickup, pick up'),
                                               ('arkku_auki', 'avaat arkun tai hautakasan', 'chest open, wooden lid creak'),
                                               ('arkku_kiinni', 'suljet oman (rakentamasi) arkun', 'chest close, wooden lid shut'),
@@ -831,6 +833,9 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
                                        ('kylla', 'söit itsesi täyteen', 'satisfied sigh, content after meal'),
                                        ('lammin', 'pääset lämpimään (nuotio tai lämmin koti)', 'relieved sigh, warm comfort'),
                                        ('levannyt', 'olet levännyt (levon vaikutus alkaa)', 'refreshed stretch, relaxed exhale')])]),
+    (4, 'extra', 'Extra – F-tarkastelu', [   # v2.98 (käyttäjä): F-ihmettely – tyytyväinen ääni esinettä tarkastellessa
+        ('f_ihmettely', 'F-ihmettely', '🔍', [('wow', 'F-tarkastelu on kestänyt 2 s: 30 % todennäköisyydellä kerran (tai varmasti, kun hahmo tarkastelee uutta esinettä itsestään) – ihastunut "vau"', 'impressed wow, amazed male voice short'),
+                                             ('mmm', 'sama kuin wow (arvotaan wow tai mmm) – tyytyväinen hymähdys', 'satisfied hmm, pleased mmm male voice')])]),
 ]
 P_EV = {}
 P_CFGS = []

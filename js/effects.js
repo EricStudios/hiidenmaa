@@ -360,7 +360,8 @@ function ashAnim(m,dt){const D=m.da,f=m.f,g=f.g,t=m.deadT,r=Math.max(.35,m.def.r
 const _ashC=new THREE.Color(0x0e0c0b);
 
 /* ---------------- PELAAJA: PALAMINEN JA KUOLEMA ---------------- */
-// Palavan nuotion päällä seisova pelaaja syttyy (4 s, 4 hp/s, sade/vesi sammuttaa). Kuolema: kaatuminen ja raajojen valahtaminen,
+const FIRE_DPS_P=8,FIRE_DPS_M=10;   // v2.99 tulen vahinko 2× (ennen pelaaja 4, olennot 5 hp/s)
+// Palavan nuotion päällä seisova pelaaja syttyy (4 s, 8 hp/s, sade/vesi sammuttaa). Kuolema: kaatuminen ja raajojen valahtaminen,
 // veriläntti jää 60 s; palokuolemassa hahmo mustuu ja muuttuu tuhkakasaksi (näkyy taas herätessä).
 /* v1.97: märkä = ulkona sateessa (ei katon alla; shelterCache) tai vedessä. Märkä pelaaja EI syty lainkaan (ei ilmoitusta, ei ääntä) eikä liekki pala
    märkänä; katon alla sade ei kastele, joten sielläkin voi syttyä ja palaa. Sateen sammutus: 3 s jäähy ennen uutta syttymistä, ilmoitus enintään 12 s välein. */
@@ -374,7 +375,7 @@ function updatePlayerBurn(dt){if(P.dead)return;
   if(!P.inDun&&canIgnitePlayer()){for(const p of pieces){if(!isFirePiece(p.t)||!fireLit(p)||playTime<(p.igP||0))continue;if(dist2(p.x,p.z,P.pos.x,P.pos.z)<.8*.8&&Math.abs(P.pos.y-(p.y||0))<1.2){P.burnT=4;P.igniteCd=playTime+1;p.igP=playTime+1;   /* v2.17: sama tuli sytyttää enintään 1 s välein */if(playTime-(P.igMsgT||-99)>12){P.igMsgT=playTime;msg('Syttyit tuleen! Pois tulesta – vesi tai sade sammuttaa.','warn');}if(playTime-(P.igSnd||-99)>2.5){P.igSnd=playTime;sfx('build',1.4,.6);}break;}}}
   if(!(P.burnT>0)){if(P.fireFx){fig.g.remove(P.fireFx);P.fireFx=null;}return;}
   if(playerWet()){P.burnT=0;P.igniteCd=playTime+FIRE_CD;if(playTime-(P.exFx||-99)>2.5){P.exFx=playTime;burst(P.pos.x,P.pos.y+1,P.pos.z,0x9a9a9a,6,2);}if(playTime-(P.exMsgT||-99)>12){P.exMsgT=playTime;msg(P.inWater?'Vesi sammutti liekit.':'Sade sammutti liekit.');}return;}   // v2.73 jäähy FIRE_CD, ilmoitus enintään 12 s välein   // v2.17: efekti enintään 2,5 s välein
-  P.burnT-=dt;if(!devOn('god')){P.hp-=4*dt;P.hurtFlash=Math.max(P.hurtFlash,.2);}P.lastFire=playTime;
+  P.burnT-=dt;if(!devOn('god')){P.hp-=FIRE_DPS_P*dt;P.hurtFlash=Math.max(P.hurtFlash,.2);}P.lastFire=playTime;
   if(!P.fireFx){const g=new THREE.Group();for(let i=0;i<7;i++){const a=i/7*TAU,c=new THREE.Mesh(new THREE.ConeGeometry(.12,.45+Math.random()*.25,6),i%2?MAT.flame2:MAT.flame);c.position.set(Math.cos(a)*.22,.5+Math.random()*.9,Math.sin(a)*.18);g.add(c);}fig.g.add(g);P.fireFx=g;}
   P.fireFx.children.forEach((c,i)=>{c.scale.y=.7+.5*Math.abs(Math.sin(playTime*11+i*1.3));});
   if(Math.random()<dt*12)emitEmber(P.pos.x+(Math.random()-.5)*.5,P.pos.y+.4+Math.random()*1.4,P.pos.z+(Math.random()-.5)*.5,'spark');if(Math.random()<dt*3)smokePuff(P.pos.x,P.pos.y+1.6,P.pos.z,1,.2);

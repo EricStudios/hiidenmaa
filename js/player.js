@@ -17,6 +17,7 @@ const _qh=new THREE.Quaternion(),_qf=new THREE.Quaternion(),_qd=new THREE.Quater
 let torchFl=null,torchBarT=0,torchIgn=0,shDark=0;const torchPh=[Math.random()*TAU,Math.random()*TAU];
 const OVER_STAM=5;   // v2.67 ylikuorman kestävyyskulutus (/s)
 const SHIELD_STAM=1,SHIELD_REST=20;   // v2.85 kilven pito 1/s, uupuneena nosto vasta 20 kestävyydellä
+const AFK_NOSTR_INSP=.3;   // v2.99 esine oikeassa kädessä: rapsutuksen tilalla 30 % F-tarkastelu, 70 % hengitys ja pään pyörittely
 function updatePlayer(dt){
   if(P.dead)return;updatePlayerBurn(dt);if(P.dead)return;
   P.invul=Math.max(0,P.invul-dt);P.stagger=Math.max(0,P.stagger-dt);P.hurtFlash=Math.max(0,P.hurtFlash-dt);
@@ -24,12 +25,12 @@ function updatePlayer(dt){
   const fwd=_tmpV.set(-Math.sin(camYaw),0,-Math.cos(camYaw)),right=_tmpV2.set(Math.cos(camYaw),0,-Math.sin(camYaw));
   let mx=0,mz=0;if(state==='play'&&P.stagger<=0){if(kd('fwd'))mx+=1;if(kd('back'))mx-=1;if(kd('right'))mz+=1;if(kd('left'))mz-=1;}
   let dx=fwd.x*mx+right.x*mz,dz=fwd.z*mx+right.z*mz;const dl=Math.hypot(dx,dz);if(dl>0){dx/=dl;dz/=dl;}
-  P.blocking=state==='play'&&mouseR&&w.cat!=='hammer'&&w.cat!=='bow'&&w.cat!=='shovel'&&P.stam>0&&!P.atk;
+  P.blocking=state==='play'&&mouseR&&!!equipped('shield')&&w.cat!=='hammer'&&w.cat!=='bow'&&w.cat!=='shovel'&&P.stam>0&&!P.atk;   // v2.99 torjunta vain kilpi kädessä (ennen myös naru/tyhjä käsi)
   if(P.shTired){if(P.stam>=SHIELD_REST)P.shTired=false;else P.blocking=false;}   // v2.85 uupunut: kilpeä ei voi nostaa ennen kuin kestävyyttä on SHIELD_REST
   // v1.39 (lista 4, kohta 18): rikkinäisellä kilvellä ei voi torjua (kilpi on selässä kunnes ehjä)
   {const sh0=equipped('shield');if(P.blocking&&sh0&&sh0.shBrk!=null&&!shieldOk(sh0)){P.blocking=false;if(playTime-(P.shMsgT||-9)>1.5){P.shMsgT=playTime;const r=Math.max(0,SHIELD_FIX-(playTime-sh0.shBrk));msg(`Kilpi on rikki (${Math.floor(r/60)}:${String(Math.floor(r%60)).padStart(2,'0')})`,'warn');}}}
   const armor=equipped('armor');
-  {const c0=P.crouch;P.crouch=state==='play'&&kd('crouch')&&P.onGround&&!P.swim;if(c0&&!P.crouch)P.uncrouchT=playTime;}   // v1.39: kyykystä nousun hetki (eläimet säikähtävät 0,1 s viiveellä)
+  {const c0=P.crouch;P.inTent=!P.inDun&&!P.swim&&!devOn('noclip')&&!!tentCeil(P.pos.x,P.pos.z,P.pos.y);P.crouch=state==='play'&&kd('crouch')&&P.onGround&&!P.swim||P.inTent;   /* v2.98 teltassa pakotettu kyykky */if(c0&&!P.crouch)P.uncrouchT=playTime;}   // v1.39: kyykystä nousun hetki (eläimet säikähtävät 0,1 s viiveellä)
   let speed=4.6;const wantRun=kd('run')&&!P.crouch;
   P.running=false;
   // v1.39 (lista 4, kohta 3): ylämäkeen juoksu ja hyppy kuluttavat kestävyyttä +30 % (rinne > ~6°, jyrkemmässä enintään +60 %)
@@ -68,7 +69,7 @@ function updatePlayer(dt){
   {const jd=state==='play'&&kd('jump');if(jd&&!P.jumpHeld){if(devOn('fly')&&playTime-(P.jumpTap||-9)<.35){P.flying=!P.flying;P.vy=0;msg(P.flying?'Lento päällä (välilyönti ylös, Shift alas).':'Lento pois.');P.jumpTap=-9;}else P.jumpTap=playTime;}P.jumpHeld=jd;if(!devOn('fly'))P.flying=false;}
   const vK=DEV&&keys.KeyV?6:1;   // v1.92: V pohjassa myös lento 6× nopeampi
   if(P.flying){const fs=(keys.ControlLeft||keys.ControlRight?32:16)*vK;P.vel.x=lerp(P.vel.x,dx*fs,Math.min(1,dt*6));P.vel.z=lerp(P.vel.z,dz*fs,Math.min(1,dt*6));}
-  if(state==='play'&&kd('jump')&&P.onGround&&!P.swim&&P.stam>=8&&!over&&!P.flying){P.vy=7.2;P.onGround=false;P.stam-=8*(P.upK||1);P.stamDelay=.8;}
+  if(state==='play'&&kd('jump')&&P.onGround&&!P.swim&&P.stam>=8&&!over&&!P.flying&&!P.inTent){P.vy=7.2;P.onGround=false;P.stam-=8*(P.upK||1);P.stamDelay=.8;}
   const lad=!P.swim&&!P.dead&&ladderAt(P.pos);P.onLadder=!!lad;
   if(P.flying){P.vy=lerp(P.vy,((kd('jump')?9:0)-(keys.ShiftLeft||keys.ShiftRight?9:0))*vK,Math.min(1,dt*6));P.onGround=false;}
   else if(P.swim){if(P.swUp){const top=wy+waveAt(P.pos.x,P.pos.z)-1.3+Math.sin(playTime*1.7)*.06;P.vy=lerp(P.vy,clamp((top-P.pos.y)*2.2,-1.5,2.6),Math.min(1,dt*3));}
@@ -82,7 +83,7 @@ function updatePlayer(dt){
   if(P.kbx||P.kbz){P.pos.x+=P.kbx*dt;P.pos.z+=P.kbz*dt;const kk=Math.exp(-dt*4.5);P.kbx*=kk;P.kbz*=kk;if(Math.abs(P.kbx)+Math.abs(P.kbz)<.05)P.kbx=P.kbz=0;}
   // v1.92 DEV seinien läpi (noclip): ei törmäyksiä eikä kattoa; maa = maasto tai luolan lattia (esineiden päälle ei nousta)
   const nc=devOn('noclip');
-  if(!nc){collideXZ(P.pos,.38,1.8,feet);limbPush(feet);}   // v2.88 raajat (pää, kädet, kyynärpäät, polvet) osana osumalaatikkoa
+  if(!nc){COL_CROUCH=!!P.crouch;collideXZ(P.pos,.38,P.crouch?1.5:1.8,feet);COL_CROUCH=false;limbPush(feet);}   // v2.88 raajat (pää, kädet, kyynärpäät, polvet) osana osumalaatikkoa
   P.pos.y+=P.vy*dt;
   const ceil=nc?1e9:ceilingAt(P.pos.x,P.pos.z,.38,feet+1.8);if(P.vy>0&&P.pos.y+1.8>ceil){P.pos.y=ceil-1.8;P.vy=0;}
   const g=nc?(P.inDun?DUN.y:terrainH(P.pos.x,P.pos.z)):groundAt(P.pos.x,P.pos.z,.38,feet);
@@ -145,7 +146,10 @@ function updatePlayer(dt){
      käyrä (sstep), ja kaikki kerrotaan afkK:lla, joten liikkeelle lähtiessä kädet palaavat sulavasti. */
   if(P.idleK>.01){tLz+=brth*.035;tRz-=brth*.035;
     if(aK>0){const sw2=Math.sin(aP*.7)*.1*aK;tLx+=sw2-.06*aK;tRx-=sw2+.06*aK;tLz+=.09*aK;tRz-=.09*aK;   // kädet hieman irti reisistä (ei armClear-värinää)
-      const seg=Math.floor(aP/5.5),u=aP-seg*5.5-1.1,env=sstep(0,.8,u)*(1-sstep(2.6,3.4,u))*aK,g=['sway','scratch','sway','stretch'][seg%4];
+      const seg=Math.floor(aP/5.5),u=aP-seg*5.5-1.1,env=sstep(0,.8,u)*(1-sstep(2.6,3.4,u))*aK,g0=['sway','scratch','sway','stretch'][seg%4];let g=g0;
+      /* v2.99 käyttäjä: millä tahansa esineellä oikeassa kädessä ei selän/pään rapsutusta – vain paljaalla kädellä koko AFK-animaatio (käsi kurottaa selän taakse, esine menisi vartalon läpi) –
+         tilalle arvonta: AFK_NOSTR_INSP (30 %) F-tarkastelu, muuten (70 %) pelkkä hengitys ja pään pyörittely. Venyttely säilyy. Kerran jaksoa kohden (P.afkSeg). */
+      if(g0==='scratch'&&heldId&&ITEMS[heldId].cat!=='bow'){   /* v2.99: mikä tahansa esine oikeassa kädessä (jousi on vasemmassa) */g='sway';if(P.afkSeg!==seg){P.afkSeg=seg;if(Math.random()<AFK_NOSTR_INSP&&typeof inspectStart==='function')inspectStart(null,{afk:1});}}
       if(env>0&&g==='scratch'){tRx=lerp(tRx,-2.75,env);tRz=lerp(tRz,-.55,env);eRo=lerp(-.2,-2.25+Math.sin(aP*11)*.12*sstep(.7,1,u)*(1-sstep(2.3,2.6,u)),env);}
       if(env>0&&g==='stretch'){const o=1.25*env;tLz+=o;tRz-=o;tLx=lerp(tLx,-.15,env);tRx=lerp(tRx,-.15,env);eLo=lerp(-.15,-.05,env);eRo=lerp(-.15,-.05,env);}}}
   const hold=mouseL&&state==='play';
@@ -170,6 +174,7 @@ function updatePlayer(dt){
   if(P.drawing){tLx=-1.58;tRx=-1.5;tRz=.5;}
   if(heldMesh&&ITEMS[heldId].cat==='bow'){if(P.drawing)tLz=-.3;}
   if(P.atk)P.recT=.55;else P.recT=Math.max(0,(P.recT||0)-dt);if(!P.atk&&P.recT>0&&!P.drawing&&!P.blocking)rate=Math.min(rate,5);// iskun jälkeen kädet palaavat lepoon pehmeästi
+  inspectRestore();   // v2.99 F-tarkastelun IK ei jää käsivarren perusasennoksi (nykiminen paluussa)
   const e=Math.min(1,dt*rate);
   armSh+=(tSh-armSh)*e;fig.armL.position.x=armSh;fig.armR.position.x=-armSh;
   fig.armR.rotation.y=lerpAngle(fig.armR.rotation.y,0,e);fig.armL.rotation.y=lerpAngle(fig.armL.rotation.y,0,e);fig.armR.rotation.x=lerpAngle(fig.armR.rotation.x,tRx,e);fig.armR.rotation.z=lerpAngle(fig.armR.rotation.z,tRz,e);
@@ -199,6 +204,7 @@ function updatePlayer(dt){
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.
   P.drawK=lerp(P.drawK||0,P.drawing&&heldMesh&&ITEMS[heldId].cat==='bow'?1:0,Math.min(1,dt*14));
   {const bk=P.drawK>.01&&heldMesh&&heldMesh.userData.bow?P.drawK:0;fig.rig.rotation.y=-.55*bk;fig.head.rotation.y=.55*bk+aK*(Math.sin(aP*.55)*.6+Math.sin(aP*1.3)*.12);if(bk)bowAim(heldMesh,bk);}   // v1.22 ampuja-asento: vartalo sivuttain, pää eteen
+  inspectPose(dt);   // v2.98 F-tarkastelu (inspect.js): käsi IK:lla eteen, esine kääntyy, pää seuraa
   // Kilpi torjunnassa: käännetään (pehmeästi, blockK) osoittamaan eteenpäin – kämmenen kierto kumotaan niin että kilven normaali (x) on hahmon +z
   if(offMesh&&offId&&ITEMS[offId].cat==='shield'){P.blockK=lerp(P.blockK||0,P.blocking?1:0,Math.min(1,dt*10));
     if(P.blockK>.01){fig.g.updateMatrixWorld(true);fig.handL.getWorldQuaternion(_qh);fig.g.getWorldQuaternion(_qf);_qd.copy(_qf).multiply(_qt.setFromEuler(_eb.set(0,-Math.PI/2,0)));
@@ -296,7 +302,7 @@ function limbCapture(){if(!fig||!fig.head)return;fig.g.updateMatrixWorld(true);c
 /* pallon (x,y,z,r) tunkeutuma rakennusosiin, kiviin ja puihin: _lp = vaakasuora ulostyöntö (suurin akseleittain), palauttaa false jos ei osumaa */
 const _lp={x:0,z:0};
 function limbPen(x,y,z,r,feet){_lp.x=_lp.z=0;let hit=false;gridQuery(x,z,r+.5,_cl);
-  for(const c of _cl){if(c.maxY<=feet+STEPUP||y<c.minY-r||y>c.maxY+r)continue;
+  for(const c of _cl){if(c.maxY<=feet+STEPUP||y<c.minY-r||y>c.maxY+r||c.crouchOk&&P.crouch)continue;
     if(c.t==='c'){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),m=r+c.r;if(d<m&&d>1e-5){const k=(m-d)/d;hit=true;if(Math.abs(dx*k)>Math.abs(_lp.x))_lp.x=dx*k;if(Math.abs(dz*k)>Math.abs(_lp.z))_lp.z=dz*k;}}
     else{const cx=clamp(x,c.minX,c.maxX),cz=clamp(z,c.minZ,c.maxZ),dx=x-cx,dz=z-cz,d2=dx*dx+dz*dz;if(d2>=r*r)continue;hit=true;
       let ux,uz,dd;if(d2>1e-8){const d=Math.sqrt(d2);ux=dx/d;uz=dz/d;dd=r-d;}else{const l=x-c.minX,rr=c.maxX-x,b=z-c.minZ,f=c.maxZ-z,mn=Math.min(l,rr,b,f);ux=mn===l?-1:mn===rr?1:0;uz=mn===b?-1:mn===f?1:0;dd=mn+r;}
@@ -310,7 +316,7 @@ function limbPush(feet){if(!LIMB.length||P.swim||P.onLadder||state!=="play")retu
     let ex=e.x,ez=e.z;if(e.arm){const h=Math.hypot(ex,ez);if(h>LIMB_ARM_R){ex*=LIMB_ARM_R/h;ez*=LIMB_ARM_R/h;}}   /* ojennettu käsi työntää enintään LIMB_ARM_R:n päästä (ei metrin päähän seinästä) */
     const x=P.pos.x+ex,y=feet+e.y,z=P.pos.z+ez;if(limbPen(x,y,z,e.r,feet)){if(Math.abs(_lp.x)>Math.abs(px))px=_lp.x;if(Math.abs(_lp.z)>Math.abs(pz))pz=_lp.z;}}
   if(!px&&!pz)return;const L=Math.hypot(px,pz),k=L>LIMB_MAX?LIMB_MAX/L:1;P.pos.x+=px*k;P.pos.z+=pz*k;
-  collideXZ(P.pos,.38,1.8,feet);}   // työntö ei saa viedä rungon toisen seinän sisään
+  COL_CROUCH=!!P.crouch;collideXZ(P.pos,.38,P.crouch?1.5:1.8,feet);COL_CROUCH=false;}   // työntö ei saa viedä rungon toisen seinän sisään
 function armClear(arm,elbow,hand){let i=0;const sx=Math.sign(arm.position.x)||1;for(;i<16;i++){fig.g.updateMatrixWorld(true);if(bodyPen(hand,.07)<=0&&bodyPen(elbow,.06)<=0)break;if(arm.rotation.x>-1.45)arm.rotation.x-=.06;else arm.rotation.z+=sx*.06;}return i;}
 // Kahden nivelen IK napavektorilla (v0.72): kämmen osuu maailman pisteeseen T ja kyynärpää osoittaa luonnolliseen suuntaan (pole,
 // vanhemman eli rigin koordinaateissa; oletus alas ja ulospäin). Olkavarsi a = 0,35 m, kyynärvarsi b = 0,33 m.
@@ -426,10 +432,27 @@ function shorePoint(x,z){for(let r=1.5;r<700;r+=1.5){const n=Math.max(10,Math.ro
     for(let i=0;i<n;i++){const a=i/n*TAU,px=x+Math.sin(a)*r,pz=z+Math.cos(a)*r,h=terrainH(px,pz);if(h>=.5&&h<bh&&Math.hypot(px,pz)<seaBorder(px,pz)){bh=h;best={x:px,y:h,z:pz};}}
     if(best)return best;}return null;}
 // Hautakasa: kivet + pieni valomajakka (läpikuultava pylväs + himmeä pistevalo), joka näkyy lähellä (updateStations).
-function makeGrave(g){const m=new THREE.Group();m.add(bx(1,.5,1,mat(0x6a6862),0,.25,0),bx(.5,1.2,.2,mat(0x8f8d86),0,.9,-.3));
-  const bm=new THREE.MeshBasicMaterial({color:0x8fffee,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide});
-  const beam=new THREE.Mesh(new THREE.CylinderGeometry(.06,.3,8,8,1,true),bm);beam.position.y=4.4;m.add(beam);g.beam=beam;
+/* v2.99 käyttäjä: hienompi kuolema-arkku – kivikehä, puuarkku rautavanteineen, riimukivi hehkuvalla riimulla; keskitasosta ylöspäin (SET.detail high)
+   majakka kuten pomon saaliissa: kirkas ydin, leveä hehku, maarengas ja nousevat kipinät (graveFx). Matalalla vanha yksinkertainen pylväs. */
+const GRAVE_C=0x8fffee;let _graveRune=null;
+function makeGrave(g){const m=new THREE.Group(),st=mat(0x6e6c66),st2=mat(0x8a8780);
+  for(let i=0;i<9;i++){const a=i/9*Math.PI*2+.2,r=.72+(i%2)*.08,s=.18+((i*37)%5)*.03,o=bx(s*1.4,s,s*1.2,i%3?st:st2,Math.sin(a)*r,s/2-.02,Math.cos(a)*r);o.rotation.y=a*1.7;m.add(o);}
+  const ch=makeChest('wood',.82,.56,.56);ch.rotation.y=.12;ch.position.y=.02;m.add(ch);
+  const ir=mat(0x3d3a36,{metalness:.5,roughness:.6});for(const x of [-.27,.27])m.add(bx(.05,.6,.6,ir,x,.3,0));
+  const hs=bx(.52,1.15,.18,st2,0,.57,-.62);hs.rotation.x=-.06;m.add(hs);
+  if(!_graveRune)_graveRune=new THREE.MeshBasicMaterial({color:GRAVE_C,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false});
+  for(const [w,h,x,y] of [[.05,.5,0,.72],[.22,.04,0,.86],[.16,.04,-.05,.6]]){const r=new THREE.Mesh(new THREE.PlaneGeometry(w,h),_graveRune);r.position.set(x,y,-.525);m.add(r);}
+  const fancy=SET.detail==='high'&&+SET.mist>=1;g.fancy=fancy;   // Medium+ ja ylempänä
+  if(fancy){const H=14,add=o=>new THREE.MeshBasicMaterial({color:GRAVE_C,map:beaconTex(),transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,fog:false});
+    const bg=new THREE.Group(),core=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,H,12,1,true),add(.9)),outer=new THREE.Mesh(new THREE.CylinderGeometry(.32,.2,H,20,1,true),add(.3));core.position.y=outer.position.y=H/2+.3;
+    const ring=new THREE.Mesh(new THREE.RingGeometry(.5,.95,40),new THREE.MeshBasicMaterial({color:GRAVE_C,transparent:true,opacity:.45,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,fog:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.04;
+    bg.add(core,outer,ring);bg.renderOrder=5;m.add(bg);g.beam=bg;g.bfx={core,outer,ring};}
+  else{const bm=new THREE.MeshBasicMaterial({color:GRAVE_C,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide});
+    const beam=new THREE.Mesh(new THREE.CylinderGeometry(.06,.3,8,8,1,true),bm);beam.position.y=4.4;m.add(beam);g.beam=beam;}
   g.dim=g.dim||curDim();m.position.set(g.x,g.y,g.z);m.visible=!g.hid;scene.add(m);g.mesh=m;g.light={x:g.x,y:g.y+1.4,z:g.z,c:0x8fffee,i:1.1,dun:g.dim!=='world',on:()=>!g.hid&&(g.dim||'world')===curDim()};   /* v2.73 hid: ei näy kuolinkamerassa */lightSources.push(g.light);graves.push(g);}
+// v2.99 majakan sykkivä hehku ja kipinät (ai.js updateStations)
+function graveFx(g,dt){const B=g.bfx;if(!B){g.beam.material.opacity=.28+Math.sin(playTime*3)*.1;return;}const p=.8+.2*Math.sin(playTime*3.2+g.x);B.core.material.opacity=.9*p;B.outer.material.opacity=.3*p;B.ring.material.opacity=.42*p;B.ring.scale.setScalar(.92+.18*Math.sin(playTime*2));
+  if(Math.random()<dt*5)burst(g.x+(Math.random()-.5)*.5,g.y+.4+Math.random()*1.4,g.z+(Math.random()-.5)*.5,GRAVE_C,1,.8);}
 function graveVanish(g){const m=g.mesh;removeGrave(g,true);let t=0;burst(g.x,g.y+.4,g.z,0x6a5a44,18,4);sfx('crumble',.8,.6);
   fx.push({obj:m,t:0,update:(f,dt)=>{t+=dt;m.position.y=g.y-t*.9;m.rotation.z=Math.sin(t*9)*.05*(1-t/1.6);if(Math.random()<dt*14)burst(g.x+(Math.random()-.5),g.y+.1,g.z+(Math.random()-.5),0x5a4a36,2,2);return t>1.6;}});}
 function removeGrave(g,keepMesh){if(!keepMesh)scene.remove(g.mesh);const i=graves.indexOf(g);if(i>=0)graves.splice(i,1);const j=lightSources.indexOf(g.light);if(j>=0)lightSources.splice(j,1);}
