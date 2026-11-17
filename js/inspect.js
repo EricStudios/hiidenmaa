@@ -22,7 +22,7 @@ const INSP_AFK0=3,INSP_AFK_P=.1,INSP_CLOSE={long:'pitka_tera',heavy:'raskas_tera
 function inspectAfkTick(){const a=P.afkT||0;if(a<INSP_AFK0){INS.afk=null;return;}
   if(!INS.afk)INS.afk={at:Math.random()<INSP_AFK_P?INSP_AFK0+(Math.random()<.5?.2:5+Math.random()*5):-1};
   const A=INS.afk;if(A.at>0&&a>=A.at){A.at=-1;if(heldId&&!P.insp&&state==='play')inspectStart(INSP_CLOSE[INSP_TYPE(heldId)]);}}
-const INSP_SND_T=2,INSP_SND_P=.3,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
+const INSP_SND_T=2,INSP_SND_P=.3,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_KNIFE_BOTTLE=.001,INSP_THROW_V=.7,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
 function INSP_TYPE(id){if(!id)return 'small';const d=ITEMS[id];if(!d)return 'small';if(id==='puukko')return 'knife';
   if(/miekka/.test(id)||id==='keihas'||d.cat==='shovel')return 'long';if(d.chop||d.pick||id==='nuija')return 'heavy';return 'small';}
 const _ie=(a,b,k)=>a+(b-a)*k,_iv3=(a,b,k)=>[_ie(a[0],b[0],k),_ie(a[1],b[1],k),_ie(a[2],b[2],k)],_ism=x=>{x=clamp(x,0,1);return x*x*x*(x*(x*6-15)+10);};
@@ -65,28 +65,47 @@ const INSP_ANIMS=[
       [3.2,[-.24,1.78,.44],[0,.2,1],0,R],[3.45,[-.14,1.1,.58],[0,.1,1],0,R],[3.9,[-.12,1.3,.42],[0,.2,1],0,R],[4.6,[-.12,1.3,.42],[.1,.3,1],0,0],[5.2,KI,KID],[7,KI,[.5,.6,.65],S*1.2]],t);
     if(t>=t0&&t<t0+T){const u=(t-t0)/T,pp=_iv3(O,C,u);pp[1]+=1.3*Math.sin(Math.PI*u);pz.fly={p:pp,a:u*(Math.PI*4+R)};pz.g=0;}else if(t>=t0+T&&t<1.85)pz.g=R;
     return pz;}},
+  {id:'puukko_heitto3',n:'Kolme korkeaa heittoa putkeen',best:'puukko (puolet 5 %:n heitoista)',type:'knife',rare:'throw3',dur:6.4,f:(t,S,R)=>{
+    /* v2.99 käyttäjä: 5 %:n heiton muunnelma – kolme korkeaa heittoa peräkkäin hieman eri korkeuksille (R = arvotut korkeudet), 2 kierrosta kukin,
+       käsi laskee heiton ajaksi ja nappaa huitaisulla kiinni oikein päin; lopuksi katselu */
+    const O=[-.14,1.3,.4],C=[-.04,1.3,.44],T=.95,TS=[.45,1.75,3.05],H=R||[1.05,1.35,1.2];
+    const K=[[0,KG,KD],[TS[0],O,[0,.35,1]]];TS.forEach((ts,i)=>{K.push([ts+.25,[-.16,1.36,.4],[0,.4,1]],[ts+.6,[-.22,1.12,.38],[0,.2,1]],[ts+.8,[-.4,1.3,.32],[-.2,.3,1]],[ts+T,C,[.1,.25,1]],[ts+T+.25,O,[0,.35,1]]);});
+    K.push([4.6,KI,KID],[6.4,KI,[.5,.6,.65],S*1.2]);const pz=_ikf(K,t);
+    TS.forEach((ts,i)=>{if(t>=ts&&t<ts+T){const u=(t-ts)/T,pp=_iv3(O,C,u);pp[1]+=H[i]*Math.sin(Math.PI*u);pz.fly={p:pp,a:u*Math.PI*4,n:i};pz.g=0;}});
+    return pz;}},
   {id:'puukko_kaanto',n:'Pyöräytysheittely 180°',best:'puukko (10 %)',type:'knife',rare:'flip',dur:5.8,f:(t,S)=>{
     /* puukko pystyssä; 4 pientä heittoa, joissa se kääntyy 180° (ote vaihtuu oikea ↔ väärä), käsi notkahtaa heittojen välissä; sitten katselu */
     const H=[-.13,1.3,.42],D=[0,.8,.6],L=[-.13,1.2,.42],T=.5,TS=[.6,1.35,2.1,2.85];
     const K=[[0,KG,KD],[.4,H,D]];TS.forEach((ts,i)=>{K.push([ts,H,D,0,i*Math.PI],[ts+T*.5,L,D,0,i*Math.PI],[ts+T,H,D,0,(i+1)*Math.PI],[ts+T+.12,L,D,0,(i+1)*Math.PI]);});
     K.push([3.9,KI,KID,0,4*Math.PI],[5.8,KI,[.5,.6,.65],S*1.2,4*Math.PI]);const pz=_ikf(K,t);
-    for(let i=0;i<TS.length;i++){const ts=TS[i];if(t>=ts&&t<ts+T){const u=(t-ts)/T,pp=H.slice();pp[1]+=.34*Math.sin(Math.PI*u);pz.fly={p:pp,a:i*Math.PI+u*Math.PI};pz.g=0;}}
+    for(let i=0;i<TS.length;i++){const ts=TS[i];if(t>=ts&&t<ts+T){const u=(t-ts)/T,pp=H.slice();pp[1]+=.34*Math.sin(Math.PI*u);pz.fly={p:pp,a:i*Math.PI+u*Math.PI,n:i};pz.g=0;}}
+    return pz;}},
+  {id:'puukko_pullo',n:'Pyöritys kämmenellä (pullonpyöritys)',best:'puukko (0,1 %)',type:'knife',rare:'bottle',dur:7.6,f:(t,S)=>{
+    /* v2.99 käyttäjä: puukko asetellaan lappeelleen kämmenelle (.3–.7), vasen käsi tarttuu kärkeen ja antaa vauhtia (1,1–1,3), puukko pyörii kuin
+       pullo ja hidastuu pehmeästi (ω ∝ (1−u)², 1,25–4,3 s), pompautus ilmaan (4,6–5,1) ja kiinniotto oikein päin, lopuksi katselu */
+    const PALM=[-.07,1.28,.4],pz=_ikf([[0,KG,KD],[.6,PALM,[0,-.15,1],INSP_PALM_S],[4.55,PALM,[0,-.15,1],INSP_PALM_S],[4.85,[-.1,1.34,.45],[0,.1,1],INSP_PALM_S*.4],
+      [5.15,[-.12,1.28,.42],[0,.25,1]],[5.8,KI,KID],[7.6,KI,[.5,.6,.65],S*1.2]],t);
+    const T0=1.25,TT=3.05,W0=14,u=clamp((t-T0)/TT,0,1),th=t<T0?0:W0*TT*(1-Math.pow(1-u,3))/3;
+    const w=sstep(.3,.7,t)*(1-sstep(4.6,5.1,t)),tu=clamp((t-4.6)/.5,0,1);
+    pz.spin={th,w,h:t>4.6&&t<5.1?.26*Math.sin(Math.PI*tu):0};
+    pz.L=_ikf([[.8,[.1,1.05,.25],[0,0,1]],[1.08,[-.02,1.24,.6],[0,0,1]],[1.32,[.14,1.26,.5],[0,0,1]],[2,[.12,1.1,.3],[0,0,1]]],t).p;pz.lw=sstep(.75,1.05,t)*(1-sstep(1.4,2.1,t));
     return pz;}},
 ];
-const INS={u:0,k:0,pose:null,hy:0,hp:0,qid:new THREE.Quaternion(),bq:new THREE.Quaternion(),be:0,saved:false,flew:false};
+const INSP_PALM_S=Math.PI/2,INSP_SFLAT=Math.PI/2,INSP_KMID=.1;   // kämmen ylöspäin (käden kierto), terä lappeellaan, puukon keskikohta kahvasta
+const INS={u:0,k:0,pose:null,hy:0,hp:0,qid:new THREE.Quaternion(),bq:new THREE.Quaternion(),be:0,saved:false,bqL:new THREE.Quaternion(),beL:0,savedL:false,flew:false};
 const _ispA=new THREE.Vector3(),_ispB=new THREE.Vector3(),_ispX=new THREE.Vector3(),_ispY=new THREE.Vector3(),_ispZ=new THREE.Vector3(),_ispM=new THREE.Matrix4(),_ispQ=new THREE.Quaternion(),_ispQ2=new THREE.Quaternion(),_ispQ3=new THREE.Quaternion();
 function inspectAnimsFor(type){return INSP_ANIMS.filter(a=>a.type===type||(type==='knife'&&a.type==='small'));}
-function _ipMix(a,b,w){if(!a)return b;return {p:_iv3(a.p,b.p,w),d:_iv3(a.d,b.d,w),s:_ie(a.s||0,b.s||0,w),g:_ie(a.g||0,b.g||0,w),fly:b.fly};}
+function _ipMix(a,b,w){if(!a)return b;return {p:_iv3(a.p,b.p,w),d:_iv3(a.d,b.d,w),s:_ie(a.s||0,b.s||0,w),g:_ie(a.g||0,b.g||0,w),fly:b.fly,spin:b.spin,L:b.L,lw:(b.lw||0)*w};}
 // F: vasara kädessä → korjaa (input.js); muuten tarkastelu. id = DEV-valinta, o.auto = uusi esine (ääni varmasti)
 function inspectStart(id,o={}){if(state!=='play'||P.dead||P.swim||P.atk||P.drawing||P.carve)return false;const w=equipped('weapon');if(w&&w.cat==='hammer')return false;if(heldId&&ITEMS[heldId].cat==='bow')return false;   // jousi on vasemmassa kädessä
-  if(INS.pose&&INS.pose.fly)return false;   // puukko ilmassa: ei keskeytetä kesken heiton
+  if(INS.pose&&(INS.pose.fly||INS.pose.spin&&INS.pose.spin.w>.02))return false;   // puukko ilmassa: ei keskeytetä kesken heiton
   const type=INSP_TYPE(heldId);let a=id?INSP_ANIMS.find(x=>x.id===id):null;
   if(!a){const L=inspectAnimsFor(type).filter(x=>!x.rare&&(!P.insp||x.id!==P.insp.a.id)),r=Math.random();
-    a=type==='knife'&&r<INSP_KNIFE_THROW?INSP_ANIMS.find(x=>x.rare==='throw'):type==='knife'&&r<INSP_KNIFE_THROW+INSP_KNIFE_FLIP?INSP_ANIMS.find(x=>x.rare==='flip'):L[Math.random()*L.length|0];}
+    a=type==='knife'&&r<INSP_KNIFE_BOTTLE?INSP_ANIMS.find(x=>x.rare==='bottle'):type==='knife'&&r<INSP_KNIFE_THROW?INSP_ANIMS.find(x=>x.rare===(Math.random()<.5?'throw3':'throw')):type==='knife'&&r<INSP_KNIFE_THROW+INSP_KNIFE_FLIP?INSP_ANIMS.find(x=>x.rare==='flip'):L[Math.random()*L.length|0];}
   if(!a)return false;
   // ristiinhäivytys: uusi animaatio alkaa edellisen (tai paluuta tekevän) asennon kohdalta
   const from=INS.pose&&INS.k>.02?{p:INS.pose.p.slice(),d:INS.pose.d.slice(),s:_iwr(INS.pose.s||0),g:_iwr(INS.pose.g||0)}:null;
-  P.insp={a,t:0,S:Math.random()<.5?-1:1,item:heldId,snd:false,auto:!!o.auto,from,fk:from?INS.k:0};return true;}
+  P.insp={a,t:0,R:[.95+Math.random()*.25,1.2+Math.random()*.3,1.05+Math.random()*.25].sort(()=>Math.random()-.5),S:Math.random()<.5?-1:1,item:heldId,snd:false,auto:!!o.auto,from,fk:from?INS.k:0};return true;}
 function inspectStop(){if(P.insp)P.insp=null;}
 // joka ruutu (main.js update): keskeytys, ääni ja uuden esineen automaattinen tarkastelu
 function inspectTick(dt){const I=P.insp;
@@ -96,23 +115,33 @@ function inspectTick(dt){const I=P.insp;
   inspectAfkTick();
   const N=P.newItem;if(N&&!N.done&&state==='play'&&heldId&&heldId===N.id&&playTime-N.t<INSP_NEW_T&&(P.afkT||0)>INSP_AFK_T&&!P.atk&&!P.drawing){N.done=1;inspectStart(null,{auto:1});}}
 // v2.99 perusasennon palautus ennen käsivarren lerpiä (player.js): IK-tulos ei jää perusasennoksi
-function inspectRestore(){if(!INS.saved)return;fig.armR.quaternion.copy(INS.bq);fig.elbowR.rotation.x=INS.be;INS.saved=false;}
+function inspectRestore(){if(INS.savedL){fig.armL.quaternion.copy(INS.bqL);fig.elbowL.rotation.x=INS.beL;INS.savedL=false;}if(!INS.saved)return;fig.armR.quaternion.copy(INS.bq);fig.elbowR.rotation.x=INS.be;INS.saved=false;}
 function _heldReset(){if(!heldMesh)return;const U=heldMesh.userData;if(U.ip0)heldMesh.position.copy(U.ip0);if(U.iq0)heldMesh.quaternion.copy(U.iq0);}
 // asennon jälkeen (player.js): käsi IK:lla, esineen suunta ja ote, pää seuraa; INS.k pehmentää sisään ja ulos
 function inspectPose(dt){const I=P.insp;INS.u=clamp(INS.u+(I?dt/INSP_IN:-dt/INSP_OUT),0,1);INS.k=_ism(INS.u);
-  if(I){let pz=I.a.f(I.t,I.S);if(I.from){const w=_ism(I.t/INSP_XF);pz=_ipMix(I.from,pz,w);if(w>=1)I.from=null;}INS.pose=pz;}
+  if(I){let pz=I.a.f(I.t,I.S,I.R);if(I.from){const w=_ism(I.t/INSP_XF);pz=_ipMix(I.from,pz,w);if(w>=1)I.from=null;}INS.pose=pz;}
   if(INS.k<=0||!INS.pose){if(!I){INS.pose=null;fig.hand.quaternion.identity();}if(INS.flew){_heldReset();INS.flew=false;}return;}
   const k=INS.k,pz=INS.pose;
+  {const fk=pz.fly?(pz.fly.n??0)+'|'+(I?I.a.id:''):pz.spin&&pz.spin.h>0?'pop|'+(I?I.a.id:''):null;if(fk&&fk!==INS.flyK&&I&&k>.5)plSnd('lyonnit','huitaisu',{v:INSP_THROW_V,p:1.1});INS.flyK=fk;}   // v2.99 huitaisuääni jokaisesta heitosta (−30 %)
   INS.bq.copy(fig.armR.quaternion);INS.be=fig.elbowR.rotation.x;INS.saved=true;   // perusasento talteen (palautus seuraavan ruudun alussa)
   fig.g.updateMatrixWorld(true);armIK(fig.armR,fig.elbowR,fig.g.localToWorld(_ispA.set(pz.p[0],pz.p[1],pz.p[2])),k,_poleR);
+  if(pz.L&&pz.lw>0){INS.bqL.copy(fig.armL.quaternion);INS.beL=fig.elbowL.rotation.x;INS.savedL=true;armIK(fig.armL,fig.elbowL,fig.g.localToWorld(_ispA.set(pz.L[0],pz.L[1],pz.L[2])),k*pz.lw);}   // v2.99 vasen käsi (pullonpyöritys)
   // esineen kanta kehon koordinaateissa: z = suunta, y = ylös (kohtisuora), kierto s akselin ympäri
   _ispZ.set(pz.d[0],pz.d[1],pz.d[2]).normalize();_ispY.set(0,1,0);if(Math.abs(_ispZ.y)>.95)_ispY.set(0,0,-1);_ispX.crossVectors(_ispY,_ispZ).normalize();_ispY.crossVectors(_ispZ,_ispX).normalize();
   _ispM.makeBasis(_ispX,_ispY,_ispZ);_ispQ.setFromRotationMatrix(_ispM);_ispQ.multiply(_ispQ2.setFromAxisAngle(_ispB.set(0,0,1),pz.s||0));
   fig.armR.updateMatrixWorld(true);fig.g.getWorldQuaternion(_ispQ3);_ispQ.premultiply(_ispQ3);fig.hand.parent.getWorldQuaternion(_ispQ2);_ispQ.premultiply(_ispQ2.invert());fig.hand.quaternion.copy(INS.qid).slerp(_ispQ,k);
   // esine: ote (g) ja lento irti kädestä (fly)
   if(heldMesh&&heldMesh.parent===fig.hand){const U=heldMesh.userData;if(!U.ip0){U.ip0=heldMesh.position.clone();U.iq0=heldMesh.quaternion.clone();}
+    if(pz.spin&&pz.spin.w*k>0){const sp=pz.spin,w=sp.w*k;fig.hand.updateMatrixWorld(true);
+      /* lappeellaan pyörivä puukko: maailman asento = keho · kierto pystyakselin ympäri · kanta (eteen, terä vaakaan) · iq0; käden koordinaatteihin */
+      _ispZ.set(0,0,1);_ispY.set(0,1,0);_ispX.set(1,0,0);_ispM.makeBasis(_ispX,_ispY,_ispZ);_ispQ.setFromRotationMatrix(_ispM).multiply(_ispQ2.setFromAxisAngle(_ispB.set(0,0,1),INSP_SFLAT));
+      _ispQ.premultiply(_ispQ2.setFromAxisAngle(_ispB.set(0,1,0),sp.th));fig.g.getWorldQuaternion(_ispQ3);_ispQ.premultiply(_ispQ3).multiply(U.iq0);
+      fig.hand.getWorldQuaternion(_ispQ2);_ispQ.premultiply(_ispQ2.invert());heldMesh.quaternion.copy(U.iq0).slerp(_ispQ,w);
+      fig.hand.getWorldPosition(_ispA);_ispB.set(0,1,0).applyQuaternion(_ispQ3);_ispA.addScaledVector(_ispB,.045+sp.h);
+      _ispB.set(Math.sin(sp.th),0,Math.cos(sp.th)).applyQuaternion(_ispQ3);_ispA.addScaledVector(_ispB,-INSP_KMID);heldMesh.position.copy(U.ip0).lerp(fig.hand.worldToLocal(_ispA),w);INS.flew=true;}
+    else{
     const ga=_iwr(pz.fly?pz.fly.a:pz.g||0)*k;   /* kierrokset pois → paluussa esine ei pyöri */if(ga||pz.fly||INS.flew){heldMesh.quaternion.copy(U.iq0).premultiply(_ispQ2.setFromAxisAngle(_ispB.set(1,0,0),ga));
-      if(pz.fly&&k>.5){fig.hand.updateMatrixWorld(true);heldMesh.position.copy(fig.hand.worldToLocal(fig.g.localToWorld(_ispA.set(pz.fly.p[0],pz.fly.p[1],pz.fly.p[2]))));}else heldMesh.position.copy(U.ip0);INS.flew=true;}}
+      if(pz.fly&&k>.5){fig.hand.updateMatrixWorld(true);heldMesh.position.copy(fig.hand.worldToLocal(fig.g.localToWorld(_ispA.set(pz.fly.p[0],pz.fly.p[1],pz.fly.p[2]))));}else heldMesh.position.copy(U.ip0);INS.flew=true;}}}
   // pää katsoo hieman alas ja seuraa esineen keskikohtaa (lennossa itse esinettä); oma pehmennys → ei hyppyjä
   const ty=INSP_TYPE(I?I.item:heldId),len=ty==='long'||ty==='heavy'?.42:.12,c=pz.fly?pz.fly.p:[pz.p[0]+_ispZ.x*len,pz.p[1]+_ispZ.y*len,pz.p[2]+_ispZ.z*len],hx=0,hy=1.62,hz=.06;
   const yaw=clamp(Math.atan2(c[0]-hx,c[2]-hz),-.75,.75),pit=clamp(Math.atan2(hy-c[1],Math.hypot(c[0]-hx,c[2]-hz))*.85+.12,-.55,.7),hk=Math.min(1,dt*(pz.fly?9:4.5));
