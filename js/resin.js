@@ -14,7 +14,7 @@
    RESIN_MAX = vanhojen tallennusten oletus (e.cap puuttuu). */
 const RESIN_CAP_MIN=10,RESIN_CAP_MAX=50,RESIN_S_MAX=2.0;
 const RESIN_P=.03,RESIN_MIN_S=.75,RESIN_MAX=20,RESIN_T=3600,RESIN_FADE=120,CARVE_T=10,RESIN_G_R=80,RESIN_VIS_R=40;
-const RES={vis:new Map(),flagsRef:null,t:0,near:[],sndT:0};
+const RES={vis:new Map(),flagsRef:null,t:0,near:[],sndT:0,fallen:new Map()};
 function resinHash(id){let h=Math.imul((id|0)+1,2654435761)^Math.imul(((typeof SEED==='number'?SEED:0)|0)+7,40503);h^=h>>>15;h=Math.imul(h,2246822507);h^=h>>>13;h=Math.imul(h,3266489909);h^=h>>>16;return (h>>>0)/4294967296;}
 function resinKind(n){return !!n&&n.def&&n.def.kind==='tree'&&(n.type==='manty'||n.type==='kuusi')&&!n.isLog&&!n.dun;}
 function resinEligible(n){return resinKind(n)&&n.s>=RESIN_MIN_S;}
@@ -112,14 +112,18 @@ function resinTick(dt,td=dt){   // td = pelin ajan nopeus (kertymä ja hiipumine
   const st=flags.resin;if(st)for(const id in st){const e=st[id];
     if(e.b&&(e.tot||0)<eCap(e)){const add=Math.min(eCap(e)-(e.tot||0),td*eCap(e)/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;}
     if((e.tot||0)>=eCap(e)&&!e.done){e.fade=Math.min(1,(e.fade||0)+td/RESIN_FADE);if(e.fade>=1)e.done=1;}}
-  RES.t-=dt;if(RES.t<=0){RES.t=.25;resinVisTick();}}
+  RES.t-=dt;if(RES.t<=0){RES.t=.25;resinVisTick();for(const [id,r] of RES.fallen)if(playTime-r.t>30){if(r.v&&!r.v.attached)resinVisFree(r.v);RES.fallen.delete(id);}}
+  resinSwayTick();}
 // solmu kaatui (resources.js killNode): kulho, naru ja pihkat maahan, ilmoitus
-function resinKilled(n){const st=flags&&flags.resin;if(!st||!st[n.id])return;const e=st[n.id];delete st[n.id];if(P.carve&&P.carve.id===n.id)P.carve=null;resinVisDrop(n.id);
+function resinKilled(n){const vv=RES.vis.get(n.id);if(vv){RES.vis.delete(n.id);}const st=flags&&flags.resin,e0=st&&st[n.id];
+  /* v2.96 kaatuva puu: kuvio (tai pihkavalumat) jää talteen fallTree:lle (resinFallAttach) ja tukin läiskälle (resinLogMark) */
+  if(vv||e0)RES.fallen.set(n.id,{v:vv||null,e:e0?{...e0}:null,t:playTime});
+  if(!e0)return;const e=e0;delete st[n.id];if(P.carve&&P.carve.id===n.id)P.carve=null;
   if(!e.b)return;const k=Math.floor(e.acc||0),y=resinBase(n)+.3;spawnDrop('kulho',1,n.x+.6,y,n.z);spawnDrop('naru',1,n.x-.5,y,n.z+.3);if(k>0)spawnDrop('pihka',k,n.x,y,n.z+.6);
   msg(`${n._storm?'Myrsky kaatoi pihkapuusi':'Pihkapuusi kaatui'} – kulho, naru${k>0?` ja ${k} pihkaa`:''} putosivat maahan.`,'warn');}
 
 /* ---------- ulkoasu ---------- */
-const RES_MAT={hint:mat(0x9a7a38),amber:mat(0xd9a03a,{emissive:0x3a2200}),bark:mat(0x9a5a2c),groove:mat(0xe8c896),bowl:mat(0xa8743e),rope:mat(0xb09a6c),fill:mat(0xd9962a,{emissive:0x2a1800})};
+const RES_MAT={hint:mat(0x9a7a38),amber:mat(0xb8893c,{emissive:0x1a0f00}),bark:mat(0x8a5028),groove:mat(0xbf9e72),bowl:mat(0xa8743e),rope:mat(0xb09a6c),fill:mat(0xe8b23a,{emissive:0x2a1a00}),fillO:mat(0xd9802a,{emissive:0x241000})};   // v2.96 urat himmeämmät; kulhon pihka keltainen + oranssi
 function resinClearVis(){for(const v of RES.vis.values())resinVisFree(v);RES.vis.clear();}
 function resinVisDrop(id){const v=RES.vis.get(+id);if(v){resinVisFree(v);RES.vis.delete(+id);}}
 function resinVisFree(v){scene.remove(v.g);v.g.traverse(o=>{if(o.isMesh){o.geometry.dispose();if(o.material.userData.own)o.material.dispose();}});}
@@ -129,6 +133,21 @@ function resinVisTick(){if(P.inDun){if(RES.vis.size)resinClearVis();return;}
     const key=resinVisKey(n,e),v=RES.vis.get(n.id);if(v&&v.key===key)continue;if(v)resinVisFree(v);RES.vis.set(n.id,resinBuild(n,e,key));}
   for(const [id,v] of RES.vis)if(!want.has(id)){resinVisFree(v);RES.vis.delete(id);}}
 function resinVisKey(n,e){return e?[Math.floor((e.c||0)*24),e.b?1:0,Math.floor((e.fade||0)*10),Math.min(10,Math.floor((e.acc||0)/eCap(e)*10)),e.done?1:0,n.x.toFixed(2),n.z.toFixed(2)].join('|'):'h|'+n.x.toFixed(2)+'|'+n.z.toFixed(2);}
+// kuvion mitat (rungon pinnalla, korkeudet tyvestä)
+function resinGeom(n){const hw=resinHW(n),th=resinTrunkH(n),y0=Math.max(.4,Math.min(.55,th-1.2)),y1=Math.min(1.55,th-.15);return {hw,th,y0,y1,W:hw*2*.84};}
+/* v2.96 kaatuminen: kuvio ja kulho liitetään kaatuvaan puuhun (state.js fallTree) → kaatuvat mukana */
+function resinFallAttach(n,g){const r=RES.fallen.get(n.id);if(!r||!r.v)return;g.updateMatrixWorld(true);r.v.g.updateMatrixWorld(true);g.attach(r.v.g);r.v.attached=1;}
+/* v2.96 tukkiin jää kaiverruksen kohdalle tumma läiskä (resources.js spawnLogs → ensimmäinen tukki) */
+function resinLogMark(n,a,lg){const r=RES.fallen.get(n.id);RES.fallen.delete(n.id);if(!r||!r.e||!((r.e.c||0)>0)||!lg)return;const G=resinGeom(n),hm=(G.y0+G.y1)/2,ea=r.e.a||0;
+  const fx=Math.sin(a),fz=Math.cos(a),nx=Math.sin(ea),nz=Math.cos(ea),sd=nx*Math.cos(a)-nz*Math.sin(a),v=-(nx*fx+nz*fz),th=Math.atan2(v,sd);
+  const mid=(Math.hypot(lg.ax-n.x,lg.az-n.z)+Math.hypot(lg.bx-n.x,lg.bz-n.z))/2,z=clamp(hm-mid,-lg.len/2+.2,lg.len/2-.2);
+  logPatch(lg,th,z,.03,G.W*.5*Math.min(1,r.e.c*1.5),(G.y1-G.y0)*.5*Math.min(1,r.e.c*1.2),0x3a2414);}
+/* v2.96 huojunta: sama siirtymä kuin puiden varjostimessa (resources.js treeMat, SWAY) kuvion keskikorkeudella → kuvio ja kulho pysyvät rungossa */
+function resinSwayTick(){if(!RES.vis.size)return;const t=SWAY.uTime.value,uw=SWAY.uWind.value,ul=SWAY.uLean.value,W=SWAY.uWDir.value;
+  for(const [id,v] of RES.vis){const n=resinNode(id);if(!n)continue;const G=resinGeom(n),hl=((G.y0+G.y1)/2)/n.s,swH=Math.max(0,hl-1.5),by=resinBase(n);
+    if(swH<=0){v.g.position.set(n.x,by,n.z);continue;}const ph=n.x*.13+n.z*.11,r=n.rot||0,c=Math.cos(r),s=Math.sin(r);
+    let dx=Math.sin(t*1.7+ph)*uw*swH*.05,dz=Math.cos(t*1.3+ph)*uw*swH*.035;const lx=W.x*c-W.z*s,lz=W.x*s+W.z*c,ll=Math.hypot(lx,lz)||1,lean=ul*swH*Math.min(swH,5)*.016*(1+.35*Math.sin(t*1.9+ph));
+    dx+=lx/ll*lean;dz+=lz/ll*lean;v.g.position.set(n.x+(dx*c+dz*s)*n.s,by,n.z+(-dx*s+dz*c)*n.s);}}
 function resinBuild(n,e,key){const g=new THREE.Group(),hw=resinHW(n),by=resinBase(n),th=resinTrunkH(n);g.position.set(n.x,by,n.z);g.userData.resin=1;
   const add=(w,h,d,m,x,y,z,rz)=>{const me=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);me.position.set(x,y,z);if(rz)me.rotation.z=rz;me.castShadow=false;me.receiveShadow=true;g.add(me);return me;};
   // kellertävä pinta: pienet pihkavalumat kahdella sivulla (ainoa tuntomerkki)
@@ -138,7 +157,7 @@ function resinBuild(n,e,key){const g=new THREE.Group(),hw=resinHW(n),by=resinBas
   // kuvio omassa ryhmässä kaiverrussivun suuntaan (paikallinen +z = ulospäin rungosta)
   const P0=new THREE.Group();P0.rotation.y=(e.a||0)-(g.rotation.y||0);g.add(P0);
   const fade=e.fade||0,op=1-fade,own=m=>{if(op>=.999)return m;const c=m.clone();c.transparent=true;c.opacity=op;c.depthWrite=false;c.userData.own=1;return c;};
-  const y0=Math.max(.4,Math.min(.55,th-1.2)),y1=Math.min(1.55,th-.15),H=y1-y0,W=hw*2*.84,z=hw+.004,c=e.c||0;
+  const G0=resinGeom(n),y0=G0.y0,y1=G0.y1,H=y1-y0,W=G0.W,z=hw+.004,c=e.c||0;
   const addP=(w,h,d,m,x,y,zz,rz)=>{const me=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);me.position.set(x,y,zz);if(rz)me.rotation.z=rz;me.castShadow=false;me.receiveShadow=true;P0.add(me);return me;};
   const flow=e.b&&(e.tot||0)<eCap(e);
   // kuorittu alue kasvaa ylhäältä alas (0–30 %), urat ylhäältä alas (30–90 %), keskikouru lopuksi (90–100 %)
@@ -150,7 +169,9 @@ function resinBuild(n,e,key){const g=new THREE.Group(),hw=resinHW(n),by=resinBas
   // kulho narulla rungon ympärillä
   if(e.b){const by0=y0-.08,bm=RES_MAT.bowl;const b=new THREE.Mesh(new THREE.CylinderGeometry(.1,.065,.08,10,1,true),bm);b.material.side=THREE.DoubleSide;b.position.set(0,by0,z+.09);P0.add(b);
     const bot=new THREE.Mesh(new THREE.CylinderGeometry(.065,.065,.01,10),bm);bot.position.set(0,by0-.04,z+.09);P0.add(bot);
-    const lv=Math.min(1,(e.acc||0)/eCap(e));if(lv>.02){const f=new THREE.Mesh(new THREE.CylinderGeometry(.065+.033*lv,.065+.033*lv,.006,10),RES_MAT.fill);f.position.set(0,by0-.035+.07*lv,z+.09);P0.add(f);}
+    /* v2.96 täyttö puun pihkamäärän mukaan: kun koko puun pihka on kulhossa, kulho on täynnä (keltainen, oransseja juovia) */
+    const lv=Math.min(1,(e.acc||0)/eCap(e));if(lv>.02){const hh=.072*lv,rr=.066+.032*lv,f=new THREE.Mesh(new THREE.CylinderGeometry(rr,.066,hh,10),RES_MAT.fill);f.position.set(0,by0-.036+hh/2,z+.09);P0.add(f);
+      for(const [ox,oz,r0] of [[.02,.01,.035],[-.03,-.015,.022]]){const o=new THREE.Mesh(new THREE.CylinderGeometry(r0*lv+.008,r0*lv+.008,.004,8),RES_MAT.fillO);o.position.set(ox*lv,by0-.036+hh+.002,z+.09+oz*lv);P0.add(o);}}
     const rw=hw+.012,ry=by0+.03;addP(rw*2+.02,.018,.018,RES_MAT.rope,0,ry,rw);addP(rw*2+.02,.018,.018,RES_MAT.rope,0,ry,-rw);addP(.018,.018,rw*2+.02,RES_MAT.rope,rw,ry,0);addP(.018,.018,rw*2+.02,RES_MAT.rope,-rw,ry,0);
     for(const sd of [-1,1])addP(.012,.07,.012,RES_MAT.rope,sd*.08,by0+.01,z+.05);}
   scene.add(g);return {g,key};}

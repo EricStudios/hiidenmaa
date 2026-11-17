@@ -384,7 +384,7 @@ function spawnLogs(n,a){
     for(let t=0;t<=len;t+=.9){const px=ax+(bx-ax)*t/len,pz=az+(bz-az)*t/len;lg.cols.push(addCircle(px,pz,rad,y-1,y+rad*1.8,lg));}
     lg.gk=[];const ks=new Set();for(let t=0;t<=len;t+=2){ks.add(ck(Math.floor((ax+(bx-ax)*t/len)/CELL),Math.floor((az+(bz-az)*t/len)/CELL)));}ks.add(ck(Math.floor(bx/CELL),Math.floor(bz/CELL)));
     for(const k of ks){let arr=NGRID.get(k);if(!arr)NGRID.set(k,arr=[]);arr.push(lg);lg.gk.push(k);}
-    logs.push(lg);}
+    logs.push(lg);if(i===0&&typeof resinLogMark==='function')resinLogMark(n,a,lg);}   // v2.96 kaiverruksen jälki tukkiin
 }
 function removeLog(lg){lg.alive=false;scene.remove(lg.mesh);lg.mesh.geometry.dispose();for(const c of lg.cols)gridRemove(c);ngridRemove(lg);const i=logs.indexOf(lg);if(i>=0)logs.splice(i,1);}
 function clearLogs(){for(const lg of [...logs])removeLog(lg);}

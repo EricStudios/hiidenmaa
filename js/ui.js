@@ -167,6 +167,16 @@ function renderDev(){const B=$('#devBody');if(!B)return;const clk=()=>{const h=d
     if(k==='noclip'&&!DEVF.noclip&&!P.flying)P.vy=0;msg(`DEV: ${b.querySelector('b').textContent} ${DEVF[k]?'päällä':'pois'}.`,'loot');invDirty=true;renderDev();});
   B.querySelectorAll('[data-heal]').forEach(b=>b.onclick=()=>{P.hp=maxHp();P.stam=100;P.hunger=100;P.burnT=0;P.dead=false;msg('DEV: terveys, kestävyys ja kylläisyys täynnä.','loot');renderDev();});
   $('#devMap').onclick=()=>{devRevealMap();msg('Kartta ja kaikki kohteet paljastettu.','loot');};}
+/* v2.96 DEV-valikon elävät arvot: kello, terveys, kylläisyys, sää, nopeudet ja isot kytkimet seuraavat peliä (5×/s), paitsi juuri vedettävä liukusäädin. */
+let devLiveT=0;
+function devLiveTick(dt){if(openPanel!=='dev')return;devLiveT-=dt;if(devLiveT>0)return;devLiveT=.2;const B=$('#devBody');if(!B)return;
+  const drag=id=>sldDrag&&sldDrag.el&&sldDrag.el.id===id,h=dayT*24,sl=(id,v,lab,txt,max)=>{const el=document.getElementById(id);if(!el||drag(id))return;if(max!==undefined)el.dataset.max=max;sldSet(el,v);const L=document.getElementById(lab);if(L)L.textContent=txt;};
+  sl('devT',dayT,'devClk',`${Math.floor(h)}:${String(Math.floor(h%1*60)).padStart(2,'0')}`);
+  sl('devHp',Math.round(P.hp),'devHpV',`${Math.round(P.hp)} / ${maxHp()}`,maxHp());
+  sl('devHu',Math.round(P.hunger),'devHuV',`${Math.round(P.hunger)}`);
+  B.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('on',b.dataset.w===weather.cur));
+  B.querySelectorAll('[data-spd]').forEach(b=>b.classList.toggle('on',+b.dataset.spd===worldSpd()));B.querySelectorAll('[data-tspd]').forEach(b=>b.classList.toggle('on',+b.dataset.tspd===timeSpd()));
+  B.querySelectorAll('[data-big]').forEach(b=>{const on=!!DEVF[b.dataset.big];b.classList.toggle('on',on);const sp=b.querySelector('span');if(sp)sp.textContent=sp.textContent.replace(/^(PÄÄLLÄ|pois)/,on?'PÄÄLLÄ':'pois');});}
 let devQ='',devN=1;
 const WIND_WARN=8;   // v2.01 tuulivaroituksen raja (m/s)
 /* v2.00 DEV-valikko Å: esineet. Pikavalinnat (yksi painallus antaa ehdotetun määrän, "Anna kaikki" kaikki kerralla) + esinehaku määrällä. */

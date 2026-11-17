@@ -586,6 +586,17 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.96 pihkakuvio kaatuu puun mukana + tumma läiskä tukkiin, huojunta, kulho täyttyy puun pihkamäärän mukaan, DEV-valikon elävät arvot',()=>{
+    const om=msg;msg=()=>{};let res,n=null;const R0=JSON.stringify(flags.resin||{}),L0=logs.length;
+    try{n=nodes.filter(q=>isResinTree(q)&&q.s>=SMALL_TREE+.1).sort((a,b)=>Math.hypot(a.x-P.pos.x,a.z-P.pos.z)-Math.hypot(b.x-P.pos.x,b.z-P.pos.z))[0];
+      const st=resinStore();st[n.id]={c:1,acc:resinCap(n),tot:resinCap(n),q:1,a:n.rot||0,b:1,cap:resinCap(n)};const p0=P.pos.clone();P.pos.set(n.x+8,P.pos.y,n.z);resinVisTick();P.pos.copy(p0);const v=RES.vis.get(n.id);
+      const a=!!v&&/eCap\(e\)/.test(resinBuild.toString())&&/fillO/.test(resinBuild.toString());
+      resinSwayTick();const b=typeof resinSwayTick==='function'&&Math.abs(v.g.position.x-n.x)<.2;
+      killNode(n);fallTree(n,(n.rot||0)+1.2,false);const c=!!(v.g.parent&&v.g.parent!==scene);for(let i=0;i<240;i++)updateFx(1/30);const nl=logs.slice(L0);const d=nl.length>0&&nl[0].mesh.children.length>=1;
+      const e=typeof devLiveTick==='function'&&/devLiveTick/.test(update.toString())&&/sldDrag/.test(devLiveTick.toString());
+      res=a&&b&&c&&d&&e||`virhe kulho ${a} huojunta ${b} kaatuu ${c} läiskä ${d} dev ${e}`;}
+    finally{msg=om;for(const lg of logs.slice(L0))removeLog(lg);flags.resin=JSON.parse(R0);if(n&&!n.alive)reviveNode(n);RES.fallen.clear();}
+    return res;});
   t('v2.95 pihkaa puun koon mukaan 10–50 (1 h), kaadosta vain lajin suurimmista enintään 1 (25 %), välkkyvät mallipinnat korjattu',()=>{
     const a=resinCap({s:RESIN_MIN_S})===10&&resinCap({s:2})===50&&resinCap({s:1.375})===30;
     const kz=nodes.filter(n=>n.type==='kuusi'),big=fellBigS('kuusi');let sm=0,lg=0,N=4000;const small=kz.find(n=>n.s<big),large=kz.find(n=>n.s>=big);

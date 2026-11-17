@@ -263,6 +263,7 @@ function fallTree(n,dir,crush,src){const g=new THREE.Group();const m=new THREE.M
       else{const lf=new THREE.Mesh(new THREE.IcosahedronGeometry(L*.3,0),lm);lf.position.x=L*.85;lf.castShadow=true;b.add(lf);
 }}
     b.position.set(Math.cos(phi)*.12*n.s,h,-Math.sin(phi)*.12*n.s);b.rotation.set(0,phi,tilt);g.add(b);brs.push(b);b.userData.det=.3+rng()*.6;}
+  if(typeof resinFallAttach==='function')resinFallAttach(n,g);   // v2.96 pihkakuvio kaatuu puun mukana
   fx.push({obj:g,t:0,update:(f,dt)=>{const k=Math.min(1,f.t/dur);g.rotation.set(0,0,0);g.rotateOnWorldAxis(_tmpV.set(Math.cos(a),0,-Math.sin(a)),Math.pow(k,2.6)*Math.PI/2);
     for(const b of brs)if(!b.userData.off&&k>=b.userData.det&&k<1){b.userData.off=1;g.updateMatrixWorld(true);dropBranch(b,Math.sin(a)*k*4,Math.cos(a)*k*4);}
     if(f.t>dur&&!f.dropped){f.dropped=1;{const dd=Math.hypot(P.pos.x-n.x,P.pos.z-n.z);sfx('thud',1/clamp(n.s,.7,1.6),clamp(1.15-dd/90,.12,1));}if(crush)crushPlayer(n,a,src);

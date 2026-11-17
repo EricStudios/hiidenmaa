@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='2.95';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='2.96';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -229,7 +229,7 @@ function update(dt){
   lightT-=dt;if(lightT<=0){lightT=.4;updateLights();}
   slowT-=dt;if(slowT<=0){slowT=1;exploreTick();updateGoals();if(Math.floor(playTime)%5===0)respawnNodes();if(isNight()&&!P.inDun)nightRegrow();}
   saveT+=dt;if(saveT>120){saveT=0;saveGame(true);}   // v1.35 (kohta 21): automaattitallennus 2 min välein
-  updateZone(dt);updateHUD(dt);
+  updateZone(dt);updateHUD(dt);if(DEV)devLiveTick(dt);   // v2.96 DEV-valikon elävät arvot
 }
 /* v1.15 (lista 2, kohta 6): valikon taustakamera näyttää satunnaisia kohteita lähikuvina: luontokohteet (biomit, järvi), hylätty
    leiri päivällä ja yöllä (nuotio palaa) ja eläimiä (kamera seuraa). 20 s per kohde, hidas 30° kierto ja hieman laskeutuen, vaihto
