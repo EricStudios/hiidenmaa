@@ -49,7 +49,10 @@ SPLIT_EV = {'hytina': dict(k=8, gap=.9, seg_max=2.5), 'kipu_tuli': dict(k=8, gap
 PEAK_EV = {'heinasirkat': -9.0}   # v2.86 huippu dBFS (tasainen taso kaikille pätkille)
 CHUNK_EV = {'puiden_humina': dict(n=6, ln=22.0)}   # v2.86 pitkästä humina-nauhoituksesta tasavälein n pätkää (ln s) – peli soittaa hiljaa reiluin häivytyksin
 NOCUT_EV = {'salama', 'tausta_myrsky'}   # v2.86 salaman kaiku saa jäädä kokonaan: ei loppuleikkausta eikä pituusrajaa; alusta vain lähes hiljainen osa (−60 dB)
-_pv0 = lambda ev: f'{PV_T}pk2' if ev in PEAK_EV else f'{PV_T}nc1' if ev in NOCUT_EV else f'{PV_T}c1' if ev in CHUNK_EV else f'{PV_T}w1' if ev in WHOLE_LOOP else f'{PV_T}t3' if ev in TIGHT_EV else f'{PV_T}n2' if ev in NOISE_EV else f'{PV_T}s1' if ev in SPLIT_EV else PV_T
+LOOP_XF = {'aallot_rauhallinen': 3.0, 'aallot_kovat': 3.0}   # v2.87 silmukan saumahäivytys s (oletus 0,25)
+MID_EV = {'ovi_narina': 0.85}   # v2.87 käyttäjä: narina raa'an KESKELTÄ (ei alkuosaa) – pätkän pituus s ≈ oven kääntyminen 0,6 s + häivytys
+ATTACK_EV = {'ovi_avaus', 'ovi_kiinni'}   # v2.87 käyttäjä: alku tarkasti iskuun (alun kynnys −30 dB huipusta, loppu tavallisesti)
+_pv0 = lambda ev: f'{PV_T}xf1' if ev in LOOP_XF else f'{PV_T}md1' if ev in MID_EV else f'{PV_T}at2' if ev in ATTACK_EV else f'{PV_T}pk2' if ev in PEAK_EV else f'{PV_T}nc1' if ev in NOCUT_EV else f'{PV_T}c1' if ev in CHUNK_EV else f'{PV_T}w1' if ev in WHOLE_LOOP else f'{PV_T}t3' if ev in TIGHT_EV else f'{PV_T}n2' if ev in NOISE_EV else f'{PV_T}s1' if ev in SPLIT_EV else PV_T
 # v2.72 nopeat kertaäänet: alkuun jää 3 ms hiljaisuutta (ennen 20 ms) → kaikki kertaäänet käsitellään kerran uudelleen (q1); silmukat ja musiikki ennallaan
 QUICK_SKIP = lambda ev: ev in MUSIC_EV or ev in LOOP_EV or ev in ACT_EV or ev in AMB_LOOPS or ev in ('sydan', 'hengastys')
 pv_of = lambda ev: _pv0(ev) if QUICK_SKIP(ev) else f'{_pv0(ev)}q5'   # q2 tarkka kestomittaus, q4 askeleet −48 dB (−38 dB siirsi pitkän suonauhoituksen pätkiä), q5 alun pehmennys 3 ms   # tiukan trimmauksen ja kohinakorjauksen äänet käsitellään kerran uudelleen
@@ -270,6 +273,19 @@ def natural_end(ff, wav, d, cap, cap_long, win=0.1, drop=30.0, gap=3):
     return (round(best + 0.05, 3), False) if best else (cap_long, True)
 
 
+def attack_start(ff, wav, win=0.005, below=8.0, pre=0.004):
+    """v2.87 oven isku: ensimmäinen 5 ms ikkuna, joka on alle `below` dB voimakkaimmasta (mitattu ylipäästön JÄLKEEN – raa'an alun
+    infrabasso ei kuulu); palauttaa alun sekunteina (pre s ennen iskua) tai None."""
+    lv = levels(ff, wav, win)
+    if not lv:
+        return None
+    m = max(lv)
+    for i, v in enumerate(lv):
+        if v >= m - below:
+            return max(0.0, round(i * win - pre, 3))
+    return None
+
+
 def event_end(ff, wav, win=0.025, drop=20.0, hold=4):
     """v1.97: osuma-äänen (hurt) loppuhäntä pois. Etsii ensimmäisen tapahtuman lopun: kohdan, jossa taso (RMS, 25 ms ikkunat) on pysyvästi
     (hold ikkunaa) yli `drop` dB kulkevan huipun alapuolella; palauttaa sen ajan sekunteina (+ 60 ms jättö). Raakaäänen perässä oleva hiljainen
@@ -360,7 +376,8 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
             pre += nfix + ','
         trim_t = 'atrim=start=0.015,asetpts=PTS-STARTPTS,' + trim.replace('-48dB', '-42dB') if kind in TIGHT_EV else trim   # v2.66 valikkoefektit: loppu tiukemmin (viimeiset 15 ms = mahdollinen loppunapsahdus pois, häntä −42 dB)
         nocut = kind in NOCUT_EV
-        r = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + ('highpass=f=40' if (loop and mode != 'act') or kind in WHOLE_LOOP else 'highpass=f=40,silenceremove=start_periods=1:start_threshold=-60dB:start_silence=0.01' if nocut else 'highpass=f=40' if kind in PEAK_EV else f'highpass=f=40,{trim},areverse,{trim_t},areverse'),
+        trim_s = trim.replace('-48dB', '-30dB').replace('start_silence=0.003', 'start_silence=0') if kind in ATTACK_EV else trim   # v2.87 ovi: alku suoraan iskuun
+        r = run([ff, '-hide_banner', '-loglevel', 'error', '-y'] + inp + ['-af', pre + ('highpass=f=40' if (loop and mode != 'act') or kind in WHOLE_LOOP else 'highpass=f=40,silenceremove=start_periods=1:start_threshold=-60dB:start_silence=0.01' if nocut else 'highpass=f=40' if kind in PEAK_EV else f'highpass=f=40,{trim_s},areverse,{trim_t},areverse'),
                 '-ac', AC, '-ar', '44100', '-c:a', 'pcm_s16le', w1])
         if r.returncode != 0 or not os.path.exists(w1):
             return r.stderr.strip()[-300:] or 'tuntematon virhe', None
@@ -371,6 +388,13 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
                       '-ac', AC, '-ar', '44100', '-c:a', 'pcm_s16le', w1])
             if r2.returncode == 0:
                 d = duration(ff, w1)
+        if kind in ATTACK_EV:   # v2.87 ovi: alku suoraan kuuluvaan iskuun
+            st = attack_start(ff, w1)
+            if st and st > 0.002:
+                w1a = os.path.join(td, 'a1.wav')
+                if run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', w1, '-af', f'atrim=start={st:.3f},asetpts=PTS-STARTPTS', '-c:a', 'pcm_s16le', w1a]).returncode == 0:
+                    w1 = w1a
+                    d = duration(ff, w1)
         if d < (0.004 if kind in TIGHT_EV else 0.015):   # v2.72 UI-naksahdus voi olla vain muutama ms (hover); v2.50: 0,05 → 0,015 s (lyhyt käyttöliittymän naksahdus, esim. sulje.mp3 ~0,04 s, hylättiin hiljaisena)
             return 'ääni on käytännössä hiljaa', None
         # 2b) v2.22 silmukka: ei häivytyksiä; loppu ristihäivytetään alkuun (pituus enintään 6 s, sauma xf), jolloin silmukka on saumaton
@@ -386,7 +410,7 @@ def process(ff, src, dst, fmt, ai='hostile', kind='idle', prof=None, big=False, 
             shutil.copyfile(w1, w2)
         elif loop:
             L = min(d, LONG_LOOP.get(kind, 20.0) if mode == 'act' else 6.0)   # v2.61 sää- ja tunnelmasilmukat 60 s
-            xf = min(0.25, L * 0.15)
+            xf = min(LOOP_XF.get(kind, 0.25), L * 0.15)   # v2.87 aallot: pitkä sauma (3 s), ettei aallon kesken katkeava kohta kuulu
             r = run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', w1, '-i', w1, '-filter_complex',
                      f'[0:a]atrim=start={xf:.3f}:end={L:.3f},asetpts=PTS-STARTPTS[body];'
                      f'[1:a]atrim=end={xf:.3f},asetpts=PTS-STARTPTS[head];[body][head]acrossfade=d={xf:.3f}:c1=qsin:c2=qsin[o]',
@@ -651,6 +675,7 @@ T_PROF = {'askel': (.5, .8, .05, -27), 'kahlaus': (1.2, 1.5, .15, -25), 'uinti':
           'syominen': (2.5, 2.5, .3, -25), 'juominen': (2.5, 2.5, .3, -26), 'lentoonlahto': (2.0, 2.0, .3, -19), 'palaminen': (3.0, 3.0, .15, -24), 'kahina': (1.2, 1.2, .15, -25),
           'loiskahdus': (1.2, 1.5, .2, -21), 'ryntays': (2.0, 2.5, .25, -18), 'tomistys': (.6, .9, .08, -26)}
 # v2.25: pelaajan osien äänet (yläraja s, iso, häivytys s, LUFS); puuttuva avain → T_DEF (työkalu ei kaadu uuteen ääneen)
+T_PROF.update({'ovi_narina': (.85, .85, .25, -24)})   # v2.87 keskeltä otettu narina: pehmeä loppu oven pysähtyessä
 T_PROF.update({'putoaminen_tomahdys': (1.2, 1.2, .2, -19), 'sukellus': (1.5, 1.5, .25, -22), 'pinnalle': (1.5, 1.5, .25, -21), 'nilkka': (1.5, 1.5, .2, -18)})   # v2.67
 T_PROF.update({'alastulo': (.6, .8, .08, -24), 'puska': (1.2, 1.2, .15, -24), 'lataus': (.8, .8, .1, -24), 'torjunta': (.8, .8, .1, -19), 'ei': (.6, .6, .08, -21),
                'puu': (3.0, 3.0, .3, -18), 'puu_kaatuu': (8.5, 8.5, .3, -18), 'puu_tomahdys': (2.0, 2.0, .3, -17), 'tukki': (1.2, 1.2, .15, -20), 'kivi': (1.5, 1.5, .2, -19), 'veto': (1.2, 1.2, .1, -24), 'laukaus': (.8, .8, .1, -21),
@@ -775,7 +800,11 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
                                               ('ovi_narina', 'oven sarana narisee kääntymisen ajan (animaatio 0,6 s) – avatessa ja sulkiessa', 'door hinge creak, wooden door creak'),
                                               ('ovi_kiinni', 'ovi sulkeutuu – soi kun sulkemisanimaatio loppuu ja ovi osuu karmiin', 'wooden door close, door shut thud'),
                                               ('syominen', 'syöt ruokaa', 'eating food, chewing bite'),
-                                              ('juominen', 'juot juoman', 'drinking potion, gulp')]),
+                                              ('juominen', 'juot juoman (myös vesikulhosta)', 'drinking potion, gulp'),
+                                              ('kaiverrus', 'kaiverrat puukolla pihkakuviota puun kaarnaan (toistuu n. 0,55 s välein, 10 s ajan)', 'knife carving bark, wood scraping'),
+                                              ('kulho_taytto', 'täytät puukulhon vedellä veden ääressä', 'bowl scoop water, splash fill'),
+                                              ('vesi_kaato', 'kaadat vesikulhon päällesi ja sammutat tulen', 'pour water bucket splash, fire hiss'),
+                                              ('kulho_kiinni', 'sidot kulhon narulla pihkapuuhun tai irrotat sen', 'rope tie, wooden bowl knock')]),
         ('valikot', 'Valikot', '📜', [('reppu', 'avaat tai suljet repun (Tab) – sama ääni molempiin', 'backpack open, leather bag'),
                                      ('rakennusvalikko', 'avaat rakennusvalikon', 'menu open, tool select'),
                                      ('kartta', 'avaat kartan', 'map unfold, paper rustle'),
@@ -1086,7 +1115,11 @@ def process_toiminnot(ff, init, old, C=None):
         mode = 'act' if ev in C.get('act', ACT_EV) else 'step' if step_like(ev) else None if ev in LOOP_EV else 'best'   # v2.28: pelaajalla silmukka vain sydän (ei juominen)
         # v2.23: pitkä askelnauhoitus (yli 3 s) → useita askelpätkiä: voimakkain = _n, muut _n01, _n02 … (peli arpoo kaikista)
         jobs = [(base, None)]
-        if ev in CHUNK_EV:   # v2.86 tasavälein pätkät (jatkuva ääni, ei selviä tapahtumia)
+        if ev in MID_EV:   # v2.87 pätkä raa'an keskeltä
+            dd = duration(ff, p)
+            ln = min(MID_EV[ev], dd)
+            jobs = [(base, (max(0.0, (dd - ln) / 2), ln))]
+        elif ev in CHUNK_EV:   # v2.86 tasavälein pätkät (jatkuva ääni, ei selviä tapahtumia)
             prev = [k for k in old if k.startswith(f'{PRE}/{g}/{ev}_') and old[k].get('src') == src_h and old[k].get('pv') == pv_of(ev)]
             if prev and all(os.path.exists(os.path.join(odir(g), k.split('/')[2] + '.mp3')) for k in prev):
                 jobs = [(k.split('/')[2], old[k].get('seg')) for k in sorted(prev, key=natkey)]

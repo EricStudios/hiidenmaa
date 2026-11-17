@@ -3,7 +3,7 @@
    vasta sitten latausnäyttö ja pelin skriptit. Ennen jakso pyöri pelin latauksen päällä, jolloin häivytykset pätkivät. Pelin skriptit
    esiladataan taustalla (<link rel=preload>) ja ajetaan yksi kerrallaan pienellä tauolla, jotta riimut ehtivät syttyä näkyvästi.
    Välilyönti, Enter tai napsautus ohittaa koko jakson (ja testin) ja vie suoraan latausnäyttöön. */
-window.__BJV='2.86';
+window.__BJV='2.96';
 (function(){
   var Q=location.search,wd=!!navigator.webdriver;
   function ls(k){try{return localStorage.getItem(k);}catch(e){return null;}}
@@ -48,7 +48,8 @@ window.__BJV='2.86';
   try{fetch('sounds/manifest.json?v='+(window.HV||'')).then(function(r){return r.ok?r.json():null;}).then(function(j){BS.man=(j&&j.sounds)||{};
     for(var k in BS.man)if(/^m\/(aloitus|lataus)\//.test(k))(function(k){var e=BS.man[k];fetch('sounds/'+e.f+'?h='+e.h).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer();})
       .then(function(b){return BS.ac.decodeAudioData(b);}).then(function(B){BS.buf[k]=B;}).catch(function(){});})(k);muTry();}).catch(function(){});}catch(e){}   // v2.66 musiikkia ei pureta muistiin (suoratoisto, ks. alla)
-  window.__bootSnd=function(g,ev){var ac=BS.ac;if(!ac||ac.state!=='running')return false;var v=bsVolK('ui');if(!(v>0))return false;
+  var BS_EVK={lataus_valmis:.8};   // v2.89 käyttäjä: latausnäytön ääni −20 %
+  window.__bootSnd=function(g,ev){var ac=BS.ac;if(!ac||ac.state!=='running')return false;var v=bsVolK('ui')*(BS_EVK[ev]||1);if(!(v>0))return false;
     var L=[];for(var k in BS.buf)if(k.indexOf('m/'+g+'/'+ev+'_')===0)L.push(k);if(!L.length)return false;
     var src=ac.createBufferSource(),gn=ac.createGain();src.buffer=BS.buf[L[Math.random()*L.length|0]];gn.gain.value=v;src.connect(gn);gn.connect(ac.destination);src.start();return true;};
   /* v2.66 MUSIIKKI (pääkansio music/, avaimet mu/<valikko|biomit|ulottuvuudet>/<kappale>_<n>, manifestin polku sounds/ + f = ../music/valmiit/…).

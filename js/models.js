@@ -210,14 +210,14 @@ function makePlayer(){
   const g=new THREE.Group(),rig=new THREE.Group(),hip=.8,F=(c,o)=>smat(c,Object.assign({flatShading:true},o||{}));g.add(rig);
   const skin=F(0xe2b48c),hairM=smat(0x4a2e1a),leather=F(0x5e4026),fur=F(0xa18a68),cloth=F(0x8a6a46),pant=F(0x5a4632),boot=F(0x3f2d1c);
   const mkLeg=x=>{const p=new THREE.Group();p.position.set(x,hip,0);tube(p,.092,.078,.4,pant,0,-.2,0,1,1,8);rnd(p,0,-.4,0,.072,pant,1,1,1,8);
-    const k=new THREE.Group();k.position.set(0,-.4,0);p.add(k);tube(k,.072,.06,.4,pant,0,-.2,0,1,1,8);tube(k,.07,.07,.2,boot,0,-.3,0,1,1,8);tube(k,.083,.083,.06,fur,0,-.2,0,1,1,8);rnd(k,0,-.37,.07,.075,boot,1,.7,1.8,8);rig.add(p);return[p,k];};
+    const k=new THREE.Group();k.position.set(0,-.4,0);p.add(k);tube(k,.072,.06,.392,pant,0,-.196,0,1,1,8);tube(k,.07,.07,.2,boot,0,-.3,0,1,1,8);   /* v2.95 lahje päättyy saappaan sisään (ennen pohjat samassa tasossa → välkkyi) */tube(k,.083,.083,.06,fur,0,-.2,0,1,1,8);rnd(k,0,-.37,.07,.075,boot,1,.7,1.8,8);rig.add(p);return[p,k];};
   const [legL,kneeL]=mkLeg(-.12),[legR,kneeR]=mkLeg(.12);
   /* v1.74 (käyttäjä): hieman V-muotoinen vartalo (ylä .218 / ala .205, ennen .2/.22). Yläpinta laskettu kauluksen sisään (korkeus .74,
      ennen .76 → yläkansi samassa tasossa kuin kauluksen kansi → välkkyvä tumma laikku). Tumma osa näkyy nyt pyöreäreunaisena kumpuna
      hieman kauluksen yläpuolella. Alkuperäinen koodi: docs/KEHITYSMUISTIO.md v1.74 (peruutusta varten). */
   const torso=tube(rig,.218,.205,.74,cloth,0,hip+.37,0,1.18,.62,8);rnd(rig,0,hip+.758,0,.2,cloth,1.12,.13,.58,10);
   tube(rig,.235,.235,.07,leather,0,hip+.1,0,1.18,.65,8);rnd(rig,.22,hip+.08,.1,.06,leather,1,1.2,.8,6);{const pc=new THREE.Group(),dk=F(0x4a3220);   // v1.37 (lista 3, kohta 37): vyön takana nahkapussi (ennen irrallinen karvapallo), kiinni vyössä
-    pc.add(bx(.13,.13,.055,leather,0,-.01,0),bx(.136,.05,.062,dk,0,.05,-.002),bx(.03,.03,.02,F(0xb08d57),0,.03,-.034),bx(.02,.05,.012,dk,-.045,.075,.026),bx(.02,.05,.012,dk,.045,.075,.026));
+    pc.add(bx(.13,.13,.055,leather,0,-.01,0),bx(.136,.05,.07,dk,0,.05,.002),bx(.03,.03,.02,F(0xb08d57),0,.03,-.034),bx(.02,.05,.012,dk,-.045,.075,.026),bx(.02,.05,.012,dk,.045,.075,.026));
     pc.position.set(-.165,hip+.03,-.15);pc.rotation.y=.42;rig.add(pc);}
   tube(rig,.285,.235,.12,fur,0,hip+.7,0,1.22,.7,8);   // v1.74: kaulus hieman leveämpi (ennen .27/.23, sx 1.2) → olkapäät kiinni
   const cloths=[torso];
@@ -269,7 +269,7 @@ function buildArmor(f,id){for(const m of f.armorParts)if(m.parent)m.parent.remov
   if(id==='nahkavaatteet'||id==='karhuhaarniska'){const lt=F(id==='karhuhaarniska'?0x5a3c26:0x7a5232),dk=F(0x4a3020),fur=F(id==='karhuhaarniska'?0x4a3424:0xa18a68),st=F(0x2e2016);
     T(f.rig,.235,.25,.62,lt,0,hip+.4,0,1.18,.68,10);for(let i=0;i<4;i++)B(f.rig,.02,.5,.02,st,-.08+i*.055,hip+.42,.165);   // nahkatakki + nyöritys
     T(f.rig,.31,.25,.16,fur,0,hip+.7,0,1.15,.75,10);T(f.rig,.255,.255,.07,dk,0,hip+.12,0,1.18,.7,10);   // turkiskaulus, vyö
-    bracer(lt,dk);for(const k of [f.kneeL,f.kneeR])T(k,.082,.08,.18,dk,0,-.3,0,1,1,8);tassets(lt,dk,6,.22);
+    bracer(lt,dk);for(const k of [f.kneeL,f.kneeR])T(k,.082,.08,.155,dk,0,-.3125,0,1,1,8);tassets(lt,dk,6,.22);   // v2.95 kääre päättyy turkisrenkaan alle
     openShell(.255,lt,.3,.36,1.08);B(f.head,.34,.26,.07,lt,0,.14,-.2,.3,0,0);hoodHair(.255,.3,1.08);   // huppu (edestä avoin) + niskaosa
     if(id==='karhuhaarniska'){const cape=S(f.rig,.34,fur,0,hip+.48,-.14,1.15,1.35,.45,10);cape.rotation.x=.08;S(f.rig,.3,fur,0,hip+.66,-.02,1.25,.5,.9,10);   // taljaviitta
       for(const [arm,sd] of [[f.armL,1],[f.armR,-1]])S(arm,.13,fur,sd*.02,.02,0,1.2,.75,1.2,8);
@@ -278,20 +278,20 @@ function buildArmor(f,id){for(const m of f.armorParts)if(m.parent)m.parent.remov
     return;}
   if(id==='kuparipanssari'){const cu=M(0xc07a40,.55,.4),cd=M(0x8a5228,.5,.5),lt=F(0x5e4026),gold=M(0xe0a050,.7,.3);
     for(let i=0;i<6;i++)T(f.rig,.245-i*.004,.255-i*.004,.11,i%2?cd:cu,0,hip+.16+i*.1,0,1.2,.7,12);   // suomurivit
-    T(f.rig,.27,.27,.08,lt,0,hip+.12,0,1.2,.72,10);B(f.rig,.1,.08,.03,gold,0,hip+.12,.2);   // vyö + solki
+    T(f.rig,.27,.27,.084,lt,0,hip+.12,0,1.2,.72,10);B(f.rig,.1,.07,.03,gold,0,hip+.12,.202);   // v2.95 solki ei samassa tasossa vyön kanssa   // vyö + solki
     T(f.rig,.3,.26,.12,cu,0,hip+.72,0,1.12,.75,10);pauldron(cu,cd,1.2);tassets(cu,cd,8,.26);greave(cu,cd,true);bracer(cu,lt);
     const hm=T(f.head,.03,.235,.3,cu,0,.47,0,1,1.05,10);T(f.head,.24,.24,.06,cd,0,.33,0,1,1.05,12);B(f.head,.04,.18,.04,cd,0,.27,.22);helmHair();   // kartiokypärä, nenäsuoja
     for(const sd of [-1,1])B(f.head,.08,.16,.03,cu,sd*.2,.22,.04,0,0,sd*.15);return;}   // poskisuojat
   if(id==='rautapanssari'){const fe=M(0x9aa6b3,.7,.32),fd=M(0x5e6670,.6,.45),mail=M(0x6c747c,.5,.6),lt=F(0x4a3422);
     T(f.rig,.25,.26,.68,mail,0,hip+.38,0,1.2,.7,12);const bp=S(f.rig,.26,fe,0,hip+.48,.06,1.15,1.15,.65,12);   // rengaspaita + rintalevy
-    T(f.rig,.2,.24,.12,fe,0,hip+.78,0,1.05,.8,10);T(f.rig,.27,.27,.08,lt,0,hip+.12,0,1.2,.72,10);   // kaulasuoja, vyö
+    T(f.rig,.2,.24,.12,fe,0,hip+.78,0,1.05,.8,10);T(f.rig,.27,.27,.084,lt,0,hip+.12,0,1.2,.72,10);   // kaulasuoja, vyö
     pauldron(fe,fd,1.45);tassets(fe,fd,8,.3);greave(fe,fd,true);bracer(fe,fd);
     cap(.245,fe,.3,.42);T(f.head,.25,.25,.05,fd,0,.37,0,1,1.08,12);helmHair();   // kypärä (kupoli otsaan asti)
     for(const sd of [-1,1]){const r=new THREE.Mesh(new THREE.TorusGeometry(.05,.012,5,10),fd);r.position.set(sd*.07,.31,.21);add(f.head,r);}B(f.head,.035,.12,.03,fd,0,.29,.23);   /* v1.14 nenäpalkki ylemmäs (.26 → .29) */   // silmäsuojat
     openRing(.25,.29,.2,mail,.24,.34);return;}   // niskasuoja (rengasverho, edestä avoin); v1.14 nostettu 4 cm (y .2 → .24) käyttäjän toiveesta
   if(id==='hiidenpanssari'){const st=M(0x2a3036,.3,.6),sd2=M(0x3a434b,.35,.55),gl=new THREE.MeshBasicMaterial({color:0x5fe6d9});
-    for(let i=0;i<4;i++)T(f.rig,.25,.26,.15,i%2?sd2:st,0,hip+.2+i*.15,0,1.2,.72,8);for(let i=0;i<4;i++)B(f.rig,.4,.012,.02,gl,0,hip+.27+i*.15,.18);   // kivilevyt + hehkuvat riimusaumat
-    B(f.rig,.012,.5,.02,gl,0,hip+.45,.185);T(f.rig,.3,.26,.14,st,0,hip+.74,0,1.12,.78,8);
+    for(let i=0;i<4;i++)T(f.rig,.25,.26,.15,i%2?sd2:st,0,hip+.2+i*.15,0,1.2,.72,8);for(let i=0;i<4;i++)B(f.rig,.4,.012,.02,gl,0,hip+.266+i*.15,.184);   // v2.95 3 mm levyjen sauman alapuolella   // kivilevyt + hehkuvat riimusaumat
+    B(f.rig,.012,.5,.02,gl,0,hip+.45,.189);T(f.rig,.3,.26,.14,st,0,hip+.74,0,1.12,.78,8);
     pauldron(st,sd2,1.5,sd2);tassets(st,sd2,8,.3);greave(st,sd2,true);bracer(st,sd2);for(const k of [f.kneeL,f.kneeR])B(k,.012,.22,.02,gl,0,-.2,.088);
     S(f.head,.245,st,0,.33,0,1,1.05,1.08,8);B(f.head,.3,.03,.02,gl,0,.31,.235);helmHair();   // kivikypärä + hehkuva visiiri
     for(let i=0;i<5;i++){const c=new THREE.Mesh(new THREE.ConeGeometry(.03,.14+(i%2)*.06,5),sd2);const a=(i-2)*.4;c.position.set(Math.sin(a)*.2,.55,Math.cos(a)*.08);c.rotation.z=-a*.4;add(f.head,c);}return;}
@@ -315,7 +315,7 @@ function makeHeld(id){
       const bat=new THREE.Mesh(new THREE.CylinderGeometry(.095,.034,.8,10),wd);   /* v1.06: paksu pää kärkeen (+z), ohut kahvaan; ennen toisin päin */bat.rotation.x=Math.PI/2;bat.position.z=.34;bat.castShadow=true;g.add(bat);
       const tip=new THREE.Mesh(new THREE.SphereGeometry(.095,10,7),wd);tip.scale.z=.6;tip.position.z=.74;tip.castShadow=true;g.add(tip);
       const knob=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.04,10),dk);knob.rotation.x=Math.PI/2;knob.position.z=-.07;g.add(knob);
-      const grip=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.24,8),dk);grip.rotation.x=Math.PI/2;grip.position.z=.06;g.add(grip);
+      const grip=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.245,8),dk);grip.rotation.x=Math.PI/2;grip.position.z=.0575;   /* v2.95 ei samassa tasossa mailan pään kanssa */g.add(grip);
       for(const z of [.5,.64]){const b=new THREE.Mesh(new THREE.CylinderGeometry(.088+(z-.5)*.06,.088+(z-.5)*.06,.03,10),band);b.rotation.x=Math.PI/2;b.position.z=z;g.add(b);}break;}
     case 'hakku':case 'kuparihakku':case 'rautahakku':{shaft(g,.85,W);const c=id==='hakku'?0x58606b:id==='kuparihakku'?0xd98a4e:0x9aa6b3,R=.45,arc=1.7;
       const geo=new THREE.TorusGeometry(R,.04,6,14,arc);geo.rotateZ(-arc/2);geo.rotateY(-Math.PI/2);geo.translate(0,0,.72-R);const me=new THREE.Mesh(geo,metalOf(c));me.castShadow=true;g.add(me);
@@ -327,12 +327,18 @@ function makeHeld(id){
       g.add(poly([[.18,.05],[.18+L-.14,.05],[.18+L,0],[.18+L-.14,-.05],[.18,-.05]],.03,bm));break;}
     case 'lapio':{shaft(g,.95,W);g.add(poly([[.82,.1],[1.0,.1],[1.12,.0],[1.0,-.1],[.82,-.1]],.03,metalOf(0x8a96a3,{roughness:.5})));const gr=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.06),W);gr.position.set(0,0,-.08);g.add(gr);break;}
     case 'kuokka':{shaft(g,.95,W);g.add(bx(.06,.34,.16,mat(0x8a96a3,{metalness:.2,roughness:.55}),0,-.15,.86));g.add(bx(.08,.08,.12,mat(0x3a3a3a),0,0,.86));break;}
+    case 'puukko':{/* v2.91 puukko: koivupahkakahva, messinkihela, kapea terä */const hw=smat(0x6b4527,{flatShading:true});const h=new THREE.Mesh(new THREE.CylinderGeometry(.024,.028,.13,8),hw);h.rotation.x=Math.PI/2;h.position.z=.0;g.add(h);
+      g.add(bx(.05,.04,.012,mat(0xc9a24a,{metalness:.5,roughness:.4}),0,0,.07,false));const bl=metalOf(0xb8c2cc);g.add(poly([[.075,.013],[.24,.01],[.27,-.004],[.24,-.016],[.075,-.016]],.008,bl));break;}
+    case 'kulho':case 'vesikulho':{const bw=smat(0xa8743e,{flatShading:true});const b=new THREE.Mesh(new THREE.CylinderGeometry(.12,.075,.08,10,1,true),bw);b.material.side=THREE.DoubleSide;b.position.set(0,.03,.08);g.add(b);
+      const bot=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.012,10),bw);bot.position.set(0,-.006,.08);g.add(bot);
+      if(id==='vesikulho'){const w=new THREE.Mesh(new THREE.CylinderGeometry(.105,.105,.006,12),mat(0x4f8fb8,{transparent:true,opacity:.8,roughness:.1}));w.position.set(0,.055,.08);g.add(w);}break;}
+    case 'naru':{const nm=smat(0xb09a6c);for(const [r,y] of [[.07,0],[.06,.018],[.05,-.018]]){const t=new THREE.Mesh(new THREE.TorusGeometry(r,.012,5,14),nm);t.position.set(0,y,.06);t.rotation.x=Math.PI/2;g.add(t);}break;}
     case 'soihtu':{shaft(g,.6,W,.034);const wrap=new THREE.Mesh(new THREE.CylinderGeometry(.052,.04,.14,8),smat(0x3a2a1c));wrap.rotation.x=Math.PI/2;wrap.position.z=.56;g.add(wrap);
       const fa=new THREE.Mesh(new THREE.ConeGeometry(.095,.3,7),MAT.flame),fb=new THREE.Mesh(new THREE.ConeGeometry(.06,.22,7),MAT.flame2),fc=new THREE.Mesh(new THREE.ConeGeometry(.032,.14,6),new THREE.MeshBasicMaterial({color:0xfffbe0}));
       const glow=new THREE.Mesh(new THREE.SphereGeometry(.2,10,8),new THREE.MeshBasicMaterial({color:0xff9a3a,transparent:true,opacity:.22,depthWrite:false,fog:false}));
       // Liekit osoittavat aina ylös (kämmenen koordinaatistossa +y), sauva kärjestä eteen
-      for(const [m,y] of[[fa,.2],[fb,.16],[fc,.12]]){m.position.set(0,y,.62);g.add(m);}glow.position.set(0,.18,.62);g.add(glow);g.userData.flame=[fa,fb,fc,glow];FLAME_UP.add(g);break;}   // v2.43 liekit lukittu pystyyn
-    case 'vasara':{shaft(g,.6,W);g.add(bx(.34,.14,.16,mat(0x7c6a52),0,0,.54));for(const sx of[-1,1])g.add(bx(.04,.16,.18,mat(0x4b4338),sx*.15,0,.54));g.add(bx(.07,.16,.07,mat(0x4b4338),0,0,.4));break;}
+      for(const [m,y] of[[fa,.2],[fb,.164],[fc,.128]]){m.position.set(0,y,.62);g.add(m);}   /* v2.95 kartioiden pohjat eri tasoissa */glow.position.set(0,.18,.62);g.add(glow);g.userData.flame=[fa,fb,fc,glow];FLAME_UP.add(g);break;}   // v2.43 liekit lukittu pystyyn
+    case 'vasara':{shaft(g,.6,W);g.add(bx(.34,.14,.16,mat(0x7c6a52),0,0,.54));for(const sx of[-1,1])g.add(bx(.04,.16,.18,mat(0x4b4338),sx*.154,0,.54));   /* v2.95 levy 4 mm ulompana (ennen pään päätypinta samassa tasossa) */g.add(bx(.07,.16,.07,mat(0x4b4338),0,0,.4));break;}
     // Jousi: runko kaareva (selkä +z eli ampumasuuntaan, kärjet ampujaa kohti), jänne kärkien välillä ja nuoli, joka vedetään taakse ampujaa kohti (updateBowMesh).
     // v0.68: poistettu aiempi 180° kääntö, joka käänsi kaaren ampujaan päin ja jänteen venymään eteenpäin.
     case 'jousi':case 'hiidenjousi':{const R=.62,arc=1.9,geo=new THREE.TorusGeometry(R,.032,6,16,arc);geo.rotateZ(-arc/2);geo.rotateY(-Math.PI/2);geo.translate(0,0,.12-R);

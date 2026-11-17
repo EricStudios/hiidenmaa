@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='2.86';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='2.96';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -218,17 +218,18 @@ function update(dt){
   if(typeof TUT!=='undefined'&&TUT.hold){tutHoldUpdate(dt);return;}   // v2.71 opastus: peli seis omalla tilallaan (ei DEV freeze)
   // v1.92 DEV: freeze = maailma seis (vain pelaaja, kamera ja käyttöliittymä päivittyvät), lockTW = kello ja sää pysyvät
   const fz=devOn('freeze'),lkT=fz||devOn('lockTW');
-  playTime+=dt;if(!lkT){dayT+=dt/DAY_LEN;if(dayT>=1){dayT-=1;dayN++;msg(`Päivä ${dayN}`);}}
+  const td=dt*timeSpd();   // v2.93 pelin ajan nopeus
+  playTime+=dt;if(!lkT){dayT+=td/DAY_LEN;if(dayT>=1){dayT-=1;dayN++;msg(`Päivä ${dayN}`);}}
   const wasNight=isNight();
   updatePlayer(dt);updateEffects(dt);updateDungeons(dt);updateStory(dt);
-  if(!fz){updateMobs(dt);creTick(dt);updateProjs(dt);updateDrops(dt);updateFx(dt);updateStations(dt);doorTick(dt);spawner(dt);survival(dt);}
-  if(!lkT)updateWeather();else weather.until=Math.max(weather.until,playTime+1);
+  if(!fz){updateMobs(dt);creTick(dt);updateProjs(dt);updateDrops(dt);updateFx(dt);updateStations(td);doorTick(dt);spawner(dt);survival(td);resinTick(dt,td);}
+  if(!lkT){if(td>dt)weather.until-=td-dt;updateWeather();}else weather.until=Math.max(weather.until,playTime+1);
   updateEnvironment(dt);updateCamera(dt);updateBenchRings();updateChunkVis();updateGrass();
   if(state==='play'){lookTarget=findInteract();updateGhost();}else if(ghost)ghost.visible=false;
   lightT-=dt;if(lightT<=0){lightT=.4;updateLights();}
   slowT-=dt;if(slowT<=0){slowT=1;exploreTick();updateGoals();if(Math.floor(playTime)%5===0)respawnNodes();if(isNight()&&!P.inDun)nightRegrow();}
   saveT+=dt;if(saveT>120){saveT=0;saveGame(true);}   // v1.35 (kohta 21): automaattitallennus 2 min välein
-  updateZone(dt);updateHUD(dt);
+  updateZone(dt);updateHUD(dt);if(DEV)devLiveTick(dt);   // v2.96 DEV-valikon elävät arvot
 }
 /* v1.15 (lista 2, kohta 6): valikon taustakamera näyttää satunnaisia kohteita lähikuvina: luontokohteet (biomit, järvi), hylätty
    leiri päivällä ja yöllä (nuotio palaa) ja eläimiä (kamera seuraa). 20 s per kohde, hidas 30° kierto ja hieman laskeutuen, vaihto
@@ -293,19 +294,27 @@ function perfTick(raw){if(!devOn('perf')){if(perfEl){perfEl.remove();perfEl=null
 function updateFps(raw){if(SET.fps==='off')return;fpsN++;fpsT+=raw;if(fpsT<.5)return;const f=Math.round(fpsN/fpsT),el=$('#fps');fpsN=0;fpsT=0;
   if(el){el.textContent=f+' FPS';el.style.color=f>=50?'#8fd8a0':f>=30?'#e8c45a':'#e0614f';}}
 const MENU_EL=$('#menu');
+/* v2.93 DEV MAAILMAN NOPEUS (Ä-valikko): koko peli (liike, olennot, aika, sää, nälkä, tulet, pihka…) ajetaan DEVF.spd-kertaisena. Nopeutettuna
+   päivitys jaetaan enintään WSPD_STEP s askeliin (fysiikka pysyy vakaana), enintään WSPD_MAX askelta ruudussa (heikolla koneella 30× voi jäädä vajaaksi). */
+const WSPD=[.5,1,2,4,16,30],WSPD_STEP=.05,WSPD_MAX=14;
+function worldSpd(){return DEV&&DEVF.spd>0?DEVF.spd:1;}
+/* v2.93 DEV PELIN AJAN NOPEUS (yksinkertaisempi): vain kello ja siihen sidottu – vuorokausi, sään vaihtuminen, nälkä ja tehosteet (survival),
+   tulet, soihdut, ruoan kypsyminen ja sulatus (updateStations), käsisoihdun polttoaine ja pihkan kertyminen. Liike, olennot ja animaatiot normaalisti. */
+function timeSpd(){return DEV&&DEVF.tspd>0?DEVF.tspd:1;}
+function worldStep(dt){const k=worldSpd();if(k===1){update(dt);return;}const tot=dt*k,n=Math.min(WSPD_MAX,Math.max(1,Math.ceil(tot/WSPD_STEP)));for(let i=0;i<n;i++)update(tot/n);}
 function frame(now){
   requestAnimationFrame(frame);
   const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;let skip3d=false;seeThruSync();
   if(state==='play'&&SET.autoAll&&!SET.noAuto)autoQuality(raw);   /* v2.65 noAuto: ei mitään automaattista säätöä */updateFps(raw);if(DEV)perfTick(raw);musicTick();if(typeof gameSndTick==='function')gameSndTick();   /* v2.83 valikossa pelin äänet häipyvät */try{ambTick(raw);}catch(err){}   /* v2.61 sää ja tunnelma */
   try{
-    if(state==='play'||state==='ui')update(dt);
+    if(state==='play'||state==='ui')worldStep(dt);   // v2.93 DEV maailman nopeus
     if(typeof tutTick==='function')tutTick(dt);   // v2.71 opastus ja kertavinkit
     if(state==='dead')deathTick(dt);   // v2.73 kaatuminen, verilammikko ja kuolinkamera jatkuvat kuolinruudun takana
     else if(state==='menu'&&MENU_V2_OFF)menuCamOld(dt);
     else if(state==='menu'){uwOverlayOff();   /* v2.18: vedenalainen sävy ja hukkumisreunat eivät jää valikon päälle (KORJAUKSET 47: ei omaksi if-riviksi ketjun keskelle) */
       if(SET.menuBg==='3d'){mbgShow(false);menuCam(Math.min(.25,raw));}else{mbgFrame(now);skip3d=true;}}   // v1.25: kuvat = ei 3D-piirtoa valikossa   // v1.25: kuvat = ei 3D-piirtoa valikossa
     else if(state==='intro'){update(dt);introCam(dt);}
-    else if(state==='paused'&&pauseRun)update(dt);   // v1.43: Käynnissä-tila
+    else if(state==='paused'&&pauseRun)worldStep(dt);   // v1.43: Käynnissä-tila
     else if(state==='paused'){updateEnvironment(0);updateGrass();updateLights();if(typeof updateMist==='function')updateMist(0);}   // v1.35 (kohta 18): asetusmuutokset näkyvät heti myös tauolla
     else if(state==='dead'||state==='win'){updateMobs(dt*.5);updateEnvironment(dt);updateEffects(dt);}
   }catch(err){console.error(err);if(!frameErrShown&&window.__bootBox){frameErrShown=true;window.__bootBox('Virhe pelisilmukassa: '+(err&&err.message||err));}}   // v1.26 näkyviin

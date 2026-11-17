@@ -86,9 +86,15 @@ const isTorch=t=>bt(t)==='soihtuteline'||t==='seinasoihtu';   // v2.83 seisova s
 const DET=m=>{m.userData.detail=true;return m;}; // yksityiskohtameshit (asetus: rakennusten yksityiskohdat)
 const isFirePiece=t=>t==='nuotio'||t==='grilli';
 const fireLit=p=>p.data.fuel>0&&!p.data.out;   // v2.17: nuotio palaa (polttoainetta ja ei sateen sammuttama)
-// Tulen jäljellä oleva palamisaika prosentteina täydestä (FUEL_MAX yksikköä × 90 s); yli 50 % ei voi lisätä.
+// Tulen jäljellä oleva palamisaika prosentteina täydestä (FUEL_MAX yksikköä × FIRE_UNIT s); yli 50 % ei voi lisätä.
 // 100 % = palamisaika heti viimeisen polttoaineen lisäyksen jälkeen (p.data.full, s). fireRem/torchRem = jäljellä olevat sekunnit.
-const fireRem=p=>Math.max(0,p.data.fuel*90-p.data.burn),torchRem=p=>Math.max(0,p.data.burn);
+/* v2.91 POLTTOAINEET (käyttäjä): kaikki palavat samalla fysiikalla, soihdut pysyvät 2× pidempään samalla polttoaineella. Pihka 2× puuta parempi,
+   hiili 10× puu. Soihdut: pihka 3 min (seinäsoihtu tunnin = 20 pihkaa), puu 1,5 min, hiili 15 min, enintään TORCH_CAP. Nuotio/grilli: yksikkö
+   FIRE_UNIT 45 s (ennen 90 s): puu 1, pihka 2, hiili 10 yksikköä. */
+/* v2.94 käyttäjä: jokainen polttoaine lämmittää 1,5× kauemmin (FUEL_K): soihdut pihka 4,5 min, puu 2¼ min, hiili 22,5 min; nuotio yksikkö 67,5 s.
+   Sulatusuuni kuluttaa 2 puuta (tai 1/5 hiiltä) per sulatus (SMELT_WOOD). */
+const FUEL_K=1.5,FIRE_UNIT=45*FUEL_K,FIRE_FUEL={puu:1,pihka:2,hiili:10},TORCH_FUEL={pihka:180*FUEL_K,puu:90*FUEL_K,hiili:900*FUEL_K},TORCH_CAP=3600,SMELT_WOOD=2;
+const fireRem=p=>Math.max(0,p.data.fuel*FIRE_UNIT-p.data.burn),torchRem=p=>Math.max(0,p.data.burn);
 const pctOf=(rem,p)=>Math.max(0,Math.min(100,Math.round(rem/Math.max(1,p.data.full||rem||1)*100)));
 const firePct=p=>pctOf(fireRem(p),p),torchPct=p=>pctOf(torchRem(p),p);
 const fuelText=(rem,pct)=>`${pct}/100 · ${(rem/60).toFixed(1).replace('.',',')} min`;
@@ -175,7 +181,8 @@ function buildPieceMesh(t,f=0){
     case 'ovi':{const pw=(G-DOOR_W)/2,px=DOOR_W/2+pw/2,DW=def.stone?W:MAT.doorwood;g.add(bxw(pw,WH,.22,DW,-px,WH/2,0),bxw(pw,WH,.22,DW,px,WH/2,0),bxw(G,WH-DOOR_H,.22,DW,0,(DOOR_H+WH)/2,0));
       const piv=new THREE.Group();piv.position.set(-DOOR_W/2,0,0);piv.add(bxw(DOOR_W,DOOR_H-.05,.1,def.iron?IRON_MAT:MAT.doorwood,DOOR_W/2,(DOOR_H-.05)/2,0));
       if(def.iron){const rv=mat(0x2a2d31);for(const yy of [.3,1.05,1.8])piv.add(DET(bx(DOOR_W-.06,.07,.13,rv,DOOR_W/2,yy,0)));for(const xx of [.12,DOOR_W-.12])for(const yy of [.3,1.05,1.8])for(const sd of[-1,1])piv.add(DET(bx(.05,.05,.03,rv,xx,yy,sd*.075)));}   // v2.07 rautaovi: vanteet ja niitit
-      const hm=mat(0x3a3a3a);for(const sd of[-1,1]){piv.add(DET(bx(.05,.05,.1,hm,DOOR_W-.2,1.05,sd*.08)),DET(bx(.2,.045,.045,hm,DOOR_W-.28,1.05,sd*.125)));}
+      /* v2.88 kahvat molemmin puolin AINA näkyviin (ennen DET = piilossa ilman rakennusten yksityiskohtia, ja tumma väri hukkui): kilpi, varret ja vetoripa */
+      const hm=mat(0x6e6152);for(const sd of[-1,1]){piv.add(bx(.09,.26,.02,hm,DOOR_W-.2,1.05,sd*.06),bx(.04,.04,.07,hm,DOOR_W-.2,1.15,sd*.095),bx(.04,.04,.07,hm,DOOR_W-.2,.95,sd*.095),bx(.045,.24,.04,hm,DOOR_W-.2,1.05,sd*.135));}
       g.add(piv);g.userData.leaf=piv;break;}
     case 'katto':g.add(roofSlope(G,G,true,def.stone));break;
     case 'katto_loiva':g.add(roofSlope(G,G/2,true,def.stone));break;
@@ -258,8 +265,8 @@ function addPiece(t,x,y,z,rot,hp,data,f=0){
   for(const b of worldBoxes(t,x,y,z,rot,f)){const c=addBox(b.minX,b.minY,b.minZ,b.maxX,b.maxY,b.maxZ,p);c.door=b.door;c.glass=b.glass;p.cols.push(c);}
   if(isFirePiece(t)){p.data.fuel=p.data.fuel??4;p.data.burn=p.data.burn??0;if(!p.data.full)p.data.full=Math.max(90,fireRem(p));p.data.cook=(p.data.cook||[]).map(c=>typeof c==='number'?{id:'liha',t:0,need:10}:c);lightSources.push(p.light={x,y:y+.8,z,c:0xff8c3a,i:2,on:()=>fireLit(p),piece:p});}
   // Seisova soihtu palaa p.data.burn sekuntia (5 min aluksi; puu nollaa 10 min, hiili 30 min).
-  if(t==='seinasoihtu'){p.data.burn=p.data.burn??900;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);const a=(p.rot||0)*Math.PI/4;lightSources.push(p.light={x:x+Math.sin(a)*.45,y:y+.7,z:z+Math.cos(a)*.45,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
-  if(bt(t)==='soihtuteline'){p.data.burn=p.data.burn??300;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);lightSources.push(p.light={x,y:y+1.8,z,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
+  if(t==='seinasoihtu'){p.data.burn=p.data.burn??900*FUEL_K;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);const a=(p.rot||0)*Math.PI/4;lightSources.push(p.light={x:x+Math.sin(a)*.45,y:y+.7,z:z+Math.cos(a)*.45,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
+  if(bt(t)==='soihtuteline'){p.data.burn=p.data.burn??300*FUEL_K;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);lightSources.push(p.light={x,y:y+1.8,z,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
   if(t==='sulatin'){p.data.ore=p.data.ore||0;p.data.iore=p.data.iore||0;p.data.wood=p.data.wood||0;p.data.done=p.data.done||0;p.data.idone=p.data.idone||0;p.data.sand=p.data.sand||0;p.data.glass=p.data.glass||0;p.data.t=0;lightSources.push(p.light={x,y:y+.6,z,c:0xff7a2a,i:1.2,on:()=>(p.data.ore>0||p.data.iore>0||p.data.sand>=2)&&p.data.wood>0,piece:p});}
   if(t==='tyopenkki')p.ring=makeBenchRing(x,z,y<DUN.y+5&&y>DUN.y-5&&Math.abs(y-terrainH(x,z))>3?y:null);
   if(def.store){p.data.lv=p.data.lv||0;p.data.items=p.data.items||[];while(p.data.items.length<storeSlots(p))p.data.items.push(null);}
@@ -281,7 +288,10 @@ function setDoor(p,open,dir,inst){const lf=p.mesh.userData.leaf;if(!open&&!inst&
   p._da={a0:lf.rotation.y,a1,t:0,open};DOOR_ANIM.add(p);if(open)for(const c of p.cols)if(c.door)c.off=true;doorSnd(p,open?'ovi_avaus':null,true);return true;}
 /* v2.86 OVEN ÄÄNET (pelaaja_2_toiminnot/kaytto): avatessa ovi_avaus heti, sarana narisee (ovi_narina) kääntymisen ajan avatessa ja sulkiessa,
    ovi_kiinni kun sulkemisanimaatio loppuu (doorTick). Ääni oven kohdalta (3D). */
-function doorSnd(p,ev,creak){if(typeof plSnd!=='function')return;const q={x:p.x,y:(p.y||0)+1.1,z:p.z};if(ev)plSnd('kaytto',ev,{pos:q});if(creak)plSnd('kaytto','ovi_narina',{pos:q,v:.8});}
+/* v2.88 käyttäjä: puuoven avaus −30 %, muut oven äänet (narina, kiinni, rauta- ja kivioven avaus) −10 % */
+const DOOR_V={puuAvaus:.7,muut:.9};
+function doorSnd(p,ev,creak){if(typeof plSnd!=='function')return;const q={x:p.x,y:(p.y||0)+1.1,z:p.z};
+  if(ev)plSnd('kaytto',ev,{pos:q,v:ev==='ovi_avaus'&&p.t==='ovi'?DOOR_V.puuAvaus:DOOR_V.muut});if(creak)plSnd('kaytto','ovi_narina',{pos:q,v:.8*DOOR_V.muut});}
 function doorTick(dt){if(!DOOR_ANIM.size)return;for(const p of DOOR_ANIM){const d=p._da,lf=p.mesh&&p.mesh.userData.leaf;
     if(!d||!lf||!pieces.includes(p)){DOOR_ANIM.delete(p);continue;}d.t+=dt;const k=Math.min(1,d.t/DOOR_T);lf.rotation.y=d.a0+(d.a1-d.a0)*doorEase(k);shDirty=true;bldDirty=true;
     if(k>=1){DOOR_ANIM.delete(p);p._da=null;if(!d.open){for(const c of p.cols)if(c.door)c.off=false;doorSnd(p,'ovi_kiinni',false);}markShadowDirty();}}}

@@ -82,7 +82,7 @@ function updatePlayer(dt){
   if(P.kbx||P.kbz){P.pos.x+=P.kbx*dt;P.pos.z+=P.kbz*dt;const kk=Math.exp(-dt*4.5);P.kbx*=kk;P.kbz*=kk;if(Math.abs(P.kbx)+Math.abs(P.kbz)<.05)P.kbx=P.kbz=0;}
   // v1.92 DEV seinien läpi (noclip): ei törmäyksiä eikä kattoa; maa = maasto tai luolan lattia (esineiden päälle ei nousta)
   const nc=devOn('noclip');
-  if(!nc)collideXZ(P.pos,.38,1.8,feet);
+  if(!nc){collideXZ(P.pos,.38,1.8,feet);limbPush(feet);}   // v2.88 raajat (pää, kädet, kyynärpäät, polvet) osana osumalaatikkoa
   P.pos.y+=P.vy*dt;
   const ceil=nc?1e9:ceilingAt(P.pos.x,P.pos.z,.38,feet+1.8);if(P.vy>0&&P.pos.y+1.8>ceil){P.pos.y=ceil-1.8;P.vy=0;}
   const g=nc?(P.inDun?DUN.y:terrainH(P.pos.x,P.pos.z)):groundAt(P.pos.x,P.pos.z,.38,feet);
@@ -194,6 +194,8 @@ function updatePlayer(dt){
     heldMesh.worldToLocal(_ikS);_gp.set(0,0,clamp(_ikS.z,.17,.42));heldMesh.localToWorld(_gp);armIK(fig.armL,fig.elbowL,_gp,P.gripK);}   // v1.37: kädet ≥ 0,17 m erillään
 
   armClear(fig.armL,fig.elbowL,fig.handL);
+  carvePose();   // v2.91 pihkakuvion kaiverrus
+  if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand);armWorldClear(fig.armL,fig.elbowL,fig.handL);}   // v2.88
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.
   P.drawK=lerp(P.drawK||0,P.drawing&&heldMesh&&ITEMS[heldId].cat==='bow'?1:0,Math.min(1,dt*14));
   {const bk=P.drawK>.01&&heldMesh&&heldMesh.userData.bow?P.drawK:0;fig.rig.rotation.y=-.55*bk;fig.head.rotation.y=.55*bk+aK*(Math.sin(aP*.55)*.6+Math.sin(aP*1.3)*.12);if(bk)bowAim(heldMesh,bk);}   // v1.22 ampuja-asento: vartalo sivuttain, pää eteen
@@ -204,11 +206,12 @@ function updatePlayer(dt){
     else offMesh.quaternion.identity();}
   // vyöllä roikkuva vasara heiluu askelten tahdissa ja kallistuu hieman taakse juostessa
   if(backHang){const hv2=Math.hypot(P.vel.x,P.vel.z);backHang.rotation.x=.05+Math.min(.22,hv2*.022)+Math.sin(P.walkPh*2)*.05*Math.min(1,hv2/4);/* > 0 = varren alapää taaksepäin, ei vartalon sisään */backHang.rotation.z=Math.sin(P.walkPh)*.06*Math.min(1,hv2/4);}
+  limbCapture();   // v2.88 raajojen paikat (seuraavan ruudun törmäykseen)
   fig.g.visible=camDist>1.8;
   // torch light
   const ts=torchSlot();let torch=false;
   if(ts){if(ts.fuel===undefined)ts.fuel=torchMax(ts);if(ts.lit===undefined)ts.lit=true;
-    if(ts.lit&&ts.fuel>0){ts.fuel-=dt*(P.running?1.2:1);
+    if(ts.lit&&ts.fuel>0){ts.fuel-=dt*timeSpd()*(P.running?1.2:1);
       if(wRain>.5&&!shelterCache&&!P.inDun){ts.lit=false;msg('Sade sammutti soihtusi! Sytytä se uudelleen viemällä se kiinni toiseen liekkiin ja odota hetki.','warn');sfx('hit');}
       else if(P.inWater&&!P.inDun){ts.lit=false;msg('Vesi sammutti soihtusi! Sytytä se uudelleen viemällä se kiinni toiseen liekkiin ja odota hetki.','warn');sfx('hit');}
       else if(ts.fuel<=0){ts.fuel=0;ts.lit=false;msg('Soihtusi paloi loppuun! Avaa reppu (Tab) ja napsauta soihtua – sieltä voit lisätä siihen pihkaa. Sen jälkeen sytytä se toisen liekin avulla.','warn');invDirty=true;}}
@@ -282,6 +285,32 @@ function chopApply(w){
    suorana. Kierto käden x-akselin ympäri, joten jousi seuraa käsivartta (heiluu sen mukana); kulma säädetty niin, että levossa jänne on
    vaakatasossa. (Vartaloon lukittu suunta kokeiltiin v1.66:ssa ja hylättiin: käyttäjä haluaa käsivarren mukaisen.) */
 const BOW_CARRY=1.71;
+/* v2.88 RAAJOJEN TÖRMÄYS (käyttäjä: kädet, pää ja polvet – esim. kyykyssä – eivät saa mennä helposti asioiden läpi).
+   limbCapture tallentaa asennon jälkeen raajojen paikat suhteessa jalkoihin; limbPush (heti collideXZ:n jälkeen) tarkistaa ne pallona
+   seiniä, ovia, rakennusosia, kiviä ja puita vasten ja työntää pelaajaa vaakasuunnassa ulos (enintään LIMB_MAX m/ruutu, ei nykimistä).
+   Kädet ja kyynärpäät eivät työnnä lyönnin, hakkuun tai jousen vedon aikana (muuten pelaaja liukuisi puusta tai seinästä iskiessä). */
+const LIMB_MAX=.12,LIMB_ARM_R=.6,LIMB=[];const _lb=new V3();
+function limbParts(){return [[fig.head,.14,0],[fig.hand,.06,1],[fig.handL,.06,1],[fig.elbowR,.06,1],[fig.elbowL,.06,1],[fig.kneeL,.08,0],[fig.kneeR,.08,0]];}
+function limbCapture(){if(!fig||!fig.head)return;fig.g.updateMatrixWorld(true);const L=limbParts();
+  for(let i=0;i<L.length;i++){const [o,r,arm]=L[i];o.getWorldPosition(_lb);const e=LIMB[i]||(LIMB[i]={x:0,y:0,z:0,r,arm});e.x=_lb.x-P.pos.x;e.y=_lb.y-P.pos.y;e.z=_lb.z-P.pos.z;e.r=r;e.arm=arm;}}
+/* pallon (x,y,z,r) tunkeutuma rakennusosiin, kiviin ja puihin: _lp = vaakasuora ulostyöntö (suurin akseleittain), palauttaa false jos ei osumaa */
+const _lp={x:0,z:0};
+function limbPen(x,y,z,r,feet){_lp.x=_lp.z=0;let hit=false;gridQuery(x,z,r+.5,_cl);
+  for(const c of _cl){if(c.maxY<=feet+STEPUP||y<c.minY-r||y>c.maxY+r)continue;
+    if(c.t==='c'){const dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz),m=r+c.r;if(d<m&&d>1e-5){const k=(m-d)/d;hit=true;if(Math.abs(dx*k)>Math.abs(_lp.x))_lp.x=dx*k;if(Math.abs(dz*k)>Math.abs(_lp.z))_lp.z=dz*k;}}
+    else{const cx=clamp(x,c.minX,c.maxX),cz=clamp(z,c.minZ,c.maxZ),dx=x-cx,dz=z-cz,d2=dx*dx+dz*dz;if(d2>=r*r)continue;hit=true;
+      let ux,uz,dd;if(d2>1e-8){const d=Math.sqrt(d2);ux=dx/d;uz=dz/d;dd=r-d;}else{const l=x-c.minX,rr=c.maxX-x,b=z-c.minZ,f=c.maxZ-z,mn=Math.min(l,rr,b,f);ux=mn===l?-1:mn===rr?1:0;uz=mn===b?-1:mn===f?1:0;dd=mn+r;}
+      if(Math.abs(ux*dd)>Math.abs(_lp.x))_lp.x=ux*dd;if(Math.abs(uz*dd)>Math.abs(_lp.z))_lp.z=uz*dd;}}return hit;}
+/* käsi seinän tai esineen sisällä → kyynärpää koukistuu ja käsivarsi laskee (ojennettu käsi ei mene läpi; pelaajaa ei työnnetä) */
+function armWorldClear(arm,elbow,hand){if(state!=='play'||P.swim)return;const feet=P.pos.y;
+  for(let i=0;i<14;i++){arm.updateMatrixWorld(true);hand.getWorldPosition(_lb);if(!limbPen(_lb.x,_lb.y,_lb.z,.06,feet)){elbow.getWorldPosition(_lb);if(!limbPen(_lb.x,_lb.y,_lb.z,.06,feet))return;}
+    if(elbow.rotation.x>-2.1)elbow.rotation.x-=.16;else if(arm.rotation.x<.2)arm.rotation.x+=.12;else return;}}
+function limbPush(feet){if(!LIMB.length||P.swim||P.onLadder||state!=="play")return;const armsBusy=!!(P.atk||P.chopW>.05||P.drawK>.2||P.drawing);let px=0,pz=0;
+  for(const e of LIMB){if(e.arm&&armsBusy)continue;if(Math.hypot(e.x,e.z)<.3)continue;   /* rungon sisällä olevat (collideXZ hoitaa) */
+    let ex=e.x,ez=e.z;if(e.arm){const h=Math.hypot(ex,ez);if(h>LIMB_ARM_R){ex*=LIMB_ARM_R/h;ez*=LIMB_ARM_R/h;}}   /* ojennettu käsi työntää enintään LIMB_ARM_R:n päästä (ei metrin päähän seinästä) */
+    const x=P.pos.x+ex,y=feet+e.y,z=P.pos.z+ez;if(limbPen(x,y,z,e.r,feet)){if(Math.abs(_lp.x)>Math.abs(px))px=_lp.x;if(Math.abs(_lp.z)>Math.abs(pz))pz=_lp.z;}}
+  if(!px&&!pz)return;const L=Math.hypot(px,pz),k=L>LIMB_MAX?LIMB_MAX/L:1;P.pos.x+=px*k;P.pos.z+=pz*k;
+  collideXZ(P.pos,.38,1.8,feet);}   // työntö ei saa viedä rungon toisen seinän sisään
 function armClear(arm,elbow,hand){let i=0;const sx=Math.sign(arm.position.x)||1;for(;i<16;i++){fig.g.updateMatrixWorld(true);if(bodyPen(hand,.07)<=0&&bodyPen(elbow,.06)<=0)break;if(arm.rotation.x>-1.45)arm.rotation.x-=.06;else arm.rotation.z+=sx*.06;}return i;}
 // Kahden nivelen IK napavektorilla (v0.72): kämmen osuu maailman pisteeseen T ja kyynärpää osoittaa luonnolliseen suuntaan (pole,
 // vanhemman eli rigin koordinaateissa; oletus alas ja ulospäin). Olkavarsi a = 0,35 m, kyynärvarsi b = 0,33 m.

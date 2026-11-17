@@ -149,11 +149,16 @@ for(const [k,d] of Object.entries(MOBDEF)){const bk=BOSS_HP_K[k];d.hp=Math.round
 const MOB_SKULL={hiidenkarhu:4,hiidenhirvi:4,kalmasusi:3,suonakki:3,karhu:3,hirvi:2,ilves:1,ahma:1,emakko:1,porsas:0,janis:0,kettu:0,metso:0,poro:0,peura:0,karju:1,hiisi:1,susi:2,kalmo:2,ylimys:3,vartija:5,kivivartija:3,routasusi:2,jaajattari:5,kalmaherra:5,aarnihirvio:5};
 let mobs=[], boss=null;
 function mobEyeY(m){return m.pos.y+(m.type==='vartija'?4:(m.def.eye||1.2));}
+const HIISI_KNIFE=.2;
 function spawnMob(type,x,z,opts={}){
   const def=MOBDEF[type],f=def.fig();const y=opts.y??terrainH(x,z);
   f.g.position.set(x,y,z);scene.add(f.g);if(typeof creLoad==='function')creLoad(type);   // v1.84 olentojen äänet ladataan laiskasti
   const mats=[],cl=new Map();f.g.traverse(m=>{if(m.isMesh&&m.material.isMeshStandardMaterial){let c=cl.get(m.material);if(!c){c=m.material.clone();cl.set(m.material,c);mats.push(c);}m.material=c;}});
-  const m={type,def,f,mats,pos:new V3(x,y,z),vel:new V3(),yaw:rng()*TAU,hp:def.hp,maxHp:def.hp,state:'idle',t:0,wander:null,atkCd:1,wind:0,angry:false,flash:0,walkPh:0,lastHit:-99,stuck:0,home:{x,z},dun:!!opts.dun,anim:0,dead:false,deadT:0,hurtT:-99};
+  /* v2.91 puukkohiisi (20 % sammalhiisistä): isku +50 %, hieman nopeampi tahti, mutta ulottuu vain aivan lähelle (range 0,9);
+     nuija vaihtuu puukkoon kädessä; puukko ei putoa kuollessa. Oma def-kopio (prototyyppinä alkuperäinen). */
+  let def2=def;if(type==='hiisi'&&!opts.noKnife&&(opts.knife||Math.random()<HIISI_KNIFE)){def2=Object.assign(Object.create(def),{dmg:def.dmg*1.5,range:.9,cd:def.cd*.85,knife:1});
+    for(const c of [...f.hand.children])f.hand.remove(c);const k=makeHeld('puukko');k.scale.setScalar(1.25);f.hand.add(k);}
+  const m={type,def:def2,f,mats,pos:new V3(x,y,z),vel:new V3(),yaw:rng()*TAU,hp:def.hp,maxHp:def.hp,state:'idle',t:0,wander:null,atkCd:1,wind:0,angry:false,flash:0,walkPh:0,lastHit:-99,stuck:0,home:{x,z},dun:!!opts.dun,anim:0,dead:false,deadT:0,hurtT:-99};
   // v1.39 (lista 4, kohta 25): vihollisten ja eläinten hp 100–160 %, vahvemmat hieman isompia (+0–10 %). Ei pomoille.
   if(def.ai!=='boss'&&def.ai!=='rboss'&&!opts.noVar){const k=1+Math.random()*.6;m.hp=m.maxHp=Math.round(def.hp*k);m.hpK=k;f.g.scale.multiplyScalar(1+(k-1)/6);}
   mobs.push(m);if(!opts.noBorn&&!def.rise&&def.ai!=='boss'&&def.ai!=='rboss'&&typeof bornStart==='function')bornStart(m);   // v2.14 syntyanimaatio

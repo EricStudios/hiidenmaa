@@ -5,8 +5,8 @@
 /* ---------------- GAME STATE ---------------- */
 const P={pos:new V3(LOC.spawn.x,terrainH(LOC.spawn.x,LOC.spawn.z),LOC.spawn.z),vy:0,yaw:Math.PI,onGround:true,hp:60,stam:100,hunger:80,stamDelay:0,atk:null,blocking:false,bowDraw:0,drawing:false,heal:0,buffs:{},wetT:0,restT:0,inWater:false,dead:false,invul:0,stagger:0,walkPh:0,spawn:null,deaths:0,kills:0,hurtFlash:0,inDun:false,crouch:false,crouchK:0,packLv:0,fx:{speed:1,dmg:1,stamRegen:1,hpRegen:1},crampT:0};
 let inv=new Array(32).fill(null);
-// Käsisoihtu: palaa yhteensä 60 s (juostessa 20 % nopeammin), sammuu sateessa, syttyy toisen liekin vieressä. Tila tallentuu esineeseen (fuel, lit).
-const TORCH_T=120; // käsisoihdun paloaika (s) tasolla ★1; pihka lisää 60 s
+// Käsisoihtu: palaa yhteensä TORCH_T s (v2.94 405 s) (juostessa 20 % nopeammin), sammuu sateessa, syttyy toisen liekin vieressä. Tila tallentuu esineeseen (fuel, lit).
+const TORCH_T=405; // käsisoihdun paloaika (s) tasolla ★1 (v2.94: puu 135 s + pihka 270 s); pihka lisää TORCH_FUEL.pihka
 // Soihdun täysi paloaika ★-tason mukaan: +50 % per taso (★1 120 s, ★2 180 s, ★3 240 s).
 const torchMax=s=>TORCH_T*(1+.5*(((s&&s.q)||1)-1));
 function torchSlot(){const s=equipped('offhand');return s&&s.id==='soihtu'?s:null;}
@@ -84,7 +84,7 @@ const PACK_UP=[null,{nahka:6,puu:4},{nahka:12,kupari:4}];
 const invN=()=>32+8*P.packLv;
 // Repun päivitys: lisää paikkoja (+8) ja kantokykyä (+40 painoa) tasoa kohti.
 function setPack(lv){P.packLv=lv;recalcMaxW();while(inv.length<invN())inv.push(null);invDirty=true;}
-function equipGroup(cat){return ['weapon','bow','hammer','shovel'].includes(cat)?'weapon':['shield','offhand'].includes(cat)?'offhand':cat;}
+function equipGroup(cat){return ['weapon','bow','hammer','shovel','bowl'].includes(cat)?'weapon':['shield','offhand'].includes(cat)?'offhand':cat;}
 function equipped(cat){const grouped=cat==='weapon'||cat==='offhand';
   for(const s of inv){if(!s||!s.eq)continue;const c=ITEMS[s.id].cat;if(grouped?equipGroup(c)===cat:c===cat)return s;}
   return null;}
@@ -263,12 +263,13 @@ function fallTree(n,dir,crush,src){const g=new THREE.Group();const m=new THREE.M
       else{const lf=new THREE.Mesh(new THREE.IcosahedronGeometry(L*.3,0),lm);lf.position.x=L*.85;lf.castShadow=true;b.add(lf);
 }}
     b.position.set(Math.cos(phi)*.12*n.s,h,-Math.sin(phi)*.12*n.s);b.rotation.set(0,phi,tilt);g.add(b);brs.push(b);b.userData.det=.3+rng()*.6;}
+  if(typeof resinFallAttach==='function')resinFallAttach(n,g);   // v2.96 pihkakuvio kaatuu puun mukana
   fx.push({obj:g,t:0,update:(f,dt)=>{const k=Math.min(1,f.t/dur);g.rotation.set(0,0,0);g.rotateOnWorldAxis(_tmpV.set(Math.cos(a),0,-Math.sin(a)),Math.pow(k,2.6)*Math.PI/2);
     for(const b of brs)if(!b.userData.off&&k>=b.userData.det&&k<1){b.userData.off=1;g.updateMatrixWorld(true);dropBranch(b,Math.sin(a)*k*4,Math.cos(a)*k*4);}
     if(f.t>dur&&!f.dropped){f.dropped=1;{const dd=Math.hypot(P.pos.x-n.x,P.pos.z-n.z);sfx('thud',1/clamp(n.s,.7,1.6),clamp(1.15-dd/90,.12,1));}if(crush)crushPlayer(n,a,src);
       const mx=n.x+Math.sin(a)*H*.5,mz=n.z+Math.cos(a)*H*.5,dd=Math.hypot(P.pos.x-mx,P.pos.z-mz);plSnd('osumat','puu_tomahdys',{pos:{x:mx,y:n.y+.4,z:mz},rk:TREE_RK,v:1.5,p:clamp(1.12-.15*n.s,.8,1.05),v_ix:tomahdysIx(H)});   /* v2.28 puu iskeytyy maahan (myös karhun kaatama) */if(!P.inDun&&dd<H+8)shake(Math.min(.5,.12+.35*(1-dd/(H+8))*Math.min(1.5,n.s)));
       burst(n.x+Math.sin(a)*3,n.y+.5,n.z+Math.cos(a)*3,0x6b4527,10,4);
-      for(const [id,lo,hi] of n.def.drops){if(id==='puu'&&!small)continue;const c=Math.max(id==='puu'?1:0,Math.round(rint(rng,lo,hi)*n.s));for(let j=0;j<c;j++){const t=.8+j*H/(c+1);spawnDrop(id,1,n.x+Math.sin(a)*t,n.y+1,n.z+Math.cos(a)*t);}}
+      for(const [id,lo,hi] of n.def.drops){if(id==='puu'&&!small)continue;const c=id==='pihka'?fellResin(n):Math.max(id==='puu'?1:0,dropScale(id,Math.round(rint(rng,lo,hi)*n.s)));for(let j=0;j<c;j++){const t=.8+j*H/(c+1);spawnDrop(id,1,n.x+Math.sin(a)*t,n.y+1,n.z+Math.cos(a)*t);}}
       g.updateMatrixWorld(true);for(const b of brs)if(!b.userData.off)dropBranch(b);
       if(small){m.visible=false;for(let j=0;j<5;j++)burst(n.x+Math.sin(a)*H*j/5,n.y+.4,n.z+Math.cos(a)*H*j/5,WOOD_IN,5,3);}
       else spawnLogs(n,a);}

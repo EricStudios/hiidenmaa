@@ -222,6 +222,24 @@
    "part": 1,
    "f": "saa_ja_tunnelma/valmiit/luonto_valmis/puiden_humina_9905.mp3"
   },
+  "a/ranta/aallot_kovat_0": {
+   "h": "e86fa15536",
+   "src": "0f12fd4d8e32",
+   "dur": 56.97,
+   "pv": "9xf1",
+   "gain": -3.7,
+   "raw": 79.03,
+   "f": "saa_ja_tunnelma/valmiit/ranta_valmis/aallot_kovat_0.mp3"
+  },
+  "a/ranta/aallot_rauhallinen_0": {
+   "h": "f07d23f8be",
+   "src": "b80a7158bfa9",
+   "dur": 40.41,
+   "pv": "9xf1",
+   "gain": 11.5,
+   "raw": 43.43,
+   "f": "saa_ja_tunnelma/valmiit/ranta_valmis/aallot_rauhallinen_0.mp3"
+  },
   "a/saa/lumi_0": {
    "h": "a5041e4d7e",
    "src": "6a0595408676",
@@ -1248,12 +1266,12 @@
    "f": "olennot_aanet/valmiit/metso_idle_3.mp3"
   },
   "p/askeleet/alastulo_0": {
-   "h": "b8866b2eac",
-   "src": "f9ccdb800381",
-   "dur": 0.26,
+   "h": "e10a430400",
+   "src": "ab0937d35d79",
+   "dur": 0.23,
    "pv": "9q5",
-   "gain": -8.3,
-   "raw": 0.28,
+   "gain": -9.6,
+   "raw": 0.25,
    "f": "pelaaja_1_liike/valmiit/askeleet_valmis/alastulo_0.mp3"
   },
   "p/askeleet/askel_hiekka_1": {
@@ -1585,6 +1603,50 @@
    "gain": -9.4,
    "raw": 0.18,
    "f": "pelaaja_2_toiminnot/valmiit/kaytto_valmis/juominen_0.mp3"
+  },
+  "p/kaytto/ovi_avaus_0": {
+   "h": "8a6a2b747f",
+   "src": "8bd959b18411",
+   "dur": 1.01,
+   "pv": "9at2q5",
+   "gain": 5.3,
+   "raw": 1.04,
+   "f": "pelaaja_2_toiminnot/valmiit/kaytto_valmis/ovi_avaus_0.mp3"
+  },
+  "p/kaytto/ovi_kiinni_0": {
+   "h": "29fca40aec",
+   "src": "5ee31021c964",
+   "dur": 0.34,
+   "pv": "9at2q5",
+   "gain": -2.2,
+   "raw": 0.35,
+   "f": "pelaaja_2_toiminnot/valmiit/kaytto_valmis/ovi_kiinni_0.mp3"
+  },
+  "p/kaytto/ovi_narina_0": {
+   "h": "ab42273d99",
+   "src": "2fb7b601f540",
+   "dur": 0.83,
+   "pv": "9md1q5",
+   "gain": 6.8,
+   "raw": 0.85,
+   "seg": [
+    0.82,
+    0.85
+   ],
+   "f": "pelaaja_2_toiminnot/valmiit/kaytto_valmis/ovi_narina_0.mp3"
+  },
+  "p/kaytto/ovi_narina_1": {
+   "h": "5ae27b958f",
+   "src": "8a5b3bbae7b6",
+   "dur": 0.83,
+   "pv": "9md1q5",
+   "gain": 10.5,
+   "raw": 0.85,
+   "seg": [
+    2.055,
+    0.85
+   ],
+   "f": "pelaaja_2_toiminnot/valmiit/kaytto_valmis/ovi_narina_1.mp3"
   },
   "p/kaytto/poiminta_0": {
    "h": "846699ad8b",
