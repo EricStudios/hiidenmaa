@@ -604,6 +604,10 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('chat',SET_DEF.chatScale===1&&/--chatK/.test(hudScaleApply.toString()));ck('säteet',SET_PAGES.gfx.includes('raysQ')&&typeof RQ_K!=='undefined');
     ck('linnut',BIRD_V===.85&&FALL_ANKLE===.15);
     ck('puukkotemput',INSP_KNIFE_BOTTLE===.001&&INSP_THROW_V===.7&&INSP_ANIMS.some(x=>x.rare==='bottle')&&INSP_ANIMS.some(x=>x.rare==='throw3')&&/huitaisu/.test(inspectPose.toString())&&/inspectRestore/.test(updatePlayer.toString()));
+    {const om=msg,L=[];msg=t=>L.push(t);const f0=[flags.fTip,flags.knifeEqN],h0=heldId,tu=TUT.on;try{TUT.on=false;delete flags.fTip;flags.knifeEqN=0;let n9=false;
+      for(let i=1;i<=10;i++){heldId='puukko';inspectTipTick();if(i===9)n9=!flags.fTip;heldId=null;inspectTipTick();}
+      ck('f-vinkki',INSP_TIP_N===10&&n9&&flags.fTip===1&&L.some(t=>/tutki esinettä/.test(t))&&TUT.tipEl&&/muillakin työkaluilla/.test(TUT.tipEl.textContent));}
+     finally{msg=om;[flags.fTip,flags.knifeEqN]=f0;heldId=h0;INS.lastHeld=h0;TUT.on=tu;if(TUT.tipEl)TUT.tipEl.classList.remove('on');}}
     ck('afk-tarkastelu',INSP_AFK_P===.1&&INSP_AFK0===3&&/inspectAfkTick/.test(inspectTick.toString())&&INSP_CLOSE.long==='pitka_tera');
     ck('tarkastelu',INSP_KNIFE_FLIP===.1&&INSP_ANIMS.every(x=>x.best)&&INSP_ANIMS.some(x=>x.rare==='flip')&&INSP_ANIMS.some(x=>x.id==='pitka_huitoo')&&/inspectRestore/.test(updatePlayer.toString())&&/INSP_XF/.test(inspectPose.toString())&&/fly/.test(inspectPose.toString()));
     return e.length?'virhe: '+e.join(', '):true;});

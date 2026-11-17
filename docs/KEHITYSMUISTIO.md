@@ -378,6 +378,10 @@ tehty (v2.67, v2.86) – ei tehty uudelleen. Tehty nyt:
   perusasento palautetaan kuten oikean), hidastuu pehmeästi (ω ∝ (1−u)²), pompautus ja kiinniotto oikein päin. Puolet 5 %:n heitoista on
   kolmen korkean heiton sarja (`puukko_heitto3`, korkeudet arvotaan `I.R`). Jokaisesta heitosta huitaisuääni `p/lyonnit/huitaisu` 70 %
   (`INSP_THROW_V`, myös pyöräytysheittelyn jokainen 180° ja pullonpyörityksen pompautus).
+- **F-vinkki** (käyttäjä): kun puukko otetaan käteen 10. kerran tutoriaalin ulkopuolella (`INSP_TIP_N`, `flags.knifeEqN`), kerran maailmaa kohti
+  ylävinkki + lyhyt chat-muistutus F-tarkastelusta, myös että se toimii muillakin työkaluilla ja aseilla (`inspectTipTick`, `flags.fTip`).
+- **Poistotarkastus ennen Mergeä:** main vs. haara – ylimmän tason nimet, ITEMS 72, PIECES 66, MOBDEF 26, RECIPES 37, ACH/GOALS 47, QUESTS 26, NODE 17,
+  äänimanifesti ja tarkistusrivit (358 → 363) ennallaan; ainoa poisto `SET.ldSnd` (korvattu tarkoituksella `ldSndM`:llä). Jokainen poistettu koodirivi tarkistettu.
 - **AFK-lähitarkastelu** (käyttäjä): kun AFK-animaatio alkaa (P.afkT > 3) ja oikeassa kädessä on esine, arvotaan kerran AFK-jaksoa kohden 10 %
   (`INSP_AFK_P`): puolet heti AFK:n alussa, puolet 5–10 s AFK-animaation jälkeen; animaatio = tyypin lähikatselu (`INSP_CLOSE`, `inspectAfkTick`).
 - Tarkistusrivi v2.99 + päivitetyt (v2.40, v2.59, v2.67, v2.84, v2.85, v2.97).

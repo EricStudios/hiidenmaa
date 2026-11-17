@@ -108,7 +108,14 @@ function inspectStart(id,o={}){if(state!=='play'||P.dead||P.swim||P.atk||P.drawi
   P.insp={a,t:0,R:[.95+Math.random()*.25,1.2+Math.random()*.3,1.05+Math.random()*.25].sort(()=>Math.random()-.5),S:Math.random()<.5?-1:1,item:heldId,snd:false,auto:!!o.auto,from,fk:from?INS.k:0};return true;}
 function inspectStop(){if(P.insp)P.insp=null;}
 // joka ruutu (main.js update): keskeytys, ääni ja uuden esineen automaattinen tarkastelu
-function inspectTick(dt){const I=P.insp;
+/* v2.99 käyttäjä: F-vinkki – kun puukko otetaan käteen 10. kerran (INSP_TIP_N; vain tutoriaalin ulkopuolella, flags.knifeEqN), kerran maailmaa kohti
+   vinkki F-tarkastelusta (ylävinkki + lyhyt chat-muistutus, flags.fTip): toimii myös muilla työkaluilla ja aseilla. */
+const INSP_TIP_N=10;
+function inspectTipTick(){if(heldId===INS.lastHeld)return;INS.lastHeld=heldId;if(heldId!=='puukko'||flags.fTip||state!=='play'||(typeof TUT!=='undefined'&&TUT.on))return;
+  flags.knifeEqN=(flags.knifeEqN|0)+1;if(flags.knifeEqN<INSP_TIP_N)return;flags.fTip=1;const k=typeof keyLabel==='function'?keyLabel(BIND.repair):'F';
+  msg(`Vinkki: paina ${k} – tutki esinettä kädessäsi.`,'loot');const el=tipEl();el.querySelector('.tipD').innerHTML=`Paina <kbd>${k}</kbd>, niin hahmo tarkastelee kädessä olevaa esinettä – puukolla on myös harvinaisia temppuja. Toimii muillakin työkaluilla ja aseilla (ei vasaralla – sillä ${k} korjaa).`;
+  el.classList.add('on');TUT.tipT=14;if(typeof RES!=='undefined')RES.tipT=14;if(typeof mSnd==='function')mSnd('napit','hover');}
+function inspectTick(dt){inspectTipTick();const I=P.insp;
   if(I){I.t+=dt;if(P.atk||P.drawing||P.blocking||P.carve||mouseL||mouseR||P.dead||P.swim||heldId!==I.item||state!=='play'&&state!=='ui'){inspectStop();return;}
     if(!I.snd&&I.t>=INSP_SND_T){I.snd=true;if(I.auto||Math.random()<INSP_SND_P)plSnd('f_ihmettely',Math.random()<.5?'wow':'mmm');}
     if(I.t>=I.a.dur)inspectStop();return;}
