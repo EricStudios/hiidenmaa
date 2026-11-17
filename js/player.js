@@ -211,7 +211,7 @@ function updatePlayer(dt){
   // torch light
   const ts=torchSlot();let torch=false;
   if(ts){if(ts.fuel===undefined)ts.fuel=torchMax(ts);if(ts.lit===undefined)ts.lit=true;
-    if(ts.lit&&ts.fuel>0){ts.fuel-=dt*(P.running?1.2:1);
+    if(ts.lit&&ts.fuel>0){ts.fuel-=dt*timeSpd()*(P.running?1.2:1);
       if(wRain>.5&&!shelterCache&&!P.inDun){ts.lit=false;msg('Sade sammutti soihtusi! Sytytä se uudelleen viemällä se kiinni toiseen liekkiin ja odota hetki.','warn');sfx('hit');}
       else if(P.inWater&&!P.inDun){ts.lit=false;msg('Vesi sammutti soihtusi! Sytytä se uudelleen viemällä se kiinni toiseen liekkiin ja odota hetki.','warn');sfx('hit');}
       else if(ts.fuel<=0){ts.fuel=0;ts.lit=false;msg('Soihtusi paloi loppuun! Avaa reppu (Tab) ja napsauta soihtua – sieltä voit lisätä siihen pihkaa. Sen jälkeen sytytä se toisen liekin avulla.','warn');invDirty=true;}}

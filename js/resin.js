@@ -101,11 +101,12 @@ function carvePose(){if(!P.carve)return;const t=playTime*8.5,s=Math.sin(t);
   fig.armL.rotation.x=-1.25;fig.armL.rotation.z=-.1;fig.elbowL.rotation.x=-.35;}
 
 /* ---------- kertyminen, kaatuminen ja hiipuminen ---------- */
-function resinTick(dt){if(RES.flagsRef!==flags){RES.flagsRef=flags;resinClearVis();_resNodeMap=null;}
+function resinTick(dt,td=dt){   // td = pelin ajan nopeus (kertymä ja hiipuminen), dt = kaiverrus
+ if(RES.flagsRef!==flags){RES.flagsRef=flags;resinClearVis();_resNodeMap=null;}
   resinEnsureG();carveTick(dt);
   const st=flags.resin;if(st)for(const id in st){const e=st[id];
-    if(e.b&&(e.tot||0)<RESIN_MAX){const add=Math.min(RESIN_MAX-(e.tot||0),dt*RESIN_MAX/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;}
-    if((e.tot||0)>=RESIN_MAX&&!e.done){e.fade=Math.min(1,(e.fade||0)+dt/RESIN_FADE);if(e.fade>=1)e.done=1;}}
+    if(e.b&&(e.tot||0)<RESIN_MAX){const add=Math.min(RESIN_MAX-(e.tot||0),td*RESIN_MAX/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;}
+    if((e.tot||0)>=RESIN_MAX&&!e.done){e.fade=Math.min(1,(e.fade||0)+td/RESIN_FADE);if(e.fade>=1)e.done=1;}}
   RES.t-=dt;if(RES.t<=0){RES.t=.25;resinVisTick();}}
 // solmu kaatui (resources.js killNode): kulho, naru ja pihkat maahan, ilmoitus
 function resinKilled(n){const st=flags&&flags.resin;if(!st||!st[n.id])return;const e=st[n.id];delete st[n.id];if(P.carve&&P.carve.id===n.id)P.carve=null;resinVisDrop(n.id);

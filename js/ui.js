@@ -146,6 +146,8 @@ function renderDev(){const B=$('#devBody');if(!B)return;const clk=()=>{const h=d
     <button class="btn devBigB act" data-heal="1"><b>Terveys täyteen</b><span>Terveys, kestävyys ja kylläisyys täyteen, palaminen pois</span></button></div>
   <div class="devRow"><b>Sää</b><div class="devBtns">${Object.entries(WEATHERS).map(([k,w])=>`<button class="btn${weather.cur===k?' on':''}" data-w="${k}">${w.n}</button>`).join('')}</div></div>
   <div class="devRow"><b>Aika <span id="devClk">${clk()}</span></b>${sldHTML('devT',0,1,.005,dayT)}<div class="devBtns">${[['Aamu',.28],['Päivä',.5],['Ilta',.74],['Yö',.95]].map(([n,v])=>`<button class="btn" data-t="${v}">${n}</button>`).join('')}</div></div>
+  <div class="devRow"><b>Maailman nopeus <span>${worldSpd()}×</span></b><div class="devBtns">${WSPD.map(v=>`<button class="btn${worldSpd()===v?' on':''}" data-spd="${v}">${String(v).replace('.',',')}×</button>`).join('')}</div></div>
+  <div class="devRow"><b>Pelin ajan nopeus <span>${timeSpd()}×</span></b><div class="devBtns">${WSPD.map(v=>`<button class="btn${timeSpd()===v?' on':''}" data-tspd="${v}">${String(v).replace('.',',')}×</button>`).join('')}</div><small class="devNote">Vain kello ja siihen sidottu: vuorokausi, sää, nälkä ja tehosteet, tulet ja soihdut, ruoka, sulatus, pihka. Liike ja olennot normaalisti.</small></div>
   <div class="devRow"><b>Terveys <span id="devHpV">${Math.round(P.hp)} / ${maxHp()}</span></b>${sldHTML('devHp',1,maxHp(),1,Math.round(P.hp))}</div>
   <div class="devRow"><b>Kylläisyys <span id="devHuV">${Math.round(P.hunger)}</span></b>${sldHTML('devHu',0,100,1,Math.round(P.hunger))}</div>
   <div class="devRow"><b>Jumalvoimat</b><div class="devChk">${[['food','Ei nälkää'],['stam','Rajaton kestävyys'],['lvl','Korkein taso'],['weight','Ei painorajaa']].map(([k,n])=>`<label class="tglRow">${tglHTML('dv_'+k,!!DEVF[k],`data-dv="${k}"`)} ${n}</label>`).join('')}</div>
@@ -153,6 +155,8 @@ function renderDev(){const B=$('#devBody');if(!B)return;const clk=()=>{const h=d
   <div class="devRow"><b>Kartta</b><div class="devBtns"><button class="btn" id="devMap">Paljasta kartta ja kohteet</button></div></div>`;
   B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{weather.cur=b.dataset.w;weather.until=playTime+600;renderDev();});
   B.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{dayT=+b.dataset.t;renderDev();});
+  B.querySelectorAll('[data-spd]').forEach(b=>b.onclick=()=>{DEVF.spd=+b.dataset.spd;msg(`DEV: maailman nopeus ${String(DEVF.spd).replace('.',',')}×${DEVF.spd===1?' (normaali)':''}.`,'loot');renderDev();});   // v2.93
+  B.querySelectorAll('[data-tspd]').forEach(b=>b.onclick=()=>{DEVF.tspd=+b.dataset.tspd;msg(`DEV: pelin ajan nopeus ${String(DEVF.tspd).replace('.',',')}×${DEVF.tspd===1?' (normaali)':''}.`,'loot');renderDev();});
   bindSld('devT',v=>{dayT=v;$('#devClk').textContent=clk();});
   bindSld('devHp',v=>{P.hp=v;$('#devHpV').textContent=`${P.hp} / ${maxHp()}`;});
   bindSld('devHu',v=>{P.hunger=v;$('#devHuV').textContent=P.hunger;});
