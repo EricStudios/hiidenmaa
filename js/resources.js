@@ -262,6 +262,10 @@ function thinNode(n){n.thin=1;n.alive=false;n.respawnAt=Infinity;setNodeMatrix(n
 for(const n of nodes)if(THIN_T.has(n.type)&&thinHash(n.id)<THIN_K)thinNode(n);
 /* v2.92 käyttäjä: puut antavat 10 % enemmän puuta (myös tervaspuu), pihkaa kaadosta 20 % epätodennäköisemmin (jokainen pihka 80 %). */
 const WOOD_K=1.1,RESIN_DROP_K=.8;
+/* v2.95 käyttäjä: pihkaa kaadosta vain lajin suurimmista puista (koko ≥ lajin FELL_BIG_Q-kvantiili), enintään 1 ja todennäköisyydellä FELL_RESIN_P. */
+const FELL_BIG_Q=.75,FELL_RESIN_P=.25,FELL_BIG={};
+function fellBigS(type){if(FELL_BIG[type]===undefined){const a=nodes.filter(n=>n.type===type).map(n=>n.s0||n.s).sort((x,y)=>x-y);FELL_BIG[type]=a.length?a[Math.min(a.length-1,Math.floor(a.length*FELL_BIG_Q))]:99;}return FELL_BIG[type];}
+function fellResin(n){return n.s>=fellBigS(n.type)&&Math.random()<FELL_RESIN_P?1:0;}
 function dropScale(id,c){if(id==='puu'||id==='tervaspuu'){const x=c*WOOD_K;return Math.floor(x)+(Math.random()<x-Math.floor(x)?1:0);}if(id==='pihka'){let k=0;for(let i=0;i<c;i++)if(Math.random()<RESIN_DROP_K)k++;return k;}return c;}
 nodes.forEach(ngridAdd);
 // Etäisyys solmuun: tukeille janan lähin piste, muille keskipiste.

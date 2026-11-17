@@ -586,6 +586,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.95 pihkaa puun koon mukaan 10–50 (1 h), kaadosta vain lajin suurimmista enintään 1 (25 %), välkkyvät mallipinnat korjattu',()=>{
+    const a=resinCap({s:RESIN_MIN_S})===10&&resinCap({s:2})===50&&resinCap({s:1.375})===30;
+    const kz=nodes.filter(n=>n.type==='kuusi'),big=fellBigS('kuusi');let sm=0,lg=0,N=4000;const small=kz.find(n=>n.s<big),large=kz.find(n=>n.s>=big);
+    for(let i=0;i<N;i++){sm+=fellResin(small);lg+=fellResin(large);}const b=sm===0&&Math.abs(lg/N-.25)<.03&&fellResin(large)<=1;
+    const c=/sx\*\.154/.test(makeHeld.toString())&&/\.0575/.test(makeHeld.toString())&&/\[fb,\.164\]/.test(makeHeld.toString())&&/\.392,pant/.test(makePlayer.toString())&&/hip\+\.266\+i\*\.15/.test(buildArmor.toString());
+    return a&&b&&c||`virhe koko ${a} kaato ${sm}/${lg}/${b} mallit ${c}`;});
   t('v2.94 polttoaineet 1,5× (soihdut pihka 4,5 min, nuotio puu 67,5 s), sulatusuuni 2 puuta / sulatus',()=>{const om=msg;msg=()=>{};const made=[];let res;
     try{const x=P.pos.x+60,z=P.pos.z+60,y=terrainH(x,z),u=addPiece('sulatin',x,y,z,0);made.push(u);const D=u.data;D.ore=2;D.iore=0;D.sand=0;D.wood=3;D.t=0;D.done=0;D.job='met';
       for(let i=0;i<30*8;i++)updateStations(1/30);const a=D.done===1&&D.wood===1;for(let i=0;i<30*8;i++)updateStations(1/30);const b=D.done===1&&D.ore===1;
@@ -614,7 +620,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       stand();const noTool=findInteract();eq('puukko');stand();lookTarget=findInteract();const lab=lookTarget&&lookTarget.kind==='resin';interact();run(4);const e=flags.resin[n.id],c4=e.c;
       P.pos.x+=4;resinTick(1/30);const stop=!P.carve;lookTarget=(stand(),findInteract());interact();run(7);const a2=lab&&!(noTool&&noTool.kind==='resin')&&Math.abs(c4-.4)<.03&&stop&&e.c===1;
       eq('kulho');invAdd('naru',1);const nr=inv.find(x=>x&&x.id==='naru'&&!x.eq);toggleEquip(nr);stand();lookTarget=findInteract();interact();const a3=e.b===1;
-      for(let i=0;i<600;i++)resinTick(1);const acc=e.acc;stand();lookTarget=findInteract();const ph=invCount('pihka');interact();const a4=Math.abs(acc-10/3)<.05&&invCount('pihka')-ph===3&&e.b===0&&invCount('kulho')>=1;
+      for(let i=0;i<600;i++)resinTick(1);const acc=e.acc;stand();lookTarget=findInteract();const ph=invCount('pihka');interact();const a4=Math.abs(acc-eCap(e)/6)<.05&&invCount('pihka')-ph===Math.floor(acc)&&e.b===0&&invCount('kulho')>=1;
       const k=inv.find(x=>x&&x.id==='kulho');if(!k.eq)toggleEquip(k);const nr2=inv.find(x=>x&&x.id==='naru');if(!nr2.eq)toggleEquip(nr2);stand();lookTarget=findInteract();interact();for(let i=0;i<300;i++)resinTick(1);
       const d0=drops.length;n._storm=1;killNode(n);n._storm=0;const a5=drops.length-d0===3&&!flags.resin[n.id];reviveNode(n);
       P.buffs.vatsakipu=50;invAdd('vesikulho',1);const vk=inv.find(x=>x&&x.id==='vesikulho');toggleEquip(vk);bowlUse();const b0=P.buffs.vatsakipu;survival(.5);const a6=P.vatsaFast&&Math.abs((b0-P.buffs.vatsakipu)-2.5)<.05;delete P.buffs.vatsakipu;P.vatsaFast=false;

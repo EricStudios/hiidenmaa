@@ -268,7 +268,7 @@ function fallTree(n,dir,crush,src){const g=new THREE.Group();const m=new THREE.M
     if(f.t>dur&&!f.dropped){f.dropped=1;{const dd=Math.hypot(P.pos.x-n.x,P.pos.z-n.z);sfx('thud',1/clamp(n.s,.7,1.6),clamp(1.15-dd/90,.12,1));}if(crush)crushPlayer(n,a,src);
       const mx=n.x+Math.sin(a)*H*.5,mz=n.z+Math.cos(a)*H*.5,dd=Math.hypot(P.pos.x-mx,P.pos.z-mz);plSnd('osumat','puu_tomahdys',{pos:{x:mx,y:n.y+.4,z:mz},rk:TREE_RK,v:1.5,p:clamp(1.12-.15*n.s,.8,1.05),v_ix:tomahdysIx(H)});   /* v2.28 puu iskeytyy maahan (myös karhun kaatama) */if(!P.inDun&&dd<H+8)shake(Math.min(.5,.12+.35*(1-dd/(H+8))*Math.min(1.5,n.s)));
       burst(n.x+Math.sin(a)*3,n.y+.5,n.z+Math.cos(a)*3,0x6b4527,10,4);
-      for(const [id,lo,hi] of n.def.drops){if(id==='puu'&&!small)continue;const c=Math.max(id==='puu'?1:0,dropScale(id,Math.round(rint(rng,lo,hi)*n.s)));for(let j=0;j<c;j++){const t=.8+j*H/(c+1);spawnDrop(id,1,n.x+Math.sin(a)*t,n.y+1,n.z+Math.cos(a)*t);}}
+      for(const [id,lo,hi] of n.def.drops){if(id==='puu'&&!small)continue;const c=id==='pihka'?fellResin(n):Math.max(id==='puu'?1:0,dropScale(id,Math.round(rint(rng,lo,hi)*n.s)));for(let j=0;j<c;j++){const t=.8+j*H/(c+1);spawnDrop(id,1,n.x+Math.sin(a)*t,n.y+1,n.z+Math.cos(a)*t);}}
       g.updateMatrixWorld(true);for(const b of brs)if(!b.userData.off)dropBranch(b);
       if(small){m.visible=false;for(let j=0;j<5;j++)burst(n.x+Math.sin(a)*H*j/5,n.y+.4,n.z+Math.cos(a)*H*j/5,WOOD_IN,5,3);}
       else spawnLogs(n,a);}
