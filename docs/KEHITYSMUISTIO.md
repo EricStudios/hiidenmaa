@@ -243,7 +243,7 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 - **GitHub-käyttäjä on `EricStudios` (11/2026, ennen `erboiyprogamer-source`).** Repo `EricStudios/hiidenmaa`, peli https://ericstudios.github.io/hiidenmaa/,
   testilinkit `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html`. Vanhat repolinkit ohjautuvat, mutta vanha Pages-osoite ei – käytä aina uusia.
-  Pilvisession git-remote: `git remote set-url origin https://github.com/EricStudios/hiidenmaa` (uusi sessio kannattaa aloittaa `EricStudios/hiidenmaa` lähteenä).
+  Pilvisessio: vanhalla nimellä aloitetussa sessiossa push toimii vain vanhan nimen kautta (GitHub ohjaa); proxy estää `EricStudios`-osoitteen. Uusi sessio kannattaa aloittaa `EricStudios/hiidenmaa` lähteenä.
 - **Pelin teksteissä ei mainita muita pelejä** (esim. Minecraft, Valheim) – v1.11, käyttäjän toive.
 - Alueen löytöotsikot eivät koskaan tule päällekkäin (jono), ja alue paljastuu vasta hieman rajan sisäpuolella (v1.43, käyttäjän toive).
 - Oma alkuperäinen teos, ei Valheimin nimiä, hahmoja tai grafiikkaa. Nimistö on suomalaisesta
