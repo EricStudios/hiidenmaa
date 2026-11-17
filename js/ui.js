@@ -325,7 +325,7 @@ function renderInv(){initSearch();renderEffects();
         y.onclick=()=>{if(!upgradeInfo(s)||!upgradeInfo(s).ok)return;const m0=s.id==='soihtu'?torchMax(s):0;for(const [id,n] of Object.entries(up.req))invRemove(id,n);s.q=q+1;
           if(s.id==='soihtu')s.fuel=(s.fuel??m0)+torchMax(s)-m0;upPrev=null;sfx('craft');plSnd('rakentaminen','valmistus');msg(`${d.n} paranneltu tasolle ${q+1}.`,'loot');invDirty=true;renderInv();};
         det.querySelector('.upPrev').appendChild(y);if(up.why){const w=document.createElement('span');w.className='rq';w.innerHTML=` <span class="mat bad">${up.why}</span>`;det.querySelector('.upPrev').appendChild(w);}}}
-    if(s.id==='soihtu'&&(s.fuel??torchMax(s))<torchMax(s)){const x=document.createElement('button');x.className='btn';x.textContent='Lisää pihkaa (+60 s)';x.disabled=invCount('pihka')<1;x.onclick=()=>{if(invCount('pihka')<1)return;invRemove('pihka',1);s.fuel=Math.min(torchMax(s),(s.fuel??0)+60);sfx('build');renderInv();};b.appendChild(x);}
+    if(s.id==='soihtu'&&(s.fuel??torchMax(s))<torchMax(s)){const x=document.createElement('button');x.className='btn';x.textContent='Lisää pihkaa (+3 min)';x.disabled=invCount('pihka')<1;x.onclick=()=>{if(invCount('pihka')<1)return;invRemove('pihka',1);s.fuel=Math.min(torchMax(s),(s.fuel??0)+TORCH_FUEL.pihka);sfx('build');renderInv();};b.appendChild(x);}
     // Ammus: valinta tai automaattinen (heikoimmasta parhaaseen); valitun napin uusi painallus palauttaa automaattiseen
     if(AMMO.includes(s.id)){const sel=flags.ammo===s.id,x=document.createElement('button');x.className='btn'+(sel?' on':'');x.textContent=sel?'Valittu ammus (paina: automaattinen)':'Käytä ammuksena';x.title='Automaattinen: heikoimmasta parhaaseen';x.onclick=()=>{flags.ammo=sel?null:s.id;invDirty=true;renderInv();};b.appendChild(x);}
     const dr=document.createElement('button');dr.className='btn';dr.textContent='Pudota (Q / Shift+Q)';dr.onclick=()=>{inv[selSlot]=null;if(s.eq){s.eq=false;}playerDrop(s.id,s.n,s.q);invDirty=true;updateGear();selSlot=-1;selEq=null;renderInv();};b.appendChild(dr);}
@@ -350,7 +350,7 @@ function renderInv(){initSearch();renderEffects();
     el.innerHTML=`<div class="ic" style="background-image:url(${icon(r.id)})"></div><div><div class="nm">${ITEMS[r.id].n}${r.n?` ×${r.n}`:''}${why?` <span class="why">${why}</span>`:''}</div><div class="rq">${Object.entries(r.req).map(([id,n])=>`<span class="${invCount(id)>=n?'':'miss'}">${n} ${ITEMS[id].n.toLowerCase()}</span>`).join(', ')}${r.st?` · <span class="${okSt?'':'miss'}">${STATION_NAME[r.st]}</span>`:''}${open?'':` · <span class="miss">Taso ${r.lvl}</span>`}</div></div>`;
     const b=document.createElement('button');b.className='btn pri';b.textContent=open?'Valmista':'Lukittu';b.disabled=!(okSt&&okMat&&open);b.onclick=()=>craft(r);el.appendChild(b);cl.appendChild(el);}
 }
-function upgradeInfo(s){const d=ITEMS[s.id];if(!d.cat||d.cat==='hammer')return null;const q=s.q||1;if(q>=3)return null;const r=RECIPE_BY[s.id];if(!r)return null;
+function upgradeInfo(s){const d=ITEMS[s.id];if(!d.cat||d.cat==='hammer'||d.cat==='bowl'||s.id==='naru')return null;   /* v2.91 kulho ja naru: ei parannuksia */const q=s.q||1;if(q>=3)return null;const r=RECIPE_BY[s.id];if(!r)return null;
   const req={};for(const [id,n] of Object.entries(r.req))req[id]=Math.ceil(n/2)*q;const st=r.st||'tyopenkki';const near=nearStations()[st];
   const ok=near&&Object.entries(req).every(([id,n])=>invCount(id)>=n);return{req,ok,why:near?'':`Tarvitset: ${STATION_NAME[st]}`};}
 function craft(r){if(!recipeOpen(r))return;for(const [id,n] of Object.entries(r.req))invRemove(id,n);bump('crafted');xpFirst('c_'+r.id,6,'uusi esine');const left=invAdd(r.id,r.n||1);if(left)spawnDrop(r.id,left,P.pos.x,P.pos.y+1,P.pos.z);plSnd('rakentaminen','valmistus');sfx('craft');msg(`Valmistit: ${ITEMS[r.id].n}`,'loot');
@@ -381,6 +381,7 @@ function suggestCrafts(st){const hasBow=inv.some(s=>s&&ITEMS[s.id].cat==='bow'),
   const newUse=id=>RECIPES.some(r=>r.id!==id&&r.req[id]&&recipeKnown(r)&&recipeOpen(r)&&!made(r.id)&&invCount(id)<r.req[id]);
   const useful=r=>{const d=ITEMS[r.id];
     if(d.cat==='shovel'||d.cat==='hammer')return own(r.id)?null:'Sinulla ei ole vielä';
+    if(r.id==='kulho'||r.id==='naru')return own(r.id)||(r.id==='kulho'&&own('vesikulho'))?null:'Pihkankeräykseen';   // v2.91
     if(d.cat==='offhand'||r.id==='soihtu')return own(r.id)?null:'Valoa öihin';
     if(d.cat){const k=gearKey(d),b=bestOwned(k);if(b<0)return 'Sinulla ei ole vielä';if(gearPow(d)>b)return 'Parempi kuin nykyinen';return null;}
     if(/nuolet$/.test(r.id))return hasBow&&invCount(r.id)<40?(invCount('nuolet')+invCount('sulkanuolet')+invCount('tulinuolet')<20?'Nuolet vähissä':'Lisää nuolia'):null;

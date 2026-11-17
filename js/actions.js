@@ -8,6 +8,7 @@ let lastStamMsgT=-99;
 function onPrimary(){
   if(P.dead||P.stagger>0)return;
   const w=curWeapon();
+  if(w.cat==='bowl'){bowlUse();return;}   // v2.91 kulho / vesikulho
   if(w.cat==='hammer'){placeBuild();return;}
   if(w.cat==='shovel'){useTool(false);return;}
   if(w.cat==='bow'){if(!ammoId()){msg('Ei nuolia.','warn');showAmmo(2,true);return;}P.drawing=true;P.bowDraw=0;P.drawT=0;showAmmo(2,true);plSnd('jousi','veto');return;}
@@ -243,6 +244,7 @@ function findInteract(){
   for(const n of nodesNear(P.pos.x,P.pos.z,3.4,_nl))if(n.def.kind==='pick')consider(n.x,n.y+.3,n.z,{kind:'node',n,label:'Poimi '+n.def.label});
   for(const it of interactables)if(dist2(it.x,it.z,P.pos.x,P.pos.z)<it.r*it.r*1.6){if(it.look===undefined){const l=String(typeof it.label==='function'?it.label():it.label||'');it.look=/arkku|tynnyri|kirstu|säkki/i.test(l);}consider(it.x,it.y,it.z,{kind:'it',it},it.r,it.look);}
   for(const p of pieces){const l=pieceLabel(p);if(l&&dist2(p.x,p.z,P.pos.x,P.pos.z)<12)consider(p.x,p.y+.7,p.z,{kind:'piece',p,label:l},3,!!PIECES[p.t].store);}
+  resinConsider(consider);   // v2.91 pihkapuut (vain aivan rungon vieressä)
   for(const g of graves)if((g.dim||'world')===curDim())consider(g.x,g.y+.5,g.z,{kind:'grave',g,label:fitsAll(g.items)?'Kerää tavarasi hautakasasta':'Reppuun ei mahdu kaikkea – tee tilaa'},3.2,true);
   return best;
 }
@@ -259,7 +261,8 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   case 'ahjo':return 'Käytä ahjoa';
   default:return null;}}
 function interact(){
-  if(P.dead)return;const t=lookTarget;if(!t)return;
+  if(P.dead)return;const t=lookTarget;if(!t){resinNoTarget();return;}
+  if(t.kind==='resin'){resinInteract(t.n);return;}   // v2.91
   if(t.kind==='node'){const n=t.n,d=n.def;const c=rint(rng,d.n[0],d.n[1]);const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);return;}
   if(t.kind==='it'){t.it.use();return;}
   // v0.93: hautakasa ei katoa koskaan itsestään. Jos kaikki mahtuu reppuun, tavarat otetaan kerralla; muuten kasa avautuu arkkuikkunaan
@@ -269,8 +272,7 @@ function interact(){
     msg('Kaikki ei mahdu reppuun – ota mitä tarvitset, loput jäävät kasaan.','warn');return;}
   if(t.kind==='piece'){const p=t.p;if(bt(p.t)==='ovi'){const a=p.rot*Math.PI/4,lz=(P.pos.x-p.x)*Math.sin(a)+(P.pos.z-p.z)*Math.cos(a);if(!setDoor(p,!p.data.open,p.data.open?p.data.dir:(lz>0?1:-1))){msg('Seisot oviaukossa – siirry, niin ovi sulkeutuu.','warn');return;}sfx('build');return;}   /* v2.60 ovi kääntyy 0,6 s */if(PIECES[p.t].store){openChest(p);return;}switch(p.t){
     case 'nuotio':case 'grilli':fireInteract(p);break;
-    case 'seinasoihtu':{if(invCount('pihka')>0&&p.data.burn<1800){invRemove('pihka',1);p.data.burn=Math.min(1800,p.data.burn+900);markFull(p);msg('Pihka: seinäsoihtu palaa 15 min lisää.');sfx('build');}else msg(invCount('pihka')>0?'Seinäsoihdussa on jo tarpeeksi pihkaa.':'Tarvitset pihkaa seinäsoihtuun.','warn');break;}
-    case 'soihtuteline':case 'kivisoihtu':{const b=p.data.burn;if(torchPct(p)>50){msg(`Soihdussa on jo tarpeeksi polttoainetta (${torchPct(p)} %).`);break;}if(invCount('puu')>0&&b<600){invRemove('puu',1);p.data.burn=600;markFull(p);msg('Soihtu palaa 10 min.');sfx('build');}else if(invCount('hiili')>0&&b<1800){invRemove('hiili',1);p.data.burn=1800;markFull(p);msg('Hiili: soihtu palaa 30 min.');sfx('build');}else msg(invCount('puu')>0||invCount('hiili')>0?'Soihdussa on jo tarpeeksi polttoainetta.':'Tarvitset puuta tai hiiltä.','warn');break;}
+    case 'seinasoihtu':case 'soihtuteline':case 'kivisoihtu':torchFuelAdd(p);break;   // v2.91
     case 'sanky':sleepAt(p);break;
     case 'arkku':case 'tynnyri':openChest(p);break;
     case 'sulatin':{const D=p.data;D.sand=D.sand||0;D.glass=D.glass||0;
@@ -288,9 +290,12 @@ function fireInteract(p){const cap=p.t==='grilli'?4:3,d=p.data;
   if(d.out&&d.fuel>0){if(fireRainOut(p)){msg('Kova sade sammuttaisi tulen heti – suojaa nuotio katolla.','warn');return;}d.out=0;d.wetT=0;msg('Sytytit nuotion uudelleen.');sfx('build');return;}   // v2.17
   if(raw&&fireLit(p)&&d.cook.length<cap){invRemove(raw,1);const ct=COOK_T[raw]||[9,5];d.cook.push({id:raw,t:0,need:ct[0]+Math.random()*ct[1]});msg(`${ITEMS[raw].n} paistuu… (ota ajoissa, muuten palaa hiileksi)`);sfx('craft');return;}
   if(firePct(p)>50){msg(`Tulessa on jo tarpeeksi polttoainetta (${firePct(p)} %).`);return;}
-  if(invCount('puu')>0){invRemove('puu',1);d.fuel++;d.out=0;markFull(p);sfx('build');return;}
-  if(d.fuel<=FUEL_MAX-10&&invCount('hiili')>0){invRemove('hiili',1);d.fuel+=10;markFull(p);msg('Hiili palaa pitkään.');sfx('build');return;}
-  msg(invCount('puu')>0||invCount('hiili')>0?'Tulessa on tarpeeksi polttoainetta.':'Tarvitset puuta tai hiiltä.','warn');}
+  for(const id of ['puu','pihka','hiili']){const v=FIRE_FUEL[id];if(invCount(id)>0&&d.fuel+v<=FUEL_MAX){invRemove(id,1);d.fuel+=v;d.out=0;markFull(p);if(id!=='puu')msg(`${ITEMS[id].n}: tuli palaa ${fmtMin(v*FIRE_UNIT)} lisää.`);sfx('build');return;}}   // v2.91 puu 45 s, pihka 90 s, hiili 7,5 min
+  msg(['puu','pihka','hiili'].some(id=>invCount(id)>0)?'Tulessa on tarpeeksi polttoainetta.':'Tarvitset puuta, pihkaa tai hiiltä.','warn');}
+const fmtMin=s=>s>=60?`${(s/60).toFixed(s%60?1:0).replace('.',',')} min`:`${Math.round(s)} s`;
+// v2.91 soihdut (seinäsoihtu, seisova soihtu, kivinen soihtupylväs): pihka 3 min, puu 1,5 min, hiili 15 min; enintään TORCH_CAP (60 min)
+function torchFuelAdd(p){for(const id of ['pihka','puu','hiili']){const v=TORCH_FUEL[id];if(invCount(id)>0&&p.data.burn+v<=TORCH_CAP){invRemove(id,1);p.data.burn+=v;markFull(p);msg(`${ITEMS[id].n}: soihtu palaa ${fmtMin(v)} lisää (yhteensä ${fmtMin(p.data.burn)}).`);sfx('build');return;}}
+  msg(['pihka','puu','hiili'].some(id=>invCount(id)>0)?`Soihdussa on jo tarpeeksi polttoainetta (enintään ${TORCH_CAP/60} min).`:'Tarvitset pihkaa, puuta tai hiiltä.','warn');}
 // Tukin hakkuu: osumakohtaan kuoren pintaa pitkin litteä, kuoren sisävärinen lohkeama (kasvaa samaan kohtaan lyötäessä, 4 tasoa) + halkeamia kuoreen;
 // puupartikkeleja joka iskulla. Lohkeamat ovat pieniä ja kiinni rungon pinnassa (litteät, kulma θ poikkileikkauksessa).
 function logPatch(lg,theta,z,sx,sy,sz,color){const r=lg.rad,m=new THREE.Mesh(new THREE.SphereGeometry(1,7,5),mat(color));m.castShadow=false;m.position.set(Math.cos(theta)*r*.985,Math.sin(theta)*r*.985,z);m.rotation.z=theta;m.scale.set(sx,sy,sz);lg.mesh.add(m);return m;}

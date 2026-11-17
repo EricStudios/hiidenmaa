@@ -327,6 +327,12 @@ function makeHeld(id){
       g.add(poly([[.18,.05],[.18+L-.14,.05],[.18+L,0],[.18+L-.14,-.05],[.18,-.05]],.03,bm));break;}
     case 'lapio':{shaft(g,.95,W);g.add(poly([[.82,.1],[1.0,.1],[1.12,.0],[1.0,-.1],[.82,-.1]],.03,metalOf(0x8a96a3,{roughness:.5})));const gr=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.06),W);gr.position.set(0,0,-.08);g.add(gr);break;}
     case 'kuokka':{shaft(g,.95,W);g.add(bx(.06,.34,.16,mat(0x8a96a3,{metalness:.2,roughness:.55}),0,-.15,.86));g.add(bx(.08,.08,.12,mat(0x3a3a3a),0,0,.86));break;}
+    case 'puukko':{/* v2.91 puukko: koivupahkakahva, messinkihela, kapea terä */const hw=smat(0x6b4527,{flatShading:true});const h=new THREE.Mesh(new THREE.CylinderGeometry(.024,.028,.13,8),hw);h.rotation.x=Math.PI/2;h.position.z=.0;g.add(h);
+      g.add(bx(.05,.04,.012,mat(0xc9a24a,{metalness:.5,roughness:.4}),0,0,.07,false));const bl=metalOf(0xb8c2cc);g.add(poly([[.075,.013],[.24,.01],[.27,-.004],[.24,-.016],[.075,-.016]],.008,bl));break;}
+    case 'kulho':case 'vesikulho':{const bw=smat(0xa8743e,{flatShading:true});const b=new THREE.Mesh(new THREE.CylinderGeometry(.12,.075,.08,10,1,true),bw);b.material.side=THREE.DoubleSide;b.position.set(0,.03,.08);g.add(b);
+      const bot=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.012,10),bw);bot.position.set(0,-.006,.08);g.add(bot);
+      if(id==='vesikulho'){const w=new THREE.Mesh(new THREE.CylinderGeometry(.105,.105,.006,12),mat(0x4f8fb8,{transparent:true,opacity:.8,roughness:.1}));w.position.set(0,.055,.08);g.add(w);}break;}
+    case 'naru':{const nm=smat(0xb09a6c);for(const [r,y] of [[.07,0],[.06,.018],[.05,-.018]]){const t=new THREE.Mesh(new THREE.TorusGeometry(r,.012,5,14),nm);t.position.set(0,y,.06);t.rotation.x=Math.PI/2;g.add(t);}break;}
     case 'soihtu':{shaft(g,.6,W,.034);const wrap=new THREE.Mesh(new THREE.CylinderGeometry(.052,.04,.14,8),smat(0x3a2a1c));wrap.rotation.x=Math.PI/2;wrap.position.z=.56;g.add(wrap);
       const fa=new THREE.Mesh(new THREE.ConeGeometry(.095,.3,7),MAT.flame),fb=new THREE.Mesh(new THREE.ConeGeometry(.06,.22,7),MAT.flame2),fc=new THREE.Mesh(new THREE.ConeGeometry(.032,.14,6),new THREE.MeshBasicMaterial({color:0xfffbe0}));
       const glow=new THREE.Mesh(new THREE.SphereGeometry(.2,10,8),new THREE.MeshBasicMaterial({color:0xff9a3a,transparent:true,opacity:.22,depthWrite:false,fog:false}));

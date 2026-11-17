@@ -178,7 +178,7 @@ function updateWater(dt,sd){const U=WATER_U,ta=.05+.0025*WIND.spd*WIND.spd;WV.a=
 const _sl=[];
 // v1.19: myrsky voi kaataa myös pelaajan vieressä olevan puun (ennen > 9 m); 70 % kaatuu tuulen suuntaan (±25°), 30 % satunnaisesti.
 function stormFellTree(){const list=nodesNear(P.pos.x,P.pos.z,100,_sl).filter(n=>n.def.kind==='tree'&&n.type!=='aarnipuu'&&dist2(n.x,n.z,P.pos.x,P.pos.z)>2*2&&!nearBase(n.x,n.z));
-  if(!list.length)return null;const n=list[Math.random()*list.length|0];killNode(n);const wa=Math.atan2(WIND.x,WIND.z);fallTree(n,Math.random()<.7?wa+(Math.random()-.5)*.87:Math.random()*TAU,true);
+  if(!list.length)return null;const n=list[Math.random()*list.length|0];n._storm=1;killNode(n);n._storm=0;const wa=Math.atan2(WIND.x,WIND.z);fallTree(n,Math.random()<.7?wa+(Math.random()-.5)*.87:Math.random()*TAU,true);
   if(dist2(n.x,n.z,P.pos.x,P.pos.z)<40*40&&playTime>stormMsgT){stormMsgT=playTime+30;msg('Myrsky kaataa puita!','warn');}return n;}
 // Sadepisarat elävät maailmakoordinaateissa ja pysähtyvät maahan tai rakennuksen katon yläpintaan (ei sadetta katon läpi).
 const RAIN_STOP=new Float32Array(900);let rainInit=false;
@@ -316,7 +316,7 @@ function survival(dt){
   const cold=!fireCache&&!warmHome&&((P.wetT>0)||snowing||(isNight()&&!P.inDun&&!(armor&&ITEMS[armor.id].warm)&&!shelterCache));
   P.cold=cold;
   if(fireCache&&shelterCache){P.restT+=dt;if(P.restT>12&&!P.buffs.levannyt){P.buffs.levannyt=360;flags.rested=1;msg('Olet levännyt. Kestävyys palautuu nopeammin.','loot');}}else P.restT=0;
-  for(const k in P.buffs){P.buffs[k]-=dt;if(P.buffs[k]<=0)delete P.buffs[k];}
+  for(const k in P.buffs){P.buffs[k]-=dt*(k==='vatsakipu'&&P.vatsaFast?5:1);if(P.buffs[k]<=0){delete P.buffs[k];if(k==='vatsakipu')P.vatsaFast=false;}}   // v2.91 vesikulho: vatsakipu 5× nopeammin
   calcFx();
   P.crampT-=dt;if(P.buffs.vatsakipu&&P.crampT<=0){P.crampT=8+Math.random()*6;plSnd('keho','mahakipu');P.stam=Math.max(0,P.stam-12);P.stamDelay=Math.max(P.stamDelay,1);floatText('Auts!',P.pos.x,P.pos.y+2,P.pos.z,'#c9a66b');}
   if(P.buffs.kylla){P.hunger=100;P.buffs.taysi=60;}   // v2.00 sisujuoma: kylläisyys täynnä 5 min

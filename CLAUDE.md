@@ -58,6 +58,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 | `js/settings.js` | `ACTIONS`/`BIND` (näppäinsidonnat, `kd()`), `SET`/`SET_DEF` (oletus = yleisin taso), `SET_PAGES`, `applyGfx()`, HUD-skaala `hudK`/`hudScaleApply` (css `--hudK`), silmäpainike `seeThruSet`/`seeThruSync` (`#menu.seeThru`, vain pelin aikana), asetusvalikko (Grafiikka, Varjot, …); automaattisäätö `AUTO`/`autoOn`, väliotsikot; esiasetussäätimen teemat `pvTheme`/`PV_FX`; kaikki toiminnot -ikkuna `ALL_KEYS`/`showAllKeys` (päivitä, kun lisäät näppäimen). |
 | `js/input.js` | näppäimet, hiiri, hiiren lukitus; virtuaalinen osoitin `VC`/`vcSync`/`vcFlush` (lukitus pysyy paneelien ajan; herkkyys `SET.sens`/`SET.curSens`) |
 | `js/actions.js` | hyökkäys, vahinko, syöminen, `interact()`, alttari, luolastoon meno; jousi `bowSpread`/`bowShot`/`bowCrouch`, tähtäys `bowAimPoint`, lentorata `bowTraj` |
+| `js/resin.js` | v2.91 puukko ja pihkankeräys: pihkapuut `isResinTree` (3 %, `resinHash`, taattu `flags.resinG`), kaiverrus `P.carve`/`carveTick`/`carvePose`, kulho + naru `resinInteract`/`resinDetach`, kertymä `resinTick` (`flags.resin`), kaatuminen `resinKilled`, ulkoasu `resinBuild`; vesikulho `bowlUse` |
 | `js/building.js` | rakennushaamu, ruudukkoon kohdistus, reunakohdistus `smartSnap`, tikkaiden/portaiden jatko `jatkoFind`/`jPlace` (tila `JK`, G-tila jatko), tikkaat seinään `ladderWall`, `validPlace`, purku |
 | `js/environment.js` | päivä/yö (`DAY_LEN`), sää, satunnainen pilvimatto `deckDay`/`deckRnd` (aamumatto `m:1`), Kalmanummen usva `moorK`/`moorDay`/`moorSatSet`, pilvipäivät `cloudDay`/`cloudDayTick`, heijastuksen päiväkerroin `flareDay` (render.js), varjojen syvyys (`OPEN_BIOMES`/`openK`, `FOREST_SH`, `SH_TOD`, `shDepth`, valo `shAmb` render.js), tuuli (`WIND`, `updateWind`), veden päivitys `updateWater` (aallot tuulen mukaan), sateen/lumen suojakartta `COVER`/`coverH` (v2.90), valot, selviytyminen (nälkä, kylmä, lepo), kodin lämpö `HOME`/`homeScan`/`homeTick` |
 | `js/player.js` | v2.73 tyhjyys `voidTick`/`P.safe`, kuolinsyy `deathCauseOf`/`DEATH_INFO`/`deathScreen`; liike, fysiikka, uinti/hukkuminen (`P.swim`/`P.swUp`/`P.underT`, hautakasa rantaan `shorePoint`), animaatio (lyönnit `swingPose`, kirves/hakku `chopIK`/`CHOP_K`, käsien IK `armIK`, läpäisyn esto `armClear`; v2.88 raajojen törmäys `limbPush`/`limbPen`/`armWorldClear`), DEV-lento, kuolema, uudelleensyntyminen, nukkuminen |
@@ -84,7 +85,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 
 ## Näin lisäät sisältöä
 
-- **Esine:** `ITEMS` (+ `food`, `potion` tai `cat`), kuvake `icon()`-switchiin, resepti `RECIPES`-listaan.
+- **Esine:** `ITEMS` (+ `food`, `potion` tai `cat`; v2.91 `cat:'bowl'` = kädessä, ryhmä weapon), kuvake `icon()`-switchiin, resepti `RECIPES`-listaan.
 - **Rakennusosa:** `PIECES`, `pieceBoxes` (törmäys), `buildPieceMesh` (malli). Työpisteen
   toiminta `actions.js`:n `pieceLabel`/`interact` ja `ai.js`:n `updateStations`.
 - **Vihollinen tai eläin:** `MOBDEF` (malli `fig`, `ai`: flee/neutral/hostile/boss) ja `ai.js`:n `SPAWN`.

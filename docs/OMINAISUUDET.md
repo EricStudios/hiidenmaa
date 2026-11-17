@@ -218,10 +218,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 
 ## 7. Tuli ja valo
 
-- **Nuotio/grilli:** polttoaine ≤ 40 yksikköä (`FUEL_MAX`), puu = 1 yksikkö = 90 s, hiili = 10 yksikköä. Lisäys vain kun alle 50 %.
+- **Polttoaineet (v2.91):** kaikki palavat samalla fysiikalla (pihka 2× puu, hiili 10× puu), soihdut pysyvät 2× pidempään samalla polttoaineella.
+- **Nuotio/grilli:** polttoaine ≤ 40 yksikköä (`FUEL_MAX`), yksikkö `FIRE_UNIT` 45 s (ennen 90 s): puu 1 = 45 s, pihka 2 = 90 s, hiili 10 = 7,5 min (`FIRE_FUEL`). Lisäys vain kun alle 50 %.
   Grilli kypsentää 4 ruokaa kerrallaan (oma ajastin 9–14 s); 2× ajalla ruoka palaa hiileksi.
-- **Seisova soihtu:** puu 10 min, hiili 30 min. Lyöminen sammuttaa tulen.
-- **Käsisoihtu:** palaa **120 s** (★2 180 s, ★3 240 s; juostessa 20 % nopeammin), pihka lisää 60 s; sade ja vesi sammuttavat; sytytys toisen liekin vieressä 2,5 s.
+- **Soihdut (seinäsoihtu, seisova soihtu, kivinen soihtupylväs), v2.91:** E lisää yhden: pihka 3 min, puu 1,5 min, hiili 15 min (`TORCH_FUEL`, järjestys pihka → puu → hiili), enintään 60 min (`TORCH_CAP`): seinäsoihtu tunnin = 20 pihkaa. Rakennettuna seinäsoihtu 15 min, seisova 5 min. Lyöminen sammuttaa tulen.
+- **Käsisoihtu:** palaa **270 s** (v2.91; ★2 405 s, ★3 540 s; juostessa 20 % nopeammin), pihka lisää 3 min; sade ja vesi sammuttavat; sytytys toisen liekin vieressä 2,5 s.
 - **Valot:** enintään 6 lähintä valonlähdettä kerralla (asetus), yhteisvalon katto (`LIGHT_CAP`), elävä välke.
 - **Varjot:** aurinko/kuu (varjokartta 2048, alue 55 m); lähimmän tulen varjot pimeällä (päivitys tiheä pelaajan ollessa 17 m sisällä, kerran
   poistuttaessa); käsisoihdun pieni varjo pimeällä.
@@ -480,7 +481,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 
 ## Lista 4, erä C (v1.41)
 - Lumi kiertää pelaajan ympärillä maailmassa ja kulkee tuulen mukana. Sade ja lumi tummuvat yöllä; Medium+ lähivalot värjäävät ne lämpimiksi.
-- Seinäsoihtu (2 puu, 1 pihka, 1 rauta): kiinnitetään seinään, palaa 15 min, pihka lisää 15 min (enint. 30).
+- Seinäsoihtu (2 puu, 1 pihka, 1 rauta): kiinnitetään seinään, palaa 15 min; v2.91 pihka lisää 3 min, puu 1,5 min, hiili 15 min (enint. 60 min).
 - Sammunut soihtu syttyy 2,5 m päässä liekistä (nuotio, soihtuteline, seinäsoihtu, hauta- ja ulottuvuussoihdut), kun seisoo 1–1,5 s.
 - Arkut: puuarkut lankuista rautavantein ja niitein, linnakkeen kiviarkku riimuin; lukonreikä, avattuna ontto.
 
@@ -639,6 +640,14 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 ## Äänet (v1.84–v1.86, äänierä A: olennot)
 - **v2.86 luonnon äänet:** päivällä linnunlaulu soi koko päivän pehmeästi (pitkä nauhoitus), välillä muita lintuja; öisin heinäsirkat sirittävät omassa rytmissään kahdesta suunnasta; tuulisessa metsässä puiden humina kuuluu hiljaa pätkinä. Salamaniskujen kaiku kuuluu kokonaan.
 - **v2.86 ranta:** rannan lähellä aallot lyövät rantaan (tyynellä rauhalliset, tuulella ja myrskyssä kovat); kamera veden alla 20 %. v2.87 käyttäjän äänet: rauhalliset 40 s ja kovat 57 s silmukat, sauma häivytetään 3 s (`LOOP_XF`), ettei toistokohta kuulu.
+- **v2.91 puukko:** ahjo, 3 rautaa + 1 puu, taso 6. Vahinko kuin rautamiekka (34), kantama vain 1,2 m (miekka 2,7), nopea (0,3 s), kestävyys 5. Paranna tasolle 2–3 kuten muut aseet (+25 % vahinko/taso); taso 2 kaivertaa ja valuttaa pihkaa 10 %, taso 3 20 % nopeammin. Kuvauksessa ohjeet.
+- **v2.91 pihkankeräys** (`js/resin.js`): 3 % männyistä ja kuusista (koko ≥ 0,75) on pihkapuita (seedin mukaan), vähintään yksi 80 m sisällä aloituspaikasta. Tuntomerkki vain hillitty kellertävä pihkavaluma rungossa; ei ilmoituksia. E-ohje näkyy vasta aivan rungon vieressä (rungon puolileveys + 0,95 m) ja kun kädessä on puukko, kulho tai naru.
+  1) Puukko kädessä E → kaiverrus 10 s (kädet vetävät puukkoa, lastuja), kuvio pelaajan korkeudelle lähimmälle rungon sivulle: kuorittu alue → kalanruotourat ylhäältä alas → keskikouru. Kävely pois (yli 0,35 m ulottumasta), käden vaihto, lyönti tai uinti keskeyttää; jatkuu samasta kohdasta. 2) Tyhjä kulho kädessä + naru toisessa kädessä, E → kulho sidotaan kuvion alle narulla rungon ympäri. 3) Pihkaa kertyy 20 kpl tunnissa (1 h oikeaa aikaa, vain pelin ollessa käynnissä, pelaajan ei tarvitse olla paikalla; urat kellertävät). 4) E irrottaa kulhon: kulho, naru ja pihkat reppuun (+4 XP/pihka); voi sitoa uudelleen. Puusta saa yhteensä 20 pihkaa, sitten kuvio hiipuu 2 min:ssa ja puu ei enää anna pihkaa. Monta puuta voi valuttaa yhtä aikaa.
+  Väärin aloitettaessa selvät ilmoitukset (ei puukkoa, ei narua, kulhossa vettä, väärä puulaji, nuori puu, ei pihkapuu). Kaatunut puu (myrsky tai kirves): kulho, naru ja pihkat putoavat maahan + ilmoitus. Tila tallentuu (`flags.resin`).
+- **v2.91 kulho ja vesikulho:** kulho työpenkillä (3 puuta, taso 2), kädessä. Hiiren vasen veden ääressä → nimi vaihtuu Vesikulhoksi. Vesikulho: juo (vatsakipu kuluu 5× nopeammin kunnes ohi) tai jos palat, kaada päälle (tuli sammuu, ei juoda); vesi käytetään kerralla ja kulho on taas tyhjä.
+- **v2.91 naru:** työpenkki, 10 nahkaa, taso 2; pidetään toisessa kädessä kulhoa sidottaessa.
+- **v2.91 puukkohiidet:** 20 % sammalhiisistä kantaa puukkoa (näkyy kädessä nuijan tilalla): isku +50 %, tahti 15 % nopeampi, ulottuu vain 0,9 m (pitää lähes törmätä pelaajaan); puukko ei putoa.
+- **v2.91 saavutus Pihkankerääjä:** 20 pihkaa pihkapuista (+5 kantokyky).
 - **v2.90 sade ja lumi:** eivät näy rakennusten sisällä missään tuulessa – suojakartta `COVER` (0,4 m ruudut, 0,2 m varmuusvara) tarkistaa pisaran molemmat päät joka ruudulla; lumi ei enää sada kattojen läpi.
 - **v2.89 latausnäytön ääni:** riimujen leimahdusääni 20 % hiljaisempi (`BS_EVK`, boot.js).
 - **v2.88 ovet:** puuoven avausääni −30 %, muut oven äänet (narina, kiinni, rauta- ja kivioven avaus) −10 % (`DOOR_V`). Kahvat molemmin puolin aina näkyvissä (kilpi, varret, vetoripa; ennen yksityiskohta-asetuksen takana ja liian tummat).

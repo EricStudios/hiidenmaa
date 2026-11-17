@@ -86,9 +86,13 @@ const isTorch=t=>bt(t)==='soihtuteline'||t==='seinasoihtu';   // v2.83 seisova s
 const DET=m=>{m.userData.detail=true;return m;}; // yksityiskohtameshit (asetus: rakennusten yksityiskohdat)
 const isFirePiece=t=>t==='nuotio'||t==='grilli';
 const fireLit=p=>p.data.fuel>0&&!p.data.out;   // v2.17: nuotio palaa (polttoainetta ja ei sateen sammuttama)
-// Tulen jäljellä oleva palamisaika prosentteina täydestä (FUEL_MAX yksikköä × 90 s); yli 50 % ei voi lisätä.
+// Tulen jäljellä oleva palamisaika prosentteina täydestä (FUEL_MAX yksikköä × FIRE_UNIT s); yli 50 % ei voi lisätä.
 // 100 % = palamisaika heti viimeisen polttoaineen lisäyksen jälkeen (p.data.full, s). fireRem/torchRem = jäljellä olevat sekunnit.
-const fireRem=p=>Math.max(0,p.data.fuel*90-p.data.burn),torchRem=p=>Math.max(0,p.data.burn);
+/* v2.91 POLTTOAINEET (käyttäjä): kaikki palavat samalla fysiikalla, soihdut pysyvät 2× pidempään samalla polttoaineella. Pihka 2× puuta parempi,
+   hiili 10× puu. Soihdut: pihka 3 min (seinäsoihtu tunnin = 20 pihkaa), puu 1,5 min, hiili 15 min, enintään TORCH_CAP. Nuotio/grilli: yksikkö
+   FIRE_UNIT 45 s (ennen 90 s): puu 1, pihka 2, hiili 10 yksikköä. */
+const FIRE_UNIT=45,FIRE_FUEL={puu:1,pihka:2,hiili:10},TORCH_FUEL={pihka:180,puu:90,hiili:900},TORCH_CAP=3600;
+const fireRem=p=>Math.max(0,p.data.fuel*FIRE_UNIT-p.data.burn),torchRem=p=>Math.max(0,p.data.burn);
 const pctOf=(rem,p)=>Math.max(0,Math.min(100,Math.round(rem/Math.max(1,p.data.full||rem||1)*100)));
 const firePct=p=>pctOf(fireRem(p),p),torchPct=p=>pctOf(torchRem(p),p);
 const fuelText=(rem,pct)=>`${pct}/100 · ${(rem/60).toFixed(1).replace('.',',')} min`;

@@ -40,6 +40,7 @@ const ACH=[
   {id:'tutkija',n:'Tutkimusmatkailija',d:'Löydä 6 paikkaa.',pr:()=>[Object.keys(flags.disc||{}).length,6],b:{spd:1}},
   {id:'nuolimestari',n:'Nuolimestari',d:'Ammu 30 nuolta.',pr:()=>[cnt('shots'),30],b:{stam:5}},
   {id:'unet',n:'Hyvät yöunet',d:'Nuku yö sängyssä (katon alla). Ensimmäinen uni kertoo jotain tärkeää.',pr:()=>[Math.max(cnt('nights'),flags.dream?1:0),1],b:{stam:5}},   // v2.79 vain onnistunut uni (ennen jo yritys)
+  {id:'pihka',n:'Pihkankerääjä',d:'Kerää 20 pihkaa pihkapuista kulholla (puukko, kulho ja naru).',pr:()=>[cnt('resin'),20],b:{w:5}},   // v2.91
   {id:'vartija',n:'Kalmanvartijan voittaja',d:'Voita Kalmanvartija.',pr:()=>[flags.boss?1:0,1],b:{hp:5,stam:5}},
 ];
 const BON={hp:0,stam:0,w:0,spd:0};

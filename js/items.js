@@ -57,6 +57,11 @@ const ITEMS={
   kuparihakku:{n:'Kuparihakku',w:3.5,s:1,c:'#d98a4e',cat:'weapon',kb:1.5,dmg:9,dt:'pierce',pick:2,range:2.4,st:7,spd:.56,d:'Louhii myös rautasuonia.'},
   rautahakku:{n:'Rautahakku',w:4,s:1,c:'#8a96a3',cat:'weapon',kb:2,dmg:12,dt:'pierce',pick:3,range:2.5,st:7,spd:.52,d:'Paras hakku. Louhii kaiken nopeasti.'},
   rautakirves:{n:'Rautakirves',w:3,s:1,c:'#8a96a3',cat:'weapon',kb:3,dmg:18,dt:'slash',chop:3,range:2.5,st:6,spd:.46,d:'Kaataa myös aarnipuut.'},
+  /* v2.91 PUUKKO JA PIHKANKERÄYS (käyttäjä). Puukko: isku kuin rautamiekalla, mutta ulottuu vain aivan lähelle. Kulho ↔ vesikulho (sama esine, nimi vaihtuu). */
+  puukko:{n:'Puukko',w:.5,s:1,c:'#aab6c4',cat:'weapon',kb:.8,dmg:34,dt:'slash',range:1.2,st:5,spd:.3,d:'Lyhyt rautaterä: isku kuin rautamiekalla, mutta ulottuu vain aivan lähelle. PIHKANKERÄYS: osa männyistä ja kuusista kellertää rungosta – mene aivan kiinni ja paina E puukko kädessä, niin kaiverrat pihkakuvion (n. 10 s, jatkuu kesken jääneestä). Kiinnitä sitten kuvion alle kulho: kulho kädessä, naru toisessa kädessä, E. Pihkaa kertyy noin 20 kpl tunnissa (vain pelin ollessa käynnissä); E irrottaa kulhon ja pihkat. Parempi puukko (taso 3) kaivertaa ja valuttaa 20 % nopeammin.'},
+  kulho:{n:'Kulho',w:.4,s:1,c:'#a8743e',cat:'bowl',d:'Puukulho. Täytä vedellä veden ääressä (hiiren vasen kädessä) tai kiinnitä narulla pihkapuuhun kaiverruksen alle.'},
+  vesikulho:{n:'Vesikulho',w:.9,s:1,c:'#5aa0c8',cat:'bowl',d:'Kulhollinen vettä. Hiiren vasen kädessä: juo (vatsakipu menee ohi 5× nopeammin) – tai jos palat, kaada vesi päällesi ja sammuta tuli. Vesi käytetään kerralla.'},
+  naru:{n:'Naru',w:.3,s:10,c:'#c9b48a',cat:'offhand',d:'Nahasta punottu naru. Pidä toisessa kädessä, kun kiinnität kulhon pihkapuuhun.'},
   rautamiekka:{n:'Rautamiekka',w:2.5,s:1,c:'#b8c2cc',cat:'weapon',kb:2.5,dmg:34,dt:'slash',range:2.7,st:8,spd:.42,d:'Pitkä ja terävä rautaterä.'},
   keihas:{n:'Piikivikeihäs',w:2,s:1,c:'#66707a',cat:'weapon',kb:3,dmg:15,dt:'pierce',range:3.1,st:8,spd:.55,d:'Pitkä ulottuvuus.'},
   miekka:{n:'Kuparimiekka',w:2,s:1,c:'#e0904f',cat:'weapon',kb:2,dmg:24,dt:'slash',range:2.6,st:8,spd:.44,d:'Nopea ja terävä.'},
@@ -84,6 +89,9 @@ const RECIPES=[
   {id:'kuokka',req:{puu:4,kivi:3},alku:1},
   {id:'nuija',req:{puu:6},alku:1},
   {id:'soihtu',req:{puu:1,pihka:1},alku:1},
+  {id:'kulho',st:'tyopenkki',req:{puu:3},lvl:2},   // v2.91
+  {id:'naru',st:'tyopenkki',req:{nahka:10},lvl:2},   // v2.91 käyttäjä: 10 nahkaa
+  {id:'puukko',st:'ahjo',req:{rauta:3,puu:1},lvl:6},   // v2.91 kuten rautamiekka
   {id:'hiili',st:'nuotio',req:{puu:5},n:2,alku:1},
   {id:'kilpi',st:'tyopenkki',req:{puu:10,nahka:2},lvl:2},
   {id:'hakku',st:'tyopenkki',req:{puu:4,piikivi:5,nahka:2},lvl:2},
@@ -133,6 +141,10 @@ function icon(id){
     case 'puu':g.save();g.translate(24,24);g.rotate(-.5);g.fillStyle='#8a5a32';g.fillRect(-16,-7,30,14);g.restore();circ(33,17,7,'#d2a46c','#5e3b1f');circ(33,17,3,'#a87a46');break;
     case 'kivi':poly([[10,32],[16,16],[30,12],[40,22],[36,36],[18,38]],'#8f8d86','#55534e');poly([[18,18],[28,15],[24,22]],'#a8a69e');break;
     case 'piikivi':poly([[12,38],[20,12],[28,20],[36,10],[34,36]],'#4d535c','#2b2f35');line(20,14,24,34,1.5,'#7a8592');break;
+    case 'kulho':case 'vesikulho':{g.fillStyle='#6a4426';g.beginPath();g.ellipse(24,22,17,6,0,0,TAU);g.fill();g.fillStyle=id==='vesikulho'?'#4f9ccc':'#3a2614';g.beginPath();g.ellipse(24,22,14,4.4,0,0,TAU);g.fill();
+      g.fillStyle='#a8743e';g.strokeStyle='#3b2a1a';g.lineWidth=1.4;g.beginPath();g.moveTo(7,22);g.quadraticCurveTo(10,40,24,40);g.quadraticCurveTo(38,40,41,22);g.closePath();g.fill();g.stroke();line(12,28,36,28,1,'#c99256');
+      if(id==='vesikulho'){line(16,21,26,21,1.4,'#bfe6ff');}break;}
+    case 'naru':{g.strokeStyle='#8a7350';g.lineWidth=4;for(const r of [14,10,6]){g.beginPath();g.ellipse(24,24,r+3,r,0,0,TAU);g.stroke();}g.strokeStyle='#d9c69a';g.lineWidth=1.6;for(const r of [14,10,6]){g.beginPath();g.ellipse(24,24,r+3,r,0,0,TAU);g.stroke();}line(37,26,44,38,3,'#8a7350');break;}
     case 'pihka':poly([[24,8],[34,26],[30,38],[18,38],[14,26]],'#dc9d2c','#8a5a18');circ(21,26,3,'#f6cf72');break;
     case 'nahka':poly([[10,14],[20,10],[28,13],[38,10],[40,22],[36,38],[24,34],[12,38],[8,26]],'#a06d45','#5e3b1f');break;
     case 'luu':line(14,34,34,14,6,'#e7e1cf');circ(12,34,4,'#e7e1cf');circ(16,38,4,'#e7e1cf');circ(34,10,4,'#e7e1cf');circ(38,14,4,'#e7e1cf');break;
@@ -195,6 +207,7 @@ function icon(id){
       else if(id==='vasara'){wd(40,4.4);g.fillStyle='#7c6a52';g.strokeStyle='#1f1a16';g.lineWidth=1.3;g.fillRect(36,-10,9,20);g.strokeRect(36,-10,9,20);g.fillStyle='#4b4338';g.fillRect(36,-10,2.5,20);g.fillRect(42.5,-10,2.5,20);line(39,-8,39,8,1.2,'#fff6');}
       else if(/miekka/.test(id)){const gr=g.createLinearGradient(0,-3,0,3);gr.addColorStop(0,tier[1]);gr.addColorStop(1,tier[2]);g.fillStyle=gr;g.beginPath();g.moveTo(13,-3);g.lineTo(40,-3);g.lineTo(49,0);g.lineTo(40,3);g.lineTo(13,3);g.closePath();g.fill();g.strokeStyle='#1f1a16';g.lineWidth=1.2;g.stroke();line(14,0,40,0,1,'#fff8');
         g.fillStyle='#8f5326';g.fillRect(10,-8,4,16);g.strokeRect(10,-8,4,16);g.fillStyle='#4a2f18';g.fillRect(1,-2,9,4);circ(0,0,3.2,'#c9a24a','#3b2a1a');for(const x of[3,5.5,8])line(x,-2,x,2,1,'#1f1a16');}
+      else if(id==='puukko'){g.fillStyle='#4a2f18';g.fillRect(2,-3.5,18,7);g.strokeStyle='#1f1a16';g.lineWidth=1;g.strokeRect(2,-3.5,18,7);for(const x of[6,10,14])line(x,-3.5,x,3.5,1,'#2e1d0e');g.fillStyle='#c9a24a';g.fillRect(19,-4.5,3,9);metal([[22,-3],[40,-2.5],[47,1],[40,3],[22,3]]);line(24,-1,42,-.5,1,'#fff9');}
       else if(id==='soihtu'){wd(38,4.6);circ(42,0,8,'#ff7a1a');circ(44,0,5.5,'#ffb43a');circ(46,0,3,'#fff0a8');}
       else if(id==='vasara_'){}
       else{wd(44,4);metal([[30,-4],[44,-4],[44,4],[30,4]]);}

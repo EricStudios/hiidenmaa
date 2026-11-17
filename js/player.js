@@ -194,6 +194,7 @@ function updatePlayer(dt){
     heldMesh.worldToLocal(_ikS);_gp.set(0,0,clamp(_ikS.z,.17,.42));heldMesh.localToWorld(_gp);armIK(fig.armL,fig.elbowL,_gp,P.gripK);}   // v1.37: kädet ≥ 0,17 m erillään
 
   armClear(fig.armL,fig.elbowL,fig.handL);
+  carvePose();   // v2.91 pihkakuvion kaiverrus
   if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand);armWorldClear(fig.armL,fig.elbowL,fig.handL);}   // v2.88
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.
   P.drawK=lerp(P.drawK||0,P.drawing&&heldMesh&&ITEMS[heldId].cat==='bow'?1:0,Math.min(1,dt*14));
