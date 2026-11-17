@@ -151,8 +151,9 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 
 ## Julkaisu
 
-- Repo: `erboiyprogamer-source/hiidenmaa`, GitHub Pages haarasta `main` (juuri), `.nojekyll` käytössä.
-- Peli: https://erboiyprogamer-source.github.io/hiidenmaa/ (päivittyy noin minuutissa, kun `main` muuttuu).
+- Repo: `EricStudios/hiidenmaa` (käyttäjänimi vaihtui 11/2026, vanha `erboiyprogamer-source` ohjautuu vain repon osalta), GitHub Pages haarasta `main` (juuri), `.nojekyll` käytössä.
+- Peli: https://ericstudios.github.io/hiidenmaa/ (vanha `erboiyprogamer-source.github.io` EI ohjaudu; päivittyy noin minuutissa, kun `main` muuttuu).
+- Testilinkit: `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html`.
 - Käyttäjä työskentelee yleensä pilvisessiossa. Kun erä on valmis ja testattu: commit, push ja
   pull request `main`-haaraan. Kerro käyttäjälle lyhyesti mitä muuttui ja muistuta yhdistämään PR
   (Merge), jos et voi tehdä sitä itse.

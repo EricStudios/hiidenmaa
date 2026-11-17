@@ -3,7 +3,7 @@
 Viikinkihenkinen 3D-selviytymispeli, joka toimii suoraan selaimessa. Kerää puuta ja kiveä,
 rakenna suoja ennen yötä, takoa kuparista aseet, tutki Hautakummun luolasto ja voita Kalmanvartija.
 
-**Pelaa:** https://erboiyprogamer-source.github.io/hiidenmaa/
+**Pelaa:** https://ericstudios.github.io/hiidenmaa/
 
 Toimii parhaiten tietokoneella hiirellä ja näppäimistöllä. Voit myös ladata repon ja avata
 `index.html`-tiedoston suoraan selaimessa.

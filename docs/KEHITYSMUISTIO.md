@@ -241,6 +241,9 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Pysyvät päätökset
 
+- **GitHub-käyttäjä on `EricStudios` (11/2026, ennen `erboiyprogamer-source`).** Repo `EricStudios/hiidenmaa`, peli https://ericstudios.github.io/hiidenmaa/,
+  testilinkit `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html`. Vanhat repolinkit ohjautuvat, mutta vanha Pages-osoite ei – käytä aina uusia.
+  Pilvisession git-remote: `git remote set-url origin https://github.com/EricStudios/hiidenmaa` (uusi sessio kannattaa aloittaa `EricStudios/hiidenmaa` lähteenä).
 - **Pelin teksteissä ei mainita muita pelejä** (esim. Minecraft, Valheim) – v1.11, käyttäjän toive.
 - Alueen löytöotsikot eivät koskaan tule päällekkäin (jono), ja alue paljastuu vasta hieman rajan sisäpuolella (v1.43, käyttäjän toive).
 - Oma alkuperäinen teos, ei Valheimin nimiä, hahmoja tai grafiikkaa. Nimistö on suomalaisesta
@@ -328,6 +331,10 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### Käyttäjänimen vaihto (vain dokumentit ja linkit, ei versionostoa – v2.86 jälkeen)
+- GitHub-käyttäjä `erboiyprogamer-source` → `EricStudios`. README:n pelilinkki, CLAUDE.md:n Julkaisu-osio ja Pysyvät päätökset päivitetty uusiin osoitteisiin.
+  Uusia ääniä ei ollut v2.86:n jälkeen (tarkistettu `origin/main` 52861ef). Pelikoodi ei muuttunut.
 
 ### Äänilistan merkinnät (vain työkalu ja dokumentit, ei versionostoa)
 - `tools/process_sounds.py` tuottaa AANILISTA.md:hen roolit varaääniketjusta (`VARAANI`): 💎 = juuri (lainaajia, ei lainaa itse), ⭐ = väli
