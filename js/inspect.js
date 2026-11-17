@@ -15,6 +15,13 @@
    - Esine kuuluu animaatioon: puukon heitot irtoavat kädestä (pose.fly: lentopiste kehon koordinaateissa + pyörähdys), ote voi kääntyä
      (pose.g = esineen kierto käden x-akselin ympäri, väärä ote = π/2). Miekalla villimpi huitomis- ja pistokoe, puukolla villimmät pistot,
      5 % korkea heitto (pyörii ilmassa, napataan huitaisulla kämmeneen väärinpäin), 10 % pyöräytysheittely (180° kerrallaan, käsi notkahtaa). */
+/* v2.99 käyttäjä: AFK-lähitarkastelu – kun AFK-animaatio alkaa (P.afkT > INSP_AFK0, sama raja kuin player.js afkK) ja oikeassa kädessä on esine,
+   arvotaan kerran AFK-jaksoa kohden INSP_AFK_P (10 %): puolet heti AFK:n alussa, puolet 5–10 s AFK-animaation jälkeen. Animaatio = esineen
+   tyypin lähikatselu (INSP_CLOSE). Liikkuminen/syöte nollaa P.afkT → uusi arvonta seuraavalla AFK-kerralla. */
+const INSP_AFK0=3,INSP_AFK_P=.1,INSP_CLOSE={long:'pitka_tera',heavy:'raskas_tera',small:'pieni_lahikatselu',knife:'pieni_lahikatselu'};
+function inspectAfkTick(){const a=P.afkT||0;if(a<INSP_AFK0){INS.afk=null;return;}
+  if(!INS.afk)INS.afk={at:Math.random()<INSP_AFK_P?INSP_AFK0+(Math.random()<.5?.2:5+Math.random()*5):-1};
+  const A=INS.afk;if(A.at>0&&a>=A.at){A.at=-1;if(heldId&&!P.insp&&state==='play')inspectStart(INSP_CLOSE[INSP_TYPE(heldId)]);}}
 const INSP_SND_T=2,INSP_SND_P=.3,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
 function INSP_TYPE(id){if(!id)return 'small';const d=ITEMS[id];if(!d)return 'small';if(id==='puukko')return 'knife';
   if(/miekka/.test(id)||id==='keihas'||d.cat==='shovel')return 'long';if(d.chop||d.pick||id==='nuija')return 'heavy';return 'small';}
@@ -86,6 +93,7 @@ function inspectTick(dt){const I=P.insp;
   if(I){I.t+=dt;if(P.atk||P.drawing||P.blocking||P.carve||mouseL||mouseR||P.dead||P.swim||heldId!==I.item||state!=='play'&&state!=='ui'){inspectStop();return;}
     if(!I.snd&&I.t>=INSP_SND_T){I.snd=true;if(I.auto||Math.random()<INSP_SND_P)plSnd('f_ihmettely',Math.random()<.5?'wow':'mmm');}
     if(I.t>=I.a.dur)inspectStop();return;}
+  inspectAfkTick();
   const N=P.newItem;if(N&&!N.done&&state==='play'&&heldId&&heldId===N.id&&playTime-N.t<INSP_NEW_T&&(P.afkT||0)>INSP_AFK_T&&!P.atk&&!P.drawing){N.done=1;inspectStart(null,{auto:1});}}
 // v2.99 perusasennon palautus ennen käsivarren lerpiä (player.js): IK-tulos ei jää perusasennoksi
 function inspectRestore(){if(!INS.saved)return;fig.armR.quaternion.copy(INS.bq);fig.elbowR.rotation.x=INS.be;INS.saved=false;}

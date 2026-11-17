@@ -373,6 +373,8 @@ tehty (v2.67, v2.86) – ei tehty uudelleen. Tehty nyt:
   Animaatiot avainruuduin (`_ikf`). Uudet/villimmät: `pitka_huitoo` (pistot, viillot, takakäsi, ranteen pyöräytys), villit puukon pistot ja
   viillot, korkea heitto (puukko irti kädestä 1,1 s, 2¼ kierrosta, nappaus huitaisulla väärinpäin, `pose.fly`, ote `pose.g`), 10 % pyöräytysheittely
   (4 × 180°, käsi notkahtaa, `INSP_KNIFE_FLIP`). DEV-listassa vihje mille esineelle (`best`). Kesken heiton F ei keskeytä.
+- **AFK-lähitarkastelu** (käyttäjä): kun AFK-animaatio alkaa (P.afkT > 3) ja oikeassa kädessä on esine, arvotaan kerran AFK-jaksoa kohden 10 %
+  (`INSP_AFK_P`): puolet heti AFK:n alussa, puolet 5–10 s AFK-animaation jälkeen; animaatio = tyypin lähikatselu (`INSP_CLOSE`, `inspectAfkTick`).
 - Tarkistusrivi v2.99 + päivitetyt (v2.40, v2.59, v2.67, v2.84, v2.85, v2.97).
 
 ### v2.98 (F-tarkastelu, hylätyn leirin korjaukset, puukon tiedot – käyttäjän pyyntö)

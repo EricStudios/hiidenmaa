@@ -603,6 +603,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('arkku',/makeChest/.test(makeGrave.toString())&&typeof graveFx==='function');ck('nuoli',/miter/.test(windArrow.toString()));
     ck('chat',SET_DEF.chatScale===1&&/--chatK/.test(hudScaleApply.toString()));ck('säteet',SET_PAGES.gfx.includes('raysQ')&&typeof RQ_K!=='undefined');
     ck('linnut',BIRD_V===.85&&FALL_ANKLE===.15);
+    ck('afk-tarkastelu',INSP_AFK_P===.1&&INSP_AFK0===3&&/inspectAfkTick/.test(inspectTick.toString())&&INSP_CLOSE.long==='pitka_tera');
     ck('tarkastelu',INSP_KNIFE_FLIP===.1&&INSP_ANIMS.every(x=>x.best)&&INSP_ANIMS.some(x=>x.rare==='flip')&&INSP_ANIMS.some(x=>x.id==='pitka_huitoo')&&/inspectRestore/.test(updatePlayer.toString())&&/INSP_XF/.test(inspectPose.toString())&&/fly/.test(inspectPose.toString()));
     return e.length?'virhe: '+e.join(', '):true;});
   t('v2.98 F-tarkastelu: 11 animaatiota (3 tyyppiä + puukko), käsi IK + pää seuraa, keskeytys, uuden esineen AFK-tarkastelu, ääni f_ihmettely, DEV-lista',()=>{const om=msg;msg=()=>{};const inv0=JSON.stringify(inv),sv=[state,mouseL,P.atk,P.afkT,P.newItem];let res;
