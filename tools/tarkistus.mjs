@@ -586,6 +586,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;}return r;});
+  t('v2.92 puuta +10 %, pihkaa kaadosta −20 %, oksia ja irtokiviä −20 % (pysyvästi poissa, ei tallennu, ei uusiudu)',()=>{
+    const pk=nodes.filter(n=>THIN_T.has(n.type)),th=pk.filter(n=>n.thin),k=th.length/pk.length;
+    const a=k>.17&&k<.23&&th.every(n=>!n.alive&&n.respawnAt===Infinity)&&!serialize().nodes.some(([id])=>th.some(n=>n.id===id));
+    let w=0,r=0;const N=20000;for(let i=0;i<N;i++){w+=dropScale('puu',4);r+=dropScale('pihka',1);}const b=Math.abs(w/N/4-1.1)<.01&&Math.abs(r/N-.8)<.015&&dropScale('kivi',5)===5;
+    const n0=th[0];restoreNode(n0);const c=n0.thin&&!n0.alive;
+    return a&&b&&c||`virhe harvennus ${k.toFixed(3)}/${a} pudotukset ${(w/N/4).toFixed(3)} ${(r/N).toFixed(3)}/${b} palautus ${c}`;});
   t('v2.91 puukko ja pihkankeräys: 3 % pihkapuita, kaiverrus 10 s (keskeytys), kulho + naru, 20 pihkaa/h, irrotus, myrsky pudottaa, vesikulho, puukkohiisi, polttoaineet',()=>{
     const om=msg;msg=()=>{};const p0=P.pos.clone(),inv0=JSON.stringify(inv),dr0=drops.length,R0=JSON.stringify(flags.resin||{});let res,n=null;
     try{const el=nodes.filter(q=>resinEligible(q)),rt=el.filter(q=>isResinTree(q)),pct=rt.length/el.length;const a1=pct>.02&&pct<.045&&rt.some(q=>Math.hypot(q.x-LOC.spawn.x,q.z-LOC.spawn.z)<RESIN_G_R);

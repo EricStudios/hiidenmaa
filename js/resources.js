@@ -254,6 +254,15 @@ function setNodeMatrix(n,vis){_q.setFromEuler(_e.set(0,n.rot,0));_s.setScalar(vi
 const NGRID=new Map();
 function ngridAdd(n){const k=ck(Math.floor(n.x/CELL),Math.floor(n.z/CELL));let a=NGRID.get(k);if(!a)NGRID.set(k,a=[]);a.push(n);n.gk=[k];}
 function ngridRemove(n){for(const k of n.gk||[]){const a=NGRID.get(k);if(a){const i=a.indexOf(n);if(i>=0)a.splice(i,1);}}n.gk=[];}
+/* v2.92 käyttäjä: oksia ja irtokiviä maassa 20 % harvemmin. Solmut luodaan kuten ennen (tunnisteet ja tallennukset säilyvät), mutta
+   THIN_K osuus niistä on pysyvästi poissa (n.thin: ei näy, ei uusiudu, ei tallennu, restoreNode pitää poissa). Valinta seedin ja tunnisteen mukaan. */
+const THIN_K=.2,THIN_T=new Set(['oksa','kivikasa']);
+function thinHash(id){let h=Math.imul((id|0)+977,2246822519)^Math.imul(((typeof SEED==='number'?SEED:0)|0)+13,3266489917);h^=h>>>15;h=Math.imul(h,668265263);h^=h>>>13;return (h>>>0)/4294967296;}
+function thinNode(n){n.thin=1;n.alive=false;n.respawnAt=Infinity;setNodeMatrix(n,false);if(n.col)n.col.off=true;}
+for(const n of nodes)if(THIN_T.has(n.type)&&thinHash(n.id)<THIN_K)thinNode(n);
+/* v2.92 käyttäjä: puut antavat 10 % enemmän puuta (myös tervaspuu), pihkaa kaadosta 20 % epätodennäköisemmin (jokainen pihka 80 %). */
+const WOOD_K=1.1,RESIN_DROP_K=.8;
+function dropScale(id,c){if(id==='puu'||id==='tervaspuu'){const x=c*WOOD_K;return Math.floor(x)+(Math.random()<x-Math.floor(x)?1:0);}if(id==='pihka'){let k=0;for(let i=0;i<c;i++)if(Math.random()<RESIN_DROP_K)k++;return k;}return c;}
 nodes.forEach(ngridAdd);
 // Etäisyys solmuun: tukeille janan lähin piste, muille keskipiste.
 function nodeDist(n,x,z){if(!n.isLog)return Math.hypot(x-n.x,z-n.z);const dx=n.bx-n.ax,dz=n.bz-n.az,t=clamp(((x-n.ax)*dx+(z-n.az)*dz)/(dx*dx+dz*dz),0,1);return Math.hypot(x-(n.ax+dx*t),z-(n.az+dz*t));}
@@ -351,7 +360,8 @@ function ftApply(list){for(const [cx,cz,e] of list||[]){const p=ftEnsure(cx,cz);
 function ftReset(){for(const p of FT_P){scene.remove(p.mesh);p.mesh.geometry.dispose();}FT_P.length=0;FT_IDX.fill(0);FT_ANY=false;FTM.d.fill(0);FTM.t.needsUpdate=true;}
 // biomien sekoituksen muutos → laikkujen pohjavärit uudelleen (render.js blendApply)
 function ftRecolor(){for(const p of FT_P){for(let j=0;j<FT_NV;j++)for(let i=0;i<FT_NV;i++){const k=j*FT_NV+i,gx=p.cx*FT_CS+i/FT_S,gz=p.cz*FT_CS+j/FT_S;for(let c=0;c<3;c++)p.c0[k*3+c]=ftTri(q=>TCOL0[q*3+c],gx,gz);}ftColors(p);}}
-function restoreNode(n){if(n.x!==n.ox||n.z!==n.oz||n.s!==n.s0)moveNode(n,n.ox,n.oz,n.s0);syncNodeY(n);if(!n.alive)reviveNode(n);else setNodeMatrix(n,true);}
+function restoreNode(n){if(n.thin){thinNode(n);return;}   // v2.92
+  if(n.x!==n.ox||n.z!==n.oz||n.s!==n.s0)moveNode(n,n.ox,n.oz,n.s0);syncNodeY(n);if(!n.alive)reviveNode(n);else setNodeMatrix(n,true);}
 
 /* ---------------- TUKIT (kaatuneet puut) ---------------- */
 const logs=[];
