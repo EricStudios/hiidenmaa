@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='2.98';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='2.99';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -157,7 +157,7 @@ function introCam(dt){if(!intro)return;if(!intro.hold)intro.t+=Math.min(dt,.05);
   camera.position.lerpVectors(_iH,_iP,k);camera.quaternion.copy(_iHQ).slerp(_iQ,k);
   if(k<1){const nf=scene.fog.near,ff=scene.fog.far;scene.fog.near=lerp(260,nf,k);scene.fog.far=lerp(700,ff,k);updateChunkVis();}
   if(t>=4.3&&$('#introT').classList.contains('on')){$('#introT').classList.remove('on');$('#introT').classList.add('out');}
-  if(t>=4&&!intro.dsc){intro.dsc=1;const h=mSnd('uusi_maailma','kamera_laskeutuu');if(h)ISND.one.push(h);}   // v2.52 syöksyn ääni
+  if(t>=5&&!intro.dsc){intro.dsc=1;   /* v2.99 syöksyääni 1 s ennen paikalleen asettumista (ennen 2 s) */const h=mSnd('uusi_maailma','kamera_laskeutuu');if(h)ISND.one.push(h);}   // v2.52 syöksyn ääni
   introCloudsTick(dt);if(t>=6)endIntro(true);}
 /* v1.52 (lista 5, kohta 4): uusi maailma latausnäytön takana. Riimukivi näytetään (__ldShow), maailma rakennetaan, intron korkea
    kamera piirretään muutama kuva valmiiksi (varjostimet, ruudut) intro pidossa (hold). Kun latausnäyttö leimahtaa ja alkaa häipyä
@@ -227,7 +227,7 @@ function update(dt){
   updateEnvironment(dt);updateCamera(dt);updateBenchRings();updateChunkVis();updateGrass();
   if(state==='play'){lookTarget=findInteract();updateGhost();}else if(ghost)ghost.visible=false;
   lightT-=dt;if(lightT<=0){lightT=.4;updateLights();}
-  slowT-=dt;if(slowT<=0){slowT=1;exploreTick();updateGoals();if(Math.floor(playTime)%5===0)respawnNodes();if(isNight()&&!P.inDun)nightRegrow();}
+  slowT-=dt;if(slowT<=0){slowT=1;exploreTick();updateGoals();if(Math.floor(playTime)%5===0)respawnNodes();pickFarTick(1);if(isNight()&&!P.inDun)nightRegrow();}
   saveT+=dt;if(saveT>120){saveT=0;saveGame(true);}   // v1.35 (kohta 21): automaattitallennus 2 min välein
   updateZone(dt);updateHUD(dt);if(DEV)devLiveTick(dt);   // v2.96 DEV-valikon elävät arvot
 }

@@ -271,7 +271,16 @@ nodes.forEach(ngridAdd);
 // Etäisyys solmuun: tukeille janan lähin piste, muille keskipiste.
 function nodeDist(n,x,z){if(!n.isLog)return Math.hypot(x-n.x,z-n.z);const dx=n.bx-n.ax,dz=n.bz-n.az,t=clamp(((x-n.ax)*dx+(z-n.az)*dz)/(dx*dx+dz*dz),0,1);return Math.hypot(x-(n.ax+dx*t),z-(n.az+dz*t));}
 function nodesNear(x,z,r,out){out.length=0;const x0=Math.floor((x-r)/CELL),x1=Math.floor((x+r)/CELL),z0=Math.floor((z-r)/CELL),z1=Math.floor((z+r)/CELL);for(let gx=x0;gx<=x1;gx++)for(let gz=z0;gz<=z1;gz++){const a=NGRID.get(ck(gx,gz));if(a)for(const n of a)if(n.alive&&!out.includes(n)&&nodeDist(n,x,z)<r)out.push(n);}return out;}
-function killNode(n){markShadowDirty();if(typeof resinKilled==='function')resinKilled(n);   /* v2.91 pihkapuun kulho putoaa */n.alive=false;n.respawnAt=playTime+n.def.respawn;setNodeMatrix(n,false);if(n.col)n.col.off=true;}
+/* v2.99 käyttäjä: kivet ja malmisuonet uusiutuvat samaan kohtaan ORE_DAYS (5) vuorokauden kuluttua (n.respD, päivälaskuri dayN + dayT – nukkuminen
+   kuluttaa vuorokauden), eivät rakennusten (nearBase: työpenkki, sänky, kaikki osat, leirit) eivätkä löytöpaikkojen (siteBlocked) lähelle.
+   Oksat ja marjat (PICK_FAR) uusiutuvat lähes samaan kohtaan vasta, kun pelaaja on vähintään PICK_FAR_D (¼ kartan pituudesta) päässä; tarkistus
+   kerran minuutissa pelin aikana (pickFarTick), ei nukkuessa. */
+const ORE_DAYS=5,PICK_FAR=new Set(['oksa','marjat']),PICK_FAR_D=HALF/2,PICK_FAR_T=60;
+function rockReady(n){return n.respD==null?n.respawnAt<=playTime:dayN+dayT>=n.respD;}
+function pickFarTick(dt){NODE_FAR.t-=dt;if(NODE_FAR.t>0)return;NODE_FAR.t=PICK_FAR_T;if(P.inDun)return;
+  for(const n of nodes)if(!n.alive&&!n.thin&&PICK_FAR.has(n.type)&&playTime-(n.deadT??-1e9)>=PICK_FAR_T&&dist2(n.ox,n.oz,P.pos.x,P.pos.z)>PICK_FAR_D*PICK_FAR_D&&!nearBase(n.x,n.z))respawnNode(n);}
+const NODE_FAR={t:PICK_FAR_T};
+function killNode(n){markShadowDirty();if(typeof resinKilled==='function')resinKilled(n);   /* v2.91 pihkapuun kulho putoaa */n.alive=false;n.deadT=playTime;n.respawnAt=playTime+n.def.respawn;if(PICK_FAR.has(n.type))n.respawnAt=Infinity;if(n.def.kind==='rock')n.respD=dayN+dayT+ORE_DAYS;setNodeMatrix(n,false);if(n.col)n.col.off=true;}
 function reviveNode(n){markShadowDirty();n.alive=true;n.hp=n.maxHp;setNodeMatrix(n,true);if(n.col)n.col.off=false;}
 // Siirtää puun/kasvin uuteen paikkaan (törmäys, ruudukko, korkeus, koko).
 function moveNode(n,x,z,s){n.x=x;n.z=z;n.s=s;n.y=terrainH(x,z);n.maxHp=(n.def.hp||1)*(n.def.kind==='tree'?s*s*1.2:1);
@@ -401,7 +410,7 @@ const BASE_PIECE_R=15;
 function nearBase(x,z){for(const p of pieces){const r=p.t==='tyopenkki'?BENCH_R*1.3:(typeof CAMPS!=='undefined'&&CAMPS.some(c=>dist2(c.x,c.z,p.x,p.z)<49))?7:BASE_PIECE_R;if(dist2(p.x,p.z,x,z)<r*r)return true;}return false;}
 // Yöllä nukkuessa: kaadetut puut ja poimitut kasvit uusiutuvat (ei uusia), paitsi rakennusten lähellä.
 function regrowForest(){let revived=nightRegrow();
-  for(const n of nodes)if(!n.alive&&n.def.kind==='pick'&&!nearBase(n.x,n.z)){if(respawnNode(n))revived++;}
+  for(const n of nodes)if(!n.alive&&!n.thin&&n.def.kind==='pick'&&!PICK_FAR.has(n.type)&&!nearBase(n.x,n.z)){if(respawnNode(n))revived++;}
   return{revived,planted:0};}
 // Kaadetut puut yrittävät kasvaa takaisin vain kerran yössä ja vain pelaajan 100 m säteellä (ei rakennusalueelle).
 // Yön tunnus: illan tunnit kuuluvat kuluvaan päivään, aamuyö edelliseen (flags.rgN = viimeisin yö, jona yritettiin).

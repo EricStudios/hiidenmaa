@@ -131,6 +131,13 @@ function updateStory(dt){
 // onnistuu) ja sänky sisällä, istuintukki ja säkki (löydetty säiliö). Paikka valitaan kasvillisuuden sijoittelun JÄLKEEN puista ja kivistä
 // vapaalta tasaiselta maalta (≥ 60 m muista paikoista), joten maiseman numerointi ja vanhat tallennukset eivät muutu. Rakennelmat ovat
 // tavallisia rakennusosia (tallentuvat, `flags.camps` = luotu); vanhaan tallennukseen ne luodaan latauksessa.
+/* v2.99 halkopinon paikka: ei palkin (istuin), teltan, nuotion, telineen, säkin eikä ämpärin päällä (ennen kiinteä siirtymä → saattoi osua palkkiin) */
+function campPileSpot(c){const A=c.rot*Math.PI/4,fw=(d,s)=>[c.x+Math.sin(A)*d+Math.cos(A)*s,c.z+Math.cos(A)*d-Math.sin(A)*s],[bx0,bz0]=fw(1.6,1.4),B=((c.rot+2)%8)*Math.PI/4,ex=Math.cos(B)*1.3,ez=-Math.sin(B)*1.3;
+  const segD=(x,z)=>{const vx=2*ex,vz=2*ez,t=clamp(((x-bx0+ex)*vx+(z-bz0+ez)*vz)/(vx*vx+vz*vz),0,1);return Math.hypot(x-(bx0-ex+vx*t),z-(bz0-ez+vz*t));};
+  const [tx,tz]=fw(-3.2,0),circ=[[tx,tz,2.1],[c.x,c.z,1.1],[c.x+1.6,c.z+2.4,1.1],[c.x+2.2,c.z-1.6,.6],[c.x+.9,c.z-1.1,.4]],ok=(x,z)=>segD(x,z)>1.1&&circ.every(([qx,qz,r])=>Math.hypot(x-qx,z-qz)>r+.85);
+  if(ok(c.x-2.4,c.z+1.8))return [c.x-2.4,c.z+1.8];
+  for(const R of [3,3.6,4.2])for(let i=0;i<16;i++){const a=i/16*Math.PI*2,x=c.x+Math.sin(a)*R,z=c.z+Math.cos(a)*R;if(ok(x,z)&&Math.abs(terrainH(x,z)-terrainH(c.x,c.z))<.6)return [x,z];}
+  return [c.x-2.4,c.z+1.8];}
 const CAMPS=(function(){const r=mulberry32(seedMix(97531+MAP_ID*7919)),out=[],n=1+(r()<.5?1:0),tmp=[];
   // ensin tiukat ehdot (niitty/koivikko/metsä/kangas, tasainen, 60 m muista paikoista), jos ei löydy, väljemmät (vuoriset kartat)
   for(let t=0;t<8000&&out.length<n;t++){const loose=t>=4000,x=(r()-.5)*HALF*1.6,z=(r()-.5)*HALF*1.6,h=terrainH(x,z);if(h<2||h>(loose?30:18))continue;
@@ -142,7 +149,7 @@ const CAMPS=(function(){const r=mulberry32(seedMix(97531+MAP_ID*7919)),out=[],n=
   for(const c of out){const sx=c.x+2.2,sz=c.z-1.6,sy=terrainH(sx,sz),key='camp:'+c.k,sk=new THREE.Group();sk.position.set(sx,sy,sz);
     sk.add(bx(.55,.5,.42,mat(0x8a7454),0,.25,0),bx(.2,.12,.2,mat(0x6a5434),0,.55,0));statics.add(sk);addBox(sx-.28,sy,sz-.21,sx+.28,sy+.61,sz+.21,'static');   // säkki (v2.63 kiinteä)
     // v1.04 leirin yksityiskohdat: puupino, nahankuivausteline (taljoja), kaatunut ämpäri ja luita/oksia maassa
-    {const wp=new THREE.Group(),wx=c.x-2.4,wz=c.z+1.8,wy=terrainH(wx,wz);wp.position.set(wx,wy,wz);const lw=mat(0x6b4a2e),cut=mat(0xc08a52);c.pileLogs=[];
+    {const [wx,wz]=campPileSpot(c),wp=new THREE.Group(),wy=terrainH(wx,wz);wp.position.set(wx,wy,wz);const lw=mat(0x6b4a2e),cut=mat(0xc08a52);c.pileLogs=[];
       for(let row=0;row<3;row++)for(let q=0;q<4-row;q++){const lg=new THREE.Group(),cy=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,1.1,7),lw);cy.rotation.x=Math.PI/2;cy.castShadow=true;lg.add(cy);lg.position.set((q-(3-row)/2)*.23,.11+row*.2,0);wp.add(lg);c.pileLogs.push(lg);
         for(const e of [-.555,.555]){const cap=new THREE.Mesh(new THREE.CircleGeometry(.105,7),cut);cap.position.set(0,0,e);cap.rotation.y=e>0?0:Math.PI;lg.add(cap);}}statics.add(wp);
       c.pile={x:wx,y:wy,z:wz,g:wp,col:addBox(wx-.5,wy,wz-.58,wx+.5,wy+.62,wz+.58,'static')};}   // v2.98 kiinteä, kirveellä rikottava (campPileHit)
@@ -213,6 +220,15 @@ function worldChests(){const out=[];
   STASHES.forEach((c,i)=>out.push({key:'stash:'+c.k,L:LOC[c.k],loot:[[['kupari',2],['nuolet',10],['liha',2]],[['pihka',3],['kivi',8],['luu',3]]][i%2]}));
   for(let i=0;i<3;i++)out.push({key:'sarc:'+i,L:LOC.barrow,loot:SARC_LOOT[i],barrow:1});
   return out;}
+/* v2.99 käyttäjä: maailman arkuista metalleja vain noin 5 % tarpeesta (kupariharkot reseptit yht. ~48, rauta ~71): kupari + kuparimalmi
+   yhteensä enintään CHEST_CU, rauta + rautamalmi enintään CHEST_FE kaikissa maailman arkuissa. Ylijäämä vaihtuu muihin tarvikkeisiin (CHEST_FILL).
+   Vanhoissa tallennuksissa avaamattomat arkut rajataan latauksessa (flags.wlCap). Ulottuvuuksien arkut ja pomojen saalis ennallaan. */
+const CHEST_CU=2,CHEST_FE=3,CHEST_FILL=[['nuolet',8],['pihka',2],['nahka',2],['hiili',3],['luu',3]];
+function capWlMetals(wl){const G=[[['kupari','malmi'],CHEST_CU],[['rauta','rautamalmi'],CHEST_FE]],left=G.map(g=>g[1]);let fi=0;
+  for(const k in wl){if(k.startsWith('_')||!Array.isArray(wl[k]))continue;const out=[];
+    for(const e of wl[k]){const gi=G.findIndex(g=>g[0].includes(e[0]));if(gi<0){out.push(e);continue;}const take=Math.min(e[1],left[gi]);left[gi]-=take;if(take>0)out.push([e[0],take]);
+      if(e[1]>take){const f=CHEST_FILL[fi++%CHEST_FILL.length],ex=out.find(x=>x[0]===f[0]);if(ex)ex[1]+=f[1];else out.push(f.slice());}}
+    wl[k]=out;}return wl;}
 function planLoot(old){const fc=fo('fc'),W=worldChests().filter(c=>!fc[c.key]),pool=[];let key=false;
   for(const c of W)for(const [id,n] of c.loot){if(id==='jaaavain'){key=true;continue;}pool.push([id,+n]);}
   if(!old)key=true;else if(fc['poi:poiR1']||!portalLocked('portal1')||invCount('jaaavain')>0)key=false;
@@ -220,7 +236,7 @@ function planLoot(old){const fc=fo('fc'),W=worldChests().filter(c=>!fc[c.key]),p
   const wl={};for(const c of W)wl[c.key]=[];pool.forEach((e,i)=>{const c=W[i%W.length];const ex=wl[c.key].find(x=>x[0]===e[0]);if(ex)ex[1]+=e[1];else wl[c.key].push(e);});
   const KW=W.filter(c=>!c.barrow);   // v2.62 Jääavain vain tavallisiin maailman arkkuihin (ei Hautakummun kirstuihin)
   if(key&&KW.length){const c=KW[Math.random()*KW.length|0];wl[c.key].unshift(['jaaavain',1]);wl._key=c.key;}
-  flags.wl=wl;}
+  capWlMetals(wl);flags.wl=wl;flags.wlCap=1;}
 function wlLoot(key,def){const wl=flags.wl;return wl&&wl[key]?wl[key]:def;}
 const chestLoc=key=>{const c=worldChests().find(c=>c.key===key);return c?c.L:null;};
 // Epämääräinen suunta (vain ilmansuunta, ei matkaa)

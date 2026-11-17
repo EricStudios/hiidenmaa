@@ -409,7 +409,7 @@ function raysPeek(){const R=RAYS,gl=renderer.getContext(),gl2=typeof WebGL2Rende
     gl.bindBuffer(gl.PIXEL_PACK_BUFFER,RPK.pbo);gl.getBufferSubData(gl.PIXEL_PACK_BUFFER,0,RPK.buf,0,RPK.w*RPK.h*4);gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);
     if(RPK.on)raysEval(R,RPK.buf,RPK.w,RPK.h,RPK.x0,RPK.y0,RPK.px,RPK.py,RPK.oo);}
   if(!(R.k>.01||SET.flare===true&&R.kf>.01)||!sunDisc.visible||P.inDun||(SET.shafts===false&&SET.flare!==true)){R.pix=1;R.dir.fill(1);RPK.on=false;return;}
-  if((R.pixN=(R.pixN+1)%(gl2?2:4))!==0)return;_rp.copy(sunDisc.position).project(camera);if(_rp.z>1||Math.abs(_rp.x)>.98||Math.abs(_rp.y)>.98){R.pix=1;R.dir.fill(1);RPK.on=false;return;}
+  {const q=+SET.raysQ||3,md=gl2?[0,4,3,2][q]:[0,6,5,4][q];if((R.pixN=(R.pixN+1)%md)!==0)return;}   /* v2.99 raysQ: peittoluku harvemmin kevyellä tasolla (3 = ennallaan) */_rp.copy(sunDisc.position).project(camera);if(_rp.z>1||Math.abs(_rp.x)>.98||Math.abs(_rp.y)>.98){R.pix=1;R.dir.fill(1);RPK.on=false;return;}
   const bw=gl.drawingBufferWidth,bh=gl.drawingBufferHeight,px=(_rp.x*.5+.5)*bw,py=(_rp.y*.5+.5)*bh;
   const rad=Math.atan(9/380)/Math.tan(camera.fov*Math.PI/360)*bh/2,oo=Math.max(1,rad*.65);_rsc.copy(sunDisc.material.color);
   const e=Math.ceil(oo)+2,x0=Math.max(0,Math.round(px)-e),y0=Math.max(0,Math.round(py)-e),x1=Math.min(bw,Math.round(px)+e+1),y1=Math.min(bh,Math.round(py)+e+1),w=x1-x0,h=y1-y0;if(w<=0||h<=0)return;
@@ -418,8 +418,10 @@ function raysPeek(){const R=RAYS,gl=renderer.getContext(),gl2=typeof WebGL2Rende
   if(gl2){gl.bindBuffer(gl.PIXEL_PACK_BUFFER,RPK.pbo);gl.readPixels(x0,y0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,0);gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);RPK.sync=gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0);gl.flush();}
   else{gl.readPixels(x0,y0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,RPK.buf);raysEval(R,RPK.buf,w,h,x0,y0,px,py,oo);}}
 /* v2.40: säteen oman suunnan peitto: kulma a (näytöllä) → lähin 8 suunnasta → q.d liukuu kohti R.dir (alas 22/s ≈ lähes heti, ylös 6/s) */
-function rayOcc(q,a,ddt){const an=((a%TAU)+TAU)%TAU,bi=Math.round(an/(Math.PI/4))%8,dd=RAYS.dir[bi];q.d=lerp(q.d,dd,Math.min(1,ddt*(dd<q.d?22:6)));return q.d;}
-function raysResize(){const R=RAYS,W=Math.max(2,innerWidth>>1),H=Math.max(2,innerHeight>>1);if(R.W!==W||R.H!==H){R.W=R.c.width=W;R.H=R.c.height=H;}}
+function rayOcc(q,a,ddt){const an=((a%TAU)+TAU)%TAU,bi=Math.round(an/(Math.PI/4))%8,dd=RAYS.dir[bi],rk=RQ_K[+SET.raysQ||3]||1;q.d=lerp(q.d,dd,Math.min(1,ddt*(dd<q.d?22:6)*rk));return q.d;}
+/* v2.99 säteiden ja heijastuksen tarkkuus SET.raysQ: 1 kevyt (¼ resoluutio, peitto harvemmin ja hitaammin), 2 tarkka, 3 paras (= Ultra, ennallaan) */
+const RQ_K=[1,.6,.8,1],RQ_SH=[1,2,1,1];
+function raysResize(){const R=RAYS,sh=RQ_SH[+SET.raysQ||3]||1,W=Math.max(2,innerWidth>>sh),H=Math.max(2,innerHeight>>sh);if(R.W!==W||R.H!==H){R.W=R.c.width=W;R.H=R.c.height=H;}}
 const _rv=new THREE.Vector3();
 function drawRays(dt){const R=RAYS,want=(SET.shafts!==false&&R.k>.01||SET.flare===true&&R.kf>.01)&&!P.inDun&&!(typeof CAM_UW==='number'&&CAM_UW>0)&&sunDisc.visible;
   if(!want){if(R.clr){R.g.clearRect(0,0,R.W,R.H);R.clr=false;}return;}

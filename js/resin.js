@@ -108,10 +108,12 @@ function carvePose(){if(!P.carve)return;const t=playTime*8.5,s=Math.sin(t);
 /* v2.97 ENSIMMÄINEN PUUKKO (käyttäjä): 2 s puukon saamisesta selkeä ohje pihkankeräyksestä – chattiin ja vinkkilaatikkoon (14 s). Kerran maailmaa
    kohti (flags.knifeInfo); näkyy kaikille (ei vain opastusmaailmassa, toisin kuin TIPS). */
 const KNIFE_INFO_DELAY=2,KNIFE_INFO_SHOW=14;
-const KNIFE_INFO_TXT='Sait puukon – nyt voit kerätä pihkaa! Osa männyistä ja kuusista on tarpeeksi pihkaisia: tunnistat ne rungon kellertävistä pihkavalumista. Mene aivan kiinni sellaiseen runkoon ja paina E puukko kädessä, niin kaiverrat pihkakuvion. Sido kuvion alle kulho narulla (kulho kädessä, naru toisessa kädessä, E) – pihka valuu kulhoon itsestään.';
+/* v2.99 käyttäjä: chattiin vain lyhyt muistutus (pitkä teksti meni pelinäkymän yli); täysi ohje ylävinkissä selkeinä vaiheina */
+const KNIFE_INFO_MSG='Puukolla voi kerätä pihkaa – katso ohje ylhäältä.';
+const KNIFE_INFO_TXT='<b>Sait puukon – nyt voit kerätä pihkaa!</b><br>1. Etsi mänty tai kuusi, jonka rungossa on <b>kellertäviä pihkavaluja</b> (vain osa puista).<br>2. Mene aivan kiinni runkoon ja paina <kbd>E</kbd> puukko kädessä → kaiverrat pihkakuvion.<br>3. Ota kulho käteen ja naru toiseen käteen, paina <kbd>E</kbd> → kulho kuvion alle. Pihka valuu kulhoon itsestään.';
 function knifeInfoTick(dt){if(RES.tipT>0){RES.tipT-=dt;if(RES.tipT<=0&&TUT.tipEl)TUT.tipEl.classList.remove('on');}
   if(flags.knifeInfo||state!=='play'||P.dead)return;if(invCount('puukko')<=0){RES.knifeT=KNIFE_INFO_DELAY;return;}
-  RES.knifeT=(RES.knifeT??KNIFE_INFO_DELAY)-dt;if(RES.knifeT>0)return;flags.knifeInfo=1;msg(KNIFE_INFO_TXT,'loot');
+  RES.knifeT=(RES.knifeT??KNIFE_INFO_DELAY)-dt;if(RES.knifeT>0)return;flags.knifeInfo=1;msg(KNIFE_INFO_MSG,'loot');
   const el=tipEl();el.querySelector('.tipD').innerHTML=KNIFE_INFO_TXT;el.classList.add('on');TUT.tipT=KNIFE_INFO_SHOW;RES.tipT=KNIFE_INFO_SHOW;if(typeof mSnd==='function')mSnd('napit','hover');}
 
 /* ---------- kertyminen, kaatuminen ja hiipuminen ---------- */

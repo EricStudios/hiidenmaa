@@ -120,7 +120,7 @@ function igniteMob(m){if(m.dead)return;if(mobWet(m)||playTime<(m.igniteCd||0))re
 function stopBurn(m){m.burnT=0;if(m.fireFx){m.f.g.remove(m.fireFx);m.fireFx=null;}if(m.fireLight){const i=lightSources.indexOf(m.fireLight);if(i>=0)lightSources.splice(i,1);m.fireLight=null;updateLights();}}
 // Palavan mobin päivitys: palauttaa true, jos mobi kuoli tulessa.
 function updateBurn(m,dt){if(mobWet(m)){stopBurn(m);m.igniteCd=playTime+3;if(playTime-(m.exFx||-99)>2.5){m.exFx=playTime;burst(m.pos.x,m.pos.y+1,m.pos.z,0x9a9a9a,6,2);}return false;}   /* v2.17: sammumisefekti enintään 2,5 s välein */
-  m.burnT-=dt;if(!m.sunBurn)m.hp-=5*dt;m.hurtT=playTime;m.lastHit=playTime;
+  m.burnT-=dt;if(!m.sunBurn)m.hp-=FIRE_DPS_M*dt;m.hurtT=playTime;m.lastHit=playTime;
   // v1.87: palava pomo (boss/rboss) ähkii silmukkana: oma kipuääni (hurt) matalampana (×0,78) ja hiljaisempana (×0,55), 1,4–2,2 s välein, alle 60 m päässä
   /* v2.17: palamisen kipuääni (myös pomot, matalampi ja hiljaisempi) soi creTick:ssä 1,7–2,1 s välein */
   if(m.fireFx){const t=playTime*9;m.fireFx.children.forEach((c,i)=>{if(c.userData.glow){c.material.opacity=.14+.08*Math.abs(Math.sin(t*.7+i));return;}c.scale.y=.8+.35*Math.abs(Math.sin(t+i*1.7));});if(Math.random()<dt*24)emitEmber(m.pos.x+(Math.random()-.5)*.7,m.pos.y+(m.barH||1.5)*(.3+Math.random()*.6),m.pos.z+(Math.random()-.5)*.7,'spark');if(Math.random()<dt*3)emitEmber(m.pos.x,m.pos.y+(m.barH||1.5),m.pos.z,'smoke');if(Math.random()<dt*5)smokePuff(m.pos.x+(Math.random()-.5)*m.def.r,m.pos.y+(m.barH||1.5)*.9,m.pos.z+(Math.random()-.5)*m.def.r,1.1+m.def.r,.2);}   // v1.37 (kohta 36): isoja savupilviä

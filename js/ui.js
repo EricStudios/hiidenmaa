@@ -153,7 +153,7 @@ function renderDev(){const B=$('#devBody');if(!B)return;const clk=()=>{const h=d
   <div class="devRow"><b>Jumalvoimat</b><div class="devChk">${[['food','Ei nälkää'],['stam','Rajaton kestävyys'],['lvl','Korkein taso'],['weight','Ei painorajaa']].map(([k,n])=>`<label class="tglRow">${tglHTML('dv_'+k,!!DEVF[k],`data-dv="${k}"`)} ${n}</label>`).join('')}</div>
     <div class="devBtns"><button class="btn" data-dvall="1">Kaikki päälle</button><button class="btn" data-dvall="0">Kaikki pois</button></div></div>
   <div class="devRow"><b>Kartta</b><div class="devBtns"><button class="btn" id="devMap">Paljasta kartta ja kohteet</button></div></div>
-  <div class="devRow"><b>Tarkasteluanimaatiot (F)</b><div class="devBtns">${INSP_ANIMS.map(a=>`<button class="btn" data-insp="${a.id}">${a.n}</button>`).join('')}</div><small class="devNote">Käynnistyy 0,2 s kuluttua, kun valikko on suljettu. Toimii millä tahansa esineellä (ei vasara eikä jousi).</small></div>`;
+  <div class="devRow"><b>Tarkasteluanimaatiot (F)</b><div class="devBtns">${INSP_ANIMS.map(a=>`<button class="btn devInsp" data-insp="${a.id}" title="Toimii parhaiten: ${a.best}">${a.n}<small>${a.best}</small></button>`).join('')}</div><small class="devNote">Käynnistyy 0,2 s kuluttua, kun valikko on suljettu. Pieni teksti = esine, jolle animaatio on tehty (toimii millä tahansa, ei vasara eikä jousi).</small></div>`;
   B.querySelectorAll('[data-insp]').forEach(b=>b.onclick=()=>{const id=b.dataset.insp;closePanels();setTimeout(()=>{if(!inspectStart(id))msg('DEV: tarkastelu ei käynnisty (vasara tai jousi kädessä, uinti tai lyönti).','warn');},200);});   // v2.98
   B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{weather.cur=b.dataset.w;weather.until=playTime+600;renderDev();});
   B.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{dayT=+b.dataset.t;renderDev();});
@@ -369,7 +369,7 @@ function renderInv(){initSearch();renderEffects();
 function upgradeInfo(s){const d=ITEMS[s.id];if(!d.cat||d.cat==='hammer'||d.cat==='bowl'||s.id==='naru')return null;   /* v2.91 kulho ja naru: ei parannuksia */const q=s.q||1;if(q>=3)return null;const r=RECIPE_BY[s.id];if(!r)return null;
   const req={};for(const [id,n] of Object.entries(r.req))req[id]=Math.ceil(n/2)*q;const st=r.st||'tyopenkki';const near=nearStations()[st];
   const ok=near&&Object.entries(req).every(([id,n])=>invCount(id)>=n);return{req,ok,why:near?'':`Tarvitset: ${STATION_NAME[st]}`};}
-function craft(r){if(!recipeOpen(r))return;for(const [id,n] of Object.entries(r.req))invRemove(id,n);bump('crafted');xpFirst('c_'+r.id,6,'uusi esine');const left=invAdd(r.id,r.n||1);if(left)spawnDrop(r.id,left,P.pos.x,P.pos.y+1,P.pos.z);plSnd('rakentaminen','valmistus');sfx('craft');msg(`Valmistit: ${ITEMS[r.id].n}`,'loot');
+function craft(r){if(!recipeOpen(r))return;for(const [id,n] of Object.entries(r.req))invRemove(id,n);bump('crafted');xpFirst('c_'+r.id,6,'uusi esine');const left=invAdd(r.id,r.n||1);if(left)spawnDrop(r.id,left,P.pos.x,P.pos.y+1,P.pos.z);if(!((r.st||'tyopenkki')==='ahjo'&&plSnd('rakentaminen','ahjo_valmis')))plSnd('rakentaminen','valmistus');sfx('craft');msg(`Valmistit: ${ITEMS[r.id].n}`,'loot');   /* v2.99 ahjolla oma ääni (puuttuessa tavallinen) */
   if(ITEMS[r.id].cat&&!equipped(ITEMS[r.id].cat==='bow'||ITEMS[r.id].cat==='hammer'?'weapon':ITEMS[r.id].cat)){const s=inv.find(s=>s&&s.id===r.id&&!s.eq);if(s)toggleEquip(s);}
   invDirty=true;renderInv();}
 let buildTab='suos';
@@ -467,7 +467,7 @@ function itemProps(s,q){const d=ITEMS[s.id],o=[],f1=v=>v.toFixed(1).replace('.',
   if(d.cat==='shield')o.push(['Torjuu',pc(Math.min(.95,d.block*(1+.1*(q-1))))],['Kunto',s.shBrk!=null?`rikki – ehjä ${mss(Math.max(0,SHIELD_FIX-(playTime-s.shBrk)))} päästä`:`${(SHIELD_HITS[s.id]||15)-(s.shHit||0)} / ${SHIELD_HITS[s.id]||15} osumaa`],['Torjunnan kestävyys',pc(SHIELD_COST[s.id]||.9)+' iskusta']);
   // v1.23 (kohta 15): nuolten tiedot
   if(AMMO_STATS[s.id]){const a=AMMO_STATS[s.id],r=v=>v===1?'normaali':(v>1?'+':'−')+Math.round(Math.abs(v-1)*100)+' %';
-    o.push(['Lentonopeus',r(a.spd)],['Kaaren pudotus',r(a.grav)],['Vahinko',r(a.dmg)],['Tuulen vaikutus',a.wind<1?'puolet':'normaali']);if(a.fire)o.push(['Sytyttää','5–10 s, 5 terveyttä/s (sade sammuttaa)']);}
+    o.push(['Lentonopeus',r(a.spd)],['Kaaren pudotus',r(a.grav)],['Vahinko',r(a.dmg)],['Tuulen vaikutus',a.wind<1?'puolet':'normaali']);if(a.fire)o.push(['Sytyttää','5–10 s, '+FIRE_DPS_M+' terveyttä/s (sade sammuttaa)']);}
   if(d.cat==='shovel')o.push(...(s.id==='kuokka'?[['Vasen','nostaa maata 0,3 m'],['Oikea','palauttaa maan värin ja kasvillisuuden']]:[['Vasen','kaivaa kuoppaa 0,3 m'],['Oikea','ruskea polku']]),['Kestävyyttä / käyttö','6']);
   // v2.98 pihkan keräys esinetiedoissa (resin.js)
   if(s.id==='puukko')o.push(['Pihkan keräys','kaiverra pihkapuuhun kuvio (E rungon vieressä, '+CARVE_T+' s)'],['Pihkapuut','männyt ja kuuset, joiden kuoressa näkyy hieman kellertävää pihkaa (n. 3 % puista)'],['Pihkaa / puu','10–50 puun koon mukaan, kertyy noin tunnissa'],['Kaiverrus ja valuma',q>1?'+'+Math.round((resinFlowK(q)-1)*100)+' % nopeampi (★'+q+')':'normaali (★2 +10 %, ★3 +20 %)']);
@@ -663,9 +663,12 @@ function mapMarkers(g,sx,ox,oz){
 }
 // v0.84: tuulikompassi isolla kartalla (nuoli = puhallussuunta, kartan ylös = pohjoinen) + teksti "Tuuli: lounaasta 6 m/s".
 const mapCO={x:0,y:0,t:0};
-function windArrow(g,x,y,L,col){g.save();g.translate(x,y);g.rotate(Math.atan2(WIND.z,WIND.x));g.strokeStyle=col;g.fillStyle=col;g.lineWidth=Math.max(1.5,L*.09);g.lineCap='round';
-  g.beginPath();g.moveTo(-L*.5,0);g.lineTo(L*.32,0);g.stroke();g.beginPath();g.moveTo(L*.5,0);g.lineTo(L*.18,-L*.2);g.lineTo(L*.18,L*.2);g.closePath();g.fill();
-  g.beginPath();g.moveTo(-L*.5,0);g.lineTo(-L*.62,-L*.16);g.moveTo(-L*.38,0);g.lineTo(-L*.5,-L*.16);g.stroke();g.restore();}
+/* v2.99 käyttäjä: terävä nuoli (ennen pyöreäpäinen viiva): kapea varsi, terävä kärki, kaksi sulkaa, tumma ääriviiva, viisteet terävinä (miter) */
+function windArrow(g,x,y,L,col){g.save();g.translate(x,y);g.rotate(Math.atan2(WIND.z,WIND.x));const w=Math.max(1.2,L*.045),hw=L*.17,hl=L*.3,tip=L*.5,tail=-L*.5;
+  g.lineJoin='miter';g.lineCap='butt';g.beginPath();g.moveTo(tip,0);g.lineTo(tip-hl,-hw);g.lineTo(tip-hl*.78,-w);g.lineTo(tail+L*.08,-w);g.lineTo(tail,-L*.13);g.lineTo(tail+L*.16,-w*.4);
+  g.lineTo(tail+L*.16,w*.4);g.lineTo(tail,L*.13);g.lineTo(tail+L*.08,w);g.lineTo(tip-hl*.78,w);g.lineTo(tip-hl,hw);g.closePath();
+  g.fillStyle=col;g.fill();g.lineWidth=Math.max(1,L*.025);g.strokeStyle='rgba(12,10,8,.75)';g.stroke();
+  g.beginPath();g.moveTo(tip-L*.02,0);g.lineTo(tip-hl*.85,-hw*.55);g.lineTo(tip-hl*.7,0);g.closePath();g.fillStyle='rgba(255,255,255,.35)';g.fill();g.restore();}
 // v1.04 selkeämpi tuulinäyttö: isompi kompassi (r 46), paksu nuoli, "Tuuli lounaasta" + iso nopeus "6 m/s", voimakkuuspalkki (0–22 m/s)
 function drawWindCompass(g,x,y,r){g.save();g.fillStyle='rgba(19,17,14,.42)';g.beginPath();g.arc(x,y,r,0,TAU);g.fill();g.strokeStyle='rgba(232,164,74,.9)';g.lineWidth=2;g.stroke();
   g.strokeStyle='rgba(238,229,211,.25)';g.lineWidth=1;for(let i=0;i<16;i++){const a=i/16*TAU,l=i%4?5:9;g.beginPath();g.moveTo(x+Math.cos(a)*(r-2),y+Math.sin(a)*(r-2));g.lineTo(x+Math.cos(a)*(r-2-l),y+Math.sin(a)*(r-2-l));g.stroke();}

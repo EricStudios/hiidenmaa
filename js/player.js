@@ -24,7 +24,7 @@ function updatePlayer(dt){
   const fwd=_tmpV.set(-Math.sin(camYaw),0,-Math.cos(camYaw)),right=_tmpV2.set(Math.cos(camYaw),0,-Math.sin(camYaw));
   let mx=0,mz=0;if(state==='play'&&P.stagger<=0){if(kd('fwd'))mx+=1;if(kd('back'))mx-=1;if(kd('right'))mz+=1;if(kd('left'))mz-=1;}
   let dx=fwd.x*mx+right.x*mz,dz=fwd.z*mx+right.z*mz;const dl=Math.hypot(dx,dz);if(dl>0){dx/=dl;dz/=dl;}
-  P.blocking=state==='play'&&mouseR&&w.cat!=='hammer'&&w.cat!=='bow'&&w.cat!=='shovel'&&P.stam>0&&!P.atk;
+  P.blocking=state==='play'&&mouseR&&!!equipped('shield')&&w.cat!=='hammer'&&w.cat!=='bow'&&w.cat!=='shovel'&&P.stam>0&&!P.atk;   // v2.99 torjunta vain kilpi kädessä (ennen myös naru/tyhjä käsi)
   if(P.shTired){if(P.stam>=SHIELD_REST)P.shTired=false;else P.blocking=false;}   // v2.85 uupunut: kilpeä ei voi nostaa ennen kuin kestävyyttä on SHIELD_REST
   // v1.39 (lista 4, kohta 18): rikkinäisellä kilvellä ei voi torjua (kilpi on selässä kunnes ehjä)
   {const sh0=equipped('shield');if(P.blocking&&sh0&&sh0.shBrk!=null&&!shieldOk(sh0)){P.blocking=false;if(playTime-(P.shMsgT||-9)>1.5){P.shMsgT=playTime;const r=Math.max(0,SHIELD_FIX-(playTime-sh0.shBrk));msg(`Kilpi on rikki (${Math.floor(r/60)}:${String(Math.floor(r%60)).padStart(2,'0')})`,'warn');}}}
@@ -170,6 +170,7 @@ function updatePlayer(dt){
   if(P.drawing){tLx=-1.58;tRx=-1.5;tRz=.5;}
   if(heldMesh&&ITEMS[heldId].cat==='bow'){if(P.drawing)tLz=-.3;}
   if(P.atk)P.recT=.55;else P.recT=Math.max(0,(P.recT||0)-dt);if(!P.atk&&P.recT>0&&!P.drawing&&!P.blocking)rate=Math.min(rate,5);// iskun jälkeen kädet palaavat lepoon pehmeästi
+  inspectRestore();   // v2.99 F-tarkastelun IK ei jää käsivarren perusasennoksi (nykiminen paluussa)
   const e=Math.min(1,dt*rate);
   armSh+=(tSh-armSh)*e;fig.armL.position.x=armSh;fig.armR.position.x=-armSh;
   fig.armR.rotation.y=lerpAngle(fig.armR.rotation.y,0,e);fig.armL.rotation.y=lerpAngle(fig.armL.rotation.y,0,e);fig.armR.rotation.x=lerpAngle(fig.armR.rotation.x,tRx,e);fig.armR.rotation.z=lerpAngle(fig.armR.rotation.z,tRz,e);
@@ -427,10 +428,27 @@ function shorePoint(x,z){for(let r=1.5;r<700;r+=1.5){const n=Math.max(10,Math.ro
     for(let i=0;i<n;i++){const a=i/n*TAU,px=x+Math.sin(a)*r,pz=z+Math.cos(a)*r,h=terrainH(px,pz);if(h>=.5&&h<bh&&Math.hypot(px,pz)<seaBorder(px,pz)){bh=h;best={x:px,y:h,z:pz};}}
     if(best)return best;}return null;}
 // Hautakasa: kivet + pieni valomajakka (läpikuultava pylväs + himmeä pistevalo), joka näkyy lähellä (updateStations).
-function makeGrave(g){const m=new THREE.Group();m.add(bx(1,.5,1,mat(0x6a6862),0,.25,0),bx(.5,1.2,.2,mat(0x8f8d86),0,.9,-.3));
-  const bm=new THREE.MeshBasicMaterial({color:0x8fffee,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide});
-  const beam=new THREE.Mesh(new THREE.CylinderGeometry(.06,.3,8,8,1,true),bm);beam.position.y=4.4;m.add(beam);g.beam=beam;
+/* v2.99 käyttäjä: hienompi kuolema-arkku – kivikehä, puuarkku rautavanteineen, riimukivi hehkuvalla riimulla; keskitasosta ylöspäin (SET.detail high)
+   majakka kuten pomon saaliissa: kirkas ydin, leveä hehku, maarengas ja nousevat kipinät (graveFx). Matalalla vanha yksinkertainen pylväs. */
+const GRAVE_C=0x8fffee;let _graveRune=null;
+function makeGrave(g){const m=new THREE.Group(),st=mat(0x6e6c66),st2=mat(0x8a8780);
+  for(let i=0;i<9;i++){const a=i/9*Math.PI*2+.2,r=.72+(i%2)*.08,s=.18+((i*37)%5)*.03,o=bx(s*1.4,s,s*1.2,i%3?st:st2,Math.sin(a)*r,s/2-.02,Math.cos(a)*r);o.rotation.y=a*1.7;m.add(o);}
+  const ch=makeChest('wood',.82,.56,.56);ch.rotation.y=.12;ch.position.y=.02;m.add(ch);
+  const ir=mat(0x3d3a36,{metalness:.5,roughness:.6});for(const x of [-.27,.27])m.add(bx(.05,.6,.6,ir,x,.3,0));
+  const hs=bx(.52,1.15,.18,st2,0,.57,-.62);hs.rotation.x=-.06;m.add(hs);
+  if(!_graveRune)_graveRune=new THREE.MeshBasicMaterial({color:GRAVE_C,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false});
+  for(const [w,h,x,y] of [[.05,.5,0,.72],[.22,.04,0,.86],[.16,.04,-.05,.6]]){const r=new THREE.Mesh(new THREE.PlaneGeometry(w,h),_graveRune);r.position.set(x,y,-.525);m.add(r);}
+  const fancy=SET.detail==='high'&&+SET.mist>=1;g.fancy=fancy;   // Medium+ ja ylempänä
+  if(fancy){const H=14,add=o=>new THREE.MeshBasicMaterial({color:GRAVE_C,map:beaconTex(),transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,fog:false});
+    const bg=new THREE.Group(),core=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,H,12,1,true),add(.9)),outer=new THREE.Mesh(new THREE.CylinderGeometry(.32,.2,H,20,1,true),add(.3));core.position.y=outer.position.y=H/2+.3;
+    const ring=new THREE.Mesh(new THREE.RingGeometry(.5,.95,40),new THREE.MeshBasicMaterial({color:GRAVE_C,transparent:true,opacity:.45,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,fog:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.04;
+    bg.add(core,outer,ring);bg.renderOrder=5;m.add(bg);g.beam=bg;g.bfx={core,outer,ring};}
+  else{const bm=new THREE.MeshBasicMaterial({color:GRAVE_C,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide});
+    const beam=new THREE.Mesh(new THREE.CylinderGeometry(.06,.3,8,8,1,true),bm);beam.position.y=4.4;m.add(beam);g.beam=beam;}
   g.dim=g.dim||curDim();m.position.set(g.x,g.y,g.z);m.visible=!g.hid;scene.add(m);g.mesh=m;g.light={x:g.x,y:g.y+1.4,z:g.z,c:0x8fffee,i:1.1,dun:g.dim!=='world',on:()=>!g.hid&&(g.dim||'world')===curDim()};   /* v2.73 hid: ei näy kuolinkamerassa */lightSources.push(g.light);graves.push(g);}
+// v2.99 majakan sykkivä hehku ja kipinät (ai.js updateStations)
+function graveFx(g,dt){const B=g.bfx;if(!B){g.beam.material.opacity=.28+Math.sin(playTime*3)*.1;return;}const p=.8+.2*Math.sin(playTime*3.2+g.x);B.core.material.opacity=.9*p;B.outer.material.opacity=.3*p;B.ring.material.opacity=.42*p;B.ring.scale.setScalar(.92+.18*Math.sin(playTime*2));
+  if(Math.random()<dt*5)burst(g.x+(Math.random()-.5)*.5,g.y+.4+Math.random()*1.4,g.z+(Math.random()-.5)*.5,GRAVE_C,1,.8);}
 function graveVanish(g){const m=g.mesh;removeGrave(g,true);let t=0;burst(g.x,g.y+.4,g.z,0x6a5a44,18,4);sfx('crumble',.8,.6);
   fx.push({obj:m,t:0,update:(f,dt)=>{t+=dt;m.position.y=g.y-t*.9;m.rotation.z=Math.sin(t*9)*.05*(1-t/1.6);if(Math.random()<dt*14)burst(g.x+(Math.random()-.5),g.y+.1,g.z+(Math.random()-.5),0x5a4a36,2,2);return t>1.6;}});}
 function removeGrave(g,keepMesh){if(!keepMesh)scene.remove(g.mesh);const i=graves.indexOf(g);if(i>=0)graves.splice(i,1);const j=lightSources.indexOf(g.light);if(j>=0)lightSources.splice(j,1);}
