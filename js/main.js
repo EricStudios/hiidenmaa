@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.09';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.10';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -120,7 +120,7 @@ const SAVE_LD_FRAMES=20;
 function saveLoad(s,welcome){if(!window.__ldShow){loadData(s);startPlay();msg(welcome,'loot');return;}
   window.__ldShow('Maailma herää…');if(window.__ldSet)window.__ldSet(.1);
   setTimeout(()=>{if(window.__ldSet)window.__ldSet(.45);loadData(s);startPlay();P.spawnProt=Math.max(P.spawnProt||0,4);let n=0;
-    const tick=()=>{if(window.__ldSet)window.__ldSet(.45+n/SAVE_LD_FRAMES*.55);if(++n<SAVE_LD_FRAMES)requestAnimationFrame(tick);else{window.__ldAfter=()=>msg(welcome,'loot');if(window.__ldDone)window.__ldDone();}};requestAnimationFrame(tick);},90);}
+    const tick=()=>{if(window.__ldSet)window.__ldSet(.45+n/SAVE_LD_FRAMES*.55);if(++n<SAVE_LD_FRAMES)requestAnimationFrame(tick);else{ldPrewarm();window.__ldAfter=()=>msg(welcome,'loot');if(window.__ldDone)window.__ldDone();}};requestAnimationFrame(tick);},90);}
 $('#bRun').onclick=()=>{pauseRun=!pauseRun;try{localStorage.setItem('hiidenmaa_prun',pauseRun?'1':'0');}catch(e){}refreshMenu();};
 $('#bResume').onclick=()=>{state='play';$('#menu').hidden=true;$('#hud').hidden=false;requestLock();};
 // Tallenna: ei avaa asetuksia; ilmoitus näkyy painikkeessa ja valikon tilariviltä
@@ -148,7 +148,7 @@ function startIntro(hold){if(P.inDun)return;intro={t:0,a0:Math.random()*TAU,hold
 const INTRO_FADE=2.5,INTRO_SKIP_FADE=.3,ISND={L:[],one:[]};
 function introSndStart(){introSndStop(.05);for(const ev of ['tuuli','linnut']){const h=mSnd('uusi_maailma',ev,{loop:true,cat:'amb',menu:1});if(h)ISND.L.push(h);}const w=mSnd('uusi_maailma','pilvet_wuush');if(w)ISND.one.push(w);}
 function introSndStop(f){for(const h of ISND.L)mStop(h,f);ISND.L.length=0;if(f<=INTRO_SKIP_FADE)for(const h of ISND.one)mStop(h,Math.min(f,.15));ISND.one.length=0;}
-function endIntro(nat){if(!intro)return;introSndStop(nat?INTRO_FADE:INTRO_SKIP_FADE);intro=null;introCloudsClear();const el=$('#introT');if(el){el.classList.add('out');el.classList.remove('on');setTimeout(()=>{if(!intro)el.hidden=true;},900);}
+function endIntro(nat){if(!intro)return;introGrassVis(true);introSndStop(nat?INTRO_FADE:INTRO_SKIP_FADE);intro=null;introCloudsClear();const el=$('#introT');if(el){el.classList.add('out');el.classList.remove('on');setTimeout(()=>{if(!intro)el.hidden=true;},900);}
   if(state==='intro'){state='play';$('#hud').hidden=false;}if(typeof tutMaybeStart==='function')tutMaybeStart();}   // v2.71 opastus alkulennon jälkeen
 function introCam(dt){if(!intro)return;if(!intro.hold)intro.t+=Math.min(dt,.05);const t=intro.t,px=P.pos.x,py=P.pos.y,pz=P.pos.z;
   _iP.copy(camera.position);_iQ.copy(camera.quaternion);   // tavallinen kolmannen persoonan kamera (updateCamera juuri laski)
@@ -158,15 +158,30 @@ function introCam(dt){if(!intro)return;if(!intro.hold)intro.t+=Math.min(dt,.05);
   if(k<1){const nf=scene.fog.near,ff=scene.fog.far;scene.fog.near=lerp(260,nf,k);scene.fog.far=lerp(700,ff,k);updateChunkVis();}
   if(t>=4.3&&$('#introT').classList.contains('on')){$('#introT').classList.remove('on');$('#introT').classList.add('out');}
   if(t>=5&&!intro.dsc){intro.dsc=1;   /* v2.99 syöksyääni 1 s ennen paikalleen asettumista (ennen 2 s) */const h=mSnd('uusi_maailma','kamera_laskeutuu');if(h)ISND.one.push(h);}   // v2.52 syöksyn ääni
+  if(!SET.oldLoad)introGrassVis(camera.position.y-py<INTRO_GRASS_H);   // v3.10 ylhäältä ei ruohoa
   introCloudsTick(dt);if(t>=6)endIntro(true);}
 /* v1.52 (lista 5, kohta 4): uusi maailma latausnäytön takana. Riimukivi näytetään (__ldShow), maailma rakennetaan, intron korkea
    kamera piirretään muutama kuva valmiiksi (varjostimet, ruudut) intro pidossa (hold). Kun latausnäyttö leimahtaa ja alkaa häipyä
    (__ldAfter), pilvet aukeavat sivuille: Medium ja yli → 3D-lisäpilvet kameran edessä (poistetaan animaation jälkeen), alle Medium
    CSS-pilviverho (#cloudVeil). Sitten intro jatkuu normaalisti (4 s ylhäällä + 2 s syöksy). Karttavaihdossa (sivun lataus) sama pito. */
 function introHiQ(){const pi=presetIdx();return pi<0?(SET.shadow==='high'&&(+SET.lights||6)>=6):pi>=3;}
+/* v3.10 käyttäjä: MAAILMA VALMIIKSI LATAUSRUUDUSSA (vanha tapa: SET.oldLoad, Asetukset › Ohjaus › Ammattilaisille). Latausruudun lopussa ldPrewarm:
+   pelikamera + intron puoliväli piirretään kerran latausruudun takana ja kaikki varjostimet käännetään (renderer.compile) → lähimaailma (tarkat puut, ruoho, varjot,
+   yhdistetyt kohteet, maaston LOD) on valmiina eikä lataudu näkyvästi intron aikana. Intron yläkamerassa kevyt tila (introLight): puiden LOD lasketaan 3D-etäisyydestä
+   (korkealta kaikki kaukomalleina), ruohoa ei piirretä yli INTRO_GRASS_H m korkeudelta; laatu nousee asetusten mukaiseksi laskeutuessa. Kesto mitataan (LD_PREWARM.ms). */
+const INTRO_GRASS_H=30,LD_PREWARM={ms:0,n:0};
+function introLight(){return state==='intro'&&!SET.oldLoad;}
+function introGrassVis(on){for(const g of [typeof grassIM!=='undefined'?grassIM:null,typeof tallIM!=='undefined'?tallIM:null,...(typeof weedIMs!=='undefined'?weedIMs:[])])if(g&&g.visible!==on)g.visible=on;}
+function ldPrewarm(){if(SET.oldLoad)return 0;const t0=performance.now();
+  try{const dsc=intro&&intro.dsc,it=intro&&intro.t;
+    update(1/60);statT=0;updateChunkVis();if(typeof terrLodTick==='function')terrLodTick();if(typeof shpTick==='function')shpTick();   // pelikamera (update laski sen) ja normaali sumu
+    introGrassVis(true);sun.shadow.needsUpdate=true;renderer.compile(scene,camera);renderer.render(scene,camera);
+    if(intro){intro.dsc=1;intro.t=5;introCam(0);updateChunkVis();renderer.render(scene,camera);intro.t=it||0;intro.dsc=dsc;introCam(0);}   // intron puoliväli, sitten takaisin yläkameraan
+    LD_PREWARM.n++;}catch(e){console.warn('ldPrewarm',e);}
+  return LD_PREWARM.ms=Math.round(performance.now()-t0);}
 function worldLoad(build){if(window.__ldShow)window.__ldShow('Saari nousee merestä…');if(window.__ldSet)window.__ldSet(.08);
   introVeil(true);
-  setTimeout(()=>{if(window.__ldSet)window.__ldSet(.45);build();let n=0;const tick=()=>{if(window.__ldSet)window.__ldSet(.45+n/24*.55);if(++n<24)requestAnimationFrame(tick);else introReady();};requestAnimationFrame(tick);},90);}
+  setTimeout(()=>{if(window.__ldSet)window.__ldSet(.45);build();let n=0;const tick=()=>{if(window.__ldSet)window.__ldSet(.45+n/24*.55);if(++n<24)requestAnimationFrame(tick);else{ldPrewarm();introReady();}};requestAnimationFrame(tick);},90);}
 function introReady(){window.__ldAfter=introRelease;if(window.__ldDone)window.__ldDone();else introRelease();}
 function introRelease(){if(!intro){introVeil(false);return;}intro.hold=false;intro.t=0;introSndStart();const el=$('#introT');if(el){el.classList.remove('out');void el.offsetWidth;el.classList.add('on');}
   if(introHiQ()){introVeil(false,true);introCloudsMake();}else introVeil(false);}

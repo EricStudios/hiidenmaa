@@ -592,6 +592,13 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.10: maailma valmiiksi latausruudussa (ldPrewarm), intron kevyt yläkamera (LOD 3D-etäisyydestä, ei ruohoa ylhäällä), vanha tapa asetuksena (Ohjaus › Ammattilaisille)',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('esilataus',typeof ldPrewarm==='function'&&/ldPrewarm\(\)/.test(worldLoad.toString())&&/ldPrewarm\(\)/.test(saveLoad.toString())&&/renderer\.compile/.test(ldPrewarm.toString()));
+    ck('intro kevyt',INTRO_GRASS_H===30&&/introGrassVis/.test(introCam.toString())&&/introGrassVis\(true\)/.test(endIntro.toString())&&/introLight/.test(updateChunkVis.toString()));
+    ck('vanha tapa',SET_DEF.oldLoad===false&&(()=>{const o=SET.oldLoad;SET.oldLoad=true;const r=ldPrewarm()===0;SET.oldLoad=o;return r;})());
+    ck('asetus',(()=>{const t0=setTab;try{setTab='ctl';renderSettings();const el=document.getElementById('s_oldLoad');return !!el&&!!el.closest('.proSec')&&/v3\.09/.test(el.closest('.setRow').textContent);}finally{setTab=t0;renderSettings();}})());
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.09: maailmalistassa pelissä oleva maailma (Pelaat nyt) tai viimeksi pelattu (vaalea ääriviiva)',()=>{const s0=started,c0=curSlot,M=slotMeta;try{
       slotMeta=()=>[{name:'A',at:1},{name:'B',at:5},null,null,null];started=false;renderWorlds();const L=[...document.querySelectorAll('#worlds .world')];const ok1=L[1].classList.contains('last')&&/Viimeksi pelattu/.test(L[1].textContent)&&!L[0].querySelector('.wTag');
       started=true;curSlot=0;renderWorlds();const C=[...document.querySelectorAll('#worlds .world')];const ok2=C[0].classList.contains('cur')&&/Pelaat nyt/.test(C[0].textContent)&&!C[1].classList.contains('last');

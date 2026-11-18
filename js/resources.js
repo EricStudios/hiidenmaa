@@ -200,11 +200,11 @@ function cullStatics(){const cx=camera.position.x,cz=camera.position.z,f=scene.f
     const vis=o.userData.mg?false:c.dun?P.inDun:(!P.inDun&&dist2(cx,cz,c.x,c.z)<(f+c.r)*(f+c.r));if(o.visible!==vis)o.visible=vis;}}
 function updateChunkVis(){statT-=1/30;if(statT<=0){statT=.5;cullStatics();mergeTick();if(typeof bmTick==='function')bmTick();}else if(bmDirty&&typeof bmTick==='function')bmTick();terrLodTick();
   const cx=camera.position.x,cz=camera.position.z,f=scene.fog.far;
-  const lod=+SET.treeLod||0,h=CHS/2;
+  const lod=+SET.treeLod||0,h=CHS/2,dy=typeof introLight==='function'&&introLight()?Math.max(0,camera.position.y-P.pos.y):0,dy2=dy*dy;   // v3.10 intro: LOD 3D-etäisyydestä (yläkamerassa kevyt)
   for(const im of CHUNK_IMS){const R=Math.min(f,im.userData.vis*RDK*(im.userData.vis<80?DETK:1))+CHS*.72,on=im.count>0&&!P.inDun&&dist2(cx,cz,im.userData.cx,im.userData.cz)<R*R;im.userData.on=on;
     const low=im.userData.low;if(!low){im.visible=on;continue;}
     /* v2.41 LOD: koko ruutu kaukomalliin, kun sen lähin reuna on yli SET.treeLod m kamerasta (kaikki sen puut ovat vähintään niin kaukana) */
-    const ex=Math.max(0,Math.abs(cx-im.userData.cx)-h),ez=Math.max(0,Math.abs(cz-im.userData.cz)-h),far=on&&lod>0&&ex*ex+ez*ez>lod*lod;
+    const ex=Math.max(0,Math.abs(cx-im.userData.cx)-h),ez=Math.max(0,Math.abs(cz-im.userData.cz)-h),far=on&&lod>0&&ex*ex+ez*ez+dy2>lod*lod;
     im.visible=on&&!far;low.visible=far;low.count=im.count;}
   if(typeof shpTick==='function')shpTick();}
 /* v1.44 (lista 4, kohta 30): KAUKAISEN MAASTON LOD (asetus terrLod). Kärjet pysyvät samoina (lapion muokkaukset toimivat), vain

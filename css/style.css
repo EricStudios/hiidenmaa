@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.09';
+:root{--css-v:'3.10';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1063,3 +1063,5 @@ body.noActH #prompt{display:none!important}
 #menu .world .wTag{align-self:flex-start;margin:-4px 0 -6px;padding:2px 9px;border-radius:10px;font:700 11px 'Alegreya Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase}
 #menu .world .wTag.cur{background:#f0b45a;color:#2a1a0c;box-shadow:0 0 10px rgba(240,180,90,.45)}
 #menu .world .wTag.last{background:rgba(232,200,150,.16);color:#e8d4b0;border:1px solid rgba(232,200,150,.35)}
+/* v3.10 Ohjaus › Ammattilaisille ja vertailuun: harmaa ja läpikuultava */
+.proSec{margin-top:26px;opacity:.5;filter:grayscale(1);transition:opacity .2s}.proSec:hover{opacity:.8}

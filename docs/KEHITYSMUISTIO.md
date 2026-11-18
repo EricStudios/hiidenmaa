@@ -3,9 +3,10 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.09, 18.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.10, 18.11.2026)
 
-- **Versio 3.09** – maailmalistan Pelaat nyt / Viimeksi pelattu -merkinnät (ks. versioloki). PR #49 sisältää v3.08–v3.09.
+- **Versio 3.10** – maailma valmiiksi latausruudussa + kevyt intron yläkamera, vanha tapa asetuksena (ks. versioloki). PR #49 sisältää v3.08–v3.10.
+- **Versio 3.09** – maailmalistan Pelaat nyt / Viimeksi pelattu -merkinnät.
 - **Versio 3.08** – käyttäjän 26 kohdan lista + 4 lisäystä (pihkan täyttyminen, kartan Sulje-teksti, 3 vihjeporrasta, tallennus suljettaessa), ks. versioloki v3.08.
   Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`. **Testilinkit nyt EricStudios-muodossa:**
   `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html` (käyttäjänimi vaihtui; vanha erboiyprogamer-source-linkki ei enää päde).
@@ -412,6 +413,16 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.10 (maailma valmiiksi latausruudussa – käyttäjän pyyntö ja hyväksymä suunnitelma)
+- **Esilataus** `ldPrewarm` (main.js) latausruudun lopussa (`worldLoad` + `saveLoad`): pelikamera ja intron puoliväli piirretään kerran latausruudun takana, kaikki varjostimet
+  käännetään (`renderer.compile`), näkyvyys/yhdistäminen/maaston LOD/varjomallit ajetaan heti. Kesto testiselaimessa ~0,13–0,19 s (`LD_PREWARM.ms`).
+- **Intron yläkamera kevyt** (`introLight`): puiden LOD lasketaan 3D-etäisyydestä (korkealta kaukomallit), ruohoa/tupsuja/rikkaruohoja ei piirretä yli 30 m (`INTRO_GRASS_H`,
+  `introGrassVis`); laatu palaa asetusten mukaiseksi laskeutuessa ja `endIntro` palauttaa ruohon.
+- **Mittaus** (swiftshader, kiinteä kulma, koko intro): yläkamera 693 000 vs 750 000 kolmiota, piirtokutsut 605 vs 795, intron keskimääräinen ruutu 7,3 vs 9,4 ms,
+  pahin nykäisy laskeutuessa (t 5,27 s, 36 m) 31 vs 66 ms. Latausaika ennallaan (esilataus < 0,2 s).
+- **Vanha tapa** asetuksena: Asetukset › Ohjaus › "Ammattilaisille ja vertailuun" (harmaa, läpikuultava `.proSec`) › **Vanha maailman lataus (v3.09)** (`SET.oldLoad`, oletus pois);
+  vaihto kysyy varmistuksen, tallentaa ja lataa sivun uudelleen. Tarkistus: v3.10-rivi.
 
 ### v3.09 (maailmalista – käyttäjän pyyntö)
 - Maailmat-näkymässä pelissä oleva maailma saa kirkkaan kultaisen ääriviivan ja merkin **"Pelaat nyt"**; kun peli ei ole käynnissä, viimeksi pelattu maailma (`lastWorld`,
