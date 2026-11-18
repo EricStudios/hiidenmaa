@@ -5,7 +5,11 @@
 /* ---------------- LASKURIT, XP JA TASO ---------------- */
 // flags.cnt = laskurit (trees, rocks, kills, k_<laji>, built, crafted, cooked, picked, slept, shots), flags.xp = kokemuspisteet,
 // flags.ach = avatut saavutukset, flags.first = ensimmäiset kerrat (XP vain kerran).
-const LVL_MAX=20,needXp=n=>50+30*n; // XP tasolta n tasolle n+1
+/* v3.02 käyttäjä: huipputaso 30 (ennen 20) ja tasot hieman vaikeampia: 55 + 35n (ennen 50 + 30n), tasosta 20 alkaen lisäksi +20 × (n − 19).
+   XP on maailmakohtainen (flags.xp). Vanha tallennus muunnetaan kerran (flags.xpv): taso ja tason sisäinen osuus säilyvät (xpMigrate). */
+const LVL_MAX=30,needXp=n=>55+35*n+(n>=20?20*(n-19):0),NEED_XP_OLD=n=>50+30*n,LVL_MAX_OLD=20; // XP tasolta n tasolle n+1
+function xpMigrate(){fixFlags();if(flags.xpv)return;let xp=flags.xp||0,L=1;while(L<LVL_MAX_OLD&&xp>=NEED_XP_OLD(L)){xp-=NEED_XP_OLD(L);L++;}
+  let nx=0;for(let i=1;i<L;i++)nx+=needXp(i);nx+=L<LVL_MAX_OLD?Math.floor(xp/NEED_XP_OLD(L)*needXp(L)):xp;flags.xp=nx;flags.xpv=1;}
 function fixFlags(){flags.xp=flags.xp||0;flags.cnt=flags.cnt||{};flags.ach=flags.ach||{};flags.first=flags.first||{};}
 const cnt=k=>(flags.cnt&&flags.cnt[k])||0;
 function bump(k,n=1){fixFlags();flags.cnt[k]=(flags.cnt[k]||0)+n;}
@@ -14,7 +18,7 @@ function lvlInfo(){if(devOn('lvl'))return{L:LVL_MAX,xp:0,need:0};// DEV: korkein
 const playerLevel=()=>lvlInfo().L;
 /* v2.70 TASOPALKINNOT (käyttäjä: "Tasainen"): joka tasolla jotain, HP harvoin. HP +10 (3, 5), +15 (10, 15), +20 (20) = +70 → 130;
    kestävyys +5 (4, 8, 12, 16) = +20; muilla tasoilla kantokyky +5 (10 tasoa = +50). Lisäksi reseptit (RECIPES lvl). */
-const LVL_REW={3:{hp:10},4:{stam:5},5:{hp:10},8:{stam:5},10:{hp:15},12:{stam:5},15:{hp:15},16:{stam:5},20:{hp:20}},LVL_W=5;
+const LVL_REW={3:{hp:10},4:{stam:5},5:{hp:10},8:{stam:5},10:{hp:15},12:{stam:5},15:{hp:15},16:{stam:5},20:{hp:20},22:{stam:5},24:{hp:10},26:{stam:5},28:{hp:10},30:{hp:20}},LVL_W=5;   // v3.02 tasot 21–30
 const lvlRew=L=>L<2?{}:LVL_REW[L]||{w:LVL_W};
 function lvlBon(L){const o={hp:0,stam:0,w:0};for(let i=2;i<=(L||playerLevel());i++){const r=lvlRew(i);for(const k in r)o[k]+=r[k];}return o;}
 function addXp(n,why){if(!n||P.dead)return;fixFlags();const b=playerLevel(),h0=maxHp();flags.xp+=n;const a=playerLevel();if(maxHp()>h0)P.hp+=maxHp()-h0;   /* v1.20: terveyslisä heti */
@@ -41,6 +45,8 @@ const ACH=[
   {id:'nuolimestari',n:'Nuolimestari',d:'Ammu 30 nuolta.',pr:()=>[cnt('shots'),30],b:{stam:5}},
   {id:'unet',n:'Hyvät yöunet',d:'Nuku yö sängyssä (katon alla). Ensimmäinen uni kertoo jotain tärkeää.',pr:()=>[Math.max(cnt('nights'),flags.dream?1:0),1],b:{stam:5}},   // v2.79 vain onnistunut uni (ennen jo yritys)
   {id:'pihka',n:'Pihkankerääjä',d:'Kerää 20 pihkaa pihkapuista kulholla (puukko, kulho ja naru).',pr:()=>[cnt('resin'),20],b:{w:5}},   // v2.91
+  {id:'padankaitsija',n:'Padankaitsija',d:'Ota keittopadasta 20 valmista pataruokaa.',pr:()=>[cnt('potDish'),20],b:{w:5}},   // v3.02
+  {id:'hillo',n:'Hillomestari',d:'Keitä 10 puolukkahilloa.',pr:()=>[flags.hilloN||0,10],b:{stam:5}},   // v3.02
   {id:'vartija',n:'Kalmanvartijan voittaja',d:'Voita Kalmanvartija.',pr:()=>[flags.boss?1:0,1],b:{hp:5,stam:5}},
 ];
 const BON={hp:0,stam:0,w:0,spd:0};
@@ -77,26 +83,36 @@ const GOALS=[
   {id:'jousi',t:'Ammu jousella',d:'Valmista jousi ja nuolia. Pidä hiiren vasenta pohjassa ja päästä irti.',xp:15,ok:()=>cnt('shots')>=5},
   {id:'laajenna',t:'Laajenna reppua',d:'Repun vieressä on päivityspainike (nahkaa ja puuta).',xp:20,ok:()=>P.packLv>=1},
   {id:'kivirak',t:'Rakenna kivestä',d:'Kiviseinät, kivilattiat ja kivikatot kestävät paljon. Kivikatot ovat omassa välilehdessään.',xp:15,ok:()=>anyP(isStone)},
-  {id:'grilli',t:'Rakenna grillinuotio',d:'Grillitelineessä on neljä paikkaa ruoalle. Ota ruoka ajoissa – ylipaistettu muuttuu hiileksi.',xp:20,ok:()=>anyP(p=>p.t==='grilli')},
+  {id:'grilli',t:'Rakenna grillinuotio',d:'Grillissä on kuusi paikkaa ruoalle, ruoka kypsyy nopeammin eikä pala yhtä herkästi. Vain grillillä: metsästäjän varras ja juhla-ateria.',xp:20,ok:()=>anyP(p=>p.t==='grilli')},
   {id:'rauta',t:'Löydä rautaa',d:'Rautasuonet ovat korkealla vuoristossa. Tarvitset kuparihakun (taso 3). Rautatyökalut aukeavat tasolla 5.',xp:30,ok:()=>flags.seen&&(flags.seen.rautamalmi||flags.seen.rauta)},
   // v1.34 (lista 3, kohta 8): ulottuvuudet ennen Kalmanvartijaa; alttari vaatii kolme Kalmankruunun sirpaletta (ei enää hiidenkiviä).
   {id:'routa',t:'Avaa Routaportti',get d(){return `Routaportti on ${dirIn('portal1')} tuntureilla. Siinä on kaksi lukkoa: Kalmon sinetti (Hautakummun ylimys, ${dirIn('barrow')}) ja Jääavain (jostain saaren vanhasta arkusta). Avaimen kätkijä vuorella neuvoo.`;},xp:40,ok:()=>!portalLocked('portal1')||!!fo('rb').portal1},
   {id:'jaatar',t:'Kukista Jäätär',d:'Routaluolan perimmäisessä kammiossa. Hän kantaa luuavainta.',xp:50,ok:()=>!!fo('rb').portal1},
+  // v3.02 keittopata (taso 10) etenemisjärjestyksessä ulottuvuuksien väliin
+  {id:'pata',t:'Rakenna keittopata',d:'Tasolla 10: takoa keittopata ahjolla (rautaa ja kuparia), rakenna keittopatanuotio (Työpisteet) ja asenna pata siihen (E).',xp:30,ok:()=>!!flags.potBuilt||anyP(p=>p.t==='patanuotio'&&p.data.pot)},
+  {id:'keitto',t:'Keitä ensimmäinen pataruoka',d:'Sytytä tuli padan alle ja valitse resepti padan ikkunasta (E) tai repusta padan lähellä. Ota ruoka, kun höyryä nousee.',xp:25,ok:()=>(flags.potN||0)>=1},
   {id:'kalmaherra',t:'Kukista Kalmaherra',get d(){return `Kalmankammion portti on ${dirIn('portal2')}. Luuavain avaa sen.`;},xp:60,ok:()=>!!fo('rb').portal2},
+  {id:'haudu',t:'Hauduta kansi kiinni',d:'Laita kansi padan päälle: ruoka kypsyy nopeammin (8× grilliaika, ilman kantta 10×), jatkaa ilman tultakin ja ei pilaannu.',xp:20,ok:()=>!!flags.potLid},
+  {id:'sienet10',t:'Keitä kymmenen sientä kerralla',d:'Sienet kypsyvät vain keittopadassa – laita kerralla kymmenen.',xp:20,ok:()=>!!flags.pot10},
+  {id:'kyllainen',t:'Syö maha täyteen pataruoalla',d:'Pataruoat täyttävät eniten ja antavat Kylläinen-tilan: nälkä kasvaa puolet hitaammin.',xp:20,ok:()=>!!flags.potFull},
   {id:'aarnihirvio',t:'Kukista Aarnihirviö',get d(){return `Aarnihaudan portti on ${dirIn('portal3')}. Aarniavain avaa sen.`;},xp:70,ok:()=>!!fo('rb').portal3},
+  {id:'juhlapata',t:'Valmista juhlapata',d:'Taso 13: suurriistaa, riistaa, sieniä, villikauraa ja puolukoita padassa. Täyttää vatsan pitkäksi aikaa ja antaa voimaa.',xp:30,ok:()=>!!flags.juhlapata},
   {id:'sirpaleet',t:'Kerää kolme Kalmankruunun sirpaletta',d:'Aarnihirviö kantoi yhtä, kaksi muuta on kätketty Aarnihaudan arkkuihin.',xp:50,ok:()=>invCount('kruunusirpale')>=3||!!flags.altarSt||!!boss||!!flags.boss},
   {id:'vartija',t:'Herätä Kalmanvartija',get d(){return `Kalmankehä on ${dirIn('circle')} Hautakummun lähellä. Aseta sirpaleet alttarille ja voita vartija.`;},xp:100,ok:()=>flags.boss},
   {id:'vapaa',t:'Hiidenmaa on vapaa',d:'Jatka rakentamista ja tutkimista omaan tahtiisi.',xp:0,ok:()=>false},
 ];
 // Vanhat tallennukset (flags.gv puuttuu) käyttivät 11 tavoitteen listaa: muunnetaan indeksi ja annetaan jo ansaittu XP.
 const GOALS_V2=['poimi','kirves','puu1','puu10','vasara','penkki','lattia','seinat','ovi','katto','nuotio','lepo','marjat','paista','sanky','arkku','kupari','sulata','varusta','vihut','jousi','laajenna','kivirak','grilli','rauta','kivet','vartija','vapaa'];
+/* v3.02: tavoitelista ennen pataa (gv 3) → indeksi muunnetaan id:n mukaan (gv 4); uudet patatavoitteet jo ohitetun kohdan takana jäävät väliin */
+const GOALS_V3=['poimi','kirves','puu1','puu10','vasara','penkki','lattia','seinat','ovi','katto','nuotio','lepo','marjat','paista','sanky','arkku','kupari','sulata','varusta','vihut','jousi','laajenna','kivirak','grilli','rauta','routa','jaatar','kalmaherra','aarnihirvio','sirpaleet','vartija','vapaa'];
 const OLD_GOALS=['poimi','kirves','vasara','lattia','paista','kupari','sulata','varusta','kivet','vartija','vapaa'];
 function migrateProgress(){fixFlags();
   if(!flags.gv){const id=OLD_GOALS[Math.min(flags.goal||0,OLD_GOALS.length-1)],ni=Math.max(0,GOALS.findIndex(g=>g.id===id));
-    if(!flags.xp)for(let i=0;i<ni;i++)flags.xp+=GOALS[i].xp;flags.goal=ni;flags.gv=3;if(flags.boss)flags.xp+=60;}
+    if(!flags.xp)for(let i=0;i<ni;i++)flags.xp+=GOALS[i].xp;flags.goal=Math.max(0,GOALS_V3.indexOf(id));flags.gv=3;if(flags.boss)flags.xp+=60;}
   // v1.34: versio 2 → 3 (kivet-tavoite korvattu ulottuvuustavoitteilla); läpäistyt ohitetaan updateGoals-silmukassa.
   else if(flags.gv===2){const id=GOALS_V2[Math.min(flags.goal||0,GOALS_V2.length-1)],nid=id==='kivet'?'routa':id;flags.goal=Math.max(0,GOALS.findIndex(g=>g.id===nid));flags.gv=3;}
-  recalcBon();}
+  if(flags.gv===3){const id=GOALS_V3[Math.min(flags.goal||0,GOALS_V3.length-1)];flags.goal=Math.max(0,GOALS.findIndex(g=>g.id===id));flags.gv=4;}   // v3.02
+  xpMigrate();recalcBon();}
 let goalShown=-1;
 function updateGoals(){fixFlags();
   while(flags.goal<GOALS.length-1&&GOALS[flags.goal].ok()){const g=GOALS[flags.goal];flags.goal++;msg('Tavoite saavutettu!','loot');sfx('craft');addXp(g.xp,g.t);}

@@ -37,7 +37,7 @@ function tutDefault(){let done=false;try{done=localStorage.getItem('hiidenmaa_tu
 function tutChoose(on){try{sessionStorage.setItem('hiidenmaa_tutgo',on?'1':'0');}catch(e){}}
 // kutsutaan uuden maailman newGame()-kutsun jälkeen (main.js, molemmat polut): opastus alkaa alkulennon jälkeen (endIntro → tutMaybeStart)
 function tutOnNewWorld(){let go=null;try{go=sessionStorage.getItem('hiidenmaa_tutgo');sessionStorage.removeItem('hiidenmaa_tutgo');}catch(e){}
-  if(go===null)go=tutDefault()?'1':'0';if(go==='1'){if(SET.tutNext)try{localStorage.removeItem('hiidenmaa_tipseen');}catch(e){}flags.tut=1;flags.tips={};TUT.pending=true;}}   // v2.82 pyydetty uudelleen → vinkit alusta
+  if(go===null)go=tutDefault()?'1':'0';if(go==='1'){if(SET.tutNext)flags.tipsRe=1;flags.tut=1;flags.tips={};TUT.pending=true;}}   // v3.02 erikseen päälle laitettu opastus → nähdyt vinkit uudelleen tässä maailmassa (flags.tipsRe), ohitus peruu
 function tutMaybeStart(){if(!TUT.pending||TUT.on)return;const ld=document.getElementById('loadScr');
   if((ld&&!ld.classList.contains('out')&&getComputedStyle(ld).display!=='none')||state!=='play'){setTimeout(tutMaybeStart,400);return;}   // odota latausnäytön ja alkulennon loppu
   TUT.pending=false;tutStart();}
@@ -61,7 +61,7 @@ function tutPlace(){const S=TUT_STEPS[TUT.i],d=TUT.el;if(!S||!d)return;const car
 function tutNext(){const S=TUT_STEPS[TUT.i];if(!S||!TUT.on)return;if(typeof mSnd==='function')mSnd('napit','klikkaus');TUT.i++;if(TUT.i>=TUT_STEPS.length){tutEnd(false);return;}tutShow();}
 function tutSkipAsk(){keyDialog('Ohitetaanko opastus?',[['Vahvista',()=>tutEnd(true)],['Peruuta',null]],'Opastuksen voi ottaa uudelleen käyttöön: Asetukset › Ohjaus › Opastus seuraavassa uudessa maailmassa.');}
 function tutEnd(skipped){TUT.on=false;TUT.hold=false;TUT.pending=false;if(TUT.el)TUT.el.hidden=true;try{localStorage.setItem('hiidenmaa_tutdone','1');}catch(e){}
-  if(SET.tutNext){SET.tutNext=false;saveSet();}if(skipped&&flags)flags.tut=0;   /* ohitettu → ei kertavinkkejä */
+  if(SET.tutNext){SET.tutNext=false;saveSet();}if(skipped&&flags){flags.tut=0;flags.tipsRe=0;}   /* v3.02 ohitettu → nähtyjä vinkkejä ei toisteta (uudet vinkit näkyvät silti) */
   if(!skipped)msg('Opastus valmis – hyvää matkaa Hiidenmaassa!','loot');if(state==='play'&&!openPanel&&!locked)requestLock();}
 // näppäimet opastuksen aikana (input.js): pysäytyksessä vain vaiheen sallimat toiminnot, Enter = jatka. Palauttaa true, kun näppäin käsiteltiin tai estettiin.
 function tutKey(e){if(!TUT.on)return false;const S=TUT_STEPS[TUT.i],c=e.code;if(!S)return false;
@@ -100,14 +100,14 @@ const TIPS=[
   {id:'ulottuvuus',c:()=>P.inDun&&!!P.realm,d:()=>`Ulottuvuudessa portti vie takaisin saarelle. Pomo herää, kun astut sen kammioon – varaa ruokaa ja parannusjuomia.`},
   {id:'taso',c:()=>playerLevel()>=2,d:()=>`Uusi taso! ${kL('prog')} näyttää, mitä sait ja mitä seuraavat tasot avaavat.`},
 ];
-/* v2.82 VINKIT KERRAN PELAAJALLE (käyttäjä): nähty vinkki muistetaan kaikkien maailmojen yli (localStorage hiidenmaa_tipseen), joten opastuksen
-   jo käynyt pelaaja ei näe samoja vinkkejä uudessa opastusmaailmassa. Asetus "Opastus seuraavassa uudessa maailmassa" tyhjentää muistin (tutOnNewWorld).
-   Maailmassa ilman opastusta (flags.tut puuttuu tai ohitettu) vinkkejä ei näytetä lainkaan. */
+/* v2.82 / v3.02 VINKIT KERRAN PELAAJALLE (käyttäjä): nähty vinkki muistetaan kaikkien maailmojen yli (localStorage hiidenmaa_tipseen) – sama vinkki ei
+   tule uudelleen eri eikä uudessa maailmassa. Uusi pelaaja saa kaikki vinkit ensimmäisessä maailmassaan (myös ilman opastusta). Nähdyt vinkit
+   toistuvat VAIN, kun alun opastus on laitettu erikseen päälle (Asetukset › Opastus seuraavassa uudessa maailmassa → flags.tipsRe) eikä sitä ohiteta. */
 function tipSeenG(){try{return JSON.parse(localStorage.getItem('hiidenmaa_tipseen')||'{}')||{};}catch(e){return {};}}
 function tipSeenSet(id){const o=tipSeenG();o[id]=1;try{localStorage.setItem('hiidenmaa_tipseen',JSON.stringify(o));}catch(e){}}
-function tipsTick(dt){if(!flags||!flags.tut||state!=='play'||P.dead)return;flags.tips=flags.tips||{};const el=tipEl();
+function tipsTick(dt){if(!flags||state!=='play'||P.dead)return;flags.tips=flags.tips||{};const el=tipEl();
   if(TUT.tipT>0){TUT.tipT-=dt;if(TUT.tipT<=0)el.classList.remove('on');return;}
   TUT.tipCd-=dt;if(TUT.tipCd>0)return;TUT.tipCd=.5;
-  const G=tipSeenG();for(const T of TIPS){if(flags.tips[T.id])continue;if(G[T.id]){flags.tips[T.id]=1;continue;}let ok=false;try{ok=T.c();}catch(e){}if(!ok)continue;flags.tips[T.id]=1;tipSeenSet(T.id);
+  const G=tipSeenG();for(const T of TIPS){if(flags.tips[T.id])continue;if(G[T.id]&&!flags.tipsRe){flags.tips[T.id]=1;continue;}let ok=false;try{ok=T.c();}catch(e){}if(!ok)continue;flags.tips[T.id]=1;tipSeenSet(T.id);
     el.querySelector('.tipD').innerHTML=T.d();el.classList.add('on');TUT.tipT=10;TUT.tipCd=6;if(typeof mSnd==='function')mSnd('napit','hover');return;}}
 function tipEl(){if(TUT.tipEl)return TUT.tipEl;const d=document.createElement('div');d.id='tutTip';d.innerHTML='<b>Vinkki</b><span class="tipD"></span>';document.body.appendChild(d);TUT.tipEl=d;return d;}

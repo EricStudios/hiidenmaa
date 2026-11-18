@@ -149,12 +149,12 @@ const CAMPS=(function(){const r=mulberry32(seedMix(97531+MAP_ID*7919)),out=[],n=
   for(const c of out){const sx=c.x+2.2,sz=c.z-1.6,sy=terrainH(sx,sz),key='camp:'+c.k,sk=new THREE.Group();sk.position.set(sx,sy,sz);
     sk.add(bx(.55,.5,.42,mat(0x8a7454),0,.25,0),bx(.2,.12,.2,mat(0x6a5434),0,.55,0));statics.add(sk);addBox(sx-.28,sy,sz-.21,sx+.28,sy+.61,sz+.21,'static');   // säkki (v2.63 kiinteä)
     // v1.04 leirin yksityiskohdat: puupino, nahankuivausteline (taljoja), kaatunut ämpäri ja luita/oksia maassa
-    {const [wx,wz]=campPileSpot(c),wp=new THREE.Group(),wy=terrainH(wx,wz);wp.position.set(wx,wy,wz);const lw=mat(0x6b4a2e),cut=mat(0xc08a52);c.pileLogs=[];
+    {const [wx,wz]=campPileSpot(c),wp=new THREE.Group(),wy=terrainH(wx,wz);wp.position.set(wx,wy,wz);const lw=mat(0x6b4a2e),cut=mat(0xc08a52);c.pileLogs=[];wp.userData.noMerge=1;   /* v3.00 ei yhdistetä staattisiin (mergeStatics): muuten rikottu pino jäi näkyviin haamuna (KORJAUKSET 74) */
       for(let row=0;row<3;row++)for(let q=0;q<4-row;q++){const lg=new THREE.Group(),cy=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,1.1,7),lw);cy.rotation.x=Math.PI/2;cy.castShadow=true;lg.add(cy);lg.position.set((q-(3-row)/2)*.23,.11+row*.2,0);wp.add(lg);c.pileLogs.push(lg);
         for(const e of [-.555,.555]){const cap=new THREE.Mesh(new THREE.CircleGeometry(.105,7),cut);cap.position.set(0,0,e);cap.rotation.y=e>0?0:Math.PI;lg.add(cap);}}statics.add(wp);
       c.pile={x:wx,y:wy,z:wz,g:wp,col:addBox(wx-.5,wy,wz-.58,wx+.5,wy+.62,wz+.58,'static')};}   // v2.98 kiinteä, kirveellä rikottava (campPileHit)
 
-    {const rk=new THREE.Group(),rx=c.x+1.6,rz=c.z+2.4,ry=terrainH(rx,rz),ra=r()*3;rk.position.set(rx,ry,rz);rk.rotation.y=ra;const st=mat(0x5a3d22),hide=mat(0x9a6a44);
+    {const rk=new THREE.Group(),rx=c.x+1.6,rz=c.z+2.4,ry=terrainH(rx,rz),ra=r()*3;rk.position.set(rx,ry,rz);rk.rotation.y=ra;rk.userData.noMerge=1;   /* v3.00 otetut taljat katoavat (ei yhdistetä) */const st=mat(0x5a3d22),hide=mat(0x9a6a44);
       for(const sx2 of [-.8,.8])rk.add(bx(.07,1.5,.07,st,sx2,.75,0));rk.add(bx(1.7,.06,.06,st,0,1.45,0));const h1=bx(.7,.8,.03,hide,-.35,1.05,.02);h1.rotation.z=.08;rk.add(h1);const h2=bx(.55,.65,.03,mat(0x7a5232),.42,1.12,.02);h2.rotation.z=-.1;rk.add(h2);statics.add(rk);
       // v2.98 kiinteät tolpat ja varastettavat taljat (campRackSteal)
       for(const sx2 of [-.8,.8]){const px=rx+Math.cos(ra)*sx2,pz=rz-Math.sin(ra)*sx2;addCircle(px,pz,.09,ry,ry+1.5,'static');}

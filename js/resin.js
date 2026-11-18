@@ -40,9 +40,29 @@ function resinNode(id){if(!_resNodeMap||_resNodeMap.size!==nodes.length){_resNod
 /* ---------- vesikulho ---------- */
 function nearWater(){if(P.inDun)return false;if(P.inWater)return true;const wl=water.position.y;
   for(let a=0;a<8;a++){const dx=Math.sin(a*TAU/8),dz=Math.cos(a*TAU/8);for(const r of [.8,1.6,2.4])if(terrainH(P.pos.x+dx*r,P.pos.z+dz*r)<wl-.05)return true;}return false;}
+/* v3.04 käyttäjä: VESIKULHO KAATUU. Kun vesikulho on kädessä ja animaatio (esim. F-tarkastelu) kääntää kulhon suun alaspäin (suun suunta
+   y < BOWL_SPILL_Y, ~100° kallistus) BOWL_SPILL_T s ajan, vesi valuu pois: kulho tyhjenee, roiske, ilmoitus "Hups…" ja hahmo kiroaa
+   (paikkamerkki sounds/extra/raw/moka/kirous, avain p/moka/kirous) BOWL_CURSE_D s myöhemmin.
+   Liikkuessa (kävely, juoksu, hyppy – juoksun käsienheilunta kallistaisi kulhoa ~105°) hahmo kantaa vesikulhoa varovasti: kulho pidetään vaakasuorassa
+   (bowlLevel); vain F-tarkastelu (P.insp, myös AFK-lähitarkastelu) kääntää sen oikeasti → voi kaataa. */
+const BOWL_SPILL_Y=-.15,BOWL_SPILL_T=.12,BOWL_CURSE_D=.45,BOWL_LEVEL_K=12,_spillQ=new THREE.Quaternion(),_spillPQ=new THREE.Quaternion(),_spillFix=new THREE.Quaternion(),_spillT=new THREE.Quaternion(),_spillV=new THREE.Vector3(),_spillUp=new THREE.Vector3(0,1,0);
+function bowlLevel(hm,dt){if(!hm.userData.q0)hm.userData.q0=hm.quaternion.clone();const q0=hm.userData.q0;
+  if(P.insp){_spillT.copy(q0);}else{hm.parent.getWorldQuaternion(_spillPQ);_spillQ.copy(_spillPQ).multiply(q0);_spillV.set(0,1,0).applyQuaternion(_spillQ);
+    _spillFix.setFromUnitVectors(_spillV,_spillUp);_spillQ.premultiply(_spillFix);_spillT.copy(_spillPQ.invert()).multiply(_spillQ);}
+  hm.quaternion.slerp(_spillT,Math.min(1,dt*BOWL_LEVEL_K));}
+function bowlSpillTick(dt){if(heldId!=='vesikulho'||!heldMesh||P.dead){RES.spT=0;return;}bowlLevel(heldMesh,dt);heldMesh.getWorldQuaternion(_spillQ);const y=_spillV.set(0,1,0).applyQuaternion(_spillQ).y;
+  if(y>=BOWL_SPILL_Y){RES.spT=0;return;}RES.spT=(RES.spT||0)+dt;if(RES.spT<BOWL_SPILL_T)return;RES.spT=0;bowlSpill();}
+function bowlSpill(){const s=heldBowl();if(!s||s.id!=='vesikulho')return;heldMesh.getWorldPosition(_spillV);s.id='kulho';invDirty=true;updateGear();bump('spills');
+  burst(_spillV.x,_spillV.y,_spillV.z,0x8fc8ff,16,2.2);plSnd('kaytto','vesi_kaato',{v:.6,pos:{x:_spillV.x,y:_spillV.y,z:_spillV.z}});
+  msg('Hups! Kaadoit vedet vahingossa – kulho on taas tyhjä. Kengät kastuivat ja harmittaa.','warn');setTimeout(()=>{if(!P.dead)plSnd('moka','kirous');},BOWL_CURSE_D*1000);
+  P.buffs.markakengat=SPILL_FX.markakengat;P.buffs.kylmavesi=SPILL_FX.kylma;P.buffs.vihainen=SPILL_FX.vihainen;RES.angT=5+Math.random()*5;}   // v3.04 tilat
+/* v3.04 käyttäjä: kaatuneesta vedestä tilat – Märät kengät (liike −11 %, SPILL_FX.markakengat s), Kylmä 30 s (kuten kylmä yö: tuli lämmittää),
+   Vihainen 20 s (kestävyys kuluu 20 % nopeammin, environment.js survival; ääni p/moka/vihainen 5–10 s välein angryTick). */
+const SPILL_FX={markakengat:60,kylma:30,vihainen:20},WET_SHOE_K=.89,ANGRY_STAM_K=1.2;
+function angryTick(dt){if(!P.buffs.vihainen||P.dead){RES.angT=Math.max(RES.angT||0,1);return;}RES.angT=(RES.angT??5)-dt;if(RES.angT<=0){RES.angT=5+Math.random()*5;plSnd('moka','vihainen');}}
 function heldBowl(){const w=equipped('weapon');return w&&ITEMS[w.id].cat==='bowl'?w:null;}
 function bowlUse(){const s=heldBowl();if(!s||P.dead)return;
-  if(s.id==='kulho'){if(nearWater()){s.id='vesikulho';invDirty=true;updateGear();msg('Täytit kulhon vedellä – nyt se on vesikulho.','loot');plSnd('kaytto','kulho_taytto');sfx('pickup');}
+  if(s.id==='kulho'){if(nearWater()){s.id='vesikulho';invDirty=true;updateGear();msg('Täytit kulhon vedellä – nyt se on vesikulho.','loot');plSnd('pihka','kulho_taytto');sfx('pickup');}
     else msg('Mene veden ääreen täyttääksesi kulhon (hiiren vasen kulho kädessä).','warn');return;}
   if(s.id==='vesikulho'){s.id='kulho';invDirty=true;updateGear();
     if(P.burnT>0){P.burnT=0;P.igniteCd=playTime+FIRE_CD;if(P.fireFx){fig.g.remove(P.fireFx);P.fireFx=null;}burst(P.pos.x,P.pos.y+1.4,P.pos.z,0x8fc8ff,14,3);smokePuff(P.pos.x,P.pos.y+1.5,P.pos.z,1,.3);plSnd('kaytto','vesi_kaato');msg('Kaadoit veden päällesi – tuli sammui. Kulho on taas tyhjä.','loot');return;}
@@ -76,12 +96,12 @@ function resinInteract(n){const st=resinStore(),h=resinHeldIds();let e=st[n.id];
   if(h.w!=='kulho'){msg('Ota tyhjä kulho käteen (pikapaikka) – naru on jo toisessa kädessä.','warn');return;}
   if(h.o!=='naru'){msg(invCount('naru')>0?'Varusta naru toiseen käteen (napsauta sitä repussa).':'Tarvitset narun toiseen käteen (työpenkki: 10 nahkaa).','warn');return;}
   const w=equipped('weapon'),o=equipped('offhand');resinTake(w);resinTake(o);updateGear();invDirty=true;
-  e.b=1;e.acc=e.acc||0;plSnd('kaytto','kulho_kiinni');sfx('build');
+  e.b=1;e.acc=e.acc||0;plSnd('pihka','kulho_kiinni');sfx('build');
   msg(`Kulho sidottu pihkakuvion alle. Tästä puusta valuu noin ${eCap(e)} pihkaa tunnin aikana (vain pelin ollessa käynnissä) – voit lähteä muualle.`,'loot');}
 function resinTake(s){if(!s)return;s.n--;if(s.n<=0){const i=inv.indexOf(s);if(i>=0)inv[i]=null;}}
 function resinDetach(n,e){const k=Math.floor(e.acc||0);giveOrDrop('kulho',1,n.x,resinBase(n)+.6,n.z);giveOrDrop('naru',1,n.x,resinBase(n)+.6,n.z);
   if(k>0){giveOrDrop('pihka',k,n.x,resinBase(n)+.6,n.z);e.acc-=k;bump('resin',k);addXp(k*4,'Pihkankeräys');}
-  e.b=0;plSnd('kaytto','kulho_kiinni');msg(k>0?`Irrotit kulhon: ${k} pihkaa.`:'Irrotit kulhon – pihkaa ei ollut vielä kertynyt.','loot');}
+  e.b=0;plSnd('pihka','kulho_kiinni');msg(k>0?`Irrotit kulhon: ${k} pihkaa.`:'Irrotit kulhon – pihkaa ei ollut vielä kertynyt.','loot');}
 // E ilman kohdetta: puukko kädessä aivan muun puun vieressä → selvä ilmoitus
 function resinNoTarget(){const h=resinHeldIds();if(h.w!=='puukko'&&h.w!=='kulho'&&h.o!=='naru')return;
   for(const n of nodesNear(P.pos.x,P.pos.z,1.6,_resNl)){if(n.def.kind!=='tree'||n.isLog)continue;const hw=n.type==='kuusi'||n.type==='manty'?resinHW(n):(n.def.r||.3)*n.s;if(Math.hypot(n.x-P.pos.x,n.z-P.pos.z)>hw+.95)continue;
@@ -98,7 +118,7 @@ function carveTick(dt){const C=P.carve;if(!C)return;const n=resinNode(C.id),e=n&
   const h=resinHeldIds(),far=Math.hypot(n.x-P.pos.x,n.z-P.pos.z)>RESIN_REACH(n)+.35;
   if(far||h.w!=='puukko'||P.dead||P.atk||P.swim){carveStop(`Kaiverrus keskeytyi (${Math.floor(e.c*100)} %). Jatka painamalla E puukko kädessä puun vieressä.`);return;}
   P.yaw=Math.atan2(n.x-P.pos.x,n.z-P.pos.z);e.q=Math.max(1,h.wq);
-  e.c=Math.min(1,e.c+dt*resinFlowK(h.wq)/CARVE_T);RES.sndT-=dt;if(RES.sndT<=0){RES.sndT=.55;plSnd('kaytto','kaiverrus',{pos:{x:n.x,y:resinBase(n)+1.1,z:n.z}});if(Math.random()<.6)burst(n.x+Math.sin(e.a)*(resinHW(n)+.05),resinBase(n)+.6+(1-e.c)*.9,n.z+Math.cos(e.a)*(resinHW(n)+.05),0xc89a5a,3,1.2);}
+  e.c=Math.min(1,e.c+dt*resinFlowK(h.wq)/CARVE_T);RES.sndT-=dt;if(RES.sndT<=0){RES.sndT=.55;plSnd('pihka','kaiverrus',{pos:{x:n.x,y:resinBase(n)+1.1,z:n.z}});if(Math.random()<.6)burst(n.x+Math.sin(e.a)*(resinHW(n)+.05),resinBase(n)+.6+(1-e.c)*.9,n.z+Math.cos(e.a)*(resinHW(n)+.05),0xc89a5a,3,1.2);}
   if(e.c>=1){P.carve=null;e.q=Math.max(1,h.wq);addXp(25,'Pihkakuvio');msg('Pihkakuvio valmis! Sido kuvion alle kulho: tyhjä kulho kädessä, naru toisessa kädessä, E.','loot');sfx('craft');}}
 // oikea käsi vetää puukkoa kuvion uria pitkin, vasen tukee runkoa
 function carvePose(){if(!P.carve)return;const t=playTime*8.5,s=Math.sin(t);
@@ -109,19 +129,24 @@ function carvePose(){if(!P.carve)return;const t=playTime*8.5,s=Math.sin(t);
    kohti (flags.knifeInfo); näkyy kaikille (ei vain opastusmaailmassa, toisin kuin TIPS). */
 const KNIFE_INFO_DELAY=2,KNIFE_INFO_SHOW=14;
 /* v2.99 käyttäjä: chattiin vain lyhyt muistutus (pitkä teksti meni pelinäkymän yli); täysi ohje ylävinkissä selkeinä vaiheina */
-const KNIFE_INFO_MSG='Puukolla voi kerätä pihkaa – katso ohje ylhäältä.';
-const KNIFE_INFO_TXT='<b>Sait puukon – nyt voit kerätä pihkaa!</b><br>1. Etsi mänty tai kuusi, jonka rungossa on <b>kellertäviä pihkavaluja</b> (vain osa puista).<br>2. Mene aivan kiinni runkoon ja paina <kbd>E</kbd> puukko kädessä → kaiverrat pihkakuvion.<br>3. Ota kulho käteen ja naru toiseen käteen, paina <kbd>E</kbd> → kulho kuvion alle. Pihka valuu kulhoon itsestään.';
+/* v3.02 käyttäjä: ylävinkki lyhyeksi – ohje on puukon tiedoissa (reppu); vinkki kerran pelaajalle kuten TIPS (tipSeenG 'puukko', toisto vain flags.tipsRe) */
+const KNIFE_INFO_MSG='Puukolla voi kerätä pihkaa – ohje puukon tiedoissa (reppu).';
+const KNIFE_INFO_TXT='<b>Sait puukon – voit kerätä pihkaa!</b> Lisätietoa löydät esineen tiedoista repusta.';
 function knifeInfoTick(dt){if(RES.tipT>0){RES.tipT-=dt;if(RES.tipT<=0&&TUT.tipEl)TUT.tipEl.classList.remove('on');}
   if(flags.knifeInfo||state!=='play'||P.dead)return;if(invCount('puukko')<=0){RES.knifeT=KNIFE_INFO_DELAY;return;}
-  RES.knifeT=(RES.knifeT??KNIFE_INFO_DELAY)-dt;if(RES.knifeT>0)return;flags.knifeInfo=1;msg(KNIFE_INFO_MSG,'loot');
+  RES.knifeT=(RES.knifeT??KNIFE_INFO_DELAY)-dt;if(RES.knifeT>0)return;flags.knifeInfo=1;if(tipSeenG().puukko&&!flags.tipsRe)return;tipSeenSet('puukko');msg(KNIFE_INFO_MSG,'loot');
   const el=tipEl();el.querySelector('.tipD').innerHTML=KNIFE_INFO_TXT;el.classList.add('on');TUT.tipT=KNIFE_INFO_SHOW;RES.tipT=KNIFE_INFO_SHOW;if(typeof mSnd==='function')mSnd('napit','hover');}
 
 /* ---------- kertyminen, kaatuminen ja hiipuminen ---------- */
+/* v3.02 käyttäjä: pihkan tippuminen kulhoon kuuluu hiljaa vain aivan läheltä (RESIN_DRIP_R m), 4–8 s välein, kun kulho kerää pihkaa.
+   Pihkankeräyksen äänet (kaiverrus, kulho_kiinni, kulho_taytto, tippa) ovat extra/-kansiossa ryhmässä pihka (avaimet p/pihka/…). */
+const RESIN_DRIP_R=6,RESIN_DRIP_V=.35,RESIN_DRIP_T=[4,8];
 function resinTick(dt,td=dt){   // td = pelin ajan nopeus (kertymä ja hiipuminen), dt = kaiverrus
  if(RES.flagsRef!==flags){RES.flagsRef=flags;resinClearVis();_resNodeMap=null;}
-  resinEnsureG();carveTick(dt);knifeInfoTick(dt);inspectTick(dt);
+  resinEnsureG();carveTick(dt);knifeInfoTick(dt);inspectTick(dt);bowlSpillTick(dt);angryTick(dt);   // v3.04 vesikulho kaatuu, vihainen-ääni
   const st=flags.resin;if(st)for(const id in st){const e=st[id];
-    if(e.b&&(e.tot||0)<eCap(e)){const add=Math.min(eCap(e)-(e.tot||0),td*eCap(e)/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;}
+    if(e.b&&(e.tot||0)<eCap(e)){const add=Math.min(eCap(e)-(e.tot||0),td*eCap(e)/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;
+      e.dripT=(e.dripT??Math.random()*RESIN_DRIP_T[1])-dt;if(e.dripT<=0){e.dripT=RESIN_DRIP_T[0]+Math.random()*(RESIN_DRIP_T[1]-RESIN_DRIP_T[0]);const n=resinNode(id);if(n&&!P.inDun&&dist2(n.x,n.z,P.pos.x,P.pos.z)<RESIN_DRIP_R*RESIN_DRIP_R)plSnd('pihka','tippa',{pos:{x:n.x,y:resinBase(n)+.9,z:n.z},v:RESIN_DRIP_V,rk:.3});}}   // v3.02 tipan ääni
     if((e.tot||0)>=eCap(e)&&!e.done){e.fade=Math.min(1,(e.fade||0)+td/RESIN_FADE);if(e.fade>=1)e.done=1;}}
   RES.t-=dt;if(RES.t<=0){RES.t=.25;resinVisTick();for(const [id,r] of RES.fallen)if(playTime-r.t>30){if(r.v&&!r.v.attached)resinVisFree(r.v);RES.fallen.delete(id);}}
   resinSwayTick();}

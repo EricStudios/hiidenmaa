@@ -224,7 +224,8 @@ function placeBuild(){
   if(P.inDun&&(!P.realm||buildSel!=='tyopenkki')){msg(P.realm?'Ulottuvuuksissa ei voi rakentaa – vain työpenkin voi asettaa.':'Hautakummussa ei voi rakentaa.','warn');return;}   // v1.99
   if(!ghostPos||!ghost||!ghost.visible){if(P.inDun)msg('Tähtää lattiaan – työpenkki asetetaan vapaalle lattialle.','warn');return;}
   if(!ghostOk){msg(lastInvalid||'Ei voi rakentaa tähän.','warn');return;}
-  const def=PIECES[buildSel];for(const [id,n] of Object.entries(def.req))invRemove(id,n);
+  const def=PIECES[buildSel];if(def.lvl&&playerLevel()<def.lvl){msg(`${def.n} aukeaa tasolla ${def.lvl}.`,'warn');return;}   // v3.02 rakennusosan tasovaatimus
+  for(const [id,n] of Object.entries(def.req))invRemove(id,n);
   addPiece(buildSel,ghostPos.x,ghostPos.y,ghostPos.z,ghostRot,undefined,undefined,poseOf(buildSel));bump('built');xpFirst('b_'+buildSel,4);sfx('build');plSnd('rakentaminen','asetus',{pos:{x:ghostPos.x,y:ghostPos.y,z:ghostPos.z}});burst(ghostPos.x,ghostPos.y+.5,ghostPos.z,0x8a5a32,6,2);
 }
 // Vasaralla korjaus: kuluma pois, maksaa vauriota vastaavan osuuden rakennusaineista (vähintään 1).
@@ -240,8 +241,11 @@ function removeLooked(){
   const {o,d}=camRay();raycaster.set(o,d);raycaster.far=camDist+7;const hits=raycaster.intersectObjects(pieceRoots,true);if(!hits.length)return;
   const p=hits[0].object.userData.piece;if(!p)return;
   if(PIECES[p.t].store&&p.data.items.some(Boolean)){msg('Tyhjennä säiliö ensin.','warn');return;}
+  if(p.t==='patanuotio'&&!p.data.spo&&potBusy(p)){msg('Ota ruoka padasta ensin.','warn');return;}   // v3.02
   for(const [id,n] of Object.entries(PIECES[p.t].req))giveOrDrop(id,n,p.x,p.y+1,p.z);
   if(p.data.lv)for(let i=1;i<=p.data.lv;i++)for(const [id,n] of Object.entries(STORE_UP[i]))giveOrDrop(id,n,p.x,p.y+1,p.z);
+  if(p.t==='patanuotio'&&p.data.pot)giveOrDrop(p.data.spo?'pilapata':'keittopata',1,p.x,p.y+1,p.z);   // v3.02 asennettu pata takaisin
+  if(p.t==='sulatin'&&p.data.pp)giveOrDrop('pilapata',p.data.pp,p.x,p.y+1,p.z);
   if(p.t==='sulatin'){if(p.data.ore)giveOrDrop('malmi',p.data.ore,p.x,p.y+1,p.z);if(p.data.iore)giveOrDrop('rautamalmi',p.data.iore,p.x,p.y+1,p.z);if(p.data.done)giveOrDrop('kupari',p.data.done,p.x,p.y+1,p.z);if(p.data.idone)giveOrDrop('rauta',p.data.idone,p.x,p.y+1,p.z);}
   removePiece(p);sfx(/^kivi/.test(p.t)?'crumble':'woodBreak');plSnd('rakentaminen','purku',{pos:{x:p.x,y:p.y,z:p.z}});burst(p.x,p.y+.5,p.z,0x8a5a32,8,3);
 }

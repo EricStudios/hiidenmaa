@@ -3,6 +3,22 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.04, 18.11.2026)
+
+- **Versio 3.04** (v3.04: vesikulho kaatuu F-tarkastelussa → Märät kengät, Kylmä, Vihainen + kirous-/vihainen-äänet; v3.03: Routaluolan tunnelma ja satunnaisäänet _0/_1 −15 %, villikauran id-korjaus), valikossa **Early Access 1.1** (käyttäjä vaihtoi 1.0 → 1.1 v3.02; muuttuu vain käyttäjän pyynnöstä). Haara `claude/hiidenmaa-survival-game-fmxt0m`,
+  PR v3.00–v3.04 (PR #46). Pages päivittyy vasta Mergen jälkeen.
+- **Seuraava työ (käyttäjä):** puuttuvien äänien lisääminen. Uudet paikkamerkit v3.02: `p/rakentaminen/` pata_aloitus, pata_kiehuu, pata_valmis,
+  pata_valmis_kansi, kansi_kiinni, kansi_auki; `extra/raw/pihka/` kaiverrus, kulho_kiinni, kulho_taytto (siirretty kaytto-ryhmästä) ja uusi tippa.
+  v3.04 `extra/raw/moka/` kirous ja vihainen. Myöhemmin ehkä onkiminen (käyttäjä).
+- **Isot järjestelmät v3.02:** keittopata (`js/pot.js`, taso 10, kansi, pilaantuminen, pataruoat), hiilos kaikkiin tulipaikkoihin (10 min), ruokien nerffi +
+  Kylläinen-tila, tasot 30 (maailmakohtainen XP muunnetaan kerran `flags.xpv`), villikaura, rakennusvalikon tietoikkuna (`js/buildinfo.js`), poistu-ruksi
+  (pidä 1 s), korkeat ruohotupsut High+/Ultra (`SET.tallGrass`), vinkit pelaajakohtaisia.
+- **Pysyvät käyttäjän linjaukset (uudet):** XP ja tasot ovat maailmakohtaisia (ei siirretä maailmasta toiseen). Sienet kypsyvät VAIN keittopadassa.
+  Vinkit (TIPS + puukkovinkki) näytetään pelaajalle kerran kaikkien maailmojen yli; toistuvat vain erikseen päälle laitetussa opastuksessa, jota ei ohiteta.
+- **Korjattu v3.02:** v2.99:n kaiku kaatoi pelisilmukan ("Failed to execute 'connect' on 'AudioNode'") ja jäädytti kameran – KORJAUKSET 75.
+  Asetussiirtojen järjestys v7/v8 – KORJAUKSET 76. v3.03: villikauran solmu-id:t siirsivat kasvaneiden puiden id:t – KORJAUKSET 77.
+- Testit: `tools/tarkistus.mjs` KAIKKI OK (v3.02-rivit: keittopata, hiilos+ruoat+tasot+tietoikkuna, vinkit+äänet+ruoho+EA), full157 6/6 karttaa.
+
 ## Peli lyhyesti
 
 - Pelaaja haaksirikkoutuu Hiidenmaan saarelle. Saarta hallitsee kivinen **Kalmanvartija**.
@@ -17,7 +33,7 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
 - **PR #35 (v2.28–v2.49) ja #36 (muistiinpanot) on yhdistetty. PR #37 (v2.50–v2.56, lista 7 kokonaan + sarvien varaääni + Kalmanvartija 10 + puolituksen korjaus + äänet ja ikkunat v2.57–v2.58 + latausnäyttö v2.59) odottaa yhdistämistä.**
   Lista 7: ks. Ideajono › "Lista 7" (kaikki kohdat tehty; uudet äänet paikkamerkkeinä). **Lista 8 tehty v2.60–v2.62 (Ideajono › "Lista 8").** Avoimet: Ideajono › "Avoimet havainnot".
-- **Versio 2.99** (v2.99 iso päivitys: torjunta vain kilvellä, malmit 5 vrk, oksat/marjat kaukana, arkkujen metallit ~5 %, tuli 2×, hiidenkarhu, vesiraja, kuolema-arkku, kaiku, lokit, ahjo/uuni-äänet, chatin koko, säteiden tarkkuus, DEV-salasana, F-tarkastelun pehmeät siirtymät ja puukon heitot; v2.98 F-tarkastelu (11 animaatiota, AFK-tarkastelu uudella esineellä, ääni `extra/f_ihmettely`), hylätty leiri: isompi kiinteä teltta kyykkyineen, halkopino 20 puuta, kuivausteline, nuotio ei paista, puukon tiedot repussa; v2.97 pihkavalumat 10 % kirkkaammat, ensimmäisestä puukosta ohje; v2.96 pihkakuvio liikkuu puun mukana ja jää tukkiin läiskänä, himmeämmät urat, kulho täyttyy puun pihkamäärän mukaan, DEV-valikon elävät arvot; v2.95 pihka puun koon mukaan 10–50, kaadosta vain suurimmista, välkkyvät mallipinnat korjattu; v2.94 polttoaineet 1,5× pidempään, sulatusuuni 2 puuta / sulatus; v2.93 DEV: maailman nopeus ja pelin ajan nopeus 0,5–30×; v2.92 puuta +10 %, pihkaa kaadosta −20 %, oksia ja irtokiviä −20 %; v2.91 puukko ja pihkankeräys, kulho/vesikulho, naru, puukkohiidet, polttoaineet uusiksi; v2.90 sade ja lumi eivät näy talon sisällä; v2.89 latausnäytön ääni −20 %; v2.88 oven äänet ja kahvat, kodin lämpö puuttuvalla seinällä, maanmuokkauksen pisteviiva pois, kamera ei mene seinään, raajojen törmäys; v2.87 äänierä: oven äänet (narina keskeltä, avaus ja kiinni iskusta), ranta-aallot pitkällä saumalla, uusi alastulo; v2.86 äänierä: sirkat, linnunlaulu, humina, salama, valikkotaustat, oven ja rannan paikkamerkit, viimeisen pomon musiikki; v2.85 kilven pito kuluttaa kestävyyttä; v2.84 tulen ääni valonlähteille, sammuneen sulatusuunin suu musta, pelottavat 2 valvotun yön jälkeen; v2.83 kodin lämmön tarkistukset luotettaviksi, Lämmin koti lämmittää, valikossa pelin äänet häipyvät, kivimuuri ja kivinen soihtupylväs; v2.82 rakennusvinkki G, vinkit kerran pelaajalle, seinäsoihdun G-kohdistus; v2.81 sääänet −60 %; v2.80 sydämen syke tasaiseksi, kolme lihatyyppiä ja paistoruoat, jousen ensimmäinen painallus, opastuksen C; v2.79 susien ulvonnan kantama kuten muilla eläimillä, ensimmäinen uni vihjaa Kalmanummen ja Hautakummun, sää ja tunnelma −20 %; v2.78 verilammikko maaston mukaan, ruumis hiipuu heti herätessä, kuokan oikea palauttaa kasvillisuuden; v2.77 kuolinruudun vinkki vain tarvittaessa; v2.76 hengästys yhtenä jatkuvana silmukkana, ei ala alusta; v2.75 liukusäätimen napsu hiljemmaksi ja portaittaisessa vain arvon vaihtuessa; v2.74 opastuksen kokeilut 1–8 ja N, parempi aloitusteksti, isompi paljastus aloituspaikalla; v2.73 kuolema uusiksi + tyhjyys + tuli/sade + äänimerkki + extrojen pallot + äänitasot; v2.72 nopeiden äänten alku 20 → 3 ms, uusi hengästys silmukaksi; v2.71 interaktiivinen opastus + kertavinkit; v2.70 tasopalkinnot, reseptit aiemmin, tavoitetekstit, näppäinsivu; v2.69 maailman seed: paikat ja kasvillisuus seedin mukaan, poiminnat ilman ilmoitusääntä; v2.68 biomien sekoitus esiasetuksiin + Grafiikka-sivulle, 8× väritys säilyy, suorituskykypallot; v2.67 äänierä: silmukat ja häivytykset, hengästys + ylikuorma, luonto- ja biomiäänet, vedenalainen vaimennus, salama, putoamis- ja vesiäänet, ilmoitusäänen sääntö, nappien säädin; v2.66 musiikki music/-kansioon + uusi soitin, valikkoefektit; v2.65 tarkka maanmuokkaus + biomien sekoitus, v2.64 silmäpainike grafiikkasivuille, v2.60 ovi + äänirajat, v2.61 sää- ja tunnelmaäänet, v2.62 kaksi lukkoa + Avaimen kätkijä + 9 hiidenkiveä, v2.63 nummi, väritys, kivet, arkut, muuri, HUD), haara `claude/hiidenmaa-survival-game-fmxt0m` (jatkettu mainista). **PR #25** (v1.38–v1.83), **#27** (v1.84–v1.95) ja **#28** (v1.96–v2.10) on **yhdistetty**. **#29** (v2.11–v2.15) on **yhdistetty**. **#30** (v2.16: kivivartija, ääniprojektien kansiot, toimintoäänet B1) on **yhdistetty**. v2.17 (pomojen toimintokansio, ryntäysäänet, vesi sammuttaa, sade sammuttaa nuotion) ja v2.18 (vesiuudistus: uinti, hukkuminen, vesivarjostin, vedenalaiset efektit, K pois) PR #31:ssä; v2.19 korjaa valikon 3D-piirron (KORJAUKSET 47); v2.20 Extra-grafiikka, low poly -vesi, rantaroiskeet, ylämäen hidastus, kohteet rinteen mukaan. **PR #31 (v2.17–v2.20) on yhdistetty.** **PR #32 (v2.21) on yhdistetty.** **PR #33 (v2.22) on yhdistetty.** v2.23 (toimintoäänierä 2, kivivartijan äänet, toimintosilmukat, tarkistustyökalun korjaus) ja v2.24 (äänitasot, juominen, pää alas, pelaajan toimintoäänet) ja v2.25 (sudet hiljemmaksi, Aarnipuun törmäys, karhun syöksy, pelaajan äänet osat 1–3) ja v2.26 (pensasäänet, askeleet −20 %, terveyspalkkien näkyvyys) ja v2.27 (Aarnimetsän askel, oksat) – **PR #34 (v2.23–v2.27) on yhdistetty.** v2.28 (pelaajan äänierä osa 2: 22 ääntä, puun tömähdys, reppu kiinni, arkun sulkeminen) ja v2.29 (narinan ajoitus, siirto- ja puolitusäänet, Shift-siirtoslider) ja v2.30 (sliderin korjaukset, poimintaääni) ja v2.31 (poimintaäänen sävy) ja v2.32 (valitse + oikea klikkaus puolittaa myös hiiren lukituksessa) ja v2.33 (valinta säilyy pienessä liikkeessä, avointen biomien vaaleammat varjot) ja v2.34 (metsien varjot 20 % vaaleammat, vuorokauden vaihtelu ±15 %) ja v2.35 (näytön auringonsäteet, linssiheijastus) ja v2.36 (säteiden ajoitus, päiväkohtaisuus, peitto) ja v2.37 (säteet takaisin koko päiväksi) ja v2.38 (pyöreä auringon hehku, pilvien syvyys, kovat/pehmeät säteet) ja v2.39 (pienempi auringon hehku) ja v2.40 (elävät säteet, peitto suunnittain) ja v2.41 (suorituskykyoptimoinnit: puiden LOD, varjomallit, rakennusten yhdistäminen) ja v2.42 (low poly -sävytys säilyy varjojen vaalennuksessa) ja v2.43 (hautakummun kieleke, savujen optimointi, liekit pystyyn) ja v2.44 (satunnainen pilvimatto) ja v2.45 (terävät soihtuvarjot Extra-grafiikkaan) ja v2.46 (repun vilkkuminen/puolitus, pilvet, hukkumisen tarkistus) ja v2.47 (pilvipäivät, pilvimatto 50 %, heijastuksen päivävaihtelu, pilvet ylemmäs) PR #35:ssä. Käyttäjä tekee seuraavaksi ehkä ketulle omat äänet. Aiemmin #27: äänierä A (v1.84–v1.86: äänet, Aarnihirviön äänet pääääneksi, kaiku ulottuvuuksiin). **JATKA TÄSTÄ (äänet):** käyttäjä lisää olentojen ääniä erissä → noudata "Äänierän rutiini"; v2.11 HUOM: `aarnihirvio_chase_2` ja `karhu_hurt_1` ovat sama tiedosto; isot vahvistukset (raaka hiljainen): `kalmo_chase_1` +24, `susi_hurt_2` +23,7 (raaka 7,5 s ulvonta osumapaikassa → 0,18 s, väärä paikka?), `metso_hurt_1/2`, `hiisi_death_1` (+12…14 dB). Puuttuvat ketjun alut (🎯): `hiidenkarhu_chase`, `hiidenhirvi_chase`. Aiempi:
+- **Versio 3.04** (v3.04 vesikulho kaatuu F-tarkastelussa + tilat Märät kengät/Kylmä/Vihainen; v3.03 Routaluolan tunnelma −15 % ja satunnainen_routaluola _0/_1 −15 %, villikauran id-korjaus; v3.02 keittopata + pataruoat, hiilos, ruokanerffi + Kylläinen, tasot 30, villikaura, rakennusvalikon tietoikkuna, poistu-ruksi (pito 1 s), korkeat ruohotupsut, pelaajakohtaiset vinkit, Early Access 1.1, AudioNode-korjaus; v3.01 nuotio 2 paikkaa / grillinuotio 6 paikkaa + 30 % nopeampi + palaa 3×, varras ja juhla-ateria vain grillillä, Poistu pelistä -nappi, ulottuvuuksien ja Hautakummun olennot uusiutuvat 20 min jonossa; v3.00 korjaus: leirin halkopino katoaa rikottaessa, ei jää haamuksi; v2.99 v2.99 iso päivitys: torjunta vain kilvellä, malmit 5 vrk, oksat/marjat kaukana, arkkujen metallit ~5 %, tuli 2×, hiidenkarhu, vesiraja, kuolema-arkku, kaiku, lokit, ahjo/uuni-äänet, chatin koko, säteiden tarkkuus, DEV-salasana, F-tarkastelun pehmeät siirtymät ja puukon heitot; v2.98 F-tarkastelu (11 animaatiota, AFK-tarkastelu uudella esineellä, ääni `extra/f_ihmettely`), hylätty leiri: isompi kiinteä teltta kyykkyineen, halkopino 20 puuta, kuivausteline, nuotio ei paista, puukon tiedot repussa; v2.97 pihkavalumat 10 % kirkkaammat, ensimmäisestä puukosta ohje; v2.96 pihkakuvio liikkuu puun mukana ja jää tukkiin läiskänä, himmeämmät urat, kulho täyttyy puun pihkamäärän mukaan, DEV-valikon elävät arvot; v2.95 pihka puun koon mukaan 10–50, kaadosta vain suurimmista, välkkyvät mallipinnat korjattu; v2.94 polttoaineet 1,5× pidempään, sulatusuuni 2 puuta / sulatus; v2.93 DEV: maailman nopeus ja pelin ajan nopeus 0,5–30×; v2.92 puuta +10 %, pihkaa kaadosta −20 %, oksia ja irtokiviä −20 %; v2.91 puukko ja pihkankeräys, kulho/vesikulho, naru, puukkohiidet, polttoaineet uusiksi; v2.90 sade ja lumi eivät näy talon sisällä; v2.89 latausnäytön ääni −20 %; v2.88 oven äänet ja kahvat, kodin lämpö puuttuvalla seinällä, maanmuokkauksen pisteviiva pois, kamera ei mene seinään, raajojen törmäys; v2.87 äänierä: oven äänet (narina keskeltä, avaus ja kiinni iskusta), ranta-aallot pitkällä saumalla, uusi alastulo; v2.86 äänierä: sirkat, linnunlaulu, humina, salama, valikkotaustat, oven ja rannan paikkamerkit, viimeisen pomon musiikki; v2.85 kilven pito kuluttaa kestävyyttä; v2.84 tulen ääni valonlähteille, sammuneen sulatusuunin suu musta, pelottavat 2 valvotun yön jälkeen; v2.83 kodin lämmön tarkistukset luotettaviksi, Lämmin koti lämmittää, valikossa pelin äänet häipyvät, kivimuuri ja kivinen soihtupylväs; v2.82 rakennusvinkki G, vinkit kerran pelaajalle, seinäsoihdun G-kohdistus; v2.81 sääänet −60 %; v2.80 sydämen syke tasaiseksi, kolme lihatyyppiä ja paistoruoat, jousen ensimmäinen painallus, opastuksen C; v2.79 susien ulvonnan kantama kuten muilla eläimillä, ensimmäinen uni vihjaa Kalmanummen ja Hautakummun, sää ja tunnelma −20 %; v2.78 verilammikko maaston mukaan, ruumis hiipuu heti herätessä, kuokan oikea palauttaa kasvillisuuden; v2.77 kuolinruudun vinkki vain tarvittaessa; v2.76 hengästys yhtenä jatkuvana silmukkana, ei ala alusta; v2.75 liukusäätimen napsu hiljemmaksi ja portaittaisessa vain arvon vaihtuessa; v2.74 opastuksen kokeilut 1–8 ja N, parempi aloitusteksti, isompi paljastus aloituspaikalla; v2.73 kuolema uusiksi + tyhjyys + tuli/sade + äänimerkki + extrojen pallot + äänitasot; v2.72 nopeiden äänten alku 20 → 3 ms, uusi hengästys silmukaksi; v2.71 interaktiivinen opastus + kertavinkit; v2.70 tasopalkinnot, reseptit aiemmin, tavoitetekstit, näppäinsivu; v2.69 maailman seed: paikat ja kasvillisuus seedin mukaan, poiminnat ilman ilmoitusääntä; v2.68 biomien sekoitus esiasetuksiin + Grafiikka-sivulle, 8× väritys säilyy, suorituskykypallot; v2.67 äänierä: silmukat ja häivytykset, hengästys + ylikuorma, luonto- ja biomiäänet, vedenalainen vaimennus, salama, putoamis- ja vesiäänet, ilmoitusäänen sääntö, nappien säädin; v2.66 musiikki music/-kansioon + uusi soitin, valikkoefektit; v2.65 tarkka maanmuokkaus + biomien sekoitus, v2.64 silmäpainike grafiikkasivuille, v2.60 ovi + äänirajat, v2.61 sää- ja tunnelmaäänet, v2.62 kaksi lukkoa + Avaimen kätkijä + 9 hiidenkiveä, v2.63 nummi, väritys, kivet, arkut, muuri, HUD), haara `claude/hiidenmaa-survival-game-fmxt0m` (jatkettu mainista). **PR #25** (v1.38–v1.83), **#27** (v1.84–v1.95) ja **#28** (v1.96–v2.10) on **yhdistetty**. **#29** (v2.11–v2.15) on **yhdistetty**. **#30** (v2.16: kivivartija, ääniprojektien kansiot, toimintoäänet B1) on **yhdistetty**. v2.17 (pomojen toimintokansio, ryntäysäänet, vesi sammuttaa, sade sammuttaa nuotion) ja v2.18 (vesiuudistus: uinti, hukkuminen, vesivarjostin, vedenalaiset efektit, K pois) PR #31:ssä; v2.19 korjaa valikon 3D-piirron (KORJAUKSET 47); v2.20 Extra-grafiikka, low poly -vesi, rantaroiskeet, ylämäen hidastus, kohteet rinteen mukaan. **PR #31 (v2.17–v2.20) on yhdistetty.** **PR #32 (v2.21) on yhdistetty.** **PR #33 (v2.22) on yhdistetty.** v2.23 (toimintoäänierä 2, kivivartijan äänet, toimintosilmukat, tarkistustyökalun korjaus) ja v2.24 (äänitasot, juominen, pää alas, pelaajan toimintoäänet) ja v2.25 (sudet hiljemmaksi, Aarnipuun törmäys, karhun syöksy, pelaajan äänet osat 1–3) ja v2.26 (pensasäänet, askeleet −20 %, terveyspalkkien näkyvyys) ja v2.27 (Aarnimetsän askel, oksat) – **PR #34 (v2.23–v2.27) on yhdistetty.** v2.28 (pelaajan äänierä osa 2: 22 ääntä, puun tömähdys, reppu kiinni, arkun sulkeminen) ja v2.29 (narinan ajoitus, siirto- ja puolitusäänet, Shift-siirtoslider) ja v2.30 (sliderin korjaukset, poimintaääni) ja v2.31 (poimintaäänen sävy) ja v2.32 (valitse + oikea klikkaus puolittaa myös hiiren lukituksessa) ja v2.33 (valinta säilyy pienessä liikkeessä, avointen biomien vaaleammat varjot) ja v2.34 (metsien varjot 20 % vaaleammat, vuorokauden vaihtelu ±15 %) ja v2.35 (näytön auringonsäteet, linssiheijastus) ja v2.36 (säteiden ajoitus, päiväkohtaisuus, peitto) ja v2.37 (säteet takaisin koko päiväksi) ja v2.38 (pyöreä auringon hehku, pilvien syvyys, kovat/pehmeät säteet) ja v2.39 (pienempi auringon hehku) ja v2.40 (elävät säteet, peitto suunnittain) ja v2.41 (suorituskykyoptimoinnit: puiden LOD, varjomallit, rakennusten yhdistäminen) ja v2.42 (low poly -sävytys säilyy varjojen vaalennuksessa) ja v2.43 (hautakummun kieleke, savujen optimointi, liekit pystyyn) ja v2.44 (satunnainen pilvimatto) ja v2.45 (terävät soihtuvarjot Extra-grafiikkaan) ja v2.46 (repun vilkkuminen/puolitus, pilvet, hukkumisen tarkistus) ja v2.47 (pilvipäivät, pilvimatto 50 %, heijastuksen päivävaihtelu, pilvet ylemmäs) PR #35:ssä. Käyttäjä tekee seuraavaksi ehkä ketulle omat äänet. Aiemmin #27: äänierä A (v1.84–v1.86: äänet, Aarnihirviön äänet pääääneksi, kaiku ulottuvuuksiin). **JATKA TÄSTÄ (äänet):** käyttäjä lisää olentojen ääniä erissä → noudata "Äänierän rutiini"; v2.11 HUOM: `aarnihirvio_chase_2` ja `karhu_hurt_1` ovat sama tiedosto; isot vahvistukset (raaka hiljainen): `kalmo_chase_1` +24, `susi_hurt_2` +23,7 (raaka 7,5 s ulvonta osumapaikassa → 0,18 s, väärä paikka?), `metso_hurt_1/2`, `hiisi_death_1` (+12…14 dB). Puuttuvat ketjun alut (🎯): `hiidenkarhu_chase`, `hiidenhirvi_chase`. Aiempi:
   `main` = v1.37. Kaikki käyttäjän pyynnöt tehty: päivityslistat 4 (v1.39–v1.44), 5 (v1.49–v1.52) ja 6 (v1.53–v1.57) sekä valikon ja
   logon uudistukset (v1.45–v1.48). Seuraava työ: uusi lista käyttäjältä.
 - **Koko pelin tarkistus v1.57** (6 karttaa, päivä/yö, kaikki 22 vihollistyyppiä, 3 ulottuvuutta + pomot, Hautakumpu, tallennus/lataus,
@@ -180,6 +196,8 @@ Testattu ajossa: jokainen hyökkäävä olento (hostile + neutral) lyö pelaajaa
   on yhteinen (v 3): ääntelyn avain `<id>_<laji>_<n>`, toimintojen `t/<ryhmä>/<ääni>_<n>`; peli hakee tiedoston polusta `sounds/` + `f`.
   **v2.25 pelaajan äänet kolmessa osassa:** `sounds/pelaaja_1_liike/` (askeleet, vesi), `sounds/pelaaja_2_toiminnot/` (lyönnit, osumat, jousi,
   rakentaminen, käyttö, valikot) ja `sounds/pelaaja_3_aanet/` (kipu, keho); avaimet `p/<ryhmä>/<ääni>_<n>` (ryhmät yksilölliset), työkalun `P_PARTS`.
+  **v2.98/v3.02 osa 4 `sounds/extra/`:** ryhmät `f_ihmettely` (F-tarkastelu) ja `pihka` (pihkankeräys: kaiverrus, kulho_kiinni, kulho_taytto – siirretty v3.02
+  kaytto-ryhmästä – ja tippa); keittopadan äänet ovat `pelaaja_2_toiminnot/rakentaminen`-ryhmässä.
   **Pelaajan osissa yksi paikkamerkki per ääni ilman numeroa** (`mahakipu.mp3`), lisäversiot `mahakipu_1`, `_2` … (käyttäjän päätös v2.25; numeroton
   = manifestissa `_0`). Äänilistat taulukkoina: `AANILISTA_OSA<n>.csv` jokaisessa osassa (GitHub näyttää taulukkona) + yhteinen
   `sounds/AANILISTA_PELAAJA.xlsx` (välilehdet Osa 1–3, värit, lukittu otsikko; kirjoitetaan ilman lisäkirjastoja `write_xlsx`). Ei enää md-listaa pelaajalle.
@@ -308,6 +326,12 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Oviaukko | 1,7 × 2,3 m |
 | Portaat / Raput | 6 askelmaa (0,43 m) |
 | Reppu | 32 paikkaa, päivitys +8 paikkaa +40 painoa (2 tasoa) |
+| v3.02 kylläisyys (h / hp / st) | raaka pienriista 2, riista 3, suurriista 4; puolukat 5 / – / 16; sieni 6 / 5; paistettu sieni 14 / 8; pienpaisti 25 / 12; paisti 35 / 20; suurpaisti 50 / 32 / 24; lihakeitto 45 / 28 / 16; varras 42 / 32 (+voima); juhla-ateria 70 / 56 / 40 (+voima) |
+| v3.02 pataruoat (h / hp / st / Kylläinen s) | hillo 28 / – / 35 / 120; sienikeitto 50 / 30 / – / 240; puuro 55 / – / 35 / 300; sienipata 62 / 36 / – / 300; risotto 68 / 36 / 25 / 330; riistakeitto 78 / 45 / 20 / 360; juhlapata 100 / 75 / 50 / 480 (+voima) |
+| v3.02 Kylläinen | nälkä × `KYL_K` 0,5; täyteen syötynä täysi vatsa 60 s + `KYL_FULL` 0,25 × kyl |
+| v3.02 keittopata | kansi pois `POT_K_OPEN` 10× grilliaika, kansi päällä `POT_K_LID` 8×, ilman tulta kansi päällä × `POT_LID_NOFIRE` 0,7, sieniä `POT_MAX` 10, pilaantuu `DAY_LEN` (ilman kantta), pilapata → 2 rautaa + 1 kupari (`POT_MELT`, 12 s) |
+| v3.02 hiilos | `EMBER_T` 600 s, paisto × 0,8, lämpö 0,5 × säde, sade 3× |
+| v3.02 tasot | `LVL_MAX` 30, `needXp(n)` = 55 + 35n (+20 × (n − 19), n ≥ 20); taso 20 = 7 695 XP, taso 30 ≈ 17 920 XP |
 
 | Olento | HP | Juoksu m/s | Vahinko | Huom. |
 | --- | --- | --- | --- | --- |
@@ -331,6 +355,101 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.04 (vesikulho kaatuu – käyttäjän idea)
+- **Vesikulho kaatuu** (resin.js `bowlSpillTick`/`bowlSpill`, `BOWL_SPILL_Y` −0,15 ≈ 100°, `BOWL_SPILL_T` 0,12 s): kun F-tarkastelu (myös AFK-lähitarkastelu) kääntää
+  kulhon suun alaspäin, vesi valuu pois: kulho tyhjenee, roiske, "Hups! Kaadoit vedet vahingossa…", vesi_kaato-ääni ja 0,45 s myöhemmin kirous (paikkamerkki
+  `extra/raw/moka/kirous`). Pienen esineen F-animaatioista lähikatselu ja ojennus kaatavat, kääntely ei.
+- **Kantaa varovasti** (`bowlLevel`): juoksun käsienheilunta kallistaisi kulhoa ~105° → liikkuessa vesikulho pidetään vaakasuorassa (kävely, juoksu, hyppy eivät kaada).
+- **Tilat kaatumisesta** (`SPILL_FX`): **Märät kengät** 60 s (liike × `WET_SHOE_K` 0,89 = −11 %), **Kylmä** 30 s (`P.buffs.kylmavesi` → tavallinen Kylmä; tuli ja lämmin
+  koti lämmittävät), **Vihainen** 20 s (kestävyyden kulutus × `ANGRY_STAM_K` 1,2 – survival vertaa edellisen ruudun arvoon `P._stP`; ääni `p/moka/vihainen`
+  5–10 s välein `angryTick`).
+- Vesikulhon kuvaus ja repun tiedot: "Ole varovainen veden kanssa – vesi ei ole kiinteästi kulhossa kiinni :)".
+- Tarkistus v3.04 (kaatuminen, tilat, äänet); nimien yhteentörmäys `_bwQ` (oli jo käytössä) huomattiin latauksessa → `_spillQ` (CLAUDE.md-sääntö: sama ylimmän
+  tason nimi vain kerran – tarkista `grep` ennen uutta nimeä).
+
+### v3.03 (äänitasot ja koko pelin tarkistus – käyttäjän pyyntö)
+- **Routaluola:** tunnelmasilmukka −15 % (audio.js `AMB_PLACE_V.routaluola` 0,85) ja satunnaisäänet `satunnainen_routaluola` (`_0`) ja `_1` −15 %
+  (`SND_FILE_V`, mSnd kertoo tiedostokohtaisella kertoimella; `_2` ennallaan).
+- **Korjaus (KORJAUKSET 77):** v3.02:n villikaura sai solmu-id:t ennen pelin aikana kasvaneita puita → vanhan tallennuksen kaadettu/siirretty kasvanut puu
+  olisi osoittanut villikauraan. Uusien solmutyyppien id:t omalta alueeltaan (`NODE_ID_X` 1 000 000+, `NODE_ID_XT`), `nodeIdN` vain perussolmuista.
+  (v3.02-testilinkillä tallennetuissa maailmoissa muutama villikaura/kasvanut puu voi vaihtaa tilaa kerran – ei haittaa.)
+- **Korjaus:** vanhan tallennuksen nuotiolla paistumassa ollut sieni antoi otettaessa tyhjän esineen (sieni ei enää `COOKABLE`:ssa) → nyt paistettu sieni (`POT_COOK`).
+- **Koko pelin tarkistus:** tarkistus KAIKKI OK, full157 6/6 karttaa 0 virhettä, äänellinen kestotesti (oikea AudioContext, talo, vuori, pata 4 min,
+  tietoikkuna, padan ikkuna) 0 silmukkavirhettä, asetussiirto vanhasta High+-tallenteesta (`_v` 6 → 9: biomeBlend, flare, raysQ, tallGrass) oikein,
+  tietoikkunan geometrioiden vapautus ei koske jaettuja geometrioita (kaikki rakennusosat luovat omansa).
+
+### v3.02 (keittopata, hiilos, ruoat, tasot 30, tietoikkuna, poistu-ruksi, ruohotupsut, vinkit – käyttäjän suunnitelma, 4 + 4 vastausta)
+- **Korjaus – pelisilmukan virhe ja kameran jumi (KORJAUKSET 75):** v2.99:n pelaajan äänten kaiku (`plRevAmt`, talossa/vuorella) kytki kaiun olentoäänten väylään
+  `CRE.gain`, joka luodaan vasta ensimmäisen olentoäänen yhteydessä → `connect(undefined)` heitti joka askeleella, ruutu keskeytyi ennen kamerapäivitystä
+  (kamera "jäi paikoilleen", virheruutu "Failed to execute 'connect' on 'AudioNode'"). Ei liittynyt tallennukseen. Korjaus: `creRevOn` luo väylän tarvittaessa.
+  Vahvistettu oikealla äänikontekstilla: v3.01 kaatuu, v3.02 ei.
+- **Poistu pelistä** (main.js `QUIT_HOLD`, index.html `#bQuit.quitX`, css): ei varmistusikkunaa – himmeä ✕ päävalikon oikeassa alakulmassa (näkyy myös pelin aikana
+  valikossa; ennen nappi jäi pitkän valikon alle), hiiren päällä liukuu esiin "Poistu pelistä · pidä pohjassa 1 s". Pito 1 s → sulkee; pidon alussa peli tallentuu
+  (jos käynnissä), napin taustalla etenee sivuttainen punainen palkki (`--qp`), irrotus peruu. Näkyy vain päänäkymässä (`#menu[data-view=main]`).
+- **Hiilos** (pieces.js `EMBER_*`, `emberOn`, `coalBed`; pot.js `emberTick`): kun polttoaine loppuu, tuli hiipuu 10 min (`EMBER_T`) hiillokseksi: hehkuva hiilipeti,
+  himmeä valo, kipinät ja savu. Paistaa −20 % (`EMBER_COOK_K`; nuotio, grilli, pata), ei avaa reseptejä (asemat vaativat polttoaineen), lämmittää puolella säteellä
+  (`EMBER_WARM_R`), ei pelota olentoja eikä sytytä pelaajaa, sade sammuttaa 3× nopeammin (`EMBER_RAIN_K`), polttoaine sytyttää heti (`fireFuelAdd`), aseella
+  tallaaminen sammuttaa hiilloksenkin. Tallentuu (`ember`).
+- **Keittopata** (uusi `js/pot.js`; malli `potModel` pieces.js; ikkuna `#potP`): esine **Keittopata** (ahjo, rauta 4 + kupari 3, taso 10) asennetaan rakennusosaan
+  **Keittopatanuotio** (Työpisteet, kivi 12 + puu 6 + rauta 2, taso 10 – uusi rakennusosan tasovaatimus `PIECES.lvl`). E avaa ikkunan: tila (tuli, sisältö, kansi,
+  arvioitu aika, pilaantumisvaroitus), edistymispalkki, napit (kansi, ota ruoka, lisää sieni / kaikki sienet, polttoaine, irrota/asenna pata) ja pataruokien lista.
+  - Kypsyminen grilliajasta: **kansi pois 10×, kansi päällä 8×** (käyttäjä: suunnitelman 5×/4× tuplana). Kansi päällä ilman tulta −30 %, ilman kantta pysähtyy;
+    hiilloksella −20 %. Aloitus vaatii palavan tulen. Valmis ruoka ei pala koskaan. Ilman kantta valmis ruoka pilaantuu vuorokaudessa (`DAY_LEN`): ruoka katoaa,
+    pohjalle jää hiiltä (irrotettaessa 1 hiili) ja pata on käyttökelvoton → **Pilaantunut pata** sulatetaan sulatusuunissa (2 rautaa + 1 kupari, 12 s, 2 puuta)
+    ja uusi pata asennetaan. Purku palauttaa asennetun padan.
+  - **Sienet kypsyvät vain padassa** (enintään 10 kerralla; nuotio/grilli kertovat sen). Padan lähellä valmistetut pataruoat (`st:'pata'`) menevät pataan
+    kypsymään (repun valmistus → `potCraft`), vesikulho palauttaa kulhon heti.
+  - Mallissa kolmijalka, ketju, rautapata, sisällön väri (raaka → valmis, pilaantunut musta), kansi päällä / nojaa kiveen, höyry (valmis runsas, kypsyy vähän;
+    kansi päällä reunan raosta), kupliva kiehuminen. Äänet: pata_aloitus (alku), pata_kiehuu (7–12 s välein), pata_valmis / pata_valmis_kansi (valmistuminen
+    ilman kantta / kansi päällä), kansi_kiinni / kansi_auki – paikkamerkit.
+  - Pataruoat (taso, aineet, grilliaika `pt`): Puolukkahillo ×2 (10; 6 puolukkaa; 12 s), Sienikeitto ×2 (10; 4 sientä + vesikulho; 15), Puolukkapuuro ×2
+    (10; 3 villikauraa + 3 puolukkaa + vesikulho; 14), Sienipata ×2 (11; 5 sientä + pienriista; 18), Sienirisotto ×2 (11; 3 sientä + 3 villikauraa; 18),
+    Riistakeitto ×2 (12; 2 riistaa + 2 sientä + vesikulho; 20), Juhlapata ×3 (13; suurriista + riista + 3 sientä + 2 villikauraa + 2 puolukkaa; 30).
+- **Villikaura** (resources.js, uusi poimittava): niityt ja koivulehdot, oma satunnaislähde viimeisenä (muut solmut eivät siirry), 3 taattua aloituksen lähelle.
+- **Ruokanerffi + Kylläinen** (items.js, actions.js `KYL_K`/`KYL_FULL`, environment.js): kaikki ruoat antavat vähemmän kylläisyyttä (ks. Tasapainoarvot);
+  pataruoat täyttävät eniten ja antavat **Kylläinen**-tilan (`P.buffs.ravittu`, `food.kyl` s): nälkä kasvaa puolet hitaammin ja täyteen syötynä vatsa pysyy
+  täynnä 60 s + ¼ × kyl. Sisujuoman tila nimettiin "Täysi vatsa". Repun tiedoissa rivi Kylläinen.
+- **Tasot 30** (progress.js): `LVL_MAX` 30, `needXp` 55 + 35n (+20 × (n − 19) tasosta 20) – hieman vaikeampi. Tasopalkinnot 22 kestävyys, 24 HP 10, 26 kestävyys,
+  28 HP 10, 30 HP 20, muut kantokyky +5. **XP on maailmakohtainen**: vanha tallennus muunnetaan kerran (`xpMigrate`, `flags.xpv`) niin, että taso ja tason
+  sisäinen osuus säilyvät. Pata-XP: ensimmäinen pataruoka 25, pataruoka 6, haudutus kansi päällä +4, täysi 10 sienen pata 8, sienet 1/kpl (enint. 6).
+- **Uudet tavoitteet** (etenemisjärjestys, `gv` 4 – vanha indeksi muunnetaan id:n mukaan): Jäätären jälkeen Rakenna keittopata, Keitä ensimmäinen pataruoka;
+  Kalmaherran jälkeen Hauduta kansi kiinni, Keitä 10 sientä kerralla, Syö maha täyteen pataruoalla; Aarnihirviön jälkeen Valmista juhlapata.
+  Saavutukset: Padankaitsija (20 pataruokaa, +5 kantokyky), Hillomestari (10 hilloa, +5 kestävyys).
+- **Rakennusvalikon tietoikkuna** (uusi `js/buildinfo.js`, `#binfo`): kun hiiri (myös virtuaalinen osoitin) on saman kortin päällä 2 s, valikon vasemmalle
+  puolelle aukeaa kapea, valikon korkuinen, tummempi ikkuna: pyörivä 3D-kuva pienin animaatioin (kääntö, keinunta, liekit, hiilos), nimi, hinta, kestävyys,
+  ominaisuudet (`PIECE_INFO`: nuotio, grilli, pata, sulatin, ahjo, työpenkki, sänky + yleiset) ja piilotettu "Miten toimii? ▸" -selostus. Pysyy auki, kun hiiri
+  siirtyy ikkunaan. Kortissa näkyy myös tasovaatimus.
+- **Korkeat ruohotupsut** (resources.js `TALL_GEO`/`TALL_K`/`tallIM`, asetus `SET.tallGrass` Grafiikka-sivulla): High+ ja Ultra -esiasetuksissa pitkää ruohoa
+  kasoissa (2–4 tupsua) niityillä runsaasti, koivulehdoissa ja metsänreunoilla harvemmin; sama tuulivarjostin kuin ruoholla (huojuu kuten puut).
+  Asetussiirto `_v` 9.
+- **Vinkit pelaajakohtaisia** (tutorial.js `flags.tipsRe`, resin.js): nähty vinkki ei toistu missään maailmassa; uusi pelaaja saa kaikki vinkit ensimmäisessä
+  maailmassaan (myös ilman opastusta); toisto vain erikseen päälle laitetussa opastuksessa, ohitus peruu. Puukkovinkki lyhyeksi: "Sait puukon – voit kerätä
+  pihkaa! Lisätietoa löydät esineen tiedoista repusta."
+- **Äänet:** pihkankeräyksen äänet `extra/raw/pihka/` (kaiverrus, kulho_kiinni, kulho_taytto siirretty; uusi **tippa**: hiljaa, alle 6 m, 4–8 s välein kun kulho
+  kerää). Padan 6 paikkamerkkiä `p/rakentaminen/`.
+- **Early Access 1.1** (käyttäjä). Asetussiirtojen järjestys korjattu (KORJAUKSET 76).
+- Tarkistus: 3 uutta riviä + päivitetyt (tasoraja 7 ilman pataa, paisti 35, sytytys `fireFuelAdd`, vinkit, puukkovinkki, EA 1.1). Kuvat: pata (kansi pois/päällä,
+  höyry, hiilos), padan ikkuna, tietoikkuna, poistu-ruksi, ruohotupsut.
+
+### v3.01 (nuotiot, Poistu pelistä, olentojen uusiutuminen – käyttäjän pyyntö)
+- **Nuotio vs. grillinuotio** (pieces.js `FIRE_SLOTS`, `GRILL_COOK_K`, `FIRE_BURN_K`): nuotiolla 2 paikkaa (ennen 3) – ruoka kypsyy näkyvästi lappeellaan kivien
+  päällä (uusi malli, ennen nuotiolla ei näkynyt ruokaa); grillillä 6 paikkaa (ennen 4) kahdessa tangossa × 3, kypsyy 30 % nopeammin (aika × 0,7) ja palaa hiileksi
+  vasta 3× kypsymisajasta (nuotio 2×). Ei ruokabonusta. Värit (raaka → kypsä → palanut) seuraavat palamisrajaa. Valmistus: hiili ja lihakeitto kummallakin,
+  metsästäjän varras ja juhla-ateria vain grillillä (`st:'grilli'`, `nearStations` → `s.grilli`, grilli kelpaa myös nuotioksi, `STATION_NAME.grilli`).
+  Grillin tavoiteteksti päivitetty. Vanhan tallennuksen nuotion 3. ruoka on yhä otettavissa (malli näyttää 2).
+- **Poistu pelistä** (main.js `quitGame`, `QUIT`, index.html `#bQuit`, css `#quitScr`): päävalikon alin nappi. Jos peli on käynnissä eikä Tallenna nyt -nappia ole
+  painettu tällä valikkokäynnillä → Tallenna ja poistu / Poistu tallentamatta / Peruuta; muuten varmistus. Selain sallii `window.close()`:n vain skriptin avaamille
+  ikkunoille → muuten musiikki ja äänet pysähtyvät ja näytetään lopetusruutu "Peli on suljettu – voit sulkea välilehden" + Avaa peli uudelleen.
+- **Olentojen uusiutuminen ulottuvuuksissa ja Hautakummussa** (dungeons.js `mobRespQueue`/`mobRespawnTick`, `flags.mq`): kuollut tavallinen olento jonoon
+  alueittain; yksi kerrallaan, ensimmäinen palaa `MOB_RESP_T` 20 min kuoleman jälkeen, seuraava taas 20 min myöhemmin. Ei pomoja, ei Kalmon ylimystä
+  (`MOB_RESP_NO`, sinetti/tarina), ei pesän murskaamisen tyhjentämiä paikkoja, ei pomon kutsumia tai pesän synnyttämiä. Alueella oltaessa olento syntyy paikalleen
+  syntyanimaatiolla (ei alle 14 m pelaajasta – silloin 30 s myöhemmin).
+- Tarkistusrivi v3.01 (toimintatestit: paikat, nopeus, palaminen, asemat, reseptit, poistu, jono). Kuvatarkistus: nuotion ja grillin ruoat, poistumisdialogi, lopetusruutu.
+
+### v3.00 (korjaus – käyttäjän pyyntö)
+- **Leirin halkopino:** rikottu pino jäi näkyviin haamuna ja sen läpi pystyi kävelemään (yhdistetty staattinen kopio, KORJAUKSET 74). Pino ja kuivausteline
+  merkitty `noMerge`. Testattu kuvin: ennen, rikottaessa, yhdistämisen jälkeen ja tallennus + lataus. Tarkistusrivi v3.00.
 
 ### v2.99 (iso päivityslista 27 kohtaa + F-tarkastelun korjaukset – käyttäjän pyyntö)
 Listan kohdat 4 (lämmin-ääni lämpimässä kodissa), 6–10 ja 13 (äänien käsittely, paikkamerkit ovi/ranta/viimeinen pomo, valikkotaustat) olivat jo
@@ -2038,7 +2157,7 @@ tehty (v2.67, v2.86) – ei tehty uudelleen. Tehty nyt:
   painoraja) – normaali eteneminen. Tarkistus: DEV-paneelin tarkistus ehdolliseksi.
 - Kun DEV pois, kaikki DEV-viitteet piilossa (merkki, paneeli, näppäinlistan ja Kaikki toiminnot -ikkunan DEV-rivit, kytkimen kuvaus
   lyhyenä); vain kytkin "Kehittäjätyökalut (DEV)" näkyy. Testattu tekstihaulla.
-- **Päävalikko:** "Selviytymispeli · versio X" perään turkoosi tunnus "Early Access 1.0" (`.eaTag`). **Pysyvä sääntö:** numeroa 1.0 ei
+- **Päävalikko:** "Selviytymispeli · versio X" perään turkoosi tunnus "Early Access 1.1" (`.eaTag`; v3.02 käyttäjä vaihtoi 1.0 → 1.1). **Pysyvä sääntö:** numero muuttuu vain käyttäjän pyynnöstä.
   muuteta päivitysten mukana (käyttäjä); bump.sh muuttaa vain "versio X".
 
 ### v1.81 (pomo väsyy: 3 kuolemaa → ei enää parane)
@@ -3865,6 +3984,14 @@ kanssa; (3) Ultra-asetuksella jopa ~830 piirtokutsua.
 - Ensimmäinen pelattava versio yhtenä HTML-tiedostona.
 
 ## Ideajono
+
+### Ruokapäivitys (suunniteltu 18.11.) – ruoanlaitto TEHTY v3.01, keittopata (idea 3) + hiilos + ruokanerffi + Kylläinen (≈ idea 12) TEHTY v3.02; muut lisäideat odottavat valintaa
+- Nuotio 2 paikkaa (ruoka kypsyy näkyvästi kivien päällä), grillinuotio 6 paikkaa (2 × 3 ritilällä), grillillä kypsyy 30 % nopeammin ja palaa hiileksi vasta
+  3× kypsymisajasta (nuotio 2×), ei ruokabonusta. Valmistus tulen lähellä: hiili ja lihakeitto kummallakin, metsästäjän varras ja juhla-ateria vain grillillä
+  (`st:'grilli'`, grilli kelpaa myös nuotioksi). Vanhojen tallennusten ylimääräiset ruoat otettavissa.
+- Ehdotetut lisäideat (käyttäjä valitsee): 1 ruoan pilaantuminen + savustus/kuivausteline, 2 kalastus, 3 keittopata, 4 puukolla vuolu, 5 tervaus, 6 jano
+  (asetus, oletus pois), 7 syömis-/juomisanimaatio, 8 kilven F-tarkastelu, 9 grillin savu maamerkkinä + tuoksu houkuttelee susia, 10 eläinten jäljet,
+  11 kannettava teltta, 12 lämmin ateria -tehoste. Ehdotettu samaan PR:ään: ruoanlaitto + 1 + 7 + 12.
 
 ### Lista 9 (v2.99, käyttäjän iso päivityslista 27 kohtaa) – tehty v2.99 (ks. versioloki); jo aiemmin tehdyt: 4, 6–10, 13
 - Avoimena: käyttäjä vaihtaa kameran laskeutumisäänen (`m/uusi_maailma/kamera_laskeutuu`) ja kertoo, mitä puuttuvia ääniä ei halua.

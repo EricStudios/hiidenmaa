@@ -106,7 +106,8 @@ function creRevMake(a){if(CRE.rev)return CRE.rev;const sr=a.sampleRate,len=Math.
     lp+=(n-lp)*(.85-.6*t);d[i]=lp*Math.pow(1-t,2.6)*(i<sr*.012?i/(sr*.012):1);}}
   const cv=a.createConvolver();cv.normalize=true;cv.buffer=buf;const inp=a.createGain(),lp=a.createBiquadFilter(),out=a.createGain();lp.type='lowpass';lp.frequency.value=3200;out.gain.value=.9;
   inp.connect(lp);lp.connect(cv);cv.connect(out);CRE.rev={inp,cv,out,on:false,t:0};return CRE.rev;}
-function creRevOn(a){const R=creRevMake(a);R.t=3;if(!R.on){R.out.connect(CRE.gain);R.on=true;}return R;}
+function creRevOn(a){const R=creRevMake(a);R.t=3;if(!CRE.gain){CRE.gain=a.createGain();CRE.gain.connect(sndBus(a));}   /* v3.02 KORJAUKSET 75: pelaajan kaiku ennen ensimmäistä olentoääntä → connect(undefined) kaatoi silmukan */
+  if(!R.on){R.out.connect(CRE.gain);R.on=true;}return R;}
 function creRevTick(dt){const R=CRE.rev;if(!R||!R.on)return;if(CRE.voices.some(v=>v.sd)||TGV.v.some(v=>v.sd)){R.t=3;return;}R.t-=dt;if(R.t<=0){try{R.out.disconnect();}catch(e){}R.on=false;}}
 function creStop(v,t){try{v.g.gain.setTargetAtTime(0,actx.currentTime,.03);v.src.stop(actx.currentTime+(t||.12));}catch(e){}}
 // v1.88 kaikuääni: pomon paikasta, mutta enintään 38 m pelaajasta (kaukainen pomo kuuluu vaimeana kaikuna luolastossa, ei hiljaisuutena)
@@ -387,7 +388,7 @@ function mSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;mLoad();const L0
   const key=g+'/'+ev;let pick=L;if(pick.length>1&&MSND.last[key])pick=pick.filter(x=>x!==MSND.last[key]);const name=pick[Math.random()*pick.length|0];MSND.last[key]=name;
   if(!MSND.gain){MSND.gain=a.createGain();MSND.gain.connect(a.destination);}MSND.gain.gain.value=1;   /* v2.53: taso äänikohtaisesti (kategoria o.cat) */
   const src=a.createBufferSource();src.buffer=CRE.buf[name];src.playbackRate.value=(o.p||1)*(1+(Math.random()*2-1)*(o.pj??.03));
-  const gn=a.createGain(),v0=(o.v??1)*vol,h={src,g:gn,done:false,cat:o.cat||'ui',v:o.v??1};src.connect(gn);gn.connect((o.cat==='notif'||o.cat==='amb')&&!o.menu?sndBus(a):MSND.gain);   /* v2.83 o.menu: valikon/alkulennon taustaäänet eivät mykisty valikossa */   /* v2.67 pelin äänet vedenalaisen väylän kautta */src.onended=()=>{h.done=true;try{gn.disconnect();}catch(e){}};
+  const gn=a.createGain(),v0=(o.v??1)*vol*(SND_FILE_V[name]||1),h={src,g:gn,done:false,cat:o.cat||'ui',v:o.v??1};src.connect(gn);gn.connect((o.cat==='notif'||o.cat==='amb')&&!o.menu?sndBus(a):MSND.gain);   /* v2.83 o.menu: valikon/alkulennon taustaäänet eivät mykisty valikossa */   /* v2.67 pelin äänet vedenalaisen väylän kautta */src.onended=()=>{h.done=true;try{gn.disconnect();}catch(e){}};
   if(o.loop){src.loop=true;const lp=tgLoopPts(src.buffer);src.loopStart=lp[0];src.loopEnd=lp[1];gn.gain.setValueAtTime(0,a.currentTime);gn.gain.linearRampToValueAtTime(v0,a.currentTime+.15);}   /* 0,15 s vain naksahduksen esto, ei fade in */
   else gn.gain.value=v0;src.start();return h;}   // v2.52: palauttaa kahvan (mStop)
 // v2.52 äänen pysäytys häivyttäen (f s): silmukat (tuuli, linnut) ja kesken jäävät kertaäänet (intro ohitetaan)
@@ -524,6 +525,8 @@ const AMB_FADE=2.5,AMB_RND_MIN=10,AMB_RND_MAX=40,AMB_RND_V=.8;
 const WEATHER_K=.4;
 const AMB_V={sade:.8*WEATHER_K,tihku:.6*WEATHER_K,myrsky:1*WEATHER_K,tuuli:.7*WEATHER_K,lumi:.5*WEATHER_K,sumu:.5*WEATHER_K,ukkonen:.75*WEATHER_K,salama:1*WEATHER_K,tunnelma:.75,vedenalla:.8,luonto:.35,ranta:.55};   // v2.86 ranta-aallot
 const AMB_REALM={portal1:'routaluola',portal2:'kalmankammio',portal3:'aarnihauta'};
+/* v3.03 käyttäjä: Routaluolan tunnelmasilmukka −15 % (AMB_PLACE_V) ja satunnaisäänet satunnainen_routaluola (_0) ja _1 −15 % (SND_FILE_V, mSnd: tiedostokohtainen kerroin) */
+const AMB_PLACE_V={routaluola:.85},SND_FILE_V={'a/satunnaiset/satunnainen_routaluola_0':.85,'a/satunnaiset/satunnainen_routaluola_1':.85};
 /* v2.67 (käyttäjä): siirtymät ja silmukat. Jokaisesta silmukasta arvotaan yksi versio, kun se alkaa (sää alkaa, paikkaan tullaan), ja vain sitä
    loopataan, kunnes se loppuu. Sää vaihtuu: vanha hiipuu ja uusi voimistuu AMB_FADE 2,5 s. Paikka vaihtuu (maailma ↔ Hautakumpu ↔ ulottuvuus):
    vanhat silmukat loppuvat AMB_CUT 0,3 s:ssa ja uuden paikan silmukat alkavat AMB_HOLD 1 s:n päästä (nousu 1 s). Taukovalikko: kaikki hiljenevät
@@ -553,7 +556,7 @@ function natEp(k,ok,dt){dt=+dt||0;const N=AMB.nat[k]||(AMB.nat[k]={on:false,t:nR
   N.t-=dt;if(N.t<=0){N.on=!N.on;N.t=N.on?nRnd(NAT_LEN):nRnd(NAT_GAP);N.fd=nRnd(NAT_FADE);N.v=.75+Math.random()*.25;}return N.on?N.v:0;}
 const BIRD_V=.85,LOKKI_V=.35;
 function ambTargets(dt){const t={};if(typeof state==='undefined'||(state!=='play'&&state!=='ui'&&state!=='paused')||P.dead)return t;
-  if(P.inDun){t['tunnelma/tunnelma_'+ambPlace()]=AMB_V.tunnelma;return t;}
+  if(P.inDun){t['tunnelma/tunnelma_'+ambPlace()]=AMB_V.tunnelma*(AMB_PLACE_V[ambPlace()]||1);return t;}
   const W=WEATHERS[weather.cur]||WEATHERS.selkea,cur=weather.cur;
   if(W.storm){const sk=clamp(wRain/1.4,0,1);t['saa/myrsky']=sk*AMB_V.myrsky;t['saa/ukkonen']=sk*AMB_V.ukkonen;}else if(cur==='tihku')t['saa/tihku']=clamp(wRain/.35,0,1)*AMB_V.tihku;else t['saa/sade']=clamp(wRain,0,1)*AMB_V.sade;
   if(!W.storm)t['saa/tuuli']=clamp((WIND.spd-6)/8,0,1)*AMB_V.tuuli;
