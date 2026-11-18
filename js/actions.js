@@ -293,7 +293,7 @@ function interact(){if(P.insp)inspectStop();
 // Nuotio ja grillinuotio: 1) kerää valmis ruoka, 2) ripusta raaka ruoka (jokaisella oma aika), 3) lisää polttoainetta (puu = 1 yksikkö, hiili = 10).
 function fireInteract(p){const cap=FIRE_SLOTS[p.t]||2,d=p.data;   // v3.00 nuotio 2, grilli 6
   const done=d.cook.filter(c=>c.t>=c.need);
-  if(done.length){for(const c of done){const burnt=c.t>=c.need*(FIRE_BURN_K[p.t]||2);giveOrDrop(burnt?'hiili':COOKABLE[c.id],1,p.x,p.y+.8,p.z);if(!burnt)bump('cooked');}d.cook=d.cook.filter(c=>c.t<c.need);sfx('pickup');return;}
+  if(done.length){for(const c of done){const burnt=c.t>=c.need*(FIRE_BURN_K[p.t]||2);giveOrDrop(burnt?'hiili':COOKABLE[c.id]||POT_COOK[c.id]||'paisti',1,p.x,p.y+.8,p.z);   /* v3.03 vanhan tallennuksen nuotiolla paistuva sieni → paistettu sieni */if(!burnt)bump('cooked');}d.cook=d.cook.filter(c=>c.t<c.need);sfx('pickup');return;}
   const raw=!d.camp&&Object.keys(COOKABLE).find(id=>invCount(id)>0);   // v2.98 hylätyn leirin nuotio on tavallinen tuli (ei paistoa)
   if(d.out&&d.fuel>0){fireFuelAdd(p);return;}   // v2.17
   if(raw&&(fireLit(p)||emberOn(p))&&d.cook.length<cap){invRemove(raw,1);const ct=COOK_T[raw]||[9,5];d.cook.push({id:raw,t:0,need:ct[0]+Math.random()*ct[1]});msg(`${ITEMS[raw].n} paistuu… (ota ajoissa, muuten palaa hiileksi)`);sfx('craft');return;}

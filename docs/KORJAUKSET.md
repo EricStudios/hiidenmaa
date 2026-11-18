@@ -579,3 +579,10 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   `_v=8` ja v7-siirto (biomien sekoitus esiasetuksen mukaan) jäi tekemättä. Lisäksi esiasetuksen tunnistus vertasi myös myöhempien siirtojen avaimia
   (raysQ, flare, tallGrass), jolloin High+/Ultra ei tunnistunut. Korjaus: järjestys v7 → v8 → v9 ja jokainen siirto ohittaa myöhempien siirtojen avaimet.
 - **Sääntö:** uusi siirtolohko aina viimeiseksi (suurin numero alimmaksi), ja lisää sen avain aiempien lohkojen ohituslistaan.
+
+## 77. Uusi solmutyyppi siirsi vanhojen tallennusten solmu-id:t (v3.02, korjattu v3.03)
+- Solmujen id on juokseva (`nodeIdN`, `initNode`) ja tallennus viittaa id:llä kaadettuihin, siirrettyihin ja (pelin aikana kasvaneiden) puiden tietoihin.
+  Villikaura lisättiin `placeNodes`:n loppuun (perussolmujen id:t säilyivät), mutta pelin aikana kasvaneet puut (`plantTree`) saavat id:n perussolmujen
+  JÄLKEEN → ne siirtyivät villikauran määrällä, ja vanhan tallennuksen viittaus osui villikauraan. Korjaus: uudet solmutyypit omalta id-alueeltaan
+  (`NODE_ID_X` = 1 000 000 +, `NODE_ID_XT`), `unplantAll` laskee `nodeIdN`:n vain perussolmuista.
+- **Sääntö:** uusi solmutyyppi → lisää se `NODE_ID_XT`:hen (ja oma satunnaislähde placeNodes:n loppuun), ettei mikään vanha id muutu.

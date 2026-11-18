@@ -662,6 +662,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   on laitettu erikseen päälle eikä sitä ohiteta. Puukon pihkavinkki on lyhyt ja ohjaa esineen tietoihin repussa.
 - **v3.02 Äänet:** pihkan tippuminen kulhoon kuuluu hiljaa aivan läheltä (6 m). Pihkankeräyksen äänet ovat `sounds/extra/raw/pihka/`.
 - **v3.02 Päävalikko:** Early Access 1.1.
+- **v3.04 Vesikulho kaatuu:** jos F-tarkastelu kääntää vesikulhon ylösalaisin, vesi kaatuu (Hups!, hahmo kiroaa): Märät kengät 60 s (liike −11 %), Kylmä 30 s, Vihainen 20 s
+  (kestävyys kuluu 20 % nopeammin, ärtynyt ääni 5–10 s välein). Liikkuessa hahmo kantaa vesikulhoa vaakasuorassa, joten juoksu ei kaada.
+- **v3.03 Routaluola:** tunnelmasilmukka ja satunnaisäänet `satunnainen_routaluola` (_0, _1) 15 % hiljempaa.
 - **v3.01 olentojen uusiutuminen:** ulottuvuuksissa ja Hautakummussa kuolleet tavalliset olennot palaavat yksi kerrallaan 20 min välein (ei pomot eikä Kalmon ylimys).
 - **v2.99 AFK ja esine kädessä:** millä tahansa esineellä oikeassa kädessä selän rapsutuksen tilalla 30 % tarkastelu tai 70 % hengitys ja pään pyörittely (venyttely säilyy).
 - **v2.99 F-vinkki:** kun otat puukon käteen 10. kerran (tutoriaalin jälkeen), tulee kerran vinkki F-tarkastelusta – toimii myös muilla työkaluilla ja aseilla.

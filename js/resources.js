@@ -108,7 +108,10 @@ treeMat.onBeforeCompile=sh=>{sh.uniforms.uTime=SWAY.uTime;sh.uniforms.uWind=SWAY
 const TREE_H={kuusi:5.8,koivu:6.2,kelo:4.8,manty:8.4,aarnipuu:21};
 const POOL={kuusi:400,koivu:400,manty:200,aarnipuu:60}; // varapaikat öisin kasvaville puille
 const treeS=()=>.6+Math.pow(rng(),1.6)*1.4;   // puun koko .6–2.0, pienet yleisimpiä
-let nodeIdN=0;
+let nodeIdN=0,nodeIdX=0;
+/* v3.03 (KORJAUKSET 77): uusien solmutyyppien (villikaura v3.02) id:t omalta alueeltaan NODE_ID_X+, jotta vanhojen tallennusten id:t (kaadetut, siirretyt,
+   kasvaneet puut = perussolmujen jälkeen numeroidut) eivät siirry. */
+const NODE_ID_X=1e6,NODE_ID_XT=new Set(['villikaura']);
 const CHN=10,CHS=HALF*2/CHN,CHUNK_IMS=[];
 const VIS_R={tree:130,rock:110,pick:60,deco:55}; // näkyvyysetäisyys lajeittain (sumu peittää kauempana)
 function chunkOf(x,z){return clamp(Math.floor((z+HALF)/CHS),0,CHN-1)*CHN+clamp(Math.floor((x+HALF)/CHS),0,CHN-1);}
@@ -243,7 +246,7 @@ function mergeStatics(){unmergeStatics();cullStatics();statics.updateMatrixWorld
     for(const {o,top} of e.list){if(o===top){o.userData.mg=true;MG_HID.push(o);}else{o.visible=false;MG_HID.push(o);}}}
   cullStatics();mergeN=statics.children.length;}
 function mergeTick(){if(!SET.mergeSt){if(MERGED.length)unmergeStatics();return;}if(statics.children.length!==mergeN)mergeStatics();}
-function initNode(n){n.ox=n.x;n.oz=n.z;n.s0=n.s;n.id=nodeIdN++;n.def=NODE[n.type];n.maxHp=(n.def.hp||1)*(n.def.kind==='tree'?n.s*n.s*1.2:1);n.hp=n.maxHp;n.alive=true;n.respawnAt=0;
+function initNode(n){n.ox=n.x;n.oz=n.z;n.s0=n.s;n.id=NODE_ID_XT.has(n.type)?NODE_ID_X+(nodeIdX++):nodeIdN++;n.def=NODE[n.type];n.maxHp=(n.def.hp||1)*(n.def.kind==='tree'?n.s*n.s*1.2:1);n.hp=n.maxHp;n.alive=true;n.respawnAt=0;
   setNodeMatrix(n,true);
   if(n.def.kind==='tree')n.col=addCircle(n.x,n.z,(n.def.cr||n.def.r)*n.s,n.y-1,n.y+6*n.s,n);
   else if(n.def.kind==='rock'){n.col=addCircle(n.x,n.z,n.def.r*n.s,n.y-1,n.y+1.2*n.s,n);rockTop(n.col,n.s);}
@@ -408,7 +411,7 @@ function clearLogs(){for(const lg of [...logs])removeLog(lg);}
 function plantTree(type,x,z,s){const k=chunkOf(x,z),im=(nodeIM[type]||[]).find(m=>m.userData.k===k);if(!im||im.userData.used>=im.instanceMatrix.count)return null;
   const n={type,x,z,y:terrainH(x,z),s,rot:rng()*TAU,idx:im.userData.used++,im,planted:true};im.count=im.userData.used;initNode(n);ngridAdd(n);return n;}
 function unplantAll(){for(let i=nodes.length-1;i>=0;i--){const n=nodes[i];if(!n.planted)continue;setNodeMatrix(n,false);if(n.col)gridRemove(n.col);ngridRemove(n);nodes.splice(i,1);}
-  for(const k in nodeIM)for(const im of nodeIM[k]){im.userData.used=im.userData.base;im.count=im.userData.base;}nodeIdN=nodes.length?Math.max(...nodes.map(n=>n.id))+1:0;}
+  for(const k in nodeIM)for(const im of nodeIM[k]){im.userData.used=im.userData.base;im.count=im.userData.base;}{let m=-1;for(const n of nodes)if(n.id<NODE_ID_X&&n.id>m)m=n.id;nodeIdN=m+1;}}
 // Pelaajan rakentamien osien läheisyyteen ei uusiudu eikä kasva puita tai kasveja: 15 m jokaisesta rakennusosasta
 // ja työpenkin rakennusalue + 30 % (BENCH_R × 1,3 = 26 m).
 const BASE_PIECE_R=15;

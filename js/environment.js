@@ -235,6 +235,8 @@ function effects(){const e=[],wt=invWeight(),b=P.buffs,add=(key,name,kind,desc,t
   if(P.hunger<=0)add('nalka','Nälkä','bad','Menetät terveyttä, kävely −15 %, isku −20 %, kestävyys palautuu puolet hitaammin. Syö!');
   else if(P.hunger<25)add('nalkainen','Nälkäinen','bad','Isku −10 %, kestävyys palautuu 15 % ja terveys 50 % hitaammin. Syö pian.');
   if(b.pahoinvointi)add('pahoinvointi','Pahoinvointi','bad','Raa\'asta lihasta: terveys ei palaudu itsestään, kestävyys palautuu puolet hitaammin.',b.pahoinvointi);
+  if(b.markakengat)add('markakengat','Märät kengät','bad','Kaadoit vesikulhon jaloillesi: liikkuminen −11 %.',b.markakengat);   // v3.04
+  if(b.vihainen)add('vihainen','Vihainen','bad','Harmittaa! Kestävyys kuluu 20 % nopeammin.',b.vihainen);
   if(b.vatsakipu)add('vatsakipu','Vatsakipu','bad','Liiasta syömisestä: kävely −10 %, kestävyys palautuu 30 % hitaammin ja kramppi vie välillä kestävyyttä.',b.vatsakipu);
   if(!devOn('weight')&&wt>MAXW)add('kuorma','Ylikuormitus','bad','Kävely −45 %, et voi juosta etkä hypätä. Pudota tavaroita tai päivitä reppu.');
   if(b.levannyt)add('levannyt','Levännyt','good','Kestävyys palautuu 45 % nopeammin ja terveys palautuu nopeammin.',b.levannyt);
@@ -256,6 +258,7 @@ function calcFx(){const f=P.fx,b=P.buffs;f.speed=1;f.dmg=1;f.stamRegen=1;f.hpReg
   if(P.hunger<=0){f.speed*=.85;f.dmg*=.8;f.stamRegen*=.5;f.hpRegen=0;}else if(P.hunger<25){f.dmg*=.9;f.stamRegen*=.85;f.hpRegen*=.5;}
   if(b.pahoinvointi){f.stamRegen*=.5;f.hpRegen=0;}
   if(b.vatsakipu){f.speed*=.9;f.stamRegen*=.7;}
+  if(b.markakengat)f.speed*=WET_SHOE_K;   // v3.04 märät kengät −11 %
   if(b.levannyt)f.stamRegen*=1.45;f.speed*=1+BON.spd/100;}
 /* v2.09 KODIN LÄMPÖ. homeScan (0,5 s välein): 16 vaakasädettä kolmella korkeudella (0,6 / 1,5 / 2,2 m) pelaajasta enintään 15 m – jokaisen on
    osuttava seinään, suljettuun oveen, lasiin tai maastoon; katto pelaajan kohdalla ja 1 m joka suuntaan (sheltered). Aukkoikkuna päästää säteen läpi
@@ -304,7 +307,7 @@ function homeTick(dt){const H=HOME;H.chk-=dt;
 function homeHealRate(){return HOME.lvl===2?1*HOME.k:HOME.lvl===1?.5*HOME.k:0;}
 function homeHungerK(){const m=HOME.lvl===2?.5:HOME.lvl===1?.7:1;return 1-(1-m)*HOME.k;}
 function fmtT(t){return t>=60?`${Math.ceil(t/60)} min`:`${Math.ceil(t)} s`;}
-function survival(dt){
+function survival(dt){if(P.buffs.vihainen&&P._stP!=null&&P.stam<P._stP)P.stam=Math.max(0,P.stam-(P._stP-P.stam)*(ANGRY_STAM_K-1));   /* v3.04 vihainen: kulutus +20 % */
   // statuses
   envTick-=dt;if(envTick<=0){envTick=.5;shelterCache=sheltered(P.pos.x,P.pos.y,P.pos.z);fireCache=nearFire(P.pos.x,P.pos.z);indoorT=indoorScore();}
   homeTick(dt);   // v2.09 kodin lämpö
@@ -314,7 +317,7 @@ function survival(dt){
   if(P.wetT>0)P.wetT-=dt*(fireCache||warmHome?5:1);
   const armor=equipped('armor');
   const snowing=wSnow>.5&&P.pos.y>10&&!P.inDun&&!shelterCache;
-  const cold=!fireCache&&!warmHome&&((P.wetT>0)||snowing||(isNight()&&!P.inDun&&!(armor&&ITEMS[armor.id].warm)&&!shelterCache));
+  const cold=!fireCache&&!warmHome&&((P.wetT>0)||!!P.buffs.kylmavesi||snowing||(isNight()&&!P.inDun&&!(armor&&ITEMS[armor.id].warm)&&!shelterCache));
   P.cold=cold;
   if(fireCache&&shelterCache){P.restT+=dt;if(P.restT>12&&!P.buffs.levannyt){P.buffs.levannyt=360;flags.rested=1;msg('Olet levännyt. Kestävyys palautuu nopeammin.','loot');}}else P.restT=0;
   for(const k in P.buffs){P.buffs[k]-=dt*(k==='vatsakipu'&&P.vatsaFast?5:1);if(P.buffs[k]<=0){delete P.buffs[k];if(k==='vatsakipu')P.vatsaFast=false;}}   // v2.91 vesikulho: vatsakipu 5× nopeammin
@@ -328,4 +331,5 @@ function survival(dt){
   if(P.heal>0){const h=Math.min(P.heal,3*dt);P.heal-=h;P.hp+=h;}
   P.hp=Math.min(maxHp(),P.hp+reg*dt);
   if(P.hunger<=0){P.hp-=.5*dt;if(P.hp<=0)playerDie();}
+  P._stP=P.stam;   // v3.04 vihaisen kulutuksen vertailu
 }

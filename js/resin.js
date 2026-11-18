@@ -40,6 +40,26 @@ function resinNode(id){if(!_resNodeMap||_resNodeMap.size!==nodes.length){_resNod
 /* ---------- vesikulho ---------- */
 function nearWater(){if(P.inDun)return false;if(P.inWater)return true;const wl=water.position.y;
   for(let a=0;a<8;a++){const dx=Math.sin(a*TAU/8),dz=Math.cos(a*TAU/8);for(const r of [.8,1.6,2.4])if(terrainH(P.pos.x+dx*r,P.pos.z+dz*r)<wl-.05)return true;}return false;}
+/* v3.04 käyttäjä: VESIKULHO KAATUU. Kun vesikulho on kädessä ja animaatio (esim. F-tarkastelu) kääntää kulhon suun alaspäin (suun suunta
+   y < BOWL_SPILL_Y, ~100° kallistus) BOWL_SPILL_T s ajan, vesi valuu pois: kulho tyhjenee, roiske, ilmoitus "Hups…" ja hahmo kiroaa
+   (paikkamerkki sounds/extra/raw/moka/kirous, avain p/moka/kirous) BOWL_CURSE_D s myöhemmin.
+   Liikkuessa (kävely, juoksu, hyppy – juoksun käsienheilunta kallistaisi kulhoa ~105°) hahmo kantaa vesikulhoa varovasti: kulho pidetään vaakasuorassa
+   (bowlLevel); vain F-tarkastelu (P.insp, myös AFK-lähitarkastelu) kääntää sen oikeasti → voi kaataa. */
+const BOWL_SPILL_Y=-.15,BOWL_SPILL_T=.12,BOWL_CURSE_D=.45,BOWL_LEVEL_K=12,_spillQ=new THREE.Quaternion(),_spillPQ=new THREE.Quaternion(),_spillFix=new THREE.Quaternion(),_spillT=new THREE.Quaternion(),_spillV=new THREE.Vector3(),_spillUp=new THREE.Vector3(0,1,0);
+function bowlLevel(hm,dt){if(!hm.userData.q0)hm.userData.q0=hm.quaternion.clone();const q0=hm.userData.q0;
+  if(P.insp){_spillT.copy(q0);}else{hm.parent.getWorldQuaternion(_spillPQ);_spillQ.copy(_spillPQ).multiply(q0);_spillV.set(0,1,0).applyQuaternion(_spillQ);
+    _spillFix.setFromUnitVectors(_spillV,_spillUp);_spillQ.premultiply(_spillFix);_spillT.copy(_spillPQ.invert()).multiply(_spillQ);}
+  hm.quaternion.slerp(_spillT,Math.min(1,dt*BOWL_LEVEL_K));}
+function bowlSpillTick(dt){if(heldId!=='vesikulho'||!heldMesh||P.dead){RES.spT=0;return;}bowlLevel(heldMesh,dt);heldMesh.getWorldQuaternion(_spillQ);const y=_spillV.set(0,1,0).applyQuaternion(_spillQ).y;
+  if(y>=BOWL_SPILL_Y){RES.spT=0;return;}RES.spT=(RES.spT||0)+dt;if(RES.spT<BOWL_SPILL_T)return;RES.spT=0;bowlSpill();}
+function bowlSpill(){const s=heldBowl();if(!s||s.id!=='vesikulho')return;heldMesh.getWorldPosition(_spillV);s.id='kulho';invDirty=true;updateGear();bump('spills');
+  burst(_spillV.x,_spillV.y,_spillV.z,0x8fc8ff,16,2.2);plSnd('kaytto','vesi_kaato',{v:.6,pos:{x:_spillV.x,y:_spillV.y,z:_spillV.z}});
+  msg('Hups! Kaadoit vedet vahingossa – kulho on taas tyhjä. Kengät kastuivat ja harmittaa.','warn');setTimeout(()=>{if(!P.dead)plSnd('moka','kirous');},BOWL_CURSE_D*1000);
+  P.buffs.markakengat=SPILL_FX.markakengat;P.buffs.kylmavesi=SPILL_FX.kylma;P.buffs.vihainen=SPILL_FX.vihainen;RES.angT=5+Math.random()*5;}   // v3.04 tilat
+/* v3.04 käyttäjä: kaatuneesta vedestä tilat – Märät kengät (liike −11 %, SPILL_FX.markakengat s), Kylmä 30 s (kuten kylmä yö: tuli lämmittää),
+   Vihainen 20 s (kestävyys kuluu 20 % nopeammin, environment.js survival; ääni p/moka/vihainen 5–10 s välein angryTick). */
+const SPILL_FX={markakengat:60,kylma:30,vihainen:20},WET_SHOE_K=.89,ANGRY_STAM_K=1.2;
+function angryTick(dt){if(!P.buffs.vihainen||P.dead){RES.angT=Math.max(RES.angT||0,1);return;}RES.angT=(RES.angT??5)-dt;if(RES.angT<=0){RES.angT=5+Math.random()*5;plSnd('moka','vihainen');}}
 function heldBowl(){const w=equipped('weapon');return w&&ITEMS[w.id].cat==='bowl'?w:null;}
 function bowlUse(){const s=heldBowl();if(!s||P.dead)return;
   if(s.id==='kulho'){if(nearWater()){s.id='vesikulho';invDirty=true;updateGear();msg('Täytit kulhon vedellä – nyt se on vesikulho.','loot');plSnd('pihka','kulho_taytto');sfx('pickup');}
@@ -123,7 +143,7 @@ function knifeInfoTick(dt){if(RES.tipT>0){RES.tipT-=dt;if(RES.tipT<=0&&TUT.tipEl
 const RESIN_DRIP_R=6,RESIN_DRIP_V=.35,RESIN_DRIP_T=[4,8];
 function resinTick(dt,td=dt){   // td = pelin ajan nopeus (kertymä ja hiipuminen), dt = kaiverrus
  if(RES.flagsRef!==flags){RES.flagsRef=flags;resinClearVis();_resNodeMap=null;}
-  resinEnsureG();carveTick(dt);knifeInfoTick(dt);inspectTick(dt);
+  resinEnsureG();carveTick(dt);knifeInfoTick(dt);inspectTick(dt);bowlSpillTick(dt);angryTick(dt);   // v3.04 vesikulho kaatuu, vihainen-ääni
   const st=flags.resin;if(st)for(const id in st){const e=st[id];
     if(e.b&&(e.tot||0)<eCap(e)){const add=Math.min(eCap(e)-(e.tot||0),td*eCap(e)/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;
       e.dripT=(e.dripT??Math.random()*RESIN_DRIP_T[1])-dt;if(e.dripT<=0){e.dripT=RESIN_DRIP_T[0]+Math.random()*(RESIN_DRIP_T[1]-RESIN_DRIP_T[0]);const n=resinNode(id);if(n&&!P.inDun&&dist2(n.x,n.z,P.pos.x,P.pos.z)<RESIN_DRIP_R*RESIN_DRIP_R)plSnd('pihka','tippa',{pos:{x:n.x,y:resinBase(n)+.9,z:n.z},v:RESIN_DRIP_V,rk:.3});}}   // v3.02 tipan ääni

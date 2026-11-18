@@ -843,7 +843,10 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
         ('pihka', 'Pihkankeräys', '🍯', [('kaiverrus', 'kaiverrat puukolla pihkakuviota puun kaarnaan (toistuu n. 0,55 s välein, 10 s ajan)', 'knife carving bark, wood scraping'),
                                        ('kulho_kiinni', 'sidot kulhon narulla pihkapuuhun tai irrotat sen', 'rope tie, wooden bowl knock'),
                                        ('kulho_taytto', 'täytät puukulhon vedellä veden ääressä', 'bowl scoop water, splash fill'),
-                                       ('tippa', 'pihkaa tippuu kulhoon (hiljaa, vain aivan läheltä 6 m, 4–8 s välein)', 'single sticky resin drip into wooden bowl, soft drop')])]),
+                                       ('tippa', 'pihkaa tippuu kulhoon (hiljaa, vain aivan läheltä 6 m, 4–8 s välein)', 'single sticky resin drip into wooden bowl, soft drop')]),
+        # v3.04 (käyttäjä): hahmo kiroaa, kun kaatoi vesikulhon vahingossa (F-tarkastelu kääntää kulhon)
+        ('moka', 'Mokat', '😬', [('kirous', 'hahmo kiroaa/mutisee harmissaan, kun kaatoi vesikulhon vedet vahingossa (0,45 s roiskeen jälkeen)', 'man muttering curse, annoyed grumble, oops damn short'),
+                               ('vihainen', 'Vihainen-tila (20 s kaatuneesta vedestä): ärtynyt tuhahdus/murahdus 5–10 s välein', 'annoyed huff, irritated grunt, angry sigh male short')])]),
 ]
 P_EV = {}
 P_CFGS = []

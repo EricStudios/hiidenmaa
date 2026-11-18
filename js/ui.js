@@ -472,7 +472,7 @@ function itemProps(s,q){const d=ITEMS[s.id],o=[],f1=v=>v.toFixed(1).replace('.',
   // v2.98 pihkan keräys esinetiedoissa (resin.js)
   if(s.id==='puukko')o.push(['Pihkan keräys','kaiverra pihkapuuhun kuvio (E rungon vieressä, '+CARVE_T+' s)'],['Pihkapuut','männyt ja kuuset, joiden kuoressa näkyy hieman kellertävää pihkaa (n. 3 % puista)'],['Pihkaa / puu','10–50 puun koon mukaan, kertyy noin tunnissa'],['Kaiverrus ja valuma',q>1?'+'+Math.round((resinFlowK(q)-1)*100)+' % nopeampi (★'+q+')':'normaali (★2 +10 %, ★3 +20 %)']);
   if(s.id==='kulho')o.push(['Pihka','kiinnitä narulla kaiverrettuun pihkapuuhun (naru toisessa kädessä)'],['Vesi','täytä vedessä (vasen hiiri)']);
-  if(s.id==='vesikulho')o.push(['Vesi','vasen hiiri: juo (helpottaa vatsakipua) – jos palat, kaadat veden päällesi']);
+  if(s.id==='vesikulho')o.push(['Vesi','vasen hiiri: juo (helpottaa vatsakipua) – jos palat, kaadat veden päällesi'],['Varoitus','vesi ei ole kiinni kulhossa – kulhon kääntäminen kaataa sen']);   // v3.04
   if(s.id==='naru')o.push(['Käyttö','pidä toisessa kädessä, kun kiinnität kulhon pihkapuuhun']);
   if(d.cat==='armor'){const a=d.arm*(1+.2*(q-1));o.push(['Suoja',a.toFixed(0)],['Vahinko pienenee',pc(1-20/(20+a))]);if(d.warm)o.push(['Lämmin','kyllä']);}
   if(AMMO.includes(s.id))o.push(['Ammus',flags.ammo===s.id?'valittu':ammoId()===s.id?'käytössä (automaattinen)':flags.ammo?'ei käytössä':'automaattinen: heikoimmasta parhaaseen']);
