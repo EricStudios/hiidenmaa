@@ -104,7 +104,8 @@ const FUEL_K=1.5,FIRE_UNIT=45*FUEL_K,FIRE_FUEL={puu:1,pihka:2,hiili:10},TORCH_FU
 const fireRem=p=>Math.max(0,p.data.fuel*FIRE_UNIT-p.data.burn),torchRem=p=>Math.max(0,p.data.burn);
 const pctOf=(rem,p)=>Math.max(0,Math.min(100,Math.round(rem/Math.max(1,p.data.full||rem||1)*100)));
 const firePct=p=>pctOf(fireRem(p),p),torchPct=p=>pctOf(torchRem(p),p);
-const fuelText=(rem,pct)=>`${pct}/100 · ${(rem/60).toFixed(1).replace('.',',')} min`;
+/* v3.07 käyttäjä: "100/100" oli prosentti VIIMEISIMMÄSTÄ täytöstä (aina 100 heti lisäyksen jälkeen) – nyt näytetään jäljellä oleva aika / suurin mahdollinen (fuelCap). */
+const fuelCap=p=>p.t==='patanuotio'?POT_FUEL_S:isTorch(p.t)?TORCH_CAP:FUEL_MAX*FIRE_UNIT,_fm=s=>(s/60).toFixed(1).replace('.',','),fuelText=(rem,p)=>`${_fm(rem)} / ${_fm(fuelCap(p))} min`;
 function markFull(p){p.data.full=isTorch(p.t)?torchRem(p):fireRem(p);}
 /* v3.00 käyttäjä: nuotio vs. grillinuotio – nuotiolla FIRE_SLOTS 2 paikkaa (ruoka kypsyy kivien päällä), grillillä 6 (2 tankoa × 3); grilli kypsentää
    GRILL_COOK_K nopeammin (30 % lyhyempi aika) ja ruoka palaa hiileksi vasta FIRE_BURN_K 3× kypsymisajasta (nuotio 2×). */

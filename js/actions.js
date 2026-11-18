@@ -258,12 +258,12 @@ function findInteract(){
 function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLowerCase();if(bt(p.t)==='ovi')return p.data.open?'Sulje ovi':'Avaa ovi';switch(p.t){
   case 'tikkaat':case 'kivitikkaat':return 'Kiipeä: pidä W (alas S)';
   case 'ovi':return p.data.open?'Sulje ovi':'Avaa ovi';
-  case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=!p.data.camp&&Object.keys(COOKABLE).some(id=>invCount(id)>0),em=emberOn(p);   /* v2.98 leirin nuotio: ei paistoa */return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&(fireLit(p)||em)&&p.data.cook.length<(FIRE_SLOTS[p.t]||2)?(em?'Paista hiilloksella (−20 %)':'Paista ruokaa'):em?`Hiilos ${fmtMin(p.data.ember)} – lisää polttoainetta`:`Polttoainetta ${fuelText(fireRem(p),firePct(p))} – lisää`;}   // v3.02 hiilos
+  case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=!p.data.camp&&Object.keys(COOKABLE).some(id=>invCount(id)>0),em=emberOn(p);   /* v2.98 leirin nuotio: ei paistoa */return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&(fireLit(p)||em)&&p.data.cook.length<(FIRE_SLOTS[p.t]||2)?(em?'Paista hiilloksella (−20 %)':'Paista ruokaa'):em?`Hiilos ${fmtMin(p.data.ember)} – lisää polttoainetta`:`Polttoainetta ${fuelText(fireRem(p),p)} – lisää`;}   // v3.02 hiilos
   case 'patanuotio':return potLabel(p);   // v3.02
   case 'vedenkeraaja':return waterLabel(p);   // v3.06
   case 'pelto':return fieldLabel(p);   // v3.06 farm.js
   case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':return nauLabel(p);   // v3.06 fish.js
-  case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),torchPct(p))} – lisää`;
+  case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),p)} – lisää`;
   case 'sanky':return isNight()?'Nuku':'Aseta herätyspaikka';
   case 'arkku':return 'Avaa arkku';
   case 'tynnyri':return 'Avaa tynnyri';

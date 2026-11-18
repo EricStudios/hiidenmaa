@@ -5,6 +5,30 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
 ## ⭐ TÄRKEINTÄ NYT (päivitetty v3.06, 18.11.2026)
 
+- **⏯️ KESKEN: v3.07 (käyttäjän korjaukset v3.06:een, 18.11.) – kun käyttäjä sanoo "jatka nyt", jatka tästä listasta.** Vastaukset 5 kysymykseen kirjattu alle.
+  Iso päivitys (eri lista) tulee käyttäjältä myöhemmin – älä aloita sitä ennen kuin lista saapuu.
+  - ✅ TEHTY (commit WIP, ei vielä testattu): F-tarkastelun wow/mmm 10 % jokaisella toistolla (myös uusi esine); keitossa käytetty vesikulho → tyhjä kulho käteen
+    (`potCraft`, `updateGear`); polttoainemittari "100/100" → "jäljellä / enintään min" (`fuelCap`, `fuelText(rem,p)`); veden nimi vain kerran löydettäessä (`fishTick`).
+  - ⏳ TEKEMÄTTÄ:
+    1. Rikkaruohot: uusia lajeja, korsien kokovaihtelu, biomeittain eri pituus, vähemmän keltaisia, emissive pienemmäksi (`WEED_*`, resources.js).
+    2. Käsisoihtuun tulen ääni (lainaa palaminen, hiljaisempi kuin muut tulet; `fireSndTick` + `torchSlot`).
+    3. Kaatuva puu: pelaajalle aarnipuu 90 % maxHP, täysikasvuinen 60 %, pienet 40–50 % koon mukaan; eläimille sama % × vertailu-HP (karhu menettää aarnipuusta ~50 %, susi voi kuolla pienestä).
+    4. Vinkit: näyttöaika lukemisen mukaan (sanamäärä), katoaa nopeasti kun vinkkiä käyttää (`TIPS[].u`); tarkista että vinkit vain uusille / opastusmaailmaan (logiikka jo `tipsTick`).
+    5. Tietoikkuna vaihtuu heti korttien välillä (ei 1 s viivettä kun jo auki); ei selaimen vierityspalkkia eikä sivuttaisvieritystä; KAIKKIIN vieritettäviin teemoitettu oma
+       liukuri (CSS ::-webkit-scrollbar + scrollbar-color), paitsi DEV-valikoissa.
+    6. Hakkujen malli ontto (TorusGeometry-kaari) → päihin umpinaiset kärjet (models.js `makeHeld`).
+    7. Viljely: pelto → **Viljelylaatikko** (id `pelto`, puu, 1 kylvö, kasvu 60 %/uni, sato 9 + siemen takaisin) ja uusi **Kohopenkki** (kalliimpi, kivi+puu, 4 kylvöä,
+       kukin 9 + siemen, kasvu 70 %/uni). Maahan istutettu varpu/rihmasto/kaura: sato 2 + siemen, 30 %/uni. Puut ennallaan.
+    8. Kuokka + siemen toisessa kädessä ilman kyykkyä → ilmoitus "muista mennä kyykkyyn (näppäin)" eikä maanmuokkausta.
+    9. Pelin äänet: häivytys VAIN päävalikossa (tauko). Muissa paneeleissa (reppu, työpenkki, arkku, pata…) äänet soivat, mutta pieni alipäästösuodin ja −30 % voimakkuus.
+    10. Sulatusuunin tulisuu hehkuu kirkkaammaksi/keltaisemmaksi lämmön noustessa (oma materiaali, väri lämmön mukaan); sama savustimeen (lämpö savustaessa).
+    11. Hiili lämmittää sulatusuunin 20 % nopeammin (seuraa hiilipolttoainetta `D.coal`).
+    12. Onki: malliin koukku roikkumaan kärjestä (piiloon heiton ajaksi).
+    13. Testit (tarkistus + uudet rivit, full157), muistio + **valmiiden ominaisuuksien lista** muistioon, versio 3.07, commit, push, PR, testilinkki muodossa
+        `https://raw.githack.com/erboiyprogamer-source/hiidenmaa/claude/hiidenmaa-survival-game-fmxt0m/index.html`.
+  - Vastaukset: nimet Viljelylaatikko + Kohopenkki (kohopenkki kalliimpi, 4 erää × 9, +10 % kasvu); äänet kuten kohta 9; "kommentointi" = F-tarkastelun wow/mmm harvemmin;
+    puun isku pelaajaan, eläimille vahvuuden mukaan; iso päivitys on erillinen lista, joka tulee myöhemmin.
+
 - **Versio 3.06** – iso päivitys: lista A (16 kohtaa) + onkimispäivitys B toteutettu (ks. versioloki v3.06). Valikossa yhä **Early Access 1.1** (2.0 varattu uuden saaren
   päivitykseen). Haara `claude/hiidenmaa-survival-game-fmxt0m`, PR #47 (v3.05) yhdistetty; v3.06 uudessa PR:ssä. Pages päivittyy vasta Mergen jälkeen.
 - **Uudet tiedostot v3.06:** `js/farm.js` (siemenet, taimet, pelto), `js/smelt.js` (sulatusuunin valikko), `js/fish.js` (vedet, onki, katiska, savustin, kalanaulakko,

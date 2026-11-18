@@ -96,7 +96,7 @@ function fishTick(dt){const rod=rodDef();if(FS.st!=='idle'){FS.t+=dt;
     if(FS.dip>0)FS.dip=Math.max(0,FS.dip-dt*1.6);fishMeshUpd();fishHud();}
   // vesien nimet: rantaan tultaessa hienovaraisesti (kerran minuutissa samalle vedelle)
   FS.wbT-=dt;if(FS.wbT<=0){FS.wbT=1;if(!P.inDun){let wb=null;for(let a=0;a<8&&!wb;a++){const x=P.pos.x+Math.cos(a/8*TAU)*7,z=P.pos.z+Math.sin(a/8*TAU)*7;if(terrainH(x,z)<-.45)wb=wbAt(x,z);}
-      if(wb&&wb!==FS.last&&playTime-(FS.lastT[wb.id]??-999)>60){FS.lastT[wb.id]=playTime;const F=fishF(),nw=!F.wb[wb.id];F.wb[wb.id]=1;wbShow(wb.name,nw);}FS.last=wb;}}}
+      if(wb&&wb!==FS.last){const F=fishF();if(!F.wb[wb.id]){F.wb[wb.id]=1;wbShow(wb.name,true);}}FS.last=wb;}}}   // v3.07 käyttäjä: nimi näkyy vain kerran, kun vesi löytyy (ennen joka kerta pelin alkaessa)
 function fishFight(dt){const B=FISH_B[FS.sp],S=.45+.55*clamp((FS.kg-B.kg[0])/(B.kg[1]-B.kg[0]),0,1),hold=mouseL&&locked&&P.stam>0;FS.fightT+=dt;
   FS.pullT-=dt;if(FS.pullT<=0){FS.pullOn=!FS.pullOn;FS.pullT=FS.pullOn?.5+Math.random()*.9:1.2+Math.random()*1.8;if(FS.pullOn){FS.dip=1;plSnd('onkiminen','nykaisy',{v:.6,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});}}
   if(hold){FS.prog+=dt*(FS.pullOn?.03:.16)/(.6+S*.6);FS.ten+=dt*(FS.pullOn?1.05*S:.18*S)/FS.rod.ten;P.stam-=dt*4;P.stamDelay=Math.max(P.stamDelay,.5);FS.kelT-=dt;if(FS.kelT<=0){FS.kelT=.45;plSnd('onkiminen','kelaus',{v:.45});}}

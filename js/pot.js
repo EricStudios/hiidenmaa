@@ -28,7 +28,8 @@ function potWhy(p,r){if(!p)return 'Ei keittopataa lähellä';const d=p.data;if(!
   if(!fireLit(p))return 'Tarvitsee palavan tulen';if(r){if(!recipeOpen(r))return `Taso ${r.lvl}`;if(!Object.entries(r.req).every(([id,n])=>invCount(id)>=n))return 'Aineita puuttuu';}return '';}
 // Resepti pataan (valmistuspaneelista tai padan ikkunasta)
 function potCraft(r,p){p=p||potNear();const w=potWhy(p,r);if(w){msg(w==='Pata on käytössä'?'Keittopata on jo käytössä – ota ruoka ensin.':w+'.','warn');return false;}
-  const d=p.data;for(const [id,n] of Object.entries(r.req))invRemove(id,n);if(r.ret)for(const [id,n] of Object.entries(r.ret))giveOrDrop(id,n,P.pos.x,P.pos.y+1,P.pos.z);
+  const d=p.data,wasW=(equipped('weapon')||{}).id==='vesikulho';for(const [id,n] of Object.entries(r.req))invRemove(id,n);if(r.ret)for(const [id,n] of Object.entries(r.ret))giveOrDrop(id,n,P.pos.x,P.pos.y+1,P.pos.z);
+  if(wasW&&!equipped('weapon')){const k=inv.find(s=>s&&s.id==='kulho');if(k)toggleEquip(k);}updateGear();   // v3.07 käyttäjä: käteen jäi vesikulhon malli – tyhjä kulho tilalle
   d.job={id:r.id,n:r.n||1,t:0,need:r.pt||15};d.doneT=0;d.rdy=0;bump('potStart');xpFirst('c_'+r.id,6,'uusi pataruoka');
   sfx('craft');plSnd('rakentaminen',r.req.vesikulho?'pata_vesi':'pata_aloitus',potSndAt(p));msg(`${ITEMS[r.id].n} kiehuu padassa – valmis noin ${fmtMin(potEta(p))} (${d.lid?'kansi päällä':'kansi pois'}).`);invDirty=true;potRefresh(true);return true;}
 function potAddMush(p,all){const d=p.data;if(!d.pot||d.spo||d.job){msg(!d.pot?'Asenna ensin keittopata.':d.spo?'Pata on pilaantunut.':'Padassa kypsyy jo ruokaa.','warn');return;}
@@ -84,7 +85,7 @@ function potOpen(p){curPot=p;potSig='';if(openPanel!=='pot')togglePanel('pot');e
 // Ikkuna: tila päivitetään 0,4 s välein; napit piirretään uudelleen vain tilan muuttuessa (napsautus ei katoa kesken)
 function potRefresh(force){if(openPanel!=='pot'||!curPot)return;const p=curPot;if(!pieces.includes(p)||dist2(p.x,p.z,P.pos.x,P.pos.z)>8*8){closePanels();return;}
   const d=p.data,lit=fireLit(p),em=emberOn(p),busy=potBusy(p),done=potAnyDone(p),all=potAllDone(p),e=potEta(p);
-  const fireTxt=lit?`Palaa · ${fuelText(fireRem(p),firePct(p))}`:em?`Hiilos ${mmss(d.ember)} (paistaa −20 %)`:d.out&&d.fuel>0?'Sade sammutti – sytytä uudelleen':'Sammunut';
+  const fireTxt=lit?`Palaa · ${fuelText(fireRem(p),p)}`:em?`Hiilos ${mmss(d.ember)} (paistaa −20 %)`:d.out&&d.fuel>0?'Sade sammutti – sytytä uudelleen':'Sammunut';
   const st=!d.pot?'Ei pataa – asenna keittopata':d.spo?'Pilaantunut: ruoka hiiltyi pohjaan':!busy?'Tyhjä':all?`${potName(p)} – valmis!`:done?`${potName(p)} – osa valmiina`:`${potName(p)} kypsyy`;
   const eta=!busy||all?'':e===Infinity?'Pysähtynyt – sytytä tuli tai laita kansi päälle (kansi päällä kypsyy ilman tultakin −30 %)':`Valmis noin ${mmss(e)}`;
   const spoil=done&&!d.lid&&!d.spo?`Pilaantuu ilman kantta: ${mmss(Math.max(0,DAY_LEN-(d.doneT||0)))} – laita kansi päälle tai ota ruoka`:'';
