@@ -4,7 +4,7 @@
    raskas (kirveet, hakut, nuija), pieni (kulho, tyhjä käsi ym.), puukko (knife: omat + pienten animaatiot). F arpoo sopivan animaation.
    Käsi viedään IK:lla (armIK) kehon koordinaateissa annettuun pisteeseen ja esineen suunta lasketaan suoraan (käden kvaternio).
    Keskeytyy heti, kun kättä käytetään (lyönti, hiiren napit, jousi, torjunta, kaiverrus, E-toiminto, pikapaikka, esineen vaihto, uinti).
-   Ääni (sounds/extra/raw/f_ihmettely): 2 s kohdalla 30 % wow tai mmm. Uusi esine (saatu alle 2 min sitten) kädessä ja pelaaja AFK (P.afkT)
+   Ääni (sounds/extra/raw/f_ihmettely): 2 s kohdalla 10 % wow tai mmm (v3.07 käyttäjä: harvinaisempi, arvotaan kerran jokaisella toistolla, myös uudella esineellä). Uusi esine (saatu alle 2 min sitten) kädessä ja pelaaja AFK (P.afkT)
    → tarkastelee kerran itsestään ja ääni soi varmasti. DEV Ä › Tarkasteluanimaatiot (0,2 s viive, vihje mille esineelle).
    v2.99 (käyttäjä: nykiminen, varsinkin paluu lepoon):
    - Sekoitus aikapohjainen ja pehmeä (INS.u lineaarinen 0…1, INS.k = smootherstep): sisään INSP_IN s, ulos INSP_OUT s.
@@ -22,7 +22,7 @@ const INSP_AFK0=3,INSP_AFK_P=.1,INSP_CLOSE={long:'pitka_tera',heavy:'raskas_tera
 function inspectAfkTick(){const a=P.afkT||0;if(a<INSP_AFK0){INS.afk=null;return;}
   if(!INS.afk)INS.afk={at:Math.random()<INSP_AFK_P?INSP_AFK0+(Math.random()<.5?.2:5+Math.random()*5):-1};
   const A=INS.afk;if(A.at>0&&a>=A.at){A.at=-1;if(heldId&&!P.insp&&state==='play')inspectStart(INSP_CLOSE[INSP_TYPE(heldId)]);}}
-const INSP_SND_T=2,INSP_SND_P=.3,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_KNIFE_BOTTLE=.001,INSP_THROW_V=.7,INSP_THROW_VS=.4,INSP_SPIN_UP=.07,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
+const INSP_SND_T=2,INSP_SND_P=.1,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_KNIFE_BOTTLE=.001,INSP_THROW_V=.7,INSP_THROW_VS=.4,INSP_SPIN_UP=.07,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
 function INSP_TYPE(id){if(!id)return 'small';const d=ITEMS[id];if(!d)return 'small';if(id==='puukko')return 'knife';if(d.cat==='hammer')return 'heavy';
   if(/miekka/.test(id)||id==='keihas'||d.cat==='shovel')return 'long';if(d.chop||d.pick||id==='nuija')return 'heavy';return 'small';}
 const _ie=(a,b,k)=>a+(b-a)*k,_iv3=(a,b,k)=>[_ie(a[0],b[0],k),_ie(a[1],b[1],k),_ie(a[2],b[2],k)],_ism=x=>{x=clamp(x,0,1);return x*x*x*(x*(x*6-15)+10);};
@@ -117,7 +117,7 @@ function inspectTipTick(){if(heldId===INS.lastHeld)return;INS.lastHeld=heldId;if
   el.classList.add('on');TUT.tipT=14;if(typeof RES!=='undefined')RES.tipT=14;if(typeof mSnd==='function')mSnd('napit','hover');}
 function inspectTick(dt){inspectTipTick();const I=P.insp;
   if(I){I.t+=dt;if(P.atk||P.drawing||P.blocking||P.carve||mouseL||mouseR||P.dead||P.swim||heldId!==I.item||state!=='play'&&state!=='ui'){inspectStop();return;}
-    if(!I.snd&&I.t>=INSP_SND_T){I.snd=true;if(I.auto||Math.random()<INSP_SND_P)plSnd('f_ihmettely',Math.random()<.5?'wow':'mmm',{v:.85});   /* v3.05 käyttäjän äänet hieman hiljempaa */}
+    if(!I.snd&&I.t>=INSP_SND_T){I.snd=true;if(Math.random()<INSP_SND_P)plSnd('f_ihmettely',Math.random()<.5?'wow':'mmm',{v:.85});   /* v3.05 käyttäjän äänet hieman hiljempaa */}
     if(I.t>=I.a.dur)inspectStop();return;}
   inspectAfkTick();
   const N=P.newItem;if(N&&!N.done&&state==='play'&&heldId&&heldId===N.id&&playTime-N.t<INSP_NEW_T&&(P.afkT||0)>INSP_AFK_T&&!P.atk&&!P.drawing){N.done=1;inspectStart(null,{auto:1});}}

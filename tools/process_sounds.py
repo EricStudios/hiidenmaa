@@ -846,7 +846,7 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
                                        ('kylla', 'söit itsesi täyteen', 'satisfied sigh, content after meal'),
                                        ('lammin', 'pääset lämpimään (nuotio tai lämmin koti)', 'relieved sigh, warm comfort'),
                                        ('levannyt', 'olet levännyt (levon vaikutus alkaa)', 'refreshed stretch, relaxed exhale')])]),
-    (4, 'extra', 'Extra – F-tarkastelu', [   # v2.98 (käyttäjä): F-ihmettely – tyytyväinen ääni esinettä tarkastellessa
+    (4, 'extra', 'Extra – F-tarkastelu, pihka, mokat ja onkiminen', [   # v2.98 (käyttäjä): F-ihmettely – tyytyväinen ääni esinettä tarkastellessa
         ('f_ihmettely', 'F-ihmettely', '🔍', [('wow', 'F-tarkastelu on kestänyt 2 s: 30 % todennäköisyydellä kerran (tai varmasti, kun hahmo tarkastelee uutta esinettä itsestään) – ihastunut "vau"', 'impressed wow, amazed male voice short'),
                                              ('mmm', 'sama kuin wow (arvotaan wow tai mmm) – tyytyväinen hymähdys', 'satisfied hmm, pleased mmm male voice')]),
         # v3.02 (käyttäjä): pihkankeräyksen äänet samaan extra-kansioon (siirretty pelaaja_2_toiminnot/kaytto:sta) + uusi tipan ääni
@@ -856,7 +856,16 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
                                        ('tippa', 'pihkaa tippuu kulhoon (hiljaa, vain aivan läheltä 6 m, 4–8 s välein)', 'single sticky resin drip into wooden bowl, soft drop')]),
         # v3.04 (käyttäjä): hahmo kiroaa, kun kaatoi vesikulhon vahingossa (F-tarkastelu kääntää kulhon)
         ('moka', 'Mokat', '😬', [('kirous', 'hahmo kiroaa/mutisee harmissaan, kun kaatoi vesikulhon vedet vahingossa (0,45 s roiskeen jälkeen)', 'man muttering curse, annoyed grumble, oops damn short'),
-                               ('vihainen', 'Vihainen-tila (20 s kaatuneesta vedestä): ärtynyt tuhahdus/murahdus 5–10 s välein', 'annoyed huff, irritated grunt, angry sigh male short')])]),
+                               ('vihainen', 'Vihainen-tila (20 s kaatuneesta vedestä): ärtynyt tuhahdus/murahdus 5–10 s välein', 'annoyed huff, irritated grunt, angry sigh male short')]),
+        # v3.06 (käyttäjä): onkimisen äänet (vastaus 11: sounds/extra/onkiminen)
+        ('onkiminen', 'Onkiminen', '🎣', [('heitto', 'heität ongen: vavan vihellys ja siiman suhina', 'fishing rod cast whoosh, line whizz'),
+                                        ('loiskahdus', 'koho putoaa veteen (3D, kohon kohdalta)', 'small bobber plop into water'),
+                                        ('nykaisy', 'kala nykäisee kohoa (hiljainen, 3D) – myös väsytyksen vedot', 'tiny water bloop, bobber twitch'),
+                                        ('tarppays', 'TÄRPPÄÄ: koho sukeltaa (selkeä, 3D)', 'bobber pulled under water, splash plunk'),
+                                        ('kelaus', 'kelaat siimaa (lyhyt rätinä ~0,4 s, toistuu kelatessa)', 'fishing reel clicking, ratchet spin short'),
+                                        ('siima_katkeaa', 'siima katkeaa väsytyksessä', 'fishing line snap, twang'),
+                                        ('saalis', 'kala nousee vedestä ja sätkii', 'fish flopping out of water splash'),
+                                        ('roska', 'koukusta nousee jotain muuta kuin kala (saapas, pullo, avain, harkko)', 'item pulled from water, wet clank splash')])]),
 ]
 P_EV = {}
 P_CFGS = []

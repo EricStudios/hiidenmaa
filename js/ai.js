@@ -407,6 +407,7 @@ function moveMob(m,tx,tz,spd,dt){
   const l=Math.hypot(tx,tz);
   if(l>.01){const ty=Math.atan2(tx,tz);m.yaw=lerpAngle(m.yaw,ty,Math.min(1,dt*8));}
   let vx=0,vz=0;if(l>.01&&spd>0){const sx=Math.sin(m.yaw),sz=Math.cos(m.yaw),uk=m.dun||m.fly?1:uphillK(m.pos.x,m.pos.z,sx,sz);vx=sx*spd*uk;vz=sz*spd*uk;}   // v2.20: ylämäki hidastaa (90° = puolet)
+  if(m.dun&&!m.fly&&iceAt(m.pos.x,m.pos.z)){const k=Math.min(1,dt*ICE_GRIP);m.ivx=lerp(m.ivx??vx,vx,k);m.ivz=lerp(m.ivz??vz,vz,k);vx=m.ivx;vz=m.ivz;}else{m.ivx=vx;m.ivz=vz;}   // v3.06 jäällä olennotkin liukuvat
   m.vel.x*=Math.max(0,1-dt*6);m.vel.z*=Math.max(0,1-dt*6);
   const nx=m.pos.x+(vx+m.vel.x)*dt,nz=m.pos.z+(vz+m.vel.z)*dt;
   if(!m.dun&&terrainH(nx,nz)<-.7&&terrainH(m.pos.x,m.pos.z)>=-.7){m.wander=null;if(m.state!=='chase'){if(!(m.shoreW>0)){m.shoreT=SHORE_CALM;m.shoreYaw=m.yaw+Math.PI*(.8+Math.random()*.4);m.state='idle';m.fearT=0;}else m.shoreYaw+=Math.PI*.5;}return;}   // v2.99 vesiraja: pysähdys ja rauhoittuminen, sitten pois vedestä
@@ -597,7 +598,7 @@ function spawner(dt){
     const pack=type==='susi'&&night&&!sp.near?2:type==='poro'?3+(Math.random()*3|0):1;/* porot laumoina 3–5 */for(let k=0;k<pack;k++){const m=spawnMob(type,x+(k%3)*1.8,z+(k/3|0)*1.8+k*.3);if(m&&sp.near)m.state='idle';
       if(type==='emakko')for(let j=0,n=2+(Math.random()*3|0);j<n;j++){const pg=spawnMob('porsas',x+1.2+j*.8,z-1+j*.6);pg.mom=m;}}return;}  // emakko + 2–4 porsasta
 }
-function respawnNodes(){for(const n of nodes)if(!n.alive&&!n.thin&&n.def.kind!=='tree'&&(n.def.kind==='rock'?rockReady(n)&&!siteBlocked(n.x,n.z):n.respawnAt<=playTime)&&dist2(n.x,n.z,P.pos.x,P.pos.z)>40*40&&!nearBase(n.x,n.z))respawnNode(n);}   // v2.99 kivet päivien mukaan (rockReady)
+// v3.06: respawnNodes poistettu – kivet arvotaan nukkuessa (regrowForest), poimittavat pickFarTick (resources.js)
 const LIGHT_CAP=3.0;let shFrame=0,shNearPrev=false;const ALL_LIGHTS=[...LIGHTS,torchLight,torchFill];
 let shYaw0=null;
 /* v2.17 KOVA SADE SAMMUTTAA NUOTION: sateessa (wRain > 0,9, sade tai myrsky) taivasalla oleva nuotio/grilli sihisee ja sammuu 4 s:ssa
@@ -622,12 +623,9 @@ function updateStations(dt){
       const fm=p.mesh.userData.food;if(fm){const bk=FIRE_BURN_K[p.t]||2;for(let i=0;i<fm.length;i++){const c=d.cook[i],m=fm[i];m.visible=!!c;if(c){const r=c.t/c.need;m.material.color.setHex(r<1?(r<.6?0xc9554e:0xb06a42):r<bk?0x7a4524:0x15110f);}}}}
     if(isTorch(p.t)){const f=p.mesh.userData.flame,on=p.data.burn>0;f[0].visible=f[1].visible=on;if(on){p.data.burn=Math.max(0,p.data.burn-dt);const u=p.fl||(p.fl={cur:1,target:1,t:Math.random()*.2}),s=flick(u,dt);f[0].scale.set(.9+s*.15,.7+s*.5,.9+s*.15);f[1].scale.set(1,.8+s*.4,1);
         if(dist2(p.x,p.z,P.pos.x,P.pos.z)<30*30){if(Math.random()<dt*1.8)emitEmber(p.x+(Math.random()-.5)*.15,p.y+1.9,p.z+(Math.random()-.5)*.15,'spark');if(Math.random()<dt*.4)emitEmber(p.x,p.y+2,p.z,'smoke');}}}
-    if(p.t==='sulatin'){const D=p.data,met=D.ore>0||D.iore>0,sand=(D.sand||0)>=2,run=(met||sand)&&D.wood>=SMELT_WOOD,ppRun=(D.pp||0)>0&&D.wood>=SMELT_WOOD;
-      if(ppRun){D.ppT=(D.ppT||0)+dt;if(D.ppT>=POT_MELT_T){D.ppT=0;D.pp--;D.wood-=SMELT_WOOD;D.idone+=POT_MELT.rauta;D.done+=POT_MELT.kupari;smeltDone(p);}}   // v3.02 pilaantunut pata → 2 rautaa + 1 kupari
-      {const gl=p.mesh.userData.glow;gl.visible=true;const mt=run||ppRun?MAT.flame:SMELT_DARK;if(gl.material!==mt)gl.material=mt;}   /* v2.84 sammuneena tulisuu musta (ennen katosi → umpinainen kivikasa) */
-      if(run){if(!met)D.job='sand';else if(!sand)D.job='met';else if(!D.job)D.job='met';   // v2.07: malmit ja hiekka vuorotellen
-        D.t+=dt;if(D.job==='sand'){if(D.t>=GLASS_T){D.t=0;D.wood-=SMELT_WOOD;D.sand-=2;D.glass=(D.glass||0)+1;D.job=met?'met':'sand';smeltDone(p);}}
-        else{const iron=D.ore<=0;if(D.t>=(iron?10:7)){D.t=0;D.wood-=SMELT_WOOD;if(iron){D.iore--;D.idone++;}else{D.ore--;D.done++;}D.job=sand?'sand':'met';smeltDone(p);}}}}
+    if(p.t==='vedenkeraaja')waterTick(p,dt);   // v3.06
+    if(p.t==='katiska')katTick(p,dt);else if(p.t==='savustin')savTick(p,dt);   // v3.06 fish.js
+    if(p.t==='sulatin')smTick(p,dt);   // v3.06 sulatusuunin jono, polttoaine ja lämpötila (smelt.js)
   }
   for(const g of graves){const same=(g.dim||'world')===curDim()&&!g.hid,near=same&&dist2(g.x,g.z,P.pos.x,P.pos.z)<50*50;g.mesh.visible=same;g.beam.visible=near;   /* v2.73 hid: piilossa kuolinkamerassa */   // v1.33 (kohta 13): majakka myös ulottuvuuksissa, hauta näkyy vain omassa tilassaan
     if(near)graveFx(g,dt);}

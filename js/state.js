@@ -79,12 +79,12 @@ function fitsAll(list){const sim=inv.map(s=>s?{id:s.id,n:s.n}:null);
   for(const it of list){if(!it)continue;let n=it.n;const d=ITEMS[it.id];if(d.s>1)for(const s of sim){if(n<=0)break;if(s&&s.id===it.id&&s.n<d.s){const k=Math.min(n,d.s-s.n);s.n+=k;n-=k;}}
     for(let i=0;i<sim.length&&n>0;i++)if(!sim[i]){const k=Math.min(n,d.s);sim[i]={id:it.id,n:k};n-=k;}if(n>0)return false;}return true;}
 function invWeight(){let w=0;for(const s of inv)if(s)w+=ITEMS[s.id].w*s.n;return w;}
-let MAXW=160;
+let MAXW=60;   // v3.06 alku 60 (recalcMaxW)
 const PACK_UP=[null,{nahka:6,puu:4},{nahka:12,kupari:4}];
 const invN=()=>32+8*P.packLv;
 // Repun päivitys: lisää paikkoja (+8) ja kantokykyä (+40 painoa) tasoa kohti.
 function setPack(lv){P.packLv=lv;recalcMaxW();while(inv.length<invN())inv.push(null);invDirty=true;}
-function equipGroup(cat){return ['weapon','bow','hammer','shovel','bowl'].includes(cat)?'weapon':['shield','offhand'].includes(cat)?'offhand':cat;}
+function equipGroup(cat){return ['weapon','bow','hammer','shovel','bowl','rod'].includes(cat)?'weapon':['shield','offhand'].includes(cat)?'offhand':cat;}
 function equipped(cat){const grouped=cat==='weapon'||cat==='offhand';
   for(const s of inv){if(!s||!s.eq)continue;const c=ITEMS[s.id].cat;if(grouped?equipGroup(c)===cat:c===cat)return s;}
   return null;}
@@ -94,7 +94,7 @@ function toggleEquip(s){const cat=ITEMS[s.id].cat;if(!cat)return;
   if(equipGroup(cat)==='offhand'&&s.eq){const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='bow')w.eq=false;}
   invDirty=true;updateGear();if(cat!=='hammer'||!s.eq)setBuildSel(null);sfx('pickup');}
 // v1.32 (lista 3, kohdat 3 ja 29): pikapaikan numero syö ruoan (ainoa tapa syödä), ottaa nuolet käyttöön (pysyvät valittuina) tai varustaa.
-function useSlot(i){const s=inv[i];if(!s)return;const d=ITEMS[s.id];if(d.food)eat(s);else if(d.potion)drink(s);else if(AMMO.includes(s.id)){if(flags.ammo!==s.id){flags.ammo=s.id;msg(`Ammus: ${d.n}`);sfx('pickup',1.2,.4);}invDirty=true;}else if(d.cat)toggleEquip(s);}
+function useSlot(i){const s=inv[i];if(!s)return;const d=ITEMS[s.id];if(d.food)eat(s);else if(d.potion)drink(s);else if(AMMO.includes(s.id)){if(flags.ammo!==s.id){flags.ammo=s.id;msg(`Ammus: ${d.n}`);sfx('pickup',1.2,.4);}invDirty=true;}else if(d.use)itemUse(s);   /* v3.06 pulloposti, kalastajan kirja (fish.js) */else if(d.cat)toggleEquip(s);}
 function giveOrDrop(id,n,x,y,z,q=1){const left=invAdd(id,n,q);if(left>0){spawnDrop(id,left,x,y,z,q);msg('Reppu on täynnä.','warn');}if(n-left>0){msg(`+${n-left} ${ITEMS[id].n}`,'loot');}}
 let invDirty=true;
 
@@ -288,10 +288,14 @@ const TOM_BIG=9.5,TOM_SMALL=4.5,TREE_RK=.5;   // v2.67 kaatuvan puun narina ja t
 function tomahdysIx(H){return H>=TOM_BIG?[2]:H<TOM_SMALL?[1]:[0,1];}
 function treeHit(n,a,x,z,y){const H=(TREE_H[n.type]||5)*n.s,dx=x-n.x,dz=z-n.z,along=dx*Math.sin(a)+dz*Math.cos(a),lat=Math.abs(dx*Math.cos(a)-dz*Math.sin(a));
   return along>0&&along<H&&lat<1.4*Math.max(1,n.s)&&y-terrainH(x,z)<3;}   // kohde lähellä maata (ei esim. katolla)
-function crushPlayer(n,a,src){
-  for(const m of mobs)if(m!==src&&!m.dead&&!m.dun&&treeHit(n,a,m.pos.x,m.pos.z,m.pos.y)){damageMob(m,m.maxHp*.8,null,Math.sin(a),Math.cos(a),3);}
+/* v3.07 käyttäjä: KAATUVAN PUUN ISKU – pelaajalle osuus maksimiterveydestä: aarnipuu 90 %, täysikasvuinen (koko ≥ 1,4) 60 %, pienet 40–50 % koon mukaan (treeCrushK).
+   Eläimille sama osuus × TREE_REF (vertailuterveys 67, ±25 %): karhu (120) menettää aarnipuusta noin puolet, susi (44) voi kuolla keskikokoisesta puusta. */
+const TREE_REF=67;
+function treeCrushK(n){return n.type==='aarnipuu'?.9:.4+.2*clamp((n.s-.6)/.8,0,1);}
+function crushPlayer(n,a,src){const ck=treeCrushK(n);
+  for(const m of mobs)if(m!==src&&!m.dead&&!m.dun&&treeHit(n,a,m.pos.x,m.pos.z,m.pos.y)){damageMob(m,ck*TREE_REF*(.8+Math.random()*.5),null,Math.sin(a),Math.cos(a),3);}
   if(P.dead||P.inDun||devOn('god'))return;
-  if(treeHit(n,a,P.pos.x,P.pos.z,P.pos.y)){const d=maxHp()*.8;P.hp-=d;P.hurtFlash=.8;shake(.6);sfx('hurt');floatText('-'+Math.round(d),P.pos.x,P.pos.y+2.2,P.pos.z,'#e0614f');if(P.hp<=0){P.deathCause='tree';playerDie();}else msg('Kaatuva puu osui! Väistä sivuun, kun puu kallistuu.','warn');}}   // v1.70: lyhyt vihje sivuilmoituksena, kuolema → kuolinruudun vihje   // v1.70: kuolinsyy → vihje kuolinruudussa
+  if(treeHit(n,a,P.pos.x,P.pos.z,P.pos.y)){const d=maxHp()*ck;P.hp-=d;P.hurtFlash=.8;shake(.6);sfx('hurt');floatText('-'+Math.round(d),P.pos.x,P.pos.y+2.2,P.pos.z,'#e0614f');if(P.hp<=0){P.deathCause='tree';playerDie();}else msg('Kaatuva puu osui! Väistä sivuun, kun puu kallistuu.','warn');}}   // v1.70: lyhyt vihje sivuilmoituksena, kuolema → kuolinruudun vihje   // v1.70: kuolinsyy → vihje kuolinruudussa
 function shockwave(x,y,z,r,color=0x8ffff0){const m=new THREE.Mesh(new THREE.RingGeometry(.8,1,32),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.8,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;m.position.set(x,y+.15,z);scene.add(m);fx.push({obj:m,t:0,update:(f)=>{const k=f.t/.5;m.scale.setScalar(.5+k*r);m.material.opacity=.8*(1-k);return k>=1;}});}
 
 /* ---------------- PROJECTILES ---------------- */

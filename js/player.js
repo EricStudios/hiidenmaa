@@ -63,7 +63,8 @@ function updatePlayer(dt){
   if(P.blocking&&P.stam<=0)P.blocking=false;
   P.stam=Math.max(0,P.stam);if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu
   // velocity
-  P.vel.x=lerp(P.vel.x,dx*speed,Math.min(1,dt*(P.onGround?12:3)));P.vel.z=lerp(P.vel.z,dz*speed,Math.min(1,dt*(P.onGround?12:3)));
+  P.onIce=P.inDun&&P.onGround&&iceAt(P.pos.x,P.pos.z);   // v3.06 Routaluolan jäälätäkkö: lähes kitkaton (ICE_GRIP)
+  {const gk=P.onIce?ICE_GRIP:P.onGround?12:3;P.vel.x=lerp(P.vel.x,dx*speed,Math.min(1,dt*gk));P.vel.z=lerp(P.vel.z,dz*speed,Math.min(1,dt*gk));}
   // v1.37 (lista 3, kohta 33): DEV-lento. Kun "Lento" on päällä, tuplahyppy (2 painallusta 0,35 s sisällä) aloittaa tai lopettaa lennon.
   // Lennossa välilyönti nousee, Shift laskee, Ctrl nopeampi; ei painovoimaa eikä putoamisvahinkoa.
   {const jd=state==='play'&&kd('jump');if(jd&&!P.jumpHeld){if(devOn('fly')&&playTime-(P.jumpTap||-9)<.35){P.flying=!P.flying;P.vy=0;msg(P.flying?'Lento päällä (välilyönti ylös, Shift alas).':'Lento pois.');P.jumpTap=-9;}else P.jumpTap=playTime;}P.jumpHeld=jd;if(!devOn('fly'))P.flying=false;}
@@ -83,7 +84,9 @@ function updatePlayer(dt){
   if(P.kbx||P.kbz){P.pos.x+=P.kbx*dt;P.pos.z+=P.kbz*dt;const kk=Math.exp(-dt*4.5);P.kbx*=kk;P.kbz*=kk;if(Math.abs(P.kbx)+Math.abs(P.kbz)<.05)P.kbx=P.kbz=0;}
   // v1.92 DEV seinien läpi (noclip): ei törmäyksiä eikä kattoa; maa = maasto tai luolan lattia (esineiden päälle ei nousta)
   const nc=devOn('noclip');
-  if(!nc){COL_CROUCH=!!P.crouch;collideXZ(P.pos,.38,P.crouch?1.5:1.8,feet);COL_CROUCH=false;limbPush(feet);}   // v2.88 raajat (pää, kädet, kyynärpäät, polvet) osana osumalaatikkoa
+  const _ix=P.pos.x,_iz=P.pos.z;
+  if(!nc){COL_CROUCH=!!P.crouch;collideXZ(P.pos,.38,P.crouch?1.5:1.8,feet);COL_CROUCH=false;limbPush(feet);}
+  if(P.onIce&&dt>0){const cx=P.pos.x-_ix,cz=P.pos.z-_iz;if(Math.abs(cx)>1e-4)P.vel.x*=.35;if(Math.abs(cz)>1e-4)P.vel.z*=.35;}   // v3.06 jäällä seinään törmäys pysäyttää liu'un   // v2.88 raajat (pää, kädet, kyynärpäät, polvet) osana osumalaatikkoa
   P.pos.y+=P.vy*dt;
   const ceil=nc?1e9:ceilingAt(P.pos.x,P.pos.z,.38,feet+1.8);if(P.vy>0&&P.pos.y+1.8>ceil){P.pos.y=ceil-1.8;P.vy=0;}
   const g=nc?(P.inDun?DUN.y:terrainH(P.pos.x,P.pos.z)):groundAt(P.pos.x,P.pos.z,.38,feet);
@@ -174,6 +177,7 @@ function updatePlayer(dt){
   if(P.drawing){tLx=-1.58;tRx=-1.5;tRz=.5;}
   if(heldMesh&&ITEMS[heldId].cat==='bow'){if(P.drawing)tLz=-.3;}
   if(P.atk)P.recT=.55;else P.recT=Math.max(0,(P.recT||0)-dt);if(!P.atk&&P.recT>0&&!P.drawing&&!P.blocking)rate=Math.min(rate,5);// iskun jälkeen kädet palaavat lepoon pehmeästi
+  if(P._eOff){fig.armR.rotation.x-=P._eOff[0];fig.elbowR.rotation.x-=P._eOff[1];P._eOff=null;}   // v3.06 E-toiminnon käsiliike (lisäys poistetaan ennen pehmennystä)
   inspectRestore();   // v2.99 F-tarkastelun IK ei jää käsivarren perusasennoksi (nykiminen paluussa)
   const e=Math.min(1,dt*rate);
   armSh+=(tSh-armSh)*e;fig.armL.position.x=armSh;fig.armR.position.x=-armSh;
@@ -200,6 +204,7 @@ function updatePlayer(dt){
 
   armClear(fig.armL,fig.elbowL,fig.handL);
   carvePose();   // v2.91 pihkakuvion kaiverrus
+  {const ea=playTime-(P.eT??-9);if(ea>=0&&ea<E_ANIM_T&&!P.atk&&!P.carve&&!P.insp&&!P.drawing&&!P.dead){const k=Math.sin(ea/E_ANIM_T*Math.PI);P._eOff=[-.62*k,-.38*k];fig.armR.rotation.x+=P._eOff[0];fig.elbowR.rotation.x+=P._eOff[1];}}   // v3.06 (käyttäjä): E-toiminnossa käsi käy hieman eteen ja takaisin
   if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand);armWorldClear(fig.armL,fig.elbowL,fig.handL);}   // v2.88
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.
   P.drawK=lerp(P.drawK||0,P.drawing&&heldMesh&&ITEMS[heldId].cat==='bow'?1:0,Math.min(1,dt*14));

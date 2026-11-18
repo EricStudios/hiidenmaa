@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.05';
+:root{--css-v:'3.07';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -995,3 +995,51 @@ button:focus,select:focus{outline:none}
 #binfo .props{font-size:12px;width:100%;border-collapse:collapse} #binfo .props td{padding:2px 0;vertical-align:top} #binfo .props td:first-child{color:var(--dim);padding-right:8px;white-space:nowrap}
 #binfo details{font-size:12px;color:#d8c8a8;border-top:1px solid #4a3018;padding-top:6px} #binfo summary{cursor:pointer;color:#e8a44a;font-weight:700;list-style:none} #binfo summary::-webkit-details-marker{display:none}
 #binfo summary::after{content:' ▸'} #binfo details[open] summary::after{content:' ▾'} #binfo details p{margin:6px 0 0;line-height:1.4}
+#binfo .biPin{margin-top:auto;font-size:12px;text-align:center;padding:5px 6px;border:1px dashed #6e4a28;border-radius:3px;color:#c9b48a} #binfo .biPin.on{border-style:solid;color:#e8a44a;border-color:#e8a44a}
+
+/* v3.06 sulatusuuni (#smeltP, smelt.js): kivimuuri ja hehku */
+#smeltP{display:grid;grid-template-columns:minmax(260px,330px) minmax(300px,390px);gap:22px;background:radial-gradient(ellipse at 50% 120%,rgba(255,120,40,.22),transparent 60%),repeating-linear-gradient(0deg,#2c2a28 0,#2c2a28 26px,#1c1a19 26px,#1c1a19 28px),#2a2826;border:3px solid #141210;box-shadow:inset 0 0 0 2px #4a4540,0 20px 60px rgba(0,0,0,.7)}
+#smeltP .props{width:100%;font-size:13px} #smeltP .props td:first-child{color:var(--dim);padding-right:10px;white-space:nowrap;vertical-align:top}
+.smMeter{display:grid;grid-template-columns:78px 1fr;align-items:center;gap:8px;margin:8px 0} .smMeter label{font-size:12px;color:var(--dim)}
+.smBar{height:12px;background:#120e0c;border:1px solid #4a4540;border-radius:2px;overflow:hidden} .smBar i{display:block;height:100%;width:0;transition:width .3s}
+.smBar.heat i{background:linear-gradient(90deg,#3a5a8a,#c8742a,#ff5a1a)} .smBar.heat.hot{box-shadow:0 0 10px rgba(255,110,40,.6)} .smBar.fuel i{background:linear-gradient(90deg,#6a4426,#b8843e)} .smBar.prog i{background:linear-gradient(90deg,#b8733e,#ffd27a)}
+.smQ{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:6px 0 4px}
+.smSlot{position:relative;aspect-ratio:1;background:#1a1716;border:1px solid #4a4540;border-radius:3px;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;color:var(--fg)}
+.smSlot img{width:70%;height:70%} .smSlot span{position:absolute;right:4px;bottom:2px;font-size:12px;font-weight:700;text-shadow:0 1px 2px #000} .smSlot em{position:absolute;left:3px;top:1px;font-size:10px;font-style:normal;color:var(--dim)}
+.smSlot.cur{border-color:#ff9a3a;box-shadow:inset 0 0 12px rgba(255,120,40,.45)} .smSlot.cur em{color:#ffb060} .smSlot.empty{cursor:default;opacity:.6}
+.smOut{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:8px;background:#1a1716;border:1px solid #4a4540;border-radius:3px;font-size:13px}
+@media (max-width:760px){#smeltP{grid-template-columns:1fr}}
+.warnTxt{color:#ffab7a}
+/* v3.06 käyttäjä: TEEMOITETUT VALIKOT – tausta sen mukaan, mistä valikko avattiin (data-st) */
+#inv[data-st="tyopenkki"]{background:linear-gradient(180deg,rgba(255,220,160,.06),transparent 30%),repeating-linear-gradient(90deg,#3e2a18 0,#3e2a18 118px,#2e1f12 118px,#2e1f12 121px),#3a2716;border-color:#7a5a36;box-shadow:inset 0 0 0 2px #5a3e22,0 20px 60px rgba(0,0,0,.7)}
+#inv[data-st="ahjo"]{background:radial-gradient(ellipse at 50% 115%,rgba(255,110,30,.28),transparent 55%),linear-gradient(180deg,#22201f,#161413);border-color:#5a4a40;box-shadow:inset 0 0 0 2px #3a3230,inset 0 -30px 60px -30px rgba(255,90,20,.35),0 20px 60px rgba(0,0,0,.7)}
+#chest[data-st="arkku"]{background:repeating-linear-gradient(180deg,#4a3018 0,#4a3018 34px,#3a240f 34px,#3a240f 37px),#432b16;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #7a6a5a,0 20px 60px rgba(0,0,0,.7)}
+#chest[data-st="tynnyri"]{background:repeating-linear-gradient(90deg,#3b2614 0,#3b2614 46px,#2a1a0c 46px,#2a1a0c 49px),#35220f;border:3px solid #1e140a;box-shadow:inset 0 22px 0 -16px #55575c,inset 0 -22px 0 -16px #55575c,0 20px 60px rgba(0,0,0,.7)}
+#chest[data-st="hauta"]{background:radial-gradient(ellipse at 30% 20%,rgba(90,110,70,.25),transparent 50%),repeating-linear-gradient(0deg,#2e2f2c 0,#2e2f2c 30px,#232421 30px,#232421 32px);border:3px solid #181915}
+#chest[data-st="loyto"]{background:radial-gradient(ellipse at 50% 0%,rgba(230,180,80,.16),transparent 60%),repeating-linear-gradient(180deg,#2e2014 0,#2e2014 30px,#24180e 30px,#24180e 32px);border:3px solid #6a5022;box-shadow:inset 0 0 0 2px #3a2a12,0 20px 60px rgba(0,0,0,.7)}
+#chest[data-st="kivi"]{background:repeating-linear-gradient(0deg,#3a3936 0,#3a3936 24px,#2a2927 24px,#2a2927 26px),#33322f;border:3px solid #1c1b19;box-shadow:inset 0 0 0 2px #55534e,0 20px 60px rgba(0,0,0,.7)}
+/* v3.06 onkiminen (fish.js): tärppi, väsytys, vesien nimet, kalastajan kirja */
+#fishHud{position:fixed;left:50%;top:calc(50% + 46px);transform:translateX(-50%);min-width:220px;text-align:center;font-size:13px;color:var(--fg);pointer-events:none;text-shadow:0 1px 3px #000}
+#fishHud.wait{opacity:.7}
+#fishHud.bite b{display:block;font:900 44px 'Uncial Antiqua',serif;color:#ffd24a;animation:fishPulse .3s infinite alternate;line-height:1} #fishHud.bite span{font-weight:700;color:#ffe9a8}
+@keyframes fishPulse{from{transform:scale(1)}to{transform:scale(1.25)}}
+#fishHud.fight{background:rgba(19,17,14,.75);border:1px solid var(--line2);border-radius:4px;padding:8px 10px}
+#fishHud .fl{font-weight:700;margin-bottom:5px} #fishHud .fh{font-size:12px;color:var(--dim);margin-top:4px}
+#fishHud .fb{height:9px;background:#120e0c;border:1px solid #4a4540;border-radius:2px;margin:3px 0;overflow:hidden} #fishHud .fb i{display:block;height:100%}
+#fishHud .fb i.ten{background:linear-gradient(90deg,#4a8a5a,#d8b040)} #fishHud .fb i.ten.hi{background:#e04a3a} #fishHud .fb i.pr{background:linear-gradient(90deg,#4f8fb8,#a9d8f2)}
+#wbName{position:fixed;left:50%;top:18%;transform:translateX(-50%);font:italic 600 20px 'Alegreya Sans',sans-serif;color:#a9d8f2;text-shadow:0 1px 4px #000;opacity:0;pointer-events:none;letter-spacing:.06em}
+#wbName.on{animation:wbFade 4.5s ease forwards} @keyframes wbFade{0%{opacity:0}18%{opacity:.85}70%{opacity:.85}100%{opacity:0}}
+#fishP{max-width:min(720px,calc(100vw - 32px));background:linear-gradient(180deg,rgba(60,90,110,.12),transparent 40%),var(--panel)}
+.fishT{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0} .fishT th{text-align:left;color:var(--dim);font-weight:600;border-bottom:1px solid var(--line)} .fishT td{padding:3px 6px 3px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.fishT tr.na{opacity:.55} .fishT .ic{display:inline-block;width:22px;height:22px;background-size:contain;vertical-align:middle;margin-right:6px} .fishT .ic.q{background:none;text-align:center;color:var(--dim)}
+.fishCols{display:grid;grid-template-columns:1fr 1fr;gap:16px} .fishCols ul{margin:4px 0;padding-left:16px;font-size:13px} .fishCols .fg{list-style:none;padding-left:0} .fishCols .fg li.ok{color:#9ad06a}
+@media (max-width:640px){.fishCols{grid-template-columns:1fr}}
+/* v3.07 käyttäjä: EI SELAIMEN OMAA VIERITYSPALKKIA – kaikki vieritettävät saavat pelin teeman mukaisen liukurin (DEV-valikot poikkeus).
+   Tietoikkuna ei vieritä sivuttain (leveys lukittu, pitkät sanat rivittyvät). */
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar{width:9px;height:9px}
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-track{background:rgba(18,12,7,.55);border-radius:5px;box-shadow:inset 0 0 0 1px rgba(110,74,40,.35)}
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#9a6a34,#6e4a24);border:1px solid #2a1a0c;border-radius:5px;box-shadow:inset 0 1px 0 rgba(255,220,160,.25)}
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-thumb:hover{background:linear-gradient(90deg,#c08a44,#8a5a2a)}
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-corner{background:transparent}
+html,body,.panel,#binfo,#potRec,#fishP,#smeltP,#chest,#inv *{scrollbar-color:#8a5a2a rgba(18,12,7,.55);scrollbar-width:thin}
+#binfo{overflow-x:hidden!important;overflow-y:auto} #binfo *{max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}

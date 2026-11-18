@@ -834,6 +834,34 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - Työkalu tulostaa erän lopuksi HUOM-varoitukset (tuplatiedosto, vahvistus yli ±12 dB, liian lyhyt, ylimääräinen paikka).
 - Työkalun trimmaus/voimakkuus: pituuden rajat (idle 3 s … death 3,5 s, pomot enemmän) ja tavoite-LUFS lajeittain (idle −22 … death/aggro −16, pomo +1,5 dB).
 
+## v3.06 – viljely, sulatusuuni, onkiminen ja muut
+- **Kantokyky:** 60 alussa → enintään 200 (reppu 2 × 15, saavutukset 50, tasot 60). **Toimintojen ilmoitukset** -asetus (oletus päällä).
+- **Rakennusvalikon tietoikkuna:** 1 s hover, I lukitsee auki.
+- **Uusiutuminen:** puut ja kivet nukkuessa 20 % (kivet aikaisintaan 5 vrk), poimittavat ≥ 10 min + yli 60 m + 20 %/min. Rakennusten suoja 15 m / työpenkki 26 m.
+- **Viljely:** siemenet (käpy, koivun siemen, aarnipuun siemen, pihkakävyt) 5 % kaadosta, pihkapuu 70 %. Istutus: siemen toisessa kädessä + kuokka + kyykky + vasen.
+  Taimi kasvaa nukkuessa 30 %. Varpu, rihmasto, kauransiemen (työpenkki) maahan tai **pellolle** (E kylvää, E korjaa). Istutettu ei uusiudu.
+- **Villikaura** vain kolmella seedin mukaan arvotulla alueella. **Ultra-rikkaruohot** (asetus, Ultra), ruoho taipuu kulkijan tieltä.
+- **E-toiminnot:** käsi liikahtaa eteen ja takaisin.
+- **Sulatusuuni (E avaa):** jono 5, polttoaine (puu 20 s, hiili 200 s, max 10 min), lämpötila 45 s → sulatuslämpö, jäähtyy 2 min, aineet vain kuumaan uuniin, mittarit + arvio.
+- **Veden kerääjä:** kupari 4 + rauta 2, taso 6. Sateella taivasalla 10 %/min, 20 vesikulhollista.
+- **Keittopatanuotio** vaatii työpenkin, polttoainetta enintään 10 min. Kalakeitto, lohikeitto (vesi), kalakukko.
+- **Teemoitetut valikot:** tausta työpisteen/säilytyksen mukaan.
+- **Routaluola:** jäälätäköt käytävissä – pelaaja ja olennot liukuvat.
+- **Onkiminen:** vedet nimetty kalalajin mukaan (kartta + rannalla); vavat onki (työpenkki), kuparivapa (ahjo, t5), hiidenvapa (3 sirua, t9); mato 2 % maanmuokkauksesta;
+  tärppi 1–5 min, vasen 0,6 s:ssa, iso kala väsytetään; 8 lajia (järvi: ahven, hauki, lahna; meri: silakka, turska, lohi; suolampi: ruutana, suonsilmä), aika ja sää vaikuttavat;
+  kalat paistetaan nuotiolla/grillillä, savustimessa savukala, padassa keitot; katiska veteen, kalanaulakko seinään; muut saaliit (saapas, pulloposti, ruostunut avain → upponut arkku,
+  hiidenkiven siru, rauta- ja kupariharkko); Kalastajan kirja (käytä) + tavoitteet.
+
+## v3.07 – tarkennukset
+- **Viljelylaatikko** (ent. pelto, puu 4): 1 kylvö, kasvaa nukkuessa 60 %, sato 9 + siemen. **Kohopenkki** (kivi 10 + puu 4, taso 6): 4 kylvöä, 70 %, kustakin 9 + siemen.
+  Maahan istutettu varpu/rihmasto/kaura: 2 + siemen. Kuokka + siemen ilman kyykkyä → muistutus.
+- **Kaatuva puu:** pelaajalle aarnipuu 90 %, iso puu 60 %, pieni 40–50 % maksimiterveydestä; eläimille vahvuuden mukaan (karhu ~50 % aarnipuusta).
+- **Sulatusuuni:** hiili lämmittää 20 % nopeammin; tulisuun hehku muuttuu lämmön mukaan (punainen → keltainen). Savustin hehkuu savustaessa.
+- **Polttoainemittari:** "jäljellä / enintään min".
+- **Äänet:** päävalikossa häipyvät, pelin paneeleissa −30 % ja hieman vaimeammat. Käsisoihdussa hiljainen rätinä. F-tarkastelun ihastus 10 %.
+- **Vinkit:** näkyvät lukuajan (4–9 s) ja katoavat heti, kun neuvoa noudattaa. **Vierityspalkit** pelin teemassa. Tietoikkuna vaihtuu heti.
+- **Rikkaruohot (Ultra):** 3 lajia, biomeittain eri korkeus. Hakuissa umpinaiset kärjet, ongessa roikkuva koukku. Keittoon käytetty vesikulho vaihtuu tyhjäksi kädessä.
+
 ## DEV-työkalut (vain DEV-tilassa)
 - Ä = DEV-valikko. Isot napit alussa (v1.92): Kuolemattomuus, Lento (alkaa heti), Seinien läpi, Lukitse aika ja sää, Näkymätön (v2.15: olennot eivät huomaa sinua, lyönti suututtaa), Pysäytä maailma
   (vain pelaaja liikkuu), Terveys täyteen. Lisäksi sää, aika, terveys, kylläisyys, pienet täpät, esinehaku, kartta.

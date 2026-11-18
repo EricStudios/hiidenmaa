@@ -183,7 +183,7 @@ function creTick(dt){const a=actx;if(!a||a.state!=='running'||typeof camera==='u
   creRevTick(dt);tgTick(dt);plTick(dt);
   for(const v of CRE.voices.slice())if(!creSpaceOk(v.m)){creStop(v,.15);CRE.voices.splice(CRE.voices.indexOf(v),1);}   // v2.58 tila vaihtui → ääni pois
   for(const v of CRE.voices){if(v.ec)creEchoPos(v.m,v.pn);else if(!v.m.dead){crePos(v.pn,v.m.pos.x,v.m.pos.y+(v.m.def.r||.5)*1.6,v.m.pos.z);creDistFx(v,Math.sqrt(dist2(v.m.pos.x,v.m.pos.z,P.pos.x,P.pos.z)));}}
-  if(state!=='play'||!soundOn)return;
+  if((state!=='play'&&state!=='ui')||!soundOn)return;   // v3.07 käyttäjä: äänet jatkuvat myös pelin paneeleissa (reppu, työpenkki…)
   vartijaEcho(dt);farHowl(dt);
   for(const m of mobs){if(m.dead||!creSpaceOk(m))continue;const d2=dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z),ai=m.def.ai,hs=CRE_CHASE.includes(ai),chasing=m.state==='chase',hasChase=hs&&chasing&&creRes(m.type,'chase');
     // rauhallinen ääntely 6–15 s välein alle 25 m päässä (ei jahdin aikana, jos olennolla on jahtiääni)
@@ -312,17 +312,40 @@ function tgStep(m,g,d,spd){const sf=tgSurface(m,g),run=spd>(m.def.walk||1.5)*1.4
 /* v2.84 TULEN ÄÄNI VALONLÄHTEILLE (käyttäjä): nuotio, grillinuotio, käynnissä oleva sulatusuuni, soihdut (seisova, kivinen pylväs, seinäsoihtu)
    ja Hautakummun/ulottuvuuksien liekit (FLAMES, sama tila curDim) soittavat olentojen palamisäänen (t/yhteiset/palaminen) 3D-silmukkana. Enintään FIRE_MAX 2 yhtä aikaa: lähimmät
    (etäisyys / √voimakkuus), kuuluvuus FIRE_R. Nuotio kovin (FIRE_V). Valinta 0,5 s välein; poistuva lähde häipyy (tgStop). */
-const FIRE_MAX=2,FIRE_V={nuotio:.9,grilli:.8,sulatin:.55,soihtu:.35,liekki:.35},FIRE_R={nuotio:24,grilli:22,sulatin:16,soihtu:12,liekki:12},FSND={t:0,v:[]};
+const FIRE_MAX=2,FIRE_V={nuotio:.9,grilli:.8,sulatin:.55,soihtu:.35,liekki:.35,kasi:.2},FIRE_R={nuotio:24,grilli:22,sulatin:16,soihtu:12,liekki:12,kasi:8},FSND={t:0,v:[]};
 function fireKind(t){return isFirePiece(t)?(t==='grilli'?'grilli':'nuotio'):isTorch(t)?'soihtu':t==='sulatin'?'sulatin':null;}
-function fireSndTick(dt){FSND.t-=dt;if(FSND.t>0)return;FSND.t=.5;const C=[];
+/* v3.06 (käyttäjä): tulen silmukka pehmeämmäksi ja vaihtelevammaksi – raakaääni on vain 2 s, joten saman pätkän kierto kuului. Nyt rakeinen soitin: jokaiselle
+   tulelle ajastetaan päällekkäisiä 0,6–1,2 s jyviä satunnaisista kohdista satunnaisista palaminen-tiedostoista (häivytys FIRE_GF, sävel ±6 %, voimakkuus ±15 %),
+   yhteinen suodin + panneri (etäisyyssuodin päivittyy). Ei kuluta olentojen äänibudjettia (TGV). */
+const FIRE_GF=.16,FIRE_AHEAD=.7;
+function fireGrainNew(c){const a=actx;if(!a||a.state!=='running'||!soundOn)return null;const L0=tgRes('yhteiset','palaminen');if(!L0)return null;
+  const L=L0.filter(n=>CRE.buf[n]);if(!L.length){for(const n of L0)creBuf(n);return null;}const vol=volK('cre');if(!(vol>0))return null;
+  if(!CRE.gain){CRE.gain=a.createGain();CRE.gain.connect(sndBus(a));}CRE.gain.gain.value=vol;const t=a.currentTime;
+  const out=a.createGain();out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(FIRE_V[c.k],t+.4);
+  const df=a.createBiquadFilter();df.type='lowpass';df.Q.value=.5;df.frequency.value=creLpf(tgDistK(c.d));const dg=a.createGain();dg.gain.value=1-TG_DG*tgDistK(c.d);
+  const pn=a.createPanner();pn.panningModel='equalpower';pn.distanceModel='inverse';pn.refDistance=2.4*TG_RK;pn.maxDistance=120*TG_RK;pn.rolloffFactor=1.45;
+  out.connect(df);df.connect(dg);dg.connect(pn);pn.connect(CRE.gain);crePos(pn,c.x,c.y+.3,c.z);let sd=null;
+  if(c.dun){const Rv=creRevOn(a);sd=a.createGain();sd.gain.value=.35;pn.connect(sd);sd.connect(Rv.inp);}
+  return {L,out,df,dg,pn,sd,next:t+.02,rate:c.k==='soihtu'||c.k==='liekki'||c.k==='kasi'?1.12:c.k==='sulatin'?.85:1,loop:true,gran:1,n:0};}
+function fireGrainPump(e){const a=actx;if(!a||!e.loop)return;let guard=0;
+  while(e.next<a.currentTime+FIRE_AHEAD&&guard++<8){const B=CRE.buf[e.L[Math.random()*e.L.length|0]];if(!B)return;const lp=tgLoopPts(B),len=Math.max(.2,lp[1]-lp[0]);
+    const dur=Math.min(len*.92,.6+Math.random()*.6),off=lp[0]+Math.random()*Math.max(0,len-dur),rate=e.rate*(1+(Math.random()*2-1)*.06),wall=dur/rate,f=Math.min(FIRE_GF,wall*.3),gv=.85+Math.random()*.3;
+    const t0=Math.max(e.next,a.currentTime+.01),s=a.createBufferSource();s.buffer=B;s.playbackRate.value=rate;const g=a.createGain();
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(gv,t0+f);g.gain.setValueAtTime(gv,t0+wall-f);g.gain.linearRampToValueAtTime(0,t0+wall);
+    s.connect(g);g.connect(e.out);s.onended=()=>{try{g.disconnect();}catch(err){}};s.start(t0,off,dur);e.n++;e.next=t0+wall-f;}}
+function fireGrainStop(e){if(!e)return;e.loop=false;const a=actx;if(!a)return;try{e.out.gain.cancelScheduledValues(a.currentTime);e.out.gain.setTargetAtTime(0,a.currentTime,.1);}catch(err){}
+  setTimeout(()=>{try{e.pn.disconnect();e.out.disconnect();}catch(err){}if(e.sd)try{e.sd.disconnect();}catch(err){}},1500);}
+function fireSndTick(dt){for(const e of FSND.v){fireGrainPump(e.h);if(e.key==='_kasi')crePos(e.h.pn,P.pos.x,P.pos.y+1.6,P.pos.z);}FSND.t-=dt;if(FSND.t>0)return;FSND.t=.25;const C=[];
   if(!P.inDun){for(const p of pieces){const k=fireKind(p.t);if(!k)continue;const on=k==='nuotio'||k==='grilli'?fireLit(p):!!(p.light&&p.light.on());if(!on)continue;
       const d=Math.sqrt(dist2(p.x,p.z,P.pos.x,P.pos.z));if(d<FIRE_R[k]&&Math.abs((p.y||0)-P.pos.y)<12)C.push({key:p,x:p.x,y:(p.y||0)+(k==='soihtu'?1.4:.5),z:p.z,k,d,dun:false});}}
   else if(typeof FLAMES!=='undefined'){const dm=curDim();for(const f of FLAMES){if(f.dim!==dm)continue;const d=Math.sqrt(dist2(f.x,f.z,P.pos.x,P.pos.z));if(d<FIRE_R.liekki)C.push({key:f,x:f.x,y:f.y,z:f.z,k:'liekki',d,dun:true,realm:P.realm||undefined});}}
   C.sort((a,b)=>a.d/Math.sqrt(FIRE_V[a.k])-b.d/Math.sqrt(FIRE_V[b.k]));const sel=C.slice(0,FIRE_MAX);
-  for(const e of FSND.v.slice())if(!sel.some(c=>c.key===e.key)||!e.h.loop){tgStop(e.h);FSND.v.splice(FSND.v.indexOf(e),1);}
-  for(const c of sel){if(FSND.v.some(e=>e.key===c.key))continue;const pos={x:c.x,y:c.y,z:c.z},m={pos,dun:c.dun,realm:c.realm,type:'_tuli',def:{r:.5}};
-    const h=tgPlay(m,'palaminen','yhteiset',{loop:1,rnd:1,v:FIRE_V[c.k],p:c.k==='soihtu'||c.k==='liekki'?1.12:c.k==='sulatin'?.85:1,pos},false);if(h&&h.src){h.stat=1;FSND.v.push({key:c.key,h});}}}
-function tgTick(dt){if(!CRE.ok||state!=='play')return;fireSndTick(dt);
+  if(typeof torchSlot==='function'&&torchSlot()&&!P.dead&&!P.swim)sel.push({key:'_kasi',x:P.pos.x,y:P.pos.y+1.3,z:P.pos.z,k:'kasi',d:0,dun:!!P.inDun,realm:P.realm||undefined});   // v3.07 käyttäjä: käsisoihdun rätinä (hiljaisempi, ei vie FIRE_MAX-paikkaa)
+  for(const e of FSND.v.slice())if(!sel.some(c=>c.key===e.key)||!e.h.loop){fireGrainStop(e.h);FSND.v.splice(FSND.v.indexOf(e),1);}
+  for(const c of sel){const e=FSND.v.find(x=>x.key===c.key);if(e){const k=tgDistK(c.d);try{e.h.df.frequency.value=creLpf(k);e.h.dg.gain.value=1-TG_DG*k;if(c.k==='kasi')crePos(e.h.pn,c.x,c.y+.3,c.z);}catch(err){}continue;}
+    const h=fireGrainNew(c);   /* tunniste: 'palaminen','yhteiset' */if(h){fireGrainPump(h);FSND.v.push({key:c.key,h});}}}
+function fireSndOff(){for(const e of FSND.v)fireGrainStop(e.h);FSND.v.length=0;}
+function tgTick(dt){if(!CRE.ok||(state!=='play'&&state!=='ui')){if(FSND.v.length)fireSndOff();return;}fireSndTick(dt);
   for(const v of TGV.v.slice()){const m=v.m;if(m&&!creSpaceOk(m)){tgStop(v);continue;}   // v2.58
     if(v.loop&&!v.stat&&(!mobs.includes(m)||(m.dead&&v.ev!=='palaminen'))){tgStop(v);continue;}if(v.fixed)continue;crePos(v.pn,m.pos.x,m.pos.y+.3,m.pos.z);if(actx)creDistFx(v,Math.sqrt(dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)));}
   const C=[];
@@ -649,8 +672,10 @@ function sndBus(a){if(!SBUS.f){SBUS.f=a.createBiquadFilter();SBUS.f.type='lowpas
    silmukat, sää ja tunnelma, ilmoitukset) kulkevat väylän SBUS kautta → SBUS.m häivyttää ne ~0,8 s:ssa, kun valikko tai tauko on auki
    (state 'menu'/'paused'), ja palauttaa ~0,6 s:ssa, kun peli jatkuu. Silmukat jatkavat hiljaa samasta kohdasta. Valikon napit (MSND) ja musiikki
    eivät kulje tätä kautta. Kutsu: main.js frame() joka ruutu. */
-function gameSndTick(){const a=actx;if(!a||!SBUS.m)return;const on=state!=='menu'&&state!=='paused';if(on===SBUS.on)return;SBUS.on=on;
-  const t=a.currentTime;SBUS.m.gain.cancelScheduledValues(t);SBUS.m.gain.setValueAtTime(SBUS.m.gain.value,t);SBUS.m.gain.setTargetAtTime(on?1:0,t,on?.15:.2);}
-function uwAudioTick(){const a=actx;if(!a||!SBUS.f)return;const uw=typeof CAM_UW!=='undefined'&&CAM_UW>0&&!P.inDun&&(state==='play'||state==='ui'||state==='paused');if(uw===SBUS.uw)return;SBUS.uw=uw;
-  const t=a.currentTime;SBUS.f.frequency.cancelScheduledValues(t);SBUS.f.frequency.setTargetAtTime(uw?UW_LP:22000,t,.1);SBUS.g.gain.setTargetAtTime(uw?UW_G:1,t,.1);}
+/* v3.07 käyttäjä: häivytys VAIN päävalikossa/tauolla. Pelin paneeleissa (reppu, työpenkki, arkku, pata…) äänet soivat, mutta UI_G (−30 %) ja pieni alipäästö UI_LP. */
+const UI_G=.7,UI_LP=4200;
+function gameSndTick(){const a=actx;if(!a||!SBUS.m)return;const on=state!=='menu'&&state!=='paused',tg=on?(state==='ui'?UI_G:1):0;if(tg===SBUS.tg)return;SBUS.tg=tg;
+  const t=a.currentTime;SBUS.m.gain.cancelScheduledValues(t);SBUS.m.gain.setValueAtTime(SBUS.m.gain.value,t);SBUS.m.gain.setTargetAtTime(tg,t,tg>0?.15:.2);}
+function uwAudioTick(){const a=actx;if(!a||!SBUS.f)return;const uw=typeof CAM_UW!=='undefined'&&CAM_UW>0&&!P.inDun&&(state==='play'||state==='ui'||state==='paused'),ui=state==='ui',key=(uw?1:0)+(ui?2:0);if(key===SBUS.uw)return;SBUS.uw=key;
+  const t=a.currentTime;SBUS.f.frequency.cancelScheduledValues(t);SBUS.f.frequency.setTargetAtTime(uw?UW_LP:ui?UI_LP:22000,t,.1);SBUS.g.gain.setTargetAtTime(uw?UW_G:1,t,.1);}   // v3.07 paneelissa pieni alipäästö
 creInit();   // v2.52: manifesti ja valikko-/introäänet heti (maailman intro sivun uudelleenlatauksen jälkeen)

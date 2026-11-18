@@ -9,6 +9,7 @@ function onPrimary(){
   if(P.dead||P.stagger>0)return;
   const w=curWeapon();
   if(w.cat==='bowl'){bowlUse();return;}   // v2.91 kulho / vesikulho
+  if(w.cat==='rod'){fishClick();return;}   // v3.06 onki (fish.js)
   if(w.cat==='hammer'){placeBuild();return;}
   if(w.cat==='shovel'){useTool(false);return;}
   if(w.cat==='bow'){if(!ammoId()){msg('Ei nuolia.','warn');showAmmo(2,true);return;}P.drawing=true;P.bowDraw=0;P.drawT=0;showAmmo(2,true);plSnd('jousi','veto');return;}
@@ -18,7 +19,7 @@ function onPrimary(){
 //  kuokka vasen: nostaa maata 0,3 m (keskellä eniten, enint. +3 m alkuperäisestä) ja palauttaa maan biomin perusvärin (multa pois)
 //  kuokka oikea: palauttaa maan alkuperäisen värin ja kasvillisuuden (ruoho, mudAt), ei korkeutta (v2.78)
 //  lapio vasen: kaivaa kuoppaa 0,3 m (enint. −3 m), väri biomin perusväri; lapio oikea: ruskea polku (tasoittaa jalkojen korkeudelle + multa)
-let shovelCd=0;const _sh=[];
+let shovelCd=0;const _sh=[];const WORM_P=.02;   // v3.06 maanmuokkaus: kastemato 2 %
 function terraTool(mode){
   if(P.dead||P.inDun||state!=='play'||playTime<shovelCd)return;
   if(P.stam<6){if(playTime-lastStamMsgT>1.2){msg('Liian uupunut.','warn');lastStamMsgT=playTime;}return;}
@@ -28,8 +29,9 @@ function terraTool(mode){
   const h0=P.pos.y;
   if(!ftTool(mode,c.x,c.z,R,h0)){msg('Maailman reunalla maata ei voi muokata.','warn');return;}   // v2.65 tarkka 1 m verkko (4× kärkiä)
   terraFlush();mudFlush();for(const n of nodesNear(c.x,c.z,R+3,_sh))syncNodeY(n);
+  if(Math.random()<WORM_P){spawnDrop('mato',1,c.x,terrainH(c.x,c.z)+.3,c.z);msg('Maasta kiemurteli kastemato – hyvää syöttiä!','loot');}   // v3.06 syötti 2 %
   sfx('build');burst(c.x,terrainH(c.x,c.z)+.2,c.z,mode==='path'?0x7a5a38:0x6b5a3a,8,3);}
-function useTool(alt){const w=curWeapon();if(w.cat!=='shovel')return;terraTool(w.id==='kuokka'?(alt?'restore':'raise'):(alt?'path':'dig'));}
+function useTool(alt){const w=curWeapon();if(w.cat!=='shovel')return;if(!alt&&plantMode()){plantTry();return;}if(!alt&&w.id==='kuokka'&&!P.crouch&&seedHeld()){plantHint();return;}   /* v3.07 käyttäjä: muistutus kyykystä, ei maanmuokkausta siemen kädessä */   /* v3.06 kuokka + kyykky + siemen toisessa kädessä = istutus (farm.js) */terraTool(w.id==='kuokka'?(alt?'restore':'raise'):(alt?'path':'dig'));}
 /* v2.01: jousi laukeaa vasta, kun vetoa on kestänyt vähintään BOW_MIN_T (v2.03: 0,4 s); lyhyempi veto peruuntuu (nuoli ei kulu), ilmoitus enintään 4 s välein. */
 const BOW_MIN_T=.4;   // v2.03: 0,7 → 0,4 s
 function bowCancel(){if(playTime-(P.bowCancelMsg||-99)>4){P.bowCancelMsg=playTime;msg('Ampuminen peruuntui – jännitä jousta vähintään 0,4 s.','warn');}}
@@ -85,7 +87,7 @@ function doMeleeHit(w){
     n.hp-=(5+w.chop*4)*(1+.25*((w.q||1)-1));sfx(n.hp<=0?(n.isLog?'logBreak':'chopFinal'):n.isLog?'chopLog':'chop');shake(.08);{const q={x:n.isLog?P.pos.x+fx:n.x,y:n.y+1,z:n.isLog?P.pos.z+fz:n.z};plSnd('osumat','osuma_puu',{pos:q});if(n.hp<=0)plSnd('osumat',n.isLog?'tukki_hajoaa':'puu_kaatuu',n.isLog?{pos:q}:{pos:q,until:fallDur(n),fit:1,p:creakP(n),rk:TREE_RK});   /* v2.67 narina −50 % kuuluvuus */}   /* v2.25 */
     if(n.isLog)chopLog(n);else burst(n.x,n.y+1.2,n.z,0x8a5a32,5,3);
     if(n.hp<=0){if(n.isLog){removeLog(n);const c=Math.max(1,dropScale(n.dropId,Math.round(rint(rng,3,4)*n.s)));for(let j=0;j<c;j++){const t=(j+.5)/c;spawnDrop(n.dropId,1,n.ax+(n.bx-n.ax)*t,n.y+.8,n.az+(n.bz-n.az)*t);}burst(n.x,n.y+.4,n.z,0x6b4527,12,4);}
-      else{killNode(n);fallTree(n,undefined,true);bump('trees');}}}
+      else{const rz=isResinTree(n);killNode(n);fallTree(n,undefined,true);bump('trees');seedDrop(n,rz);}}}   // v3.06 siemen 5 % / pihkapuu 70 %
   else if(n.def.kind==='rock'){if(!w.pick){if(!hitMob){msg('Tarvitset hakun louhiaksesi kiveä.','warn');sfx('hit');plSnd('osumat','ei_tehoa');}return;}
     if(w.pick<(n.def.tier||1)){if(!hitMob){msg('Tarvitset paremman hakun.','warn');sfx('hit');plSnd('osumat','ei_tehoa');}return;}
     n.hp-=(9+w.pick*3)*(1+.25*((w.q||1)-1));sfx(n.hp<=0?'rockBreak':'pick');{const q={x:n.x,y:n.y+.8,z:n.z};plSnd('osumat','osuma_kivi',{pos:q});if(n.hp<=0)plSnd('osumat','kivi_hajoaa',{pos:q});}   /* v2.25 */burst(n.x,n.y+.8,n.z,n.type==='kuparisuoni'?0xd9874a:n.type==='rautasuoni'?0x8a4f3c:0x8f8d86,6,4);shake(.08);
@@ -256,20 +258,24 @@ function findInteract(){
 function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLowerCase();if(bt(p.t)==='ovi')return p.data.open?'Sulje ovi':'Avaa ovi';switch(p.t){
   case 'tikkaat':case 'kivitikkaat':return 'Kiipeä: pidä W (alas S)';
   case 'ovi':return p.data.open?'Sulje ovi':'Avaa ovi';
-  case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=!p.data.camp&&Object.keys(COOKABLE).some(id=>invCount(id)>0),em=emberOn(p);   /* v2.98 leirin nuotio: ei paistoa */return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&(fireLit(p)||em)&&p.data.cook.length<(FIRE_SLOTS[p.t]||2)?(em?'Paista hiilloksella (−20 %)':'Paista ruokaa'):em?`Hiilos ${fmtMin(p.data.ember)} – lisää polttoainetta`:`Polttoainetta ${fuelText(fireRem(p),firePct(p))} – lisää`;}   // v3.02 hiilos
+  case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=!p.data.camp&&Object.keys(COOKABLE).some(id=>invCount(id)>0),em=emberOn(p);   /* v2.98 leirin nuotio: ei paistoa */return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&(fireLit(p)||em)&&p.data.cook.length<(FIRE_SLOTS[p.t]||2)?(em?'Paista hiilloksella (−20 %)':'Paista ruokaa'):em?`Hiilos ${fmtMin(p.data.ember)} – lisää polttoainetta`:`Polttoainetta ${fuelText(fireRem(p),p)} – lisää`;}   // v3.02 hiilos
   case 'patanuotio':return potLabel(p);   // v3.02
-  case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),torchPct(p))} – lisää`;
+  case 'vedenkeraaja':return waterLabel(p);   // v3.06
+  case 'pelto':case 'kohopenkki':return fieldLabel(p);   // v3.06 farm.js, v3.07 kohopenkki
+  case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':return nauLabel(p);   // v3.06 fish.js
+  case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),p)} – lisää`;
   case 'sanky':return isNight()?'Nuku':'Aseta herätyspaikka';
   case 'arkku':return 'Avaa arkku';
   case 'tynnyri':return 'Avaa tynnyri';
-  case 'sulatin':{const D=p.data,st=`kupari ${D.ore}, rauta ${D.iore}, hiekka ${D.sand||0}${D.pp?', pata '+D.pp:''}, puu ${D.wood}`;return D.done>0||D.idone>0||D.glass>0?`Ota valmiit (kupari ${D.done}, rauta ${D.idone}, lasi ${D.glass||0})`:invCount('malmi')>0||invCount('rautamalmi')>0||invCount('hiekka')>0||invCount('pilapata')>0||invCount('puu')>0?`Lisää malmia, hiekkaa ja puuta (${st})`:`Sulatusuuni (${st})`;}
+  case 'sulatin':return smLabel(p);   // v3.06 smelt.js
   case 'tyopenkki':return 'Käytä työpenkkiä';
   case 'ahjo':return 'Käytä ahjoa';
   default:return null;}}
+const E_ANIM_T=.42;   // v3.06 E-toiminnon käsiliike (player.js)
 function interact(){if(P.insp)inspectStop();
-  if(P.dead)return;const t=lookTarget;if(!t){resinNoTarget();return;}
+  if(P.dead)return;const t=lookTarget;if(!t){resinNoTarget();return;}P.eT=playTime;
   if(t.kind==='resin'){resinInteract(t.n);return;}   // v2.91
-  if(t.kind==='node'){const n=t.n,d=n.def;const c=rint(rng,d.n[0],d.n[1]);const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);return;}
+  if(t.kind==='node'){const n=t.n,d=n.def,own=n.planted&&CROP_SEED[n.type];const c=own?GROUND_YIELD:rint(rng,d.n[0],d.n[1]);   /* v3.07 maahan istutettu: 2 + siemen (siemen vasta onnistuneen poiminnan jälkeen) */const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);if(own)giveOrDrop(CROP_SEED[n.type],1,n.x,n.y+.5,n.z);return;}
   if(t.kind==='it'){t.it.use();return;}
   // v0.93: hautakasa ei katoa koskaan itsestään. Jos kaikki mahtuu reppuun, tavarat otetaan kerralla; muuten kasa avautuu arkkuikkunaan
   // (ota mitä mahtuu, loput jäävät). Kun kasa on tyhjä, se vajoaa maahan (graveVanish) ja pääkallo poistuu kartalta.
@@ -279,15 +285,14 @@ function interact(){if(P.insp)inspectStop();
   if(t.kind==='piece'){const p=t.p;if(bt(p.t)==='ovi'){const a=p.rot*Math.PI/4,lz=(P.pos.x-p.x)*Math.sin(a)+(P.pos.z-p.z)*Math.cos(a);if(!setDoor(p,!p.data.open,p.data.open?p.data.dir:(lz>0?1:-1))){msg('Seisot oviaukossa – siirry, niin ovi sulkeutuu.','warn');return;}sfx('build');return;}   /* v2.60 ovi kääntyy 0,6 s */if(PIECES[p.t].store){openChest(p);return;}switch(p.t){
     case 'nuotio':case 'grilli':fireInteract(p);break;
     case 'patanuotio':potOpen(p);break;   // v3.02 keittopadan ikkuna
+    case 'vedenkeraaja':waterInteract(p);break;   // v3.06
+    case 'pelto':case 'kohopenkki':fieldInteract(p);break;   // v3.06 farm.js, v3.07 kohopenkki
+    case 'katiska':katInteract(p);break;case 'savustin':savInteract(p);break;case 'kalanaulakko':nauInteract(p);break;   // v3.06 fish.js
     case 'seinasoihtu':case 'soihtuteline':case 'kivisoihtu':torchFuelAdd(p);break;   // v2.91
     case 'sanky':sleepAt(p);break;
     case 'arkku':case 'tynnyri':openChest(p);break;
-    case 'sulatin':{const D=p.data;D.sand=D.sand||0;D.glass=D.glass||0;
-      if(D.done>0||D.idone>0||D.glass>0){if(D.done>0)giveOrDrop('kupari',D.done,p.x,p.y+1,p.z);if(D.idone>0)giveOrDrop('rauta',D.idone,p.x,p.y+1,p.z);if(D.glass>0)giveOrDrop('lasi',D.glass,p.x,p.y+1,p.z);D.done=0;D.idone=0;D.glass=0;sfx('pickup');break;}
-      {const o=Math.min(invCount('malmi'),10-D.ore),io=Math.min(invCount('rautamalmi'),10-D.iore),sd=Math.min(invCount('hiekka'),SAND_MAX-D.sand),w=Math.min(invCount('puu'),20-D.wood),hc=Math.min(invCount('hiili'),Math.floor((20-D.wood-w)/10)),pp=Math.min(invCount('pilapata'),2-(D.pp||0));if(o<=0&&io<=0&&sd<=0&&w<=0&&hc<=0&&pp<=0){msg('Tarvitset malmia (kupari tai rauta), hiekkaa tai pilaantuneen padan sekä puuta tai hiiltä.','warn');break;}
-       if(pp>0){invRemove('pilapata',pp);D.pp=(D.pp||0)+pp;}   // v3.02 pilaantunut pata sulatukseen (enintään 2)
-       if(o>0){invRemove('malmi',o);D.ore+=o;}if(io>0){invRemove('rautamalmi',io);D.iore+=io;}if(sd>0){invRemove('hiekka',sd);D.sand+=sd;}if(w>0){invRemove('puu',w);D.wood+=w;}if(hc>0){invRemove('hiili',hc);D.wood+=hc*10;}msg(`Uuniin: ${o} kuparimalmia, ${io} rautamalmia, ${sd} hiekkaa, ${w} puuta${hc?`, ${hc} hiiltä`:''}${pp?`, ${pp} pilaantunut pata`:''}.`);sfx('build');}break;}
-    case 'tyopenkki':case 'ahjo':togglePanel('inv');break;
+    case 'sulatin':smOpen(p);break;   // v3.06 sulatusuunin valikko (smelt.js)
+    case 'tyopenkki':case 'ahjo':invCtx=p.t;togglePanel('inv');break;   // v3.06 tausta työpisteen mukaan
   }}
 }
 // Nuotio ja grillinuotio: 1) kerää valmis ruoka, 2) ripusta raaka ruoka (jokaisella oma aika), 3) lisää polttoainetta (puu = 1 yksikkö, hiili = 10).
@@ -302,8 +307,10 @@ function fireInteract(p){const cap=FIRE_SLOTS[p.t]||2,d=p.data;   // v3.00 nuoti
 // v3.02 polttoaine (nuotio, grilli, keittopatanuotio): sateen sammuttama sytytetään uudelleen, muuten lisätään puuta/pihkaa/hiiltä; hiilos syttyy heti.
 function fireFuelAdd(p){const d=p.data;
   if(d.out&&d.fuel>0){if(fireRainOut(p)){msg('Kova sade sammuttaisi tulen heti – suojaa nuotio katolla.','warn');return;}d.out=0;d.wetT=0;msg('Sytytit nuotion uudelleen.');sfx('build');return;}
-  if(firePct(p)>50){msg(`Tulessa on jo tarpeeksi polttoainetta (${firePct(p)} %).`);return;}
-  for(const id of ['puu','pihka','hiili']){const v=FIRE_FUEL[id];if(invCount(id)>0&&d.fuel+v<=FUEL_MAX){const em=emberOn(p);invRemove(id,1);d.fuel+=v;d.out=0;markFull(p);if(em)msg('Hiilos leimahti heti tuleen.');else if(id!=='puu')msg(`${ITEMS[id].n}: tuli palaa ${fmtMin(v*FIRE_UNIT)} lisää.`);sfx('build');return;}}   // v2.91 puu 45 s, pihka 90 s, hiili 7,5 min
+  const potCap=p.t==='patanuotio'?POT_FUEL_S:0;   // v3.06 keittopatanuotio: polttoainetta enintään POT_FUEL_S (10 min) paloajaksi, ei 50 %-rajaa
+  if(!potCap&&firePct(p)>50){msg(`Tulessa on jo tarpeeksi polttoainetta (${firePct(p)} %).`);return;}
+  if(potCap&&fireRem(p)+FIRE_UNIT>potCap){msg(`Padan alla on jo polttoainetta ${fmtMin(fireRem(p))} (enintään ${fmtMin(potCap)}).`);return;}
+  for(const id of ['puu','pihka','hiili']){const v=FIRE_FUEL[id];if(invCount(id)>0&&d.fuel+v<=FUEL_MAX&&(!potCap||fireRem(p)+v*FIRE_UNIT<=potCap)){const em=emberOn(p);invRemove(id,1);d.fuel+=v;d.out=0;markFull(p);if(em)msg('Hiilos leimahti heti tuleen.');else if(id!=='puu')msg(`${ITEMS[id].n}: tuli palaa ${fmtMin(v*FIRE_UNIT)} lisää.`);sfx('build');return;}}   // v2.91 puu 45 s, pihka 90 s, hiili 7,5 min
   msg(['puu','pihka','hiili'].some(id=>invCount(id)>0)?'Tulessa on tarpeeksi polttoainetta.':'Tarvitset puuta, pihkaa tai hiiltä.','warn');}
 const fmtMin=s=>s>=60?`${(s/60).toFixed(s%60?1:0).replace('.',',')} min`:`${Math.round(s)} s`;
 // v2.91 soihdut (seinäsoihtu, seisova soihtu, kivinen soihtupylväs): pihka 3 min, puu 1,5 min, hiili 15 min; enintään TORCH_CAP (60 min)

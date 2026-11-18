@@ -586,3 +586,22 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   JÄLKEEN → ne siirtyivät villikauran määrällä, ja vanhan tallennuksen viittaus osui villikauraan. Korjaus: uudet solmutyypit omalta id-alueeltaan
   (`NODE_ID_X` = 1 000 000 +, `NODE_ID_XT`), `unplantAll` laskee `nodeIdN`:n vain perussolmuista.
 - **Sääntö:** uusi solmutyyppi → lisää se `NODE_ID_XT`:hen (ja oma satunnaislähde placeNodes:n loppuun), ettei mikään vanha id muutu.
+
+## 78. Testirivi jätti paneelin auki ja kaatoi myöhempiä rivejä (v3.06)
+- Sulatusuunin E avaa nyt valikon (`togglePanel` → `state='ui'`). Vanha v3.02-tarkistusrivi kutsui `interact()` sulatukselle eikä sulkenut paneelia → myöhemmät rivit
+  (uinti, F-tarkastelun AFK, puukon vinkki) epäonnistuivat, koska ne vaativat `state==='play'`. Korjaus: rivi käyttää suoraan `smFuel`/`smAdd`.
+- **Sääntö:** kun toiminto alkaa avata paneelin, tarkista tarkistusrivit, jotka kutsuvat sitä, ja palauta `state`/`closePanels()` finallyssa. Uusien rivien testikanta (reppu
+  painaa) voi myös ylittää kantokyvyn (60) → aseta `MAXW` testin ajaksi.
+
+## 79. Uusi esiasetusavain ja siirtojen ohituslistat (v3.06, KORJAUKSET 76:n jatko)
+- `weeds` lisättiin kaikkiin `PRESETS`-riveihin ja siirtoon `_v` 10. Aiemmat siirrot (v7, v8, v9) vertaavat asetuksia esiasetuksiin – ilman ohitusta `weeds` olisi estänyt
+  Ultra-käyttäjän tunnistuksen. Korjaus: `weeds` lisätty v7-, v8- ja v9-lohkojen ohitukseen.
+- **Sääntö:** joka kerta kun esiasetuksiin tulee uusi avain, lisää se KAIKKIEN aiempien siirtojen ohituslistoihin.
+
+## 80. Kommenttitarkistus: puolipiste + "v3.06 (" näyttää koodilta (v3.06)
+- `// v3.02 villikaura; v3.06 (käyttäjä): …` laukaisi KORJAUKSET 49 -tarkistuksen (puolipiste + nimi + sulku). Korjaus: pilkku puolipisteen sijaan.
+- **Sääntö:** `//`-kommentissa vältä `; sana (` -yhdistelmää.
+
+## 81. //-kommentti lisättiin rivin keskelle korvauksessa (v3.07, KORJAUKSET 49 uudelleen)
+- Python-korvauksessa lisätty `// selitys` päätyi rivin keskelle (savustimen malli: perässä `for`-silmukka ja `break;}` → syntaksivirhe; onkikoukku: fishTick:n loppurivi
+  kommentoitui pois). `node --check` paljasti molemmat. **Sääntö:** kun lisäät koodia olemassa olevan rivin keskelle, käytä AINA `/* */`; `//` vain kun rivin loppu on varmasti tyhjä.

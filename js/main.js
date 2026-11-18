@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.05';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.07';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -222,12 +222,12 @@ function update(dt){
   playTime+=dt;if(!lkT){dayT+=td/DAY_LEN;if(dayT>=1){dayT-=1;dayN++;msg(`Päivä ${dayN}`);}}
   const wasNight=isNight();
   updatePlayer(dt);updateEffects(dt);updateDungeons(dt);updateStory(dt);
-  if(!fz){updateMobs(dt);creTick(dt);updateProjs(dt);updateDrops(dt);updateFx(dt);updateStations(td);doorTick(dt);spawner(dt);survival(td);resinTick(dt,td);}
+  if(!fz){updateMobs(dt);creTick(dt);updateProjs(dt);updateDrops(dt);updateFx(dt);updateStations(td);doorTick(dt);spawner(dt);survival(td);resinTick(dt,td);fishTick(dt);}   /* v3.06 onkiminen (fish.js) */
   if(!lkT){if(td>dt)weather.until-=td-dt;updateWeather();}else weather.until=Math.max(weather.until,playTime+1);
   updateEnvironment(dt);updateCamera(dt);updateBenchRings();updateChunkVis();updateGrass();
   if(state==='play'){lookTarget=findInteract();updateGhost();}else if(ghost)ghost.visible=false;
   lightT-=dt;if(lightT<=0){lightT=.4;updateLights();}
-  slowT-=dt;if(slowT<=0){slowT=1;exploreTick();updateGoals();if(Math.floor(playTime)%5===0)respawnNodes();pickFarTick(1);mobRespawnTick();   /* v3.00 */if(isNight()&&!P.inDun)nightRegrow();}
+  slowT-=dt;if(slowT<=0){slowT=1;exploreTick();updateGoals();pickFarTick(1);mobRespawnTick();   /* v3.00 */farmSync();   /* v3.06 taimet ja pellot (uusiutuminen: nukkuessa, pickFarTick) */}
   saveT+=dt;if(saveT>120){saveT=0;saveGame(true);}   // v1.35 (kohta 21): automaattitallennus 2 min välein
   updateZone(dt);updateHUD(dt);if(DEV)devLiveTick(dt);   // v2.96 DEV-valikon elävät arvot
 }

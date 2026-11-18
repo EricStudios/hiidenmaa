@@ -73,7 +73,12 @@ const NGEO={
   piikivi:mergeParts([part(new THREE.TetrahedronGeometry(.22,0),0x40464f,0,.12,0),part(new THREE.TetrahedronGeometry(.16,0),0x50565f,.22,.08,-.1)]),
   marjat:mergeParts([part(new THREE.IcosahedronGeometry(.5,0),0x3f6a2c,0,.35,0,0,0,0,1,.7,1),part(new THREE.BoxGeometry(.1,.1,.1),0xc8263a,.3,.5,.2),part(new THREE.BoxGeometry(.1,.1,.1),0xc8263a,-.25,.45,.25),part(new THREE.BoxGeometry(.1,.1,.1),0xc8263a,.05,.62,-.25),part(new THREE.BoxGeometry(.1,.1,.1),0xc8263a,-.3,.4,-.2)]),
   sieni:mergeParts([part(new THREE.BoxGeometry(.12,.25,.12),0xefe6d2,0,.12,0),part(new THREE.ConeGeometry(.24,.18,6),0x9b6a3a,0,.3,0)]),
-  villikaura:mergeParts([...[[0,0,0],[.12,.05,.6],[-.1,-.08,-.5],[.04,.12,.3],[-.06,.1,-.2]].flatMap(([x,z,a])=>[part(new THREE.BoxGeometry(.025,.7,.025),0x9a8a48,x,.35,z,a*.25,0,a*.3),part(new THREE.ConeGeometry(.05,.2,4),0xd6b96a,x+Math.sin(a*.3)*-.3,.72,z)])]),
+  villikaura:(()=>{const r=mulberry32(7741),P=[];   /* v3.06 (käyttäjä): vaaleampi ja tunnistettava kauratupsu – oljenkeltaiset korret, riippuvat tähkylät, lehdet tyvellä */
+    for(let i=0;i<7;i++){const a=i/7*TAU+r()*.5,d=.04+r()*.1,x=Math.cos(a)*d,z=Math.sin(a)*d,h=.62+r()*.36,lz=(r()-.5)*.36,lx=(r()-.5)*.3,tx=x-Math.sin(lz)*h,ty=Math.cos(lz)*Math.cos(lx)*h,tz=z+Math.sin(lx)*h;
+      P.push(part(new THREE.BoxGeometry(.018,h,.018),0xcdbd7a,x-Math.sin(lz)*h/2,h/2,z+Math.sin(lx)*h/2,lx,0,lz));
+      for(let k=0;k<5;k++){const sa=a+k*1.3+r(),sr=.025+k*.012,sy=ty-.02-k*.035;P.push(part(new THREE.ConeGeometry(.018,.1,4),k%2?0xf0e3b4:0xe4d39a,tx+Math.cos(sa)*sr,sy-.04,tz+Math.sin(sa)*sr,Math.PI+.35*Math.cos(sa),0,.35*Math.sin(sa)));}}
+    for(let i=0;i<4;i++){const a=i/4*TAU+.4;P.push(part(new THREE.BoxGeometry(.035,.32,.006),0xa9b064,Math.cos(a)*.05,.15,Math.sin(a)*.05,Math.sin(a)*.45,a,-Math.cos(a)*.45));}
+    return mergeParts(P);})(),
 };
 // Kaatuvan puun runko ilman irtoavia oksia (oksat lisätään erikseen, jotta ne voivat irrota)
 const NGEO_FALL={koivu:mergeParts(koivuBase())};
@@ -106,12 +111,13 @@ treeMat.onBeforeCompile=sh=>{sh.uniforms.uTime=SWAY.uTime;sh.uniforms.uWind=SWAY
   float swLean=uLean*swH*min(swH,5.)*.016*(1.+.35*sin(uTime*1.9+swPh));transformed.x+=swL.x*swLean;transformed.z+=swL.z*swLean;`);};
 // Puiden korkeus kertoimella s=1 (tukkien pituutta varten).
 const TREE_H={kuusi:5.8,koivu:6.2,kelo:4.8,manty:8.4,aarnipuu:21};
-const POOL={kuusi:400,koivu:400,manty:200,aarnipuu:60}; // varapaikat öisin kasvaville puille
+const POOL={kuusi:400,koivu:400,manty:200,aarnipuu:60,marjat:150,sieni:150,villikaura:150}; // varapaikat istutetuille (v3.06 farm.js: puut + marjat, sienet, kaura)
 const treeS=()=>.6+Math.pow(rng(),1.6)*1.4;   // puun koko .6–2.0, pienet yleisimpiä
 let nodeIdN=0,nodeIdX=0;
 /* v3.03 (KORJAUKSET 77): uusien solmutyyppien (villikaura v3.02) id:t omalta alueeltaan NODE_ID_X+, jotta vanhojen tallennusten id:t (kaadetut, siirretyt,
    kasvaneet puut = perussolmujen jälkeen numeroidut) eivät siirry. */
 const NODE_ID_X=1e6,NODE_ID_XT=new Set(['villikaura']);
+const VK_REG=[],VK_N=3,VK_PER=26,VK_R=26*WS;   // v3.06 villikauran kasvualueet (kartalla vihjeenä ei näytetä – löydettävä)
 const CHN=10,CHS=HALF*2/CHN,CHUNK_IMS=[];
 const VIS_R={tree:130,rock:110,pick:60,deco:55}; // näkyvyysetäisyys lajeittain (sumu peittää kauempana)
 function chunkOf(x,z){return clamp(Math.floor((z+HALF)/CHS),0,CHN-1)*CHN+clamp(Math.floor((x+HALF)/CHS),0,CHN-1);}
@@ -163,10 +169,13 @@ function vegDens(x,z){return VEG_O?.55+.9*fbm(x*.018+VEG_O[0],z*.018+VEG_O[1],2)
   {const rs=mulberry32(seedMix(4242+MAP_ID*97)),want=5+Math.floor(rs()*6),pts=[];
    for(let i=0;i<60000&&pts.length<want;i++){const px=(rs()-.5)*AR,pz=(rs()-.5)*AR,h=terrainH(px,pz);if(h<.15||h>1.05||biomeAt(px,pz,h)!=='beach'||!clear(px,pz))continue;
      if(pts.some(q=>dist2(q[0],q[1],px,pz)<60*60))continue;pts.push([px,pz]);add('hiekkakasa',px,pz,1.2+rs()*.35);}}
-  // v3.02 villikaura: niityt ja koivulehdot, oma satunnaislähde ja viimeisenä (muut solmut eivät muutu); taattu muutama aloituksen lähelle
-  {const rs=mulberry32(seedMix(9311+MAP_ID*53));let c=0;
-   for(let i=0;i<5000*WS*WS&&c<260;i++){const px=(rs()-.5)*AR,pz=(rs()-.5)*AR,h=terrainH(px,pz);if(h<1)continue;const b=biomeAt(px,pz,h);if((b!=='meadow'&&b!=='koivu')||!clear(px,pz)||rs()>.5)continue;add('villikaura',px,pz,.9+rs()*.3,rs()*TAU);c++;}
-   for(let i=0,k=0;i<400&&k<3;i++){const a=rs()*TAU,d=16+rs()*24,px=S0.x+Math.cos(a)*d,pz=S0.z+Math.sin(a)*d,h=terrainH(px,pz);if(h<1||!clear(px,pz))continue;add('villikaura',px,pz,1,rs()*TAU);k++;}}
+  // v3.02 villikaura, v3.06 käyttäjä: harvinaisempi ja vain seedin mukaan arvotuilla kasvualueilla (VK_REG: 3 aluetta niityllä, koivikossa tai metsässä,
+  // ensimmäinen 70–170 m päässä aloituksesta), oma satunnaislähde ja viimeisenä (muut solmut eivät muutu)
+  {const rs=mulberry32(seedMix(9311+MAP_ID*53)),ok=b=>b==='meadow'||b==='koivu'||b==='forest';let c=0;
+   for(let i=0,tries=0;VK_REG.length<VK_N&&tries<4000;tries++){const near=!VK_REG.length,a=rs()*TAU,d=70+rs()*100,px=near?S0.x+Math.cos(a)*d:(rs()-.5)*AR*.9,pz=near?S0.z+Math.sin(a)*d:(rs()-.5)*AR*.9,h=terrainH(px,pz);
+     if(h<1.5||!ok(biomeAt(px,pz,h))||VK_REG.some(q=>dist2(q.x,q.z,px,pz)<160*160))continue;VK_REG.push({x:px,z:pz,r:VK_R});i++;}
+   for(const R of VK_REG)for(let i=0;i<900&&c<VK_PER*(VK_REG.indexOf(R)+1);i++){const a=rs()*TAU,d=Math.sqrt(rs())*R.r,px=R.x+Math.cos(a)*d,pz=R.z+Math.sin(a)*d,h=terrainH(px,pz);
+     if(h<1||!ok(biomeAt(px,pz,h))||!clear(px,pz))continue;add('villikaura',px,pz,.9+rs()*.3,rs()*TAU);c++;}}
   // Instanssit jaetaan CHN×CHN ruutuun: jokaisella oma rajauspallo, joten näkymättömät ruudut karsitaan.
   for(const type in tmp){const per=new Map();for(const n of tmp[type]){const k=chunkOf(n.x,n.z);if(!per.has(k))per.set(k,[]);per.get(k).push(n);}
     const pool=POOL[type]||0;nodeIM[type]=[];
@@ -280,14 +289,18 @@ nodes.forEach(ngridAdd);
 // Etäisyys solmuun: tukeille janan lähin piste, muille keskipiste.
 function nodeDist(n,x,z){if(!n.isLog)return Math.hypot(x-n.x,z-n.z);const dx=n.bx-n.ax,dz=n.bz-n.az,t=clamp(((x-n.ax)*dx+(z-n.az)*dz)/(dx*dx+dz*dz),0,1);return Math.hypot(x-(n.ax+dx*t),z-(n.az+dz*t));}
 function nodesNear(x,z,r,out){out.length=0;const x0=Math.floor((x-r)/CELL),x1=Math.floor((x+r)/CELL),z0=Math.floor((z-r)/CELL),z1=Math.floor((z+r)/CELL);for(let gx=x0;gx<=x1;gx++)for(let gz=z0;gz<=z1;gz++){const a=NGRID.get(ck(gx,gz));if(a)for(const n of a)if(n.alive&&!out.includes(n)&&nodeDist(n,x,z)<r)out.push(n);}return out;}
-/* v2.99 käyttäjä: kivet ja malmisuonet uusiutuvat samaan kohtaan ORE_DAYS (5) vuorokauden kuluttua (n.respD, päivälaskuri dayN + dayT – nukkuminen
+/* v2.99 käyttäjä: kivet ja malmisuonet uusiutuvat samaan kohtaan aikaisintaan ORE_DAYS (5) vuorokauden kuluttua (n.respD, päivälaskuri dayN + dayT – nukkuminen
    kuluttaa vuorokauden), eivät rakennusten (nearBase: työpenkki, sänky, kaikki osat, leirit) eivätkä löytöpaikkojen (siteBlocked) lähelle.
-   Oksat ja marjat (PICK_FAR) uusiutuvat lähes samaan kohtaan vasta, kun pelaaja on vähintään PICK_FAR_D (¼ kartan pituudesta) päässä; tarkistus
-   kerran minuutissa pelin aikana (pickFarTick), ei nukkuessa. */
-const ORE_DAYS=5,PICK_FAR=new Set(['oksa','marjat']),PICK_FAR_D=HALF/2,PICK_FAR_T=60;
+   v3.06 UUSIUTUMINEN (käyttäjä):
+   - kivet: kun 5 vrk on kulunut, arvotaan seuraavalla nukkumisella REGROW_K (20 %) – ei enää ajastettuna kesken päivän
+   - KAIKKI poimittavat (PICK_FAR = kind 'pick': oksa, marjat, sieni, kivikasa, piikivi, hiekkakasa, villikaura): vain poimitut; aikaisintaan PICK_T (10 min)
+     poiminnasta, pelaaja yli PICK_FAR_D (60 m) päässä ja arpa PICK_K (20 %) – tarkistus kerran minuutissa (pickFarTick) ja kerran nukkuessa
+   - istutetut (n.planted) eivät uusiudu koskaan (farm.js) */
+const ORE_DAYS=5,PICK_FAR=new Set(Object.keys(NODE).filter(k=>NODE[k].kind==='pick')),PICK_FAR_D=60,PICK_FAR_T=60,PICK_T=600,PICK_K=.2,REGROW_K=.2;
 function rockReady(n){return n.respD==null?n.respawnAt<=playTime:dayN+dayT>=n.respD;}
-function pickFarTick(dt){NODE_FAR.t-=dt;if(NODE_FAR.t>0)return;NODE_FAR.t=PICK_FAR_T;if(P.inDun)return;
-  for(const n of nodes)if(!n.alive&&!n.thin&&PICK_FAR.has(n.type)&&playTime-(n.deadT??-1e9)>=PICK_FAR_T&&dist2(n.ox,n.oz,P.pos.x,P.pos.z)>PICK_FAR_D*PICK_FAR_D&&!nearBase(n.x,n.z))respawnNode(n);}
+function pickReady(n){return !n.alive&&!n.thin&&!n.planted&&PICK_FAR.has(n.type)&&playTime-(n.deadT??-1e9)>=PICK_T&&dist2(n.ox,n.oz,P.pos.x,P.pos.z)>PICK_FAR_D*PICK_FAR_D&&!nearBase(n.x,n.z);}
+function pickRoll(){let c=0;for(const n of nodes)if(pickReady(n)&&Math.random()<PICK_K&&respawnNode(n))c++;return c;}
+function pickFarTick(dt){NODE_FAR.t-=dt;if(NODE_FAR.t>0)return;NODE_FAR.t=PICK_FAR_T;if(P.inDun)return;pickRoll();}
 const NODE_FAR={t:PICK_FAR_T};
 function killNode(n){markShadowDirty();if(typeof resinKilled==='function')resinKilled(n);   /* v2.91 pihkapuun kulho putoaa */n.alive=false;n.deadT=playTime;n.respawnAt=playTime+n.def.respawn;if(PICK_FAR.has(n.type))n.respawnAt=Infinity;if(n.def.kind==='rock')n.respD=dayN+dayT+ORE_DAYS;setNodeMatrix(n,false);if(n.col)n.col.off=true;}
 function reviveNode(n){markShadowDirty();n.alive=true;n.hp=n.maxHp;setNodeMatrix(n,true);if(n.col)n.col.off=false;}
@@ -411,23 +424,22 @@ function clearLogs(){for(const lg of [...logs])removeLog(lg);}
 function plantTree(type,x,z,s){const k=chunkOf(x,z),im=(nodeIM[type]||[]).find(m=>m.userData.k===k);if(!im||im.userData.used>=im.instanceMatrix.count)return null;
   const n={type,x,z,y:terrainH(x,z),s,rot:rng()*TAU,idx:im.userData.used++,im,planted:true};im.count=im.userData.used;initNode(n);ngridAdd(n);return n;}
 function unplantAll(){for(let i=nodes.length-1;i>=0;i--){const n=nodes[i];if(!n.planted)continue;setNodeMatrix(n,false);if(n.col)gridRemove(n.col);ngridRemove(n);nodes.splice(i,1);}
-  for(const k in nodeIM)for(const im of nodeIM[k]){im.userData.used=im.userData.base;im.count=im.userData.base;}{let m=-1;for(const n of nodes)if(n.id<NODE_ID_X&&n.id>m)m=n.id;nodeIdN=m+1;}}
+  for(const k in nodeIM)for(const im of nodeIM[k]){im.userData.used=im.userData.base;im.count=im.userData.base;}{let m=-1,mx=-1;for(const n of nodes){if(n.id<NODE_ID_X){if(n.id>m)m=n.id;}else if(n.id-NODE_ID_X>mx)mx=n.id-NODE_ID_X;}nodeIdN=m+1;nodeIdX=mx+1;}}   // v3.06 myös istutetun kauran id-alue
 // Pelaajan rakentamien osien läheisyyteen ei uusiudu eikä kasva puita tai kasveja: 15 m jokaisesta rakennusosasta
 // ja työpenkin rakennusalue + 30 % (BENCH_R × 1,3 = 26 m).
 const BASE_PIECE_R=15;
 // v1.04: hylättyjen leirien rakennelmat suojaavat vain 7 m (metsä saa olla lähempänä kuin pelaajan rakennuksissa, 15 m).
 function nearBase(x,z){for(const p of pieces){const r=p.t==='tyopenkki'?BENCH_R*1.3:(typeof CAMPS!=='undefined'&&CAMPS.some(c=>dist2(c.x,c.z,p.x,p.z)<49))?7:BASE_PIECE_R;if(dist2(p.x,p.z,x,z)<r*r)return true;}return false;}
-// Yöllä nukkuessa: kaadetut puut ja poimitut kasvit uusiutuvat (ei uusia), paitsi rakennusten lähellä.
-function regrowForest(){let revived=nightRegrow();
-  for(const n of nodes)if(!n.alive&&!n.thin&&n.def.kind==='pick'&&!PICK_FAR.has(n.type)&&!nearBase(n.x,n.z)){if(respawnNode(n))revived++;}
-  return{revived,planted:0};}
-// Kaadetut puut yrittävät kasvaa takaisin vain kerran yössä ja vain pelaajan 100 m säteellä (ei rakennusalueelle).
-// Yön tunnus: illan tunnit kuuluvat kuluvaan päivään, aamuyö edelliseen (flags.rgN = viimeisin yö, jona yritettiin).
-const REGROW_R=100;
+// v3.06 (käyttäjä) NUKKUESSA: kaadetut puut koko kartalla REGROW_K (20 %) / puu / uni (±5 m, sama biomi, ei rakennusten lähelle), kivet joiden 5 vrk on
+// kulunut 20 %, poimittavat kerran (pickRoll) ja taimet + pellot (farmGrow, farm.js). Istutetut puut eivät uusiudu. (Ennen: puut kerran yössä 100 m säteellä, nightRegrow.)
+function regrowForest(){let revived=0;
+  for(const n of nodes){if(n.alive||n.thin||n.planted||n.isLog)continue;const k=n.def.kind;
+    if(k==='tree'){if(Math.random()<REGROW_K&&!nearBase(n.x,n.z)&&respawnNode(n))revived++;}
+    else if(k==='rock'){if(rockReady(n)&&Math.random()<REGROW_K&&!siteBlocked(n.x,n.z)&&!nearBase(n.x,n.z)&&respawnNode(n))revived++;}}
+  revived+=pickRoll();const planted=typeof farmGrow==='function'?farmGrow():0;
+  return{revived,planted};}
+// Yön tunnus: illan tunnit kuuluvat kuluvaan päivään, aamuyö edelliseen (sänky: flags.sleptN).
 function nightId(){return dayN-(dayT<.5?1:0);}
-function nightRegrow(){const id=nightId();if(flags.rgN===id)return 0;flags.rgN=id;let c=0;
-  for(const n of nodes)if(!n.alive&&n.def.kind==='tree'&&dist2(n.x,n.z,P.pos.x,P.pos.z)<REGROW_R*REGROW_R&&!nearBase(n.x,n.z)){if(respawnNode(n))c++;}
-  return c;}
 
 /* ---------------- RUOHO (v1.00, kohta 15) ---------------- */
 // Pystyheinätupsut pelaajan ympärillä (instanssit): tiheys, pituus ja väri biomin mukaan (TBIOME, render.js), ei poluilla (multa), vedessä,
@@ -439,13 +451,18 @@ const GRASS_DEF=[[1,1,0x3d6a22,0x9ccf52],[.9,.95,0x3a6624,0x8cc04a],[.5,.8,0x2c4
   [.2,.9,0x1f3a1c,0x4f7a34],[.3,.75,0x4a4436,0x8a7f60],[.55,.55,0x5a5a30,0xa09a58],[.08,.5,0x5a5a3a,0x9a9a70],[.15,.6,0x50583a,0x8a9060],[.1,.8,0x8a8a5a,0xd0c890]];
 let grassC={x:1e9,z:1e9},grassIM=null;
 const GRASS_MAT=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide,transparent:true,opacity:.5,depthWrite:false});   // v1.02 läpikuultava, kevyt
-GRASS_MAT.onBeforeCompile=sh=>{sh.uniforms.uTime=SWAY.uTime;sh.uniforms.uWind=SWAY.uWind;sh.uniforms.uWDir=SWAY.uWDir;sh.uniforms.uLean=SWAY.uLean;
-  sh.vertexShader='uniform float uTime;uniform float uWind;uniform vec3 uWDir;uniform float uLean;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+const GRASS_U={uPl:{value:new V3(0,-999,0)}};   // v3.06 pelaajan paikka: ruoho ja rikkaruohot taipuvat kulkijan tieltä
+const grassCompile=sh=>{sh.uniforms.uTime=SWAY.uTime;sh.uniforms.uWind=SWAY.uWind;sh.uniforms.uWDir=SWAY.uWDir;sh.uniforms.uLean=SWAY.uLean;sh.uniforms.uPl=GRASS_U.uPl;
+  sh.vertexShader='uniform float uTime;uniform float uWind;uniform vec3 uWDir;uniform float uLean;uniform vec3 uPl;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
   float gPh=instanceMatrix[3].x*.31+instanceMatrix[3].z*.27;float gh=max(0.,position.y);float gk=gh*gh;
   mat3 gM=mat3(instanceMatrix);vec3 gL=vec3(dot(gM[0],uWDir),dot(gM[1],uWDir),dot(gM[2],uWDir));gL/=max(length(gL),1e-4);
   float gs=(.1+uWind*.25)*sin(uTime*2.3+gPh)+min(uLean,1.2)*(.35+.12*sin(uTime*1.7+gPh*1.3));
   transformed.x+=gL.x*gs*gk;transformed.z+=gL.z*gs*gk;transformed.y-=abs(gs)*gk*.25;
-  transformed.x+=sin(uTime*3.1+gPh*2.)*.025*gh*(.3+uWind);`);};
+  transformed.x+=sin(uTime*3.1+gPh*2.)*.025*gh*(.3+uWind);
+  vec2 pd=instanceMatrix[3].xz-uPl.xz;float pl=length(pd);float pk=(1.-smoothstep(.2,1.25,pl))*(1.-step(2.2,abs(instanceMatrix[3].y-uPl.y)));
+  vec3 pw=vec3(pd.x,0.,pd.y)/max(pl,.05);vec3 pL=vec3(dot(gM[0],pw),dot(gM[1],pw),dot(gM[2],pw));pL/=max(length(pL),1e-4);
+  transformed.x+=pL.x*pk*gh*.95;transformed.z+=pL.z*pk*gh*.95;transformed.y-=pk*gk*.45;`);};
+GRASS_MAT.onBeforeCompile=grassCompile;
 // Tupsu: 7 kortta eri suuntiin ja pituuksiin (kolmio, tyvi tumma → kärki vaalea), kaarevuus pieni kallistus ulospäin.
 const GRASS_GEO=(function(){const pos=[],col=[],r=mulberry32(4711);
   for(let i=0;i<4;i++){const a=r()*TAU,h=.2+r()*.32,w=.012+r()*.01,ox=(r()-.5)*.25,oz=(r()-.5)*.25,tx=Math.cos(a)*.12,tz=Math.sin(a)*.12,cx=Math.sin(a)*w,cz=-Math.cos(a)*w;
@@ -464,36 +481,65 @@ const TALL_K={0:1,1:.55,2:.25},TALL_GEO=(function(){const pos=[],col=[],r=mulber
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(pos.map((v,i)=>i%3===1?1:0),3));
   g.boundingSphere=new THREE.Sphere(new V3(0,0,0),80);return g;})();
 let tallIM=null;
+/* v3.06 käyttäjä: ULTRA-RIKKARUOHOT (SET.weeds, vain Ultra): korret ruohon korkeudesta pelaajan korkeuteen; taipuvat pelaajan tieltä (GRASS_U.uPl) ja tuulessa.
+   v3.07 käyttäjä: kolme lajia (WEED_GEOS: heinäkorsi röyhyineen, lehtevä putkikasvi valkoisella sarjalla, ohdakemainen violetilla mykerolla), korsien koko vaihtelee
+   (leveys ja pituus erikseen), biomeittain eri korkeus (WEED_H: niitty korkein, metsänreuna matalin) ja lajisuhteet (WEED_MIX); värit hillityt, hohto pieni. */
+const WEED_K={0:1,1:.5,2:.18,3:.4},WEED_H={0:1.85,1:1.35,2:.95,3:1.2},WEED_MIX={0:[.5,.3,.2],1:[.35,.55,.1],2:[.3,.6,.1],3:[.5,.2,.3]};
+const WEED_MAT=new THREE.MeshLambertMaterial({vertexColors:true,emissive:0x0a0904,side:THREE.DoubleSide,transparent:true,opacity:.9,depthWrite:false});WEED_MAT.onBeforeCompile=grassCompile;
+const WEED_COL=[[0xb8b07a,0x86904e],[0x8aa462,0x667f44],[0x8a9a66,0x6c7c4c]];
+function weedGeo(kind){const pos=[],col=[],r=mulberry32(5531+kind*97);
+  if(kind===0){for(let i=0;i<6;i++){const a=r()*TAU,h=.6+r()*.4,w=.01+r()*.008,ox=(r()-.5)*.22,oz=(r()-.5)*.22,tx=Math.cos(a)*.12,tz=Math.sin(a)*.12,cx=Math.sin(a)*w,cz=-Math.cos(a)*w;   // heinäkorsi
+      pos.push(ox-cx,0,oz-cz, ox+cx,0,oz+cz, ox+tx,h,oz+tz);col.push(.85,.85,.62, .85,.85,.62, 1.1,1.06,.78);
+      if(i%2===0){const mx=ox+tx*.82,mz=oz+tz*.82,my=h*.8;for(let k=0;k<2;k++){const b=a+(k?1.2:-1.2);pos.push(mx,my,mz, mx+Math.cos(b)*.05,my+.03,mz+Math.sin(b)*.05, ox+tx*1.05+Math.cos(b)*.06,h*1.04,oz+tz*1.05+Math.sin(b)*.06);col.push(1.05,1,.75, 1.1,1.05,.78, 1.15,1.08,.8);}}}
+    for(let i=0;i<3;i++){const a=r()*TAU,cx=Math.sin(a)*.03,cz=-Math.cos(a)*.03;pos.push(-cx,0,-cz, cx,0,cz, Math.cos(a)*.18,.28,Math.sin(a)*.18);col.push(.8,.86,.6, .8,.86,.6, .95,1,.7);}}
+  else if(kind===1){for(let i=0;i<3;i++){const a=r()*TAU,h=.7+r()*.3,ox=(r()-.5)*.2,oz=(r()-.5)*.2,cx=Math.sin(a)*.012,cz=-Math.cos(a)*.012;   // lehtevä putkikasvi
+      pos.push(ox-cx,0,oz-cz, ox+cx,0,oz+cz, ox,h,oz);col.push(.75,.86,.55, .75,.86,.55, .9,1,.65);
+      for(let k=0;k<4;k++){const y=h*(.2+k*.17),b=a+k*2.1,L=.16-k*.025;pos.push(ox,y,oz, ox+Math.cos(b+.4)*.03,y+.04,oz+Math.sin(b+.4)*.03, ox+Math.cos(b)*L,y+.06,oz+Math.sin(b)*L);col.push(.7,.9,.5, .72,.92,.52, .85,1.02,.6);}
+      for(let k=0;k<6;k++){const b=k/6*TAU,R=.07;pos.push(ox,h,oz, ox+Math.cos(b)*R,h+.015,oz+Math.sin(b)*R, ox+Math.cos(b+.5)*R,h+.015,oz+Math.sin(b+.5)*R);col.push(1.2,1.2,1.1, 1.3,1.3,1.22, 1.3,1.3,1.22);}}}
+  else{for(let i=0;i<5;i++){const a=i/5*TAU+r()*.3;pos.push(0,.02,0, Math.cos(a+.25)*.05,.04,Math.sin(a+.25)*.05, Math.cos(a)*.22,.08,Math.sin(a)*.22);col.push(.7,.8,.55, .72,.82,.56, .8,.9,.6);}   // ohdake: ruusuke
+    for(let i=0;i<2;i++){const a=r()*TAU,h=.55+r()*.3,ox=(r()-.5)*.12,oz=(r()-.5)*.12,cx=Math.sin(a)*.014,cz=-Math.cos(a)*.014;pos.push(ox-cx,0,oz-cz, ox+cx,0,oz+cz, ox,h,oz);col.push(.72,.82,.56, .72,.82,.56, .85,.92,.62);
+      for(let k=0;k<5;k++){const b=k/5*TAU;pos.push(ox,h-.02,oz, ox+Math.cos(b)*.045,h+.06,oz+Math.sin(b)*.045, ox+Math.cos(b+.6)*.045,h+.06,oz+Math.sin(b+.6)*.045);col.push(.9,.7,1, 1.05,.72,1.15, 1.05,.72,1.15);}}}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(pos.map((v,i)=>i%3===1?1:0),3));
+  g.boundingSphere=new THREE.Sphere(new V3(0,0,0),80);return g;}
+const WEED_GEOS=[weedGeo(0),weedGeo(1),weedGeo(2)];
+let weedIM=null,weedIMs=[];   // weedIM = runsain laji (tarkistus), weedIMs = kaikki
 const _grM=new THREE.Matrix4(),_grQ=new THREE.Quaternion(),_grS=new V3(),_grP=new V3(),_grC=new THREE.Color(),_grC2=new THREE.Color();
 function grassHash(i,j){let h=Math.imul(i,374761393)+Math.imul(j,668265263)|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296;}
 // v1.04 (käyttäjän palaute: "kevyempi, ohuempi, vähemmän, kasoja, läpinäkyvä"): ruoho on harvaan sirottuneita pieniä **kasoja** – ruudukon
 // solu (normaali 2,6 m, täysi 1,8 m) saa todennäköisyydellä tiheys × laikku × 0,6 yhden kasan, jossa 3–6 tupsua 0,5 m säteellä.
 function siteBlockedG(x,z){for(const k in LOC){const L=LOC[k],r=(SITE_CLEAR[L.kind]||(k==='barrow'?13:k==='circle'?15:k.startsWith('rune')?3.5:k.startsWith('ruin')?10:0))*.6;if(r&&dist2(x,z,L.x,L.z)<r*r)return true;}return false;}
 function rebuildGrass(){let lv=+(SET.grass??1);grassDirty=false;if(AUTO.fx>=2)lv=0;else if(AUTO.fx>=1&&lv>=2)lv=1;   /* v1.12 automaattisäätö */
-  if(grassIM){scene.remove(grassIM);grassIM.dispose();grassIM=null;}if(tallIM){scene.remove(tallIM);tallIM.dispose();tallIM=null;}if(!lv||P.inDun)return;
-  const tall=!!SET.tallGrass&&!(AUTO.fx>=1);let tn=0,TI=null;
+  if(grassIM){scene.remove(grassIM);grassIM.dispose();grassIM=null;}if(tallIM){scene.remove(tallIM);tallIM.dispose();tallIM=null;}for(const w of weedIMs){scene.remove(w);w.dispose();}weedIMs=[];weedIM=null;if(!lv||P.inDun)return;
+  const tall=!!SET.tallGrass&&!(AUTO.fx>=1),weed=!!SET.weeds&&!(AUTO.fx>=1);let tn=0,TI=null;const WN0=[0,0,0];let WIs=null;
   const R=lv>=3?54:lv>=2?40:30,C=lv>=3?1.45:lv>=2?1.8:2.6,cx=P.pos.x,cz=P.pos.z,N=Math.ceil(Math.PI*R*R/(C*C))*6+10;
   const im=new THREE.InstancedMesh(GRASS_GEO,GRASS_MAT,N);im.castShadow=false;im.receiveShadow=true;im.frustumCulled=false;const TN=tall?Math.ceil(N/3)+8:0;
   if(tall){TI=new THREE.InstancedMesh(TALL_GEO,GRASS_MAT,TN);TI.castShadow=false;TI.receiveShadow=true;TI.frustumCulled=false;}
+  const WN=weed?Math.ceil(N/2)+8:0;if(weed)WIs=WEED_GEOS.map(g=>{const m=new THREE.InstancedMesh(g,WEED_MAT,WN);m.castShadow=false;m.receiveShadow=true;m.frustumCulled=false;return m;});
   let n=0;const i0=Math.floor((cx-R)/C),i1=Math.ceil((cx+R)/C),j0=Math.floor((cz-R)/C),j1=Math.ceil((cz+R)/C);
   for(let j=j0;j<=j1&&n<N-6;j++)for(let i=i0;i<=i1&&n<N-6;i++){const ox=(i+grassHash(i,j))*C,oz=(j+grassHash(j+7919,i-104729))*C;if((ox-cx)**2+(oz-cz)**2>R*R)continue;
     const gi=Math.round((ox+HALF)/GS),gj=Math.round((oz+HALF)/GS);if(gi<0||gj<0||gi>=HN||gj>=HN)continue;const k=gj*HN+gi,bi=TBIOME[k];if(bi===255)continue;const D=GRASS_DEF[bi];
-    const pv=vnoise(ox*.06+13,oz*.06-7)*.7+vnoise(ox*.23,oz*.23)*.3,patch=sstep(.45,.65,pv);if(patch<=0||grassHash(i*3+1,j*5+2)>D[0]*patch*.6||mudAt(ox,oz)>.22)continue;
-    const nt=3+Math.floor(grassHash(i+11,j-13)*4);
+    const pv=vnoise(ox*.06+13,oz*.06-7)*.7+vnoise(ox*.23,oz*.23)*.3,patch=sstep(.38,.64,pv);if(patch<=0||grassHash(i*3+1,j*5+2)>D[0]*patch*.82||mudAt(ox,oz)>.22)continue;   /* v3.06 käyttäjä: vähemmän kasoissa – enemmän pienempiä, harvempia ryhmiä */
+    const nt=2+Math.floor(grassHash(i+11,j-13)*3);
+    if(weed&&WEED_K[bi]&&grassHash(i*17+3,j*7-11)<WEED_K[bi]*.55*patch){const mx=WEED_MIX[bi]||WEED_MIX[0],hr=grassHash(i+71,j-29),ty=hr<mx[0]?0:hr<mx[0]+mx[1]?1:2,WI=WIs[ty],Hm=WEED_H[bi]||1.2,m=(ty===2?1:2)+Math.floor(grassHash(i+5,j+41)*3);   // v3.06/v3.07 rikkaruohot
+      for(let t=0;t<m&&WN0[ty]<WN;t++){const a=grassHash(i*3+t,j*13-t)*TAU,d=Math.sqrt(grassHash(i+t*7,j-t*3))*.9,x=ox+Math.cos(a)*d,z=oz+Math.sin(a)*d,y=terrainH(x,z);if(y<.35||mudAt(x,z)>.22)continue;
+        if(t===0&&(pointBlocked(x,y+.3,z)||siteBlockedG(x,z)))break;const q=grassHash(i+61+t,j+5),hgt=(ty===2?.3:.35)+(Hm*(ty===2?.55:1)-.35)*Math.pow(q,1.25)*(.6+.4*grassHash(t+2,i)),wd=.6+grassHash(i+t,j*3+t)*.7;
+        _grQ.setFromAxisAngle(_up,grassHash(i-13+t,j+23)*TAU);_grS.set(wd*(.7+hgt*.3),hgt,wd*(.7+hgt*.3));_grP.set(x,y-.04,z);_grM.compose(_grP,_grQ,_grS);WI.setMatrixAt(WN0[ty],_grM);
+        _grC.setHex(WEED_COL[ty][0]).lerp(_grC2.setHex(WEED_COL[ty][1]),grassHash(i+19,j-9+t)*.7);WI.setColorAt(WN0[ty],_grC);WN0[ty]++;}}
     if(tall&&TALL_K[bi]&&tn<TN-4&&grassHash(i*13+5,j*11-3)<TALL_K[bi]*.42*patch){const m=2+Math.floor(grassHash(i+3,j+29)*3);   // v3.02 korkea kasa
       for(let t=0;t<m&&tn<TN;t++){const a=grassHash(i*5+t,j*9-t)*TAU,d=Math.sqrt(grassHash(i+t*3,j-t))*.6,x=ox+Math.cos(a)*d,z=oz+Math.sin(a)*d,y=terrainH(x,z);if(y<.35||mudAt(x,z)>.22)continue;
         if(t===0&&(pointBlocked(x,y+.3,z)||siteBlockedG(x,z)))break;const s=(.8+grassHash(i+51+t,j+3)*.45)*D[1];_grQ.setFromAxisAngle(_up,grassHash(i-9+t,j+19)*TAU);_grS.set(s,s*(.9+grassHash(t,j)*.35),s);_grP.set(x,y-.04,z);_grM.compose(_grP,_grQ,_grS);TI.setMatrixAt(tn,_grM);
         _grC.setHex(D[3]).lerp(_grC2.setHex(D[2]),grassHash(i+97,j-7+t)*.5);TI.setColorAt(tn,_grC);tn++;}}
-    for(let t=0;t<nt;t++){const a=grassHash(i*7+t,j*3-t)*TAU,d=Math.sqrt(grassHash(i-t,j+t*5))*.5,x=ox+Math.cos(a)*d,z=oz+Math.sin(a)*d,y=terrainH(x,z);if(y<.35)continue;
+    for(let t=0;t<nt;t++){const a=grassHash(i*7+t,j*3-t)*TAU,d=Math.sqrt(grassHash(i-t,j+t*5))*1.05,x=ox+Math.cos(a)*d,z=oz+Math.sin(a)*d,y=terrainH(x,z);if(y<.35)continue;
       if(t===0&&(Math.abs(terrainH(x+.8,z)-y)>.9||pointBlocked(x,y+.3,z)||siteBlockedG(x,z)))break;
       const s=(.55+grassHash(i+31+t,j+17)*.6)*D[1]*(t===0?1:.75+grassHash(t,i)*.35);_grQ.setFromAxisAngle(_up,grassHash(i-5+t,j+9)*TAU);_grS.set(s,s,s);_grP.set(x,y-.03,z);_grM.compose(_grP,_grQ,_grS);im.setMatrixAt(n,_grM);
       _grC.setHex(D[3]).lerp(_grC2.setHex(D[2]),grassHash(i+77,j-3+t)*.45);im.setColorAt(n,_grC);n++;}}
   // v1.38 (KORJAUKSET 28): ruohoton alue (kivinen vuori, kohteen ympäristö) → n = 0 eikä setColorAt-kutsua → instanceColor = null. Sama
   // GRASS_MAT on jo käännetty instanssiväreillä, joten three.js r128 kaatui piirrossa ("Script error"). Tyhjää ei lisätä näkymään.
+  if(WIs)WIs.forEach((WI,k)=>{const wn=WN0[k];if(wn){WI.count=wn;WI.instanceMatrix.needsUpdate=true;if(WI.instanceColor)WI.instanceColor.needsUpdate=true;scene.add(WI);weedIMs.push(WI);if(!weedIM||wn>weedIM.count)weedIM=WI;}else WI.dispose();});   // KORJAUKSET 28: tyhjää ei lisätä
   grassC={x:cx,z:cz};if(TI){if(tn){TI.count=tn;TI.instanceMatrix.needsUpdate=true;if(TI.instanceColor)TI.instanceColor.needsUpdate=true;scene.add(TI);tallIM=TI;}else TI.dispose();}   // KORJAUKSET 28: tyhjää ei lisätä
   if(!n){im.dispose();return;}
   im.count=n;im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;scene.add(im);grassIM=im;}
-function updateGrass(){if(P.inDun){if(grassIM)grassIM.visible=false;if(tallIM)tallIM.visible=false;return;}if(grassIM)grassIM.visible=true;if(tallIM)tallIM.visible=true;
+function updateGrass(){GRASS_U.uPl.value.set(P.pos.x,P.pos.y,P.pos.z);if(P.inDun){if(grassIM)grassIM.visible=false;if(tallIM)tallIM.visible=false;for(const w of weedIMs)w.visible=false;return;}if(grassIM)grassIM.visible=true;if(tallIM)tallIM.visible=true;for(const w of weedIMs)w.visible=true;
   if(grassDirty||dist2(P.pos.x,P.pos.z,grassC.x,grassC.z)>36)rebuildGrass();}
 
 /* ---------------- v2.41 VARJOJEN OPTIMOINTI (SET.shOpt) ----------------

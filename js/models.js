@@ -319,6 +319,8 @@ function makeHeld(id){
       for(const z of [.5,.64]){const b=new THREE.Mesh(new THREE.CylinderGeometry(.088+(z-.5)*.06,.088+(z-.5)*.06,.03,10),band);b.rotation.x=Math.PI/2;b.position.z=z;g.add(b);}break;}
     case 'hakku':case 'kuparihakku':case 'rautahakku':{shaft(g,.85,W);const c=id==='hakku'?0x58606b:id==='kuparihakku'?0xd98a4e:0x9aa6b3,R=.45,arc=1.7;
       const geo=new THREE.TorusGeometry(R,.04,6,14,arc);geo.rotateZ(-arc/2);geo.rotateY(-Math.PI/2);geo.translate(0,0,.72-R);const me=new THREE.Mesh(geo,metalOf(c));me.castShadow=true;g.add(me);
+      for(const sg of [1,-1]){const th=sg*arc/2,oy=sg*Math.cos(th),oz=-sg*Math.sin(th),tip=new THREE.Mesh(new THREE.ConeGeometry(.042,.13,6),metalOf(c));   // v3.07 käyttäjä: kaaren päät umpeen (ennen ontto putki näkyi läpi)
+        tip.rotation.x=Math.atan2(oz,oy);tip.position.set(0,R*Math.sin(th)+oy*.065,R*Math.cos(th)+.72-R+oz*.065);tip.castShadow=true;g.add(tip);}
       const hub=new THREE.Mesh(new THREE.BoxGeometry(.09,.09,.1),mat(0x3a3a3a));hub.position.z=.72;g.add(hub);break;}
     case 'keihas':{shaft(g,1.7,W,.026);g.add(poly([[1.6,.035],[1.78,0],[1.6,-.035]],.03,metalOf(0x66707a)));g.position.z=-.3;break;}
     case 'miekka':case 'rautamiekka':case 'hiidenmiekka':{const L=id==='miekka'?.85:1,bm=metalOf(id==='miekka'?0xe9a46a:id==='hiidenmiekka'?0x7fe9dd:0xc8d2dc,{metalness:.6,roughness:.4});
@@ -326,6 +328,12 @@ function makeHeld(id){
       g.add(bx(.3,.05,.06,metalOf(0x8f5326),0,0,.17));
       g.add(poly([[.18,.05],[.18+L-.14,.05],[.18+L,0],[.18+L-.14,-.05],[.18,-.05]],.03,bm));break;}
     case 'lapio':{shaft(g,.95,W);g.add(poly([[.82,.1],[1.0,.1],[1.12,.0],[1.0,-.1],[.82,-.1]],.03,metalOf(0x8a96a3,{roughness:.5})));const gr=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.06),W);gr.position.set(0,0,-.08);g.add(gr);break;}
+    case 'onki':case 'kuparivapa':case 'hiidenvapa':{const c=id==='onki'?0x8a6a3a:id==='kuparivapa'?0xd98a4e:0x5fe6d9;shaft(g,ROD_LEN,smat(id==='onki'?0x9a7a4a:0x5a3a22),.018);   // v3.06 vapa: pitkä ohut varsi, kela, rengas kärjessä
+      const reel=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.04,10),mat(c,{metalness:id==='onki'?0:.5,roughness:.5}));reel.rotation.z=Math.PI/2;reel.position.set(0,-.06,.22);g.add(reel);
+      for(const z of [.8,1.4,ROD_LEN-.02]){const r=new THREE.Mesh(new THREE.TorusGeometry(.016,.004,4,8),mat(0xc8c8c8,{metalness:.6}));r.position.set(0,-.02,z);g.add(r);}
+      {const hk=new THREE.Group(),L=.28,ln=new THREE.Mesh(new THREE.CylinderGeometry(.0025,.0025,L,3),mat(0xe8e8e0));ln.position.y=-L/2;hk.add(ln);   // v3.07 käyttäjä: koukku roikkuu kärjestä (piiloon heiton ajaksi, fishTick)
+       const h=new THREE.Mesh(new THREE.TorusGeometry(.018,.003,4,10,Math.PI*1.4),mat(0xb8bcc4,{metalness:.7,roughness:.3}));h.position.set(.012,-L-.012,0);h.rotation.z=Math.PI*.8;hk.add(h);
+       const sk=new THREE.Mesh(new THREE.SphereGeometry(.012,6,4),mat(0x5a5a5a,{metalness:.6}));sk.position.y=-L*.55;hk.add(sk);hk.position.set(0,-.02,ROD_LEN-.1);g.add(hk);g.userData.hook=hk;}break;}
     case 'kuokka':{shaft(g,.95,W);g.add(bx(.06,.34,.16,mat(0x8a96a3,{metalness:.2,roughness:.55}),0,-.15,.86));g.add(bx(.08,.08,.12,mat(0x3a3a3a),0,0,.86));break;}
     case 'puukko':{/* v2.91 puukko: koivupahkakahva, messinkihela, kapea terä */const hw=smat(0x6b4527,{flatShading:true});const h=new THREE.Mesh(new THREE.CylinderGeometry(.024,.028,.13,8),hw);h.rotation.x=Math.PI/2;h.position.z=.0;g.add(h);
       g.add(bx(.05,.04,.012,mat(0xc9a24a,{metalness:.5,roughness:.4}),0,0,.07,false));const bl=metalOf(0xb8c2cc);g.add(poly([[.075,.013],[.24,.01],[.27,-.004],[.24,-.016],[.075,-.016]],.008,bl));break;}

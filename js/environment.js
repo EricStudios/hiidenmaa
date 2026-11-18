@@ -235,7 +235,7 @@ function effects(){const e=[],wt=invWeight(),b=P.buffs,add=(key,name,kind,desc,t
   if(P.hunger<=0)add('nalka','Nälkä','bad','Menetät terveyttä, kävely −15 %, isku −20 %, kestävyys palautuu puolet hitaammin. Syö!');
   else if(P.hunger<25)add('nalkainen','Nälkäinen','bad','Isku −10 %, kestävyys palautuu 15 % ja terveys 50 % hitaammin. Syö pian.');
   if(b.pahoinvointi)add('pahoinvointi','Pahoinvointi','bad','Raa\'asta lihasta: terveys ei palaudu itsestään, kestävyys palautuu puolet hitaammin.',b.pahoinvointi);
-  if(b.markakengat)add('markakengat','Märät kengät','bad','Kaadoit vesikulhon jaloillesi: liikkuminen −11 %.',b.markakengat);   // v3.04
+  if(b.markakengat)add('markakengat','Märät kengät','bad','Kaadoit vesikulhon jaloillesi: liikkuminen −22 %.',b.markakengat);   // v3.04
   if(b.vihainen)add('vihainen','Vihainen','bad','Harmittaa! Kestävyys kuluu 20 % nopeammin.',b.vihainen);
   if(b.vatsakipu)add('vatsakipu','Vatsakipu','bad','Liiasta syömisestä: kävely −10 %, kestävyys palautuu 30 % hitaammin ja kramppi vie välillä kestävyyttä.',b.vatsakipu);
   if(!devOn('weight')&&wt>MAXW)add('kuorma','Ylikuormitus','bad','Kävely −45 %, et voi juosta etkä hypätä. Pudota tavaroita tai päivitä reppu.');
@@ -258,7 +258,7 @@ function calcFx(){const f=P.fx,b=P.buffs;f.speed=1;f.dmg=1;f.stamRegen=1;f.hpReg
   if(P.hunger<=0){f.speed*=.85;f.dmg*=.8;f.stamRegen*=.5;f.hpRegen=0;}else if(P.hunger<25){f.dmg*=.9;f.stamRegen*=.85;f.hpRegen*=.5;}
   if(b.pahoinvointi){f.stamRegen*=.5;f.hpRegen=0;}
   if(b.vatsakipu){f.speed*=.9;f.stamRegen*=.7;}
-  if(b.markakengat)f.speed*=WET_SHOE_K;   // v3.04 märät kengät −11 %
+  if(b.markakengat)f.speed*=WET_SHOE_K;   // v3.04/v3.06 märät kengät −22 %
   if(b.levannyt)f.stamRegen*=1.45;f.speed*=1+BON.spd/100;}
 /* v2.09 KODIN LÄMPÖ. homeScan (0,5 s välein): 16 vaakasädettä kolmella korkeudella (0,6 / 1,5 / 2,2 m) pelaajasta enintään 15 m – jokaisen on
    osuttava seinään, suljettuun oveen, lasiin tai maastoon; katto pelaajan kohdalla ja 1 m joka suuntaan (sheltered). Aukkoikkuna päästää säteen läpi
