@@ -21,7 +21,7 @@ function resinEligible(n){return resinKind(n)&&n.s>=RESIN_MIN_S;}
 function resinStore(){if(!flags.resin)flags.resin={};return flags.resin;}
 function resinState(n){return n&&flags.resin?flags.resin[n.id]:null;}
 // pihkapuu (ei tyhjentynyt): 3 % tai maailman taattu puu
-function isResinTree(n){if(!resinEligible(n)||!n.alive)return false;const e=resinState(n);if(e&&e.done)return false;return resinHash(n.id)<RESIN_P||n.id===flags.resinG;}
+function isResinTree(n){if(!resinEligible(n)||!n.alive)return false;const e=resinState(n);if(e&&e.done)return false;return resinHash(n.id)<RESIN_P||n.id===flags.resinG||!!n.rz;}   // v3.06 n.rz: pihkasiemenestä istutettu (farm.js)
 // rungon puolileveys (laatikkorunko: kuusi 0,4 m, mänty 0,36 m) ja tyven korkeus (puu upotetaan rinteeseen kuten setNodeMatrix)
 function resinHW(n){return (n.type==='kuusi'?.2:.18)*n.s;}
 function resinTrunkH(n){return (n.type==='kuusi'?2.2:2.6)*n.s;}
@@ -45,7 +45,7 @@ function nearWater(){if(P.inDun)return false;if(P.inWater)return true;const wl=w
    (paikkamerkki sounds/extra/raw/moka/kirous, avain p/moka/kirous) BOWL_CURSE_D s myöhemmin.
    Liikkuessa (kävely, juoksu, hyppy – juoksun käsienheilunta kallistaisi kulhoa ~105°) hahmo kantaa vesikulhoa varovasti: kulho pidetään vaakasuorassa
    (bowlLevel); vain F-tarkastelu (P.insp, myös AFK-lähitarkastelu) kääntää sen oikeasti → voi kaataa. */
-const BOWL_SPILL_Y=-.15,BOWL_SPILL_T=.12,BOWL_CURSE_D=.45,BOWL_LEVEL_K=12,_spillQ=new THREE.Quaternion(),_spillPQ=new THREE.Quaternion(),_spillFix=new THREE.Quaternion(),_spillT=new THREE.Quaternion(),_spillV=new THREE.Vector3(),_spillUp=new THREE.Vector3(0,1,0);
+const BOWL_SPILL_Y=-.15,BOWL_SPILL_T=.12,BOWL_CURSE_D=2,BOWL_LEVEL_K=12,_spillQ=new THREE.Quaternion(),_spillPQ=new THREE.Quaternion(),_spillFix=new THREE.Quaternion(),_spillT=new THREE.Quaternion(),_spillV=new THREE.Vector3(),_spillUp=new THREE.Vector3(0,1,0);
 function bowlLevel(hm,dt){if(!hm.userData.q0)hm.userData.q0=hm.quaternion.clone();const q0=hm.userData.q0;
   if(P.insp){_spillT.copy(q0);}else{hm.parent.getWorldQuaternion(_spillPQ);_spillQ.copy(_spillPQ).multiply(q0);_spillV.set(0,1,0).applyQuaternion(_spillQ);
     _spillFix.setFromUnitVectors(_spillV,_spillUp);_spillQ.premultiply(_spillFix);_spillT.copy(_spillPQ.invert()).multiply(_spillQ);}
@@ -55,10 +55,10 @@ function bowlSpillTick(dt){if(heldId!=='vesikulho'||!heldMesh||P.dead){RES.spT=0
 function bowlSpill(){const s=heldBowl();if(!s||s.id!=='vesikulho')return;heldMesh.getWorldPosition(_spillV);s.id='kulho';invDirty=true;updateGear();bump('spills');
   burst(_spillV.x,_spillV.y,_spillV.z,0x8fc8ff,16,2.2);plSnd('kaytto','vesi_kaato',{v:.6,pos:{x:_spillV.x,y:_spillV.y,z:_spillV.z}});
   msg('Hups! Kaadoit vedet vahingossa – kulho on taas tyhjä. Kengät kastuivat ja harmittaa.','warn');setTimeout(()=>{if(!P.dead)plSnd('moka','kirous',{v:.9});},BOWL_CURSE_D*1000);   // v3.05 käyttäjän ääni hieman hiljempaa
-  P.buffs.markakengat=SPILL_FX.markakengat;P.buffs.kylmavesi=SPILL_FX.kylma;P.buffs.vihainen=SPILL_FX.vihainen;RES.angT=5+Math.random()*5;}   // v3.04 tilat
+  P.buffs.markakengat=SPILL_FX.markakengat;P.buffs.kylmavesi=SPILL_FX.kylma;P.buffs.vihainen=SPILL_FX.vihainen;RES.angT=ANGRY_FIRST;}   // v3.06 vihaisen ääni aikaisintaan 6 s päästä   // v3.04 tilat
 /* v3.04 käyttäjä: kaatuneesta vedestä tilat – Märät kengät (liike −11 %, SPILL_FX.markakengat s), Kylmä 30 s (kuten kylmä yö: tuli lämmittää),
    Vihainen 20 s (kestävyys kuluu 20 % nopeammin, environment.js survival; ääni p/moka/vihainen 5–10 s välein angryTick). */
-const SPILL_FX={markakengat:60,kylma:30,vihainen:20},WET_SHOE_K=.89,ANGRY_STAM_K=1.2;
+const SPILL_FX={markakengat:60,kylma:30,vihainen:20},WET_SHOE_K=.78,ANGRY_STAM_K=1.2,ANGRY_FIRST=6;   // v3.06 käyttäjä: märät kengät −22 %, kirous 2 s, vihainen-ääni 6 s jälkeen
 function angryTick(dt){if(!P.buffs.vihainen||P.dead){RES.angT=Math.max(RES.angT||0,1);return;}RES.angT=(RES.angT??5)-dt;if(RES.angT<=0){RES.angT=5+Math.random()*5;plSnd('moka','vihainen',{v:.8});}}
 function heldBowl(){const w=equipped('weapon');return w&&ITEMS[w.id].cat==='bowl'?w:null;}
 function bowlUse(){const s=heldBowl();if(!s||P.dead)return;

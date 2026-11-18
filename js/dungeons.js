@@ -194,6 +194,7 @@ function ensureRealm(id){
   {const isWc=(x,z)=>isW(Math.round((x-D.cx)/DC+W/2-.5),Math.round((z-D.cz)/DC+H/2-.5)),N=48,cap=5.5*DC,rays=[];
     for(let i=0;i<N;i++){const a=i/N*TAU,c=Math.cos(a),s=Math.sin(a);let d=0;while(d<cap&&!isWc(R.boss.x+c*(d+.25),R.boss.z+s*(d+.25)))d+=.25;rays.push(d);}
     R.room={x:R.boss.x,z:R.boss.z,rays,avg:rays.reduce((a,b)=>a+b,0)/N};}
+  if(id==='portal1')iceBuild(R,g,W,H,cell,y0,r,L);   // v3.06 jäälätäköt käytäviin
   R.grid={g,W,H,cx:D.cx,cz:D.cz};   // v1.92: ruudukko talteen (DEV-reittiviiva bossRoute)
   R.mobs=L.mobs.map(m=>({...cell(m.ix,m.iz),type:m.type}));
   fo('rnc')[id]=L.chests.length;R.nChest=L.chests.length;   // v2.62 arkkujen määrä (hukattujen arvoesineiden siirto)
@@ -474,6 +475,20 @@ function devRoomOutline(){const on=devOn('bossLine')&&P.inDun&&P.realm&&BUILT[P.
    ensimmäiseen pomohuoneen ruutuun (inBossRoom), sitten suoristus: hypätään niin pitkälle kuin suora mahtuu (0,6 m väli seiniin).
    Viiva on lattialla, näkyy seinien läpi, päivittyy kun ruutu vaihtuu (ensimmäinen pätkä seuraa pelaajaa joka ruudussa); huoneessa se katoaa. */
 let ROUTE=null;
+/* v3.06 käyttäjä: JÄÄTÄREN ULOTTUVUUDEN (Routaluola) JÄÄLÄTÄKÖT – pitkiä, lähes kitkattomia jääkaistaleita käytävissä (ICE_N kpl, 3–7 ruutua).
+   Pelaaja ja olennot liukuvat (ICE_GRIP: liike muuttuu hitaasti, vauhti säilyy; seinä pysäyttää). Ei sisäänkäynnin, pomohuoneen eikä spawnerin päällä. */
+const ICE_GRIP=.55,ICE_N=9,ICE={list:[]};
+function iceAt(x,z){if(!P.inDun||P.realm!=='portal1')return false;const R=BUILT.portal1;if(!R||!R.ice)return false;for(const q of R.ice)if(x>=q.x0&&x<=q.x1&&z>=q.z0&&z<=q.z1)return true;return false;}
+function iceBuild(R,g,W,H,cell,y0,r,L){R.ice=[];const isF=(x,z)=>x>=0&&z>=0&&x<W&&z<H&&g[z][x]!=='#',runs=[];
+  const ok=(x,z)=>!(Math.abs(x-L.ent.ix)<=2&&Math.abs(z-L.ent.iz)<=2)&&Math.hypot(x-L.boss.ix,z-L.boss.iz)>6&&!(L.spw&&Math.abs(x-L.spw.ix)<=1&&Math.abs(z-L.spw.iz)<=1);
+  for(const hz of [0,1])for(let a=0;a<(hz?W:H);a++){let run=[];for(let b=0;b<=(hz?H:W);b++){const x=hz?a:b,z=hz?b:a;   /* hz 0: vaakakäytävät, 1: pystykäytävät */
+      const cor=isF(x,z)&&ok(x,z)&&(hz?!isF(x-1,z)&&!isF(x+1,z):!isF(x,z-1)&&!isF(x,z+1));if(cor)run.push([x,z]);else{if(run.length>=3)runs.push(run);run=[];}}}
+  for(let i=runs.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[runs[i],runs[j]]=[runs[j],runs[i]];}
+  const mat=new THREE.MeshStandardMaterial({color:0xcfeeff,roughness:.06,metalness:.35,transparent:true,opacity:.82,emissive:0x2a5a78,emissiveIntensity:.35});
+  for(const run of runs.slice(0,ICE_N)){const n=Math.min(run.length,3+Math.floor(r()*5)),s=Math.floor(r()*(run.length-n+1)),seg=run.slice(s,s+n),a=cell(...seg[0]),b=cell(...seg[seg.length-1]);
+    const hw=DC*.42,x0=Math.min(a.x,b.x)-(a.x===b.x?hw:DC*.5),x1=Math.max(a.x,b.x)+(a.x===b.x?hw:DC*.5),z0=Math.min(a.z,b.z)-(a.z===b.z?hw:DC*.5),z1=Math.max(a.z,b.z)+(a.z===b.z?hw:DC*.5);
+    R.ice.push({x0,x1,z0,z1});const m=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,.04,z1-z0),mat);m.position.set((x0+x1)/2,y0+.02,(z0+z1)/2);m.receiveShadow=true;R.g.add(m);
+    for(let k=0;k<6;k++){const c=new THREE.Mesh(new THREE.BoxGeometry(.03,.012,.4+r()*.9),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35}));c.position.set(x0+r()*(x1-x0),y0+.045,z0+r()*(z1-z0));c.rotation.y=r()*TAU;R.g.add(c);}}}   // halkeamat
 function rCell(G,x,z){return [Math.round((x-G.cx)/DC+G.W/2-.5),Math.round((z-G.cz)/DC+G.H/2-.5)];}
 function rPos(G,ix,iz){return {x:G.cx+(ix-G.W/2+.5)*DC,z:G.cz+(iz-G.H/2+.5)*DC};}
 function rWall(G,ix,iz){return ix<0||iz<0||ix>=G.W||iz>=G.H||G.g[iz][ix]==='#';}

@@ -18,7 +18,7 @@ function lvlInfo(){if(devOn('lvl'))return{L:LVL_MAX,xp:0,need:0};// DEV: korkein
 const playerLevel=()=>lvlInfo().L;
 /* v2.70 TASOPALKINNOT (käyttäjä: "Tasainen"): joka tasolla jotain, HP harvoin. HP +10 (3, 5), +15 (10, 15), +20 (20) = +70 → 130;
    kestävyys +5 (4, 8, 12, 16) = +20; muilla tasoilla kantokyky +5 (10 tasoa = +50). Lisäksi reseptit (RECIPES lvl). */
-const LVL_REW={3:{hp:10},4:{stam:5},5:{hp:10},8:{stam:5},10:{hp:15},12:{stam:5},15:{hp:15},16:{stam:5},20:{hp:20},22:{stam:5},24:{hp:10},26:{stam:5},28:{hp:10},30:{hp:20}},LVL_W=5;   // v3.02 tasot 21–30
+const LVL_REW={2:{w:10},3:{hp:10,w:8},4:{stam:5},5:{hp:10},8:{stam:5},10:{hp:15},12:{stam:5},15:{hp:15},16:{stam:5},20:{hp:20},22:{stam:5},24:{hp:10},26:{stam:5},28:{hp:10},30:{hp:20}},LVL_W=3;   // v3.06 kantokyky: taso 2 +10, 3 +8, muut +3   // v3.02 tasot 21–30
 const lvlRew=L=>L<2?{}:LVL_REW[L]||{w:LVL_W};
 function lvlBon(L){const o={hp:0,stam:0,w:0};for(let i=2;i<=(L||playerLevel());i++){const r=lvlRew(i);for(const k in r)o[k]+=r[k];}return o;}
 function addXp(n,why){if(!n||P.dead)return;fixFlags();const b=playerLevel(),h0=maxHp();flags.xp+=n;const a=playerLevel();if(maxHp()>h0)P.hp+=maxHp()-h0;   /* v1.20: terveyslisä heti */
@@ -47,10 +47,14 @@ const ACH=[
   {id:'pihka',n:'Pihkankerääjä',d:'Kerää 20 pihkaa pihkapuista kulholla (puukko, kulho ja naru).',pr:()=>[cnt('resin'),20],b:{w:5}},   // v2.91
   {id:'padankaitsija',n:'Padankaitsija',d:'Ota keittopadasta 20 valmista pataruokaa.',pr:()=>[cnt('potDish'),20],b:{w:5}},   // v3.02
   {id:'hillo',n:'Hillomestari',d:'Keitä 10 puolukkahilloa.',pr:()=>[flags.hilloN||0,10],b:{stam:5}},   // v3.02
+  {id:'kalamies',n:'Kalamies',d:'Ongi 25 kalaa.',pr:()=>[cnt('fish'),25],b:{w:5}},   // v3.06
   {id:'vartija',n:'Kalmanvartijan voittaja',d:'Voita Kalmanvartija.',pr:()=>[flags.boss?1:0,1],b:{hp:5,stam:5}},
 ];
 const BON={hp:0,stam:0,w:0,spd:0};
-function recalcMaxW(){MAXW=160+40*P.packLv+BON.w+lvlBon().w;}   // v2.70 + tasojen kantokyky
+/* v3.06 käyttäjä: kantokyky alussa 60, enintään TASAN 200 kun kaikki tehty: alku W_BASE 60 + reppu 2 × W_PACK 15 + saavutukset 50 + tasot 60
+   (taso 2 +10, taso 3 +8, muut kantokykytasot +3). */
+const W_BASE=60,W_PACK=15;
+function recalcMaxW(){MAXW=W_BASE+W_PACK*P.packLv+BON.w+lvlBon().w;}   // v2.70 + tasojen kantokyky
 function recalcBon(){fixFlags();BON.hp=BON.stam=BON.w=BON.spd=0;for(const a of ACH)if(flags.ach[a.id])for(const k in a.b)BON[k]+=a.b[k];recalcMaxW();}
 const bonText=b=>Object.entries(b).map(([k,v])=>({hp:`+${v} enimmäisterveys`,stam:`+${v} enimmäiskestävyys`,w:`+${v} kantokyky`,spd:`+${v} % nopeus`}[k])).join(', ');
 function checkAch(){fixFlags();let any=false;

@@ -206,7 +206,8 @@ function validPlace(t,x,y,z,rot,f=0){
     return true;}
   for(const [id,n] of Object.entries(def.req))if(invCount(id)<n){lastInvalid=`Tarvitset: ${reqText(def.req)}`;return false;}
   if(!def.noBench&&!nearPiece('tyopenkki',x,z,BENCH_R)){lastInvalid=pieces.some(p=>p.t==='tyopenkki')?'Rakenna työpenkin alueelle (oranssi raja).':'Rakenna ensin työpenkki.';return false;}
-  if(y<-.4&&bt(t)!=='lattia'&&bt(t)!=='tervaslattia'&&!def.col){lastInvalid='Liian syvällä vedessä.';return false;}
+  if(def.water){if(y>-.25){lastInvalid='Katiska asetetaan veteen (vähintään 0,3 m syvään).';return false;}}   // v3.06
+  else if(y<-.4&&bt(t)!=='lattia'&&bt(t)!=='tervaslattia'&&!def.col){lastInvalid='Liian syvällä vedessä.';return false;}
   if(def.roof){for(const p of pieces)if(PIECES[p.t].roof&&Math.abs(p.x-x)<.1&&Math.abs(p.z-z)<.1&&Math.abs(p.y-y)<.5){lastInvalid='Paikalla on jo katto.';return false;}
     for(const b of worldBoxes(t,x,y,z,rot,f)){const px=clamp(P.pos.x,b.minX,b.maxX),pz=clamp(P.pos.z,b.minZ,b.maxZ);if(dist2(px,pz,P.pos.x,P.pos.z)<.16&&b.maxY>P.pos.y+.3&&b.minY<P.pos.y+1.8){lastInvalid='Seisot tiellä.';return false;}}
     return true;}
@@ -245,8 +246,7 @@ function removeLooked(){
   for(const [id,n] of Object.entries(PIECES[p.t].req))giveOrDrop(id,n,p.x,p.y+1,p.z);
   if(p.data.lv)for(let i=1;i<=p.data.lv;i++)for(const [id,n] of Object.entries(STORE_UP[i]))giveOrDrop(id,n,p.x,p.y+1,p.z);
   if(p.t==='patanuotio'&&p.data.pot)giveOrDrop(p.data.spo?'pilapata':'keittopata',1,p.x,p.y+1,p.z);   // v3.02 asennettu pata takaisin
-  if(p.t==='sulatin'&&p.data.pp)giveOrDrop('pilapata',p.data.pp,p.x,p.y+1,p.z);
-  if(p.t==='sulatin'){if(p.data.ore)giveOrDrop('malmi',p.data.ore,p.x,p.y+1,p.z);if(p.data.iore)giveOrDrop('rautamalmi',p.data.iore,p.x,p.y+1,p.z);if(p.data.done)giveOrDrop('kupari',p.data.done,p.x,p.y+1,p.z);if(p.data.idone)giveOrDrop('rauta',p.data.idone,p.x,p.y+1,p.z);}
+  if(p.t==='sulatin')smRefund(p);   // v3.06 jono, valmiit ja polttoaine takaisin
   removePiece(p);sfx(/^kivi/.test(p.t)?'crumble':'woodBreak');plSnd('rakentaminen','purku',{pos:{x:p.x,y:p.y,z:p.z}});burst(p.x,p.y+.5,p.z,0x8a5a32,8,3);
 }
 function damagePiece(p,d,src){if(src==='mob'&&PIECES[p.t].mobProof)return;p.hp-=d;burst(p.x,p.y+1,p.z,0x8a5a32,4,2);if(p.hp>0)setPieceDamage(p);

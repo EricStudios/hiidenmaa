@@ -8,7 +8,7 @@
      irrota (pilaantunut pata) ja sulata sulatusuunissa (POT_MELT) tai asenna uusi pata.
    - Äänet (p/rakentaminen/…, käyttäjän äänet v3.05): pata_aloitus (valmistus alkaa), pata_vesi (veden vaativa resepti alkaa), pata_kiehuu (silmukkamainen kupliva, harvakseltaan),
      pata_valmis_kansi / pata_valmis (valmis kansi päällä / ilman kantta), kansi_kiinni, kansi_auki. */
-const POT_MAX=10,POT_K_OPEN=10,POT_K_LID=8,POT_LID_NOFIRE=.7,POT_COOK={sieni:'sienipaisti'},POT_MELT={rauta:2,kupari:1},POT_MELT_T=12,POT_R=4;
+const POT_FUEL_S=600,POT_MAX=10,POT_K_OPEN=10,POT_K_LID=8,POT_LID_NOFIRE=.7,POT_COOK={sieni:'sienipaisti'},POT_MELT={rauta:2,kupari:1},POT_MELT_T=12,POT_R=4;
 let curPot=null,potUiT=0,potSig='';
 /* v3.05 käyttäjä: padan äänet hiljaisia (POT_SND_V; työkalu lisäksi −26…−29 LUFS), kiehuminen vielä hiljempaa (POT_BUB_V). Resepti, joka vaatii veden
    (vesikulho), soittaa alussa pata_vesi (veden kaato pataan) aloitusäänen sijaan. */
@@ -106,3 +106,14 @@ function potClick(e){const b=e.target.closest('[data-pot],[data-potr]');if(!b||b
   switch(b.dataset.pot){case 'install':potInstall(p);break;case 'lid':potLid(p);break;case 'take':potTake(p);break;case 'm1':potAddMush(p,false);break;case 'mall':potAddMush(p,true);break;
     case 'remove':potRemove(p);break;case 'fuel':fireFuelAdd(p);potRefresh(true);break;}}
 {const el=document.getElementById('potP');if(el)el.addEventListener('click',potClick);}
+
+/* v3.06 käyttäjä: VEDEN KERÄÄJÄ (kupari 4 + rauta 2, taso 6): iso saavi ulos taivasalle; sateella (wRain > 0,3, ei katon alla) täyttyy WATER_FILL (10 %/min).
+   Täynnä täyttää vesikulhon WATER_USES (20) kertaa: tyhjä kulho kädessä + E. Purettaessa vesi menetetään. Pinta nousee täyttymisen mukaan. */
+const WATER_FILL=.1/60,WATER_USES=20;
+function waterTick(p,dt){const d=p.data;d.w=d.w||0;if(!P.inDun&&wRain>.3&&d.w<1){if(playTime>=(d.shU||0)){d.shU=playTime+2;d.shd=sheltered(p.x,(p.y||0)+.2,p.z);}if(!d.shd)d.w=Math.min(1,d.w+dt*WATER_FILL*clamp(wRain,0,1.2));}
+  const w=p.mesh.userData.water;if(w){w.visible=d.w>.005;if(w.visible){w.position.y=.08+.7*d.w;const k=.86+.14*d.w;w.scale.set(k,k,1);}}}
+function waterUses(p){return Math.floor((p.data.w||0)*WATER_USES+1e-6);}
+function waterLabel(p){const n=waterUses(p),pc=Math.round((p.data.w||0)*100),s=heldBowl();return `Veden kerääjä: ${pc} % (${n} kulhollista)`+(s&&s.id==='kulho'&&n>0?' – täytä kulho (E)':n>0?' – ota tyhjä kulho käteen':wRain>.3?' – täyttyy sateella':' – täyttyy, kun sataa');}
+function waterInteract(p){const s=heldBowl();if(!s||s.id!=='kulho'){msg(s&&s.id==='vesikulho'?'Kulhossa on jo vettä.':'Ota tyhjä kulho käteen ja paina E täyttääksesi sen.','warn');return;}
+  if(waterUses(p)<1){msg('Kerääjässä ei ole tarpeeksi vettä – se täyttyy sateella.','warn');return;}
+  p.data.w=Math.max(0,(p.data.w||0)-1/WATER_USES);s.id='vesikulho';invDirty=true;updateGear();plSnd('pihka','kulho_taytto');msg('Täytit kulhon sadevedellä.','loot');}

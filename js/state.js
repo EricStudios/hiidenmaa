@@ -79,12 +79,12 @@ function fitsAll(list){const sim=inv.map(s=>s?{id:s.id,n:s.n}:null);
   for(const it of list){if(!it)continue;let n=it.n;const d=ITEMS[it.id];if(d.s>1)for(const s of sim){if(n<=0)break;if(s&&s.id===it.id&&s.n<d.s){const k=Math.min(n,d.s-s.n);s.n+=k;n-=k;}}
     for(let i=0;i<sim.length&&n>0;i++)if(!sim[i]){const k=Math.min(n,d.s);sim[i]={id:it.id,n:k};n-=k;}if(n>0)return false;}return true;}
 function invWeight(){let w=0;for(const s of inv)if(s)w+=ITEMS[s.id].w*s.n;return w;}
-let MAXW=160;
+let MAXW=60;   // v3.06 alku 60 (recalcMaxW)
 const PACK_UP=[null,{nahka:6,puu:4},{nahka:12,kupari:4}];
 const invN=()=>32+8*P.packLv;
 // Repun päivitys: lisää paikkoja (+8) ja kantokykyä (+40 painoa) tasoa kohti.
 function setPack(lv){P.packLv=lv;recalcMaxW();while(inv.length<invN())inv.push(null);invDirty=true;}
-function equipGroup(cat){return ['weapon','bow','hammer','shovel','bowl'].includes(cat)?'weapon':['shield','offhand'].includes(cat)?'offhand':cat;}
+function equipGroup(cat){return ['weapon','bow','hammer','shovel','bowl','rod'].includes(cat)?'weapon':['shield','offhand'].includes(cat)?'offhand':cat;}
 function equipped(cat){const grouped=cat==='weapon'||cat==='offhand';
   for(const s of inv){if(!s||!s.eq)continue;const c=ITEMS[s.id].cat;if(grouped?equipGroup(c)===cat:c===cat)return s;}
   return null;}
@@ -94,7 +94,7 @@ function toggleEquip(s){const cat=ITEMS[s.id].cat;if(!cat)return;
   if(equipGroup(cat)==='offhand'&&s.eq){const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='bow')w.eq=false;}
   invDirty=true;updateGear();if(cat!=='hammer'||!s.eq)setBuildSel(null);sfx('pickup');}
 // v1.32 (lista 3, kohdat 3 ja 29): pikapaikan numero syö ruoan (ainoa tapa syödä), ottaa nuolet käyttöön (pysyvät valittuina) tai varustaa.
-function useSlot(i){const s=inv[i];if(!s)return;const d=ITEMS[s.id];if(d.food)eat(s);else if(d.potion)drink(s);else if(AMMO.includes(s.id)){if(flags.ammo!==s.id){flags.ammo=s.id;msg(`Ammus: ${d.n}`);sfx('pickup',1.2,.4);}invDirty=true;}else if(d.cat)toggleEquip(s);}
+function useSlot(i){const s=inv[i];if(!s)return;const d=ITEMS[s.id];if(d.food)eat(s);else if(d.potion)drink(s);else if(AMMO.includes(s.id)){if(flags.ammo!==s.id){flags.ammo=s.id;msg(`Ammus: ${d.n}`);sfx('pickup',1.2,.4);}invDirty=true;}else if(d.use)itemUse(s);   /* v3.06 pulloposti, kalastajan kirja (fish.js) */else if(d.cat)toggleEquip(s);}
 function giveOrDrop(id,n,x,y,z,q=1){const left=invAdd(id,n,q);if(left>0){spawnDrop(id,left,x,y,z,q);msg('Reppu on täynnä.','warn');}if(n-left>0){msg(`+${n-left} ${ITEMS[id].n}`,'loot');}}
 let invDirty=true;
 

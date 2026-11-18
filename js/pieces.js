@@ -45,7 +45,12 @@ const PIECES={
   tyopenkki:{n:'Työpenkki',req:{puu:10},hp:200,snap:'free',noBench:1,cat:'tyopisteet',alku:1},
   nuotio:{n:'Nuotio',req:{kivi:5,puu:2},hp:80,snap:'free',noBench:1,cat:'tyopisteet',alku:1},
   grilli:{n:'Grillinuotio',req:{kivi:6,puu:4,kupari:2},hp:100,snap:'free',noBench:1,cat:'tyopisteet'},
-  patanuotio:{n:'Keittopatanuotio',req:{kivi:12,puu:6,rauta:2},hp:140,snap:'free',noBench:1,cat:'tyopisteet',lvl:10},   // v3.02 pata asennetaan erikseen (keittopata, ahjo)
+  patanuotio:{n:'Keittopatanuotio',req:{kivi:12,puu:6,rauta:2},hp:140,snap:'free',cat:'tyopisteet',lvl:10},   // v3.06 vaatii työpenkin lähelle   // v3.02 pata asennetaan erikseen (keittopata, ahjo)
+  katiska:{n:'Katiska',req:{puu:4,naru:1},hp:60,snap:'free',cat:'tyopisteet',lvl:4,noBench:1,water:1},   // v3.06 onkiminen (fish.js): pyydys veteen
+  savustin:{n:'Savustin',req:{kivi:8,puu:6},hp:140,snap:'free',cat:'tyopisteet',lvl:5},   // v3.06 savukala
+  kalanaulakko:{n:'Kalanaulakko',req:{puu:3,rauta:1},hp:40,snap:'free',cat:'kalusto',lvl:3,wallMount:1},   // v3.06 ennätyskala seinälle
+  pelto:{n:'Pelto',req:{puu:3,kivi:2},hp:80,snap:'free',cat:'tyopisteet',lvl:3,noBench:1},   // v3.06 viljely (farm.js): kylvö, kasvu nukkuessa, sato
+  vedenkeraaja:{n:'Veden kerääjä',req:{kupari:4,rauta:2},hp:160,snap:'free',cat:'tyopisteet',lvl:6},   // v3.06 sadevesi (pot.js waterTick)
   sulatin:{n:'Sulatusuuni',req:{kivi:20,puu:4},hp:300,snap:'free',cat:'tyopisteet'},
   ahjo:{n:'Ahjo',req:{kivi:10,kupari:6,puu:4},hp:300,snap:'free',cat:'tyopisteet'},
   sanky:{n:'Sänky',req:{puu:8,nahka:4},hp:100,snap:'free',cat:'kalusto',alku:1,fine2:.28},
@@ -128,6 +133,7 @@ function potLidPose(g,on){const l=g.userData.lid;if(!l)return;if(on){l.position.
 function potInit(p){const d=p.data;d.pot=d.pot?1:0;d.spo=d.spo?1:0;d.lid=d.lid?1:0;d.job=d.job||null;d.doneT=d.doneT||0;d.cook=d.cook||[];potLidPose(p.mesh,!!d.lid);}
 const FUEL_MAX=40,COOKABLE={liha:'paisti',pienliha:'pienpaisti',suurliha:'suurpaisti'},COOK_T={pienliha:[7,3],liha:[9,5],suurliha:[14,5],sieni:[8,4]};   /* v3.02 sieni kypsyy vain keittopadassa (POT_COOK, pot.js) */   // v2.80 kypsymisaika [min, +satunnainen] s
 for(const d of Object.values(PIECES))if(d.base){const b=PIECES[d.base];for(const k of ['poses','flip','span2','noBench','store','col','dim'])if(d[k]===undefined&&b[k]!==undefined)d[k]=b[k];}
+const FIELD_W=2.4;   // v3.06 pellon sivu (m), farm.js
 const BUILD_CATS=[['alku','Alkupeli'],['seinat','Seinät ja lattiat'],['katot','Katot'],['palkit','Palkit ja pylväät'],['portaat','Portaat ja tikkaat'],['kalusto','Kalusto'],['tyopisteet','Työpisteet'],['valo','Valo'],['puolustus','Puolustus'],['kivi','Kivirakennus'],['kivikatot','Kivikatot']];
 // Portaiden geometria asennon mukaan: 0 tavallinen, 1 jyrkkä (puolet syvyydestä), 2 loiva (puolet korkeudesta).
 // v2.13 tikkaiden kulmat: asento f 0–2 = pysty, 1:3, 1:2. Jokainen tikas nousee WH:n ja siirtyy sivulle (yläpää taaksepäin, -z) G/3 tai G/2 →
@@ -171,6 +177,9 @@ function pieceBoxes(t,f=0){const def=PIECES[t];t=bt(t);if(def.dim)return[[0,def.
   case 'grilli':return[[0,.15,0,1.1,.3,1.1],[-.6,.55,0,.12,1.1,.12],[.6,.55,0,.12,1.1,.12]];
   case 'patanuotio':return[[0,.15,0,1.3,.3,1.3],[0,.72,0,.62,.5,.62]];
   case 'sulatin':return[[0,1.3,0,1.4,2.6,1.4]];
+  case 'pelto':return[[0,.06,0,FIELD_W,.12,FIELD_W]];
+  case 'katiska':return[];case 'kalanaulakko':return[];case 'savustin':return[[0,.9,0,1.1,1.8,1.1]];   // v3.06   // v3.06 matala: päälle voi kävellä
+  case 'vedenkeraaja':return[[0,.42,0,1.15,.84,1.15]];
   case 'ahjo':return[[0,.55,0,1.7,1.1,1]];
   case 'sanky':return[[0,.25,0,1.1,.5,2.1]];
   case 'arkku':return[[0,.35,0,1,.7,.65]];
@@ -236,6 +245,22 @@ function buildPieceMesh(t,f=0){
       const im=mat(0x3a3a3a,{metalness:.5,roughness:.5});g.add(bx(.1,1.1,.1,im,-.6,.55,0),bx(.1,1.1,.1,im,.6,.55,0));
       for(const sd of [-1,1])g.add(bx(.07,.07,.42,im,sd*.6,1.08,0));for(const z of [-.17,.17])g.add(bx(1.3,.06,.06,im,0,1.05,z));   // v3.00 kaksi tankoa (6 paikkaa)
       const food=[];for(const z of [-.17,.17])for(let i=0;i<3;i++){const x=-.35+i*.35,m=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),new THREE.MeshStandardMaterial({color:0xc9554e,roughness:.8}));m.position.set(x,.88,z);m.scale.set(1,1.3,1);m.visible=false;m.castShadow=true;g.add(m);food.push(m);g.add(bx(.015,.1,.015,im,x,.98,z,false));}g.userData.food=food;break;}
+    case 'katiska':{const wr=new THREE.MeshStandardMaterial({color:0x6a6a5a,wireframe:true,roughness:.8});const c=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,1,10,3,true),wr);c.rotation.z=Math.PI/2;c.position.y=.35;g.add(c);   // v3.06 verkkopyydys
+      for(const x of [-.5,.5]){const f=new THREE.Mesh(new THREE.ConeGeometry(.32,.3,10,1,true),wr);f.rotation.z=x<0?-Math.PI/2:Math.PI/2;f.position.set(x*.86,.35,0);g.add(f);}for(const x of [-.5,0,.5]){const r=new THREE.Mesh(new THREE.TorusGeometry(.32,.015,4,12),MAT.wood);r.rotation.y=Math.PI/2;r.position.set(x,.35,0);g.add(r);}
+      const fl=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),mat(0xd83a2a));fl.position.set(0,1.1,0);g.add(fl);g.add(bx(.02,.75,.02,mat(0xd8d0b8),0,.72,0));break;}
+    case 'savustin':{g.add(bx(1.1,.5,1.1,MAT.stone,0,.25,0),bx(1,1.1,1,MAT.wood,0,1.05,0),bx(1.15,.1,1.15,MAT.wood,0,1.65,0),bx(.25,.3,.25,MAT.stone,.3,1.85,.3));   // v3.06 savustin: kivijalka, puinen kaappi, piippu
+      g.add(bx(.4,.25,.04,mat(0x1a1410),0,.22,.56));for(let i=0;i<3;i++)g.add(bx(.86,.03,.03,mat(0x3a3a3a,{metalness:.5}),0,.7+i*.3,0));break;}
+    case 'kalanaulakko':{g.add(bx(.7,.36,.04,MAT.wood,0,0,.02));g.add(bx(.04,.04,.06,mat(0x3a3a3a,{metalness:.6}),0,.12,.06));const fm=new THREE.Group();fm.position.set(0,-.02,.1);g.add(fm);g.userData.fishM=fm;break;}   // v3.06 kalanaulakko
+    case 'pelto':{const soil=mat(0x3a2a1a,{roughness:1}),ridge=mat(0x4a3622,{roughness:1});g.add(bx(FIELD_W,.1,FIELD_W,soil,0,.05,0));   // v3.06 pelto: multa, vaot ja laudoitus
+      for(let i=0;i<3;i++)g.add(bx(FIELD_W-.2,.08,.36,ridge,0,.13,(i-1)*.7));
+      for(const [w,d,x,z] of [[FIELD_W+.1,.08,0,FIELD_W/2],[FIELD_W+.1,.08,0,-FIELD_W/2],[.08,FIELD_W,FIELD_W/2,0],[.08,FIELD_W,-FIELD_W/2,0]])g.add(bx(w,.16,d,MAT.wood,x,.08,z));
+      const cg=new THREE.Group();cg.position.y=.17;g.add(cg);g.userData.crop=cg;break;}
+    case 'vedenkeraaja':{const cu=mat(0xb8733e,{metalness:.6,roughness:.45}),fe=mat(0x55575c,{metalness:.6,roughness:.5});   // v3.06 iso kuparisaavi rautavanteilla
+      const tub=new THREE.Mesh(new THREE.CylinderGeometry(.56,.48,.8,16,1,true),cu);tub.material.side=THREE.DoubleSide;tub.position.y=.42;g.add(tub);
+      const bot=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.04,16),cu);bot.position.y=.04;g.add(bot);
+      for(const y of [.18,.62]){const r=new THREE.Mesh(new THREE.TorusGeometry(y<.4?.5:.545,.022,5,20),fe);r.position.y=y;r.rotation.x=Math.PI/2;g.add(r);}
+      const w=new THREE.Mesh(new THREE.CircleGeometry(.5,18),new THREE.MeshStandardMaterial({color:0x4f8fb8,transparent:true,opacity:.8,roughness:.08,metalness:.1}));w.rotation.x=-Math.PI/2;w.position.y=.08;w.visible=false;g.add(w);g.userData.water=w;
+      for(let i=0;i<4;i++){const a=i/4*TAU+.4;g.add(bx(.08,.12,.08,fe,Math.cos(a)*.47,.06,Math.sin(a)*.47));}break;}
     case 'patanuotio':{for(let i=0;i<9;i++){const a=i/9*TAU;g.add(bx(.3,.22,.3,mat(0x6a6862),Math.cos(a)*.58,.11,Math.sin(a)*.58));}
       const l1=bxw(.14,.14,.8,MAT.wood,0,.12,0);l1.rotation.y=.6;const l2=bxw(.14,.14,.8,MAT.wood,0,.16,0);l2.rotation.y=-.6;g.add(l1,l2);
       const f=new THREE.Mesh(new THREE.ConeGeometry(.28,.5,5),MAT.flame);f.position.y=.38;g.add(f);const f2=new THREE.Mesh(new THREE.ConeGeometry(.15,.32,5),MAT.flame2);f2.position.y=.34;g.add(f2);g.userData.flame=[f,f2];
@@ -309,11 +334,11 @@ function addPiece(t,x,y,z,rot,hp,data,f=0){
   // Seisova soihtu palaa p.data.burn sekuntia (5 min aluksi; puu nollaa 10 min, hiili 30 min).
   if(t==='seinasoihtu'){p.data.burn=p.data.burn??900*FUEL_K;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);const a=(p.rot||0)*Math.PI/4;lightSources.push(p.light={x:x+Math.sin(a)*.45,y:y+.7,z:z+Math.cos(a)*.45,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
   if(bt(t)==='soihtuteline'){p.data.burn=p.data.burn??300*FUEL_K;if(!p.data.full)p.data.full=Math.max(60,p.data.burn);lightSources.push(p.light={x,y:y+1.8,z,c:0xffa04a,i:1.5,on:()=>p.data.burn>0,piece:p});}
-  if(t==='sulatin'){p.data.ore=p.data.ore||0;p.data.iore=p.data.iore||0;p.data.wood=p.data.wood||0;p.data.done=p.data.done||0;p.data.idone=p.data.idone||0;p.data.sand=p.data.sand||0;p.data.glass=p.data.glass||0;p.data.t=0;lightSources.push(p.light={x,y:y+.6,z,c:0xff7a2a,i:1.2,on:()=>(p.data.ore>0||p.data.iore>0||p.data.sand>=2||p.data.pp>0)&&p.data.wood>0,piece:p});}
+  if(t==='sulatin'){smInit(p);lightSources.push(p.light={x,y:y+.6,z,c:0xff7a2a,i:1.2,on:()=>smBurning(p),piece:p});}   // v3.06 jono, polttoaine ja lämpötila (smelt.js)
   if(t==='tyopenkki')p.ring=makeBenchRing(x,z,y<DUN.y+5&&y>DUN.y-5&&Math.abs(y-terrainH(x,z))>3?y:null);
   if(def.store){p.data.lv=p.data.lv||0;p.data.items=p.data.items||[];while(p.data.items.length<storeSlots(p))p.data.items.push(null);}
   if(bt(t)==='ovi'){p.data.open=!!p.data.open;setDoor(p,p.data.open,p.data.dir||1,true);}
-  pieces.push(p);pieceRoots.push(mesh);setPieceDamage(p);markShadowDirty();return p;
+  pieces.push(p);pieceRoots.push(mesh);setPieceDamage(p);markShadowDirty();if(t==='kalanaulakko'&&typeof nauVis==='function')nauVis(p);if(t==='pelto'&&typeof fieldVis==='function')fieldVis(p);return p;
 }
 function removePiece(p){markShadowDirty();scene.remove(p.mesh);if(p.ring){scene.remove(p.ring);p.ring.geometry.dispose();}for(const c of p.cols)gridRemove(c);pieces.splice(pieces.indexOf(p),1);pieceRoots.splice(pieceRoots.indexOf(p.mesh),1);if(p.light){const i=lightSources.indexOf(p.light);if(i>=0)lightSources.splice(i,1);}}
 // Ovi aukeaa pelaajasta poispäin (dir ±1 = kummalle puolelle lehti kääntyy), sarana pysyy samassa kohdassa.
@@ -345,7 +370,7 @@ function nearPiece(t,x,z,r){for(const p of pieces)if(p.t===t&&dist2(p.x,p.z,x,z)
    joten lähellä kaikki toimii kuten ennen (osumat, purku, korjaus, ovet). Alkuperäiset meshit vain piilotetaan (säteen osumat toimivat
    piilotettuihinkin). Ei yhdistetä: tulet, säiliöt, ovet, lasit, hehkuvat ja renkaalliset osat. Vaurio tai osien muutos solussa → purku. */
 const BM_CELL=24,BM_FAR=70,BM_NEAR=60,BMC=new Map();
-function bmOk(p){if(p._bmOk!==undefined)return p._bmOk;let ok=!isFirePiece(p.t)&&!PIECES[p.t].store&&!p.ring;
+function bmOk(p){if(p._bmOk!==undefined)return p._bmOk;let ok=!isFirePiece(p.t)&&!PIECES[p.t].store&&!p.ring&&p.t!=='pelto'&&p.t!=='kalanaulakko'&&p.t!=='savustin';   /* v3.06 pellon kasvit vaihtuvat */
   if(ok)p.mesh.traverse(o=>{const u=o.userData;if(u.flame||u.food||u.leaf||u.glass||u.glow||u.lid)ok=false;if(o.isMesh&&(Array.isArray(o.material)||o.material.transparent))ok=false;});return p._bmOk=ok;}
 const _bmN3=new THREE.Matrix3(),_bmV=new THREE.Vector3();
 function bmBuild(e){let n=0;const gs=e.list.map(o=>{const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry;n+=g.attributes.position.count;return g;});
