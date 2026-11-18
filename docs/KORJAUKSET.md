@@ -560,3 +560,8 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   settings.js tyhjeni. Palautettiin gitistä ja muutokset tehtiin uudelleen. **Sääntö:** lue ensin muuttujaan, kirjoita sitten; tarkista `git diff --stat`.
 - **Kommentti rivin keskellä (KORJAUKSET 49) toistui kahdesti:** `// …` lisättiin rivin keskelle (render.js peittoluku, inspect.js ote) → rivin loppu
   ei suorittunut. Tarkistus (`v2.23 ei koodia //-kommentin perässä`) huomasi ensimmäisen. Lisää välikommentit aina `/* */`-muodossa.
+
+## 74. Leirin halkopino jäi rikottuna näkyviin haamuna (v3.00)
+- Pino (ja kuivaustelineen taljat) oli `statics`-ryhmässä, jonka `mergeStatics` yhdistää yhdeksi malliksi. Rikottaessa törmäys poistui ja alkuperäiset tukit
+  piilotettiin, mutta yhdistetty kopio jäi näkyviin → pinon läpi pystyi kävelemään. Korjaus: `userData.noMerge=1` (story.js, pino `wp` ja teline `rk`).
+  **Sääntö:** jos staattista mallia piilotetaan tai muutetaan pelin aikana, merkitse se `noMerge` (tai lisää suoraan sceneen), muuten yhdistetty kopio jää.

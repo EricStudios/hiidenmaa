@@ -587,6 +587,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;const I=JSON.parse(inv0);for(let q=0;q<inv.length;q++)inv[q]=I[q]||null;invDirty=true;updateGear();}return r;});
+  t('v3.00 leirin halkopino ja kuivausteline eivät yhdisty staattisiin (rikottu pino katoaa, ei haamua)',()=>CAMPS.every(c=>!c.pile||c.pile.g.userData.noMerge===1)&&CAMPS.every(c=>!c.rack||c.rack.hides[0].parent.userData.noMerge===1)||'pino tai teline yhdistyy staattisiin');
   t('v2.99 iso päivitys (+ F-tarkastelun pehmeät siirtymät, puukon heitot irti kädestä): torjunta vain kilvellä, halkopino irti palkista, DEV-salasana, latausääni, tuli 2×, jahti 40 % lyhyempi, pelottavat 90 %, malmit 5 vrk, oksat/marjat kaukana, arkkujen metallit, hiidenkarhu, vesiraja, ahjo/uuni-äänet, lokit, kaiku, kuolema-arkku, tuulinuoli, chatin koko, säteiden tarkkuus',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     ck('kilpi',/equipped\('shield'\)/.test(updatePlayer.toString().slice(0,4000)));
