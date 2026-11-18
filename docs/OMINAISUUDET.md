@@ -886,8 +886,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
-## v3.11 – intron pilvimatto
-- Matalilla esiasetuksilla (Low–Medium+, heikosti High) intron yläkamerassa piirtoraja on pehmeän sumun ja pilvimaton alla: saari näkyy pilvien aukosta, ja matto häipyy kameran syöksyessä.
+## v3.11–v3.12 – intron pilvet
+- Matalilla esiasetuksilla (Low–Medium+, heikosti High) intron yläkamerassa piirtoraja on liikkuvien, peittävien pilvien alla (95 m korkeudella): saari näkyy pilvien aukosta,
+  pilvet hajaantuvat ja häipyvät kameran syöksyessä. Maan tasolla vain kevyt usva.
 
 ## v3.10 – maailman lataus
 - Latausruudun lopussa lähimaailma piirretään valmiiksi (pelikamera + intron puoliväli, varjostimet käännetty), joten intro ei lataa näkyvästi. Intron yläkamerassa puut

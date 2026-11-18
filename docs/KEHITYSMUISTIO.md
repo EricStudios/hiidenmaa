@@ -3,9 +3,10 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.11, 18.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.12, 18.11.2026)
 
-- **Versio 3.11** – intron piirtorajan sumennus ja pilvimatto matalilla esiasetuksilla. PR #49 sisältää v3.08–v3.11.
+- **Versio 3.12** – intron oikeat pilvet piirtorajan päällä (matalat esiasetukset). PR #49 sisältää v3.08–v3.12.
+- **Versio 3.11** – intron piirtorajan sumennus ja pilvimatto matalilla esiasetuksilla.
 - **Versio 3.10** – maailma valmiiksi latausruudussa + kevyt intron yläkamera, vanha tapa asetuksena (ks. versioloki). PR #49 sisältää v3.08–v3.10.
 - **Versio 3.09** – maailmalistan Pelaat nyt / Viimeksi pelattu -merkinnät.
 - **Versio 3.08** – käyttäjän 26 kohdan lista + 4 lisäystä (pihkan täyttyminen, kartan Sulje-teksti, 3 vihjeporrasta, tallennus suljettaessa), ks. versioloki v3.08.
@@ -414,6 +415,12 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.12 (intron pilvet – käyttäjä: "kauhea vaalea sumu")
+- Litteä läpikuultava pilvimatto korvattu **oikeilla pilvillä**: `IE_N` 330 peittävää pilvipalloa (sprite, 4 satunnaista tekstuuria `introPuffTex`, varjostettu pohja), korkeudella
+  `IC_H` 95 m pelaajan yllä. Aukko saaren kohdalla lasketaan kameran kautta (projektio pilvitasolle: keskus C + (P − C)·s, s = 1 − IC_H / kameran korkeus), joten aukko osuu
+  piirtorajaan kameran kiertäessä. Pilvet kiertävät ja aaltoilevat hitaasti, hajaantuvat ulospäin ja häipyvät syöksyssä (piiloon, kun kamera on alle IC_H + 25 m).
+  Maan tason usva vain kevyt (`IE_FOG` 0,4 × voimakkuus). Mittaus: Medium intro 7,8 ms keskim., pahin 19 ms; Low+ 7,3 / 18 ms. Tarkistus: v3.12-rivi.
 
 ### v3.11 (intron piirtorajan sumennus ja pilvimatto – käyttäjän pyyntö, ratkaisu päätetty itse)
 - Matalilla esiasetuksilla yläkamerasta näkyi terävä raja, johon puut loppuvat. Voimakkuus `introEdgeK` = (230 − puiden piirtoetäisyys) / 120: Low–Medium- 1, Medium 0,83,
