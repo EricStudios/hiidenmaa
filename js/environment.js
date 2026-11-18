@@ -6,7 +6,7 @@
 const DAY_LEN=720;
 function isNight(){return dayT<.21||dayT>.79;}
 function sheltered(x,y,z){if(P.inDun)return true;raycaster.set(_tmpV.set(x,y+1.7,z),_tmpV2.set(0,1,0));raycaster.far=14;return raycaster.intersectObjects(pieceRoots,true).length>0;}
-function nearFire(x,z,r=5.5){for(const p of pieces)if(isFirePiece(p.t)&&fireLit(p)&&dist2(p.x,p.z,x,z)<r*r)return true;return false;}
+function nearFire(x,z,r=5.5){for(const p of pieces)if(isFirePiece(p.t)&&(fireLit(p)?dist2(p.x,p.z,x,z)<r*r:emberOn(p)&&dist2(p.x,p.z,x,z)<(r*EMBER_WARM_R)**2))return true;return false;}   // v3.02 hiilos lämmittää puolella säteellä
 let shelterCache=false,fireCache=false,envTick=0,indoorT=0,indoorK=0;
 const cIndoor=new THREE.Color(0x6a5a48);
 // Yksinkertainen valofysiikka: suojassa ja seinien ympäröimänä taivaanvalo himmenee ja sininen sävy poistuu.
@@ -239,7 +239,8 @@ function effects(){const e=[],wt=invWeight(),b=P.buffs,add=(key,name,kind,desc,t
   if(!devOn('weight')&&wt>MAXW)add('kuorma','Ylikuormitus','bad','Kävely −45 %, et voi juosta etkä hypätä. Pudota tavaroita tai päivitä reppu.');
   if(b.levannyt)add('levannyt','Levännyt','good','Kestävyys palautuu 45 % nopeammin ja terveys palautuu nopeammin.',b.levannyt);
   if(b.elpyminen)add('elpyminen','Elpyminen','good','Elpymisjuoma: terveys palautuu 1 sekunnissa.',b.elpyminen);
-  if(b.kylla)add('kylla','Kylläinen','good','Sisujuoma: kylläisyys pysyy täynnä.',b.kylla);
+  if(b.kylla)add('kylla','Täysi vatsa','good','Sisujuoma: kylläisyys pysyy täynnä.',b.kylla);   // v3.02 nimi (Kylläinen = pataruoka)
+  if(b.ravittu)add('ravittu','Kylläinen','good','Pataruoka: kylläisyys laskee puolet hitaammin ja täyteen syötynä pysyy täynnä pidempään.',b.ravittu);
   if(b.sisu)add('sisu','Sisu','good','Sisujuoma: kestävyys pysyy täynnä.',b.sisu);
   if(b.voima)add('voima','Voimistunut','good','Isku +15 %, enimmäisterveys +15, enimmäiskestävyys +25.',b.voima);
   if(fireCache)add('lampo','Lämmin','good','Tulen lähellä et kylmety ja kuivut nopeasti.');
@@ -320,7 +321,7 @@ function survival(dt){
   calcFx();
   P.crampT-=dt;if(P.buffs.vatsakipu&&P.crampT<=0){P.crampT=8+Math.random()*6;plSnd('keho','mahakipu');P.stam=Math.max(0,P.stam-12);P.stamDelay=Math.max(P.stamDelay,1);floatText('Auts!',P.pos.x,P.pos.y+2,P.pos.z,'#c9a66b');}
   if(P.buffs.kylla){P.hunger=100;P.buffs.taysi=60;}   // v2.00 sisujuoma: kylläisyys täynnä 5 min
-  if(!P.buffs.taysi)P.hunger=Math.max(0,P.hunger-dt*(100/1000)*(cold?1.3:1)*(P.atk||kd('run')?1.15:1)*homeHungerK());   /* v2.09: kodin lämpö hidastaa nälkää */if(devOn('food'))P.hunger=100;   // DEV: ei nälkää; v2.00: täyteen syötyä 60 s ei kulu
+  if(!P.buffs.taysi)P.hunger=Math.max(0,P.hunger-dt*(100/1000)*(cold?1.3:1)*(P.atk||kd('run')?1.15:1)*homeHungerK()*(P.buffs.ravittu?KYL_K:1));   /* v3.02 Kylläinen (pataruoka) */   /* v2.09: kodin lämpö hidastaa nälkää */if(devOn('food'))P.hunger=100;   // DEV: ei nälkää; v2.00: täyteen syötyä 60 s ei kulu
   if(P.buffs.elpyminen)P.hp=Math.min(maxHp(),P.hp+dt);   // v2.00 elpymisjuoma: +1 terveys / s
   // regen
   let reg=P.hunger>35?.35:P.hunger>0?.15:0;if(P.buffs.levannyt)reg+=.6;reg*=P.fx.hpRegen;if(P.hunger>0&&!P.buffs.pahoinvointi)reg+=homeHealRate();   // v2.09 kodin lämpö +0,5 / +1,0 hp/s

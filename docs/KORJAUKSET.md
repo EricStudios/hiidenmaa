@@ -565,3 +565,17 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Pino (ja kuivaustelineen taljat) oli `statics`-ryhmässä, jonka `mergeStatics` yhdistää yhdeksi malliksi. Rikottaessa törmäys poistui ja alkuperäiset tukit
   piilotettiin, mutta yhdistetty kopio jäi näkyviin → pinon läpi pystyi kävelemään. Korjaus: `userData.noMerge=1` (story.js, pino `wp` ja teline `rk`).
   **Sääntö:** jos staattista mallia piilotetaan tai muutetaan pelin aikana, merkitse se `noMerge` (tai lisää suoraan sceneen), muuten yhdistetty kopio jää.
+
+## 75. Virhe "Failed to execute 'connect' on 'AudioNode'" ja kamera jäi paikoilleen (v3.02)
+- v2.99 lisäsi pelaajan äänille kaiun paikan mukaan (`plRevAmt`: talossa, vuorella). Kaiku kytkeytyy jaettuun ConvolverNodeen, jonka ulostulo menee
+  olentoäänten väylään `CRE.gain`. Väylä luotiin vasta ensimmäisessä olentoäänessä → jos pelaajan ääni kaikui ensin (askel kotona), `R.out.connect(undefined)`
+  heitti, `frame()`-silmukan try/catch näytti virheruudun ja ruudun loppu (mm. kamera) jäi päivittämättä joka askeleella, kunnes jokin olento ääntelehti.
+  Ei liittynyt vanhaan tallennukseen. Korjaus: `creRevOn` luo `CRE.gain`-väylän tarvittaessa. Vahvistus oikealla AudioContextilla (Playwright
+  `--autoplay-policy=no-user-gesture-required`): v3.01 heittää, v3.02 ei.
+- **Sääntö:** kun äänisolmu kytketään jaettuun väylään, varmista että väylä on olemassa (luo laiskasti samassa funktiossa) – älä oleta toisen järjestelmän luoneen sitä.
+
+## 76. Asetussiirrot väärässä järjestyksessä (v2.99, korjattu v3.02)
+- settings.js:n kertasiirrot (`SET._v`) ovat peräkkäisiä `if(!(SET._v>=N))`-lohkoja. v2.99 lisäsi v8-lohkon v7:n ELLEEN → vanhoilla asetuksilla v8 asetti
+  `_v=8` ja v7-siirto (biomien sekoitus esiasetuksen mukaan) jäi tekemättä. Lisäksi esiasetuksen tunnistus vertasi myös myöhempien siirtojen avaimia
+  (raysQ, flare, tallGrass), jolloin High+/Ultra ei tunnistunut. Korjaus: järjestys v7 → v8 → v9 ja jokainen siirto ohittaa myöhempien siirtojen avaimet.
+- **Sääntö:** uusi siirtolohko aina viimeiseksi (suurin numero alimmaksi), ja lisää sen avain aiempien lohkojen ohituslistaan.

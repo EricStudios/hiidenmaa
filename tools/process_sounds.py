@@ -794,7 +794,13 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
                                                            ('korjaus', 'korjaat rakennusosan', 'hammer repair, nail hammering'),
                                                            ('valmistus', 'valmistat tai parannat esineen', 'crafting sound, workbench craft'),
                                                            ('ahjo_valmis', 'v2.99: esine valmistuu ahjolla (tilalla soi tavallinen valmistus, jos tiedostoa ei ole)', 'blacksmith anvil ding, forge craft complete'),
-                                                           ('sulatin_valmis', 'v2.99: sulatusuunista tulee valmis harkko tai lasi (3D, uunin kohdalta)', 'furnace done, metal ingot clink, smelting complete')]),
+                                                           ('sulatin_valmis', 'v2.99: sulatusuunista tulee valmis harkko tai lasi (3D, uunin kohdalta)', 'furnace done, metal ingot clink, smelting complete'),
+                                                           ('pata_aloitus', 'v3.02: keittopadassa alkaa valmistus (aineet pataan, roiske + sihaus)', 'ingredients dropped into cooking pot, splash, sizzle start'),
+                                                           ('pata_kiehuu', 'v3.02: pata kiehuu hiljaa (soi 7–12 s välein kypsymisen aikana)', 'pot simmering, gentle bubbling stew'),
+                                                           ('pata_valmis', 'v3.02: ruoka valmis padassa ilman kantta (höyry pöllähtää)', 'stew ready, steam puff, open pot bubbling'),
+                                                           ('pata_valmis_kansi', 'v3.02: ruoka valmis kansi päällä (kansi kolisee höyryn paineesta)', 'pot lid rattling from steam, stew ready'),
+                                                           ('kansi_kiinni', 'v3.02: padan kansi laitetaan päälle (metallinen kolahdus)', 'iron pot lid placed, metal clank'),
+                                                           ('kansi_auki', 'v3.02: padan kansi otetaan pois (raapaisu + höyry)', 'iron pot lid lifted, scrape, steam release')]),
         ('kaytto', 'Keräily ja käyttö', '🎒', [('poiminta', 'poimit esineen maasta tai kasvista', 'item pickup, pick up'),
                                               ('arkku_auki', 'avaat arkun tai hautakasan', 'chest open, wooden lid creak'),
                                               ('arkku_kiinni', 'suljet oman (rakentamasi) arkun', 'chest close, wooden lid shut'),
@@ -803,10 +809,7 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
                                               ('ovi_kiinni', 'ovi sulkeutuu – soi kun sulkemisanimaatio loppuu ja ovi osuu karmiin', 'wooden door close, door shut thud'),
                                               ('syominen', 'syöt ruokaa', 'eating food, chewing bite'),
                                               ('juominen', 'juot juoman (myös vesikulhosta)', 'drinking potion, gulp'),
-                                              ('kaiverrus', 'kaiverrat puukolla pihkakuviota puun kaarnaan (toistuu n. 0,55 s välein, 10 s ajan)', 'knife carving bark, wood scraping'),
-                                              ('kulho_taytto', 'täytät puukulhon vedellä veden ääressä', 'bowl scoop water, splash fill'),
-                                              ('vesi_kaato', 'kaadat vesikulhon päällesi ja sammutat tulen', 'pour water bucket splash, fire hiss'),
-                                              ('kulho_kiinni', 'sidot kulhon narulla pihkapuuhun tai irrotat sen', 'rope tie, wooden bowl knock')]),
+                                              ('vesi_kaato', 'kaadat vesikulhon päällesi ja sammutat tulen', 'pour water bucket splash, fire hiss')]),   # v3.02 pihkan äänet → extra/ (ryhmä pihka)
         ('valikot', 'Valikot', '📜', [('reppu', 'avaat tai suljet repun (Tab) – sama ääni molempiin', 'backpack open, leather bag'),
                                      ('rakennusvalikko', 'avaat rakennusvalikon', 'menu open, tool select'),
                                      ('kartta', 'avaat kartan', 'map unfold, paper rustle'),
@@ -835,7 +838,12 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
                                        ('levannyt', 'olet levännyt (levon vaikutus alkaa)', 'refreshed stretch, relaxed exhale')])]),
     (4, 'extra', 'Extra – F-tarkastelu', [   # v2.98 (käyttäjä): F-ihmettely – tyytyväinen ääni esinettä tarkastellessa
         ('f_ihmettely', 'F-ihmettely', '🔍', [('wow', 'F-tarkastelu on kestänyt 2 s: 30 % todennäköisyydellä kerran (tai varmasti, kun hahmo tarkastelee uutta esinettä itsestään) – ihastunut "vau"', 'impressed wow, amazed male voice short'),
-                                             ('mmm', 'sama kuin wow (arvotaan wow tai mmm) – tyytyväinen hymähdys', 'satisfied hmm, pleased mmm male voice')])]),
+                                             ('mmm', 'sama kuin wow (arvotaan wow tai mmm) – tyytyväinen hymähdys', 'satisfied hmm, pleased mmm male voice')]),
+        # v3.02 (käyttäjä): pihkankeräyksen äänet samaan extra-kansioon (siirretty pelaaja_2_toiminnot/kaytto:sta) + uusi tipan ääni
+        ('pihka', 'Pihkankeräys', '🍯', [('kaiverrus', 'kaiverrat puukolla pihkakuviota puun kaarnaan (toistuu n. 0,55 s välein, 10 s ajan)', 'knife carving bark, wood scraping'),
+                                       ('kulho_kiinni', 'sidot kulhon narulla pihkapuuhun tai irrotat sen', 'rope tie, wooden bowl knock'),
+                                       ('kulho_taytto', 'täytät puukulhon vedellä veden ääressä', 'bowl scoop water, splash fill'),
+                                       ('tippa', 'pihkaa tippuu kulhoon (hiljaa, vain aivan läheltä 6 m, 4–8 s välein)', 'single sticky resin drip into wooden bowl, soft drop')])]),
 ]
 P_EV = {}
 P_CFGS = []

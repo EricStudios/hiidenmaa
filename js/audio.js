@@ -106,7 +106,8 @@ function creRevMake(a){if(CRE.rev)return CRE.rev;const sr=a.sampleRate,len=Math.
     lp+=(n-lp)*(.85-.6*t);d[i]=lp*Math.pow(1-t,2.6)*(i<sr*.012?i/(sr*.012):1);}}
   const cv=a.createConvolver();cv.normalize=true;cv.buffer=buf;const inp=a.createGain(),lp=a.createBiquadFilter(),out=a.createGain();lp.type='lowpass';lp.frequency.value=3200;out.gain.value=.9;
   inp.connect(lp);lp.connect(cv);cv.connect(out);CRE.rev={inp,cv,out,on:false,t:0};return CRE.rev;}
-function creRevOn(a){const R=creRevMake(a);R.t=3;if(!R.on){R.out.connect(CRE.gain);R.on=true;}return R;}
+function creRevOn(a){const R=creRevMake(a);R.t=3;if(!CRE.gain){CRE.gain=a.createGain();CRE.gain.connect(sndBus(a));}   /* v3.02 KORJAUKSET 75: pelaajan kaiku ennen ensimmäistä olentoääntä → connect(undefined) kaatoi silmukan */
+  if(!R.on){R.out.connect(CRE.gain);R.on=true;}return R;}
 function creRevTick(dt){const R=CRE.rev;if(!R||!R.on)return;if(CRE.voices.some(v=>v.sd)||TGV.v.some(v=>v.sd)){R.t=3;return;}R.t-=dt;if(R.t<=0){try{R.out.disconnect();}catch(e){}R.on=false;}}
 function creStop(v,t){try{v.g.gain.setTargetAtTime(0,actx.currentTime,.03);v.src.stop(actx.currentTime+(t||.12));}catch(e){}}
 // v1.88 kaikuääni: pomon paikasta, mutta enintään 38 m pelaajasta (kaukainen pomo kuuluu vaimeana kaikuna luolastossa, ei hiljaisuutena)

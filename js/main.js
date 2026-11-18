@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.01';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.02';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -333,8 +333,7 @@ perfApply();if(window.__ldDone)window.__ldDone();   // v1.60: testi tehty jo enn
 requestAnimationFrame(frame);
 window.__game={renderer,keys,G,WH,get ghost(){return{sel:buildSel,ok:ghostOk,pos:ghostPos,why:lastInvalid}},placeBuild,openChest,scene,camera,P,get mobs(){return mobs},inv:()=>inv,pieces:()=>pieces,invAdd,addPiece,spawnMob,newGame,startPlay,flags:()=>flags,saveGame,serialize,loadData,setState:s=>state=s,get state(){return state},update,interact,togglePanel,useSlot,craft,RECIPE_BY,setBuildSel,enterDungeon,exitDungeon,camYaw:v=>camYaw=v,doMeleeHit,startAttack,nodes,setDay:v=>dayT=v};
 
-/* v3.00 käyttäjä: Poistu pelistä (päävalikon alin nappi). Jos peli on käynnissä eikä Tallenna nyt -nappia ole painettu tällä valikkokäynnillä (QUIT.saved),
-   kysytään: Tallenna ja poistu / Poistu tallentamatta / Peruuta. Selain sallii window.close():n vain skriptin avaamille ikkunoille – muuten peli
+/* v3.00 käyttäjä: Poistu pelistä (päävalikon alin nappi; v3.02 pidetään pohjassa 1 s, ks. QUIT_HOLD alla – ei enää kysymysikkunaa). Selain sallii window.close():n vain skriptin avaamille ikkunoille – muuten peli
    pysäytetään (äänet hiljaisiksi) ja näytetään lopetusruutu "voit sulkea välilehden" + Avaa peli uudelleen. */
 const QUIT={saved:false};
 function quitGame(){try{if(window.__mus)window.__mus.stop();}catch(e){}try{if(window.__AC)window.__AC.suspend();}catch(e){}state='paused';
@@ -342,6 +341,13 @@ function quitGame(){try{if(window.__mus)window.__mus.stop();}catch(e){}try{if(wi
   setTimeout(()=>{if(document.getElementById('quitScr'))return;const d=document.createElement('div');d.id='quitScr';
     d.innerHTML='<div class="qBox"><div class="qRunes" aria-hidden="true">ᚺᛁᛁᛞᛖᚾᛗᚨᚨ</div><h2>Peli on suljettu</h2><p>Voit nyt sulkea selaimen välilehden.</p><button class="btn pri" id="bReopen">Avaa peli uudelleen</button></div>';
     document.body.appendChild(d);document.getElementById('bReopen').onclick=()=>location.reload();},250);}
-$('#bQuit').onclick=()=>{
-  if(started&&!QUIT.saved&&!P.dead)keyDialog('Tallennetaanko peli ennen poistumista?',[['Tallenna ja poistu',()=>{saveGame(true);quitGame();}],['Poistu tallentamatta',quitGame],['Peruuta',null]],'Et ole tallentanut tällä valikkokäynnillä. Automaattitallennus tehdään 2 min välein.');
-  else keyDialog('Poistutaanko pelistä?',[['Poistu',quitGame],['Peruuta',null]],started?'Peli on tallennettu.':'');};
+/* v3.02 käyttäjä: ei varmistusikkunaa – nappia pidetään pohjassa QUIT_HOLD (1 s); painalluksen alussa peli tallentuu heti (jos käynnissä),
+   napin taustalla etenee sivuttainen palkki (--qp), irrottaminen ennen aikaa peruu. */
+const QUIT_HOLD=1;
+(function(){const b=$('#bQuit');let t0=0,raf=0,saved=false;const stop=()=>{t0=0;cancelAnimationFrame(raf);b.style.setProperty('--qp','0');b.classList.remove('holding');};
+  const step=()=>{if(!t0)return;const k=Math.min(1,(performance.now()-t0)/(QUIT_HOLD*1000));b.style.setProperty('--qp',k.toFixed(3));if(k>=1){stop();quitGame();return;}raf=requestAnimationFrame(step);};
+  const start=e=>{if(e.button!=null&&e.button!==0)return;if(t0)return;e.preventDefault();t0=performance.now();b.classList.add('holding');
+    if(started&&!P.dead&&!saved){saved=!!saveGame(true);if(saved){QUIT.saved=true;$('#saveMsg').textContent='Tallennettu – pidä pohjassa sulkeaksesi';}}raf=requestAnimationFrame(step);};
+  b.addEventListener('pointerdown',start);b.addEventListener('mousedown',start);b.addEventListener('touchstart',start,{passive:false});
+  for(const ev of ['pointerup','mouseup','mouseleave','pointerleave','touchend','touchcancel','blur'])b.addEventListener(ev,()=>{if(t0)stop();saved=false;});
+  b.onclick=e=>e.preventDefault();})();

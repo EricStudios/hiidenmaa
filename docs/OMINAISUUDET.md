@@ -72,7 +72,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   levänneenä + 0,6/s.
 - **Syöminen:** ruoka lisää kylläisyyttä ja terveyttä (`heal` 3/s). **Ähky (vatsakipu) vain, jos kylläisyys on jo ≥ 99 ja syö silti** (v2.00: täyteen syöty = 100, laskee vasta 60 s:n jälkeen)
   (52 s: kävely −10 %, kestävyys hitaammin, kramppi vie 12 kestävyyttä 8–14 s välein). Raaka liha: 45 % pahoinvointi (40 s).
-- **Lihat (v2.80):** pienriistan liha (jänis, kettu, metso, porsas; yleinen) → paistettuna kylläisyys 40 / terveys 15; riistanliha (peura, poro, karju, emakko; epätavallinen) → 55 / 25; suurriistan liha (hirvi, karhu, hiidenkarhu, hiidenhirvi; harvinainen) → 80 / 40 + kestävyys 30. Kypsyminen: pieni 7–10 s, riista 9–14 s, suuri 14–19 s. Nuotiolla: Lihakeitto (taso 2) 70 / 35 / 20, Juhla-ateria (taso 4) 100 / 70 / 50 + voima, varras 65 / 40 + voima, paistettu sieni 24 / 10.
+- **Lihat (v2.80, arvot v3.02):** pienriistan liha (jänis, kettu, metso, porsas; yleinen) → paistettuna kylläisyys 25 / terveys 12; riistanliha (peura, poro, karju, emakko; epätavallinen) → 35 / 20; suurriistan liha (hirvi, karhu, hiidenkarhu, hiidenhirvi; harvinainen) → 50 / 32 + kestävyys 24. Raakana 2 / 3 / 4. Kypsyminen: pieni 7–10 s, riista 9–14 s, suuri 14–19 s. Nuotiolla: Lihakeitto (taso 2) 45 / 28 / 16; grillillä Juhla-ateria (taso 4) 70 / 56 / 40 + voima, varras 42 / 32 + voima. Puolukat 5 / – / 16, sieni 6 / 5, paistettu sieni (vain keittopadassa) 14 / 8. **v3.02 pataruoat** täyttävät eniten ja antavat Kylläinen-tilan (ks. Keittopata).
 - **Tilat** (repun Tilat-osio, hiirellä lisätiedot ja ajastin): märkä (60 s, kuivuu 5× nopeammin tulella), kylmä (−7 % nopeus, −10 % isku,
   −40 % kestävyyden palautus), nälkä / nälkäinen, pahoinvointi, vatsakipu, ylikuormitus, levännyt (12 s tulen ja katon alla →
   360 s, kestävyys +45 %), voimistunut, lämmin, suojassa, hiipii.
@@ -361,8 +361,10 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Ilmoitukset:** näkyvät pituuden mukaan pidempään, piiloon valikoissa; L näyttää 10 viimeisintä (v1.18; ennen T).
 - **Tehtävä ja tavoite piiloon (v1.18):** T kiertää: molemmat → vain tehtävä → vain tavoite → ei kumpaakaan; piilotettuna pieni vihje, valinta muistetaan.
 
-## Tasot (v2.70)
-- Taso 1–20 (XP tasolta n seuraavalle 50 + 30n). Palkinnot: HP +10 (taso 3 ja 5), +15 (10 ja 15), +20 (20) = 130 HP tasolla 20; kestävyys +5
+## Tasot (v2.70, v3.02)
+- **v3.02:** taso 1–30, XP tasolta n seuraavalle 55 + 35n (tasosta 20 lisäksi +20 × (n − 19)). XP on maailmakohtainen; vanha tallennus muunnetaan kerran niin, että
+  taso ja tason sisäinen osuus säilyvät. Lisäpalkinnot: kestävyys +5 (22, 26), HP +10 (24, 28), +20 (30); muut kantokyky +5. Keittopata ja pataruoat tasoilla 10–13.
+- Alkuperäinen v2.70: taso 1–20 (XP tasolta n seuraavalle 50 + 30n). Palkinnot: HP +10 (taso 3 ja 5), +15 (10 ja 15), +20 (20) = 130 HP tasolla 20; kestävyys +5
   (4, 8, 12, 16); muilla tasoilla kantokyky +5. Reseptit: 2 piikivityökalut, kilpi, keihäs, nahkavaatteet, varras, jousi + puunuolet; 3 nuolet ja
   kupariaseet/-työkalut; 4 kuparipanssari, kuparikilpi, karhuhaarniska; 5 rautakirves ja -hakku; 6 rautamiekka; 7 rautakilpi ja -panssari;
   10 hiidenjousi, 12 hiidenmiekka, 14 hiidenpanssari. J-paneeli näyttää jokaisen tason palkinnon. Poiminnat ja XP-viestit eivät soita ilmoitusääntä.
@@ -643,7 +645,23 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **v2.99:** torjunta vain kilpi kädessä; tulen vahinko 2× (pelaaja 8, olennot 10 hp/s); malmit ja kivet uusiutuvat samaan kohtaan 5 vuorokaudessa (ei rakennusten tai kohteiden lähellä); oksat ja marjat uusiutuvat, kun olet ¼ kartan päässä (tarkistus 1/min); maailman arkuissa metalleja enintään ~5 % tarpeesta; jahti loppuu 40 % nopeammin näköyhteyden katketessa; pelottavat 10 %/yö, 2 valvotun yön jälkeen 90 %; hiidenkarhu kaataa aarnipuut ja loikkaa 50 % pidemmälle; eläimet rauhoittuvat vesirajalla ja kääntyvät pois; kuolema-arkku ja majakka (Medium+); kaiku talossa, tunneleissa ja vuorilla; lokit tyynellä rannalla; ahjon ja sulatusuunin valmistumisäänet; chatin koko-asetus; linssiheijastus Medium+:sta, säteiden tarkkuus 3 tasoa; latausnäytön ääni oletuksena aina (4 vaihtoehtoa); DEV vaatii salasanan.
 - **v2.99 puukkotemput:** 0,1 % pullonpyöritys kämmenellä (puukko 7 cm kämmenen yläpuolella, vasen käsi antaa vauhtia, hidastuu, pompautus ja kiinniotto); puolet 5 %:n heitoista on kolme korkeaa heittoa putkeen eri korkeuksille; jokaisesta heitosta huitaisuääni: isot heitot −30 %, pienet (pyöräytysheittely, pompautus) −60 %.
 - **v3.01 nuotiot:** nuotio 2 paikkaa (ruoka kivien päällä), grillinuotio 6 paikkaa, kypsyy 30 % nopeammin ja palaa hiileksi vasta 3× kypsymisajasta (nuotio 2×). Metsästäjän varras ja juhla-ateria valmistetaan vain grillin lähellä; hiili ja lihakeitto kummankin.
-- **v3.01 Poistu pelistä:** päävalikon alin nappi; kysyy tallennuksesta, jos et ole tallentanut tällä valikkokäynnillä. Sulkee pelin (tai näyttää lopetusruudun, jos selain ei salli sulkemista).
+- **v3.01 Poistu pelistä** (v3.02: himmeä ✕ päävalikon oikeassa alakulmassa, teksti hiiren ollessa päällä, pidä pohjassa 1 s – tallentaa pidon alussa, sivuttainen palkki; ei varmistusikkunaa). Alkuperäinen v3.01: päävalikon alin nappi; kysyi tallennuksesta, jos et ollut tallentanut tällä valikkokäynnillä. Sulkee pelin (tai näyttää lopetusruudun, jos selain ei salli sulkemista).
+- **v3.02 Keittopata (taso 10):** Keittopata (ahjo: rauta 4, kupari 3) asennetaan Keittopatanuotioon (Työpisteet: kivi 12, puu 6, rauta 2, taso 10). E avaa padan ikkunan:
+  tila, arvioitu aika, kansi, sienet, polttoaine, ruoan otto, padan irrotus/asennus ja pataruoat. Kansi pois 10× grilliaika, kansi päällä 8×; kansi päällä kypsyy ilman tultakin
+  (−30 %), ilman kantta pysähtyy; hiilloksella −20 %. Aloitus vaatii palavan tulen. Valmis ruoka ei pala, mutta ilman kantta pilaantuu vuorokaudessa → ruoka hiiltyy, pata
+  on käyttökelvoton: irrota (Pilaantunut pata + 1 hiili) ja sulata sulatusuunissa (2 rautaa + 1 kupari). Sienet kypsyvät vain padassa (enintään 10). Padan lähellä
+  valmistetut pataruoat menevät pataan. Valmis ruoka: höyryä ja äänimerkki (eri ääni kansi päällä / ilman). Pataruoat: puolukkahillo, sienikeitto, puolukkapuuro,
+  sienipata, sienirisotto, riistakeitto, juhlapata (tasot 10–13). **Kylläinen**: nälkä kasvaa puolet hitaammin (2–8 min), täyteen syötynä vatsa pysyy täynnä pidempään.
+- **v3.02 Hiilos:** kun nuotion, grillin tai padan polttoaine loppuu, tuli hiipuu 10 min hiillokseksi: paistaa −20 %, ei avaa reseptejä, lämmittää puolella säteellä, ei
+  pelota olentoja, sade sammuttaa 3× nopeammin, polttoaine sytyttää heti.
+- **v3.02 Villikaura:** poimittava kasvi niityillä ja koivulehdoissa (2–3 kpl, uusiutuu 10 min). Risottoon ja puuroon.
+- **v3.02 Rakennusvalikon tietoikkuna:** kun hiiri on saman rakennusosan päällä 2 s, valikon vasemmalle puolelle aukeaa ikkuna: pyörivä 3D-kuva, nimi, hinta, kestävyys,
+  ominaisuudet ja avattava "Miten toimii?" -selostus. Kortissa näkyy myös tasovaatimus (esim. keittopatanuotio taso 10).
+- **v3.02 Korkeat ruohotupsut:** High+ ja Ultra (asetus Grafiikka › Korkeat ruohotupsut): pitkää ruohoa kasoissa niityillä, koivulehdoissa ja metsänreunoilla, huojuu tuulessa.
+- **v3.02 Vinkit:** jokainen vinkki näytetään pelaajalle kerran kaikkien maailmojen yli (uusi pelaaja saa kaikki ensimmäisessä maailmassaan); toistuvat vain, kun alun opastus
+  on laitettu erikseen päälle eikä sitä ohiteta. Puukon pihkavinkki on lyhyt ja ohjaa esineen tietoihin repussa.
+- **v3.02 Äänet:** pihkan tippuminen kulhoon kuuluu hiljaa aivan läheltä (6 m). Pihkankeräyksen äänet ovat `sounds/extra/raw/pihka/`.
+- **v3.02 Päävalikko:** Early Access 1.1.
 - **v3.01 olentojen uusiutuminen:** ulottuvuuksissa ja Hautakummussa kuolleet tavalliset olennot palaavat yksi kerrallaan 20 min välein (ei pomot eikä Kalmon ylimys).
 - **v2.99 AFK ja esine kädessä:** millä tahansa esineellä oikeassa kädessä selän rapsutuksen tilalla 30 % tarkastelu tai 70 % hengitys ja pään pyörittely (venyttely säilyy).
 - **v2.99 F-vinkki:** kun otat puukon käteen 10. kerran (tutoriaalin jälkeen), tulee kerran vinkki F-tarkastelusta – toimii myös muilla työkaluilla ja aseilla.

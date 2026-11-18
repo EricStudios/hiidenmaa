@@ -24,22 +24,33 @@ const ITEMS={
   sydan:{n:'Vartijan sydän',w:3,s:1,c:'#5fe6d9',d:'Kivinen sydän, joka sykkii vielä hiljaa. Voittosi merkki.'},
   /* v2.80 KOLME LIHATYYPPIÄ (käyttäjä): harvinaisuus = saaliin vaarallisuus ja koko. Paistettuna merkittävästi enemmän kylläisyyttä (ennen 30),
      harvinaisempi liha täyttää enemmän. rar = harvinaisuusväri (itemRarity, ui.js). */
-  pienliha:{n:'Raaka pienriistan liha',w:.5,s:30,c:'#d06a5e',food:{h:4,raw:true},d:'Jäniksestä, ketusta, metsosta tai porsaasta. Paista nuotiolla – nopein kypsentää.'},
-  liha:{n:'Raaka riistanliha',w:1,s:20,c:'#c9554e',food:{h:6,raw:true},rar:'unc',d:'Peurasta, porosta tai villikarjusta. Paista nuotiolla. Raakana vatsa voi kääntyä.'},
-  suurliha:{n:'Raaka suurriistan liha',w:1.5,s:15,c:'#a83a36',food:{h:8,raw:true},rar:'rare',d:'Hirvestä tai karhusta. Paistuu hitaasti, mutta täyttää parhaiten. (Harvinainen)'},
-  pienpaisti:{n:'Paistettu pienriista',w:.5,s:30,c:'#9a5a36',food:{h:40,hp:15},d:'Pientä mutta täyttävää.'},
-  paisti:{n:'Paistettu riistanliha',w:1,s:20,c:'#8d4b2b',food:{h:55,hp:25},rar:'unc',d:'Täyttävää ja lämmintä.'},
-  suurpaisti:{n:'Paistettu suurriistan liha',w:1.5,s:15,c:'#6e3520',food:{h:80,hp:40,st:30},rar:'rare',d:'Mehevä ja voimia antava. (Harvinainen)'},
-  lihakeitto:{n:'Lihakeitto',w:1,s:10,c:'#a8743e',food:{h:70,hp:35,st:20},rar:'unc',d:'Pienriistaa ja sieniä padassa – lämmittää pitkään.'},
-  juhla:{n:'Juhla-ateria',w:2,s:5,c:'#c08a3a',food:{h:100,hp:70,st:50,buff:'voima'},rar:'rare',d:'Suurriistaa, riistaa, sieniä ja marjoja. Täyttää vatsan ja antaa voimaa viideksi minuutiksi. (Harvinainen)'},
-  marjat:{n:'Puolukat',w:.2,s:50,c:'#c82a3c',food:{h:8,st:20},d:'Hapanta virkistystä.'},
-  sieni:{n:'Herkkutatti',w:.3,s:30,c:'#c8a26b',food:{h:10,hp:6},d:'Metsän pohjalta.'},
-  varras:{n:'Metsästäjän varras',w:1,s:10,c:'#b06c3a',food:{h:65,hp:40,buff:'voima'},rar:'unc',d:'Lihaa, sieniä ja marjoja. Antaa voimaa viideksi minuutiksi.'},
+  pienliha:{n:'Raaka pienriistan liha',w:.5,s:30,c:'#d06a5e',food:{h:2,raw:true},d:'Jäniksestä, ketusta, metsosta tai porsaasta. Paista nuotiolla – nopein kypsentää.'},
+  liha:{n:'Raaka riistanliha',w:1,s:20,c:'#c9554e',food:{h:3,raw:true},rar:'unc',d:'Peurasta, porosta tai villikarjusta. Paista nuotiolla. Raakana vatsa voi kääntyä.'},
+  suurliha:{n:'Raaka suurriistan liha',w:1.5,s:15,c:'#a83a36',food:{h:4,raw:true},rar:'rare',d:'Hirvestä tai karhusta. Paistuu hitaasti, mutta täyttää parhaiten. (Harvinainen)'},
+  pienpaisti:{n:'Paistettu pienriista',w:.5,s:30,c:'#9a5a36',food:{h:25,hp:12},d:'Pientä mutta täyttävää.'},
+  paisti:{n:'Paistettu riistanliha',w:1,s:20,c:'#8d4b2b',food:{h:35,hp:20},rar:'unc',d:'Täyttävää ja lämmintä.'},
+  suurpaisti:{n:'Paistettu suurriistan liha',w:1.5,s:15,c:'#6e3520',food:{h:50,hp:32,st:24},rar:'rare',d:'Mehevä ja voimia antava. (Harvinainen)'},
+  lihakeitto:{n:'Lihakeitto',w:1,s:10,c:'#a8743e',food:{h:45,hp:28,st:16},rar:'unc',d:'Pienriistaa ja sieniä padassa – lämmittää pitkään.'},
+  juhla:{n:'Juhla-ateria',w:2,s:5,c:'#c08a3a',food:{h:70,hp:56,st:40,buff:'voima'},rar:'rare',d:'Suurriistaa, riistaa, sieniä ja marjoja. Täyttää vatsan ja antaa voimaa viideksi minuutiksi. (Harvinainen)'},
+  marjat:{n:'Puolukat',w:.2,s:50,c:'#c82a3c',food:{h:5,st:16},d:'Hapanta virkistystä.'},
+  sieni:{n:'Herkkutatti',w:.3,s:30,c:'#c8a26b',food:{h:6,hp:5},d:'Metsän pohjalta. Kypsennä keittopadassa (enintään 10 kerralla).'},
+  varras:{n:'Metsästäjän varras',w:1,s:10,c:'#b06c3a',food:{h:42,hp:32,buff:'voima'},rar:'unc',d:'Lihaa, sieniä ja marjoja. Antaa voimaa viideksi minuutiksi.'},
   /* v2.00 juomat: löytyvät vain arkuista (10 % / juoma / arkku ensimmäisellä avauksella). Juodaan pikapaikasta kuten ruoka (drink, actions.js). */
   parannusjuoma:{n:'Parannusjuoma',w:.4,s:5,c:'#d8323c',potion:{full:1},d:'Punainen juoma. Palauttaa terveyden heti täyteen.'},
   elpymisjuoma:{n:'Elpymisjuoma',w:.4,s:5,c:'#3fbf5a',potion:{regen:60},d:'Vihreä juoma. Palauttaa 1 terveyttä sekunnissa minuutin ajan.'},
   sisujuoma:{n:'Sisujuoma',w:.4,s:5,c:'#3f7fe0',potion:{sisu:1},d:'Sininen juoma. Kylläisyys pysyy täynnä 5 minuuttia ja kestävyys 30 sekuntia.'},
-  sienipaisti:{n:'Paistettu sieni',w:.3,s:30,c:'#9b6a3a',food:{h:24,hp:10},d:'Nuotiolla kypsennetty herkkutatti.'},
+  sienipaisti:{n:'Paistettu sieni',w:.3,s:30,c:'#9b6a3a',food:{h:14,hp:8},d:'Keittopadassa kypsennetty herkkutatti.'},
+  /* v3.02 KEITTOPATA (käyttäjä): pataruoat täyttävät eniten; kyl = Kylläinen-tilan kesto s (nälkä kasvaa puolet hitaammin, täyteen syötynä pysyy täynnä pidempään). */
+  villikaura:{n:'Villikaura',w:.2,s:50,c:'#d6b96a',d:'Niityiltä ja koivulehdoista poimittua kauraa. Keittopadassa risottoon ja puuroon.'},
+  keittopata:{n:'Keittopata',w:6,s:1,c:'#3d3d40',d:'Rautainen pata. Asenna keittopatanuotioon (E). Pataruoat aukeavat tasolta 10.'},
+  pilapata:{n:'Pilaantunut pata',w:6,s:1,c:'#2a2420',d:'Ruoka pilaantui padassa ilman kantta. Sulata sulatusuunissa: saat 2 rautaharkkoa ja 1 kupariharkon takaisin.'},
+  puolukkahillo:{n:'Puolukkahillo',w:.4,s:20,c:'#a3182c',food:{h:28,st:35,kyl:120},rar:'unc',d:'Padassa keitettyä puolukkaa. Virkistää ja pitää nälän loitolla.'},
+  sienikeitto:{n:'Sienikeitto',w:.6,s:10,c:'#b48a52',food:{h:50,hp:30,kyl:240},rar:'unc',d:'Herkkutateista ja vedestä padassa keitetty keitto.'},
+  puolukkapuuro:{n:'Puolukkapuuro',w:.6,s:10,c:'#c47a82',food:{h:55,st:35,kyl:300},rar:'unc',d:'Villikaurapuuro puolukoilla. Täyttää pitkäksi aikaa.'},
+  sienipata:{n:'Sienipata',w:.8,s:10,c:'#7a5230',food:{h:62,hp:36,kyl:300},rar:'unc',d:'Herkkutatteja ja pienriistaa haudutettuna.'},
+  sienirisotto:{n:'Sienirisotto',w:.8,s:10,c:'#d8c08a',food:{h:68,hp:36,st:25,kyl:330},rar:'unc',d:'Villikauraa ja herkkutatteja padassa – kermaisen täyttävä.'},
+  riistakeitto:{n:'Riistakeitto',w:1,s:10,c:'#9a5a34',food:{h:78,hp:45,st:20,kyl:360},rar:'rare',d:'Riistanlihaa, sieniä ja vettä hitaasti keitettynä. (Harvinainen)'},
+  juhlapata:{n:'Juhlapata',w:2,s:5,c:'#8a4a24',food:{h:100,hp:75,st:50,buff:'voima',kyl:480},rar:'rare',d:'Suurriistaa, riistaa, sieniä, kauraa ja puolukoita padassa. Täyttää vatsan, pitää sen täynnä ja antaa voimaa viideksi minuutiksi. (Harvinainen)'},
   hiili:{n:'Puuhiili',w:.5,s:50,c:'#2a2623',fuel:10,d:'Palaa kymmenen kertaa pidempään kuin puu. Nuotioon, sulatusuuniin ja seisoviin soihtuihin. Syntyy ylipaistetusta ruoasta tai nuotiolla puusta.'},
   hiekka:{n:'Hiekka',w:.5,s:50,c:'#d8c38c',d:'Rannan hiekkaa. Sulatusuunissa 2 hiekkaa → 1 lasi.'},
   lasi:{n:'Lasi',w:.4,s:20,c:'#a9d6e6',d:'Sulatettua hiekkaa. Lasi-ikkunoihin.'},
@@ -105,6 +116,15 @@ const RECIPES=[
   {id:'varras',st:'grilli',req:{paisti:1,sieni:2,marjat:3},lvl:2},
   {id:'lihakeitto',st:'nuotio',req:{pienpaisti:2,sieni:2},lvl:2},   // v2.80
   {id:'juhla',st:'grilli',req:{suurpaisti:1,paisti:1,sieni:2,marjat:3},lvl:4},
+  /* v3.02 keittopata: st 'pata' = aineet menevät padan lähellä pataan ja kypsyvät siinä (pt = grilliaika s; kansi pois ×10, kansi päällä ×8); ret = palautuu heti */
+  {id:'keittopata',st:'ahjo',req:{rauta:4,kupari:3},lvl:10},
+  {id:'puolukkahillo',st:'pata',req:{marjat:6},n:2,lvl:10,pt:12},
+  {id:'sienikeitto',st:'pata',req:{sieni:4,vesikulho:1},n:2,lvl:10,pt:15,ret:{kulho:1}},
+  {id:'puolukkapuuro',st:'pata',req:{villikaura:3,marjat:3,vesikulho:1},n:2,lvl:10,pt:14,ret:{kulho:1}},
+  {id:'sienipata',st:'pata',req:{sieni:5,pienliha:1},n:2,lvl:11,pt:18},
+  {id:'sienirisotto',st:'pata',req:{sieni:3,villikaura:3},n:2,lvl:11,pt:18},
+  {id:'riistakeitto',st:'pata',req:{liha:2,sieni:2,vesikulho:1},n:2,lvl:12,pt:20,ret:{kulho:1}},
+  {id:'juhlapata',st:'pata',req:{suurliha:1,liha:1,sieni:3,villikaura:2,marjat:2},n:3,lvl:13,pt:30},
   {id:'miekka',st:'ahjo',req:{kupari:6,puu:2,nahka:2},lvl:3},
   {id:'piikivikirves',st:'tyopenkki',req:{puu:3,piikivi:3,nahka:1},lvl:2},   // v1.53
   {id:'kuparikirves',st:'ahjo',req:{kupari:4,puu:3},lvl:3},
@@ -123,7 +143,7 @@ const RECIPES=[
   {id:'hiidenpanssari',st:'ahjo',req:{rauta:14,hiidenkivi:4,nahka:8},lvl:14},
 ];
 const RECIPE_BY={};RECIPES.forEach(r=>RECIPE_BY[r.id]=r);
-const STATION_NAME={tyopenkki:'Työpenkki',nuotio:'Nuotio',grilli:'Grillinuotio',ahjo:'Ahjo'};   // v3.00 grilli: varras ja juhla-ateria
+const STATION_NAME={tyopenkki:'Työpenkki',nuotio:'Nuotio',grilli:'Grillinuotio',ahjo:'Ahjo',pata:'Keittopata'};   // v3.02 pata: pataruoat   // v3.00 grilli: varras ja juhla-ateria
 // Valmistusvälilehdet: Alkupeli (alku:1) on oletus, muut ryhmitellään esineen tyypin mukaan.
 const CRAFT_CATS=[['alku','Alkupeli'],['tyokalut','Työkalut'],['aseet','Aseet'],['varusteet','Varusteet'],['ruoka','Ruoka'],['muut','Muut']];
 function recipeCat(r){const d=ITEMS[r.id];if(d.food)return 'ruoka';if(d.cat==='armor'||d.cat==='shield')return 'varusteet';if(d.cat==='weapon'&&(d.chop||d.pick))return 'tyokalut';if(d.cat==='shovel'||d.cat==='hammer')return 'tyokalut';if(d.cat==='weapon'||d.cat==='bow'||r.id==='nuolet'||r.id==='tulinuolet')return 'aseet';return 'muut';}
@@ -165,6 +185,13 @@ function icon(id){
     case 'liha':case 'paisti':case 'suurliha':case 'suurpaisti':{const k=id[0]==='s'?1.2:1;circ(28,22,12*k,d.c,'#4a2216');line(18,32,9,41,5,'#e7e1cf');circ(8,42,3.5,'#e7e1cf');if(id.endsWith('paisti'))line(22,18,34,24,2,'#c47a4a');break;}
     case 'pienliha':case 'pienpaisti':circ(30,20,8,d.c,'#4a2216');line(24,26,12,40,3.5,'#e7e1cf');circ(11,41,3,'#e7e1cf');if(id==='pienpaisti')line(26,17,34,21,2,'#c47a4a');break;
     case 'lihakeitto':circ(24,30,15,'#5a4636','#2a1e16');circ(24,27,11,d.c,'#6a4a26');circ(19,25,3,'#8d4b2b');circ(28,29,3,'#c8a26b');line(36,16,42,6,2.5,'#c9b48a');break;
+    case 'villikaura':for(const [x,a] of [[16,-.25],[24,0],[32,.25]]){line(x,42,x+a*30,8,1.6,'#8a7a3a');for(let k=0;k<5;k++){const t=k/5,yy=12+t*18,xx=x+a*30*(1-(yy-8)/34);g.fillStyle='#d6b96a';g.beginPath();g.ellipse(xx-2.5,yy,2.4,1.3,-.6,0,TAU);g.fill();g.beginPath();g.ellipse(xx+2.5,yy+1,2.4,1.3,.6,0,TAU);g.fill();}}break;
+    case 'keittopata':case 'pilapata':{const sp=id==='pilapata';poly([[9,20],[39,20],[37,36],[30,41],[18,41],[11,36]],sp?'#2a2420':'#3d3d40',sp?'#120e0c':'#1a1a1c');g.fillStyle=sp?'#0c0a09':'#55565a';g.beginPath();g.ellipse(24,20,15,4,0,0,TAU);g.fill();
+      line(10,19,6,12,2,'#6a6a70');line(38,19,42,12,2,'#6a6a70');line(6,12,42,12,1.5,'#8a8a90');if(sp){circ(20,20,2,'#3a3330');circ(28,19,1.5,'#3a3330');}else line(14,28,18,34,1.5,'rgba(255,255,255,.18)');break;}
+    case 'puolukkahillo':g.fillStyle='rgba(210,235,240,.5)';g.fillRect(14,14,20,26);g.strokeStyle='#3a4a50';g.lineWidth=1.5;g.strokeRect(14,14,20,26);g.fillStyle=d.c;g.fillRect(15.5,20,17,18.5);g.fillStyle='#c8a26b';g.fillRect(12,9,24,6);circ(20,28,2,'#e04a5a');circ(27,32,2,'#e04a5a');line(17,22,17,34,1.5,'rgba(255,255,255,.4)');break;
+    case 'sienikeitto':case 'puolukkapuuro':case 'sienipata':case 'sienirisotto':case 'riistakeitto':case 'juhlapata':{const big=id==='juhlapata';circ(24,30,big?17:15,big?'#3d3d40':'#5a4636',big?'#1a1a1c':'#2a1e16');circ(24,27,big?13:11,d.c,'#4a3020');
+      const dots={sienikeitto:[['#e4d4b2',19,25],['#9b6a3a',28,28],['#9b6a3a',23,30]],puolukkapuuro:[['#c82a3c',19,26],['#c82a3c',28,27],['#c82a3c',24,31],['#f0e2c8',22,24]],sienipata:[['#9b6a3a',19,26],['#c9554e',28,28],['#e4d4b2',23,31]],sienirisotto:[['#9b6a3a',19,27],['#9b6a3a',29,26],['#f4ead2',24,30],['#f4ead2',21,23]],riistakeitto:[['#6e3520',19,26],['#8d4b2b',28,29],['#c8a26b',24,24]],juhlapata:[['#6e3520',18,26],['#8d4b2b',29,28],['#c82a3c',24,23],['#c8a26b',22,32],['#d6b96a',30,22]]}[id];
+      for(const [c,x,y] of dots)circ(x,y,big?3.5:3,c);if(id!=='juhlapata')line(36,16,42,6,2.5,'#c9b48a');else{line(8,22,4,14,2,'#6a6a70');line(40,22,44,14,2,'#6a6a70');}break;}
     case 'juhla':circ(24,30,17,'#d8d0bc','#8a8070');circ(20,27,8,'#6e3520','#3a1a10');circ(30,30,6,'#8d4b2b','#4a2216');circ(28,22,3,'#c82a3c');circ(32,24,3,'#c82a3c');circ(16,34,3.5,'#c8a26b');break;
     case 'marjat':[[18,20],[28,18],[22,29],[32,28],[15,31]].forEach(p=>circ(p[0],p[1],6,'#c82a3c','#6a1220'));line(22,8,24,16,2,'#5a7a2a');break;
     case 'sieni':g.fillStyle='#efe6d2';g.fillRect(20,24,8,16);poly([[8,26],[14,12],[24,8],[34,12],[40,26]],'#9b6a3a','#5e3b1f');break;
