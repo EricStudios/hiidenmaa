@@ -5,6 +5,24 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
 ## ⭐ TÄRKEINTÄ NYT (päivitetty v3.07, 18.11.2026)
 
+- **⏯️ KESKEN: v3.08 – käyttäjän 26 kohdan päivityslista (18.11.)** – jos keskeytyy, jatka tästä ("jatka nyt"). Testilinkit nyt muodossa
+  `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html`.
+  - **Erä 1 korjaukset:** 10 lapio-error kaadetun puun vieressä (resources.js:271 setMatrixAt, n.im undefined → tukki/solmu ilman im:ää), 3 järvellä ei Meri-biomia/ilmoitusta
+    (nimi "Järvi"/"Lampi" + kalan mukaan), vesinimet kartalla kaikilla zoomeilla veden päällä, DEV-paljastus näyttää kaikki vedet, kartta zoomaa enemmän ulos; 11 Windows-teksti +
+    logo samalle keskilinjalle; 12 vinkki pois kun valikko avataan/suljetaan; 13 hakkuuanimaation nykiminen (kuten F-korjaus v2.99 `inspectRestore`); 17 onkimalli: koukku oikein,
+    tarkempi malli, taipuva kärki (onki yksinkertaisin); 7 metso −40 %.
+  - **Erä 2:** 6 juomisääni 2–4× (keitot, puurot, padat, risotto, hillo); 23 päävalikko ilman taukoa −70 % + voimakkaampi LP; 24 kuolemakamerassa äänet häipyvät + kuva tummuu hitaasti,
+    palautuu; 25 kaatuva hahmo varusteineen, käsitavarat lentävät viereen (vain ulkoasu, hautakasaan); 26 veri tummemmaksi/ei hohda (kaikki värit); 20 sade enemmän sivuttain,
+    lumi ilmestyy pehmeästi rajalla.
+  - **Erä 3:** 4 siemen putoaa kun puu kaatuu tukeiksi; 5 istutettavat mallina vasemmassa kädessä; 9 istutetut puut kasvavat lajin kokovaiheet (60 % joka 5. yö), pihka koon mukaan,
+    luonnon puut eivät muutu; 8 aarnipuista 1 % pihkaisia (kapasiteetti 3×, kertymä 4×); 15 kastelu +5 % ja mato multaan +5 % (kerran per kasvu; 5 kastelua → pysyvä +5 %,
+    2 matoa → pysyvä +5 %, lohkokohtainen, multatekstuurit: madot, tumma multa, ruohoa reunalla, yhdistelmä).
+  - **Erä 4:** 1 Extra-grafiikka: napit Kevyin/Vaativin (varmistus 1. kerralla); 2 introvarjot (selvitetty: harva varjopäivitys + lukitsematon varjokamera → tekselilukitus + intro
+    joka ruutu; jos ei riitä, sumennus/varjot pois intron ajaksi, vain heikommilla asetuksilla); 14+22 kategoriat molempiin valikoihin + haku kategorioilla/yleissanoilla;
+    18 DEV ilmainen rakentaminen/valmistus; 19 olkahihna kun selässä kilpi/työkalu (puukilpi vaalea, muut tumma, rautakilpi nahka + solki); 21 kalat: kuha, made, muikku, siika,
+    särki, kiiski, toutain, kampela, meritaimen, suutari + kalakirjaan kuvat.
+  - **Erä 5:** tarkistus + full157, muistiot (valmiit ominaisuudet), versio 3.08, PR, linkit (haara + SHA, EricStudios).
+
 - **Versio 3.07** – käyttäjän korjaukset ja ideat v3.06:een (16 kohtaa, ks. versioloki v3.07). Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`;
   PR #48 (v3.06) ja v3.07 samassa haarassa – muistuta käyttäjää yhdistämään.
 - **SEURAAVAKSI:** käyttäjä lähettää **erillisen ison päivityksen listan** (voi sisältää jo tehtyjä asioita – tarkista "Valmiit ominaisuudet" -listasta alta, ettei tehdä
