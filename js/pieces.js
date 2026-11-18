@@ -100,6 +100,9 @@ const pctOf=(rem,p)=>Math.max(0,Math.min(100,Math.round(rem/Math.max(1,p.data.fu
 const firePct=p=>pctOf(fireRem(p),p),torchPct=p=>pctOf(torchRem(p),p);
 const fuelText=(rem,pct)=>`${pct}/100 · ${(rem/60).toFixed(1).replace('.',',')} min`;
 function markFull(p){p.data.full=isTorch(p.t)?torchRem(p):fireRem(p);}
+/* v3.00 käyttäjä: nuotio vs. grillinuotio – nuotiolla FIRE_SLOTS 2 paikkaa (ruoka kypsyy kivien päällä), grillillä 6 (2 tankoa × 3); grilli kypsentää
+   GRILL_COOK_K nopeammin (30 % lyhyempi aika) ja ruoka palaa hiileksi vasta FIRE_BURN_K 3× kypsymisajasta (nuotio 2×). */
+const FIRE_SLOTS={nuotio:2,grilli:6},GRILL_COOK_K=1/.7,FIRE_BURN_K={nuotio:2,grilli:3};
 const FUEL_MAX=40,COOKABLE={liha:'paisti',pienliha:'pienpaisti',suurliha:'suurpaisti',sieni:'sienipaisti'},COOK_T={pienliha:[7,3],liha:[9,5],suurliha:[14,5],sieni:[8,4]};   // v2.80 kypsymisaika [min, +satunnainen] s
 for(const d of Object.values(PIECES))if(d.base){const b=PIECES[d.base];for(const k of ['poses','flip','span2','noBench','store','col','dim'])if(d[k]===undefined&&b[k]!==undefined)d[k]=b[k];}
 const BUILD_CATS=[['alku','Alkupeli'],['seinat','Seinät ja lattiat'],['katot','Katot'],['palkit','Palkit ja pylväät'],['portaat','Portaat ja tikkaat'],['kalusto','Kalusto'],['tyopisteet','Työpisteet'],['valo','Valo'],['puolustus','Puolustus'],['kivi','Kivirakennus'],['kivikatot','Kivikatot']];
@@ -200,12 +203,15 @@ function buildPieceMesh(t,f=0){
       for(let i=0;i<STEP_N;i++)g.add(bxw(G,.1,d+.02,W,0,h*(i+1)-.05,G/2-d/2-i*d));
       for(const x of[-(G/2-.07),G/2-.07]){const sb=seamLen(bxw(.12,.26,L,W,x,0,0),'d');const gr=new THREE.Group();gr.add(sb);gr.rotation.x=al;gr.position.set(0,gm.rise/2-.22,G/2-gm.run/2);g.add(gr);}break;}
     case 'tyopenkki':g.add(bxw(1.8,.14,.9,MAT.wood,0,.86,0));for(const [x,z] of [[-.8,-.35],[.8,-.35],[-.8,.35],[.8,.35]])g.add(bxw(.14,.8,.14,MAT.wood,x,.4,z));g.add(DET(bx(.5,.08,.2,mat(0x8f8d86),.3,.98,0)));g.add(DET(bxw(.08,.06,.6,MAT.wood,-.4,.96,.1)));break;
-    case 'nuotio':for(let i=0;i<8;i++){const a=i/8*TAU;g.add(bx(.26,.2,.26,mat(0x6a6862),Math.cos(a)*.48,.1,Math.sin(a)*.48));}{const l1=bxw(.14,.14,.8,MAT.wood,0,.12,0);l1.rotation.y=.6;const l2=bxw(.14,.14,.8,MAT.wood,0,.16,0);l2.rotation.y=-.6;g.add(l1,l2);const f=new THREE.Mesh(new THREE.ConeGeometry(.28,.7,5),MAT.flame);f.position.y=.5;g.add(f);const f2=new THREE.Mesh(new THREE.ConeGeometry(.15,.45,5),MAT.flame2);f2.position.y=.45;g.add(f2);g.userData.flame=[f,f2];}break;
+    case 'nuotio':for(let i=0;i<8;i++){const a=i/8*TAU;g.add(bx(.26,.2,.26,mat(0x6a6862),Math.cos(a)*.48,.1,Math.sin(a)*.48));}{const l1=bxw(.14,.14,.8,MAT.wood,0,.12,0);l1.rotation.y=.6;const l2=bxw(.14,.14,.8,MAT.wood,0,.16,0);l2.rotation.y=-.6;g.add(l1,l2);const f=new THREE.Mesh(new THREE.ConeGeometry(.28,.7,5),MAT.flame);f.position.y=.5;g.add(f);const f2=new THREE.Mesh(new THREE.ConeGeometry(.15,.45,5),MAT.flame2);f2.position.y=.45;g.add(f2);g.userData.flame=[f,f2];}
+      {const food=[];for(const a of [Math.PI*.25,Math.PI*1.25]){const m=new THREE.Mesh(new THREE.SphereGeometry(.11,8,6),new THREE.MeshStandardMaterial({color:0xc9554e,roughness:.8}));m.position.set(Math.cos(a)*.48,.24,Math.sin(a)*.48);m.scale.set(1.35,.5,1);m.rotation.y=-a;m.visible=false;m.castShadow=true;g.add(m);food.push(m);}g.userData.food=food;}   // v3.00 ruoka kypsyy kivien päällä
+      break;
     case 'grilli':{for(let i=0;i<8;i++){const a=i/8*TAU;g.add(bx(.26,.2,.26,mat(0x6a6862),Math.cos(a)*.48,.1,Math.sin(a)*.48));}
       const l1=bxw(.14,.14,.8,MAT.wood,0,.12,0);l1.rotation.y=.6;const l2=bxw(.14,.14,.8,MAT.wood,0,.16,0);l2.rotation.y=-.6;g.add(l1,l2);
       const f=new THREE.Mesh(new THREE.ConeGeometry(.28,.7,5),MAT.flame);f.position.y=.5;g.add(f);const f2=new THREE.Mesh(new THREE.ConeGeometry(.15,.45,5),MAT.flame2);f2.position.y=.45;g.add(f2);g.userData.flame=[f,f2];
-      const im=mat(0x3a3a3a,{metalness:.5,roughness:.5});g.add(bx(.1,1.1,.1,im,-.6,.55,0),bx(.1,1.1,.1,im,.6,.55,0),bx(1.3,.07,.07,im,0,1.05,0));
-      const food=[];for(let i=0;i<4;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),new THREE.MeshStandardMaterial({color:0xc9554e,roughness:.8}));m.position.set(-.45+i*.3,.88,0);m.scale.set(1,1.3,1);m.visible=false;m.castShadow=true;g.add(m);food.push(m);g.add(bx(.015,.1,.015,im,-.45+i*.3,.98,0,false));}g.userData.food=food;break;}
+      const im=mat(0x3a3a3a,{metalness:.5,roughness:.5});g.add(bx(.1,1.1,.1,im,-.6,.55,0),bx(.1,1.1,.1,im,.6,.55,0));
+      for(const sd of [-1,1])g.add(bx(.07,.07,.42,im,sd*.6,1.08,0));for(const z of [-.17,.17])g.add(bx(1.3,.06,.06,im,0,1.05,z));   // v3.00 kaksi tankoa (6 paikkaa)
+      const food=[];for(const z of [-.17,.17])for(let i=0;i<3;i++){const x=-.35+i*.35,m=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),new THREE.MeshStandardMaterial({color:0xc9554e,roughness:.8}));m.position.set(x,.88,z);m.scale.set(1,1.3,1);m.visible=false;m.castShadow=true;g.add(m);food.push(m);g.add(bx(.015,.1,.015,im,x,.98,z,false));}g.userData.food=food;break;}
     case 'sulatin':g.add(bx(1.4,1.1,1.4,MAT.stone,0,.55,0),bx(1.1,1,1.1,MAT.stone,0,1.6,0),bx(.6,.6,.6,MAT.stone,0,2.4,0));{const glow=bx(.5,.4,.05,MAT.flame,0,.5,.71,false);g.add(glow);g.userData.glow=glow;}break;
     case 'ahjo':g.add(bx(1,.8,.7,MAT.stone,-.3,.4,0),bx(.7,.25,.35,mat(0x3a3a3a,{metalness:.6,roughness:.4}),.45,.95,0),bx(.3,.6,.3,mat(0x3a3a3a),.45,.5,0));{const coal=bx(.6,.06,.4,MAT.flame,-.3,.82,0,false);g.add(coal);}break;
     case 'teltta':{// v0.99 kangasteltta: A-runko, kaksi kaltevaa kangaslapetta, umpinainen takapääty, edestä avoin, harjasalko ja kiilat

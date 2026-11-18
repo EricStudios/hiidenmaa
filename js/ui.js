@@ -304,7 +304,7 @@ const REPPU_CLOSE_P=1.3,ARKKU_CLOSE_P=1.15,ARKKU_CLOSE_V=.8;   // v2.50 repun su
 function closePanels(keep,skipLock){splitClose();upPrev=null;chestSel=null;if(openPanel){panelClosedAt=performance.now();if(!keep){const own=openPanel==='chest'&&curChest&&!curChest.found;   /* v2.28: reppu kiinni = sama ääni kuin auki, oma arkku oma sulkemisääni */
     if(!(openPanel==='inv'?plSnd('valikot','reppu',{p:REPPU_CLOSE_P}):openPanel==='chest'?plSnd('kaytto','arkku_auki',{p:ARKKU_CLOSE_P,v:ARKKU_CLOSE_V}):false))plSnd('valikot','sulje');   /* v2.56: kaikki arkut: avausääni hiljempaa ja korkeammalta */}}for(const id of ['#inv','#build','#mapP','#chest','#progP','#logP','#devP','#devMP','#devIP'])if($(id))$(id).hidden=true;openPanel=null;curChest=null;selSlot=-1;selHalf=false;selEq=null;slotDrag=null;hoverSlot=null;if(typeof updGhost==='function')updGhost();if(!keep){state='play';if(!skipLock&&!locked)requestLock();}vcSync();}
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closePanels()));
-function nearStations(){const s={};for(const p of pieces){const k=isFirePiece(p.t)?'nuotio':p.t;if(['tyopenkki','nuotio','ahjo'].includes(k)&&dist2(p.x,p.z,P.pos.x,P.pos.z)<(k==='nuotio'?4:8)**2&&!P.inDun){if(k==='nuotio'&&p.data.fuel<=0)continue;s[k]=1;}}return s;}
+function nearStations(){const s={};for(const p of pieces){const k=isFirePiece(p.t)?'nuotio':p.t;if(['tyopenkki','nuotio','ahjo'].includes(k)&&dist2(p.x,p.z,P.pos.x,P.pos.z)<(k==='nuotio'?4:8)**2&&!P.inDun){if(k==='nuotio'&&p.data.fuel<=0)continue;s[k]=1;if(p.t==='grilli')s.grilli=1;}}return s;}   // v3.00 grilli = oma asema (varras, juhla-ateria) + kelpaa nuotioksi
 let fxAt=0;
 // Tilat repun vieressä: nimi, jäljellä oleva aika ja vaikutus (osoita hiirellä tai lue suoraan).
 function renderEffects(fxs){fxs=fxs||effects();$('#effects').innerHTML=`<h3>Tilat</h3>`+(fxs.length?fxs.map(e=>`<div class="fx ${e.kind}" title="${e.desc}"><b>${e.name}${e.t?' · '+fmtT(e.t):''}</b><span>${e.desc}</span></div>`).join(''):'<div class="s">Ei erityisiä tiloja.</div>');}
@@ -391,7 +391,7 @@ function bestOwned(key){let b=-1;for(const s of inv)if(s&&ITEMS[s.id].cat&&gearK
 //  mukana, 4) välituotteet, joita tarvitaan sinulle uuden esineen valmistukseen. Tarpeettomia (huonompi/jo omistettu varuste) ei ehdoteta.
 const SUG_REPEAT=['nuolet','sulkanuolet','tulinuolet','soihtu','hiili','varras'];
 function suggestCrafts(st){const hasBow=inv.some(s=>s&&ITEMS[s.id].cat==='bow'),made=id=>!!(flags.first&&flags.first['c_'+id]),own=id=>invCount(id)>0;
-  const stBuilt=k=>pieces.some(p=>k==='nuotio'?isFirePiece(p.t):p.t===k||PIECES[p.t].base===k);
+  const stBuilt=k=>pieces.some(p=>k==='nuotio'?isFirePiece(p.t):p.t===k||PIECES[p.t].base===k);   /* grilli: p.t==='grilli' */
   // pelin vaihe: korkein omistetun varusteen ohjetaso (keskeneräiset myöhemmät tasot eivät hyppää kärkeen)
   let stage=1;for(const x of inv)if(x&&RECIPE_BY[x.id]&&ITEMS[x.id].cat)stage=Math.max(stage,RECIPE_BY[x.id].lvl||1);
   const newUse=id=>RECIPES.some(r=>r.id!==id&&r.req[id]&&recipeKnown(r)&&recipeOpen(r)&&!made(r.id)&&invCount(id)<r.req[id]);

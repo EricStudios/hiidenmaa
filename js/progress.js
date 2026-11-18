@@ -77,7 +77,7 @@ const GOALS=[
   {id:'jousi',t:'Ammu jousella',d:'Valmista jousi ja nuolia. Pidä hiiren vasenta pohjassa ja päästä irti.',xp:15,ok:()=>cnt('shots')>=5},
   {id:'laajenna',t:'Laajenna reppua',d:'Repun vieressä on päivityspainike (nahkaa ja puuta).',xp:20,ok:()=>P.packLv>=1},
   {id:'kivirak',t:'Rakenna kivestä',d:'Kiviseinät, kivilattiat ja kivikatot kestävät paljon. Kivikatot ovat omassa välilehdessään.',xp:15,ok:()=>anyP(isStone)},
-  {id:'grilli',t:'Rakenna grillinuotio',d:'Grillitelineessä on neljä paikkaa ruoalle. Ota ruoka ajoissa – ylipaistettu muuttuu hiileksi.',xp:20,ok:()=>anyP(p=>p.t==='grilli')},
+  {id:'grilli',t:'Rakenna grillinuotio',d:'Grillissä on kuusi paikkaa ruoalle, ruoka kypsyy nopeammin eikä pala yhtä herkästi. Vain grillillä: metsästäjän varras ja juhla-ateria.',xp:20,ok:()=>anyP(p=>p.t==='grilli')},
   {id:'rauta',t:'Löydä rautaa',d:'Rautasuonet ovat korkealla vuoristossa. Tarvitset kuparihakun (taso 3). Rautatyökalut aukeavat tasolla 5.',xp:30,ok:()=>flags.seen&&(flags.seen.rautamalmi||flags.seen.rauta)},
   // v1.34 (lista 3, kohta 8): ulottuvuudet ennen Kalmanvartijaa; alttari vaatii kolme Kalmankruunun sirpaletta (ei enää hiidenkiviä).
   {id:'routa',t:'Avaa Routaportti',get d(){return `Routaportti on ${dirIn('portal1')} tuntureilla. Siinä on kaksi lukkoa: Kalmon sinetti (Hautakummun ylimys, ${dirIn('barrow')}) ja Jääavain (jostain saaren vanhasta arkusta). Avaimen kätkijä vuorella neuvoo.`;},xp:40,ok:()=>!portalLocked('portal1')||!!fo('rb').portal1},

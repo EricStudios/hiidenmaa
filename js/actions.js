@@ -138,7 +138,7 @@ function killMob(m){m.dead=true;m.deadT=0;m.ashDeath=m.burnT>0||!!m.fireHit;if(m
   for(const [id,lo,hi] of [...m.def.drops,...(m.rv&&REALM_LOOT[m.realm]||[])]){const c=rint(rng,lo,hi);if(c>0){if(m.def.ai==='boss'||m.def.ai==='rboss')(m.bossLoot||(m.bossLoot=[])).push([id,c]);else spawnDrop(id,c,m.pos.x,m.pos.y+1,m.pos.z);}}   // v0.91: ulottuvuusversioilla lisäsaalis; v1.90 pomon saalis ilmestyy kuolema-animaatiossa
   if(m.archer&&Math.random()<.5)spawnDrop('nuolet',2+(Math.random()*4|0),m.pos.x,m.pos.y+1,m.pos.z);   // v1.42 jousikalmo pudottaa joskus nuolia
   if(m.type==='vartija'&&!m.devSpawn){flags.boss=1;bossDefeated();}   /* v1.94: palkin piilotus/KUKISTETTU hoitaa bossBarTick */   // v1.91: DEV-luotu vartija ei kirjaa voittoa
-  if(m.dunIdx!==undefined)dunKilled[m.dunIdx]=1;
+  if(m.dunIdx!==undefined){dunKilled[m.dunIdx]=1;mobRespQueue('barrow',m.dunIdx,m.type);}   // v3.00 uusiutuu 20 min jonossa
   if(m.sinetti&&!flags.sinetti){flags.sinetti=1;spawnDrop('sinetti',1,m.pos.x,m.pos.y+1,m.pos.z);msg('Ylimyksen vyöltä putoaa Kalmon sinetti!','loot');}   // v2.62
   onMobKilled(m);
 }
@@ -252,7 +252,7 @@ function findInteract(){
 function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLowerCase();if(bt(p.t)==='ovi')return p.data.open?'Sulje ovi':'Avaa ovi';switch(p.t){
   case 'tikkaat':case 'kivitikkaat':return 'Kiipeä: pidä W (alas S)';
   case 'ovi':return p.data.open?'Sulje ovi':'Avaa ovi';
-  case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=!p.data.camp&&Object.keys(COOKABLE).some(id=>invCount(id)>0);   /* v2.98 leirin nuotio: ei paistoa */return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&fireLit(p)&&p.data.cook.length<(p.t==='grilli'?4:3)?'Paista ruokaa':`Polttoainetta ${fuelText(fireRem(p),firePct(p))} – lisää`;}
+  case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=!p.data.camp&&Object.keys(COOKABLE).some(id=>invCount(id)>0);   /* v2.98 leirin nuotio: ei paistoa */return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&fireLit(p)&&p.data.cook.length<(FIRE_SLOTS[p.t]||2)?'Paista ruokaa':`Polttoainetta ${fuelText(fireRem(p),firePct(p))} – lisää`;}
   case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),torchPct(p))} – lisää`;
   case 'sanky':return isNight()?'Nuku':'Aseta herätyspaikka';
   case 'arkku':return 'Avaa arkku';
@@ -284,9 +284,9 @@ function interact(){if(P.insp)inspectStop();
   }}
 }
 // Nuotio ja grillinuotio: 1) kerää valmis ruoka, 2) ripusta raaka ruoka (jokaisella oma aika), 3) lisää polttoainetta (puu = 1 yksikkö, hiili = 10).
-function fireInteract(p){const cap=p.t==='grilli'?4:3,d=p.data;
+function fireInteract(p){const cap=FIRE_SLOTS[p.t]||2,d=p.data;   // v3.00 nuotio 2, grilli 6
   const done=d.cook.filter(c=>c.t>=c.need);
-  if(done.length){for(const c of done){const burnt=c.t>=c.need*2;giveOrDrop(burnt?'hiili':COOKABLE[c.id],1,p.x,p.y+.8,p.z);if(!burnt)bump('cooked');}d.cook=d.cook.filter(c=>c.t<c.need);sfx('pickup');return;}
+  if(done.length){for(const c of done){const burnt=c.t>=c.need*(FIRE_BURN_K[p.t]||2);giveOrDrop(burnt?'hiili':COOKABLE[c.id],1,p.x,p.y+.8,p.z);if(!burnt)bump('cooked');}d.cook=d.cook.filter(c=>c.t<c.need);sfx('pickup');return;}
   const raw=!d.camp&&Object.keys(COOKABLE).find(id=>invCount(id)>0);   // v2.98 hylätyn leirin nuotio on tavallinen tuli (ei paistoa)
   if(d.out&&d.fuel>0){if(fireRainOut(p)){msg('Kova sade sammuttaisi tulen heti – suojaa nuotio katolla.','warn');return;}d.out=0;d.wetT=0;msg('Sytytit nuotion uudelleen.');sfx('build');return;}   // v2.17
   if(raw&&fireLit(p)&&d.cook.length<cap){invRemove(raw,1);const ct=COOK_T[raw]||[9,5];d.cook.push({id:raw,t:0,need:ct[0]+Math.random()*ct[1]});msg(`${ITEMS[raw].n} paistuu… (ota ajoissa, muuten palaa hiileksi)`);sfx('craft');return;}

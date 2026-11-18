@@ -304,7 +304,7 @@ function spawnRealmMobs(id){const R=BUILT[id],dk=fo('rm')[id]||(fo('rm')[id]={})
 // Kutsutaan, kun mobi kuolee: tallentaa vartijoiden, sisätilojen vihollisten ja pomojen kaatumisen.
 function onMobKilled(m){
   if(m.siteK)fo('gk')[m.siteK+':'+m.gi]=1;
-  if(m.realm&&m.rmIdx!==undefined){if(m.rmIdx==='B'){fo('rb')[m.realm]=1;msg(`${m.def.n} on kaatunut!`,'loot');bossVictory(m.type);   /* v1.94: viimeinen pomo → rauha */sfx('roar');shake(.4);const k=REALMS[m.realm].key;if(k){giveOrDrop(k,1,m.pos.x,m.pos.y+1.2,m.pos.z);msg(`${ITEMS[k].n} – se avaa seuraavan portin.`,'loot');}}else(fo('rm')[m.realm]||(fo('rm')[m.realm]={}))[m.rmIdx]=1;}
+  if(m.realm&&m.rmIdx!==undefined){if(m.rmIdx==='B'){fo('rb')[m.realm]=1;msg(`${m.def.n} on kaatunut!`,'loot');bossVictory(m.type);   /* v1.94: viimeinen pomo → rauha */sfx('roar');shake(.4);const k=REALMS[m.realm].key;if(k){giveOrDrop(k,1,m.pos.x,m.pos.y+1.2,m.pos.z);msg(`${ITEMS[k].n} – se avaa seuraavan portin.`,'loot');}}else{(fo('rm')[m.realm]||(fo('rm')[m.realm]={}))[m.rmIdx]=1;mobRespQueue(m.realm,m.rmIdx,m.type);}}
 }
 
 /* ---------------- ULOTTUVUUSVERSIOT (v0.91, kohta 8) ---------------- */
@@ -590,3 +590,19 @@ function updateDrips(dt){const rk=P.inDun?(P.realm||'barrow'):null;
   dressFloor({r,add:o=>statics.add(o),cell:dunCell,y0:DUN.y,ceil:4.2,cells,bones:.3,stal:.12,puddles:.05,cave:false,rk:'barrow',stalM:new THREE.MeshStandardMaterial({color:0x7a746a,roughness:.35,metalness:.1,flatShading:true})});
   const its=[],cols=[];[[7,6],[13,7],[1,11]].forEach(([ix,iz],i)=>{const p=dunCell(ix,iz),dirs=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>(DMAP[iz+b]||'')[ix+a]==='#'),dv=dirs[0]||[0,0];
     if(DMAP[iz][ix]==='#')return;buildBarrel(o=>statics.add(o),cols,its,p.x+dv[0]*1.05,DUN.y,p.z+dv[1]*1.05,'barrow:b'+i,i*5+2);});})();
+
+/* v3.00 käyttäjä: ULOTTUVUUKSIEN JA HAUTAKUMMUN OLENNOT UUSIUTUVAT. Kuollut tavallinen olento (ei pomot, ei Kalmon ylimys MOB_RESP_NO) menee alueen
+   jonoon (flags.mq[alue] = {L: [indeksit kuolinjärjestyksessä], t: seuraavan paluun playTime}). Yksi kerrallaan: ensimmäinen palaa MOB_RESP_T (20 min)
+   kuoleman jälkeen, seuraava taas 20 min myöhemmin jne. Paluu = kuolinmerkintä pois (dunKilled / fo('rm')); jos pelaaja on alueella, olento syntyy
+   heti paikalleen syntyanimaatiolla (ei alle MOB_RESP_NEAR m pelaajasta – silloin 30 s myöhemmin). Pesän murskaamisen tyhjentämät paikat eivät palaa. */
+const MOB_RESP_T=1200,MOB_RESP_NEAR=14,MOB_RESP_NO=new Set(['ylimys','vartija']);
+function mobRespQueue(area,i,type){if(MOB_RESP_NO.has(type)||MOBDEF[type]&&(MOBDEF[type].ai==='boss'||MOBDEF[type].ai==='rboss'))return;
+  const Q=fo('mq'),q=Q[area]||(Q[area]={L:[],t:null});if(!q.L.includes(i))q.L.push(i);if(q.t==null)q.t=playTime+MOB_RESP_T;}
+function mobRespawnTick(){const Q=flags.mq;if(!Q)return;
+  for(const area in Q){const q=Q[area];if(!q.L.length){q.t=null;continue;}if(q.t==null)q.t=playTime+MOB_RESP_T;if(playTime<q.t)continue;
+    const i=q.L[0],here=P.inDun&&(area==='barrow'?!P.realm:P.realm===area);let s=null;
+    if(area==='barrow')s=dunSpawns[i];else{const R=BUILT[area];s=R&&R.mobs[i];}
+    if(here&&s&&dist2(s.x,s.z,P.pos.x,P.pos.z)<MOB_RESP_NEAR*MOB_RESP_NEAR){q.t=playTime+30;continue;}
+    q.L.shift();q.t=q.L.length?playTime+MOB_RESP_T:null;
+    if(area==='barrow'){delete dunKilled[i];if(here&&s&&!mobs.some(m=>m.dunIdx===i&&!m.dead)){const m=spawnMob(s.type,s.x,s.z,{y:DUN.y,dun:true});m.dunIdx=i;}}
+    else{const dk=fo('rm')[area];if(dk)delete dk[i];if(here&&s&&!mobs.some(m=>m.rmIdx===i&&m.realm===area&&!m.dead)){const m=realmize(spawnMob(s.type,s.x,s.z,{y:DUN.y,dun:true}),area);m.rmIdx=i;}}}}

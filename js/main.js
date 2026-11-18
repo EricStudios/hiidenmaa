@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.00';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.01';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -103,7 +103,7 @@ function musicTick(){const M=window.__mus;if(!M||!M.set)return;const now=perform
   if(started&&(state==='play'||state==='ui')){M.set(musicCtx(dt));return;}
   if(c==='tauko'&&state!=='paused')M.set(null);}
 function startPlay(){if(window.__mus)window.__mus.stop();if(typeof menuClear==='function')menuClear();if(typeof mbgShow==='function'&&MBG.cv)mbgShow(false);setTimeout(()=>{if(typeof applyHudMode==='function')applyHudMode();},50);{const f=$('#menuFade');if(f)f.style.opacity=0;}fig.g.visible=true;started=true;{const h=$('#pcHint');if(h&&!h.hidden){h.classList.add('fade');setTimeout(()=>h.hidden=true,1600);}}state='play';$('#menu').hidden=true;$('#hud').hidden=false;requestLock();invDirty=true;}
-function pauseGame(){if(state!=='play'||openPanel||P.dead)return;state='paused';pausedAt=performance.now();$('#menu').hidden=false;$('#settings').hidden=true;setMenuView('main');if(typeof logoRandom==='function')logoRandom();/* v1.48: uusi logoteema joka valikkokäynnillä */$('#hud').hidden=true;refreshMenu();mouseL=mouseR=false;P.drawing=false;}
+function pauseGame(){if(state!=='play'||openPanel||P.dead)return;QUIT.saved=false;state='paused';pausedAt=performance.now();$('#menu').hidden=false;$('#settings').hidden=true;setMenuView('main');if(typeof logoRandom==='function')logoRandom();/* v1.48: uusi logoteema joka valikkokäynnillä */$('#hud').hidden=true;refreshMenu();mouseL=mouseR=false;P.drawing=false;}
 addEventListener('beforeunload',e=>{if(started&&!flags.won&&!reloading){e.preventDefault();e.returnValue='';}});
 // Maailma rakennetaan skriptien latautuessa, joten kartan vaihto = sivun uudelleenlataus.
 let reloading=false;
@@ -124,7 +124,7 @@ function saveLoad(s,welcome){if(!window.__ldShow){loadData(s);startPlay();msg(we
 $('#bRun').onclick=()=>{pauseRun=!pauseRun;try{localStorage.setItem('hiidenmaa_prun',pauseRun?'1':'0');}catch(e){}refreshMenu();};
 $('#bResume').onclick=()=>{state='play';$('#menu').hidden=true;$('#hud').hidden=false;requestLock();};
 // Tallenna: ei avaa asetuksia; ilmoitus näkyy painikkeessa ja valikon tilariviltä
-$('#bSave').onclick=()=>{const ok=saveGame(true);refreshMenu();const lbl=$('#bSave .bLbl'),prevT='Tallenna nyt';$('#bSave').classList.toggle('saved',!!ok);   // v1.49: oma tekstielementti (firstChild on riimulaatta)
+$('#bSave').onclick=()=>{const ok=saveGame(true);if(ok)QUIT.saved=true;refreshMenu();const lbl=$('#bSave .bLbl'),prevT='Tallenna nyt';$('#bSave').classList.toggle('saved',!!ok);   // v1.49: oma tekstielementti (firstChild on riimulaatta)
   $('#saveMsg').textContent=ok?'Tallennettu selaimeen.':'Selaimen tallennus ei ole käytössä – avaa Asetukset › Tallennus ja tallenna koodi tai tiedosto.';
   lbl.textContent=ok?'Tallennettu ✓':'Tallennus epäonnistui';setTimeout(()=>{lbl.textContent=prevT;$('#saveMsg').textContent='';$('#bSave').classList.remove('saved');},2200);};
 $('#bKeys').onclick=()=>{if(!$('#settings').hidden&&setTab==='keys'){$('#settings').hidden=true;return;}openSettings('keys');};
@@ -227,7 +227,7 @@ function update(dt){
   updateEnvironment(dt);updateCamera(dt);updateBenchRings();updateChunkVis();updateGrass();
   if(state==='play'){lookTarget=findInteract();updateGhost();}else if(ghost)ghost.visible=false;
   lightT-=dt;if(lightT<=0){lightT=.4;updateLights();}
-  slowT-=dt;if(slowT<=0){slowT=1;exploreTick();updateGoals();if(Math.floor(playTime)%5===0)respawnNodes();pickFarTick(1);if(isNight()&&!P.inDun)nightRegrow();}
+  slowT-=dt;if(slowT<=0){slowT=1;exploreTick();updateGoals();if(Math.floor(playTime)%5===0)respawnNodes();pickFarTick(1);mobRespawnTick();   /* v3.00 */if(isNight()&&!P.inDun)nightRegrow();}
   saveT+=dt;if(saveT>120){saveT=0;saveGame(true);}   // v1.35 (kohta 21): automaattitallennus 2 min välein
   updateZone(dt);updateHUD(dt);if(DEV)devLiveTick(dt);   // v2.96 DEV-valikon elävät arvot
 }
@@ -332,3 +332,16 @@ updateLights();applyGfx();refreshKeyHints();
 perfApply();if(window.__ldDone)window.__ldDone();   // v1.60: testi tehty jo ennen latausta (boot.js)
 requestAnimationFrame(frame);
 window.__game={renderer,keys,G,WH,get ghost(){return{sel:buildSel,ok:ghostOk,pos:ghostPos,why:lastInvalid}},placeBuild,openChest,scene,camera,P,get mobs(){return mobs},inv:()=>inv,pieces:()=>pieces,invAdd,addPiece,spawnMob,newGame,startPlay,flags:()=>flags,saveGame,serialize,loadData,setState:s=>state=s,get state(){return state},update,interact,togglePanel,useSlot,craft,RECIPE_BY,setBuildSel,enterDungeon,exitDungeon,camYaw:v=>camYaw=v,doMeleeHit,startAttack,nodes,setDay:v=>dayT=v};
+
+/* v3.00 käyttäjä: Poistu pelistä (päävalikon alin nappi). Jos peli on käynnissä eikä Tallenna nyt -nappia ole painettu tällä valikkokäynnillä (QUIT.saved),
+   kysytään: Tallenna ja poistu / Poistu tallentamatta / Peruuta. Selain sallii window.close():n vain skriptin avaamille ikkunoille – muuten peli
+   pysäytetään (äänet hiljaisiksi) ja näytetään lopetusruutu "voit sulkea välilehden" + Avaa peli uudelleen. */
+const QUIT={saved:false};
+function quitGame(){try{if(window.__mus)window.__mus.stop();}catch(e){}try{if(window.__AC)window.__AC.suspend();}catch(e){}state='paused';
+  try{window.close();}catch(e){}
+  setTimeout(()=>{if(document.getElementById('quitScr'))return;const d=document.createElement('div');d.id='quitScr';
+    d.innerHTML='<div class="qBox"><div class="qRunes" aria-hidden="true">ᚺᛁᛁᛞᛖᚾᛗᚨᚨ</div><h2>Peli on suljettu</h2><p>Voit nyt sulkea selaimen välilehden.</p><button class="btn pri" id="bReopen">Avaa peli uudelleen</button></div>';
+    document.body.appendChild(d);document.getElementById('bReopen').onclick=()=>location.reload();},250);}
+$('#bQuit').onclick=()=>{
+  if(started&&!QUIT.saved&&!P.dead)keyDialog('Tallennetaanko peli ennen poistumista?',[['Tallenna ja poistu',()=>{saveGame(true);quitGame();}],['Poistu tallentamatta',quitGame],['Peruuta',null]],'Et ole tallentanut tällä valikkokäynnillä. Automaattitallennus tehdään 2 min välein.');
+  else keyDialog('Poistutaanko pelistä?',[['Poistu',quitGame],['Peruuta',null]],started?'Peli on tallennettu.':'');};

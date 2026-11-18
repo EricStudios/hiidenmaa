@@ -587,6 +587,22 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;const I=JSON.parse(inv0);for(let q=0;q<inv.length;q++)inv[q]=I[q]||null;invDirty=true;updateGear();}return r;});
+  t('v3.01 nuotio 2 paikkaa kivillä, grilli 6 paikkaa + 30 % nopeampi + palaa vasta 3×, varras ja juhla-ateria vain grillillä; Poistu pelistä; ulottuvuuksien/Hautakummun olennot uusiutuvat 20 min jonossa',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};const om=msg;msg=()=>{};const inv0=JSON.stringify(inv),p0=P.pos.clone();const made=[];
+    try{ck('vakiot',FIRE_SLOTS.nuotio===2&&FIRE_SLOTS.grilli===6&&Math.abs(GRILL_COOK_K-1/.7)<1e-9&&FIRE_BURN_K.grilli===3&&FIRE_BURN_K.nuotio===2);
+      const x=P.pos.x+3,z=P.pos.z+3;for(const t of ['nuotio','grilli']){const p=addPiece(t,x+(t==='grilli'?6:0),terrainH(x,z),z,0,undefined,{fuel:20,burn:0});made.push(p);
+        ck('malli '+t,p.mesh.userData.food&&p.mesh.userData.food.length===FIRE_SLOTS[t]);invAdd('liha',8);for(let i=0;i<8;i++)fireInteract(p);ck('paikat '+t,p.data.cook.length===FIRE_SLOTS[t]);}
+      const [pn,pg]=made;pn.data.cook=[{id:'liha',t:0,need:10}];pg.data.cook=[{id:'liha',t:0,need:10}];updateStations(7);ck('grilli nopeampi',pg.data.cook[0].t>pn.data.cook[0].t*1.4-.01);
+      pn.data.cook[0].t=25;pg.data.cook[0].t=25;const h0=invCount('hiili'),pa0=invCount('paisti');fireInteract(pn);fireInteract(pg);ck('palaminen',invCount('hiili')===h0+1&&invCount('paisti')===pa0+1);
+      ck('reseptit',RECIPE_BY.varras.st==='grilli'&&RECIPE_BY.juhla.st==='grilli'&&RECIPE_BY.lihakeitto.st==='nuotio'&&STATION_NAME.grilli==='Grillinuotio');
+      P.pos.set(pn.x+1,P.pos.y,pn.z);const s1=nearStations();P.pos.set(pg.x+1,P.pos.y,pg.z);const s2=nearStations();ck('asemat',s1.nuotio&&!s1.grilli&&s2.nuotio&&s2.grilli);
+      ck('poistu',!!$('#bQuit')&&typeof quitGame==='function'&&/QUIT\.saved/.test($('#bQuit').onclick.toString()));
+      const Q0=JSON.stringify(flags.mq||{}),dk0=dunKilled[0];delete (flags.mq||{}).barrow;dunKilled[0]=1;dunKilled[1]=1;mobRespQueue('barrow',0,'kalmo');mobRespQueue('barrow',1,'kalmo');mobRespQueue('portalX',0,'ylimys');
+      const q=flags.mq.barrow;ck('jono',q.L.length===2&&Math.abs(q.t-(playTime+MOB_RESP_T))<1&&!flags.mq.portalX&&MOB_RESP_T===1200);q.t=playTime-1;mobRespawnTick();
+      ck('paluu yksi kerrallaan',!dunKilled[0]&&dunKilled[1]===1&&q.L.length===1&&Math.abs(q.t-(playTime+1200))<1);
+      flags.mq=JSON.parse(Q0);if(dk0)dunKilled[0]=dk0;else delete dunKilled[0];delete dunKilled[1];}
+    finally{msg=om;for(const p of made)if(pieces.includes(p))removePiece(p);P.pos.copy(p0);const I=JSON.parse(inv0);for(let i=0;i<inv.length;i++)inv[i]=I[i]||null;invDirty=true;}
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.00 leirin halkopino ja kuivausteline eivät yhdisty staattisiin (rikottu pino katoaa, ei haamua)',()=>CAMPS.every(c=>!c.pile||c.pile.g.userData.noMerge===1)&&CAMPS.every(c=>!c.rack||c.rack.hides[0].parent.userData.noMerge===1)||'pino tai teline yhdistyy staattisiin');
   t('v2.99 iso päivitys (+ F-tarkastelun pehmeät siirtymät, puukon heitot irti kädestä): torjunta vain kilvellä, halkopino irti palkista, DEV-salasana, latausääni, tuli 2×, jahti 40 % lyhyempi, pelottavat 90 %, malmit 5 vrk, oksat/marjat kaukana, arkkujen metallit, hiidenkarhu, vesiraja, ahjo/uuni-äänet, lokit, kaiku, kuolema-arkku, tuulinuoli, chatin koko, säteiden tarkkuus',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};

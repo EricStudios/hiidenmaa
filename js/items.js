@@ -102,9 +102,9 @@ const RECIPES=[
   {id:'sulkanuolet',st:'tyopenkki',req:{puu:2,piikivi:2,sulka:1},n:15,lvl:3},
   {id:'tulinuolet',st:'tyopenkki',req:{puu:2,piikivi:2,pihka:1},n:15,lvl:3},
   {id:'nahkavaatteet',st:'tyopenkki',req:{nahka:8},lvl:2},
-  {id:'varras',st:'nuotio',req:{paisti:1,sieni:2,marjat:3},lvl:2},
+  {id:'varras',st:'grilli',req:{paisti:1,sieni:2,marjat:3},lvl:2},
   {id:'lihakeitto',st:'nuotio',req:{pienpaisti:2,sieni:2},lvl:2},   // v2.80
-  {id:'juhla',st:'nuotio',req:{suurpaisti:1,paisti:1,sieni:2,marjat:3},lvl:4},
+  {id:'juhla',st:'grilli',req:{suurpaisti:1,paisti:1,sieni:2,marjat:3},lvl:4},
   {id:'miekka',st:'ahjo',req:{kupari:6,puu:2,nahka:2},lvl:3},
   {id:'piikivikirves',st:'tyopenkki',req:{puu:3,piikivi:3,nahka:1},lvl:2},   // v1.53
   {id:'kuparikirves',st:'ahjo',req:{kupari:4,puu:3},lvl:3},
@@ -123,7 +123,7 @@ const RECIPES=[
   {id:'hiidenpanssari',st:'ahjo',req:{rauta:14,hiidenkivi:4,nahka:8},lvl:14},
 ];
 const RECIPE_BY={};RECIPES.forEach(r=>RECIPE_BY[r.id]=r);
-const STATION_NAME={tyopenkki:'Työpenkki',nuotio:'Nuotio',ahjo:'Ahjo'};
+const STATION_NAME={tyopenkki:'Työpenkki',nuotio:'Nuotio',grilli:'Grillinuotio',ahjo:'Ahjo'};   // v3.00 grilli: varras ja juhla-ateria
 // Valmistusvälilehdet: Alkupeli (alku:1) on oletus, muut ryhmitellään esineen tyypin mukaan.
 const CRAFT_CATS=[['alku','Alkupeli'],['tyokalut','Työkalut'],['aseet','Aseet'],['varusteet','Varusteet'],['ruoka','Ruoka'],['muut','Muut']];
 function recipeCat(r){const d=ITEMS[r.id];if(d.food)return 'ruoka';if(d.cat==='armor'||d.cat==='shield')return 'varusteet';if(d.cat==='weapon'&&(d.chop||d.pick))return 'tyokalut';if(d.cat==='shovel'||d.cat==='hammer')return 'tyokalut';if(d.cat==='weapon'||d.cat==='bow'||r.id==='nuolet'||r.id==='tulinuolet')return 'aseet';return 'muut';}
