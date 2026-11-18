@@ -22,8 +22,8 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
     18 DEV ilmainen rakentaminen/valmistus; 19 olkahihna kun selässä kilpi/työkalu (puukilpi vaalea, muut tumma, rautakilpi nahka + solki); 21 kalat: kuha, made, muikku, siika,
     särki, kiiski, toutain, kampela, meritaimen, suutari + kalakirjaan kuvat.
   - **Lisäys 27 (käyttäjä):** tyhjentynyt pihkapuu täyttyy uudelleen: puukohtaisesti joka 5. nukuttu yö tyhjenemisestä arvotaan 10 % → puu 30 % täyteen; koskee kaikkia
-    pihkapuita (luonto, aarni, istutetut). AVOIN: kaiverrus/kulho tyhjenemisen jälkeen – nykytila selitetty käyttäjälle (kuvio hiipuu 120 s, puu ei enää pihkapuu, kulho+naru+kerätty
-    pihka jäävät kiinni kunnes E). Odotetaan vastausta; muuten EI enää keskeytyksiä – päätä itse.
+    pihkapuita (luonto, aarni, istutetut). PÄÄTETTY: arvonta YHTEISESTI koko maailmassa joka 5. nukuttu yö (käyttäjä muutti); täyttynyt puu muuttuu taas pihkapuuksi ja pitää kaivertaa
+    uudelleen (vaihtoehto A, päätetty käyttäjän puolesta). EI enää keskeytyksiä – päätä itse.
   - **Erä 5:** tarkistus + full157, muistiot (valmiit ominaisuudet), versio 3.08, PR, linkit (haara + SHA, EricStudios).
 
 - **Versio 3.07** – käyttäjän korjaukset ja ideat v3.06:een (16 kohtaa, ks. versioloki v3.07). Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`;

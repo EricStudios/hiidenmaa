@@ -114,5 +114,6 @@ function tipsTick(dt){if(!flags||state!=='play'||P.dead)return;flags.tips=flags.
 /* v3.07 käyttäjä: vinkki näkyy lukemiseen riittävän ajan (TIP_BASE + sanat × TIP_WORD, rajat TIP_MIN–TIP_MAX; ennen aina 10 s) ja katoaa TIP_USED_T:ssa,
    kun pelaaja tekee vinkin neuvon (TIPS[].u). Vinkit näkyvät vain uusille pelaajille / opastuksen kanssa (tipSeenG, flags.tipsRe – ennallaan). */
 const TIP_BASE=2,TIP_WORD=.28,TIP_MIN=4,TIP_MAX=9,TIP_USED_T=.7;
+function tipDismiss(){if(TUT.tipT>0&&TUT.tipEl){TUT.tipT=0;TUT.tipEl.classList.remove('on');}}   // v3.08 käyttäjä: valikon avaus/sulku vie vinkin pois
 function tipReadT(html){const w=String(html).replace(/<[^>]+>/g,' ').trim().split(/\s+/).length;return clamp(TIP_BASE+w*TIP_WORD,TIP_MIN,TIP_MAX);}
 function tipEl(){if(TUT.tipEl)return TUT.tipEl;const d=document.createElement('div');d.id='tutTip';d.innerHTML='<b>Vinkki</b><span class="tipD"></span>';document.body.appendChild(d);TUT.tipEl=d;return d;}

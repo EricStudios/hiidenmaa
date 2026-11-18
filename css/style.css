@@ -649,7 +649,8 @@ button:focus,select:focus{outline:none}
 /* v1.64: varoitusruudun alaosaan Windows-yhteensopivuus (valkoinen Windows 11 -tyylinen ikoni tekstin vieressä) */
 #splash .spWin{position:absolute;left:0;right:0;bottom:56px;display:flex;align-items:center;justify-content:center;gap:10px;font:600 14px var(--font-b);color:#e8e2d4;letter-spacing:.04em;opacity:0;transition:opacity 1s ease .6s}
 #splash .spWarn.on .spWin{opacity:.9}
-#splash .spWin svg{width:15px;height:15px;fill:#fff;vertical-align:-2px;margin:0 6px 0 2px}   /* v1.65: ikoni Windows-sanan edessä */
+#splash .spWin>span{display:inline-flex;align-items:center;line-height:1}   /* v3.08 käyttäjä: teksti ja logo samalla keskilinjalla (kirjainten keskiosa = logon keskikohta) */
+#splash .spWin svg{width:14px;height:14px;fill:#fff;flex:none;margin:0 7px 0 7px;position:relative;top:var(--winY,0px)}   /* v1.65: ikoni Windows-sanan edessä */
 #inv #craftSearch{max-width:300px}   /* v1.65: lyhyempi hakupalkki */
 /* v1.66: HIIDENMAA nousee mustasta pilvestä ja vajoaa mustaan. Studio häivyttyy ensin (se on päällimmäisenä), sitten --tw musta
    (0,5 s ruudun mustana), musta savu (8 pehmeää läiskää) väistyy ulospäin ja reunojen varjo (.spVig) avautuu keskeltä; lopussa varjo
@@ -1043,3 +1044,4 @@ button:focus,select:focus{outline:none}
 :where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-corner{background:transparent}
 html,body,.panel,#binfo,#potRec,#fishP,#smeltP,#chest,#inv *{scrollbar-color:#8a5a2a rgba(18,12,7,.55);scrollbar-width:thin}
 #binfo{overflow-x:hidden!important;overflow-y:auto} #binfo *{max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}
+#deathDim{position:fixed;inset:0;background:#050403;opacity:0;pointer-events:none;z-index:4;transition:opacity 1.2s linear}   /* v3.08 kuolemaruudun hidas tummuminen (deadS sen päällä) */

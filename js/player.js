@@ -179,6 +179,7 @@ function updatePlayer(dt){
   if(P.atk)P.recT=.55;else P.recT=Math.max(0,(P.recT||0)-dt);if(!P.atk&&P.recT>0&&!P.drawing&&!P.blocking)rate=Math.min(rate,5);// iskun jälkeen kädet palaavat lepoon pehmeästi
   if(P._eOff){fig.armR.rotation.x-=P._eOff[0];fig.elbowR.rotation.x-=P._eOff[1];P._eOff=null;}   // v3.06 E-toiminnon käsiliike (lisäys poistetaan ennen pehmennystä)
   inspectRestore();   // v2.99 F-tarkastelun IK ei jää käsivarren perusasennoksi (nykiminen paluussa)
+  chopRestore();   // v3.08 sama hakkuun IK:lle
   const e=Math.min(1,dt*rate);
   armSh+=(tSh-armSh)*e;fig.armL.position.x=armSh;fig.armR.position.x=-armSh;
   fig.armR.rotation.y=lerpAngle(fig.armR.rotation.y,0,e);fig.armL.rotation.y=lerpAngle(fig.armL.rotation.y,0,e);fig.armR.rotation.x=lerpAngle(fig.armR.rotation.x,tRx,e);fig.armR.rotation.z=lerpAngle(fig.armR.rotation.z,tRz,e);
@@ -284,7 +285,11 @@ function chopIK(dt){const w0=heldMesh&&ITEMS[heldId]&&(ITEMS[heldId].chop||ITEMS
    P.chopW=(P.chopW||0)+(w-(P.chopW||0))*a;w=P.chopW;_chH.copy(P._chH);_chD.copy(P._chD);}
   if(w<=.001){heldMesh.quaternion.copy(heldMesh.userData.q0);return;}chopApply(w);
   if(P._chS&&k<wk){_chQ.copy(heldMesh.quaternion);heldMesh.quaternion.copy(P._chS.q).slerp(_chQ,P._chBl);}}   // kirveen kierto kiertona (slerp), ei pyörähdystä
-function chopApply(w){
+/* v3.08 käyttäjä: hakkuun nykiminen (sama syy kuin F-tarkastelussa v2.99, KORJAUKSET 83): IK:n tulos jäi käsivarren perusasennoksi, ja seuraavan ruudun
+   Euler-pehmennys lähti siitä (eri Euler-esitys → nykäys). Perusasento talteen ennen IK:ta ja palautus seuraavan ruudun alussa (chopRestore). */
+const CHR={saved:false,bq:new THREE.Quaternion(),be:0};
+function chopRestore(){if(!CHR.saved)return;fig.armR.quaternion.copy(CHR.bq);fig.elbowR.rotation.x=CHR.be;CHR.saved=false;}
+function chopApply(w){if(!CHR.saved){CHR.bq.copy(fig.armR.quaternion);CHR.be=fig.elbowR.rotation.x;CHR.saved=true;}
   fig.g.updateMatrixWorld(true);const T=fig.rig.localToWorld(_chA.copy(_chH));armIK(fig.armR,fig.elbowR,T,w,_chH.x>-.05?_poleChopX:_poleChop);
   // varren suunta maailmaan (rig → maailma kiertona) ja käden paikalliseksi kierroksi
   fig.g.updateMatrixWorld(true);fig.rig.getWorldQuaternion(_chQ);_chD.applyQuaternion(_chQ).normalize();
@@ -377,7 +382,7 @@ function playerDie(){if(state==='paused'||state==='intro'){P.hp=Math.max(P.hp,1)
      mukana; 3. kuolemasta alkaen se pomo ei enää palauta terveyttään (bossTired, ai.js). */
   {let kb=null,bd=45*45;for(const m of mobs){if(m.dead||!(m.def.ai==='boss'||m.def.ai==='rboss')||!!m.dun!==!!P.inDun)continue;const d=dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z);if(d<bd){bd=d;kb=m;}}
    if(kb){const B=flags.bossDeaths||(flags.bossDeaths={});B[kb.type]=(B[kb.type]||0)+1;P.bossKill={n:kb.def.n,c:B[kb.type],t:kb.type,mn:bossMercyN(kb.type)};}else P.bossKill=null;}
-  const items=inv.filter(Boolean).map(s=>({id:s.id,n:s.n,q:s.q}));inv=new Array(invN()).fill(null);invDirty=true;updateGear();setBuildSel(null);
+  const items=inv.filter(Boolean).map(s=>({id:s.id,n:s.n,q:s.q}));deathThrowGear();inv=new Array(invN()).fill(null);invDirty=true;updateGear();setBuildSel(null);   /* v3.08 varusteet jäävät kaatuvaan hahmoon, käsitavarat lentävät */
   const wd=!P.inDun&&(P.swim||P.pos.y+1.62<water.position.y);P.waterDeath=wd;   // v2.18: hukkuminen / kuolema vedessä
   const cause=deathCauseOf(wd);
   /* v2.73 hautakasa ei näy kuolinkamerassa (g.hid, näkyviin herätessä). Tyhjyydessä kasa viimeiseen turvalliseen kohtaan (P.safe: lattialla/maassa, ei seinän
@@ -463,7 +468,7 @@ function graveVanish(g){const m=g.mesh;removeGrave(g,true);let t=0;burst(g.x,g.y
 function removeGrave(g,keepMesh){if(!keepMesh)scene.remove(g.mesh);const i=graves.indexOf(g);if(i>=0)graves.splice(i,1);const j=lightSources.indexOf(g.light);if(j>=0)lightSources.splice(j,1);}
 // v0.80: kuollessa kaikki valikot (reppu, kartta, arkku, DEV, päävalikko, asetukset, näppäinikkuna) suljetaan – vain kuoleman ruutu jää.
 function closeAllForDeath(){if(openPanel)closePanels(false,true);if(state==='paused'||state==='ui')state='play';for(const id of ['#menu','#settings','#keyDlg'])if($(id))$(id).hidden=true;mouseL=mouseR=false;P.drawing=false;}
-function respawn(){if(!P.dead||state!=='dead')return;endPlayerDeath();for(const g of graves)if(g.hid){g.hid=false;if(g.mesh)g.mesh.visible=true;}P.lifeStart=playTime;P.voidT=0;P.lastMob=null;   /* v2.73 */
+function respawn(){if(!P.dead||state!=='dead')return;if(typeof deathDimReset==='function')deathDimReset();endPlayerDeath();gearUnlock();   /* v3.08 ruumis kloonataan ensin varusteineen */for(const g of graves)if(g.hid){g.hid=false;if(g.mesh)g.mesh.visible=true;}P.lifeStart=playTime;P.voidT=0;P.lastMob=null;   /* v2.73 */
   $('#deadS').hidden=true;$('#hud').hidden=false;P.dead=false;P.kbx=P.kbz=0;P.underT=P.drownT=0;P.swim=P.subm=false;P.hp=maxHp()*.6;P.stam=maxStam();P.hunger=Math.max(P.hunger,40);P.buffs={};P.wetT=0;
   if(P.inDun){P.inDun=false;P.realm=null;for(const m of [...mobs])if(m.dun)mobRemove(m);}
   const bed=pieces.find(p=>p.t==='sanky'&&P.spawn&&p.x===P.spawn.x&&p.z===P.spawn.z);

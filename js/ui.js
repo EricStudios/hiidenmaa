@@ -262,11 +262,12 @@ function devSpawnMob(type){const d=MOBDEF[type];if(!d)return;const fx=-Math.sin(
 // DEV: antaa esinettä määrän verran (ei mahtuvat putoavat maahan); ilmoitus kertoo paljonko saatiin
 function devGive(id,cnt,quiet){const n=cnt||devN||1,left=invAdd(id,n);if(left>0)spawnDrop(id,left,P.pos.x,P.pos.y+1,P.pos.z);invDirty=true;updateGear();if(quiet)return;sfx('pickup');msg(`DEV: +${n} ${ITEMS[id].n}${left>0?` (${left} maahan, reppu täynnä)`:''}`,'loot');}
 // DEV: poistaa karttapilvet kokonaan ja merkitsee kaikki nimetyt paikat (rauniot, portaalit, riimukivet…) löydetyiksi.
-function devRevealMap(){explored.fill(1);resetFog();for(const k in LOC){const L=LOC[k];if(k!=='spawn'&&L&&L.name)flags.disc[k]=1;}}
+function devRevealMap(){explored.fill(1);resetFog();for(const k in LOC){const L=LOC[k];if(k!=='spawn'&&L&&L.name)flags.disc[k]=1;}if(typeof WBS!=='undefined'){const F=fishF();for(const w of WBS)F.wb[w.id]=1;}}   // v3.08 myös kaikki vedet
 // v0.82: alueet (biomit). Nykyinen alue P.zone tarkistetaan 0,4 s välein; ensimmäisellä kerralla "Uusi alue löydetty" (flags.bio).
 let zoneT=0,zoneBanT=0;
 function updateZone(dt){zoneT-=dt;if(zoneT>0)return;zoneT=.4;if(P.inDun||P.dead)return;
-  const z=zoneAt(P.pos.x,P.pos.z);if(z===P.zone&&!zoneQuiet&&(flags.bio&&flags.bio[z]))return;const ch=z!==P.zone;P.zone=z;if(!flags.bio)flags.bio={meadow:1};
+  const z=zoneAt(P.pos.x,P.pos.z);if(z==='sea'&&typeof inlandWater==='function'&&inlandWater(P.pos.x,P.pos.z))return;   /* v3.08 käyttäjä: järvi/lampi ei avaa Meri-aluetta eikä anna ilmoitusta */
+  if(z===P.zone&&!zoneQuiet&&(flags.bio&&flags.bio[z]))return;const ch=z!==P.zone;P.zone=z;if(!flags.bio)flags.bio={meadow:1};
   if(!flags.bio[z]&&(zoneQuiet||zoneDeep(z))){flags.bio[z]=1;if(!zoneQuiet)showZoneBanner(BIOMES[z].n);}   // v1.43: löytyy vasta hieman syvemmältä
   if(ch&&z==='aarni'&&!zoneQuiet&&playTime-(flags.aarniMsg||-99)>60){flags.aarniMsg=playTime;setTimeout(()=>msg('Hirviöt ovat vihaisia Aarnimetsässä – ne liikkuvat täällä nopeammin.','warn'),flags.bio.aarni===1&&$('#zoneBan').classList.contains('on')?1500:0);}
   zoneQuiet=false;if(ch&&openPanel==='inv')renderBiome();}
@@ -303,10 +304,10 @@ function refreshKeyHints(){const on=SET.keyHints!==false;for(const k in PANEL_KE
     if(!h){h=document.createElement('span');h.className='pHint';el.appendChild(h);}h.hidden=!on;h.textContent=`Sulje: ${keyLabel(BIND.menu)}${a?' / '+keyLabel(BIND[a]):k==='dev'?' / Ä':k==='devm'?' / Ö':k==='devi'?' / Å':''}`;}
   let g=$('#gameHint');if(!g){g=document.createElement('div');g.id='gameHint';$('#hud').appendChild(g);}g.hidden=!on;g.textContent=`Päävalikko: ${keyLabel(BIND.menu)}`;}
 let invCtx=null;   // v3.06 teemoitettu valikko: työpiste, josta reppu/valmistus avattiin (työpenkki, ahjo)
-function togglePanel(name){if(openPanel===name){closePanels();return;}if(P.dead)return;{const ev={inv:'reppu',build:'rakennusvalikko',map:'kartta'}[name];if(ev)plSnd('valikot',ev);}   /* v2.25 */panelOpenedAt=performance.now();closePanels(true);openPanel=name;state='ui';if(!locked)releaseLock();else{VC.x=innerWidth/2;VC.y=innerHeight/2;}mouseL=false;mouseR=false;P.drawing=false;
+function togglePanel(name){if(typeof tipDismiss==='function')tipDismiss();if(openPanel===name){closePanels();return;}if(P.dead)return;{const ev={inv:'reppu',build:'rakennusvalikko',map:'kartta'}[name];if(ev)plSnd('valikot',ev);}   /* v2.25 */panelOpenedAt=performance.now();closePanels(true);openPanel=name;state='ui';if(!locked)releaseLock();else{VC.x=innerWidth/2;VC.y=innerHeight/2;}mouseL=false;mouseR=false;P.drawing=false;
   if(name==='inv'){$('#inv').dataset.st=invCtx||'';invCtx=null;$('#inv').hidden=false;fitInv();{const cs=$('#craftSearch');if(cs)cs.value='';}renderInv();renderBiome();}if(name==='build'){$('#build').hidden=false;{const bs=$('#buildSearch');if(bs)bs.value='';}renderBuild();}if(name==='map'){$('#mapP').hidden=false;mapZ=1;mapCX=P.pos.x;mapCZ=P.pos.z;if(!mapRAF)mapRAF=requestAnimationFrame(mapLoop);}if(name==='chest')$('#chest').hidden=false;if(name==='pot'){$('#potP').hidden=false;potRefresh(true);}if(name==='smelt'){$('#smeltP').hidden=false;smRefresh(true);}if(name==='fish'){$('#fishP').hidden=false;fishBookRender();}   /* v3.02 keittopata */if(name==='prog'){$('#progP').hidden=false;renderProg();}if(name==='log'){$('#logP').hidden=false;renderLog();}if(name==='dev'&&$('#devP')){$('#devP').hidden=false;renderDev();}if(name==='devi'&&$('#devIP')){devQ='';devN=1;$('#devIP').hidden=false;renderDevI();}if(name==='devm'&&$('#devMP')){$('#devMP').hidden=false;renderDevM();}refreshKeyHints();vcSync();}
 const REPPU_CLOSE_P=1.3,ARKKU_CLOSE_P=1.15,ARKKU_CLOSE_V=.8;   // v2.50 repun sulkeminen: sama reppu-ääni 8 % korkeammalta
-function closePanels(keep,skipLock){splitClose();if(typeof binfoHide==='function')binfoHide();upPrev=null;chestSel=null;if(openPanel){panelClosedAt=performance.now();if(!keep){const own=openPanel==='chest'&&curChest&&!curChest.found;   /* v2.28: reppu kiinni = sama ääni kuin auki, oma arkku oma sulkemisääni */
+function closePanels(keep,skipLock){splitClose();if(openPanel&&typeof tipDismiss==='function')tipDismiss();if(typeof binfoHide==='function')binfoHide();upPrev=null;chestSel=null;if(openPanel){panelClosedAt=performance.now();if(!keep){const own=openPanel==='chest'&&curChest&&!curChest.found;   /* v2.28: reppu kiinni = sama ääni kuin auki, oma arkku oma sulkemisääni */
     if(!(openPanel==='inv'?plSnd('valikot','reppu',{p:REPPU_CLOSE_P}):openPanel==='chest'?plSnd('kaytto','arkku_auki',{p:ARKKU_CLOSE_P,v:ARKKU_CLOSE_V}):false))plSnd('valikot','sulje');   /* v2.56: kaikki arkut: avausääni hiljempaa ja korkeammalta */}}for(const id of ['#inv','#build','#mapP','#chest','#potP','#smeltP','#fishP','#progP','#logP','#devP','#devMP','#devIP'])if($(id))$(id).hidden=true;openPanel=null;curChest=null;selSlot=-1;selHalf=false;selEq=null;slotDrag=null;hoverSlot=null;if(typeof updGhost==='function')updGhost();if(!keep){state='play';if(!skipLock&&!locked)requestLock();}vcSync();}
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closePanels()));
 function nearStations(){const s={};for(const p of pieces){const k=isFirePiece(p.t)?'nuotio':p.t;if(['tyopenkki','nuotio','ahjo'].includes(k)&&dist2(p.x,p.z,P.pos.x,P.pos.z)<(k==='nuotio'?4:8)**2&&!P.inDun){if(k==='nuotio'&&p.data.fuel<=0)continue;s[k]=1;if(p.t==='grilli')s.grilli=1;if(p.t==='patanuotio'&&p.data.pot&&!p.data.spo&&fireLit(p))s.pata=1;}}return s;}   /* v3.02 pata: asennettu, ehjä, tuli palaa */   // v3.00 grilli = oma asema (varras, juhla-ateria) + kelpaa nuotioksi
@@ -652,8 +653,9 @@ function mkMapClouds(S,seed,cover,scale){const c=document.createElement('canvas'
 const CLOUDC=mkMapClouds(256,911,.52,4),CLOUDC2=mkMapClouds(256,377,.56,3);
 const CLOUDSH=(function(){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.globalAlpha=.25;for(const [dx,dy] of [[0,0],[2,1],[-2,1],[1,-2],[-1,2]])for(const ox of [-256,0,256])for(const oy of [-256,0,256])g.drawImage(CLOUDC,dx+ox,dy+oy);g.globalAlpha=1;g.globalCompositeOperation='source-in';g.fillStyle='#000';g.fillRect(0,0,256,256);return c;})();
 const FOGTMP=document.createElement('canvas');FOGTMP.width=FOGTMP.height=640;
+const MAP_ZMIN=.8;   // v3.08 käyttäjä: avattu kartta zoomautuu hieman enemmän ulos
 let mapZ=1,mapCX=0,mapCZ=0,mapRAF=0,mapDrag=null,mapMouse=null,mapWindA=.9;
-function mapView(){const sw=MAPW/mapZ;return{sw,x0:clamp(mapCX+HALF-sw/2,0,MAPW-sw),y0:clamp(mapCZ+HALF-sw/2,0,MAPW-sw)};}
+function mapView(){const sw=MAPW/mapZ;if(sw>=MAPW){const o=(MAPW-sw)/2;return{sw,x0:o,y0:o};}   /* v3.08 ulos zoomattuna kartta keskellä */return{sw,x0:clamp(mapCX+HALF-sw/2,0,MAPW-sw),y0:clamp(mapCZ+HALF-sw/2,0,MAPW-sw)};}
 function mapLoop(){if(openPanel!=='map'){mapRAF=0;return;}drawBigMap();mapRAF=requestAnimationFrame(mapLoop);}
 // Onko kohta paljastettu kartalla (pelaaja on käynyt ~12 m säteellä). Löydetyn paikan merkki näkyy vain paljastetulla alueella,
 // vaikka riimukivi tai tavoite olisi jo kertonut paikan (suunta näkyy silloin tehtävässä) – pilviverhon takana ei näy merkkejä.
@@ -710,7 +712,7 @@ function drawBigMap(){const c=$('#bigmap'),g=c.getContext('2d'),W=c.width,v=mapV
 // Kartan zoom (rulla) ja siirto (vetäminen)
 (function(){const c=$('#bigmap');
   c.addEventListener('wheel',e=>{e.preventDefault();const r=c.getBoundingClientRect(),W=c.width,v=mapView(),fx=(e.clientX-r.left)/r.width,fy=(e.clientY-r.top)/r.height,wx=v.x0+fx*v.sw-HALF,wz=v.y0+fy*v.sw-HALF;
-    mapZ=clamp(mapZ*(e.deltaY<0?1.25:.8),1,6);const v2=MAPW/mapZ;mapCX=wx-(fx-.5)*v2;mapCZ=wz-(fy-.5)*v2;},{passive:false});
+    mapZ=clamp(mapZ*(e.deltaY<0?1.25:.8),MAP_ZMIN,6);const v2=MAPW/mapZ;mapCX=wx-(fx-.5)*v2;mapCZ=wz-(fy-.5)*v2;},{passive:false});
   c.addEventListener('mousedown',e=>{mapDrag={x:e.clientX,y:e.clientY};});
   /* v1.07 hiiren paikka kartan kankaan koordinaateissa (tuulikompassin häivytys) */
   c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();mapMouse={x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height};});c.addEventListener('mouseleave',()=>{mapMouse=null;});

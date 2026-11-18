@@ -6,7 +6,7 @@
 // Jokainen osuma: pisaroita (määrä vahingon ja koon mukaan) ja läntti maahan, joka häipyy 10 s:ssa. Asetus SET.blood: 1 / .5 / 0.
 // Kivihahmot pölisevät kivisiruja, kalmot luupölyä, Jäätär jääsiruja, Suonäkki usvaa, hiidet ja Aarnihirviö vihreää mahlaa.
 const BLEED={kivivartija:'stone',vartija:'stone',kalmo:'bone',ylimys:'bone',kalmaherra:'bone',jaajattari:'ice',suonakki:'mist',hiisi:'sap',aarnihirvio:'sap'};
-const BLEED_C={blood:[0x5a0808,0x7e0e0e],stone:[0x6a6660,0x8d887f],bone:[0xd8d0bc,0xb8ae98],ice:[0xbfe6ff,0x8fd0ff],mist:[0x9aa8a0,0xc8d0c8],sap:[0x34501a,0x56722a]};
+const BLEED_C={blood:[0x360404,0x4e0707],stone:[0x6a6660,0x8d887f],bone:[0xd8d0bc,0xb8ae98],ice:[0xbfe6ff,0x8fd0ff],mist:[0x9aa8a0,0xc8d0c8],sap:[0x1f3410,0x31481a]};   // v3.08 käyttäjä: kaikki veri tummemmaksi (punainen ja vihreä)
 const bleedKind=t=>BLEED[t]||'blood';
 const splats=[],_spGeo=new THREE.CircleGeometry(1,16);
 /* v1.56: läikkä mukailee maaston kaltevuutta (maastonormaali, kun läikkä on maanpinnalla eikä rakennuksella/luolastossa).
@@ -22,7 +22,7 @@ function updateFlow(s,dt){const f=s.flow;f.t+=dt;if(f.t>10){s.flow=null;return;}
   if(g<.15){s.flow=null;return;}const sp=.35*(1-f.t/12);f.x-=hx/g*sp*dt;f.z-=hz/g*sp*dt;f.acc+=dt;
   if(f.acc>.12){f.acc=0;const r=splat(f.x,terrainH(f.x,f.z),f.z,.06+Math.random()*.03,f.c,40,.88);if(r){r.m.scale.y*=2.2;r.r1=r.m.scale.y;r.grow=.2;}}}
 function splat(x,y,z,r,color,life,op=.85,nx,nz){if(!(r>0))return null;
-  const mt=new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+  const mt=new THREE.MeshLambertMaterial({color,transparent:true,opacity:0,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});   // v3.08 valaistu – ei hohda pimeässä
   const m=new THREE.Mesh(_spGeo,mt);if(nx||nz){m.rotation.set(0,Math.atan2(nx,nz),Math.random()*TAU);m.position.set(x+nx*.03,y,z+nz*.03);}else{const n=slopeN(x,z,y);if(n){m.quaternion.setFromUnitVectors(_zAx,n);m.rotateZ(Math.random()*TAU);m.position.set(x+n.x*.03,y+n.y*.03,z+n.z*.03);}else{m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*TAU;m.position.set(x,y+.025,z);}}m.scale.set(r*(.8+Math.random()*.5),r*(.6+Math.random()*.5),1);m.renderOrder=1;scene.add(m);
   const s={m,t:0,life,op,r0:m.scale.x,r1:m.scale.y,grow:.35};splats.push(s);while(splats.length>140){const o=splats.shift();scene.remove(o.m);o.m.material.dispose();}return s;}
 function updateSplats(dt){for(let i=splats.length-1;i>=0;i--){const s=splats[i];s.t+=dt;if(s.flow)updateFlow(s,dt);
@@ -60,7 +60,7 @@ const groundY=(x,z,y,dun)=>dun?DUN.y:Math.max(-1,groundAt(x,z,.2,(y??terrainH(x,
 // v1.39 (lista 4, extra 1): veren fysiikka (SET.bloodFx, High+ ja Ultra): pisarat lentävät lyönnin suuntaan (hx,hz), putoavat ja jäävät
 // maahan pieniksi läikiksi (10 s). Kuoleman lammikko kasvaa hitaasti (kasvuaika 4 s).
 const drips=[],_drGeo=new THREE.SphereGeometry(.035,5,4),_drMat={};
-function dripMat(c){return _drMat[c]||(_drMat[c]=new THREE.MeshBasicMaterial({color:c}));}
+function dripMat(c){return _drMat[c]||(_drMat[c]=new THREE.MeshLambertMaterial({color:c}));}   // v3.08 valaistu (ei hohda pimeässä)
 function updateDrips(dt){for(let i=drips.length-1;i>=0;i--){const d=drips[i];d.vy-=14*dt;d.m.position.x+=d.vx*dt;d.m.position.y+=d.vy*dt;d.m.position.z+=d.vz*dt;
   const q=d.m.position,g=d.dun?Math.max(DUN.y,groundAt(q.x,q.z,.05,q.y+.3)):groundAt(q.x,q.z,.05,q.y+.3);
   if(q.y<=g+.02){scene.remove(d.m);drips.splice(i,1);splat(q.x,g,q.z,.05+Math.random()*.07,d.c,10,.9);}
@@ -75,7 +75,7 @@ function bleed(x,y,z,kind,size,dmg,dun,hx,hz,kb){const k=+(SET.blood??1);const C
   if(!k)return;const n=Math.round(clamp((3+dmg*.18)*(.6+size)*k*U,2,26*U));burst(x,y,z,C[Math.random()<.5?0:1],n,2.2+size*1.5);
   const gy=groundY(x,z,y,dun);for(let i=0,m=1+(size>.9?2:size>.6?1:0);i<m;i++)splat(x+(Math.random()-.5)*size*1.4,gy,z+(Math.random()-.5)*size*1.4,(.18+Math.min(.5,dmg*.012))*(.7+size*.6)*Math.sqrt(k),C[0],10);}
 // Haava: tummanpunainen läikkä mobin pintaan (enint. 6), häviää ruumiin mukana.
-const _wGeo=new THREE.BoxGeometry(1,1,1),_wMat=new THREE.MeshStandardMaterial({color:0x5a0808,roughness:.5,metalness:.1}),_wSap=new THREE.MeshStandardMaterial({color:0x34501a,roughness:.5});
+const _wGeo=new THREE.BoxGeometry(1,1,1),_wMat=new THREE.MeshStandardMaterial({color:0x3a0505,roughness:.6,metalness:.05}),_wSap=new THREE.MeshStandardMaterial({color:0x223812,roughness:.5});
 function addWound(m,force){if(!(+(SET.blood??1))||(m.wounds|0)>=(force?11:6))return null;const kind=bleedKind(m.type);if(kind!=='blood'&&kind!=='sap')return null;
   const ms=[];m.f.g.traverse(o=>{if(o.isMesh&&o.geometry&&!o.userData.wound&&!(m.fireFx&&isChildOf(o,m.fireFx))&&o.material&&o.material.isMeshStandardMaterial)ms.push(o);});if(!ms.length)return null;
   const o=ms[Math.random()*ms.length|0];if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();const b=o.geometry.boundingBox,ax=Math.random()*3|0,sg=Math.random()<.5?-1:1;
@@ -440,9 +440,12 @@ function addSlash(m){if(!SET.bloodFx||!(+(SET.blood??1))||(m.slashes|0)>=5)retur
   m.bleedT=5;}
 function updateBleeders(dt){if(!SET.bloodFx)return;for(const m of mobs){if(!(m.bleedT>0)||m.dead)continue;m.bleedT-=dt;if(Math.random()<dt*5&&drips.length<120){const C=BLEED_C[bleedKind(m.type)]||BLEED_C.blood,h=(m.barH||m.def.r*2)*.5;
   const d=new THREE.Mesh(_drGeo,dripMat(C[0]));d.position.set(m.pos.x+(Math.random()-.5)*m.def.r,m.pos.y+h,m.pos.z+(Math.random()-.5)*m.def.r);scene.add(d);drips.push({m:d,c:C[0],dun:m.dun,vx:0,vz:0,vy:-.5});}}}
-function updateEffects(dt){updateSplats(dt);if(drips.length)updateDrips(dt);updateBleeders(dt);updatePuffs(dt);updatePlayerDeath(dt);corpseTick(dt);updateWaterFx(dt);}
+function updateEffects(dt){updateSplats(dt);if(drips.length)updateDrips(dt);updateBleeders(dt);updatePuffs(dt);updatePlayerDeath(dt);if(THROWN.length)thrownTick(dt);corpseTick(dt);updateWaterFx(dt);}
 // v2.73 kuolinruudun aikana (state 'dead', update() ei aja): kaatuminen, verilammikko ja kuolinkamera jatkuvat
-function deathTick(dt){updatePlayerDeath(dt);updateSplats(dt);updateCamera(dt);}
+/* v3.08 käyttäjä: kuolemaruudun takana kuva tummuu hyvin hitaasti (DEATH_DIM_T s → DEATH_DIM_MAX); äänet häipyvät (audio.js DEAD_FADE). Palaa ennalleen respawnissa. */
+const DEATH_DIM_T=40,DEATH_DIM_MAX=.6;let deathDimV=0;
+function deathTick(dt){updatePlayerDeath(dt);thrownTick(dt);updateSplats(dt);updateCamera(dt);deathDimV=Math.min(DEATH_DIM_MAX,deathDimV+dt*DEATH_DIM_MAX/DEATH_DIM_T);const el=document.getElementById('deathDim');if(el)el.style.opacity=deathDimV.toFixed(3);}
+function deathDimReset(){deathDimV=0;const el=document.getElementById('deathDim');if(el)el.style.opacity='0';}
 /* ---------------- VEDEN ALLA (v2.18) ----------------
    CAM_UW = kameran syvyys pinnan alla (m, 0 = pinnan yläpuolella; camera.js). Kun kamera on veden alla: ruutu sinertyy ja tummuu syvemmällä
    (#uwTint), sumu tihenee (camera.js). Asetuksella SET.uwFx (High+): vaaleat kuplat nousevat satunnaisesti pohjasta hiljaa vähän pinnan alle ja

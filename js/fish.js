@@ -43,7 +43,9 @@ let SUNK=null;
   if(coast.length){const S0=LOC.spawn,pts=[];let b=coast[0],bd=1e18;for(const c of coast){const p=pos(c),d=dist2(p.x,p.z,S0.x,S0.z);if(d<bd){bd=d;b=c;}}pts.push(pos(b));
     while(pts.length<3){let bb=null,bdd=-1;for(let k=0;k<coast.length;k+=3){const p=pos(coast[k]);let m=1e18;for(const q of pts)m=Math.min(m,dist2(p.x,p.z,q.x,q.z));if(m>bdd){bdd=m;bb=p;}}if(!bb)break;pts.push(bb);}
     const sps=['silakka','turska','lohi'];for(let i=sps.length-1;i>0;i--){const j=Math.floor(rs()*(i+1));[sps[i],sps[j]]=[sps[j],sps[i]];}
-    pts.forEach((p,i)=>{const sp=sps[i%3],o={id:'s'+i,name:uniq(WB_SEAN[sp]),type:'sea',sp,x:p.x,z:p.z,n:0};WB_SEA.push(o);WBS.push(o);});}
+    const seaAt=(x,z)=>{const i=Math.floor((x+HALF)/WB_S),j=Math.floor((z+HALF)/WB_S);return i>=0&&j>=0&&i<N&&j<N&&W[j*N+i]&&!(WB_ID[j*N+i]>=0&&remap[WB_ID[j*N+i]]!==-2);};
+    const off=p=>{const L=Math.hypot(p.x,p.z)||1,dx=p.x/L,dz=p.z/L;let q={x:p.x,z:p.z};for(let k=0;k<14;k++){const x=q.x+dx*WB_S,z=q.z+dz*WB_S;if(!seaAt(x,z))break;q={x,z};let ok=true;for(let a=0;a<8&&ok;a++)if(!seaAt(q.x+Math.cos(a/8*TAU)*14,q.z+Math.sin(a/8*TAU)*14))ok=false;if(ok&&k>=2)break;}return q;};   // v3.08 nimi veden päälle (ei rannalle)
+    pts.forEach((p0,i)=>{const p=off(p0),sp=sps[i%3],o={id:'s'+i,name:uniq(WB_SEAN[sp]),type:'sea',sp,x:p.x,z:p.z,n:0};WB_SEA.push(o);WBS.push(o);});}
   for(let k=0;k<N*N;k++)if(WB_ID[k]>=0)WB_ID[k]=remap[WB_ID[k]];
   // UPPONUT ARKKU: luodolla (pieni maa-alue veden keskellä) tai rannalla, yli 120 m aloituksesta
   {const lid=new Int32Array(N*N).fill(-1),isl=[];let n=0;for(let k=0;k<N*N;k++){if(W[k]||lid[k]>=0)continue;const q=[k],cells=[];lid[k]=n;let edge=false;
@@ -53,6 +55,8 @@ let SUNK=null;
     for(const cells of isl.sort(()=>rs()-.5)){for(const c of cells){const p=pos(c);if(okP(p)){pick={x:p.x,z:p.z,isl:1};break;}}if(pick)break;}
     if(!pick){for(let t=0;t<4000&&!pick;t++){const k=Math.floor(rs()*N*N);if(W[k])continue;const i=k%N,j=(k/N)|0;let wn=false;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const m=(j+b)*N+i+a;if(m>=0&&m<N*N&&W[m])wn=true;}const p=pos(k);if(wn&&okP(p))pick={x:p.x,z:p.z,isl:0};}}
     SUNK=pick;}})();
+// v3.08: onko kohta sisämaan vettä (järvi/lampi) eikä merta – ruutujen tunnukset 2 ruudun säteellä (ei Meri-aluetta järvellä)
+function inlandWater(x,z){const i0=Math.floor((x+HALF)/WB_S),j0=Math.floor((z+HALF)/WB_S);let lake=false;for(let r=0;r<=4;r++){for(let dj=-r;dj<=r;dj++)for(let di=-r;di<=r;di++){if(Math.max(Math.abs(di),Math.abs(dj))!==r)continue;const i=i0+di,j=j0+dj;if(i<0||j<0||i>=WB_N||j>=WB_N)return false;const id=WB_ID[j*WB_N+i];if(id===-2)return false;if(id>=0)lake=true;}if(lake)return true;}return false;}
 function wbAt(x,z){const i=Math.floor((x+HALF)/WB_S),j=Math.floor((z+HALF)/WB_S);if(i<0||j<0||i>=WB_N||j>=WB_N)return null;const id=WB_ID[j*WB_N+i];
   if(id>=0)return WBS[id];if(id===-2){let b=null,bd=1e18;for(const s of WB_SEA){const d=dist2(x,z,s.x,s.z);if(d<bd){bd=d;b=s;}}return b;}return null;}
 function fishF(){if(!flags.fish||typeof flags.fish!=='object')flags.fish={};const F=flags.fish;F.rec=F.rec||{};F.n=F.n||{};F.wb=F.wb||{};F.g=F.g||{};return F;}
@@ -84,7 +88,12 @@ function fishHook(){FS.st='hooked';const r=Math.random();let acc=0,junk=null;con
   else{FS.st='reel';FS.t2=0;}plSnd('onkiminen','kelaus',{v:.6});}
 function fishLoseBait(p){if(FS.bait&&Math.random()<p){FS.bait=false;return true;}return false;}
 function fishReset(m,cls){if(m)msg(m,cls);FS.st='idle';FS.sp=null;fishMeshes(false);fishHud();}
-function fishTick(dt){const rod=rodDef();if(typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.hook){const hk=heldMesh.userData.hook;hk.visible=FS.st==='idle';if(hk.visible&&hk.parent){hk.parent.updateMatrixWorld();hk.quaternion.copy(hk.parent.getWorldQuaternion(_fsQ).invert());}}   /* v3.07 koukku roikkuu pystyyn */if(FS.st!=='idle'){FS.t+=dt;
+// v3.08 käyttäjä: vavan kärki taipuu alaspäin – levossa hieman, kääntyessä/liikkuessa heilahtaen, tärpissä nykäisten ja väsytyksessä jännityksen mukaan
+const RODB={b:0,v:0,yaw:null};
+function rodBendTick(dt){const h=typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.bend;if(!h||!h.length)return;const yw=camYaw,dy=RODB.yaw==null?0:Math.atan2(Math.sin(yw-RODB.yaw),Math.cos(yw-RODB.yaw));RODB.yaw=yw;
+  const tg=.05+(FS.st==='fight'?.25+FS.ten*.55:0)+(FS.st==='bite'?.22:0)+(FS.dip||0)*.15+Math.min(.25,Math.hypot(P.vel.x,P.vel.z)*.012);
+  RODB.v+=((tg-RODB.b)*60-RODB.v*7)*dt+Math.abs(dy)*4;RODB.b+=RODB.v*dt;RODB.b=clamp(RODB.b,-.1,.9);h[0].rotation.x=RODB.b*.35;if(h[1])h[1].rotation.x=RODB.b*.65;}
+function fishTick(dt){const rod=rodDef();rodBendTick(dt);if(typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.hook){const hk=heldMesh.userData.hook;hk.visible=FS.st==='idle';if(hk.visible&&hk.parent){hk.parent.updateMatrixWorld();hk.quaternion.copy(hk.parent.getWorldQuaternion(_fsQ).invert());}}   /* v3.07 koukku roikkuu pystyyn */if(FS.st!=='idle'){FS.t+=dt;
     if(!rod||P.dead||P.inDun||P.swim||state==='dead'||dist2(P.pos.x,P.pos.z,FS.ox,FS.oz)>FISH_KEEP_R*FISH_KEEP_R){fishReset(rod&&!P.dead?'Siima kelautui sisään – pysy paikallasi onkiessa.':null);return;}
     if(FS.st==='cast'&&FS.t>.55){FS.st='wait';plSnd('onkiminen','loiskahdus',{v:.7,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});}
     else if(FS.st==='wait'){if(FS.t>=FS.nibAt){FS.nibAt=FS.t+5+Math.random()*18;FS.dip=.35;plSnd('onkiminen','nykaisy',{v:.35,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});
@@ -135,7 +144,7 @@ function fishMeshes(on){if(on&&!FS.bob){const g=new THREE.Group(),t=new THREE.Me
   if(FS.bob){FS.bob.visible=on;FS.line.visible=on;}}
 const _fsTip=new THREE.Vector3(),_fsQ=new THREE.Quaternion();
 function fishMeshUpd(){if(!FS.bob)return;const wy=water.position.y;let bx=FS.bx,bz=FS.bz,by=wy+.02+Math.sin(playTime*2.2)*.012-(FS.dip||0)*.12-(FS.st==='fight'?.08:0);
-  if(typeof heldMesh!=='undefined'&&heldMesh){heldMesh.updateMatrixWorld(true);_fsTip.set(0,0,ROD_LEN-.1);heldMesh.localToWorld(_fsTip);}else _fsTip.set(P.pos.x,P.pos.y+1.6,P.pos.z);
+  if(typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.tip){heldMesh.updateMatrixWorld(true);heldMesh.userData.tip.getWorldPosition(_fsTip);}else if(typeof heldMesh!=='undefined'&&heldMesh){heldMesh.updateMatrixWorld(true);_fsTip.set(0,0,ROD_LEN-.1);heldMesh.localToWorld(_fsTip);}else _fsTip.set(P.pos.x,P.pos.y+1.6,P.pos.z);
   if(FS.st==='cast'){const k=Math.min(1,FS.t/.55);bx=lerp(_fsTip.x,FS.bx,k);bz=lerp(_fsTip.z,FS.bz,k);by=lerp(_fsTip.y,by,k)+Math.sin(k*Math.PI)*2.2;}
   FS.bob.position.set(bx,by,bz);const a=FS.line.geometry.attributes.position,sag=FS.st==='fight'?.05:.6;
   for(let i=0;i<10;i++){const t=i/9;a.setXYZ(i,lerp(_fsTip.x,bx,t),lerp(_fsTip.y,by+.1,t)-Math.sin(t*Math.PI)*sag*(FS.st==='cast'?0:1),lerp(_fsTip.z,bz,t));}a.needsUpdate=true;}
@@ -147,8 +156,8 @@ function fishHud(){const el=document.getElementById('fishHud');if(!el)return;con
   el.innerHTML=`<div class="fl">Väsytys: ${ITEMS[FS.sp].n}</div><div class="fb"><i class="ten${FS.ten>.8?' hi':''}" style="width:${Math.round(FS.ten*100)}%"></i></div><div class="fb"><i class="pr" style="width:${Math.round(FS.prog*100)}%"></i></div><div class="fh">${FS.pullOn?'Kala vetää – päästä irti!':'Kelaa: pidä vasenta'}</div>`;}
 function wbShow(name,isNew){const el=document.getElementById('wbName');if(!el)return;el.textContent=name;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');if(isNew)msg(`Löysit veden: ${name}`,'loot');}
 // kartta: löydettyjen vesien nimet (kuten muut nimet, kursiivilla ja sinertävinä)
-function fishMapLabels(g,pt,sx){if(!(sx>1))return;const F=fishF();for(const w of WBS){if(!F.wb[w.id])continue;const [x,y]=pt(w.x,w.z);g.save();g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=3;g.shadowOffsetX=1;g.shadowOffsetY=1;
-    g.fillStyle='#a9d8f2';g.font='italic 600 12px Alegreya Sans, sans-serif';g.textAlign='center';g.fillText(w.name,x,y+4);g.restore();}
+function fishMapLabels(g,pt,sx){   /* v3.08 käyttäjä: nimet kaikilla zoomeilla (koko pienenee ulos zoomatessa) */const F=fishF();for(const w of WBS){if(!F.wb[w.id])continue;const [x,y]=pt(w.x,w.z);g.save();g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=3;g.shadowOffsetX=1;g.shadowOffsetY=1;
+    g.fillStyle='#a9d8f2';g.font=`italic 600 ${sx>1.6?13:sx>1?12:10}px Alegreya Sans, sans-serif`;g.textAlign='center';g.fillText(w.name,x,y+4);g.restore();}
   if(SUNK&&F.sunkK&&!F.sunkO){const [x,y]=pt(SUNK.x,SUNK.z);g.save();g.strokeStyle='#e8c070';g.lineWidth=2;g.beginPath();g.moveTo(x-5,y-5);g.lineTo(x+5,y+5);g.moveTo(x+5,y-5);g.lineTo(x-5,y+5);g.stroke();g.restore();}}
 /* ---------------- KÄYTETTÄVÄT ESINEET ---------------- */
 function itemUse(s){const F=fishF();

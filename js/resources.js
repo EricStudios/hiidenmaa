@@ -264,7 +264,7 @@ function initNode(n){n.ox=n.x;n.oz=n.z;n.s0=n.s;n.id=NODE_ID_XT.has(n.type)?NODE
    eivät jyrkillä rinteillä näytä vinoilta (pystyssä y-akselilla). Puut pysyvät pystyssä, mutta tyvi upotetaan rinteeseen (ei kellu alamäen
    puolella); kivet upotetaan hieman rinteen mukaan. NTILT = kallistuksen osuus lajeittain. */
 function groundSlope(x,z){const e=.8;return [(terrainH(x+e,z)-terrainH(x-e,z))/(2*e),(terrainH(x,z+e)-terrainH(x,z-e))/(2*e)];}
-function setNodeMatrix(n,vis){_q.setFromEuler(_e.set(0,n.rot,0));_s.setScalar(vis?n.s:0.0001);const kd=n.def.kind;let sink=kd==='pick'||kd==='deco'?0:.05;
+function setNodeMatrix(n,vis){if(!n.im)return;_q.setFromEuler(_e.set(0,n.rot,0));_s.setScalar(vis?n.s:0.0001);const kd=n.def.kind;let sink=kd==='pick'||kd==='deco'?0:.05;
   if(!n.dun&&!n.isLog){const [gx,gz]=groundSlope(n.x,n.z),sl=Math.hypot(gx,gz),tk=NTILT[kd]||0;
     if(tk>0&&sl>.02){_gtN.set(-gx,1,-gz).normalize();if(tk<1)_gtN.lerp(_gtU,1-tk).normalize();_q.premultiply(_gtQ.setFromUnitVectors(_gtU,_gtN));}
     if(kd==='tree')sink+=Math.min(.6,sl*(n.def.r||.3)*n.s*1.3);else if(kd==='rock')sink+=Math.min(.4,sl*(n.def.r||1)*n.s*.25);}
@@ -283,7 +283,7 @@ const WOOD_K=1.1,RESIN_DROP_K=.8;
 /* v2.95 käyttäjä: pihkaa kaadosta vain lajin suurimmista puista (koko ≥ lajin FELL_BIG_Q-kvantiili), enintään 1 ja todennäköisyydellä FELL_RESIN_P. */
 const FELL_BIG_Q=.75,FELL_RESIN_P=.25,FELL_BIG={};
 function fellBigS(type){if(FELL_BIG[type]===undefined){const a=nodes.filter(n=>n.type===type).map(n=>n.s0||n.s).sort((x,y)=>x-y);FELL_BIG[type]=a.length?a[Math.min(a.length-1,Math.floor(a.length*FELL_BIG_Q))]:99;}return FELL_BIG[type];}
-function fellResin(n){return n.s>=fellBigS(n.type)&&Math.random()<FELL_RESIN_P?1:0;}
+function fellResin(n){if(n.type==='aarnipuu'&&typeof RESIN_P_AARNI!=='undefined'&&resinHash(n.id)<RESIN_P_AARNI)return 3+Math.floor(Math.random()*3);   /* v3.08 pihkainen aarnipuu */return n.s>=fellBigS(n.type)&&Math.random()<FELL_RESIN_P?1:0;}
 function dropScale(id,c){if(id==='puu'||id==='tervaspuu'){const x=c*WOOD_K;return Math.floor(x)+(Math.random()<x-Math.floor(x)?1:0);}if(id==='pihka'){let k=0;for(let i=0;i<c;i++)if(Math.random()<RESIN_DROP_K)k++;return k;}return c;}
 nodes.forEach(ngridAdd);
 // Etäisyys solmuun: tukeille janan lähin piste, muille keskipiste.
@@ -328,7 +328,7 @@ function respawnNode(n){const kind=n.def.kind;
     moveNode(n,px,pz,ps);}
   syncNodeY(n);reviveNode(n);return true;}
 // Palauttaa solmun alkuperäiseen paikkaan ja kokoon (uusi peli / lataus).
-function syncNodeY(n){const y=terrainH(n.x,n.z);if(Math.abs(y-n.y)<.001)return;n.y=y;if(n.alive)setNodeMatrix(n,true);if(n.col){n.col.minY=y-1;n.col.maxY=n.def.kind==='tree'?y+6*n.s:y+1.2*n.s;}}
+function syncNodeY(n){if(n.isLog||!n.im)return;   /* v3.08 KORJAUKSET 82: maanmuokkaus kaadetun puun vieressä – tukeilla ei ole instanssia (n.im) → setMatrixAt-virhe */const y=terrainH(n.x,n.z);if(Math.abs(y-n.y)<.001)return;n.y=y;if(n.alive)setNodeMatrix(n,true);if(n.col){n.col.minY=y-1;n.col.maxY=n.def.kind==='tree'?y+6*n.s:y+1.2*n.s;}}
 // Maanmuokkaus (lapio): korkeuskartta, maastoverkko, solmujen korkeudet. Muokatut kärjet tallentuvat (`TERRA`).
 function terraSetVertex(i,h){if(Math.abs(h-HGT0[i])<.005){delete TERRA[i];h=HGT0[i];}else TERRA[i]=h;HGT[i]=h;terrainMesh.geometry.attributes.position.array[i*3+1]=h;waterDepSet(i);}
 function terraFlush(){terrainMesh.geometry.attributes.position.needsUpdate=true;WATER_DEP.needsUpdate=true;   /* v2.18: veden syvyyskartta seuraa lapiota */terrainMesh.geometry.computeBoundingSphere();}
@@ -436,7 +436,8 @@ function regrowForest(){let revived=0;
   for(const n of nodes){if(n.alive||n.thin||n.planted||n.isLog)continue;const k=n.def.kind;
     if(k==='tree'){if(Math.random()<REGROW_K&&!nearBase(n.x,n.z)&&respawnNode(n))revived++;}
     else if(k==='rock'){if(rockReady(n)&&Math.random()<REGROW_K&&!siteBlocked(n.x,n.z)&&!nearBase(n.x,n.z)&&respawnNode(n))revived++;}}
-  revived+=pickRoll();const planted=typeof farmGrow==='function'?farmGrow():0;
+  flags.sleepC=(flags.sleepC|0)+1;   // v3.08 yhteinen unilaskuri (joka 5. uni: pihkan täyttyminen, istutettujen puiden kasvuvaiheet)
+  revived+=pickRoll();const planted=typeof farmGrow==='function'?farmGrow():0;if(typeof treeStageSleep==='function')treeStageSleep();if(typeof resinRefillSleep==='function')resinRefillSleep();   // v3.08 pihkan uudelleentäyttyminen joka 5. uni
   return{revived,planted};}
 // Yön tunnus: illan tunnit kuuluvat kuluvaan päivään, aamuyö edelliseen (sänky: flags.sleptN).
 function nightId(){return dayN-(dayT<.5?1:0);}

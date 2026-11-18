@@ -98,7 +98,8 @@ function creLpf(k){return 15000*Math.pow(1-k,4)+500;}
 function creDistFx(v,d){const k=v.tg?tgDistK(d):creDistK(d,v.far,v.rk),now=actx.currentTime;if(v.df)v.df.frequency.setTargetAtTime(creLpf(k),now,.1);
   if(v.dg)v.dg.gain.setTargetAtTime(1-(v.tg?TG_DG:.3)*k,now,.1);if(v.lg)v.lg.gain.setTargetAtTime(30*k,now,.2);if(v.sdo)v.sdo.gain.setTargetAtTime(.08+1.8*k,now,.1);}
 const CRE_PRI={idle:1,chase:2,aggro:3,hurt:4,death:5},CRE_G={idle:.75,chase:.9,aggro:1,hurt:1,death:1};
-const CRE_VK=.8;   // v2.24 (käyttäjä): kaikki olentojen äänet 20 % hiljempaa
+const CRE_VK=.8,CRE_TYPE_V={metso:.6};   // v3.08 käyttäjä: metson äänet −40 %
+   // v2.24 (käyttäjä): kaikki olentojen äänet 20 % hiljempaa
 // Kaiku (vain ulottuvuuksien ja luolaston olennoille m.dun): yksi yhteinen ConvolverNode + proseduraalinen vastaus (1,2 s; ConvolverNode vaatii saman näytetaajuuden kuin ääni-AudioContext),
 // pimeä (alipäästö 3,2 kHz). Kytkeytyy vain kun jokin kaiullinen ääni soi ja irtoaa 3 s sen jälkeen → ei kuormaa maailmassa.
 function creRevMake(a){if(CRE.rev)return CRE.rev;const sr=a.sampleRate,len=Math.floor(sr*1.2),buf=a.createBuffer(2,len,sr);
@@ -152,7 +153,7 @@ function creSnd(m,kind,o){if(!m)return false;if(kind==='idle'&&!realmIdleOk(m))r
   const src=a.createBufferSource(),g=a.createGain(),pn=a.createPanner();src.buffer=B;src.playbackRate.value=rate;
   const far=!ec&&creIsFar(name),md=Math.sqrt(dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)),rk=creRK(m.type,kind,far);
   pn.panningModel='equalpower';pn.distanceModel='inverse';pn.refDistance=(far?10:boss?6.4:2.4)*rk*SND_DIST_K;pn.maxDistance=(far?220:120)*rk*SND_DIST_K;pn.rolloffFactor=ec?.7:far?.8:1.1;
-  g.gain.value=(CRE_G[kind]||1)*(o&&o.v||1)*CRE_VK*(CRE_WOLF.has(m.type)&&CRE_WOLF_V[kind]||1)*(CRE_WOLF.has(m.type)&&far&&kind==='idle'?WOLF_HOWL_V:1);   /* v2.25 sudet; v2.57 ulvonta −30 % */src.connect(g);let df=null,dg=null,lfo=null,lg=null;
+  g.gain.value=(CRE_G[kind]||1)*(o&&o.v||1)*CRE_VK*(CRE_TYPE_V[m.type]||1)*(CRE_WOLF.has(m.type)&&CRE_WOLF_V[kind]||1)*(CRE_WOLF.has(m.type)&&far&&kind==='idle'?WOLF_HOWL_V:1);   /* v2.25 sudet; v2.57 ulvonta −30 % */src.connect(g);let df=null,dg=null,lfo=null,lg=null;
   if(ec){const lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1500;g.connect(lp);lp.connect(pn);}   // kaikuääni: tumma, kaukainen
   else{const k0=creDistK(md,far,rk);df=a.createBiquadFilter();df.type='lowpass';df.Q.value=.5;df.frequency.value=creLpf(k0);dg=a.createGain();dg.gain.value=1-.3*k0;g.connect(df);df.connect(dg);dg.connect(pn);   // v2.12/v2.14: etäisyys tummentaa ja hiljentää
     if(src.detune){lfo=a.createOscillator();lfo.frequency.value=.35+Math.random()*.3;lg=a.createGain();lg.gain.value=30*k0;lfo.connect(lg);lg.connect(src.detune);lfo.start();}}   // kaukana pieni huojunta (utuisuus)
@@ -183,7 +184,7 @@ function creTick(dt){const a=actx;if(!a||a.state!=='running'||typeof camera==='u
   creRevTick(dt);tgTick(dt);plTick(dt);
   for(const v of CRE.voices.slice())if(!creSpaceOk(v.m)){creStop(v,.15);CRE.voices.splice(CRE.voices.indexOf(v),1);}   // v2.58 tila vaihtui → ääni pois
   for(const v of CRE.voices){if(v.ec)creEchoPos(v.m,v.pn);else if(!v.m.dead){crePos(v.pn,v.m.pos.x,v.m.pos.y+(v.m.def.r||.5)*1.6,v.m.pos.z);creDistFx(v,Math.sqrt(dist2(v.m.pos.x,v.m.pos.z,P.pos.x,P.pos.z)));}}
-  if((state!=='play'&&state!=='ui')||!soundOn)return;   // v3.07 käyttäjä: äänet jatkuvat myös pelin paneeleissa (reppu, työpenkki…)
+  if(!sndLive()||!soundOn)return;   // v3.07 käyttäjä: äänet jatkuvat myös pelin paneeleissa (reppu, työpenkki…)
   vartijaEcho(dt);farHowl(dt);
   for(const m of mobs){if(m.dead||!creSpaceOk(m))continue;const d2=dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z),ai=m.def.ai,hs=CRE_CHASE.includes(ai),chasing=m.state==='chase',hasChase=hs&&chasing&&creRes(m.type,'chase');
     // rauhallinen ääntely 6–15 s välein alle 25 m päässä (ei jahdin aikana, jos olennolla on jahtiääni)
@@ -345,7 +346,7 @@ function fireSndTick(dt){for(const e of FSND.v){fireGrainPump(e.h);if(e.key==='_
   for(const c of sel){const e=FSND.v.find(x=>x.key===c.key);if(e){const k=tgDistK(c.d);try{e.h.df.frequency.value=creLpf(k);e.h.dg.gain.value=1-TG_DG*k;if(c.k==='kasi')crePos(e.h.pn,c.x,c.y+.3,c.z);}catch(err){}continue;}
     const h=fireGrainNew(c);   /* tunniste: 'palaminen','yhteiset' */if(h){fireGrainPump(h);FSND.v.push({key:c.key,h});}}}
 function fireSndOff(){for(const e of FSND.v)fireGrainStop(e.h);FSND.v.length=0;}
-function tgTick(dt){if(!CRE.ok||(state!=='play'&&state!=='ui')){if(FSND.v.length)fireSndOff();return;}fireSndTick(dt);
+function tgTick(dt){if(!CRE.ok||!sndLive()){if(FSND.v.length)fireSndOff();return;}fireSndTick(dt);
   for(const v of TGV.v.slice()){const m=v.m;if(m&&!creSpaceOk(m)){tgStop(v);continue;}   // v2.58
     if(v.loop&&!v.stat&&(!mobs.includes(m)||(m.dead&&v.ev!=='palaminen'))){tgStop(v);continue;}if(v.fixed)continue;crePos(v.pn,m.pos.x,m.pos.y+.3,m.pos.z);if(actx)creDistFx(v,Math.sqrt(dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)));}
   const C=[];
@@ -645,7 +646,7 @@ function ambStop(h,f){if(!h)return;const a=actx;if(f&&a){try{h.g.gain.cancelSche
 // salaman isku: salama-kertaääni d s myöhemmin (lähelle iskevä 0,05–0,3 s ja täysillä, kaukainen 0,5–3 s ja hiljempaa)
 function ambThunder(d){AMB.thT=Math.max(.05,d);AMB.thV=d<.35?1:clamp(1.1-d*.2,.45,1);}
 function ambTick(dt){const a=actx;if(!a||a.state!=='running'||!soundOn||!CRE.ok){for(const k in AMB.L){ambStop(AMB.L[k].h);delete AMB.L[k];}return;}
-  dt=Math.min(dt,.25);uwAudioTick();const vol=volK('amb'),now=a.currentTime,live=state==='play'||state==='ui';
+  dt=Math.min(dt,.25);uwAudioTick();const vol=volK('amb'),now=a.currentTime,live=sndLive();   /* v3.08 myös Käynnissä-tila */
   // taukovalikko: kaikki hiljenevät 1 s ja palaavat (silmukat jatkuvat)
   const dk=live||state==='paused'?(live?1:0):1;if(dk!==AMB.duck){AMB.duck=dk;if(AMB.gain)AMB.gain.gain.setTargetAtTime(dk,now,AMB_DUCK/3);}
   if(state==='paused')return;
@@ -673,9 +674,10 @@ function sndBus(a){if(!SBUS.f){SBUS.f=a.createBiquadFilter();SBUS.f.type='lowpas
    (state 'menu'/'paused'), ja palauttaa ~0,6 s:ssa, kun peli jatkuu. Silmukat jatkavat hiljaa samasta kohdasta. Valikon napit (MSND) ja musiikki
    eivät kulje tätä kautta. Kutsu: main.js frame() joka ruutu. */
 /* v3.07 käyttäjä: häivytys VAIN päävalikossa/tauolla. Pelin paneeleissa (reppu, työpenkki, arkku, pata…) äänet soivat, mutta UI_G (−30 %) ja pieni alipäästö UI_LP. */
-const UI_G=.7,UI_LP=4200;
-function gameSndTick(){const a=actx;if(!a||!SBUS.m)return;const on=state!=='menu'&&state!=='paused',tg=on?(state==='ui'?UI_G:1):0;if(tg===SBUS.tg)return;SBUS.tg=tg;
-  const t=a.currentTime;SBUS.m.gain.cancelScheduledValues(t);SBUS.m.gain.setValueAtTime(SBUS.m.gain.value,t);SBUS.m.gain.setTargetAtTime(tg,t,tg>0?.15:.2);}
-function uwAudioTick(){const a=actx;if(!a||!SBUS.f)return;const uw=typeof CAM_UW!=='undefined'&&CAM_UW>0&&!P.inDun&&(state==='play'||state==='ui'||state==='paused'),ui=state==='ui',key=(uw?1:0)+(ui?2:0);if(key===SBUS.uw)return;SBUS.uw=key;
-  const t=a.currentTime;SBUS.f.frequency.cancelScheduledValues(t);SBUS.f.frequency.setTargetAtTime(uw?UW_LP:ui?UI_LP:22000,t,.1);SBUS.g.gain.setTargetAtTime(uw?UW_G:1,t,.1);}   // v3.07 paneelissa pieni alipäästö
+const DEAD_FADE=2.2,UI_G=.7,UI_LP=4200,RUN_G=.3,RUN_LP=1400;   // v3.08 käyttäjä: päävalikko pelin pyöriessä taustalla (Käynnissä-tila) −70 % ja voimakkaampi alipäästö
+function sndLive(){return state==='play'||state==='ui'||(state==='paused'&&typeof pauseRun!=='undefined'&&pauseRun);}
+function gameSndTick(){const a=actx;if(!a||!SBUS.m)return;const run=state==='paused'&&typeof pauseRun!=='undefined'&&pauseRun,dead=state==='dead',on=run||(state!=='menu'&&state!=='paused'&&!dead),tg=on?(run?RUN_G:state==='ui'?UI_G:1):0;   /* v3.08 kuolemaruudussa hidas häivytys */if(tg===SBUS.tg)return;SBUS.tg=tg;
+  const t=a.currentTime;SBUS.m.gain.cancelScheduledValues(t);SBUS.m.gain.setValueAtTime(SBUS.m.gain.value,t);SBUS.m.gain.setTargetAtTime(tg,t,tg>0?.15:state==='dead'?DEAD_FADE:.2);}
+function uwAudioTick(){const a=actx;if(!a||!SBUS.f)return;const uw=typeof CAM_UW!=='undefined'&&CAM_UW>0&&!P.inDun&&(state==='play'||state==='ui'||state==='paused'),ui=state==='ui',run=state==='paused'&&typeof pauseRun!=='undefined'&&pauseRun,key=(uw?1:0)+(ui?2:0)+(run?4:0);if(key===SBUS.uw)return;SBUS.uw=key;
+  const t=a.currentTime;SBUS.f.frequency.cancelScheduledValues(t);SBUS.f.frequency.setTargetAtTime(uw?UW_LP:run?RUN_LP:ui?UI_LP:22000,t,.1);SBUS.g.gain.setTargetAtTime(uw?UW_G:1,t,.1);}   // v3.07 paneelissa pieni alipäästö
 creInit();   // v2.52: manifesti ja valikko-/introäänet heti (maailman intro sivun uudelleenlatauksen jälkeen)

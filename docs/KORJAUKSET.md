@@ -605,3 +605,8 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 ## 81. //-kommentti lisättiin rivin keskelle korvauksessa (v3.07, KORJAUKSET 49 uudelleen)
 - Python-korvauksessa lisätty `// selitys` päätyi rivin keskelle (savustimen malli: perässä `for`-silmukka ja `break;}` → syntaksivirhe; onkikoukku: fishTick:n loppurivi
   kommentoitui pois). `node --check` paljasti molemmat. **Sääntö:** kun lisäät koodia olemassa olevan rivin keskelle, käytä AINA `/* */`; `//` vain kun rivin loppu on varmasti tyhjä.
+
+## 82. Lapio/kuokka kaadetun puun vieressä: "Cannot read properties of undefined (reading 'setMatrixAt')" (v3.07, korjattu v3.08)
+- `terraTool` päivittää lähellä olevien solmujen korkeuden (`nodesNear` → `syncNodeY` → `setNodeMatrix`). `nodesNear` palauttaa myös kaadetun puun **tukit** (`isLog`, samassa
+  NGRID-ruudukossa), joilla ei ole instanssimeshiä (`n.im`) → virhe joka ruutu pelisilmukassa. Korjaus: `syncNodeY` ohittaa tukit ja solmut ilman `im`:ää, `setNodeMatrix` vartioi `n.im`.
+- **Sääntö:** `nodesNear`-tulos voi sisältää tukkeja – tarkista `n.isLog` ennen solmukohtaisia (instanssi-) operaatioita.

@@ -56,7 +56,16 @@ function backPose(id){const d=ITEMS[id];
   if(/miekka/.test(id))return{p:[-.2,1.42],d:[.45,-.9,0],y:[0,0,1]};   // v1.39 (lista 4, kohta 5): lappeellaan selkää vasten               // terä litteänä selkää vasten, alaspäin
   if(d.cat==='shovel')return{p:[-.22,1.48],d:[.42,-.9,0],y:[0,0,1]};
   return{p:[.15,.85],d:[-.4,.9,0],y:[.9,.4,0]};}
-function updateGear(){updateBack();
+/* v3.08 käyttäjä: kuollessa hahmo kaatuu panssari ja selkätavarat päällään (P.gearLock: ulkoasu ei päivity), käsissä olleet esineet lentävät viereen
+   satunnaiseen asentoon (vain ulkoasu – esineet ovat hautakasassa). Palautus respawnissa (gearUnlock). */
+const THROWN=[];
+function deathThrowGear(){const fly=(m)=>{if(!m||!m.parent)return;m.updateMatrixWorld(true);const p=new THREE.Vector3(),q=new THREE.Quaternion(),s=new THREE.Vector3();m.matrixWorld.decompose(p,q,s);m.parent.remove(m);
+    m.position.copy(p);m.quaternion.copy(q);scene.add(m);const a=Math.random()*TAU;THROWN.push({m,v:new THREE.Vector3(Math.cos(a)*(1.6+Math.random()*1.6),2.2+Math.random()*1.5,Math.sin(a)*(1.6+Math.random()*1.6)),w:new THREE.Vector3((Math.random()-.5)*14,(Math.random()-.5)*10,(Math.random()-.5)*14),rest:false,t:0});};
+  fly(heldMesh);fly(offMesh);heldMesh=null;offMesh=null;heldId=null;offId=null;P.gearLock=true;}
+function thrownTick(dt){for(const o of THROWN){if(o.rest)continue;o.t+=dt;o.v.y-=14*dt;o.m.position.addScaledVector(o.v,dt);o.m.rotation.x+=o.w.x*dt;o.m.rotation.y+=o.w.y*dt;o.m.rotation.z+=o.w.z*dt;
+    const g=P.inDun?groundAt(o.m.position.x,o.m.position.z,.1,o.m.position.y+.5):terrainH(o.m.position.x,o.m.position.z);if(o.m.position.y<=g+.04){o.m.position.y=g+.04;if(Math.abs(o.v.y)<1.5||o.t>3){o.rest=true;o.m.rotation.x=Math.PI/2*(Math.random()<.5?1:-1)+(Math.random()-.5)*.3;o.m.rotation.z=(Math.random()-.5)*.6;}else{o.v.y*=-.3;o.v.x*=.5;o.v.z*=.5;o.w.multiplyScalar(.5);}}}}
+function gearUnlock(){for(const o of THROWN)scene.remove(o.m);THROWN.length=0;P.gearLock=false;updateGear();}
+function updateGear(){if(P.gearLock)return;updateBack();
   {const w0=equipped('weapon');if(!w0||w0.id!=='vasara')setBuildSel(null);}
   const w=equipped('weapon'),wid=w?w.id:null;
   if(wid!==heldId){if(heldMesh)heldMesh.parent.remove(heldMesh);heldMesh=null;heldId=wid;if(wid){heldMesh=makeHeld(wid);(ITEMS[wid].cat==='bow'?fig.handL:fig.hand).add(heldMesh);}}
@@ -271,6 +280,7 @@ function fallTree(n,dir,crush,src){const g=new THREE.Group();const m=new THREE.M
       burst(n.x+Math.sin(a)*3,n.y+.5,n.z+Math.cos(a)*3,0x6b4527,10,4);
       for(const [id,lo,hi] of n.def.drops){if(id==='puu'&&!small)continue;const c=id==='pihka'?fellResin(n):Math.max(id==='puu'?1:0,dropScale(id,Math.round(rint(rng,lo,hi)*n.s)));for(let j=0;j<c;j++){const t=.8+j*H/(c+1);spawnDrop(id,1,n.x+Math.sin(a)*t,n.y+1,n.z+Math.cos(a)*t);}}
       g.updateMatrixWorld(true);for(const b of brs)if(!b.userData.off)dropBranch(b);
+      if(n._seed&&typeof seedDrop==='function'){const sd=n._seed;n._seed=null;seedDrop(n,sd.rz,n.x+Math.sin(a)*H*.6,n.z+Math.cos(a)*H*.6);}   // v3.08 käyttäjä: siemen putoaa vasta, kun puu kaatuu tukeiksi (latvan kohdalle)
       if(small){m.visible=false;for(let j=0;j<5;j++)burst(n.x+Math.sin(a)*H*j/5,n.y+.4,n.z+Math.cos(a)*H*j/5,WOOD_IN,5,3);}
       else spawnLogs(n,a);}
     return f.t>dur+.4;}});}

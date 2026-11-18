@@ -24,6 +24,7 @@ const WEATHERS={
   sumu:{n:'Sumua',fog:.15,dark:.2,rain:0,cloud:.55},
 };
 const WMSG={sade:'Alkaa sataa.',tihku:'Alkaa tihuttaa.',myrsky:'Myrsky nousee!',lumi:'Alkaa sataa lunta.',sumu:'Sumu nousee.',tuuli:'Tuuli yltyy.'};
+let snowK=0;
 function highGround(){return !P.inDun&&(P.pos.y>20||biomeHere(P.pos.x,P.pos.z)==='mountain');}
 function updateWeather(){if(playTime<weather.until)return;const r=Math.random(),prev=weather.cur;
   let w=r<.34?'selkea':r<.54?'pilvi':r<.64?'tuuli':r<.74?'tihku':r<.86?'sade':r<.92?'myrsky':'sumu';
@@ -162,7 +163,7 @@ function updateEnvironment(dt){
   moon.position.set(camera.position.x-sd.x*370,camera.position.y-sd.y*370,camera.position.z-sd.z*370);moon.visible=-sd.y>-.08&&wDark<.5;moon.material.color.setScalar(.35+.65*ph);
   updateClouds(dt,wCloud,light,el);updateSky(light,sd,el,sunK);
   rain.visible=wRain>.15;if(rain.visible){rain.material.opacity=.45*Math.min(1,wRain);updateRain(dt);}
-  snow.visible=wSnow>.1&&P.pos.y>10;if(snow.visible){snow.material.opacity=.9*Math.min(1,wSnow);updateSnow(dt);}
+  snowK=lerp(snowK,wSnow>.1?sstep(8,13,P.pos.y):0,Math.min(1,dt*.8));snow.visible=snowK>.01;if(snow.visible){snow.material.opacity=.9*Math.min(1,wSnow)*snowK;updateSnow(dt);}   // v3.08 käyttäjä: lumi ilmestyy pehmeästi rajan ylittyessä (ennen heti)
   water.position.y=Math.sin(playTime*.6)*.04;updateWater(dt,sd);
 }
 /* v2.18: veden varjostimen päivitys. Aallon korkeus tuulen mukaan (WV.a: tyyni ~7 cm, 8 m/s ~21 cm, myrsky 15–22 m/s ~0,6–1,3 m), vaiheet
@@ -214,13 +215,14 @@ function coverBuild(cx,cz){const C=COVER,n=C.n,cs=C.cs,h=C.h;C.x0=cx-n*cs/2;C.z0
 function coverTick(dt){const C=COVER;C.t-=dt;const cx=camera.position.x,cz=camera.position.z;if(C.t<=0||Math.abs(cx-C.cx)>6||Math.abs(cz-C.cz)>6){C.t=.5;coverBuild(cx,cz);}}
 function coverH(x,z){const C=COVER;if(!C.any)return -1e9;const i=Math.floor((x-C.x0)/C.cs),j=Math.floor((z-C.z0)/C.cs);if(i<0||j<0||i>=C.n||j>=C.n)return -1e9;return C.h[j*C.n+i];}
 function roofTopAt(x,z){let h=terrainH(x,z);gridQuery(x,z,.15,_cl);for(const c of _cl)if(c.t==='b'&&c.owner&&c.owner.t&&c.maxY>h&&x>=c.minX&&x<=c.maxX&&z>=c.minZ&&z<=c.maxZ)h=c.maxY;return h;}
+const RAIN_SIDE=.7;   // v3.08 käyttäjä: sade tuulessa enemmän sivuttain (ennen 0,45); vino viiru samassa suhteessa
 function updateRain(dt){coverTick(dt);const a=rain.geometry.attributes.position.array,sp=26*(wRain>1.1?1.35:1),cx=camera.position.x,cy=camera.position.y,cz=camera.position.z;
   if(rain.position.lengthSq()>0)rain.position.set(0,0,0);
   for(let i=0,k=0;i<a.length;i+=6,k++){
-    if(rainInit){const dx=WIND.x*WIND.spd*.45*dt,dz=WIND.z*WIND.spd*.45*dt;a[i+1]-=sp*dt;a[i+4]-=sp*dt;a[i]+=dx;a[i+2]+=dz;a[i+3]+=dx;a[i+5]+=dz;}
+    if(rainInit){const dx=WIND.x*WIND.spd*RAIN_SIDE*dt,dz=WIND.z*WIND.spd*RAIN_SIDE*dt;a[i+1]-=sp*dt;a[i+4]-=sp*dt;a[i]+=dx;a[i+2]+=dz;a[i+3]+=dx;a[i+5]+=dz;}
     const out=Math.abs(a[i]-cx)>26||Math.abs(a[i+2]-cz)>26;
     if(!rainInit||out||a[i+1]<RAIN_STOP[k]||a[i+1]<coverH(a[i],a[i+2])||a[i+4]<coverH(a[i+3],a[i+5])){const x=cx+(Math.random()-.5)*50,z=cz+(Math.random()-.5)*50,stop=Math.max(roofTopAt(x,z),coverH(x,z)),y=Math.max(cy+(rainInit&&!out?14+Math.random()*8:Math.random()*22-2),stop+.5+Math.random()*3);
-      const sl=.03+WIND.spd*.03;a[i]=x;a[i+1]=y;a[i+2]=z;a[i+3]=x-WIND.x*sl;a[i+4]=y+.7;a[i+5]=z-WIND.z*sl;RAIN_STOP[k]=stop;}}
+      const sl=.03+WIND.spd*RAIN_SIDE*.7/sp;a[i]=x;a[i+1]=y;a[i+2]=z;a[i+3]=x-WIND.x*sl;a[i+4]=y+.7;a[i+5]=z-WIND.z*sl;RAIN_STOP[k]=stop;}}
   precipTint(rain.geometry,a,6,.67,.77,.85);   // v1.41: sade yöllä hyvin tumma, valot värjäävät
   rainInit=true;rain.geometry.attributes.position.needsUpdate=true;}
 function updateLights(){
