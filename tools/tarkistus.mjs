@@ -218,7 +218,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     return a&&b||`virhe havaitseminen ${a} valikko ${b}`;}finally{DEVF.unseen=o;for(const m of ms)if(mobs.includes(m))mobRemove(m);}});
   t('v2.16 ääniprojektit kansioissa: olennot_aanet/ ja olennot_toiminnot/ (raw, valmiit, lista), manifestin f-polku, kivivartija ei lainaa (v2.23 omat äänet)',()=>{
     const M=manJ(),ks=Object.keys(M),a=ks.length>50&&ks.filter(k=>!/^[a-z]+\//.test(k)).every(k=>M[k].f===`olennot_aanet/valmiit/${k}.mp3`)   /* v2.66: m/, i/, mu/, a/ = muut projektit */&&ks.filter(k=>k.startsWith('t/')).every(k=>M[k].f.startsWith('olennot_toiminnot/valmiit/'))
-      &&ks.filter(k=>k.startsWith('p/')).every(k=>/^pelaaja_[123]_[a-z]+\/valmiit\//.test(M[k].f));   /* v2.24: manifesti luetaan tiedostosta (CRE.man voi olla vielä lataamatta), pelaajan p/-avaimet */
+      &&ks.filter(k=>k.startsWith('p/')).every(k=>/^(pelaaja_[123]_[a-z]+|extra)\/valmiit\//.test(M[k].f));   /* v3.05 extra/ (osa 4) */   /* v2.24: manifesti luetaan tiedostosta (CRE.man voi olla vielä lataamatta), pelaajan p/-avaimet */
     const b=/e\.f\|\|name\+'\.mp3'/.test(creBuf.toString())&&!VARAANI.kivivartija&&!CRE_SILENT.has('kivivartija')&&/CRE_SILENT\.has\(m\.type\)/.test(killMob.toString());   /* v2.23: kivivartija sai omat äänet */
     const c=Object.keys(MOBDEF).every(k=>TG[k]&&TG_STRIDE[TG[k]]);
     return a&&b&&c||`virhe polut ${a} kivivartija ${b} ryhmät ${c}`;});
@@ -587,10 +587,15 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       for(let i=0;i<10;i++)g.update(1/30);const c=!P.blocking&&msgs===1&&P.stam<SHIELD_REST;mouseR=false;for(let i=0;i<60;i++)g.update(1/30);mouseR=true;g.update(1/30);const d=P.stam>=SHIELD_REST&&P.blocking&&!P.shTired;
       r=a&&b&&c&&d||`virhe pito ${a} (${(50-s1).toFixed(2)}) uupui ${b} pysyy ${c} uudelleen ${d} ilm ${msgs}`;}
     finally{msg=om;[state,mouseR,P.stam,P.shTired,P.atk]=sv;P.blocking=false;const I=JSON.parse(inv0);for(let q=0;q<inv.length;q++)inv[q]=I[q]||null;invDirty=true;updateGear();}return r;});
+  t('v3.05 äänierä: pata (pata_vesi veden vaativalle reseptille, padan äänet hiljaisia), kaiverrus vedoiksi 1,0–1,4 s välein, uudet äänet manifestissa',()=>{const M=manJ();
+    const need=['p/rakentaminen/pata_vesi_0','p/rakentaminen/pata_aloitus_0','p/rakentaminen/pata_kiehuu_0','p/rakentaminen/pata_valmis_0','p/rakentaminen/pata_valmis_kansi_0','p/rakentaminen/kansi_auki_0','p/rakentaminen/kansi_kiinni_0','p/pihka/kaiverrus_0','p/pihka/tippa_0','p/moka/kirous_0','p/moka/vihainen_0','p/f_ihmettely/wow_0','p/rakentaminen/sulatin_valmis_0','p/rakentaminen/ahjo_valmis_0'];
+    const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
+    const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
+    return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
   t('v3.04 vesikulho kaatuu, kun F-tarkastelu kääntää kulhon suun alaspäin (liikkuessa kulho pysyy vaakasuorassa): Hups, kirous, Märät kengät −11 %, Kylmä 30 s, Vihainen 20 s (+20 % kestävyys, ääni 5–10 s), varoitus tiedoissa',()=>{const om=msg;const L=[];msg=t=>L.push(t);const inv0=JSON.stringify(inv);let r;
     try{invAdd('vesikulho',1);const s=inv.find(x=>x&&x.id==='vesikulho');if(!s.eq)toggleEquip(s);for(let i=0;i<5;i++)g.update(1/30);const a=heldId==='vesikulho';
       for(let i=0;i<30;i++)g.update(1/30);const b=heldId==='vesikulho';inspectStart('pieni_ojennus');for(let i=0;i<300&&P.insp;i++)g.update(1/30);if(P.insp)inspectStop();
-      const c=heldId==='kulho'&&L.some(t=>/Hups/.test(t))&&P.buffs.markakengat>0&&P.buffs.kylmavesi>0&&P.buffs.vihainen>0&&SPILL_FX.vihainen===20&&SPILL_FX.kylma===30&&WET_SHOE_K===.89&&ANGRY_STAM_K===1.2&&/plSnd\('moka','vihainen'\)/.test(angryTick.toString());const d=/kiinteästi kulhossa/.test(ITEMS.vesikulho.d)&&BOWL_SPILL_Y<0&&/plSnd\('moka','kirous'\)/.test(bowlSpill.toString())&&/bowlSpillTick\(dt\)/.test(resinTick.toString());
+      const c=heldId==='kulho'&&L.some(t=>/Hups/.test(t))&&P.buffs.markakengat>0&&P.buffs.kylmavesi>0&&P.buffs.vihainen>0&&SPILL_FX.vihainen===20&&SPILL_FX.kylma===30&&WET_SHOE_K===.89&&ANGRY_STAM_K===1.2&&/plSnd\('moka','vihainen'/.test(angryTick.toString());const d=/kiinteästi kulhossa/.test(ITEMS.vesikulho.d)&&BOWL_SPILL_Y<0&&/plSnd\('moka','kirous'/.test(bowlSpill.toString())&&/bowlSpillTick\(dt\)/.test(resinTick.toString());
       r=a&&b&&c&&d||`virhe ${a} ${b} kaatuu ${c} teksti ${d}`;}
     finally{msg=om;delete P.buffs.markakengat;delete P.buffs.kylmavesi;delete P.buffs.vihainen;const I=JSON.parse(inv0);for(let q=0;q<inv.length;q++)inv[q]=I[q]||null;invDirty=true;updateGear();}return r;});
   t('v3.03 Routaluolan tunnelma ja satunnainen_routaluola (_0, _1) −15 %, villikauran id:t omalta alueeltaan (vanhojen tallennusten id:t eivät siirry)',()=>{

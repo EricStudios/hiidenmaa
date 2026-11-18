@@ -54,12 +54,12 @@ function bowlSpillTick(dt){if(heldId!=='vesikulho'||!heldMesh||P.dead){RES.spT=0
   if(y>=BOWL_SPILL_Y){RES.spT=0;return;}RES.spT=(RES.spT||0)+dt;if(RES.spT<BOWL_SPILL_T)return;RES.spT=0;bowlSpill();}
 function bowlSpill(){const s=heldBowl();if(!s||s.id!=='vesikulho')return;heldMesh.getWorldPosition(_spillV);s.id='kulho';invDirty=true;updateGear();bump('spills');
   burst(_spillV.x,_spillV.y,_spillV.z,0x8fc8ff,16,2.2);plSnd('kaytto','vesi_kaato',{v:.6,pos:{x:_spillV.x,y:_spillV.y,z:_spillV.z}});
-  msg('Hups! Kaadoit vedet vahingossa – kulho on taas tyhjä. Kengät kastuivat ja harmittaa.','warn');setTimeout(()=>{if(!P.dead)plSnd('moka','kirous');},BOWL_CURSE_D*1000);
+  msg('Hups! Kaadoit vedet vahingossa – kulho on taas tyhjä. Kengät kastuivat ja harmittaa.','warn');setTimeout(()=>{if(!P.dead)plSnd('moka','kirous',{v:.9});},BOWL_CURSE_D*1000);   // v3.05 käyttäjän ääni hieman hiljempaa
   P.buffs.markakengat=SPILL_FX.markakengat;P.buffs.kylmavesi=SPILL_FX.kylma;P.buffs.vihainen=SPILL_FX.vihainen;RES.angT=5+Math.random()*5;}   // v3.04 tilat
 /* v3.04 käyttäjä: kaatuneesta vedestä tilat – Märät kengät (liike −11 %, SPILL_FX.markakengat s), Kylmä 30 s (kuten kylmä yö: tuli lämmittää),
    Vihainen 20 s (kestävyys kuluu 20 % nopeammin, environment.js survival; ääni p/moka/vihainen 5–10 s välein angryTick). */
 const SPILL_FX={markakengat:60,kylma:30,vihainen:20},WET_SHOE_K=.89,ANGRY_STAM_K=1.2;
-function angryTick(dt){if(!P.buffs.vihainen||P.dead){RES.angT=Math.max(RES.angT||0,1);return;}RES.angT=(RES.angT??5)-dt;if(RES.angT<=0){RES.angT=5+Math.random()*5;plSnd('moka','vihainen');}}
+function angryTick(dt){if(!P.buffs.vihainen||P.dead){RES.angT=Math.max(RES.angT||0,1);return;}RES.angT=(RES.angT??5)-dt;if(RES.angT<=0){RES.angT=5+Math.random()*5;plSnd('moka','vihainen',{v:.8});}}
 function heldBowl(){const w=equipped('weapon');return w&&ITEMS[w.id].cat==='bowl'?w:null;}
 function bowlUse(){const s=heldBowl();if(!s||P.dead)return;
   if(s.id==='kulho'){if(nearWater()){s.id='vesikulho';invDirty=true;updateGear();msg('Täytit kulhon vedellä – nyt se on vesikulho.','loot');plSnd('pihka','kulho_taytto');sfx('pickup');}
@@ -118,7 +118,7 @@ function carveTick(dt){const C=P.carve;if(!C)return;const n=resinNode(C.id),e=n&
   const h=resinHeldIds(),far=Math.hypot(n.x-P.pos.x,n.z-P.pos.z)>RESIN_REACH(n)+.35;
   if(far||h.w!=='puukko'||P.dead||P.atk||P.swim){carveStop(`Kaiverrus keskeytyi (${Math.floor(e.c*100)} %). Jatka painamalla E puukko kädessä puun vieressä.`);return;}
   P.yaw=Math.atan2(n.x-P.pos.x,n.z-P.pos.z);e.q=Math.max(1,h.wq);
-  e.c=Math.min(1,e.c+dt*resinFlowK(h.wq)/CARVE_T);RES.sndT-=dt;if(RES.sndT<=0){RES.sndT=.55;plSnd('pihka','kaiverrus',{pos:{x:n.x,y:resinBase(n)+1.1,z:n.z}});if(Math.random()<.6)burst(n.x+Math.sin(e.a)*(resinHW(n)+.05),resinBase(n)+.6+(1-e.c)*.9,n.z+Math.cos(e.a)*(resinHW(n)+.05),0xc89a5a,3,1.2);}
+  e.c=Math.min(1,e.c+dt*resinFlowK(h.wq)/CARVE_T);RES.sndT-=dt;if(RES.sndT<=0){RES.sndT=1+Math.random()*.4;   /* v3.05 käyttäjän vedot ~1,2 s: ei päällekkäin */plSnd('pihka','kaiverrus',{pos:{x:n.x,y:resinBase(n)+1.1,z:n.z}});if(Math.random()<.6)burst(n.x+Math.sin(e.a)*(resinHW(n)+.05),resinBase(n)+.6+(1-e.c)*.9,n.z+Math.cos(e.a)*(resinHW(n)+.05),0xc89a5a,3,1.2);}
   if(e.c>=1){P.carve=null;e.q=Math.max(1,h.wq);addXp(25,'Pihkakuvio');msg('Pihkakuvio valmis! Sido kuvion alle kulho: tyhjä kulho kädessä, naru toisessa kädessä, E.','loot');sfx('craft');}}
 // oikea käsi vetää puukkoa kuvion uria pitkin, vasen tukee runkoa
 function carvePose(){if(!P.carve)return;const t=playTime*8.5,s=Math.sin(t);

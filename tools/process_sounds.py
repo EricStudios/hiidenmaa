@@ -45,9 +45,12 @@ NOISE_FIX = {'askel_kivi_2': 'afftdn=nr=30:nf=-40:tn=1,agate=threshold=0.1:ratio
 NOISE_EV = {'askel_kivi'}
 # v2.67 pilkottavat pitkät nauhoitukset (käyttäjä): hytinä ja palamisen kipu → useita versioita, peli arpoo (ei samaa kahdesti peräkkäin)
 SPLIT_EV = {'hytina': dict(k=8, gap=.9, seg_max=2.5), 'kipu_tuli': dict(k=8, gap=.7, seg_max=1.6),
-            'heinasirkat': dict(k=14, gap=.25, seg_max=.42, win=.025, pre=3)}   # v2.86 yksittäiset siritykset (~0,25 s, 0,45 s välein) – peli soittaa omassa rytmissään
+            'heinasirkat': dict(k=14, gap=.25, seg_max=.42, win=.025, pre=3),
+            'kaiverrus': dict(k=14, gap=.3, seg_max=1.3)}   # v3.05 kaiverrus: erilliset vedot (pätkät SEG_FIX) (peli soittaa 1,0–1,4 s välein)   # v2.86 yksittäiset siritykset (~0,25 s, 0,45 s välein) – peli soittaa omassa rytmissään
+# v3.05 käsin mitatut pätkät (alku s, pituus s): iskutunnistus osui kaiverruksen hiljaisiin väleihin → vedot 0,05 s ikkunoilla (> −45 dB) mitattuina
+SEG_FIX = {'kaiverrus': [(.75, 1.0), (2.95, 1.1), (5.05, 1.0), (7.8, 1.3), (11.25, 1.3), (14.8, 1.3), (18.15, 1.3), (20.7, 1.3), (23.35, 1.3), (26.05, 1.3)]}   # lyhyet (< 0,6 s) pois: LUFS-mittaus vaatii pidemmän pätkän
 PEAK_EV = {'heinasirkat': -9.0}   # v2.86 huippu dBFS (tasainen taso kaikille pätkille)
-CHUNK_EV = {'puiden_humina': dict(n=6, ln=22.0)}   # v2.86 pitkästä humina-nauhoituksesta tasavälein n pätkää (ln s) – peli soittaa hiljaa reiluin häivytyksin
+CHUNK_EV = {'puiden_humina': dict(n=6, ln=22.0), 'pata_kiehuu': dict(n=6, ln=5.0)}   # v3.05 padan kiehuminen 6 × 5 s (tasainen ääni)   # v2.86 pitkästä humina-nauhoituksesta tasavälein n pätkää (ln s) – peli soittaa hiljaa reiluin häivytyksin
 NOCUT_EV = {'salama', 'tausta_myrsky'}   # v2.86 salaman kaiku saa jäädä kokonaan: ei loppuleikkausta eikä pituusrajaa; alusta vain lähes hiljainen osa (−60 dB)
 LOOP_XF = {'aallot_rauhallinen': 3.0, 'aallot_kovat': 3.0}   # v2.87 silmukan saumahäivytys s (oletus 0,25)
 MID_EV = {'ovi_narina': 0.85}   # v2.87 käyttäjä: narina raa'an KESKELTÄ (ei alkuosaa) – pätkän pituus s ≈ oven kääntyminen 0,6 s + häivytys
@@ -685,7 +688,13 @@ T_PROF.update({'alastulo': (.6, .8, .08, -24), 'puska': (1.2, 1.2, .15, -24), 'l
                'sulje': (.5, .5, .08, -25), 'siirto': (.6, .6, .08, -25), 'puolitus': (.6, .6, .08, -25), 'kipu': (1.0, 1.0, .1, -18), 'kuolema': (3.0, 3.0, .3, -17), 'sydan': (3.0, 3.0, .2, -22), 'hengastys': (3.0, 3.0, .3, -22),
                'haukkoo': (2.0, 2.0, .2, -21), 'hytina': (2.5, 2.5, .3, -23), 'vatsa': (2.5, 2.5, .3, -24), 'mahakipu': (2.0, 2.0, .2, -21),
                'pahoinvointi': (2.5, 2.5, .3, -21), 'kylla': (2.0, 2.0, .2, -23), 'lammin': (2.5, 2.5, .3, -23), 'levannyt': (2.5, 2.5, .3, -23)})
-T_PROF['pusikko'] = (.3, .42, .07, -27)   # v2.27 Aarnimetsän askel lyhyemmäksi: raa'an 0,3 s hiljainen häntä pois (kuulosti venyvältä)
+T_PROF['pusikko'] = (.3, .42, .07, -27)
+# v3.05 käyttäjän äänierä (pata, pihka, mokat, F-ihmettely, sulatin, ahjo): kaikki uudet tavallista hiljaisemmiksi (käyttäjä), padan äänet erityisen hiljaisiksi
+T_PROF.update({'pata_aloitus': (3.0, 3.0, .6, -26), 'pata_vesi': (3.0, 3.0, .6, -26), 'pata_kiehuu': (5.0, 5.0, .8, -29), 'pata_valmis': (3.5, 3.5, .9, -25),
+               'pata_valmis_kansi': (4.0, 4.0, 1.0, -25), 'kansi_auki': (1.5, 1.5, .2, -25), 'kansi_kiinni': (.8, .8, .1, -25),
+               'kaiverrus': (1.3, 1.3, .15, -27), 'kulho_kiinni': (1.2, 1.2, .15, -24), 'kulho_taytto': (2.0, 2.0, .4, -25), 'tippa': (1.0, 1.0, .15, -29),
+               'vesi_kaato': (2.0, 2.0, .3, -23), 'kirous': (3.0, 3.0, .4, -23), 'vihainen': (3.0, 3.0, .3, -25), 'wow': (1.0, 1.0, .1, -24), 'mmm': (2.0, 2.0, .25, -25),
+               'ahjo_valmis': (2.2, 2.2, .3, -23), 'sulatin_valmis': (2.5, 2.5, .5, -24)})   # v2.27 Aarnimetsän askel lyhyemmäksi: raa'an 0,3 s hiljainen häntä pois (kuulosti venyvältä)
 T_DEF = (1.5, 1.5, .15, -22)
 # v2.50: tiedostokohtainen profiili (käsitellyn nimen mukaan, ohittaa t_prof:n) – puun tömähdykset: _2 pitkä (iso puu) selvällä pitkällä
 # häivytyksellä, perus ja _1 lyhyellä häivytyksellä
@@ -796,6 +805,7 @@ P_PARTS = [   # (osa, kansio, otsikko, [(ryhmä, nimi, emoji, [(ääni, milloin 
                                                            ('ahjo_valmis', 'v2.99: esine valmistuu ahjolla (tilalla soi tavallinen valmistus, jos tiedostoa ei ole)', 'blacksmith anvil ding, forge craft complete'),
                                                            ('sulatin_valmis', 'v2.99: sulatusuunista tulee valmis harkko tai lasi (3D, uunin kohdalta)', 'furnace done, metal ingot clink, smelting complete'),
                                                            ('pata_aloitus', 'v3.02: keittopadassa alkaa valmistus (aineet pataan, roiske + sihaus)', 'ingredients dropped into cooking pot, splash, sizzle start'),
+                                                           ('pata_vesi', 'v3.05: vesi kaadetaan pataan, kun pataresepti vaatii veden (vesikulho) – soi aloitusäänen sijaan', 'water pouring into iron pot, splash into cauldron'),
                                                            ('pata_kiehuu', 'v3.02: pata kiehuu hiljaa (soi 7–12 s välein kypsymisen aikana)', 'pot simmering, gentle bubbling stew'),
                                                            ('pata_valmis', 'v3.02: ruoka valmis padassa ilman kantta (höyry pöllähtää)', 'stew ready, steam puff, open pot bubbling'),
                                                            ('pata_valmis_kansi', 'v3.02: ruoka valmis kansi päällä (kansi kolisee höyryn paineesta)', 'pot lid rattling from steam, stew ready'),
@@ -1150,7 +1160,7 @@ def process_toiminnot(ff, init, old, C=None):
             if prev and all(os.path.exists(os.path.join(odir(g), k.split('/')[2] + '.mp3')) for k in prev):
                 jobs = [(k.split('/')[2], old[k].get('seg')) for k in sorted(prev, key=natkey)]
             elif duration(ff, p) > 3.0:
-                sg = step_segments(ff, p, **SPLIT_EV[ev]) if ev in SPLIT_EV else step_segments(ff, p)
+                sg = list(SEG_FIX[ev]) if ev in SEG_FIX else step_segments(ff, p, **SPLIT_EV[ev]) if ev in SPLIT_EV else step_segments(ff, p)
                 if sg:
                     num = int(mm.group(2)) or 99   # numeroton (_0) → pätkät _9901 …
                     jobs = [(base, sg[0])] + [(f'{ev}_{num * 100 + i}', x) for i, x in enumerate(sg[1:], 1)]

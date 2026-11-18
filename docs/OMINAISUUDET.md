@@ -662,6 +662,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   on laitettu erikseen päälle eikä sitä ohiteta. Puukon pihkavinkki on lyhyt ja ohjaa esineen tietoihin repussa.
 - **v3.02 Äänet:** pihkan tippuminen kulhoon kuuluu hiljaa aivan läheltä (6 m). Pihkankeräyksen äänet ovat `sounds/extra/raw/pihka/`.
 - **v3.02 Päävalikko:** Early Access 1.1.
+- **v3.05 Äänet:** padan, pihkankeräyksen, kaatuneen veden (kirous, vihainen), F-ihmettelyn, sulatusuunin ja ahjon äänet ovat käyttäjän omia; padan äänet hiljaisia.
+  Veden vaativa pataresepti soittaa alussa veden kaatoäänen.
 - **v3.04 Vesikulho kaatuu:** jos F-tarkastelu kääntää vesikulhon ylösalaisin, vesi kaatuu (Hups!, hahmo kiroaa): Märät kengät 60 s (liike −11 %), Kylmä 30 s, Vihainen 20 s
   (kestävyys kuluu 20 % nopeammin, ärtynyt ääni 5–10 s välein). Liikkuessa hahmo kantaa vesikulhoa vaakasuorassa, joten juoksu ei kaada.
 - **v3.03 Routaluola:** tunnelmasilmukka ja satunnaisäänet `satunnainen_routaluola` (_0, _1) 15 % hiljempaa.
