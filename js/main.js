@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.10';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.11';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -148,14 +148,14 @@ function startIntro(hold){if(P.inDun)return;intro={t:0,a0:Math.random()*TAU,hold
 const INTRO_FADE=2.5,INTRO_SKIP_FADE=.3,ISND={L:[],one:[]};
 function introSndStart(){introSndStop(.05);for(const ev of ['tuuli','linnut']){const h=mSnd('uusi_maailma',ev,{loop:true,cat:'amb',menu:1});if(h)ISND.L.push(h);}const w=mSnd('uusi_maailma','pilvet_wuush');if(w)ISND.one.push(w);}
 function introSndStop(f){for(const h of ISND.L)mStop(h,f);ISND.L.length=0;if(f<=INTRO_SKIP_FADE)for(const h of ISND.one)mStop(h,Math.min(f,.15));ISND.one.length=0;}
-function endIntro(nat){if(!intro)return;introGrassVis(true);introSndStop(nat?INTRO_FADE:INTRO_SKIP_FADE);intro=null;introCloudsClear();const el=$('#introT');if(el){el.classList.add('out');el.classList.remove('on');setTimeout(()=>{if(!intro)el.hidden=true;},900);}
+function endIntro(nat){if(!intro)return;introGrassVis(true);introCarpetClear();introSndStop(nat?INTRO_FADE:INTRO_SKIP_FADE);intro=null;introCloudsClear();const el=$('#introT');if(el){el.classList.add('out');el.classList.remove('on');setTimeout(()=>{if(!intro)el.hidden=true;},900);}
   if(state==='intro'){state='play';$('#hud').hidden=false;}if(typeof tutMaybeStart==='function')tutMaybeStart();}   // v2.71 opastus alkulennon jälkeen
 function introCam(dt){if(!intro)return;if(!intro.hold)intro.t+=Math.min(dt,.05);const t=intro.t,px=P.pos.x,py=P.pos.y,pz=P.pos.z;
   _iP.copy(camera.position);_iQ.copy(camera.quaternion);   // tavallinen kolmannen persoonan kamera (updateCamera juuri laski)
   const a=intro.a0+t*.11;_iH.set(px+Math.cos(a)*80,175,pz+Math.sin(a)*80);camera.position.copy(_iH);camera.lookAt(px,py,pz);_iHQ.copy(camera.quaternion);
   let k=0;if(t>4){const u=Math.min(1,(t-4)/2);k=u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;}
   camera.position.lerpVectors(_iH,_iP,k);camera.quaternion.copy(_iHQ).slerp(_iQ,k);
-  if(k<1){const nf=scene.fog.near,ff=scene.fog.far;scene.fog.near=lerp(260,nf,k);scene.fog.far=lerp(700,ff,k);updateChunkVis();}
+  if(k<1){const nf=scene.fog.near,ff=scene.fog.far,E=introEdge(px,py,pz,k);scene.fog.near=lerp(E.n,nf,k);scene.fog.far=lerp(E.f,ff,k);updateChunkVis();}   // v3.10 piirtorajan sumennus (matalat esiasetukset)
   if(t>=4.3&&$('#introT').classList.contains('on')){$('#introT').classList.remove('on');$('#introT').classList.add('out');}
   if(t>=5&&!intro.dsc){intro.dsc=1;   /* v2.99 syöksyääni 1 s ennen paikalleen asettumista (ennen 2 s) */const h=mSnd('uusi_maailma','kamera_laskeutuu');if(h)ISND.one.push(h);}   // v2.52 syöksyn ääni
   if(!SET.oldLoad)introGrassVis(camera.position.y-py<INTRO_GRASS_H);   // v3.10 ylhäältä ei ruohoa
@@ -209,6 +209,27 @@ function introVeil(on,instant){let v=$('#cloudVeil');if(on){if(!v){v=document.cr
   if(!v)return;if(instant){v.remove();return;}void v.offsetWidth;v.className='open';setTimeout(()=>{if(v.parentNode)v.remove();},3000);}
 // 3D-lisäpilvet: sprite-ryppäät kameran edessä, vasen puoli liukuu vasemmalle ja oikea oikealle 2 s:ssa, häipyen
 let IC=null;
+/* v3.10 käyttäjä: INTRON PIIRTORAJAN SUMENNUS + PILVIMATTO matalilla esiasetuksilla. Ylhäältä näkyi terävä raja, johon puut ja muut kohteet loppuvat
+   (piirtoetäisyys VIS_R.tree × RDK). Voimakkuus IE_K: Low–Medium- täysi, Medium ~0,8, Medium+ ~0,5, High ~0,2, High+/Ultra 0. Sumu alkaa ennen rajaa ja voimistuu
+   kauemmas (pelaajan kohta pysyy kirkkaana), ja rajan takana on pehmeä pilvimatto (taso 16 m maan yllä pelaajan kohdalla, reikä = puiden piirtoraja, häipyy syöksyssä).
+   Intron ajan puut rajataan pelaajan ympäriltä (introEdgeOn → updateChunkVis), jotta reikä ja raja osuvat yhteen (yläkamera on 80 m sivussa). */
+const IE={m:null,k:0};
+function introEdgeK(){if(P.inDun)return 0;const R=VIS_R.tree*RDK;return clamp((230-R)/120,0,1);}
+function introEdge(px,py,pz,k){const ek=introEdgeK();if(ek<=0){introCarpet(0);return {n:260,f:700};}
+  const h=Math.max(20,camera.position.y-py),R=VIS_R.tree*RDK,dP=Math.hypot(camera.position.x-px,camera.position.z-pz,h),
+    n=Math.max(dP*.92,Math.hypot(R*.6,h)),f=Math.max(dP+80,Math.hypot(R*1.2,h)+40);
+  introCarpet(ek*(1-clamp(k*1.6,0,1)),px,py,pz,R);return {n:lerp(260,n,ek),f:lerp(700,f,ek)};}
+function introEdgeOn(){return state==='intro'&&!!intro&&introEdgeK()>0;}   // updateChunkVis: puut rajataan pelaajan ympäriltä (reikä osuu rajaan)
+function introCarpet(a,px,py,pz,R){if(a<=.01){if(IE.m)IE.m.visible=false;return;}const S=1400,Rr=Math.round(Math.max(R,85));   /* Low: reikä vähintään 85 m (puuton maa reunalla näyttää luontevalta) */
+  if(IE.m&&IE.R!==Rr)introCarpetClear();
+  if(!IE.m){const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d'),rnd=mulberry32(4711);
+    for(let i=0;i<460;i++){const r=12+rnd()*30,x=rnd()*512,y=rnd()*512,gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(255,255,255,${.6+rnd()*.35})`);gr.addColorStop(.6,'rgba(246,248,252,.4)');gr.addColorStop(1,'rgba(240,244,250,0)');g.fillStyle=gr;g.fillRect(0,0,512,512);}
+    g.globalCompositeOperation='destination-over';g.fillStyle='rgba(238,242,248,.8)';g.fillRect(0,0,512,512);   // pohja: ei aukkoja maton läpi
+    const h=Rr/(S/2),m=g.createRadialGradient(256,256,0,256,256,256);m.addColorStop(0,'rgba(0,0,0,0)');m.addColorStop(h*.72,'rgba(0,0,0,0)');m.addColorStop(Math.min(.8,h*1.02),'rgba(0,0,0,1)');
+    m.addColorStop(.88,'rgba(0,0,0,1)');m.addColorStop(1,'rgba(0,0,0,0)');g.globalCompositeOperation='destination-in';g.fillStyle=m;g.fillRect(0,0,512,512);
+    const mt=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false,fog:false});IE.m=new THREE.Mesh(new THREE.PlaneGeometry(S,S),mt);IE.m.rotation.x=-Math.PI/2;IE.m.renderOrder=5;IE.R=Rr;scene.add(IE.m);}
+  IE.m.visible=true;IE.m.position.set(px,py+16,pz);IE.m.material.opacity=Math.min(1,a);const t=.55+.45*lightK;IE.m.material.color.setRGB(t,t,t*1.02).lerp(scene.fog.color,.25);}
+function introCarpetClear(){if(!IE.m)return;scene.remove(IE.m);IE.m.geometry.dispose();IE.m.material.map.dispose();IE.m.material.dispose();IE.m=null;}
 function introCloudTex(){if(introCloudTex.t)return introCloudTex.t;const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');
   for(let i=0;i<26;i++){const r=28+Math.random()*34,x=r+8+Math.random()*(240-2*r-16),y=r+30+Math.random()*(200-2*r-30),gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(.6,'rgba(245,248,255,.5)');gr.addColorStop(1,'rgba(240,244,250,0)');g.fillStyle=gr;g.fillRect(0,0,256,256);}
   return introCloudTex.t=new THREE.CanvasTexture(c);}

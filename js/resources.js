@@ -199,7 +199,7 @@ function cullStatics(){const cx=camera.position.x,cz=camera.position.z,f=scene.f
   for(const o of statics.children){let c=o.userData.cs;if(!c){if(o.isInstancedMesh){_sb.makeEmpty();for(let i=0;i<o.count;i++){o.getMatrixAt(i,_m4);_sb.expandByPoint(_sv.setFromMatrixPosition(_m4));}}else _sb.setFromObject(o);if(_sb.isEmpty()){o.userData.cs=c={x:o.position.x,z:o.position.z,r:1,dun:false};}else{_sb.getCenter(_sv);c=o.userData.cs={x:_sv.x,z:_sv.z,r:Math.min(400,_sb.getSize(_sv).length()/2),dun:_sb.min.y>DUN.y-5&&_sb.max.y<DUN.y+20&&Math.abs(_sb.min.x)>HALF+50};}}
     const vis=o.userData.mg?false:c.dun?P.inDun:(!P.inDun&&dist2(cx,cz,c.x,c.z)<(f+c.r)*(f+c.r));if(o.visible!==vis)o.visible=vis;}}
 function updateChunkVis(){statT-=1/30;if(statT<=0){statT=.5;cullStatics();mergeTick();if(typeof bmTick==='function')bmTick();}else if(bmDirty&&typeof bmTick==='function')bmTick();terrLodTick();
-  const cx=camera.position.x,cz=camera.position.z,f=scene.fog.far;
+  const ie=typeof introEdgeOn==='function'&&introEdgeOn(),cx=ie?P.pos.x:camera.position.x,cz=ie?P.pos.z:camera.position.z,f=ie?1e4:scene.fog.far;   // v3.10 intron pilvimatto: raja pelaajan ympäriltä
   const lod=+SET.treeLod||0,h=CHS/2,dy=typeof introLight==='function'&&introLight()?Math.max(0,camera.position.y-P.pos.y):0,dy2=dy*dy;   // v3.10 intro: LOD 3D-etäisyydestä (yläkamerassa kevyt)
   for(const im of CHUNK_IMS){const R=Math.min(f,im.userData.vis*RDK*(im.userData.vis<80?DETK:1))+CHS*.72,on=im.count>0&&!P.inDun&&dist2(cx,cz,im.userData.cx,im.userData.cz)<R*R;im.userData.on=on;
     const low=im.userData.low;if(!low){im.visible=on;continue;}

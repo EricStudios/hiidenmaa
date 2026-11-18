@@ -592,6 +592,10 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.11: intron piirtorajan sumennus + pilvimatto matalilla esiasetuksilla (voimakkuus piirtoetäisyyden mukaan, raja pelaajan ympäriltä)',()=>{
+    const r0=RDK;try{RDK=60/165;const lo=introEdgeK();RDK=520/165;const hi=introEdgeK();RDK=1;const me=introEdgeK();
+      const ok=lo===1&&hi===0&&me>.5&&me<1&&/introEdge\(/.test(introCam.toString())&&/introCarpetClear/.test(endIntro.toString())&&/introEdgeOn/.test(updateChunkVis.toString());
+      return ok||`lo ${lo} hi ${hi} me ${me}`;}finally{RDK=r0;}});
   t('v3.10: maailma valmiiksi latausruudussa (ldPrewarm), intron kevyt yläkamera (LOD 3D-etäisyydestä, ei ruohoa ylhäällä), vanha tapa asetuksena (Ohjaus › Ammattilaisille)',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     ck('esilataus',typeof ldPrewarm==='function'&&/ldPrewarm\(\)/.test(worldLoad.toString())&&/ldPrewarm\(\)/.test(saveLoad.toString())&&/renderer\.compile/.test(ldPrewarm.toString()));

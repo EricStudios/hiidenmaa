@@ -3,8 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.10, 18.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.11, 18.11.2026)
 
+- **Versio 3.11** – intron piirtorajan sumennus ja pilvimatto matalilla esiasetuksilla. PR #49 sisältää v3.08–v3.11.
 - **Versio 3.10** – maailma valmiiksi latausruudussa + kevyt intron yläkamera, vanha tapa asetuksena (ks. versioloki). PR #49 sisältää v3.08–v3.10.
 - **Versio 3.09** – maailmalistan Pelaat nyt / Viimeksi pelattu -merkinnät.
 - **Versio 3.08** – käyttäjän 26 kohdan lista + 4 lisäystä (pihkan täyttyminen, kartan Sulje-teksti, 3 vihjeporrasta, tallennus suljettaessa), ks. versioloki v3.08.
@@ -413,6 +414,13 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.11 (intron piirtorajan sumennus ja pilvimatto – käyttäjän pyyntö, ratkaisu päätetty itse)
+- Matalilla esiasetuksilla yläkamerasta näkyi terävä raja, johon puut loppuvat. Voimakkuus `introEdgeK` = (230 − puiden piirtoetäisyys) / 120: Low–Medium- 1, Medium 0,83,
+  Medium+ 0,54, High 0,21, High+/Ultra 0. Intron sumu alkaa ennen rajaa ja voimistuu kauemmas (`introEdge`); rajan takana pehmeä **pilvimatto** (`introCarpet`, taso 16 m
+  pelaajan yllä, reikä = piirtoraja, vähintään 85 m), häipyy syöksyssä ja poistetaan `endIntro`:ssa. Intron ajan puut rajataan pelaajan ympäriltä (`introEdgeOn` →
+  `updateChunkVis`), koska yläkamera on 80 m sivussa eikä pelkkä etäisyyssumu erota rajaa pelaajasta. Korkeat vuoret nousevat maton läpi (näyttää vuorilta pilvien yllä).
+- Mittaus Low: intro keskim. 4,9 ms / ruutu, pahin 10 ms. Tarkistus: v3.11-rivi.
 
 ### v3.10 (maailma valmiiksi latausruudussa – käyttäjän pyyntö ja hyväksymä suunnitelma)
 - **Esilataus** `ldPrewarm` (main.js) latausruudun lopussa (`worldLoad` + `saveLoad`): pelikamera ja intron puoliväli piirretään kerran latausruudun takana, kaikki varjostimet
