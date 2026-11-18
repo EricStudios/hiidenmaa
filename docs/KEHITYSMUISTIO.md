@@ -7,7 +7,9 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
 - **Versio 3.05** (v3.05: käyttäjän äänierä – pata, pihka, mokat, F-ihmettely, sulatin, ahjo, vesi_kaato; v3.04: vesikulho kaatuu F-tarkastelussa → Märät kengät, Kylmä, Vihainen + kirous-/vihainen-äänet; v3.03: Routaluolan tunnelma ja satunnaisäänet _0/_1 −15 %, villikauran id-korjaus), valikossa **Early Access 1.1** (käyttäjä vaihtoi 1.0 → 1.1 v3.02; muuttuu vain käyttäjän pyynnöstä). Haara `claude/hiidenmaa-survival-game-fmxt0m`,
   PR #46 (v3.00–v3.04) yhdistetty; v3.05 uudessa PR:ssä. Pages päivittyy vasta Mergen jälkeen.
-- **Seuraava työ (käyttäjä):** puuttuvien äänien lisääminen. Uudet paikkamerkit v3.02: `p/rakentaminen/` pata_aloitus, pata_kiehuu, pata_valmis,
+- **SEURAAVAKSI (käyttäjä 18.11.):** Ideajono › "⏭️ SEURAAVAT ISOT TYÖT": lista A (16 kohtaa) + onkiminen, sitten uusi saari; EA 2.0; uudet äänet `sounds2/`.
+  Kysymyksiä kesken (uusiutuminen 5–12 ym.) – jatka niistä.
+- **Aiempi seuraava työ:** puuttuvien äänien lisääminen. Uudet paikkamerkit v3.02: `p/rakentaminen/` pata_aloitus, pata_kiehuu, pata_valmis,
   pata_valmis_kansi, kansi_kiinni, kansi_auki; `extra/raw/pihka/` kaiverrus, kulho_kiinni, kulho_taytto (siirretty kaytto-ryhmästä) ja uusi tippa.
   v3.04 `extra/raw/moka/` kirous ja vihainen. Myöhemmin ehkä onkiminen (käyttäjä).
 - **Isot järjestelmät v3.02:** keittopata (`js/pot.js`, taso 10, kansi, pilaantuminen, pataruoat), hiilos kaikkiin tulipaikkoihin (10 min), ruokien nerffi +
@@ -3998,6 +4000,67 @@ kanssa; (3) Ultra-asetuksella jopa ~830 piirtokutsua.
 - Ensimmäinen pelattava versio yhtenä HTML-tiedostona.
 
 ## Ideajono
+
+### ⏭️ SEURAAVAT ISOT TYÖT (käyttäjä 18.11. – suunnitelma, EI vielä toteutettu; jatketaan kysymyksistä)
+**Työjärjestys (käyttäjä):** 1) lista A (16 kohtaa nykyiseen peliin) + onkimispäivitys (B) → 2) uusi saari (C) myöhemmin. **Early Access 2.0** isoon päivitykseen.
+**Työtapa (käyttäjä, kohta A6):** kysy KAIKKI tarvittavat kysymykset alussa, keskeytä työ enintään 2 kertaa. **Jatkossa uudet äänet kansioon `sounds2/`** (käyttäjä).
+Lue tämä osio ja vastaukset ennen jatkamista; kysymättä on vielä uusiutumiskysymykset 5–12 ja listan A/B tarkennukset (ks. "Avoimet kysymykset").
+
+#### A. Lista nykyiseen peliin (16 kohtaa)
+1. **Jäätären ulottuvuus (Routaluola):** jäälätäköitä – niissä kitka lähes nolla, pelaaja liukuu; pitkillä käytävillä pitkiäkin lätäköitä.
+2. **Onkiminen** (ks. B): vaikeaa, kala 1–5 min välein; 1 raaka kala ruokkii kuten puolukat (h 5), paistettuna kuin paistettu pienriista (h 25). Äänet extra-kansioon omaan kansioonsa
+   (huom. jatkossa uudet äänet `sounds2/`:een – tarkista käyttäjältä, kumpi koskee onkimisen ääniä).
+3. **Ultra:** kellertäviä rikkakasveja/heiniä, pituus nykyisestä ruohosta pelaajan pituuteen asti; heilahtavat, kun pelaaja kävelee läpi.
+4. **Kantokyky:** alussa 60; kaksi ensimmäistä tasonnousua antavat hieman enemmän, sitten tasaisesti.
+5. **Mokat ja pata:** kaatuneen veden kirous omana paikkamerkkinään 2 s viiveellä; vihainen-tilan äänet alkavat 6 s päästä; Märät kengät **−22 %** (nyt −11 %);
+   keittopatanuotio vaatii työpenkin lähelle (nyt noBench); **tulen silmukkaääni** sulavammaksi ja pätkät eri kohdista (ettei toistu samanlaisena).
+6. Kysy alussa kaikki, keskeytä enintään 2 kertaa (työtapa yllä).
+7. **Ruoho** harvemmin kasoina. **Villikaura:** malli kevyemmäksi ja tunnistettavammaksi, harvinaisempi ja vain tietyllä alueella biomissa; uusiutuu.
+8. **Uusiutuminen** – tarkistus ja uusi logiikka (vastaukset alla, kysymykset 5–12 kysymättä).
+9. **Kantokyky enintään 200** (taso 30 + reppu täysin päivitetty) – tasojen, repun ja muiden lisien jako uusiksi.
+10. **Rakennusvalikon tietoikkuna:** aukeaa puolet nopeammin (1 s), luotettavasti aina kun hiiri on kortin päällä; ikkunassa "Paina [vapaa näppäin]" → ikkuna jää auki luettavaksi.
+11. **Työpisteiden valikot teemoitettuina:** eri taustat (tummempi puu, tumma kivinen – luettavuus säilyy). Sama valikko (esim. reppu) saa taustan sen mukaan, minkä työpisteen kautta se avattiin (ahjo, työpenkki…).
+12. **Sulatusuunin oma valikko** (tuttu "uuni"-käyttöliittymä): jono 5 sulatettavaa järjestyksessä, polttoainepaikka, **lämpömittari** (sulatus alkaa vasta tietyssä lämmössä,
+    ennen sitä sulatettavia ei voi laittaa), mittarit polttoaineelle ja valmistumiselle, arvioitu aika.
+13. **Pata ja vesi:** moni keittoresepti vaatii ensin veden vesikulhosta (vesi kuluu). Nyt vesikulho vaaditaan sienikeitossa, puolukkapuurossa ja riistakeitossa – laajennetaan.
+14. **Veden kerääjä** (kupari + rauta, iso saavi ulkona): sateella täyttyy 10 %/min, täynnä täyttää vesikulhon 20 kertaa, purettaessa vesi menetetään.
+15. **Keittopatanuotion polttoaine** enintään 10 min paloaika; varmista, että polttoaineen lisäys toimii.
+16. **Asetus: toimintojen ilmoitukset pois** (keräys, asettaminen, toiminnot); tärkeät ennalta-arvaamattomat ilmoitukset sekä riimukivien ja kylttien tekstit näkyvät aina.
+
+#### A8. Uusiutuminen – nykyinen toiminta (selitetty käyttäjälle) ja vastaukset
+- Nyt: puut kerran yössä 100 m säteellä ±5 m samaan biomiin; kivet/malmit 5 vrk samaan kohtaan; oksat ja puolukat kun pelaaja ~175 m päässä (tarkistus 1/min); muut poimittavat
+  5–20 min ajastin, ±3 m, pelaaja yli 40 m päässä, nukkuessa kaikki kerralla; ei rakennusten lähelle (15 m, työpenkki 26 m); ulottuvuuksien olennot 20 min jono; arkut eivät täyty.
+- **Vastaus 1 (puut):** vain kaadetut puut, melkein samaan kohtaan, **vain nukkuessa** (nukkumisen aikana generoituu), **koko kartalla** (ei 100 m rajaa), arvonta: **20 %/yö** per puu.
+  **Uusi: viljely** – 5 % puista pudottaa siemenen; siemen toisessa kädessä + kuokka, kyykyssä, katso kohtaan ja lyö → istuttaa (ei kuokan normaalia toimintoa); taimi kasvaa
+  puuksi nukkuessa **30 %** todennäköisyydellä joka nukkumiskerralla. **Uusi: E-toimintojen animaatio** – kaikissa E-toiminnoissa (avaus, otto, aktivointi) käsi liikahtaa pikkuisen eteen ja takaisin.
+- **Vastaus 2:** ±5 m samaan biomiin (ennallaan).
+- **Vastaus 3 (kivet):** 5 vrk jälkeen, arvotaan seuraavan nukkumisen yhteydessä (kuten puut, todennäköisyys – tarkenna).
+- **Vastaus 4 (oksat, puolukat):** ajastin + kaukana (suositus: vähintään 10 min ja yli 60 m), mutta arvonta samoilla todennäköisyyksillä kuin puilla.
+- **Kysymättä (5–12):** muut poimittavat (sienet, kivikasat, piikivi, hiekka, villikaura), rakennusten suojasäde, nukkumisen kerta-uusiutuminen, villikauran alue/harvinaisuus,
+  ulottuvuuksien olennot (20 min), maailman eläinten syntymistahti, arkkujen täyttyminen, tukkien katoaminen.
+
+#### B. Onkimispäivitys (nykyiseen peliin; vastaukset 1–10)
+- **Välineet:** Onki (työpenkki: puu + naru) → Kuparivapa (ahjo) → **Hiidenvapa** (3 hiidenkiven sirua + rauta; harvinaisimmat kalat).
+- **Syötti vapaaehtoinen:** ilman syöttiä tärppi hitaammin. **Mato:** jokainen maan muokkaus antaa 2 % todennäköisyydellä madon; mato koukkuun, sen voi menettää ilman kalaa. Myös marja ja pienriistan liha (isot kalat).
+- **Mekaniikka:** heitto (pito = pidempi), koho, tärppi → vasen hiiri ~0,6 s ikkunassa; iso kala: väsytys (kireyspalkki, kestävyys, siima voi katketa).
+- **Vesistöt nimetään kalalajin mukaan** (esim. Haukilampi, Lohiluoto, Silakkasalmi, Ruutanasuo) – kartalla tyylikkäästi kuten muut nimet, ja vesistön äärellä nimi näkyy hillitysti.
+  Kalat vesistön mukaan: järvi ahven/hauki/lahna, meri silakka/turska/lohi harvoin, suolampi ruutana/suonsilmä, tunturijärvi nieriä/harjus, Routaluolan railo jääkala.
+- **Aika ja sää – iso vaikutus:** osa kaloista vain tiettyyn aikaan tai säällä (kuutamohauki yöllä, lohi aamuhämärässä, turska myrskyssä).
+- **Ruoka:** paisto nuotiolla/grillillä, keittopadassa kalakeitto/lohikeitto/kalakukko, **savustin** (savukala ei pilaannu, kevyt). Ravintoarvot A2:n mukaan (1 kala = puolukat, paistettu = pienpaisti; isommat kalat enemmän – tarkenna).
+- **Muu saalis:** vanha saapas (kirous), pulloposti (vihje hukkuneeseen arkkuun), **ruostunut avain** (avaa hukkuneen arkun rannalla/luodolla), harvoin **hiidenkiven siru**
+  (ei muutu hiidenkiveksi – 9 kiven määrä säilyy; siruista Hiidenvapa).
+- **Eteneminen:** tavoitteet (ensimmäinen kala, hauki, täytä kirja), **Kalastajan kirja** (lajit + suurimmat painot), saavutus Kalamies (25 kalaa, +kantokyky), XP.
+- **Koko:** jokaisella kalalla paino (esim. hauki 0,8–9 kg), "Uusi ennätys!", **kalanaulakko** (rakennusosa).
+- **Lisät:** laituri, katiska (kerää hiljalleen kuten pihkakulho), pilkkiminen (avanto kirveellä jäähän), **vene 3 kokoa** (ruuhi 1 hlö, soutuvene 2 + arkku, haapio 3 + purje):
+  rakennetaan työpenkin alueella rannalle, pysähtyy rantaan, rannalla voi työntää hitaasti, keinuu aaltojen mukaan (`waveAt`), vesi ei tule sisään, ulapalla omat kalat ja yllätys (luoto, sumu).
+  Käyttäjä (viimeisin): "onkimisupdate veneen ja laiturin kanssa" nykyiseen peliin – aiemmin vene/laituri saarelle; **tarkista**. Pilkkimistä varten nykyistä karttaa EI muuteta isosti (tarkenna paikat).
+
+#### C. Uusi saari (myöhemmin – älä tee vielä)
+- Nykyiseen karttaan ei isoja muutoksia. **Kalmanvartijan kukistamisen jälkeen alttarille portaali uudelle saarelle**, joka on **3× nykyistä isompi** ja vaihtelee seedin ja
+  karttavalinnan mukaan. Uusia biomeita, puita, metsiä, kasvillisuutta, luolia (myös jääluolasto ja tunturijärvet), työpistevariaatioita ja tekemistä; vene ja laituri voivat tulla sinne.
+- **DEV:** portaali auki suoraan / teleporttaus saarelle.
+- Nimiehdotukset (ei vielä valittu): Kaukomaa, Pohjola, Ukonsaari, Utuluoto. Kysymättä 10 kysymystä (nimi, teema, biomit, työpisteet, tekeminen, materiaalit, uhat/pomo,
+  kulku ja paluu, seed-vaihtelu, julkaisu/EA 2.0).
 
 ### Ruokapäivitys (suunniteltu 18.11.) – ruoanlaitto TEHTY v3.01, keittopata (idea 3) + hiilos + ruokanerffi + Kylläinen (≈ idea 12) TEHTY v3.02; muut lisäideat odottavat valintaa
 - Nuotio 2 paikkaa (ruoka kypsyy näkyvästi kivien päällä), grillinuotio 6 paikkaa (2 × 3 ritilällä), grillillä kypsyy 30 % nopeammin ja palaa hiileksi vasta

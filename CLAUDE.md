@@ -99,6 +99,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
 ## Äänet
 
 - **Älä koskaan tee tai generoi ääniä itse** – vain kansiot ja paikkamerkit; käyttäjä tuo äänet (v2.22).
+- **Jatkossa uudet äänet ja paikkamerkit kansioon `sounds2/`** (käyttäjä 18.11.; rakenne suunnitellaan, kun ensimmäiset uudet äänet tulevat – ks. kehitysmuistio › Ideajono).
 - Työtapa ja säännöt: `docs/KEHITYSMUISTIO.md` → "Äänisuunnitelma". Projektit omissa kansioissaan `sounds/<projekti>/` (`raw/`, `valmiit/`, oma lista):
   `olennot_aanet/` (AANILISTA.md), `pelaaja_1_liike/`, `pelaaja_2_toiminnot/`, `pelaaja_3_aanet/`, v2.98 `extra/` (osa 4: F-ihmettely, v3.02 pihkankeräys `pihka/`) (v2.25; avaimet `p/<ryhmä>/…`, työkalun `P_PARTS`; **yksi numeroton paikkamerkki per ääni**, lisäversiot `_1` …; listat `AANILISTA_OSA<n>.csv` + `sounds/AANILISTA_PELAAJA.xlsx`) ja `olennot_toiminnot/` (ryhmäkansiot `raw/<ryhmä>/` → `valmiit/<ryhmä>_valmis/`, AANILISTA_TOIMINNOT.md; kerrostuvissa ryhmissä vain
   kerrokset kuten tömistys/kalina – pohjaääni kaksi- tai nelijalkaisilta); `sounds/manifest.json` yhteinen (`f`-polku).
