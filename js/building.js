@@ -202,9 +202,9 @@ function validPlace(t,x,y,z,rot,f=0){
         else if(c.minX<b.maxX+.15&&c.maxX>b.minX-.15&&c.minZ<b.maxZ+.15&&c.maxZ>b.minZ-.15){lastInvalid='Työpenkki ei mahdu tähän – tiellä on seinä tai esine.';return false;}}
       const px=clamp(P.pos.x,b.minX,b.maxX),pz=clamp(P.pos.z,b.minZ,b.maxZ);if(dist2(px,pz,P.pos.x,P.pos.z)<.16){lastInvalid='Seisot tiellä.';return false;}}
     if(!losClear(P.pos.x,P.pos.y+1.3,P.pos.z,x,y+.6,z,true)){lastInvalid='Työpenkki ei mahdu tähän – seinä on tiellä.';return false;}
-    for(const [id,n] of Object.entries(PIECES[t].req))if(invCount(id)<n){lastInvalid=`Tarvitset: ${reqText(PIECES[t].req)}`;return false;}
+    if(!devFree())for(const [id,n] of Object.entries(PIECES[t].req))if(invCount(id)<n){lastInvalid=`Tarvitset: ${reqText(PIECES[t].req)}`;return false;}
     return true;}
-  for(const [id,n] of Object.entries(def.req))if(invCount(id)<n){lastInvalid=`Tarvitset: ${reqText(def.req)}`;return false;}
+  if(!devFree())for(const [id,n] of Object.entries(def.req))if(invCount(id)<n){lastInvalid=`Tarvitset: ${reqText(def.req)}`;return false;}
   if(!def.noBench&&!nearPiece('tyopenkki',x,z,BENCH_R)){lastInvalid=pieces.some(p=>p.t==='tyopenkki')?'Rakenna työpenkin alueelle (oranssi raja).':'Rakenna ensin työpenkki.';return false;}
   if(def.water){if(y>-.25){lastInvalid='Katiska asetetaan veteen (vähintään 0,3 m syvään).';return false;}}   // v3.06
   else if(y<-.4&&bt(t)!=='lattia'&&bt(t)!=='tervaslattia'&&!def.col){lastInvalid='Liian syvällä vedessä.';return false;}
@@ -226,7 +226,7 @@ function placeBuild(){
   if(!ghostPos||!ghost||!ghost.visible){if(P.inDun)msg('Tähtää lattiaan – työpenkki asetetaan vapaalle lattialle.','warn');return;}
   if(!ghostOk){msg(lastInvalid||'Ei voi rakentaa tähän.','warn');return;}
   const def=PIECES[buildSel];if(def.lvl&&playerLevel()<def.lvl){msg(`${def.n} aukeaa tasolla ${def.lvl}.`,'warn');return;}   // v3.02 rakennusosan tasovaatimus
-  for(const [id,n] of Object.entries(def.req))invRemove(id,n);
+  payReq(def.req);
   addPiece(buildSel,ghostPos.x,ghostPos.y,ghostPos.z,ghostRot,undefined,undefined,poseOf(buildSel));bump('built');xpFirst('b_'+buildSel,4);sfx('build');plSnd('rakentaminen','asetus',{pos:{x:ghostPos.x,y:ghostPos.y,z:ghostPos.z}});burst(ghostPos.x,ghostPos.y+.5,ghostPos.z,0x8a5a32,6,2);
 }
 // Vasaralla korjaus: kuluma pois, maksaa vauriota vastaavan osuuden rakennusaineista (vähintään 1).
@@ -235,8 +235,8 @@ function repairLooked(){
   const w=curWeapon();if(w.cat!=='hammer')return;const p=lookedPiece();if(!p)return;
   const max=PIECES[p.t].hp;if(p.hp>=max-.5){msg(`${PIECES[p.t].n} on ehjä.`);return;}
   const frac=1-p.hp/max,cost={};for(const [id,n] of Object.entries(PIECES[p.t].req))cost[id]=Math.max(1,Math.ceil(n*frac));
-  for(const [id,n] of Object.entries(cost))if(invCount(id)<n){msg(`Korjaukseen tarvitaan: ${reqText(cost)}`,'warn');return;}
-  for(const [id,n] of Object.entries(cost))invRemove(id,n);p.hp=max;setPieceDamage(p);sfx('build');plSnd('rakentaminen','korjaus');burst(p.x,p.y+1,p.z,0xe8c070,8,3);msg(`${PIECES[p.t].n} korjattu.`,'loot');}
+  if(!hasReq(cost)){msg(`Korjaukseen tarvitaan: ${reqText(cost)}`,'warn');return;}
+  payReq(cost);p.hp=max;setPieceDamage(p);sfx('build');plSnd('rakentaminen','korjaus');burst(p.x,p.y+1,p.z,0xe8c070,8,3);msg(`${PIECES[p.t].n} korjattu.`,'loot');}
 function removeLooked(){
   const w=curWeapon();if(w.cat!=='hammer'){return;}
   const {o,d}=camRay();raycaster.set(o,d);raycaster.far=camDist+7;const hits=raycaster.intersectObjects(pieceRoots,true);if(!hits.length)return;

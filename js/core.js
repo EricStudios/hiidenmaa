@@ -9,7 +9,11 @@ const DEV=(()=>{try{if(/[?&]dev=1/.test(location.search))localStorage.setItem('h
 // lvl = korkein taso, weight = ei painorajaa. Oletus: aiemmat DEV-edut päällä, uudet pois.
 // v1.91: bossLine = pomohuoneen ääriviiva ulottuvuudessa (Ö-valikko). v1.92: route = reittiviiva pomohuoneeseen (Ö), noclip = seinien ja
 // esineiden läpi, lockTW = aika ja sää lukittu, freeze = maailma pysähtyy (vain pelaaja liikkuu) – Ä-valikon isot napit.
-const DEVF=(()=>{const d={spd:1,tspd:1,god:0,food:0,stam:1,lvl:1,weight:1,fly:0,bossLine:0,route:0,noclip:0,lockTW:0,freeze:0,unseen:0,perf:0};if(!DEV)return d;try{Object.assign(d,JSON.parse(localStorage.getItem('hiidenmaa_dev')||'{}'));}catch(e){}d.spd=1;d.tspd=1;return d;})();   // v2.93 maailman ja pelin ajan nopeus alkavat aina 1×
+const DEVF=(()=>{const d={spd:1,tspd:1,free:0,god:0,food:0,stam:1,lvl:1,weight:1,fly:0,bossLine:0,route:0,noclip:0,lockTW:0,freeze:0,unseen:0,perf:0};if(!DEV)return d;try{Object.assign(d,JSON.parse(localStorage.getItem('hiidenmaa_dev')||'{}'));}catch(e){}d.spd=1;d.tspd=1;return d;})();   // v2.93 maailman ja pelin ajan nopeus alkavat aina 1×
+/* v3.08 käyttäjä: DEV › Ilmaiset materiaalit (DEVF.free) – rakentaminen, valmistus, korjaus ja päivitys eivät vaadi eivätkä kuluta aineita */
+function devFree(){return DEV&&!!DEVF.free;}
+function hasReq(req){return devFree()||Object.entries(req).every(([id,n])=>invCount(id)>=n);}
+function payReq(req){if(devFree())return;for(const [id,n] of Object.entries(req))invRemove(id,n);}
 function devOn(k){return DEV&&!!DEVF[k];}
 function saveDevF(){try{localStorage.setItem('hiidenmaa_dev',JSON.stringify(DEVF));}catch(e){}}
 

@@ -45,9 +45,22 @@ function updateBack(){const items=inv.filter(s=>s&&(!s.eq||(ITEMS[s.id].cat==='s
     if(hasArrows()){for(let i=0;i<3;i++){const a=new THREE.Group(),sh=mat(0xc9b48a);a.add(bx(.02,.72,.02,sh,0,0,0,false));a.add(bx(.045,.09,.045,mat(0x4d535c),0,-.4,0,false));
       for(const sx of[-1,1])a.add(bx(.004,.12,.05,mat(0xe8e2d2),sx*.012,.3,0,false));a.position.set((i-1)*.035,-.02+i*.02,.03);a.rotation.z=(i-1)*.04;o.add(a);}}
     o.position.set(.02,1.15,z0+.01);o.rotation.set(0,0,-.55);o.scale.setScalar(.95);backG.add(o);}
+  if(sh||bo||tl.length)backG.add(backStrap(sh,AB));   // v3.08 olkahihna
   tl.forEach(s=>{const m=makeHeld(s.id),o=new THREE.Group(),P0=backPose(s.id);o.add(m);
     _bkD.fromArray(P0.d).normalize();_bkY.fromArray(P0.y);_bkY.addScaledVector(_bkD,-_bkY.dot(_bkD)).normalize();_bkX.crossVectors(_bkY,_bkD).normalize();_bkM.makeBasis(_bkX,_bkY,_bkD);
     o.quaternion.setFromRotationMatrix(_bkM);o.position.set(P0.p[0],P0.p[1],z0+(P0.dz||0));o.scale.setScalar(.85);backG.add(o);});}
+/* v3.08 käyttäjä: OLKAHIHNA, kun selässä on kilpi, jousi tai työkalu/ase: vasemmalta olalta oikealle lantiolle edessä ja takana + olan yli.
+   Puukilpi: vaalea hihna; muut tummempi nahka; rautakilpi: nahka + metallisolki edessä. (Vasara roikkuu vyöllä – ei hihnaa yksin.) */
+const STRAP={top:[.15,1.52],bot:[-.21,.86],w:.045,t:.012};
+function backStrap(sh,AB){const g=new THREE.Group(),light=sh&&sh.id==='kilpi',m=smat(light?0xb8915e:0x4a3020),dz=AB.ch||0;
+  const x0=STRAP.top[0],y0=STRAP.top[1],x1=STRAP.bot[0],y1=STRAP.bot[1],L=Math.hypot(x0-x1,y0-y1),a=-Math.atan2(x0-x1,y0-y1);
+  for(const [z,k] of [[.15+dz,1],[-.145-dz,-1]]){const b=new THREE.Mesh(new THREE.BoxGeometry(STRAP.w,L,STRAP.t),m);b.position.set((x0+x1)/2,(y0+y1)/2,z);b.rotation.z=a;b.castShadow=true;g.add(b);
+    const e=new THREE.Mesh(new THREE.BoxGeometry(STRAP.w*1.05,STRAP.t,.07),m);e.position.set(x1-.012,y1-.01,z-k*.03);e.rotation.y=k*.5;g.add(e);}   // lantion kääre sivulle
+  const top=new THREE.Mesh(new THREE.BoxGeometry(STRAP.w,STRAP.t,.3+dz*2),m);top.position.set(x0+.01,y0+.035,0);top.rotation.z=-.25;g.add(top);
+  if(sh&&sh.id==='rautakilpi'){const mm=mat(0x9aa3ad,{metalness:.7,roughness:.35}),cy=y0-(y0-y1)*.42,cx=x0+(x1-x0)*.42,z=.15+dz+.012;
+    const fr=new THREE.Mesh(new THREE.TorusGeometry(.03,.006,4,4),mm);fr.rotation.z=Math.PI/4+a;fr.position.set(cx,cy,z);g.add(fr);
+    const pin=new THREE.Mesh(new THREE.BoxGeometry(.006,.05,.006),mm);pin.position.set(cx,cy,z+.004);pin.rotation.z=a;g.add(pin);}
+  return g;}
 const _bkD=new V3(),_bkY=new V3(),_bkX=new V3(),_bkM=new THREE.Matrix4();
 function backPose(id){const d=ITEMS[id];
   if(d.chop||id==='nuija')return{p:[.2,.82],d:[-.55,.85,0],y:[.85,.55,0]};          // terä −y → alas oikealle (sivulle)

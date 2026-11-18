@@ -336,10 +336,11 @@ window.__game={renderer,keys,G,WH,get ghost(){return{sel:buildSel,ok:ghostOk,pos
 /* v3.00 käyttäjä: Poistu pelistä (päävalikon alin nappi; v3.02 pidetään pohjassa 1 s, ks. QUIT_HOLD alla – ei enää kysymysikkunaa). Selain sallii window.close():n vain skriptin avaamille ikkunoille – muuten peli
    pysäytetään (äänet hiljaisiksi) ja näytetään lopetusruutu "voit sulkea välilehden" + Avaa peli uudelleen. */
 const QUIT={saved:false};
-function quitGame(){try{if(window.__mus)window.__mus.stop();}catch(e){}try{if(window.__AC)window.__AC.suspend();}catch(e){}state='paused';
+/* v3.08 käyttäjä: X-ruksista poistuttaessa peli tallennetaan AINA juuri ennen sulkemista samoin kuin Tallenna nyt (myös kuolleena); tulos näkyy sulkuruudussa */
+function quitGame(){let sv=null;if(started){try{sv=!!saveGame(true);if(sv)QUIT.saved=true;}catch(e){sv=false;}}try{if(window.__mus)window.__mus.stop();}catch(e){}try{if(window.__AC)window.__AC.suspend();}catch(e){}state='paused';
   try{window.close();}catch(e){}
   setTimeout(()=>{if(document.getElementById('quitScr'))return;const d=document.createElement('div');d.id='quitScr';
-    d.innerHTML='<div class="qBox"><div class="qRunes" aria-hidden="true">ᚺᛁᛁᛞᛖᚾᛗᚨᚨ</div><h2>Peli on suljettu</h2><p>Voit nyt sulkea selaimen välilehden.</p><button class="btn pri" id="bReopen">Avaa peli uudelleen</button></div>';
+    d.innerHTML='<div class="qBox"><div class="qRunes" aria-hidden="true">ᚺᛁᛁᛞᛖᚾᛗᚨᚨ</div><h2>Peli on suljettu</h2>'+(sv===true?'<p class="qSaved">Peli tallennettiin ennen sulkemista ✓</p>':sv===false?'<p class="qSaved bad">Tallennus epäonnistui!</p>':'')+'<p>Voit nyt sulkea selaimen välilehden.</p><button class="btn pri" id="bReopen">Avaa peli uudelleen</button></div>';
     document.body.appendChild(d);document.getElementById('bReopen').onclick=()=>location.reload();},250);}
 /* v3.02 käyttäjä: ei varmistusikkunaa – nappia pidetään pohjassa QUIT_HOLD (1 s); painalluksen alussa peli tallentuu heti (jos käynnissä),
    napin taustalla etenee sivuttainen palkki (--qp), irrottaminen ennen aikaa peruu. */

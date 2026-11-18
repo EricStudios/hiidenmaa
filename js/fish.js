@@ -16,7 +16,18 @@ const FISH_B={   // w: vesi, b: perusyleisyys, kg: paino, t: [aamu, päivä, ilt
   turska:{w:'sea',b:3,kg:[.8,7],t:[1.2,.7,1,1.6],wx:{myrsky:2,sade:1.4,tuuli:1.3},big:1},
   lohi:{w:'sea',b:.6,kg:[2,13],t:[2,.5,1.3,.4],wx:{sade:2,tihku:1.6,myrsky:1.3,selkea:.6},big:1},
   ruutana:{w:'bog',b:5,kg:[.1,.9],t:[1,1.4,1,.6],wx:{selkea:1.4,sade:.7}},
-  suonsilma:{w:'bog',b:1.2,kg:[.2,1.4],t:[.3,0,1,3],wx:{sumu:2.5,selkea:.8},big:1}};
+  suonsilma:{w:'bog',b:1.2,kg:[.2,1.4],t:[.3,0,1,3],wx:{sumu:2.5,selkea:.8},big:1},
+  /* v3.08 käyttäjä: 10 uutta lajia (järvet 6, meri 3, suo 1); vesien nimet pysyvät ennallaan (WB_LAKE/WB_SEAN-arvonta ei muutu) */
+  kuha:{w:'lake',b:1.5,kg:[.4,6],t:[1.5,.5,1.8,1.4],wx:{pilvi:1.4,tihku:1.3,selkea:.7},big:1},
+  made:{w:'lake',b:.8,kg:[.3,3],t:[.2,.1,.8,3],wx:{sade:1.3,myrsky:1.4,sumu:1.2,lumi:1.5},big:1},
+  muikku:{w:'lake',b:5,kg:[.02,.12],t:[1,1.2,1.3,.8],wx:{}},
+  sarki:{w:'lake',b:6,kg:[.05,.5],t:[1.2,1.3,1,.4],wx:{selkea:1.1}},
+  kiiski:{w:'lake',b:3,kg:[.02,.15],t:[1,1,1,1],wx:{pilvi:1.2}},
+  toutain:{w:'lake',b:.7,kg:[1,8],t:[1.2,1.4,1,.4],wx:{selkea:1.3},big:1},
+  siika:{w:'sea',b:2,kg:[.3,3],t:[1.4,1,1,.6],wx:{tuuli:1.2}},
+  kampela:{w:'sea',b:2.5,kg:[.2,1.5],t:[.8,1.2,1,.8],wx:{}},
+  meritaimen:{w:'sea',b:.8,kg:[1,10],t:[1.8,.6,1.4,.6],wx:{sade:1.5,tihku:1.3,tuuli:1.2},big:1},
+  suutari:{w:'bog',b:2,kg:[.3,2.5],t:[1,.8,1.3,1.2],wx:{sade:1.3,pilvi:1.2},big:1}};
 const FISH_PH=['aamulla','päivällä','illalla','yöllä'],FISH_WXN={selkea:'selkeällä',pilvi:'pilvisellä',tuuli:'tuulella',tihku:'tihkusateella',sade:'sateella',myrsky:'myrskyllä',sumu:'sumussa',lumi:'lumisateella'};
 const FISH_WAIT=[60,300],FISH_MIN=30,FISH_BAIT_K=.75,FISH_WIN=.6,FISH_CAST=[3,16],FISH_NAME_K=1.6,FISH_STEAL=.08,FISH_KEEP_R=5;
 const ROD_LEN=2.05;   // vavan pituus (models.js)
@@ -134,7 +145,7 @@ const FISH_GOALS=[{id:'eka',t:'Ongi ensimmäinen kala',xp:10,ok:F=>fishTotal(F)>
   {id:'lajit3',t:'Ongi kolme eri lajia',xp:20,ok:F=>Object.keys(F.n).length>=3},{id:'hauki4',t:'Ongi yli 4 kg hauki',xp:25,ok:F=>(F.rec.hauki||0)>4},
   {id:'lohi',t:'Ongi lohi merestä',xp:30,ok:F=>!!F.n.lohi},{id:'suonsilma',t:'Ongi suonsilmä suolammesta yöllä',xp:30,ok:F=>!!F.n.suonsilma},
   {id:'vedet',t:'Löydä viisi nimettyä vettä',xp:20,ok:F=>Object.keys(F.wb).length>=5},{id:'arkku',t:'Avaa upponut arkku',xp:40,ok:F=>!!F.sunkO},
-  {id:'kaikki',t:'Ongi kaikki kahdeksan lajia',xp:60,ok:F=>Object.keys(FISH_B).every(s=>F.n[s])}];
+  {id:'kaikki',t:`Ongi kaikki ${Object.keys(FISH_B).length} lajia`,xp:60,ok:F=>Object.keys(FISH_B).every(s=>F.n[s])}];
 function fishTotal(F){return Object.values(F.n).reduce((a,b)=>a+b,0);}
 function fishGoals(){const F=fishF();for(const g of FISH_GOALS)if(!F.g[g.id]&&g.ok(F)){F.g[g.id]=1;addXp(g.xp,'kalatavoite');msg(`Kalastajan tavoite: ${g.t} (+${g.xp} XP)`,'quest');}}
 /* ---------------- 3D: koho ja siima ---------------- */
@@ -183,7 +194,7 @@ function fishBookRender(){const el=document.getElementById('fishBody');if(!el)re
       :`<tr class="na"><td><span class="ic q">?</span>???</td><td>0</td><td>–</td><td>${wt}</td><td>–</td></tr>`;}).join('');
   const ws=WBS.filter(w=>F.wb[w.id]).map(w=>`<li>${w.name} <small>(${{lake:'järvi',sea:'meri',bog:'suolampi'}[w.type]})</small></li>`).join('')||'<li class="note">Et ole vielä löytänyt nimettyjä vesiä.</li>';
   const gs=FISH_GOALS.map(g=>`<li class="${F.g[g.id]?'ok':''}">${F.g[g.id]?'✔':'○'} ${g.t} <small>+${g.xp} XP</small></li>`).join('');
-  el.innerHTML=`<p class="note">Saaliita yhteensä ${tot}. Syöttiä (matoja): ${invCount('mato')}. Paras aika ja sää paljastuvat, kun saat lajin.</p><table class="fishT"><tr><th>Laji</th><th>Saatu</th><th>Ennätys</th><th>Vesi</th><th>Parhaiten</th></tr>${rows}</table>
+  el.innerHTML=`<p class="note keep">Saaliita yhteensä ${tot}. Syöttiä (matoja): ${invCount('mato')}. Paras aika ja sää paljastuvat, kun saat lajin.</p><table class="fishT"><tr><th>Laji</th><th>Saatu</th><th>Ennätys</th><th>Vesi</th><th>Parhaiten</th></tr>${rows}</table>
     <div class="fishCols"><div><h3>Vedet</h3><ul>${ws}</ul></div><div><h3>Tavoitteet</h3><ul class="fg">${gs}</ul></div></div>${F.sunkK&&!F.sunkO?'<p class="note">Pullopostin arkku on merkitty karttaan (✕).</p>':''}`;}
 /* ---------------- KATISKA, SAVUSTIN, KALANAULAKKO ---------------- */
 const SAV_HEAT_T=30,SAV_COOL_T=90,KAT_T=900,KAT_BAIT_K=.6,KAT_MAX=3,KAT_BAIT_MAX=5,SAV_T=180,SAV_MAX=6,SAV_WOOD=2;

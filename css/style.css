@@ -1045,3 +1045,15 @@ button:focus,select:focus{outline:none}
 html,body,.panel,#binfo,#potRec,#fishP,#smeltP,#chest,#inv *{scrollbar-color:#8a5a2a rgba(18,12,7,.55);scrollbar-width:thin}
 #binfo{overflow-x:hidden!important;overflow-y:auto} #binfo *{max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}
 #deathDim{position:fixed;inset:0;background:#050403;opacity:0;pointer-events:none;z-index:4;transition:opacity 1.2s linear}   /* v3.08 kuolemaruudun hidas tummuminen (deadS sen päällä) */
+
+/* v3.08 Extra-grafiikan pikanapit */
+.xAll{display:flex;gap:10px;align-items:center;margin:6px 0 10px;flex-wrap:wrap}.xAll .btn{min-width:110px}.xAll .btn.red{border-color:#c0583a;color:#ffb09a}
+/* v3.08 käyttäjä: kartan "Sulje: P / M" kartan oikeaan alanurkkaan ("Rulla = zoom" on vasemmassa alanurkassa) */
+#mapP>.pHint{top:auto;bottom:20px;right:22px;color:rgba(238,229,211,.8);text-shadow:1px 1px 2px #000,0 0 3px #000;opacity:1}
+/* v3.08 ohjeet ja vihjeet: porras 1 ohjetekstit, 2 näppäinvihjeet, 3 E-kehotteet; varoitusdialogi */
+body.noHelp .note:not(.keep){display:none!important}
+body.noKeyH #buildhint .kb,body.noKeyH .pHint,body.noKeyH #gameHint,body.noKeyH #aimHint{display:none!important}
+body.noActH #prompt{display:none!important}
+#keyDlg[data-warn="1"] #keyDlgN{color:#ff8a70}#keyDlg[data-warn="2"] #keyDlgT,#keyDlg[data-warn="2"] #keyDlgN{color:#ff5a48;font-weight:700}
+#keyDlg[data-warn="2"] #keyDlgN{text-shadow:0 0 8px rgba(255,60,40,.35)}
+#quitScr .qSaved{color:#9fd88a;font-weight:700}#quitScr .qSaved.bad{color:#ff7a60}

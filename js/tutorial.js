@@ -105,7 +105,8 @@ const TIPS=[
    toistuvat VAIN, kun alun opastus on laitettu erikseen päälle (Asetukset › Opastus seuraavassa uudessa maailmassa → flags.tipsRe) eikä sitä ohiteta. */
 function tipSeenG(){try{return JSON.parse(localStorage.getItem('hiidenmaa_tipseen')||'{}')||{};}catch(e){return {};}}
 function tipSeenSet(id){const o=tipSeenG();o[id]=1;try{localStorage.setItem('hiidenmaa_tipseen',JSON.stringify(o));}catch(e){}}
-function tipsTick(dt){if(!flags||state!=='play'||P.dead)return;flags.tips=flags.tips||{};const el=tipEl();
+function tipsTick(dt){if(!flags||state!=='play'||P.dead)return;if(typeof hintL1==='function'&&!hintL1()){tipDismiss();return;}   // v3.08 porras 1: ei kertavinkkejä
+flags.tips=flags.tips||{};const el=tipEl();
   if(TUT.tipT>0){const C=TUT.tipCur;if(C&&C.u&&TUT.tipT>TIP_USED_T){let used=false;try{used=C.u();}catch(e){}if(used)TUT.tipT=TIP_USED_T;}   // v3.07 vinkkiä käytettiin → pois nopeasti
     TUT.tipT-=dt;if(TUT.tipT<=0)el.classList.remove('on');return;}
   TUT.tipCd-=dt;if(TUT.tipCd>0)return;TUT.tipCd=.5;

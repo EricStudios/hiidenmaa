@@ -84,6 +84,13 @@ function updateClouds(dt,cover,light,el){deckTick();cover*=cloudDayTick(dt);   /
   if(boltGrp){boltT-=dt;boltGrp.visible=boltT>0&&((boltT*40|0)%3!==0);if(boltT<=0){scene.remove(boltGrp);boltGrp=null;}}}
 // Taivaskupoli ja auringonsäteet (vain selkeällä/puolipilvisellä säällä päivällä, ei sisällä).
 const _sky=new THREE.Color(),_skyS=new THREE.Vector3(),_up=new THREE.Vector3(0,1,0),_camD=new THREE.Vector3();
+/* v3.08 käyttäjä (kohta 2): intron varjoreunojen välkyntä alemmilla asetuksilla. Syy: auringon varjokamera seurasi pelaajaa ja aurinkoa liukuvasti
+   (osa texeliä per kuva) ja kartta päivittyi vain joka n:s kuva → reunat ja varjot hyppivät korkealta katsottaessa. Korjaus: varjokamera siirretään
+   kokonaisiin texeleihin (shadowSnap, aina), intron ajan auringon suunta lukitaan (INTRO_SD) ja kartta päivitetään joka kuva. */
+let INTRO_SD=null;const _ssR=new THREE.Vector3(),_ssU=new THREE.Vector3(),_ssF=new THREE.Vector3(),_ssD=new THREE.Vector3();
+function shadowSnap(){const sc=sun.shadow.camera,tx=(sc.right-sc.left)/sun.shadow.mapSize.x;if(!(tx>0))return;const t=sun.target.position;
+  _ssF.subVectors(t,sun.position).normalize();_ssR.set(0,1,0).cross(_ssF);if(_ssR.lengthSq()<1e-6)_ssR.set(1,0,0);_ssR.normalize();_ssU.crossVectors(_ssF,_ssR);
+  const a=t.dot(_ssR),b=t.dot(_ssU);_ssD.copy(_ssR).multiplyScalar(Math.round(a/tx)*tx-a).addScaledVector(_ssU,Math.round(b/tx)*tx-b);sun.position.add(_ssD);t.add(_ssD);}
 function updateSky(light,sd0,el,sunK){const sd=_skyS.copy(sd0);skyDome.position.copy(camera.position);skyDome.visible=!P.inDun;
   SKY_U.uHor.value.copy(scene.background);_sky.copy(scene.background).multiplyScalar(.62);_sky.b=Math.min(1,_sky.b*1.25+.03*light);SKY_U.uTop.value.copy(_sky);
   SKY_U.uSun.value.set(sd.x,sd.y,sd.z);SKY_U.uSunC.value.copy(cSun);SKY_U.uGlow.value=sunK*(1-Math.min(1,wDark*1.4))*(1-aarniK*.7)*(1-moorK*.5);   /* v2.63 nummi kuten Aarnimetsä (miedommin) */
@@ -131,6 +138,7 @@ function updateEnvironment(dt){
   // joten valon suunta vaihtuu vasta kun voimakkuus on nolla.
   const light=sstep(-.4,.45,el);lightK=light;const sunK=sstep(-.12,.08,el),moonK=sstep(-.12,-.32,el);
   const sd=_tmpV.set(Math.sin(ang)*.9,el,.35).normalize();
+  if(state==='intro'){if(!INTRO_SD)INTRO_SD=sd.clone();else sd.copy(INTRO_SD);}else INTRO_SD=null;   // v3.08 intro: auringon suunta lukittu (varjot eivät väreile)
   if(P.inDun){moorK=0;moorSatSet();const rf=P.realm?REALMS[P.realm].fog:0x050403;scene.background.setHex(rf);scene.fog.color.setHex(rf);scene.fog.near=3;scene.fog.far=28;hemi.intensity=.06+BOSS_GLOW*1.2;sun.intensity=0;shAmb.intensity=0;amb.intensity=.05+BOSS_GLOW*.5;stars.visible=false;sunDisc.visible=false;moon.visible=false;rain.visible=false;snow.visible=false;water.visible=false;return;}
   water.visible=true;stars.visible=true;
   // Aarnimetsässä tiheä sumu ja hämärä valo.
@@ -156,6 +164,7 @@ function updateEnvironment(dt){
    shAmb.color.copy(sun.color);shAmb.intensity=sun.intensity*k*f*Math.max(.15,sd.y);sun.intensity*=1-k*f;sun.shadow.radius=SUN_SH_BASE+1000*Math.round(L*100);}
   sun.target.position.copy(P.pos);
   if(SET.shUltra==='wide'){const o=160*.45,fx=-Math.sin(camYaw)*o,fz=-Math.cos(camYaw)*o;sun.target.position.x+=fx;sun.target.position.z+=fz;sun.position.x+=fx;sun.position.z+=fz;}   // v1.76: laaja alue sovitetaan näkymän suuntaan
+  shadowSnap();if(state==='intro'&&!sun.shadow.autoUpdate)sun.shadow.needsUpdate=true;   // v3.08 KORJAUKSET 84: varjokamera texel-ruudukkoon; intro joka kuva
   hemi.intensity=((.07+.2*light*(1-wDark*.4))*(1-.45*aarniK)*(1-.2*moorK)+flash*.55)*(1-.6*indoorK)+BOSS_GLOW*.8;amb.intensity=(.03+.025*light+flash*.22)*(1-.5*indoorK)+BOSS_GLOW*.3;
   hemi.color.setHex(light>.3?0xcfe4ff:0x6a7fa8);hemi.color.lerp(cIndoor,indoorK);
   stars.material.opacity=(1-light)*(1-wDark);stars.position.copy(camera.position);

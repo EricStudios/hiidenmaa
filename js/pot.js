@@ -25,10 +25,10 @@ function potEta(p){const r=potRate(p),rem=potRem(p);return rem<=0?0:r>0?rem/r:In
 function potName(p){const d=p.data;return d.job?ITEMS[d.job.id].n:d.cook.length?`${d.cook.length} × ${ITEMS.sieni.n.toLowerCase()}`:'';}
 const mmss=s=>s===Infinity?'–':`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 function potWhy(p,r){if(!p)return 'Ei keittopataa lähellä';const d=p.data;if(!d.pot)return 'Asenna ensin keittopata';if(d.spo)return 'Pata on pilaantunut';if(d.job||(r&&d.cook.length))return 'Pata on käytössä';
-  if(!fireLit(p))return 'Tarvitsee palavan tulen';if(r){if(!recipeOpen(r))return `Taso ${r.lvl}`;if(!Object.entries(r.req).every(([id,n])=>invCount(id)>=n))return 'Aineita puuttuu';}return '';}
+  if(!fireLit(p))return 'Tarvitsee palavan tulen';if(r){if(!recipeOpen(r))return `Taso ${r.lvl}`;if(!hasReq(r.req))return 'Aineita puuttuu';}return '';}
 // Resepti pataan (valmistuspaneelista tai padan ikkunasta)
 function potCraft(r,p){p=p||potNear();const w=potWhy(p,r);if(w){msg(w==='Pata on käytössä'?'Keittopata on jo käytössä – ota ruoka ensin.':w+'.','warn');return false;}
-  const d=p.data,wasW=(equipped('weapon')||{}).id==='vesikulho';for(const [id,n] of Object.entries(r.req))invRemove(id,n);if(r.ret)for(const [id,n] of Object.entries(r.ret))giveOrDrop(id,n,P.pos.x,P.pos.y+1,P.pos.z);
+  const d=p.data,wasW=(equipped('weapon')||{}).id==='vesikulho';payReq(r.req);if(r.ret)for(const [id,n] of Object.entries(r.ret))giveOrDrop(id,n,P.pos.x,P.pos.y+1,P.pos.z);
   if(wasW&&!equipped('weapon')){const k=inv.find(s=>s&&s.id==='kulho');if(k)toggleEquip(k);}updateGear();   // v3.07 käyttäjä: käteen jäi vesikulhon malli – tyhjä kulho tilalle
   d.job={id:r.id,n:r.n||1,t:0,need:r.pt||15};d.doneT=0;d.rdy=0;bump('potStart');xpFirst('c_'+r.id,6,'uusi pataruoka');
   sfx('craft');plSnd('rakentaminen',r.req.vesikulho?'pata_vesi':'pata_aloitus',potSndAt(p));msg(`${ITEMS[r.id].n} kiehuu padassa – valmis noin ${fmtMin(potEta(p))} (${d.lid?'kansi päällä':'kansi pois'}).`);invDirty=true;potRefresh(true);return true;}
