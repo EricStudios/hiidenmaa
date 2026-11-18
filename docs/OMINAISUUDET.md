@@ -848,7 +848,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Teemoitetut valikot:** tausta työpisteen/säilytyksen mukaan.
 - **Routaluola:** jäälätäköt käytävissä – pelaaja ja olennot liukuvat.
 - **Onkiminen:** vedet nimetty kalalajin mukaan (kartta + rannalla); vavat onki (työpenkki), kuparivapa (ahjo, t5), hiidenvapa (3 sirua, t9); mato 2 % maanmuokkauksesta;
-  tärppi 1–5 min, vasen 0,6 s:ssa, iso kala väsytetään; 8 lajia (järvi: ahven, hauki, lahna; meri: silakka, turska, lohi; suolampi: ruutana, suonsilmä), aika ja sää vaikuttavat;
+  tärppi 1–5 min, vasen 0,6 s:ssa, iso kala väsytetään; 18 lajia (v3.08; järvi: ahven, hauki, lahna, kuha, made, muikku, särki, kiiski, toutain; meri: silakka, turska, lohi,
+  siika, kampela, meritaimen; suolampi: ruutana, suonsilmä, suutari), aika ja sää vaikuttavat;
   kalat paistetaan nuotiolla/grillillä, savustimessa savukala, padassa keitot; katiska veteen, kalanaulakko seinään; muut saaliit (saapas, pulloposti, ruostunut avain → upponut arkku,
   hiidenkiven siru, rauta- ja kupariharkko); Kalastajan kirja (käytä) + tavoitteet.
 
@@ -862,9 +863,33 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Vinkit:** näkyvät lukuajan (4–9 s) ja katoavat heti, kun neuvoa noudattaa. **Vierityspalkit** pelin teemassa. Tietoikkuna vaihtuu heti.
 - **Rikkaruohot (Ultra):** 3 lajia, biomeittain eri korkeus. Hakuissa umpinaiset kärjet, ongessa roikkuva koukku. Keittoon käytetty vesikulho vaihtuu tyhjäksi kädessä.
 
+## v3.08 – kasvu, kastelu, pihka, vihjeet ja korjaukset
+- **Istutetut puut kasvavat** 5 lajikohtaista kokovaihetta: taimesta tulee pieni puu (vaihe 1), joka 5. nukuttu yö 60 % → seuraava vaihe, kunnes lopullinen koko (viimeinen tai
+  toiseksi viimeinen vaihe). Pihkapuun pihkamäärä kasvaa koon mukana (pihkapuu vasta koosta 0,75). Luonnon puut eivät muutu.
+- **Kastelu ja madot:** vesikulho kädessä E taimen, kasvavan istutetun puun tai viljelylohkon kohdalla → seuraava kasvu +5 % (kulho tyhjenee). Kastemato toisessa kädessä E
+  (maassa kyykyssä, laatikossa/penkissä ilman) → +5 %. Kumpikin kerran kasvua kohti. 5 kastelua = pysyvästi +5 %, 2 matoa = pysyvästi +5 % (lohkokohtainen; taimen pysyvät
+  siirtyvät puulle) kunnes rakenne puretaan. Multa: kasteltu märkä, pysyvä vesi tummempi, madot kurkkivat, molemmat + ruohotupsut reunoilla.
+- **Siemenet** putoavat, kun puu kaatuu maahan tukeiksi. Kaikki istutettavat (kävyt, siemenet, varpu, rihmasto, kaura) ja kastemato näkyvät mallina vasemmassa kädessä.
+- **Aarnipuun pihka:** 1 % aarnipuista on pihkapuita (pihkaa 3×, kertymä tunnissa 4×, kaadettaessa 3–5 pihkaa). **Pihkan täyttyminen:** joka 5. nukuttu yö jokainen tyhjä
+  pihkapuu arpoo 10 % → 30 % täyteen; puu on taas pihkapuu ja kaiverretaan uudelleen (kiinni ollut kulho täyttyy vasta uuden kaiverruksen jälkeen).
+- **Kuolema:** äänet häipyvät ja kuva tummuu hitaasti (40 s); hahmo kaatuu varusteineen, käsitavarat lentävät viereen (esineet ovat hautakasassa). Veri tummempaa, ei hohda.
+- **Äänet:** liemiruoat (keitot, puurot, padat, risotto, hillo) syödään lusikalla – juomisääni 2–4 kertaa. Päävalikko Käynnissä-tilassa: äänet −70 % ja vaimeat. Metso −40 %.
+- **Sää:** sade tulee vinommin tuulen mukana; lumi ilmestyy pehmeästi noustessa 8–13 m.
+- **Kartta:** sisävesi ei avaa Meri-aluetta; vesien nimet kaikilla zoomeilla veden päällä; zoom ulos 0,8×; "Sulje: P / M" oikeassa alanurkassa.
+- **Onkivapa:** kärki taipuu kalan vetäessä, koukku kärjessä; vavoissa korkkikahva, kela ja renkaat, onki on yksinkertainen.
+- **Valikot:** rakennusvalikkoon Säilytys, Ruoanlaitto, Viljely ja kalastus; valmistukseen Nuolet, Pataruoat, Kalastus, Viljely. Haku löytää myös kategoriat ja yleissanat
+  (esim. kilpi, kala, keitto, kirves, siemen, valo, ruoka, ase, työkalu, juoma, tuli, säilytys, ovi, katto, puolustus, metalli). Nimiosumat ensin.
+- **Extra-grafiikka:** napit Kevyin (kaikki pois) ja Vaativin (kaikki raskaimmilleen + automaattisäätö pois; varmistus ensimmäisellä kerralla). Intron varjot eivät välky.
+- **Olkahihna:** kun selässä on kilpi, jousi tai työkalu – vasemmalta olalta oikealle lantiolle; puukilpi vaalea, muut tumma, rautakilpi nahka + metallisolki.
+- **Ohjeet ja vihjeet (Asetukset › Ohjaus):** 1 ohjetekstit (valikkojen selitykset + kertavinkit), 2 näppäinvihjeet (Sulje/Päävalikko, rakentamisen näppäimet, B-vihje, jousi),
+  3 kaikki toimintovihjeet (E-kehotteet). Ylempi porras piilottaa myös alemmat; piilotus kysyy varmistuksen (2 punainen, 3 "Oletko IHAN varma?").
+- **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
+- **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
+
 ## DEV-työkalut (vain DEV-tilassa)
 - Ä = DEV-valikko. Isot napit alussa (v1.92): Kuolemattomuus, Lento (alkaa heti), Seinien läpi, Lukitse aika ja sää, Näkymätön (v2.15: olennot eivät huomaa sinua, lyönti suututtaa), Pysäytä maailma
   (vain pelaaja liikkuu), Terveys täyteen. Lisäksi sää, aika, terveys, kylläisyys, pienet täpät, esinehaku, kartta.
+- v3.08 **Ilmaiset materiaalit** (`DEVF.free`): rakentaminen, valmistus, korjaus, päivitys ja pataruoat ilman aineita (aineita ei kuluteta).
 - V pohjassa = 10× kävelynopeus, lennossa 6× lentonopeus (vaaka ja pysty).
 - Ö = olennot ja pomot (v1.91): luo minkä tahansa olennon 3 m eteen (pomot nousevat herätysanimaatiolla), siirry ulottuvuuspomon huoneeseen tai
   ulottuvuuden portin eteen, elvytä kukistettu pomo, Kalmankehään. Apuväline: pomohuoneen ääriviiva seinien läpi (huoneen reuna, varaetäisyyden

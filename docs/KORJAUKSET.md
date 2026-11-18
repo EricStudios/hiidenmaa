@@ -610,3 +610,22 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - `terraTool` päivittää lähellä olevien solmujen korkeuden (`nodesNear` → `syncNodeY` → `setNodeMatrix`). `nodesNear` palauttaa myös kaadetun puun **tukit** (`isLog`, samassa
   NGRID-ruudukossa), joilla ei ole instanssimeshiä (`n.im`) → virhe joka ruutu pelisilmukassa. Korjaus: `syncNodeY` ohittaa tukit ja solmut ilman `im`:ää, `setNodeMatrix` vartioi `n.im`.
 - **Sääntö:** `nodesNear`-tulos voi sisältää tukkeja – tarkista `n.isLog` ennen solmukohtaisia (instanssi-) operaatioita.
+
+## 83. Kirveen hakkuuanimaatio nykii (v3.08, sama syy kuin F-tarkastelussa v2.99)
+- `chopApply` kirjoitti oikean käden kvaternion ja kyynärpään suoraan asennon päälle, eikä seuraava kuva palauttanut perusasentoa ennen uutta laskua → käsi hyppäsi
+  edellisen kuvan IK-asennosta. Korjaus: `chopApply` tallentaa `armR.quaternion`/`elbowR` (`CHR`) ja `chopRestore()` palauttaa ne joka kuvan alussa (`inspectRestore`:n jälkeen).
+- **Sääntö:** jokainen asentoa suoraan kirjoittava IK/animaatio tallentaa ja palauttaa koskemansa luut (kuten `inspectRestore`, `chopRestore`).
+
+## 84. Intron varjojen reunat välkkyvät alemmilla asetuksilla (v3.08)
+- Auringon varjokamera seurasi pelaajaa liukuvasti (osa texeliä per kuva) ja aurinko liikkui hitaasti; varjokartta päivittyi vain joka n:s kuva (`shRate`/`shFar`). Korkealta
+  katsottuna varjokartan reuna ja varjot hyppivät. Korjaus: `shadowSnap()` siirtää varjokameran (aurinko + kohde) kokonaisiin texeleihin aina, intron ajan auringon suunta
+  lukitaan (`INTRO_SD`) ja kartta päivitetään joka kuva. **Sääntö:** varjokameran paikka pyöristetään aina texel-ruudukkoon (`sc.right-sc.left)/mapSize`).
+
+## 85. Ylimmän tason nimi oli jo käytössä toisessa tiedostossa / ominaisuuden nimi oli jo varattu (v3.08)
+- `const _shF` (environment.js, varjolukitus) oli jo resources.js:ssä → "Identifier '_shF' has already been declared", peli ei käynnistynyt (testissä `window.__game` ei
+  koskaan valmistunut). Samoin kasvuvaiheen kerroin `n.gk` törmäsi NGRID-ruudukon avaimeen `n.gk` (taulukko) → `ngridRemove` kaatui ("is not iterable"). Korjaukset:
+  `_ssR/_ssU/_ssF/_ssD`, `n.gsk`. **Sääntö:** ennen uutta ylimmän tason nimeä tai solmun kenttää aja `grep -n "\bnimi\b" js/*.js` – myös lyhyet `_xx`-apumuuttujat.
+
+## 86. Testissä setTimeout-ruutu ilmestyy hitaasti (v3.08, ei pelivika)
+- swiftshader-testissä pelisilmukka on hidas, joten `quitGame`:n 250 ms ajastin laukesi vasta usean sekunnin päästä → `#quitScr` puuttui 1,5 s odotuksen jälkeen.
+  **Sääntö:** odota testissä `waitForFunction`-ehtoa (esim. elementin ilmestymistä), älä kiinteää aikaa.

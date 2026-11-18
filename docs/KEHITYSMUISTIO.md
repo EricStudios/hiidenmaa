@@ -3,34 +3,17 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.07, 18.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.08, 18.11.2026)
 
-- **⏯️ KESKEN: v3.08 – käyttäjän 26 kohdan päivityslista (18.11.)** – jos keskeytyy, jatka tästä ("jatka nyt"). Testilinkit nyt muodossa
-  `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html`.
-  - **Erä 1 korjaukset:** 10 lapio-error kaadetun puun vieressä (resources.js:271 setMatrixAt, n.im undefined → tukki/solmu ilman im:ää), 3 järvellä ei Meri-biomia/ilmoitusta
-    (nimi "Järvi"/"Lampi" + kalan mukaan), vesinimet kartalla kaikilla zoomeilla veden päällä, DEV-paljastus näyttää kaikki vedet, kartta zoomaa enemmän ulos; 11 Windows-teksti +
-    logo samalle keskilinjalle; 12 vinkki pois kun valikko avataan/suljetaan; 13 hakkuuanimaation nykiminen (kuten F-korjaus v2.99 `inspectRestore`); 17 onkimalli: koukku oikein,
-    tarkempi malli, taipuva kärki (onki yksinkertaisin); 7 metso −40 %.
-  - **Erä 2:** 6 juomisääni 2–4× (keitot, puurot, padat, risotto, hillo); 23 päävalikko ilman taukoa −70 % + voimakkaampi LP; 24 kuolemakamerassa äänet häipyvät + kuva tummuu hitaasti,
-    palautuu; 25 kaatuva hahmo varusteineen, käsitavarat lentävät viereen (vain ulkoasu, hautakasaan); 26 veri tummemmaksi/ei hohda (kaikki värit); 20 sade enemmän sivuttain,
-    lumi ilmestyy pehmeästi rajalla.
-  - **Erä 3:** 4 siemen putoaa kun puu kaatuu tukeiksi; 5 istutettavat mallina vasemmassa kädessä; 9 istutetut puut kasvavat lajin kokovaiheet (60 % joka 5. yö), pihka koon mukaan,
-    luonnon puut eivät muutu; 8 aarnipuista 1 % pihkaisia (kapasiteetti 3×, kertymä 4×); 15 kastelu +5 % ja mato multaan +5 % (kerran per kasvu; 5 kastelua → pysyvä +5 %,
-    2 matoa → pysyvä +5 %, lohkokohtainen, multatekstuurit: madot, tumma multa, ruohoa reunalla, yhdistelmä).
-  - **Erä 4:** 1 Extra-grafiikka: napit Kevyin/Vaativin (varmistus 1. kerralla); 2 introvarjot (selvitetty: harva varjopäivitys + lukitsematon varjokamera → tekselilukitus + intro
-    joka ruutu; jos ei riitä, sumennus/varjot pois intron ajaksi, vain heikommilla asetuksilla); 14+22 kategoriat molempiin valikoihin + haku kategorioilla/yleissanoilla;
-    18 DEV ilmainen rakentaminen/valmistus; 19 olkahihna kun selässä kilpi/työkalu (puukilpi vaalea, muut tumma, rautakilpi nahka + solki); 21 kalat: kuha, made, muikku, siika,
-    särki, kiiski, toutain, kampela, meritaimen, suutari + kalakirjaan kuvat.
-  - **Lisäys 27 (käyttäjä):** tyhjentynyt pihkapuu täyttyy uudelleen: puukohtaisesti joka 5. nukuttu yö tyhjenemisestä arvotaan 10 % → puu 30 % täyteen; koskee kaikkia
-    pihkapuita (luonto, aarni, istutetut). PÄÄTETTY: arvonta YHTEISESTI koko maailmassa joka 5. nukuttu yö (käyttäjä muutti); täyttynyt puu muuttuu taas pihkapuuksi ja pitää kaivertaa
-    uudelleen (vaihtoehto A, päätetty käyttäjän puolesta). EI enää keskeytyksiä – päätä itse.
-  - **Erä 5:** tarkistus + full157, muistiot (valmiit ominaisuudet), versio 3.08, PR, linkit (haara + SHA, EricStudios).
+- **Versio 3.08** – käyttäjän 26 kohdan lista + 4 lisäystä (pihkan täyttyminen, kartan Sulje-teksti, 3 vihjeporrasta, tallennus suljettaessa), ks. versioloki v3.08.
+  Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`. **Testilinkit nyt EricStudios-muodossa:**
+  `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html` (käyttäjänimi vaihtui; vanha erboiyprogamer-source-linkki ei enää päde).
+- **Käyttäjän työtapa (pysyvä):** kysy tarkentavat kysymykset alussa, sitten työ loppuun ilman keskeytyksiä; kinkkiset valinnat päätetään käyttäjän puolesta ja kerrotaan lopuksi.
+  Kesken tulleet lisäykset: enintään 1–2 kysymystä per lisäys ja jatka heti.
+- **SEURAAVAKSI:** uusi saari (Ideajono › C, kysy ensin 10 kysymystä), vene + laituri + pilkkiminen. Uudet äänet `sounds2/`.
+- **Valmiit ominaisuudet** – tiivis lista: ks. "✅ VALMIIT OMINAISUUDET" alla (päivitetty v3.08).
 
-- **Versio 3.07** – käyttäjän korjaukset ja ideat v3.06:een (16 kohtaa, ks. versioloki v3.07). Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`;
-  PR #48 (v3.06) ja v3.07 samassa haarassa – muistuta käyttäjää yhdistämään.
-- **SEURAAVAKSI:** käyttäjä lähettää **erillisen ison päivityksen listan** (voi sisältää jo tehtyjä asioita – tarkista "Valmiit ominaisuudet" -listasta alta, ettei tehdä
-  tuplaan). Sen jälkeen uusi saari (Ideajono › C). Testilinkki aina muodossa `https://raw.githack.com/erboiyprogamer-source/hiidenmaa/<haara>/index.html`.
-- **Valmiit ominaisuudet** – tiivis lista koko pelistä: ks. osio "✅ VALMIIT OMINAISUUDET" heti tämän osion jälkeen.
+- **Versio 3.07** – käyttäjän korjaukset ja ideat v3.06:een (16 kohtaa, ks. versioloki v3.07). PR #48 (v3.06–v3.07).
 
 - **Versio 3.06** – iso päivitys: lista A (16 kohtaa) + onkimispäivitys B toteutettu (ks. versioloki v3.06). Valikossa yhä **Early Access 1.1** (2.0 varattu uuden saaren
   päivitykseen). Haara `claude/hiidenmaa-survival-game-fmxt0m`, PR #47 (v3.05) yhdistetty; v3.06 uudessa PR:ssä. Pages päivittyy vasta Mergen jälkeen.
@@ -50,14 +33,16 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
   Asetussiirtojen järjestys v7/v8 – KORJAUKSET 76. v3.03: villikauran solmu-id:t siirsivat kasvaneiden puiden id:t – KORJAUKSET 77.
 - Testit: `tools/tarkistus.mjs` KAIKKI OK (v3.06-rivi kattaa kaikki uudet järjestelmät), full157 6/6 karttaa.
 
-## ✅ VALMIIT OMINAISUUDET (päivitetty v3.07 – tarkista ennen uutta työtä, ettei tehdä tuplaan; yksityiskohdat OMINAISUUDET.md)
+## ✅ VALMIIT OMINAISUUDET (päivitetty v3.08 – tarkista ennen uutta työtä, ettei tehdä tuplaan; yksityiskohdat OMINAISUUDET.md)
 - **Maailma:** 6 karttaa + seed (paikat ja kasvillisuus seedin mukaan), 13 biomia, päivä/yö, sää (sade, myrsky, sumu, lumi, ukkonen), tuuli, pilvet, vesi ja aallot,
   Kalmanummen usva, riimukivet, rauniot, linnakkeet, hylätyt leirit (teltta, halkopino, kuivausteline), kiviröykkiöt, kyltit, maailman arkut, upponut arkku.
 - **Selviytyminen:** nälkä, kylmä, lepo, kodin lämpö (kodin taso), uinti ja hukkuminen, kuolema + hautakasa + kuolinruutu syyn mukaan, tyhjyyteen putoaminen,
   kantokyky 60 → 200 (reppu, saavutukset, tasot), ylikuorma.
-- **Keräily ja uusiutuminen:** puut (kaato, tukit, pihkapuut 3 % + kaiverrus + kulho), kivet ja malmit, poimittavat (oksa, kivi, piikivi, hiekka, marjat, sieni, villikaura);
+- **Keräily ja uusiutuminen:** puut (kaato, tukit, pihkapuut 3 % + aarnipuista 1 % (pihkaa 3×, kertymä 4×) + kaiverrus + kulho; tyhjä pihkapuu täyttyy 10 %:n arvonnalla joka 5. uni → 30 %, kaiverretaan uudelleen), kivet ja malmit, poimittavat (oksa, kivi, piikivi, hiekka, marjat, sieni, villikaura);
   puut ja kivet uusiutuvat nukkuessa 20 %, poimittavat 10 min + 60 m + 20 %; myrsky kaataa puita; kaatuva puu vahingoittaa (aarnipuu 90 %, iso 60 %, pieni 40–50 %).
-- **Viljely:** siemenet (5 %, pihkapuu 70 %), taimet kuokalla kyykyssä (30 %/uni), viljelylaatikko (60 %/uni, 9 + siemen), kohopenkki (4 kylvöä, 70 %/uni), maahan 2 + siemen.
+- **Viljely:** siemenet (5 %, pihkapuu 70 %, putoavat kun puu kaatuu), siemenet mallina vasemmassa kädessä, taimet kuokalla kyykyssä (30 %/uni), istutetut puut kasvavat 5 kokovaihetta
+  (60 % joka 5. uni), viljelylaatikko (60 %/uni, 9 + siemen), kohopenkki (4 kylvöä, 70 %/uni), maahan 2 + siemen; kastelu vesikulholla ja mato multaan +5 % kumpikin
+  (5 kastelua / 2 matoa = pysyvä +5 %, multatekstuurit).
 - **Valmistus ja työpisteet:** työpenkki, ahjo, nuotio/grillinuotio (paisto, hiilos 10 min), keittopata (pataruoat, kansi, pilaantuminen, vesi), sulatusuuni (jono 5,
   polttoaine, lämpömittari, hehku, hiili +20 %), savustin, veden kerääjä, katiska, kalanaulakko, arkut/tynnyrit (kiviversiot), sänky, soihdut (teline, kivinen, seinä).
 - **Rakentaminen:** ruudukko + 7 kohdistustilaa (reuna, jatko), seinät, lattiat, katot (olki, kivi), palkit, portaat, tikkaat, ovet (animoitu), lasi-ikkunat, kivirakennus,
@@ -66,13 +51,15 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
   haarniskat, olentojen luonteet, vaanivat, jousikalmot, auringossa palavat, eläinten perheet, syöminen/juominen, 4 pomoa (herätys, vaiheet, kuolema), Kalmanvartija.
 - **Eteneminen:** tasot 1–30 (palkinnot), XP, tavoitteet (GOALS), saavutukset, tehtävät, opastus + kertavinkit (vain uusille, lukuaika), avainketju ulottuvuuksiin
   (Kalmon sinetti, Jääavain, 3 ulottuvuutta: Routaluola jäälätäköineen, Kalmankammio, Aarnihauta), hiidenkivet 9, kruunusirpaleet.
-- **Onkiminen:** nimetyt vedet (kartta, löytö), 3 vapaa, mato, tärppi + väsytys, 8 lajia aika/sää, ennätykset, kalaruoat, kalastajan kirja + tavoitteet, muut saaliit.
+- **Onkiminen:** nimetyt vedet (kartta kaikilla zoomeilla, löytö; sisävesi ei avaa merta), 3 vapaa (taipuva kärki, koukku), mato, tärppi + väsytys, 18 lajia (omat kuvakkeet) aika/sää, ennätykset, kalaruoat, kalastajan kirja + tavoitteet, muut saaliit.
 - **Käyttöliittymä:** HUD (skaala), kartta (zoom, sumu, tuulikompassi), reppu (raahaus, jako), teemoitetut valikot, omat vierityspalkit, ilmoitusasetus, F-tarkastelu
-  (11 animaatiota), E-käsiliike, pikapaikat, näppäinasetukset, 5 tallennuspaikkaa + tallennuskoodi, päävalikko (21 taustaa, logoteemat), Poistu-ruksi, DEV-työkalut.
+  (11 animaatiota), E-käsiliike, pikapaikat, näppäinasetukset, 5 tallennuspaikkaa + tallennuskoodi, päävalikko (21 taustaa, logoteemat), Poistu-ruksi (tallentaa aina),
+  DEV-työkalut (ilmaiset materiaalit), valikkojen kategoriat + haku yleissanoilla, vihjeiden piilotus 3 portaassa (ohjetekstit, näppäinvihjeet, E-kehotteet).
 - **Grafiikka:** esiasetukset Low…Ultra + High+, automaattisäätö, varjot (soihtuvarjot), auringonsäteet ja linssiheijastus, ruoho + korkeat tupsut + Ultra-rikkaruohot
-  (3 lajia, taipuvat), biomien sekoitus, maaston väritystarkkuus, veri ja haavat, savut, Extra-grafiikka.
+  (3 lajia, taipuvat), biomien sekoitus, maaston väritystarkkuus, veri ja haavat (tummat, eivät hohda), savut, Extra-grafiikka (Kevyin/Vaativin),
+  vakaat varjot (texel-lukitus), olkahihna selkävarusteille, kuoleman hämärä + varusteet ruumiissa.
 - **Äänet:** käyttäjän äänet (olennot, toiminnot, pelaaja, valikot, sää ja tunnelma, musiikki, ilmoitukset), 3D-äänet, kaiku, vedenalainen suodatus, rakeinen tulen
-  rätinä (myös käsisoihtu), paneeleissa −30 % + alipäästö; paikkamerkit odottavat (onkiminen ym.).
+  rätinä (myös käsisoihtu), paneeleissa −30 % + alipäästö, Käynnissä-tilan valikossa −70 %, liemiruoat juomisäänellä; paikkamerkit odottavat (onkiminen ym.).
 
 ## Peli lyhyesti
 
@@ -353,6 +340,11 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.08:** puiden kasvuvaiheet kuusi .35/.55/.8/1.05/1.3, mänty .35/.55/.85/1.15/1.45, koivu .35/.55/.8/1.05/1.25, aarni .45/.6/.75/.92/1.1 (×0,94–1,06), 60 % joka 5. uni ·
+kastelu +5 %, mato +5 %, pysyvät +5 % (5 kastelua / 2 matoa) · aarnipihka 1 %, pihkaa 3×, kertymä 4×, kaato 3–5 · pihkan täyttyminen 10 % joka 5. uni → 30 % ·
+metso 0,6 · Käynnissä-valikko äänet 0,3 + LP 1 400 Hz · kuolinhämärä 40 s → 60 %, äänet häipyvät 2,2 s · veri 0x360404/0x4e0707, mahla 0x1f3410/0x31481a · sade sivuttain 0,7 ·
+lumi 8–13 m · kartan min-zoom 0,8 · kalat 18 (yleisyys b: muikku 5, särki 6, kiiski 3, kuha 1,5, made 0,8, toutain 0,7, siika 2, kampela 2,5, meritaimen 0,8, suutari 2).
+
 **v3.07:** puun isku pelaajalle aarnipuu 0,9 / iso 0,6 / pieni 0,4 × maxHP, eläimille × 67 (±25 %) · viljelylaatikko 60 %/uni 9 + siemen, kohopenkki 4 × 9 + siemen 70 %/uni, maahan 2 + siemen ·
 sulatusuuni hiilellä lämpenee 1,2× · savustin lämpenee 30 s · paneeleissa äänet 0,7 + LP 4 200 Hz · vinkit 4–9 s (2 + 0,28 s/sana) · F-äänet 10 % · käsisoihtu 0,2.
 **v3.06:** kantokyky 60 + reppu 2 × 15 + saavutukset 50 + tasot 60 = 200 · uusiutuminen: puut ja kivet (5 vrk jälkeen) 20 % / uni, poimittavat 10 min + 60 m + 20 % / min ·
@@ -419,6 +411,38 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.08 (käyttäjän 26 kohdan lista + 4 lisäystä – kysymykset alussa, sitten ilman keskeytyksiä)
+- **Korjaukset:** lapion `setMatrixAt`-virhe kaadetun puun vieressä (tukeilla ei `n.im` – KORJAUKSET 82); sisävesi ei enää avaa/ilmoita Meri-biomia (`inlandWater`), järvet/lammet
+  nimetty kalan mukaan, vesien nimet kartalla kaikilla zoomeilla veden päällä, DEV-paljastus näyttää kaikki vedet, kartta zoomaa ulos 0,8×; Windows-teksti + logo samalle keskilinjalle;
+  vinkki katoaa, kun valikko avataan/suljetaan (`tipDismiss`); kirveen hakkuun nykäisy (`chopRestore`, KORJAUKSET 83); onkivapa: 3 sisäkkäistä taipuvaa osaa (`RODB` jousi,
+  `userData.tip/bend`), koukku kärjessä, vavoissa korkkikahva, kela ja renkaat (onki yksinkertainen); metso −40 % (`CRE_TYPE_V`).
+- **Äänet ja kuolema:** liemiruoat (`LIQUID_FOOD`: keitot, puurot, padat, risotto, hillo) juomisääni 2–4×; päävalikko Käynnissä-tilassa −70 % + alipäästö 1,4 kHz (`RUN_G`/`RUN_LP`, `sndLive`);
+  kuolinkamerassa äänet häipyvät 2,2 s ja kuva tummuu 40 s → 60 % (`#deathDim`), palautuu herätessä; ruumis kaatuu panssari ja selkätavarat päällä, käsitavarat lentävät viereen
+  (`deathThrowGear`/`thrownTick`, vain ulkoasu – hautakasaan); kaikki veri tummempaa eikä hohda (Lambert, `BLEED_C`), myös vihreä.
+- **Sää:** sade vinommin tuulen mukaan (`RAIN_SIDE` 0,7), lumi ilmestyy pehmeästi korkeusrajalla (`sstep(8,13)`).
+- **Viljely ja puut:** siemen putoaa vasta kun puu kaatuu tukeiksi (`n._seed` → `fallTree`); kaikki istutettavat + kastemato mallina vasemmassa kädessä (`seedModel`);
+  **istutettujen puiden kasvuvaiheet** `TREE_STAGES` (5 lajikohtaista kokoa, lopullinen viimeinen/toiseksi viimeinen, ±6 % `n.gsk`), joka 5. uni (`flags.sleepC`) 60 % → seuraava
+  vaihe, pihka kasvaa koon mukana, luonnon puut eivät muutu; tallennus `planted[5..7]` (gst, gmx, gsk); **kastelu ja madot** (`careMode`/`careApply`, farm.js): vesikulho E tai mato
+  toisessa kädessä E (maassa kyykyssä) → +5 % kumpikin kerran kasvua kohti, 5 kastelua / 2 matoa → pysyvä +5 % (lohko/paikka, taimesta puulle `flags.care`), multatekstuurit
+  `careDeco` (märkä, tumma, madot, ruohotupsut). Kastemato on nyt toisen käden esine.
+- **Pihka:** aarnipuista 1 % pihkapuita (`RESIN_P_AARNI`, ei taattua), pihkaa 3× (`AARNI_CAP_K`), kertymä tunnissa 4× (`AARNI_FLOW_K`), kaadettaessa 3–5 pihkaa;
+  **täyttyminen** (`resinRefillSleep`): joka 5. uni (yhteinen laskuri) jokainen tyhjä pihkapuu arpoo 10 % → 30 % täyteen, muuttuu pihkapuuksi ja kaiverretaan uudelleen;
+  kiinni jäänyt kulho täyttyy vasta uuden kaiverruksen jälkeen (kulho näkyy, kaiverrus onnistuu kulho kiinni).
+- **Valikot ja grafiikka:** Extra-grafiikan napit **Kevyin / Vaativin** (`XGFX_MAX`, varmistus 1. kerralla `hiidenmaa_xmaxok`); intron varjojen välkyntä korjattu (varjokamera
+  texel-ruudukkoon `shadowSnap` aina, intron ajan auringon suunta lukittu `INTRO_SD` + varjokartta joka kuva – KORJAUKSET 84); uudet kategoriat: rakennus Säilytys, Ruoanlaitto,
+  Viljely ja kalastus; valmistus Nuolet, Pataruoat, Kalastus, Viljely; **haku** löytää kategoriat ja yleissanat (`SRCH_RULES`: kilpi, kala, keitto, kirves, siemen, valo, ruoka, ase,
+  työkalu, nuoli, haarniska, juoma, tuli, säilytys, lepo, ovi, ikkuna, katto, portaat, puolustus, metalli, vesi, viljely …; nimiosumat ensin); DEV › **Ilmaiset materiaalit**
+  (`DEVF.free`, `hasReq`/`payReq`); **olkahihna** selkävarusteille (`backStrap`: puukilpi vaalea, muut tumma, rautakilpi + metallisolki).
+- **Kalat:** 10 uutta lajia (kuha, made, muikku, särki, kiiski, toutain järvissä; siika, kampela, meritaimen meressä; suutari suolammissa) = 18 lajia, vesien nimet ennallaan;
+  lajikohtaiset kuvakkeet (`FISH_SHAPE`/`fishIcon`, myös paistetut) näkyvät myös kalastajan kirjassa; tavoite "Ongi kaikki 18 lajia".
+- **Lisäykset (käyttäjä kesken työn):** kartan "Sulje: P / M" oikeaan alanurkkaan (vastapäätä "Rulla = zoom"); **vihjeet 3 portaassa** (Asetukset › Ohjaus, oletus näkyvissä,
+  ylempi piilottaa myös alemmat, piilotus kysyy varmistuksen): 1 ohjetekstit (`.note`, ei `.keep`) + kertavinkit, 2 näppäinvihjeet (Sulje/Päävalikko, rakentamisen näppäimet,
+  "B tai hiiren oikea", jousi; punainen varmistus), 3 kaikki E-kehotteet (punaisin "Oletko IHAN varma?"); **Poistu-ruksi tallentaa aina** juuri ennen sulkemista (myös kuolleena),
+  sulkuruutu kertoo "Peli tallennettiin ennen sulkemista ✓".
+- Päätetty käyttäjän puolesta: pihkan arvonta yhteinen + uudelleenkaiverrus (A), hakusanat, sade 0,7, kastelu E:llä, siemenmallit, intron ratkaisu (lukitus kaikilla asetuksilla,
+  ei sumennusta tarvittu), porras 1 piilottaa myös kertavinkit (käyttäjä vahvisti), B-vihje portaaseen 2 (käyttäjä vahvisti).
+- Tarkistus: uusi v3.08-rivi (30 kohtaa); päivitetty v3.06 (siemen kaatuessa, taimi vaihe 0, 18 lajia) ja v3.07 (`sndLive`). full157 6/6.
 
 ### v3.07 (käyttäjän korjaukset ja ideat v3.06:een – 5 vastausta)
 - **Rikkaruohot:** 3 lajia (heinäkorsi, lehtevä putkikasvi valkoisella sarjalla, ohdake violetilla mykerolla), korsien leveys/pituus vaihtelee, biomeittain korkeus (`WEED_H`
@@ -4109,6 +4133,12 @@ kanssa; (3) Ultra-asetuksella jopa ~830 piirtokutsua.
 - Ensimmäinen pelattava versio yhtenä HTML-tiedostona.
 
 ## Ideajono
+
+### 💡 Ideat v3.08:n jälkeen (ei tehty – ehdotuksia, kysy käyttäjältä)
+- Istutetun puun kasvuvaihe ja kastelun/madon tila näkyviin (esim. katsoessa tai F-tarkastelussa) myös ilman vesikulhoa/matoa kädessä.
+- Kastelukannu (useampi kastelu yhdellä täytöllä), sadevesi kastelee ulkona olevat taimet ja lohkot automaattisesti.
+- Uudet kalat pataruokiin (kuhakeitto, muikkupaistos, savusiika) ja vesien nimet uusien lajien mukaan uusissa maailmoissa (vanhat nimet pidettävä ennallaan).
+- Vihjeportaille pikanäppäin tai valinta uuden maailman luonnissa ("kokenut pelaaja").
 
 ### ⏭️ SEURAAVAT ISOT TYÖT (käyttäjä 18.11.) – A ja B TOTEUTETTU v3.06; C (uusi saari) odottaa
 **Työjärjestys (käyttäjä):** 1) lista A (16 kohtaa nykyiseen peliin) + onkimispäivitys (B) → 2) uusi saari (C) myöhemmin. **Early Access 2.0** isoon päivitykseen.
