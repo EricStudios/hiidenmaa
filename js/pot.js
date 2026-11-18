@@ -6,11 +6,14 @@
      ilman kantta pysähtyy; hiilloksella EMBER_COOK_K. Aloitus (sienet, resepti) vaatii palavan tulen. Valmis ruoka ei pala koskaan.
    - Ilman kantta valmis ruoka pilaantuu vuorokaudessa (DAY_LEN): ruoka katoaa, pohjalle jää hiiltä ja pata on käyttökelvoton →
      irrota (pilaantunut pata) ja sulata sulatusuunissa (POT_MELT) tai asenna uusi pata.
-   - Äänet (paikkamerkit p/rakentaminen/…): pata_aloitus (valmistus alkaa), pata_kiehuu (silmukkamainen kupliva, harvakseltaan),
+   - Äänet (p/rakentaminen/…, käyttäjän äänet v3.05): pata_aloitus (valmistus alkaa), pata_vesi (veden vaativa resepti alkaa), pata_kiehuu (silmukkamainen kupliva, harvakseltaan),
      pata_valmis_kansi / pata_valmis (valmis kansi päällä / ilman kantta), kansi_kiinni, kansi_auki. */
 const POT_MAX=10,POT_K_OPEN=10,POT_K_LID=8,POT_LID_NOFIRE=.7,POT_COOK={sieni:'sienipaisti'},POT_MELT={rauta:2,kupari:1},POT_MELT_T=12,POT_R=4;
 let curPot=null,potUiT=0,potSig='';
-const potSndAt=p=>({pos:{x:p.x,y:(p.y||0)+.9,z:p.z}});
+/* v3.05 käyttäjä: padan äänet hiljaisia (POT_SND_V; työkalu lisäksi −26…−29 LUFS), kiehuminen vielä hiljempaa (POT_BUB_V). Resepti, joka vaatii veden
+   (vesikulho), soittaa alussa pata_vesi (veden kaato pataan) aloitusäänen sijaan. */
+const POT_SND_V=.75,POT_BUB_V=.5;
+const potSndAt=p=>({pos:{x:p.x,y:(p.y||0)+.9,z:p.z},v:POT_SND_V});
 function potNear(){let b=null,bd=POT_R*POT_R;if(P.inDun)return null;for(const p of pieces)if(p.t==='patanuotio'){const d2=dist2(p.x,p.z,P.pos.x,P.pos.z);if(d2<bd){bd=d2;b=p;}}return b;}
 function potBusy(p){const d=p.data;return !!(d.job||d.cook.length);}
 // nopeus suhteessa grilliaikaan (1 = grillin nopeus)
@@ -27,7 +30,7 @@ function potWhy(p,r){if(!p)return 'Ei keittopataa lähellä';const d=p.data;if(!
 function potCraft(r,p){p=p||potNear();const w=potWhy(p,r);if(w){msg(w==='Pata on käytössä'?'Keittopata on jo käytössä – ota ruoka ensin.':w+'.','warn');return false;}
   const d=p.data;for(const [id,n] of Object.entries(r.req))invRemove(id,n);if(r.ret)for(const [id,n] of Object.entries(r.ret))giveOrDrop(id,n,P.pos.x,P.pos.y+1,P.pos.z);
   d.job={id:r.id,n:r.n||1,t:0,need:r.pt||15};d.doneT=0;d.rdy=0;bump('potStart');xpFirst('c_'+r.id,6,'uusi pataruoka');
-  sfx('craft');plSnd('rakentaminen','pata_aloitus',potSndAt(p));msg(`${ITEMS[r.id].n} kiehuu padassa – valmis noin ${fmtMin(potEta(p))} (${d.lid?'kansi päällä':'kansi pois'}).`);invDirty=true;potRefresh(true);return true;}
+  sfx('craft');plSnd('rakentaminen',r.req.vesikulho?'pata_vesi':'pata_aloitus',potSndAt(p));msg(`${ITEMS[r.id].n} kiehuu padassa – valmis noin ${fmtMin(potEta(p))} (${d.lid?'kansi päällä':'kansi pois'}).`);invDirty=true;potRefresh(true);return true;}
 function potAddMush(p,all){const d=p.data;if(!d.pot||d.spo||d.job){msg(!d.pot?'Asenna ensin keittopata.':d.spo?'Pata on pilaantunut.':'Padassa kypsyy jo ruokaa.','warn');return;}
   if(!fireLit(p)){msg('Sienten keittäminen vaatii palavan tulen.','warn');return;}
   const n=Math.min(all?invCount('sieni'):Math.min(1,invCount('sieni')),POT_MAX-d.cook.length);if(n<=0){msg(invCount('sieni')?`Padassa on jo ${POT_MAX} sientä.`:'Sinulla ei ole sieniä.','warn');return;}
@@ -63,7 +66,7 @@ function potTick(p,dt){const d=p.data;potVis(p);if(!d.pot||d.spo)return;const r=
   if(done&&!d.lid){d.doneT=(d.doneT||0)+dt;if(d.doneT>=DAY_LEN)potSpoil(p);}
   if(near){const busy=potBusy(p),rate=done?5:busy&&r>0?1.2:0;   // höyry: valmis = runsas, kypsyy = vähän; kansi päällä reunan raosta
     if(rate&&Math.random()<dt*rate){const a=Math.random()*TAU,rr=d.lid?.34:Math.random()*.2;emitEmber(p.x+Math.cos(a)*rr,p.y+(d.lid?1:.95),p.z+Math.sin(a)*rr,'steam');}
-    if(busy&&!done&&fireLit(p)){d.bubT=(d.bubT||0)-dt;if(d.bubT<=0){d.bubT=7+Math.random()*5;plSnd('rakentaminen','pata_kiehuu',Object.assign(potSndAt(p),{v:.6}));}}}
+    if(busy&&!done&&fireLit(p)){d.bubT=(d.bubT||0)-dt;if(d.bubT<=0){d.bubT=7+Math.random()*5;plSnd('rakentaminen','pata_kiehuu',Object.assign(potSndAt(p),{v:POT_BUB_V}));}}}
   if(openPanel==='pot'&&curPot===p){potUiT-=dt;if(potUiT<=0){potUiT=.4;potRefresh(false);}}}
 function potVis(p){const g=p.mesh.userData,d=p.data;if(!g.pot)return;g.pot.visible=!!d.pot;g.lid.visible=!!d.pot&&!d.spo;
   const bm=d.spo?POT_SPO_MAT:POT_MAT;if(g.pot.userData.body.material!==bm)g.pot.userData.body.material=bm;

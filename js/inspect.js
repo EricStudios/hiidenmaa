@@ -117,7 +117,7 @@ function inspectTipTick(){if(heldId===INS.lastHeld)return;INS.lastHeld=heldId;if
   el.classList.add('on');TUT.tipT=14;if(typeof RES!=='undefined')RES.tipT=14;if(typeof mSnd==='function')mSnd('napit','hover');}
 function inspectTick(dt){inspectTipTick();const I=P.insp;
   if(I){I.t+=dt;if(P.atk||P.drawing||P.blocking||P.carve||mouseL||mouseR||P.dead||P.swim||heldId!==I.item||state!=='play'&&state!=='ui'){inspectStop();return;}
-    if(!I.snd&&I.t>=INSP_SND_T){I.snd=true;if(I.auto||Math.random()<INSP_SND_P)plSnd('f_ihmettely',Math.random()<.5?'wow':'mmm');}
+    if(!I.snd&&I.t>=INSP_SND_T){I.snd=true;if(I.auto||Math.random()<INSP_SND_P)plSnd('f_ihmettely',Math.random()<.5?'wow':'mmm',{v:.85});   /* v3.05 käyttäjän äänet hieman hiljempaa */}
     if(I.t>=I.a.dur)inspectStop();return;}
   inspectAfkTick();
   const N=P.newItem;if(N&&!N.done&&state==='play'&&heldId&&heldId===N.id&&playTime-N.t<INSP_NEW_T&&(P.afkT||0)>INSP_AFK_T&&!P.atk&&!P.drawing){N.done=1;inspectStart(null,{auto:1});}}
