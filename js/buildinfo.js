@@ -28,7 +28,7 @@ function binfoEl(){let el=document.getElementById('binfo');if(el)return el;el=do
   el.addEventListener('mouseenter',()=>{clearTimeout(BI.hide);});el.addEventListener('mouseleave',()=>binfoHideSoon());document.body.appendChild(el);return el;}
 function binfoBind(card,t){}   // v3.06 delegoitu (binfoHover)
 function binfoHover(t){clearTimeout(BI.hide);if(t===BI.hovT)return;BI.hovT=t;clearTimeout(BI.show);if(!t){if(!BI.pin)binfoHideSoon();return;}
-  if(BI.cur===t&&!binfoEl().hidden)return;if(BI.pin&&BI.cur)return;BI.show=setTimeout(()=>{if(openPanel==='build'&&BI.hovT===t)binfoShow(t);},BINFO_DELAY*1000);}
+  if(BI.cur===t&&!binfoEl().hidden)return;if(BI.pin&&BI.cur)return;if(BI.cur&&!binfoEl().hidden){binfoShow(t);return;}   /* v3.07 käyttäjä: ikkuna jo auki → vaihtuu heti toiseen korttiin */BI.show=setTimeout(()=>{if(openPanel==='build'&&BI.hovT===t)binfoShow(t);},BINFO_DELAY*1000);}
 {const bc=document.getElementById('buildCards');if(bc){const cardOf=e=>{const c=e.target&&e.target.closest&&e.target.closest('.card[data-piece]');return c?c.dataset.piece:null;};
   bc.addEventListener('mouseover',e=>binfoHover(cardOf(e)));bc.addEventListener('mousemove',e=>binfoHover(cardOf(e)));bc.addEventListener('mouseleave',()=>binfoHover(null));}}
 addEventListener('keydown',e=>{if(e.code!=='KeyI'||openPanel!=='build'||e.repeat)return;const t=BI.cur||BI.hovT;if(!t)return;e.preventDefault();e.stopImmediatePropagation();

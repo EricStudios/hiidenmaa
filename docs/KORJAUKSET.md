@@ -601,3 +601,7 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 ## 80. Kommenttitarkistus: puolipiste + "v3.06 (" näyttää koodilta (v3.06)
 - `// v3.02 villikaura; v3.06 (käyttäjä): …` laukaisi KORJAUKSET 49 -tarkistuksen (puolipiste + nimi + sulku). Korjaus: pilkku puolipisteen sijaan.
 - **Sääntö:** `//`-kommentissa vältä `; sana (` -yhdistelmää.
+
+## 81. //-kommentti lisättiin rivin keskelle korvauksessa (v3.07, KORJAUKSET 49 uudelleen)
+- Python-korvauksessa lisätty `// selitys` päätyi rivin keskelle (savustimen malli: perässä `for`-silmukka ja `break;}` → syntaksivirhe; onkikoukku: fishTick:n loppurivi
+  kommentoitui pois). `node --check` paljasti molemmat. **Sääntö:** kun lisäät koodia olemassa olevan rivin keskelle, käytä AINA `/* */`; `//` vain kun rivin loppu on varmasti tyhjä.

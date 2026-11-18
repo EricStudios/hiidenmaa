@@ -3,31 +3,13 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.06, 18.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.07, 18.11.2026)
 
-- **⏯️ KESKEN: v3.07 (käyttäjän korjaukset v3.06:een, 18.11.) – kun käyttäjä sanoo "jatka nyt", jatka tästä listasta.** Vastaukset 5 kysymykseen kirjattu alle.
-  Iso päivitys (eri lista) tulee käyttäjältä myöhemmin – älä aloita sitä ennen kuin lista saapuu.
-  - ✅ TEHTY (commit WIP, ei vielä testattu): F-tarkastelun wow/mmm 10 % jokaisella toistolla (myös uusi esine); keitossa käytetty vesikulho → tyhjä kulho käteen
-    (`potCraft`, `updateGear`); polttoainemittari "100/100" → "jäljellä / enintään min" (`fuelCap`, `fuelText(rem,p)`); veden nimi vain kerran löydettäessä (`fishTick`).
-  - ⏳ TEKEMÄTTÄ:
-    1. Rikkaruohot: uusia lajeja, korsien kokovaihtelu, biomeittain eri pituus, vähemmän keltaisia, emissive pienemmäksi (`WEED_*`, resources.js).
-    2. Käsisoihtuun tulen ääni (lainaa palaminen, hiljaisempi kuin muut tulet; `fireSndTick` + `torchSlot`).
-    3. Kaatuva puu: pelaajalle aarnipuu 90 % maxHP, täysikasvuinen 60 %, pienet 40–50 % koon mukaan; eläimille sama % × vertailu-HP (karhu menettää aarnipuusta ~50 %, susi voi kuolla pienestä).
-    4. Vinkit: näyttöaika lukemisen mukaan (sanamäärä), katoaa nopeasti kun vinkkiä käyttää (`TIPS[].u`); tarkista että vinkit vain uusille / opastusmaailmaan (logiikka jo `tipsTick`).
-    5. Tietoikkuna vaihtuu heti korttien välillä (ei 1 s viivettä kun jo auki); ei selaimen vierityspalkkia eikä sivuttaisvieritystä; KAIKKIIN vieritettäviin teemoitettu oma
-       liukuri (CSS ::-webkit-scrollbar + scrollbar-color), paitsi DEV-valikoissa.
-    6. Hakkujen malli ontto (TorusGeometry-kaari) → päihin umpinaiset kärjet (models.js `makeHeld`).
-    7. Viljely: pelto → **Viljelylaatikko** (id `pelto`, puu, 1 kylvö, kasvu 60 %/uni, sato 9 + siemen takaisin) ja uusi **Kohopenkki** (kalliimpi, kivi+puu, 4 kylvöä,
-       kukin 9 + siemen, kasvu 70 %/uni). Maahan istutettu varpu/rihmasto/kaura: sato 2 + siemen, 30 %/uni. Puut ennallaan.
-    8. Kuokka + siemen toisessa kädessä ilman kyykkyä → ilmoitus "muista mennä kyykkyyn (näppäin)" eikä maanmuokkausta.
-    9. Pelin äänet: häivytys VAIN päävalikossa (tauko). Muissa paneeleissa (reppu, työpenkki, arkku, pata…) äänet soivat, mutta pieni alipäästösuodin ja −30 % voimakkuus.
-    10. Sulatusuunin tulisuu hehkuu kirkkaammaksi/keltaisemmaksi lämmön noustessa (oma materiaali, väri lämmön mukaan); sama savustimeen (lämpö savustaessa).
-    11. Hiili lämmittää sulatusuunin 20 % nopeammin (seuraa hiilipolttoainetta `D.coal`).
-    12. Onki: malliin koukku roikkumaan kärjestä (piiloon heiton ajaksi).
-    13. Testit (tarkistus + uudet rivit, full157), muistio + **valmiiden ominaisuuksien lista** muistioon, versio 3.07, commit, push, PR, testilinkki muodossa
-        `https://raw.githack.com/erboiyprogamer-source/hiidenmaa/claude/hiidenmaa-survival-game-fmxt0m/index.html`.
-  - Vastaukset: nimet Viljelylaatikko + Kohopenkki (kohopenkki kalliimpi, 4 erää × 9, +10 % kasvu); äänet kuten kohta 9; "kommentointi" = F-tarkastelun wow/mmm harvemmin;
-    puun isku pelaajaan, eläimille vahvuuden mukaan; iso päivitys on erillinen lista, joka tulee myöhemmin.
+- **Versio 3.07** – käyttäjän korjaukset ja ideat v3.06:een (16 kohtaa, ks. versioloki v3.07). Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`;
+  PR #48 (v3.06) ja v3.07 samassa haarassa – muistuta käyttäjää yhdistämään.
+- **SEURAAVAKSI:** käyttäjä lähettää **erillisen ison päivityksen listan** (voi sisältää jo tehtyjä asioita – tarkista "Valmiit ominaisuudet" -listasta alta, ettei tehdä
+  tuplaan). Sen jälkeen uusi saari (Ideajono › C). Testilinkki aina muodossa `https://raw.githack.com/erboiyprogamer-source/hiidenmaa/<haara>/index.html`.
+- **Valmiit ominaisuudet** – tiivis lista koko pelistä: ks. osio "✅ VALMIIT OMINAISUUDET" heti tämän osion jälkeen.
 
 - **Versio 3.06** – iso päivitys: lista A (16 kohtaa) + onkimispäivitys B toteutettu (ks. versioloki v3.06). Valikossa yhä **Early Access 1.1** (2.0 varattu uuden saaren
   päivitykseen). Haara `claude/hiidenmaa-survival-game-fmxt0m`, PR #47 (v3.05) yhdistetty; v3.06 uudessa PR:ssä. Pages päivittyy vasta Mergen jälkeen.
@@ -46,6 +28,30 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 - **Korjattu v3.02:** v2.99:n kaiku kaatoi pelisilmukan ("Failed to execute 'connect' on 'AudioNode'") ja jäädytti kameran – KORJAUKSET 75.
   Asetussiirtojen järjestys v7/v8 – KORJAUKSET 76. v3.03: villikauran solmu-id:t siirsivat kasvaneiden puiden id:t – KORJAUKSET 77.
 - Testit: `tools/tarkistus.mjs` KAIKKI OK (v3.06-rivi kattaa kaikki uudet järjestelmät), full157 6/6 karttaa.
+
+## ✅ VALMIIT OMINAISUUDET (päivitetty v3.07 – tarkista ennen uutta työtä, ettei tehdä tuplaan; yksityiskohdat OMINAISUUDET.md)
+- **Maailma:** 6 karttaa + seed (paikat ja kasvillisuus seedin mukaan), 13 biomia, päivä/yö, sää (sade, myrsky, sumu, lumi, ukkonen), tuuli, pilvet, vesi ja aallot,
+  Kalmanummen usva, riimukivet, rauniot, linnakkeet, hylätyt leirit (teltta, halkopino, kuivausteline), kiviröykkiöt, kyltit, maailman arkut, upponut arkku.
+- **Selviytyminen:** nälkä, kylmä, lepo, kodin lämpö (kodin taso), uinti ja hukkuminen, kuolema + hautakasa + kuolinruutu syyn mukaan, tyhjyyteen putoaminen,
+  kantokyky 60 → 200 (reppu, saavutukset, tasot), ylikuorma.
+- **Keräily ja uusiutuminen:** puut (kaato, tukit, pihkapuut 3 % + kaiverrus + kulho), kivet ja malmit, poimittavat (oksa, kivi, piikivi, hiekka, marjat, sieni, villikaura);
+  puut ja kivet uusiutuvat nukkuessa 20 %, poimittavat 10 min + 60 m + 20 %; myrsky kaataa puita; kaatuva puu vahingoittaa (aarnipuu 90 %, iso 60 %, pieni 40–50 %).
+- **Viljely:** siemenet (5 %, pihkapuu 70 %), taimet kuokalla kyykyssä (30 %/uni), viljelylaatikko (60 %/uni, 9 + siemen), kohopenkki (4 kylvöä, 70 %/uni), maahan 2 + siemen.
+- **Valmistus ja työpisteet:** työpenkki, ahjo, nuotio/grillinuotio (paisto, hiilos 10 min), keittopata (pataruoat, kansi, pilaantuminen, vesi), sulatusuuni (jono 5,
+  polttoaine, lämpömittari, hehku, hiili +20 %), savustin, veden kerääjä, katiska, kalanaulakko, arkut/tynnyrit (kiviversiot), sänky, soihdut (teline, kivinen, seinä).
+- **Rakentaminen:** ruudukko + 7 kohdistustilaa (reuna, jatko), seinät, lattiat, katot (olki, kivi), palkit, portaat, tikkaat, ovet (animoitu), lasi-ikkunat, kivirakennus,
+  tasovaatimukset, rakennusvalikon tietoikkuna (1 s, I lukitsee, 3D-kuva), korjaus ja purku, kaukaisten rakennusten yhdistäminen.
+- **Taistelu:** aseet (nuija, kirveet, keihäs, miekat, hiidenmiekka, puukko), kilpi (torjunta, kestävyys), jousi (lentorata, pääosuma, nuolityypit, tulinuolet),
+  haarniskat, olentojen luonteet, vaanivat, jousikalmot, auringossa palavat, eläinten perheet, syöminen/juominen, 4 pomoa (herätys, vaiheet, kuolema), Kalmanvartija.
+- **Eteneminen:** tasot 1–30 (palkinnot), XP, tavoitteet (GOALS), saavutukset, tehtävät, opastus + kertavinkit (vain uusille, lukuaika), avainketju ulottuvuuksiin
+  (Kalmon sinetti, Jääavain, 3 ulottuvuutta: Routaluola jäälätäköineen, Kalmankammio, Aarnihauta), hiidenkivet 9, kruunusirpaleet.
+- **Onkiminen:** nimetyt vedet (kartta, löytö), 3 vapaa, mato, tärppi + väsytys, 8 lajia aika/sää, ennätykset, kalaruoat, kalastajan kirja + tavoitteet, muut saaliit.
+- **Käyttöliittymä:** HUD (skaala), kartta (zoom, sumu, tuulikompassi), reppu (raahaus, jako), teemoitetut valikot, omat vierityspalkit, ilmoitusasetus, F-tarkastelu
+  (11 animaatiota), E-käsiliike, pikapaikat, näppäinasetukset, 5 tallennuspaikkaa + tallennuskoodi, päävalikko (21 taustaa, logoteemat), Poistu-ruksi, DEV-työkalut.
+- **Grafiikka:** esiasetukset Low…Ultra + High+, automaattisäätö, varjot (soihtuvarjot), auringonsäteet ja linssiheijastus, ruoho + korkeat tupsut + Ultra-rikkaruohot
+  (3 lajia, taipuvat), biomien sekoitus, maaston väritystarkkuus, veri ja haavat, savut, Extra-grafiikka.
+- **Äänet:** käyttäjän äänet (olennot, toiminnot, pelaaja, valikot, sää ja tunnelma, musiikki, ilmoitukset), 3D-äänet, kaiku, vedenalainen suodatus, rakeinen tulen
+  rätinä (myös käsisoihtu), paneeleissa −30 % + alipäästö; paikkamerkit odottavat (onkiminen ym.).
 
 ## Peli lyhyesti
 
@@ -326,6 +332,8 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.07:** puun isku pelaajalle aarnipuu 0,9 / iso 0,6 / pieni 0,4 × maxHP, eläimille × 67 (±25 %) · viljelylaatikko 60 %/uni 9 + siemen, kohopenkki 4 × 9 + siemen 70 %/uni, maahan 2 + siemen ·
+sulatusuuni hiilellä lämpenee 1,2× · savustin lämpenee 30 s · paneeleissa äänet 0,7 + LP 4 200 Hz · vinkit 4–9 s (2 + 0,28 s/sana) · F-äänet 10 % · käsisoihtu 0,2.
 **v3.06:** kantokyky 60 + reppu 2 × 15 + saavutukset 50 + tasot 60 = 200 · uusiutuminen: puut ja kivet (5 vrk jälkeen) 20 % / uni, poimittavat 10 min + 60 m + 20 % / min ·
 siemen 5 % (pihkapuu 70 %), taimi ja pelto 30 % / uni, pellon sato marjat 4–6, sienet 3–4, kaura 4–6 · sulatusuuni: kupari 7 s, rauta 10 s, lasi 15 s, puu 20 s, hiili 200 s,
 max 600 s, kuumenee 45 s, jäähtyy 120 s · onki: tärppi 60–300 s × vapa (1 / 0,8 / 0,65) × syötti 0,75 / aktiivisuus, min 30 s, ikkuna 0,6 s (hiidenvapa 0,7), siima
@@ -390,6 +398,24 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.07 (käyttäjän korjaukset ja ideat v3.06:een – 5 vastausta)
+- **Rikkaruohot:** 3 lajia (heinäkorsi, lehtevä putkikasvi valkoisella sarjalla, ohdake violetilla mykerolla), korsien leveys/pituus vaihtelee, biomeittain korkeus (`WEED_H`
+  niitty 1,85, koivikko 1,35, metsä 0,95) ja lajisuhteet (`WEED_MIX`), värit hillityt (ei keltaisia), hohto 0x0a0904.
+- **Käsisoihtu** soi rakeisella tulen äänellä (`FIRE_V.kasi` 0,2 < soihtu 0,35; ei vie FIRE_MAX-paikkaa, seuraa pelaajaa).
+- **Kaatuva puu** (`treeCrushK`): pelaajalle aarnipuu 90 %, koko ≥ 1,4 60 %, 0,6 → 40 % maksimiterveydestä; eläimille sama × `TREE_REF` 67 (±25 %) → karhu ≈ 50 % aarnipuusta.
+- **Vinkit:** näyttöaika sanamäärän mukaan 4–9 s (`tipReadT`, ennen 10 s), katoaa 0,7 s:ssa kun vinkkiä käyttää (`TIPS[].u`). Vain uusille / opastuksella (ennallaan).
+- **Tietoikkuna** vaihtuu heti kortilta toiselle, ei sivuttaisvieritystä; **kaikki vierityspalkit** pelin teemassa (`:where(:not(#devP…))::-webkit-scrollbar`, Firefox `scrollbar-color`), DEV-valikot oletus.
+- **Hakut:** kaaren päihin kartiokärjet (ennen ontto putki näkyi läpi). **Onki:** kärjestä roikkuu koukku (pystyyn maailman suunnassa, piiloon heitossa).
+- **F-tarkastelun wow/mmm** 10 % jokaisella toistolla (myös uusi esine; ennen 30 % / aina).
+- **Viljely:** pelto → **Viljelylaatikko** (puu 4, 60 %/uni, 9 + siemen), uusi **Kohopenkki** (kivi 10 + puu 4, taso 6, 4 kylvöä × 9 + siemen, 70 %/uni), maahan istutettu
+  varpu/rihmasto/kaura 2 + siemen (siemen vasta onnistuneen poiminnan jälkeen – ei tuplausta täydellä repulla). Kuokka + siemen ilman kyykkyä → muistutus (`plantHint`), ei maanmuokkausta.
+- **Äänet paneeleissa:** häivytys vain päävalikossa/tauolla; repussa, työpenkillä, arkulla, padalla äänet jatkuvat −30 % (`UI_G`) + alipäästö 4,2 kHz (`UI_LP`); tulet, olennot ja askeleet eivät enää katkea.
+- **Hehku:** sulatusuunin tulisuu tummasta punaiseen, oranssiin ja kirkkaan keltaiseen sulatuslämmössä (`heatGlow`, `GLOW_STOPS`); savustin lämpenee 30 s / jäähtyy 90 s ja hehkuu.
+  **Hiili** lämmittää sulatusuunin 20 % nopeammin (`D.coal`, `SM_COAL_K`, tallentuu).
+- **Korjaukset:** keitossa käytetty vesikulho → tyhjä kulho käteen (malli päivittyy); polttoainemittari "100/100" (prosentti viimeisestä täytöstä) → "jäljellä / enintään min" (`fuelCap`);
+  veden nimi vain kerran löydettäessä (ennen joka pelin alussa, koska `FS.lastT` nollautui).
+- Tarkistus: uusi v3.07-rivi; päivitetty v3.06 (kasvu, sato), v2.98 (F-ääni 10 %), äänet-rivi (SBUS.tg).
 
 ### v3.06 (iso päivitys: lista A 16 kohtaa + onkiminen – käyttäjän suunnitelma ja 20 vastausta)
 - **Kantokyky** (A4, A9): alku 60 (`W_BASE`), reppu +15/taso (2 tasoa = 30), saavutukset yhteensä +50 (uusi Kalamies 25 kalaa +5), tasot +60 (`LVL_REW`: taso 2 +10, taso 3 +8,

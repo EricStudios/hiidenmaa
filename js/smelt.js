@@ -8,7 +8,11 @@
    - Mittarit: lämpötila (°C), polttoaine, nykyisen sulatuksen edistyminen ja arvio koko jonon kestosta (+ riittääkö polttoaine).
    Vanha tallennus (ore/iore/sand/pp/wood) muunnetaan jonoksi smInit:ssä. */
 'use strict';
-const SM_Q=5,SM_HEAT_T=45,SM_COOL_T=120,SM_PUU_S=20,SM_HIILI_S=200,SM_FUEL_MAX=600,SM_C0=20,SM_C1=1100;
+const SM_Q=5,SM_HEAT_T=45,SM_COOL_T=120,SM_PUU_S=20,SM_HIILI_S=200,SM_FUEL_MAX=600,SM_C0=20,SM_C1=1100,SM_COAL_K=1.2;   // v3.07 hiili lämmittää 20 % nopeammin (D.coal = hiilen osuus s)
+/* v3.07 käyttäjä: TULISUUN HEHKU lämmön mukaan – tumma → punainen → oranssi → kirkkaan keltainen sulatuslämmössä (heatGlow, myös savustin). */
+const GLOW_STOPS=[[0,0x0c0908],[.3,0x6a1606],[.7,0xe0601a],[.95,0xffb040],[1,0xffe68a]],_glC=new THREE.Color(),_glC2=new THREE.Color();
+function heatGlow(mesh,h,dark){if(!mesh)return;if(h<.02){if(mesh.material!==dark)mesh.material=dark;return;}if(!mesh.userData.gm)mesh.userData.gm=new THREE.MeshBasicMaterial({color:0});const m=mesh.userData.gm;if(mesh.material!==m)mesh.material=m;
+  let i=0;while(i<GLOW_STOPS.length-2&&h>GLOW_STOPS[i+1][0])i++;const [a,ca]=GLOW_STOPS[i],[b,cb]=GLOW_STOPS[i+1];m.color.copy(_glC.setHex(ca)).lerp(_glC2.setHex(cb),clamp((h-a)/(b-a),0,1));}
 const SM_ITEMS={malmi:{t:7,max:10,out:{kupari:1}},rautamalmi:{t:10,max:10,out:{rauta:1}},hiekka:{t:GLASS_T,max:20,per:2,out:{lasi:1}},pilapata:{t:POT_MELT_T,max:2,out:POT_MELT}};
 const SM_OUT_KEY={kupari:'done',rauta:'idone',lasi:'glass'};
 let curSmelt=null,smSig='',smUiT=0;
@@ -16,7 +20,7 @@ function smInit(p){const D=p.data;
   if(!Array.isArray(D.q)){D.q=new Array(SM_Q).fill(null);const push=(id,n)=>{n=Math.max(0,n|0);if(!n)return;const i=D.q.indexOf(null);if(i>=0)D.q[i]={id,n};};
     const sd=D.sand|0;push('malmi',D.ore);push('rautamalmi',D.iore);push('hiekka',sd-sd%2);push('pilapata',D.pp);if(sd%2)D.rh=(D.rh|0)+1;D.fuel=Math.min(SM_FUEL_MAX,(D.wood|0)*SM_PUU_S);D.lit=D.fuel>0;D.heat=0;D.prog=0;}
   while(D.q.length<SM_Q)D.q.push(null);D.q.length=SM_Q;D.q=D.q.map(s=>s&&SM_ITEMS[s.id]&&s.n>0?{id:s.id,n:s.n|0}:null);smCompact(D);
-  D.fuel=clamp(+D.fuel||0,0,SM_FUEL_MAX);D.heat=clamp(+D.heat||0,0,1);D.prog=Math.max(0,+D.prog||0);D.lit=!!D.lit;D.done=D.done|0;D.idone=D.idone|0;D.glass=D.glass|0;D.rh=D.rh|0;
+  D.fuel=clamp(+D.fuel||0,0,SM_FUEL_MAX);D.coal=clamp(+D.coal||0,0,D.fuel);D.heat=clamp(+D.heat||0,0,1);D.prog=Math.max(0,+D.prog||0);D.lit=!!D.lit;D.done=D.done|0;D.idone=D.idone|0;D.glass=D.glass|0;D.rh=D.rh|0;
   for(const k of ['ore','iore','sand','pp','wood','t','job','ppT'])delete D[k];}
 function smCompact(D){const a=D.q.filter(Boolean);while(a.length<SM_Q)a.push(null);D.q=a;}
 function smFront(D){return D.q.find(Boolean)||null;}
@@ -29,13 +33,13 @@ function smUnits(s){const it=SM_ITEMS[s.id];return Math.floor(s.n/(it.per||1));}
 function smEta(p){const D=p.data;let t=0;D.q.forEach((s,i)=>{if(!s)return;t+=smUnits(s)*SM_ITEMS[s.id].t;});const f=smFront(D);if(f)t-=Math.min(D.prog,SM_ITEMS[f.id].t);
   return {work:Math.max(0,t),heat:(1-D.heat)*SM_HEAT_T};}
 function smTick(p,dt){const D=p.data;if(!D.q)smInit(p);const burn=smBurning(p);
-  if(burn){D.fuel=Math.max(0,D.fuel-dt);D.heat=Math.min(1,D.heat+dt/SM_HEAT_T);if(D.fuel<=0){D.lit=false;if(dist2(p.x,p.z,P.pos.x,P.pos.z)<30*30)msg('Sulatusuunin polttoaine loppui – uuni jäähtyy.','warn');}}
+  if(burn){D.fuel=Math.max(0,D.fuel-dt);D.heat=Math.min(1,D.heat+dt/SM_HEAT_T*(D.coal>0?SM_COAL_K:1));D.coal=Math.max(0,Math.min(D.fuel,(D.coal||0)-dt));if(D.fuel<=0){D.lit=false;if(dist2(p.x,p.z,P.pos.x,P.pos.z)<30*30)msg('Sulatusuunin polttoaine loppui – uuni jäähtyy.','warn');}}
   else D.heat=Math.max(0,D.heat-dt/SM_COOL_T);
   const f=smFront(D);
   if(f&&burn&&smHot(p)){const it=SM_ITEMS[f.id],per=it.per||1;if(f.n<per){D.rh+=f.id==='hiekka'?f.n:0;D.q[D.q.indexOf(f)]=null;smCompact(D);D.prog=0;}
     else{D.prog+=dt;if(D.prog>=it.t){D.prog=0;f.n-=per;for(const [o,n] of Object.entries(it.out))D[SM_OUT_KEY[o]]=(D[SM_OUT_KEY[o]]|0)+n;bump('smelted');
       if(f.n<per){if(f.id==='hiekka')D.rh+=f.n;D.q[D.q.indexOf(f)]=null;smCompact(D);}smeltDone(p);}}}
-  {const gl=p.mesh.userData.glow;if(gl){gl.visible=true;const mt=burn?MAT.flame:SMELT_DARK;if(gl.material!==mt)gl.material=mt;}}   /* v2.84 sammuneena tulisuu musta */
+  {const gl=p.mesh.userData.glow;if(gl){gl.visible=true;heatGlow(gl,D.heat*(burn?1:.85),SMELT_DARK);}}   /* v2.84 sammuneena tulisuu musta (SMELT_DARK), v3.07 hehku lämmön mukaan */
   if(openPanel==='smelt'&&curSmelt===p){smUiT-=dt;if(smUiT<=0){smUiT=.25;smRefresh(false);}}}
 function smLabel(p){const D=p.data;if(!D.q)smInit(p);const n=smOutN(D),f=smFront(D);
   return n?`Sulatusuuni: valmiita ${n} – avaa (E)`:f?`Sulatusuuni: ${smHot(p)?'sulattaa':smBurning(p)?'lämpenee '+smCelsius(D)+' °C':'kylmä – lisää polttoainetta'} (E)`:`Sulatusuuni (${smBurning(p)?smCelsius(D)+' °C':'sammunut'}) – avaa (E)`;}
@@ -52,7 +56,7 @@ function smUnqueue(p,i){const D=p.data,s=D.q[i];if(!s)return;const front=smFront
 function smFuel(p,id,n){const D=p.data,v=id==='hiili'?SM_HIILI_S:SM_PUU_S;let k=0;
   while(k<n&&invCount(id)>k&&D.fuel+v*(k+1)<=SM_FUEL_MAX+1e-6)k++;
   if(!k){msg(invCount(id)?`Uunissa on jo polttoainetta ${fmtMin(D.fuel)} (enintään ${fmtMin(SM_FUEL_MAX)}).`:`Sinulla ei ole: ${ITEMS[id].n.toLowerCase()}.`,'warn');return;}
-  invRemove(id,k);D.fuel+=v*k;D.lit=true;sfx('build');msg(`Polttoaine: +${k} ${ITEMS[id].n.toLowerCase()} (${fmtMin(D.fuel)}).`);smRefresh(true);}
+  invRemove(id,k);D.fuel+=v*k;if(id==='hiili')D.coal=(D.coal||0)+v*k;D.lit=true;sfx('build');msg(`Polttoaine: +${k} ${ITEMS[id].n.toLowerCase()} (${fmtMin(D.fuel)}).`);smRefresh(true);}
 function smToggle(p){const D=p.data;if(D.lit){D.lit=false;msg('Sammutit uunin – polttoaine säästyy, uuni jäähtyy.');}else if(D.fuel>0){D.lit=true;msg('Sytytit uunin.');}else msg('Lisää ensin polttoainetta.','warn');smRefresh(true);}
 function smTake(p){const D=p.data;let got=0;
   for(const [o,k] of Object.entries(SM_OUT_KEY))if(D[k]>0){giveOrDrop(o,D[k],p.x,p.y+1,p.z);got+=D[k];D[k]=0;}if(D.rh>0){giveOrDrop('hiekka',D.rh,p.x,p.y+1,p.z);D.rh=0;got++;}

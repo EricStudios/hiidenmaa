@@ -49,7 +49,8 @@ const PIECES={
   katiska:{n:'Katiska',req:{puu:4,naru:1},hp:60,snap:'free',cat:'tyopisteet',lvl:4,noBench:1,water:1},   // v3.06 onkiminen (fish.js): pyydys veteen
   savustin:{n:'Savustin',req:{kivi:8,puu:6},hp:140,snap:'free',cat:'tyopisteet',lvl:5},   // v3.06 savukala
   kalanaulakko:{n:'Kalanaulakko',req:{puu:3,rauta:1},hp:40,snap:'free',cat:'kalusto',lvl:3,wallMount:1},   // v3.06 ennätyskala seinälle
-  pelto:{n:'Pelto',req:{puu:3,kivi:2},hp:80,snap:'free',cat:'tyopisteet',lvl:3,noBench:1},   // v3.06 viljely (farm.js): kylvö, kasvu nukkuessa, sato
+  pelto:{n:'Viljelylaatikko',req:{puu:4},hp:80,snap:'free',cat:'tyopisteet',lvl:3,noBench:1},   // v3.06 viljely (farm.js); v3.07 nimi: 1 kylvö, 60 %/uni, 9 + siemen
+  kohopenkki:{n:'Kohopenkki',req:{kivi:10,puu:4},hp:160,snap:'free',cat:'tyopisteet',lvl:6,noBench:1},   // v3.07 kivireunainen, 4 kylvöä, 70 %/uni
   vedenkeraaja:{n:'Veden kerääjä',req:{kupari:4,rauta:2},hp:160,snap:'free',cat:'tyopisteet',lvl:6},   // v3.06 sadevesi (pot.js waterTick)
   sulatin:{n:'Sulatusuuni',req:{kivi:20,puu:4},hp:300,snap:'free',cat:'tyopisteet'},
   ahjo:{n:'Ahjo',req:{kivi:10,kupari:6,puu:4},hp:300,snap:'free',cat:'tyopisteet'},
@@ -134,7 +135,7 @@ function potLidPose(g,on){const l=g.userData.lid;if(!l)return;if(on){l.position.
 function potInit(p){const d=p.data;d.pot=d.pot?1:0;d.spo=d.spo?1:0;d.lid=d.lid?1:0;d.job=d.job||null;d.doneT=d.doneT||0;d.cook=d.cook||[];potLidPose(p.mesh,!!d.lid);}
 const FUEL_MAX=40,COOKABLE={liha:'paisti',pienliha:'pienpaisti',suurliha:'suurpaisti'},COOK_T={pienliha:[7,3],liha:[9,5],suurliha:[14,5],sieni:[8,4]};   /* v3.02 sieni kypsyy vain keittopadassa (POT_COOK, pot.js) */   // v2.80 kypsymisaika [min, +satunnainen] s
 for(const d of Object.values(PIECES))if(d.base){const b=PIECES[d.base];for(const k of ['poses','flip','span2','noBench','store','col','dim'])if(d[k]===undefined&&b[k]!==undefined)d[k]=b[k];}
-const FIELD_W=2.4;   // v3.06 pellon sivu (m), farm.js
+const FIELD_W=2.4,BED_W=2.6;   // v3.06 viljelylaatikon sivu (m), v3.07 kohopenkin sivu; farm.js
 const BUILD_CATS=[['alku','Alkupeli'],['seinat','Seinät ja lattiat'],['katot','Katot'],['palkit','Palkit ja pylväät'],['portaat','Portaat ja tikkaat'],['kalusto','Kalusto'],['tyopisteet','Työpisteet'],['valo','Valo'],['puolustus','Puolustus'],['kivi','Kivirakennus'],['kivikatot','Kivikatot']];
 // Portaiden geometria asennon mukaan: 0 tavallinen, 1 jyrkkä (puolet syvyydestä), 2 loiva (puolet korkeudesta).
 // v2.13 tikkaiden kulmat: asento f 0–2 = pysty, 1:3, 1:2. Jokainen tikas nousee WH:n ja siirtyy sivulle (yläpää taaksepäin, -z) G/3 tai G/2 →
@@ -179,6 +180,7 @@ function pieceBoxes(t,f=0){const def=PIECES[t];t=bt(t);if(def.dim)return[[0,def.
   case 'patanuotio':return[[0,.15,0,1.3,.3,1.3],[0,.72,0,.62,.5,.62]];
   case 'sulatin':return[[0,1.3,0,1.4,2.6,1.4]];
   case 'pelto':return[[0,.06,0,FIELD_W,.12,FIELD_W]];
+  case 'kohopenkki':return[[0,.22,0,BED_W,.44,BED_W]];   // v3.07 korotettu: päälle voi astua (alle STEPUP)
   case 'katiska':return[];case 'kalanaulakko':return[];case 'savustin':return[[0,.9,0,1.1,1.8,1.1]];   // v3.06   // v3.06 matala: päälle voi kävellä
   case 'vedenkeraaja':return[[0,.42,0,1.15,.84,1.15]];
   case 'ahjo':return[[0,.55,0,1.7,1.1,1]];
@@ -250,8 +252,12 @@ function buildPieceMesh(t,f=0){
       for(const x of [-.5,.5]){const f=new THREE.Mesh(new THREE.ConeGeometry(.32,.3,10,1,true),wr);f.rotation.z=x<0?-Math.PI/2:Math.PI/2;f.position.set(x*.86,.35,0);g.add(f);}for(const x of [-.5,0,.5]){const r=new THREE.Mesh(new THREE.TorusGeometry(.32,.015,4,12),MAT.wood);r.rotation.y=Math.PI/2;r.position.set(x,.35,0);g.add(r);}
       const fl=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),mat(0xd83a2a));fl.position.set(0,1.1,0);g.add(fl);g.add(bx(.02,.75,.02,mat(0xd8d0b8),0,.72,0));break;}
     case 'savustin':{g.add(bx(1.1,.5,1.1,MAT.stone,0,.25,0),bx(1,1.1,1,MAT.wood,0,1.05,0),bx(1.15,.1,1.15,MAT.wood,0,1.65,0),bx(.25,.3,.25,MAT.stone,.3,1.85,.3));   // v3.06 savustin: kivijalka, puinen kaappi, piippu
-      g.add(bx(.4,.25,.04,mat(0x1a1410),0,.22,.56));for(let i=0;i<3;i++)g.add(bx(.86,.03,.03,mat(0x3a3a3a,{metalness:.5}),0,.7+i*.3,0));break;}
+      {const gl=bx(.4,.25,.04,SMELT_DARK,0,.22,.56,false);g.add(gl);g.userData.glow=gl;}   /* v3.07 tulisuu hehkuu savustaessa (heatGlow) */for(let i=0;i<3;i++)g.add(bx(.86,.03,.03,mat(0x3a3a3a,{metalness:.5}),0,.7+i*.3,0));break;}
     case 'kalanaulakko':{g.add(bx(.7,.36,.04,MAT.wood,0,0,.02));g.add(bx(.04,.04,.06,mat(0x3a3a3a,{metalness:.6}),0,.12,.06));const fm=new THREE.Group();fm.position.set(0,-.02,.1);g.add(fm);g.userData.fishM=fm;break;}   // v3.06 kalanaulakko
+    case 'kohopenkki':{const st=MAT.stone,soil=mat(0x3a2a1a,{roughness:1}),ridge=mat(0x4a3622,{roughness:1});g.add(bx(BED_W-.3,.4,BED_W-.3,soil,0,.2,0));   // v3.07 kohopenkki: kivireunus, multakumpu, 4 lohkoa
+      for(let i=0;i<10;i++){const t=(i+.5)/10*BED_W-BED_W/2;for(const [x,z] of [[t,BED_W/2-.12],[t,-BED_W/2+.12],[BED_W/2-.12,t],[-BED_W/2+.12,t]])g.add(bx(.26,.44,.26,st,x,.22,z));}
+      g.add(bx(.08,.06,BED_W-.4,MAT.wood,0,.43,0),bx(BED_W-.4,.06,.08,MAT.wood,0,.43,0));for(const [x,z] of [[-.6,-.6],[.6,-.6],[-.6,.6],[.6,.6]])g.add(bx(.9,.06,.9,ridge,x,.42,z));
+      const cg=new THREE.Group();cg.position.y=.45;g.add(cg);g.userData.crop=cg;break;}
     case 'pelto':{const soil=mat(0x3a2a1a,{roughness:1}),ridge=mat(0x4a3622,{roughness:1});g.add(bx(FIELD_W,.1,FIELD_W,soil,0,.05,0));   // v3.06 pelto: multa, vaot ja laudoitus
       for(let i=0;i<3;i++)g.add(bx(FIELD_W-.2,.08,.36,ridge,0,.13,(i-1)*.7));
       for(const [w,d,x,z] of [[FIELD_W+.1,.08,0,FIELD_W/2],[FIELD_W+.1,.08,0,-FIELD_W/2],[.08,FIELD_W,FIELD_W/2,0],[.08,FIELD_W,-FIELD_W/2,0]])g.add(bx(w,.16,d,MAT.wood,x,.08,z));
@@ -339,7 +345,7 @@ function addPiece(t,x,y,z,rot,hp,data,f=0){
   if(t==='tyopenkki')p.ring=makeBenchRing(x,z,y<DUN.y+5&&y>DUN.y-5&&Math.abs(y-terrainH(x,z))>3?y:null);
   if(def.store){p.data.lv=p.data.lv||0;p.data.items=p.data.items||[];while(p.data.items.length<storeSlots(p))p.data.items.push(null);}
   if(bt(t)==='ovi'){p.data.open=!!p.data.open;setDoor(p,p.data.open,p.data.dir||1,true);}
-  pieces.push(p);pieceRoots.push(mesh);setPieceDamage(p);markShadowDirty();if(t==='kalanaulakko'&&typeof nauVis==='function')nauVis(p);if(t==='pelto'&&typeof fieldVis==='function')fieldVis(p);return p;
+  pieces.push(p);pieceRoots.push(mesh);setPieceDamage(p);markShadowDirty();if(t==='kalanaulakko'&&typeof nauVis==='function')nauVis(p);if((t==='pelto'||t==='kohopenkki')&&typeof fieldVis==='function')fieldVis(p);return p;
 }
 function removePiece(p){markShadowDirty();scene.remove(p.mesh);if(p.ring){scene.remove(p.ring);p.ring.geometry.dispose();}for(const c of p.cols)gridRemove(c);pieces.splice(pieces.indexOf(p),1);pieceRoots.splice(pieceRoots.indexOf(p.mesh),1);if(p.light){const i=lightSources.indexOf(p.light);if(i>=0)lightSources.splice(i,1);}}
 // Ovi aukeaa pelaajasta poispäin (dir ±1 = kummalle puolelle lehti kääntyy), sarana pysyy samassa kohdassa.
@@ -371,7 +377,7 @@ function nearPiece(t,x,z,r){for(const p of pieces)if(p.t===t&&dist2(p.x,p.z,x,z)
    joten lähellä kaikki toimii kuten ennen (osumat, purku, korjaus, ovet). Alkuperäiset meshit vain piilotetaan (säteen osumat toimivat
    piilotettuihinkin). Ei yhdistetä: tulet, säiliöt, ovet, lasit, hehkuvat ja renkaalliset osat. Vaurio tai osien muutos solussa → purku. */
 const BM_CELL=24,BM_FAR=70,BM_NEAR=60,BMC=new Map();
-function bmOk(p){if(p._bmOk!==undefined)return p._bmOk;let ok=!isFirePiece(p.t)&&!PIECES[p.t].store&&!p.ring&&p.t!=='pelto'&&p.t!=='kalanaulakko'&&p.t!=='savustin';   /* v3.06 pellon kasvit vaihtuvat */
+function bmOk(p){if(p._bmOk!==undefined)return p._bmOk;let ok=!isFirePiece(p.t)&&!PIECES[p.t].store&&!p.ring&&p.t!=='pelto'&&p.t!=='kohopenkki'&&p.t!=='kalanaulakko'&&p.t!=='savustin';   /* v3.06 pellon kasvit vaihtuvat */
   if(ok)p.mesh.traverse(o=>{const u=o.userData;if(u.flame||u.food||u.leaf||u.glass||u.glow||u.lid)ok=false;if(o.isMesh&&(Array.isArray(o.material)||o.material.transparent))ok=false;});return p._bmOk=ok;}
 const _bmN3=new THREE.Matrix3(),_bmV=new THREE.Vector3();
 function bmBuild(e){let n=0;const gs=e.list.map(o=>{const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry;n+=g.attributes.position.count;return g;});

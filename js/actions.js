@@ -31,7 +31,7 @@ function terraTool(mode){
   terraFlush();mudFlush();for(const n of nodesNear(c.x,c.z,R+3,_sh))syncNodeY(n);
   if(Math.random()<WORM_P){spawnDrop('mato',1,c.x,terrainH(c.x,c.z)+.3,c.z);msg('Maasta kiemurteli kastemato – hyvää syöttiä!','loot');}   // v3.06 syötti 2 %
   sfx('build');burst(c.x,terrainH(c.x,c.z)+.2,c.z,mode==='path'?0x7a5a38:0x6b5a3a,8,3);}
-function useTool(alt){const w=curWeapon();if(w.cat!=='shovel')return;if(!alt&&plantMode()){plantTry();return;}   /* v3.06 kuokka + kyykky + siemen toisessa kädessä = istutus (farm.js) */terraTool(w.id==='kuokka'?(alt?'restore':'raise'):(alt?'path':'dig'));}
+function useTool(alt){const w=curWeapon();if(w.cat!=='shovel')return;if(!alt&&plantMode()){plantTry();return;}if(!alt&&w.id==='kuokka'&&!P.crouch&&seedHeld()){plantHint();return;}   /* v3.07 käyttäjä: muistutus kyykystä, ei maanmuokkausta siemen kädessä */   /* v3.06 kuokka + kyykky + siemen toisessa kädessä = istutus (farm.js) */terraTool(w.id==='kuokka'?(alt?'restore':'raise'):(alt?'path':'dig'));}
 /* v2.01: jousi laukeaa vasta, kun vetoa on kestänyt vähintään BOW_MIN_T (v2.03: 0,4 s); lyhyempi veto peruuntuu (nuoli ei kulu), ilmoitus enintään 4 s välein. */
 const BOW_MIN_T=.4;   // v2.03: 0,7 → 0,4 s
 function bowCancel(){if(playTime-(P.bowCancelMsg||-99)>4){P.bowCancelMsg=playTime;msg('Ampuminen peruuntui – jännitä jousta vähintään 0,4 s.','warn');}}
@@ -261,7 +261,7 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   case 'nuotio':case 'grilli':{if(p.data.cook.some(c=>c.t>=c.need))return 'Ota ruoka tulelta';const raw=!p.data.camp&&Object.keys(COOKABLE).some(id=>invCount(id)>0),em=emberOn(p);   /* v2.98 leirin nuotio: ei paistoa */return p.data.out&&p.data.fuel>0?'Sytytä nuotio uudelleen':raw&&(fireLit(p)||em)&&p.data.cook.length<(FIRE_SLOTS[p.t]||2)?(em?'Paista hiilloksella (−20 %)':'Paista ruokaa'):em?`Hiilos ${fmtMin(p.data.ember)} – lisää polttoainetta`:`Polttoainetta ${fuelText(fireRem(p),p)} – lisää`;}   // v3.02 hiilos
   case 'patanuotio':return potLabel(p);   // v3.02
   case 'vedenkeraaja':return waterLabel(p);   // v3.06
-  case 'pelto':return fieldLabel(p);   // v3.06 farm.js
+  case 'pelto':case 'kohopenkki':return fieldLabel(p);   // v3.06 farm.js, v3.07 kohopenkki
   case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':return nauLabel(p);   // v3.06 fish.js
   case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),p)} – lisää`;
   case 'sanky':return isNight()?'Nuku':'Aseta herätyspaikka';
@@ -275,7 +275,7 @@ const E_ANIM_T=.42;   // v3.06 E-toiminnon käsiliike (player.js)
 function interact(){if(P.insp)inspectStop();
   if(P.dead)return;const t=lookTarget;if(!t){resinNoTarget();return;}P.eT=playTime;
   if(t.kind==='resin'){resinInteract(t.n);return;}   // v2.91
-  if(t.kind==='node'){const n=t.n,d=n.def;const c=rint(rng,d.n[0],d.n[1]);const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);return;}
+  if(t.kind==='node'){const n=t.n,d=n.def,own=n.planted&&CROP_SEED[n.type];const c=own?GROUND_YIELD:rint(rng,d.n[0],d.n[1]);   /* v3.07 maahan istutettu: 2 + siemen (siemen vasta onnistuneen poiminnan jälkeen) */const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);if(own)giveOrDrop(CROP_SEED[n.type],1,n.x,n.y+.5,n.z);return;}
   if(t.kind==='it'){t.it.use();return;}
   // v0.93: hautakasa ei katoa koskaan itsestään. Jos kaikki mahtuu reppuun, tavarat otetaan kerralla; muuten kasa avautuu arkkuikkunaan
   // (ota mitä mahtuu, loput jäävät). Kun kasa on tyhjä, se vajoaa maahan (graveVanish) ja pääkallo poistuu kartalta.
@@ -286,7 +286,7 @@ function interact(){if(P.insp)inspectStop();
     case 'nuotio':case 'grilli':fireInteract(p);break;
     case 'patanuotio':potOpen(p);break;   // v3.02 keittopadan ikkuna
     case 'vedenkeraaja':waterInteract(p);break;   // v3.06
-    case 'pelto':fieldInteract(p);break;   // v3.06 farm.js
+    case 'pelto':case 'kohopenkki':fieldInteract(p);break;   // v3.06 farm.js, v3.07 kohopenkki
     case 'katiska':katInteract(p);break;case 'savustin':savInteract(p);break;case 'kalanaulakko':nauInteract(p);break;   // v3.06 fish.js
     case 'seinasoihtu':case 'soihtuteline':case 'kivisoihtu':torchFuelAdd(p);break;   // v2.91
     case 'sanky':sleepAt(p);break;

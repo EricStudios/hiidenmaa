@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.06';
+:root{--css-v:'3.07';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1034,3 +1034,12 @@ button:focus,select:focus{outline:none}
 .fishT tr.na{opacity:.55} .fishT .ic{display:inline-block;width:22px;height:22px;background-size:contain;vertical-align:middle;margin-right:6px} .fishT .ic.q{background:none;text-align:center;color:var(--dim)}
 .fishCols{display:grid;grid-template-columns:1fr 1fr;gap:16px} .fishCols ul{margin:4px 0;padding-left:16px;font-size:13px} .fishCols .fg{list-style:none;padding-left:0} .fishCols .fg li.ok{color:#9ad06a}
 @media (max-width:640px){.fishCols{grid-template-columns:1fr}}
+/* v3.07 käyttäjä: EI SELAIMEN OMAA VIERITYSPALKKIA – kaikki vieritettävät saavat pelin teeman mukaisen liukurin (DEV-valikot poikkeus).
+   Tietoikkuna ei vieritä sivuttain (leveys lukittu, pitkät sanat rivittyvät). */
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar{width:9px;height:9px}
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-track{background:rgba(18,12,7,.55);border-radius:5px;box-shadow:inset 0 0 0 1px rgba(110,74,40,.35)}
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#9a6a34,#6e4a24);border:1px solid #2a1a0c;border-radius:5px;box-shadow:inset 0 1px 0 rgba(255,220,160,.25)}
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-thumb:hover{background:linear-gradient(90deg,#c08a44,#8a5a2a)}
+:where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-corner{background:transparent}
+html,body,.panel,#binfo,#potRec,#fishP,#smeltP,#chest,#inv *{scrollbar-color:#8a5a2a rgba(18,12,7,.55);scrollbar-width:thin}
+#binfo{overflow-x:hidden!important;overflow-y:auto} #binfo *{max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}

@@ -570,7 +570,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('v2.83 kodin lämpö: seinän vieressä ja 1×1-mökissä toimii, ohut ovi ei vuoda, hystereesi, Lämmin koti lämmittää; valikossa pelin äänet häipyvät; kivimuuri ja kivinen soihtupylväs; kivisäiliöt +2 paikkaa',()=>{
     const a=HOME_PAD===.08&&/homeEdge\(dist,ox,oz\)/.test(homeScan.toString())&&/H\.miss/.test(homeTick.toString())&&/homeLos/.test(homeHeat.toString())&&/warmHome/.test(survival.toString());
     const b=typeof gameSndTick==='function'&&/gameSndTick/.test(frame.toString())&&/SBUS\.m/.test(sndBus.toString())&&/o\.menu/.test(mSnd.toString());
-    let c=true;if(actx){sndBus(actx);const st=state;state='paused';gameSndTick();const off=SBUS.on===false;state='play';gameSndTick();c=off&&SBUS.on===true;state=st;}
+    let c=true;if(actx){sndBus(actx);const st=state;state='paused';gameSndTick();const off=SBUS.tg===0;state='ui';gameSndTick();const ui=SBUS.tg===UI_G;state='play';gameSndTick();c=off&&ui&&SBUS.tg===1;state=st;}   /* v3.07 paneeleissa −30 % */
     const d=!!PIECES.kiviaita&&PIECES.kiviaita.base==='aita'&&PIECES.kiviaita.stone&&!!PIECES.kivisoihtu&&PIECES.kivisoihtu.base==='soihtuteline'&&isTorch('kivisoihtu')&&isTorch('seinasoihtu')&&!isTorch('aita')&&pieceBoxes('kivisoihtu').length>0&&PIECES.kiviarkku.store===PIECES.arkku.store+2&&PIECES.kivitynnyri.store===PIECES.tynnyri.store+2;
     return a&&b&&c&&d||`virhe ${a}${b}${c}${d}`;});
   t('v2.84 tulen ääni valonlähteille (palaminen, enintään 2, nuotio kovin), sammuneen sulatusuunin suu musta, pelottavat: 2 yötä valvottu = varmasti, muuten 10 %',()=>{
@@ -592,6 +592,32 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.07 korjaukset: rikkaruohot 3 lajia, käsisoihdun ääni, kaatuvan puun isku, vinkkien lukuaika, tietoikkuna + omat liukurit, hakun kärjet, F-äänet 10 %, viljelylaatikko/kohopenkki, kyykkyvinkki, äänet paneeleissa, hehku, hiili +20 %, onkikoukku, tyhjä kulho, polttoainemittari, veden nimi kerran',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};const om=msg;const L=[];msg=t=>L.push(t);const inv0=JSON.stringify(inv),made=[];let res;
+    try{
+      ck('rikkaruohot',WEED_GEOS.length===3&&WEED_H[0]>WEED_H[2]&&(()=>{const a=SET.weeds,b=SET.grass;try{SET.weeds=true;SET.grass=2;rebuildGrass();return weedIMs.length>=2&&weedIMs.every(w=>w.count>0);}finally{SET.weeds=a;SET.grass=b;rebuildGrass();}})());
+      ck('soihtuääni',FIRE_V.kasi<FIRE_V.soihtu&&/_kasi/.test(fireSndTick.toString())&&/'ui'/.test(tgTick.toString()));
+      ck('puun isku',treeCrushK({type:'aarnipuu',s:1})===.9&&Math.abs(treeCrushK({type:'kuusi',s:1.4})-.6)<1e-9&&Math.abs(treeCrushK({type:'kuusi',s:.6})-.4)<1e-9&&.9*TREE_REF*1.3<MOBDEF.karhu.hp&&/ck\*TREE_REF/.test(crushPlayer.toString()));
+      ck('vinkit',tipReadT('yksi kaksi')===TIP_MIN&&tipReadT('a '.repeat(80))===TIP_MAX&&TIPS.find(t=>t.id==='vasara').u&&!/tipT=10/.test(tipsTick.toString()));
+      ck('tietoikkuna',/binfoShow\(t\);return;/.test(binfoHover.toString())&&getComputedStyle($('#binfo')||document.body).overflowX!=='scroll');
+      ck('liukurit',[...document.styleSheets].some(q=>{try{return [...q.cssRules].some(r=>/::-webkit-scrollbar-thumb/.test(r.selectorText||'')&&/devP/.test(r.selectorText||''));}catch(x){return false;}}));
+      ck('hakku',makeHeld('hakku').children.filter(c=>c.geometry&&c.geometry.type==='ConeGeometry').length===2);
+      ck('F-äänet',INSP_SND_P===.1&&!/I\.auto\|\|/.test(inspectTick.toString()));
+      {const x=P.pos.x+30,z=P.pos.z-30,b=addPiece('kohopenkki',x,terrainH(x,z),z,0);made.push(b);invAdd('kauransiemen',4);const ks=inv.find(q=>q&&q.id==='kauransiemen');if(!ks.eq)toggleEquip(ks);
+       for(let i=0;i<4;i++)fieldInteract(b);const full=farmSlots(b).every(q=>q.c==='villikaura');const old=Math.random;Math.random=()=>.01;try{farmGrow();}finally{Math.random=old;}
+       const v0=invCount('villikaura'),s0=invCount('kauransiemen');fieldInteract(b);ck('kohopenkki',full&&invCount('villikaura')-v0===4*FIELD_YIELD&&invCount('kauransiemen')-s0===4&&PIECES.kohopenkki.req.kivi>0&&PIECES.pelto.n==='Viljelylaatikko'&&GROUND_YIELD===2);
+       const S=serialize();ck('kohopenkki tallentuu',S.pieces.some(q=>q.t==='kohopenkki'&&q.d&&Array.isArray(q.d.s)&&q.d.s.length===4));}
+      {invAdd('kuokka',1);const k=inv.find(q=>q&&q.id==='kuokka');if(!k.eq)toggleEquip(k);invAdd('kuusenkapy',1);const c=inv.find(q=>q&&q.id==='kuusenkapy');if(!c.eq)toggleEquip(c);const cr=P.crouch;P.crouch=false;FARM.hintT=-99;L.length=0;useTool(false);P.crouch=cr;ck('kyykkyvinkki',L.some(t=>/kyykkyyn/.test(t)));}
+      ck('äänet paneelissa',UI_G===.7&&UI_LP>0);
+      {const x=P.pos.x+20,z=P.pos.z+24,sm=addPiece('sulatin',x,terrainH(x,z),z,0);made.push(sm);sm.data.fuel=300;sm.data.coal=300;sm.data.lit=true;sm.data.heat=0;for(let i=0;i<30;i++)updateStations(1);
+       const h=sm.data.heat,gl=sm.mesh.userData.glow;ck('hiili +20 %',Math.abs(h-30/SM_HEAT_T*SM_COAL_K)<.02);for(let i=0;i<20;i++)updateStations(1);ck('hehku',gl.material!==SMELT_DARK&&gl.material.color.r>.9&&gl.material.color.g>.6);}
+      ck('savustin hehku',/heatGlow/.test(savTick.toString()));
+      ck('onkikoukku',!!makeHeld('onki').userData.hook&&/userData\.hook/.test(fishTick.toString()));
+      ck('tyhjä kulho',/wasW/.test(potCraft.toString())&&/updateGear/.test(potCraft.toString()));
+      ck('mittari',/\/ /.test(fuelText(120,{t:'patanuotio',data:{}}))&&fuelText(120,{t:'patanuotio',data:{}}).includes('10,0'));
+      ck('veden nimi kerran',!/lastT\[/.test(fishTick.toString()));
+      res=e.length?'virhe: '+e.join(', '):true;}
+    finally{msg=om;for(const q of made)if(pieces.includes(q))removePiece(q);const I=JSON.parse(inv0);for(let q=0;q<inv.length;q++)inv[q]=I[q]||null;invDirty=true;updateGear();}return res;});
   t('v3.06 iso päivitys: kantokyky 60 → 200, ilmoitusasetus, tietoikkuna 1 s + I, veden kerääjä, pata 10 min + työpenkki, mokat, tulen rakeinen silmukka, uusiutuminen, siemenet/taimet/pelto, villikaura-alueet, ruoho + Ultra-rikkaruohot, E-käsiliike, sulatusuunin valikko, teemoitetut valikot, jäälätäköt, onkiminen',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};const om=msg;msg=()=>{};const inv0=JSON.stringify(inv),made=[],sv=[P.pos.clone(),state,flags.sap,flags.fish,camRay,FS.st];let res;
     try{
@@ -602,12 +628,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       ck('kerääjä',PIECES.vedenkeraaja.lvl===6&&PIECES.vedenkeraaja.req.kupari===4&&PIECES.vedenkeraaja.req.rauta===2&&WATER_USES===20&&Math.abs(WATER_FILL*60-.1)<1e-9);
       ck('tuli',typeof fireGrainNew==='function'&&/fireGrainPump/.test(fireSndTick.toString())&&FIRE_GF>0);
       ck('uusiutuminen',REGROW_K===.2&&PICK_T===600&&PICK_FAR_D===60&&PICK_K===.2&&/planted/.test(regrowForest.toString())&&/farmGrow/.test(regrowForest.toString())&&typeof nightRegrow==='undefined'&&typeof respawnNodes==='undefined');
-      ck('siemenet',SEED_P===.05&&SEED_RZ_P===.7&&SAP_GROW===.3&&FIELD_GROW===.3&&/seedDrop/.test(doMeleeHit.toString())&&/plantMode/.test(useTool.toString())&&['kuusenkapy','mannynkapy','koivunsiemen','aarnisiemen','pihkakapy','pihkamannynkapy','puolukanvarpu','sienirihma','kauransiemen'].every(i=>ITEMS[i]&&ITEMS[i].cat==='offhand'));
+      ck('siemenet',SEED_P===.05&&SEED_RZ_P===.7&&SAP_GROW===.3&&FIELD_GROW===.6&&BED_GROW===.7&&/seedDrop/.test(doMeleeHit.toString())&&/plantMode/.test(useTool.toString())&&['kuusenkapy','mannynkapy','koivunsiemen','aarnisiemen','pihkakapy','pihkamannynkapy','puolukanvarpu','sienirihma','kauransiemen'].every(i=>ITEMS[i]&&ITEMS[i].cat==='offhand'));
       {const x=P.pos.x+40,z=P.pos.z-40;flags.sap=[{t:'koivu',x,z,rz:0},{t:'manty',x:x+4,z,rz:1}];const old=Math.random;Math.random=()=>.01;let g2;try{g2=farmGrow();}finally{Math.random=old;}const pl=nodes.filter(n=>n.planted);
        ck('taimi kasvaa',g2>=2&&pl.length>=2&&isResinTree(pl.find(n=>n.type==='manty'))&&flags.sap.length===0);const S=serialize();ck('istutettu tallentuu',S.planted.length===pl.length&&S.planted.some(q=>q[4]===1));
        for(const n of pl)killNode(n);const old2=Math.random;Math.random=()=>.01;let r2;try{r2=regrowForest();}finally{Math.random=old2;}ck('istutettu ei uusiudu',pl.every(n=>!n.alive));
        const f=addPiece('pelto',x+8,terrainH(x+8,z),z,0);made.push(f);invAdd('kauransiemen',1);const ks=inv.find(q=>q&&q.id==='kauransiemen');if(!ks.eq)toggleEquip(ks);fieldInteract(f);const c0=f.data.c==='villikaura';Math.random=()=>.01;try{farmGrow();}finally{Math.random=old;}
-       const v0=invCount('villikaura');fieldInteract(f);ck('pelto',c0&&invCount('villikaura')-v0>=FIELD_YIELD.villikaura[0]&&!f.data.c);}
+       const v0=invCount('villikaura');fieldInteract(f);ck('pelto',c0&&invCount('villikaura')-v0===FIELD_YIELD&&!f.data.c);}
       ck('villikaura',VK_REG.length===3&&nodes.filter(n=>n.type==='villikaura'&&!n.planted).length<=VK_N*VK_PER&&nodes.filter(n=>n.type==='villikaura'&&!n.planted).every(n=>VK_REG.some(R=>dist2(n.x,n.z,R.x,R.z)<=R.r*R.r+1)));
       ck('rikkaruohot',PRESETS[7].weeds===true&&PRESETS.slice(0,7).every(q=>q.weeds===false)&&SET_DEF.weeds===false&&SET_PAGES.gfx.includes('weeds')&&!!GRASS_U.uPl&&(()=>{const a=SET.weeds,b=SET.grass;try{SET.weeds=true;SET.grass=2;rebuildGrass();return !!weedIM&&weedIM.count>0;}finally{SET.weeds=a;SET.grass=b;rebuildGrass();}})());
       ck('E-liike',E_ANIM_T>0&&/P\.eT=playTime/.test(interact.toString())&&/_eOff/.test(updatePlayer.toString()));
@@ -729,7 +755,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       const a=INSP_ANIMS.length>=11&&['long','heavy','small','knife'].every(t=>INSP_ANIMS.some(x=>x.type===t))&&INSP_ANIMS.some(x=>x.rare)&&INSP_TYPE('puukko')==='knife'&&INSP_TYPE('rautamiekka')==='long'&&INSP_TYPE('kirves')==='heavy'&&INSP_TYPE('kulho')==='small';
       const b=inspectStart('puukko_pistot');for(let i=0;i<20;i++)g.update(1/30);const c=!!P.insp&&INS.k>.5&&Math.abs(fig.hand.quaternion.w)<.999;
       mouseL=true;inspectTick(1/30);const d=!P.insp;mouseL=false;
-      const e=/f_ihmettely/.test(inspectTick.toString())&&/INSP_SND_P/.test(inspectTick.toString())&&INSP_SND_T===2&&INSP_SND_P===.3&&INSP_KNIFE_THROW===.05;
+      const e=/f_ihmettely/.test(inspectTick.toString())&&/INSP_SND_P/.test(inspectTick.toString())&&INSP_SND_T===2&&INSP_SND_P===.1&&   /* v3.07 10 % */ INSP_KNIFE_THROW===.05;
       P.newItem={id:'puukko',t:playTime};P.afkT=5;inspectTick(1/30);const f=!!P.insp&&P.insp.auto;inspectStop();for(let i=0;i<30;i++)g.update(1/30);
       const h=/inspectStart/.test(renderDev.toString())&&/data-insp/.test(renderDev.toString())&&/inspectPose/.test(updatePlayer.toString());
       res=a&&b&&c&&d&&e&&f&&h||`virhe lista ${a} alku ${b} asento ${c} keskeytys ${d} ääni ${e} uusi ${f} kytkennät ${h}`;}
