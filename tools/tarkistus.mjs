@@ -592,6 +592,10 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.09: maailmalistassa pelissä oleva maailma (Pelaat nyt) tai viimeksi pelattu (vaalea ääriviiva)',()=>{const s0=started,c0=curSlot,M=slotMeta;try{
+      slotMeta=()=>[{name:'A',at:1},{name:'B',at:5},null,null,null];started=false;renderWorlds();const L=[...document.querySelectorAll('#worlds .world')];const ok1=L[1].classList.contains('last')&&/Viimeksi pelattu/.test(L[1].textContent)&&!L[0].querySelector('.wTag');
+      started=true;curSlot=0;renderWorlds();const C=[...document.querySelectorAll('#worlds .world')];const ok2=C[0].classList.contains('cur')&&/Pelaat nyt/.test(C[0].textContent)&&!C[1].classList.contains('last');
+      return ok1&&ok2||`viimeksi ${ok1} nyt ${ok2}`;}finally{slotMeta=M;started=s0;curSlot=c0;renderWorlds();}});
   t('v3.08: lapiovirhe kaatuneen puun vieressä, sisävesi ei avaa merta, Windows-teksti, vinkki pois valikossa, kirves-nykäisy, onkivapa ja koukku, metso −40 %, liemiruoat, Käynnissä-tilan äänet, kuolinhämärä, kuolinvarusteet, tummempi veri, sade ja lumi, siemen kaatuessa, siemenmallit, puiden kasvuvaiheet, aarnipuun pihka, pihkan täyttyminen, kastelu ja madot, Extra-pikanapit, intron varjot, uudet kategoriat ja haku, DEV-ilmaistila, olkahihna, 18 kalaa, vihjeportaat, kartan Sulje, tallennus suljettaessa',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};const om=msg;msg=()=>{};const inv0=JSON.stringify(inv),fl0=JSON.stringify({sap:flags.sap,care:flags.care,resin:flags.resin,sleepC:flags.sleepC}),made=[];const rnd=Math.random;
     try{

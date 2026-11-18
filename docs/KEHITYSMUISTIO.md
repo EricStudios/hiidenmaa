@@ -3,8 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.08, 18.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.09, 18.11.2026)
 
+- **Versio 3.09** – maailmalistan Pelaat nyt / Viimeksi pelattu -merkinnät (ks. versioloki). PR #49 sisältää v3.08–v3.09.
 - **Versio 3.08** – käyttäjän 26 kohdan lista + 4 lisäystä (pihkan täyttyminen, kartan Sulje-teksti, 3 vihjeporrasta, tallennus suljettaessa), ks. versioloki v3.08.
   Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`. **Testilinkit nyt EricStudios-muodossa:**
   `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html` (käyttäjänimi vaihtui; vanha erboiyprogamer-source-linkki ei enää päde).
@@ -411,6 +412,11 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.09 (maailmalista – käyttäjän pyyntö)
+- Maailmat-näkymässä pelissä oleva maailma saa kirkkaan kultaisen ääriviivan ja merkin **"Pelaat nyt"**; kun peli ei ole käynnissä, viimeksi pelattu maailma (`lastWorld`,
+  uusin `at`) saa vaalean ääriviivan ja merkin **"Viimeksi pelattu"** (`renderWorlds`, css `.world.cur/.last`, `.wTag`). Tarkistus: v3.09-rivi.
+- Vastaus käyttäjälle (pihkan täyttyminen): arvonta tehdään yhtä aikaa koko maailmassa joka 5. uni, mutta jokainen tyhjä puu arpoo itse 10 % → harva puu täyttyy kerralla.
 
 ### v3.08 (käyttäjän 26 kohdan lista + 4 lisäystä – kysymykset alussa, sitten ilman keskeytyksiä)
 - **Korjaukset:** lapion `setMatrixAt`-virhe kaadetun puun vieressä (tukeilla ei `n.im` – KORJAUKSET 82); sisävesi ei enää avaa/ilmoita Meri-biomia (`inlandWater`), järvet/lammet

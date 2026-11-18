@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.08';
+:root{--css-v:'3.09';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1057,3 +1057,9 @@ body.noActH #prompt{display:none!important}
 #keyDlg[data-warn="1"] #keyDlgN{color:#ff8a70}#keyDlg[data-warn="2"] #keyDlgT,#keyDlg[data-warn="2"] #keyDlgN{color:#ff5a48;font-weight:700}
 #keyDlg[data-warn="2"] #keyDlgN{text-shadow:0 0 8px rgba(255,60,40,.35)}
 #quitScr .qSaved{color:#9fd88a;font-weight:700}#quitScr .qSaved.bad{color:#ff7a60}
+/* v3.08 maailmat: pelissä oleva (kirkas ääriviiva + Pelaat nyt), viimeksi pelattu (vaalea ääriviiva) */
+#menu .world.cur{border:2px solid #f0b45a;box-shadow:0 0 0 1px rgba(240,180,90,.35),0 0 24px rgba(240,180,90,.35),inset 0 0 18px rgba(240,180,90,.12)}
+#menu .world.last{border:2px solid rgba(232,200,150,.45);box-shadow:0 0 12px rgba(232,200,150,.12)}
+#menu .world .wTag{align-self:flex-start;margin:-4px 0 -6px;padding:2px 9px;border-radius:10px;font:700 11px 'Alegreya Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+#menu .world .wTag.cur{background:#f0b45a;color:#2a1a0c;box-shadow:0 0 10px rgba(240,180,90,.45)}
+#menu .world .wTag.last{background:rgba(232,200,150,.16);color:#e8d4b0;border:1px solid rgba(232,200,150,.35)}
