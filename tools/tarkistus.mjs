@@ -592,6 +592,10 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.17: valikon Öinen leiri – nuotio kuuluu (0,8) ja alkaa heti (pysyvä, valmiiksi ladattu suoratoisto), sirkat useammin ja kovempaa, äänet 0,3–1,5 s kuvan vaihdosta, lataamaton ääni yritetään 0,3 s päästä',()=>{
+    const s=mbgSndTick.toString();const ok=MBG_LEIRI_V>=.7&&MBG_CR_V>=.2&&MBG_CR_MAX<=4&&MBG_FIRST[1]<=1.5&&MBG_RETRY<=.5&&typeof mbgLongKeep==='function'&&typeof mbgLongPause==='function'&&typeof mbgLongWarm==='function'
+      &&/MBG\.lrT=0/.test(s)&&/mbgLongWarm/.test(s)&&/mbgLongPause/.test(mbgSndStop.toString())&&/MBG_RETRY/.test(s)&&/return true;\}$/.test(mbgChirps.toString())&&MBG_FADE_IN<=1;
+    return ok||'valikon taustaäänet puuttuvat';});
   t('v3.16: tasot 999 (ennallaan 30:een, sen jälkeen kasvava XP, ei palkintoja), 20 nimikettä (HUD + edistyminen), DEV-valikko sivuiksi, pikakalastus-täppä + U',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     ck('tasot',LVL_MAX===999&&LVL_REW_MAX===30&&needXp(29)===1270&&needXp(30)>needXp(29)&&needXp(500)>needXp(100)&&JSON.stringify(lvlRew(31))==='{}'&&lvlBon(999).w===lvlBon(30).w&&lvlBon(999).hp===lvlBon(30).hp);

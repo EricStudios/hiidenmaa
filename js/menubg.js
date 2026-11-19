@@ -297,14 +297,18 @@ function mbgNext(){let j=MBG.i;while(j===MBG.i)j=(Math.random()*MBG_SCENES.lengt
    (alipäästö) ja kaikuva; Myrsky = satunnainen 2,5–6 s pätkä myrskyäänestä kaukaa 5–14 s välein. Kaikki hyvin hiljaa. Asetus Äänet ›
    "Päävalikon taustakuvien äänet" (SET.menuBgSnd) mykistää. Taso Taustaäänet. */
 const MBG_SND={'Öinen leiri':'tausta_leiri','Myrsky':'tausta_myrsky','Ahjo yöllä':'tausta_ahjo'},MBG_SND_MIN=5,MBG_SND_MAX=14,MBG_SND_V=.7;
-const MBG_LEIRI_V=.35,MBG_AHJO_V=.22,MBG_MYR_V=.3,MBG_CR_V=.1,MBG_CR_MIN=2,MBG_CR_MAX=7;
-function mbgSndStop(){if(MBG.leiri){if(typeof mbgLongStop==='function')mbgLongStop(MBG.leiri,1);MBG.leiri=null;}}
-function mbgSndTick(dt){const S=MBG_SCENES[MBG.i],n=S&&S.n;if(MBG.sndI!==MBG.i){MBG.sndI=MBG.i;mbgSndStop();MBG.sndT=1+Math.random()*3;MBG.crT=2+Math.random()*3;MBG.ahjoHit=0;}
+/* v3.17 käyttäjä: nuotio ei kuulunut (0,35 × taustaäänet jäi valikkomusiikin alle) ja sirkkoja liian harvoin → nuotio 0,8, sirkat 0,2 ja 1–3,5 s välein (3–8 siritystä,
+   välillä kaksi sirkkaa yhtä aikaa). Kuvan vaihduttua äänet alkavat heti: nuotio jatkuu valmiiksi ladatusta soittimesta (mbgLongKeep, häivytys 0,8 s), ensimmäinen
+   siritys / myrsky / ahjo 0,3–1,5 s kuluttua; jos ääni ei ollut vielä ladattu, yritetään 0,3 s päästä (ei pitkää hiljaisuutta). */
+const MBG_LEIRI_V=.8,MBG_AHJO_V=.22,MBG_MYR_V=.3,MBG_CR_V=.2,MBG_CR_MIN=1,MBG_CR_MAX=3.5,MBG_FIRST=[.3,1.5],MBG_RETRY=.3;
+function mbgSndStop(){if(MBG.leiri){if(MBG.leiri.stream&&typeof mbgLongPause==='function')mbgLongPause(MBG.leiri,.8);else if(typeof mbgLongStop==='function')mbgLongStop(MBG.leiri,1);MBG.leiri=null;}}
+function mbgSndTick(dt){const S=MBG_SCENES[MBG.i],n=S&&S.n,fr=()=>MBG_FIRST[0]+Math.random()*(MBG_FIRST[1]-MBG_FIRST[0]);if(MBG.sndI!==MBG.i){MBG.sndI=MBG.i;mbgSndStop();MBG.sndT=fr();MBG.crT=fr();MBG.lrT=0;MBG.ahjoHit=0;}
+  if(typeof mbgLongWarm==='function'&&(typeof SET==='undefined'||SET.menuBgSnd!==false)){mbgLongWarm('taustat','tausta_leiri');if(typeof mbgChirps==='function'&&!MBG.crW)MBG.crW=mbgChirps(0,0);if(typeof mLoad==='function')mLoad();}   // v3.17 valmiiksi ladattu
   if(typeof mbgVoice!=='function'||(typeof SET!=='undefined'&&SET.menuBgSnd===false)||!MBG_SND[n]){mbgSndStop();return;}
-  if(n==='Öinen leiri'){if(!MBG.leiri){MBG.lrT=(MBG.lrT||0)-dt;if(MBG.lrT<=0){MBG.lrT=2;MBG.leiri=mbgLong('taustat','tausta_leiri',MBG_LEIRI_V);}}
-    MBG.crT-=dt;if(MBG.crT<=0){MBG.crT=MBG_CR_MIN+Math.random()*(MBG_CR_MAX-MBG_CR_MIN);mbgChirps(2+(Math.random()*5|0),MBG_CR_V);}}
+  if(n==='Öinen leiri'){if(!MBG.leiri){MBG.lrT=(MBG.lrT||0)-dt;if(MBG.lrT<=0){MBG.lrT=MBG_RETRY;MBG.leiri=(typeof mbgLongKeep==='function'?mbgLongKeep:mbgLong)('taustat','tausta_leiri',MBG_LEIRI_V);}}
+    MBG.crT-=dt;if(MBG.crT<=0){const ok=mbgChirps(3+(Math.random()*6|0),MBG_CR_V*(.8+Math.random()*.4));if(ok&&Math.random()<.35)setTimeout(()=>mbgChirps(2+(Math.random()*4|0),MBG_CR_V*.7),150+Math.random()*500);   /* toinen sirkka */MBG.crT=ok?MBG_CR_MIN+Math.random()*(MBG_CR_MAX-MBG_CR_MIN):MBG_RETRY;}}
   else if(n==='Ahjo yöllä'){if(MBG.ahjoHit){MBG.ahjoHit=0;if(Math.random()<.75)mbgVoice('taustat','tausta_ahjo',{v:MBG_AHJO_V,lp:1700+Math.random()*900,echo:.32,p:.94+Math.random()*.1});}}
-  else if(n==='Myrsky'){MBG.sndT-=dt;if(MBG.sndT<=0){MBG.sndT=MBG_SND_MIN+Math.random()*(MBG_SND_MAX-MBG_SND_MIN);mbgVoice('taustat','tausta_myrsky',{v:MBG_MYR_V,lp:700+Math.random()*900,echo:.25,off:Math.random()*6,len:2.5+Math.random()*3.5,p:.9+Math.random()*.15});}}}
+  else if(n==='Myrsky'){MBG.sndT-=dt;if(MBG.sndT<=0){MBG.sndT=MBG_SND_MIN+Math.random()*(MBG_SND_MAX-MBG_SND_MIN);if(!mbgVoice('taustat','tausta_myrsky',{v:MBG_MYR_V,lp:700+Math.random()*900,echo:.25,off:Math.random()*6,len:2.5+Math.random()*3.5,p:.9+Math.random()*.15}))MBG.sndT=MBG_RETRY;}}}   // v3.17 ei vielä ladattu → pian uudelleen
 function mbgShow(on){mbgInit();if(on===MBG.shown)return;MBG.shown=on;if(!on)mbgSndStop();MBG.cv.style.display=on?'block':'none';if(on&&MBG.i<0)mbgSet((Math.random()*MBG_SCENES.length)|0);   /* v1.31: aina arvottu (ennen avauksessa Öinen leiri) */MBG.last=performance.now();}
 function mbgFrame(now){mbgShow(true);const raw=Math.min(.25,(now-MBG.last)/1000);MBG.acc+=raw;MBG.last=now;if(MBG.acc<1/MBG_FPS)return;const dt=MBG.acc;MBG.acc=0;mbgSndTick(dt);
   MBG.t+=dt;if(MBG.t>MBG_T)mbgSet(mbgNext());

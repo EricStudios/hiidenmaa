@@ -400,12 +400,22 @@ function mbgVoice(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;mLoad();cons
 function mbgLong(g,ev,v){creInit();if(!CRE.ok)return null;const L=mRes(g,ev,'m');const a=actx;if(!L||!a||a.state!=='running'||!soundOn)return null;const name=L[Math.random()*L.length|0],d=CRE.man[name].dur||0,vol=volK('amb')*v;
   let h=null;if(sndLong(name))h=sndStream(a,name,mbgOut(a),{loop:true,off:Math.random()*Math.max(0,d-40)});
   else{mLoad();if(!CRE.buf[name])return null;const src=a.createBufferSource();src.buffer=CRE.buf[name];src.loop=true;const gn=a.createGain();gn.gain.value=0;src.connect(gn);gn.connect(mbgOut(a));src.start(0,Math.random()*Math.max(0,d-1));h={src,g:gn,name};}
-  if(h){const t=a.currentTime;h.g.gain.setValueAtTime(0,t);h.g.gain.linearRampToValueAtTime(vol,t+2);}return h;}
+  if(h){const t=a.currentTime;h.g.gain.setValueAtTime(0,t);h.g.gain.linearRampToValueAtTime(vol,t+MBG_FADE_IN);}return h;}
+/* v3.17 käyttäjä: valikon pitkä taustaääni (Öinen leiri, 136 s suoratoisto) alkaa heti kuvan vaihduttua: sama <audio> pidetään tallessa (MBG_KEEP) ja
+   ladataan valmiiksi hiljaisena jo ennen kuvaa (mbgLongWarm) → ei uutta latausta eikä MediaElementSourcea joka kerta. Pois → häivytys ja tauko (mbgLongPause). */
+const MBG_KEEP={},MBG_FADE_IN=.8;
+function mbgLongKeep(g,ev,v){creInit();if(!CRE.ok)return null;const a=actx;if(!a||a.state!=='running'||!soundOn)return null;const key=g+'/'+ev;let h=MBG_KEEP[key];
+  if(!h){h=mbgLong(g,ev,v);if(h&&h.stream){MBG_KEEP[key]=h;h.live=1;}return h;}
+  const d=CRE.man[h.name]&&CRE.man[h.name].dur||0;if(h.el.paused){try{h.el.currentTime=Math.random()*Math.max(0,d-40);}catch(e){}const pr=h.el.play();if(pr&&pr.catch)pr.catch(()=>{});}
+  const t=a.currentTime;h.g.gain.cancelScheduledValues(t);h.g.gain.setValueAtTime(h.g.gain.value,t);h.g.gain.linearRampToValueAtTime(volK('amb')*v,t+MBG_FADE_IN);h.live=1;return h;}
+function mbgLongPause(h,f){if(!h||!actx)return;const a=actx,t=a.currentTime;h.live=0;try{h.g.gain.cancelScheduledValues(t);h.g.gain.setValueAtTime(h.g.gain.value,t);h.g.gain.linearRampToValueAtTime(0,t+f);}catch(e){}
+  setTimeout(()=>{if(!h.live)try{h.el.pause();}catch(e){}},f*1000+120);}
+function mbgLongWarm(g,ev){const key=g+'/'+ev;if(MBG_KEEP[key]||!actx||actx.state!=='running')return;const h=mbgLongKeep(g,ev,0);if(h&&h.stream)mbgLongPause(h,.05);}
 function mbgLongStop(h,f){if(!h||!actx)return;const a=actx,t=a.currentTime;f=f||1;try{h.g.gain.cancelScheduledValues(t);h.g.gain.setValueAtTime(h.g.gain.value,t);h.g.gain.linearRampToValueAtTime(0,t+f);h.src.stop(t+f+.05);}catch(e){}setTimeout(()=>{try{h.g.disconnect();}catch(e){}},f*1000+150);}
-function mbgChirps(n,v){creInit();if(!CRE.ok)return;const L0=mRes('luonto','heinasirkat','a');if(!L0)return;for(const x of L0)creBuf(x);const L=L0.filter(x=>CRE.buf[x]);const a=actx;if(!L.length||!a||a.state!=='running'||!soundOn)return;
-  const vol=volK('amb')*v;if(!(vol>0))return;const out=mbgOut(a),pan=(Math.random()*2-1)*.7,p=.94+Math.random()*.12,tp=.42+Math.random()*.14;let t=a.currentTime+.05;
+function mbgChirps(n,v){creInit();if(!CRE.ok)return false;const L0=mRes('luonto','heinasirkat','a');if(!L0)return false;for(const x of L0)creBuf(x);const L=L0.filter(x=>CRE.buf[x]);const a=actx;if(!L.length||!a||a.state!=='running'||!soundOn)return false;   // v3.17 false = ei vielä ladattu → yritä pian uudelleen
+  const vol=volK('amb')*v;if(!(vol>0))return true;const out=mbgOut(a),pan=(Math.random()*2-1)*.7,p=.94+Math.random()*.12,tp=.42+Math.random()*.14;let t=a.currentTime+.05;
   for(let i=0;i<n;i++){const src=a.createBufferSource();src.buffer=CRE.buf[L[Math.random()*L.length|0]];src.playbackRate.value=p;const g0=a.createGain();g0.gain.value=vol*(.75+Math.random()*.25);const lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;
-    let o2=lp;if(a.createStereoPanner){const pn=a.createStereoPanner();pn.pan.value=pan;lp.connect(pn);o2=pn;}src.connect(g0);g0.connect(lp);o2.connect(out);src.onended=()=>{try{o2.disconnect();lp.disconnect();g0.disconnect();}catch(e){}};src.start(t);t+=tp*(1+(Math.random()*2-1)*.05);}}
+    let o2=lp;if(a.createStereoPanner){const pn=a.createStereoPanner();pn.pan.value=pan;lp.connect(pn);o2=pn;}src.connect(g0);g0.connect(lp);o2.connect(out);src.onended=()=>{try{o2.disconnect();lp.disconnect();g0.disconnect();}catch(e){}};src.start(t);t+=tp*(1+(Math.random()*2-1)*.05);}return true;}
 const BTN_BASE=.8;   // v2.67: hover- ja klikkausäänien perustaso (−20 %)
 function mSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;mLoad();const L0=mRes(g,ev,o.pre);if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
   const a=actx;if(!a||a.state!=='running'||!soundOn)return false;const vol=volK(o.cat||'ui')*(g==='napit'?BTN_BASE*(SET.btnVol??1):1);   /* v2.67 napit: perustaso −20 % + oma säädin */if(!(vol>0))return false;

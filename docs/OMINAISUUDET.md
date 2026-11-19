@@ -886,6 +886,10 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.17 – valikon taustaäänet
+- Päävalikon Öinen leiri: nuotio kuuluu selvästi ja alkaa heti, kun kuva vaihtuu; heinäsirkat sirittävät usein (1–3,5 s välein). Kaikki taustakuvien äänet alkavat
+  0,3–1,5 s kuvan vaihtumisesta.
+
 ## v3.16 – tasot ja nimikkeet
 - **Tasot 999:** tasoon 30 kaikki ennallaan (palkinnot terveys/kestävyys/kantokyky), sen jälkeen XP-tarve kasvaa tasaisesti eikä palkintoja ole.
 - **20 tasonimikettä** Haaksirikkoutuneesta (taso 1) Hiidenmaan legendaan (taso 999); taso 30 = Kokeneempi seikkailija. Nimike näkyy HUDissa ja edistymisessä (J).

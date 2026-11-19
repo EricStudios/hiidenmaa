@@ -650,3 +650,9 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 ## 90. Kaksi id-attribuuttia samassa elementissä → `$('#…')` palauttaa null (v3.16)
 - `tglHTML('dv_x',on,'id="devFF"')` tuotti `<button id="dv_x" id="devFF">` – selain käyttää ensimmäistä id:tä, joten `$('#devFF').onclick` kaatoi koko DEV-valikon renderöinnin.
 - **Sääntö:** `tglHTML`:n kolmas parametri on vain lisäattribuuteille (data-…); id annetaan aina ensimmäisenä parametrina. Testaa uusi paneeli avaamalla se testiskriptissä (virhe näkyy heti).
+
+## 91. Valikon taustaääni ei kuulunut / alkoi myöhään (v3.17)
+- Syyt: (1) taso 0,35 × taustaäänet jäi musiikin alle, (2) uudelleenyrityksen ajastin (`MBG.lrT` 2 s) ei nollautunut kuvan vaihtuessa, (3) kertaäänen ajastin nollattiin
+  pitkäksi (5–14 s), vaikka ääntä ei vielä ollut ladattu → pitkä hiljaisuus, (4) uusi suoratoisto joka kerta.
+- **Sääntö:** ajastettu ääni nollaa pitkän välin vain, jos ääni oikeasti soi (funktio palauttaa true), muuten lyhyt uusi yritys. Pitkät suoratoistot pidetään tallessa ja
+  ladataan valmiiksi. Testaa toisto headless-selaimessa `--autoplay-policy=no-user-gesture-required` (gain-arvo, `el.paused`, `currentTime` etenee).

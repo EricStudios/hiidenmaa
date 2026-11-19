@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.16, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.17, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -349,6 +349,8 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.17:** valikon nuotio 0,8, sirkat 0,2 / 1–3,5 s, ensimmäiset äänet 0,3–1,5 s, uusi yritys 0,3 s, häivytys sisään 0,8 s.
+
 **v3.16:** tasot 999, XP n ≥ 30: 1 270 + 45·(n−29) + ½·(n−29)², palkinnot ≤ 30, nimikkeitä 20 · pikakalastus U (vain täpällä).
 
 **v3.15:** arvo 0,6 × paino + 0,4 × koko, luokkarajat 15/50/75/90/97/99,5/99,9 % · toiveet 3 / 7 päivää, XP 12–67 · sivu 4 = ensimmäinen laji · kirjan sulkuääni 1,35× / 0,55.
@@ -430,6 +432,15 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.17 (valikon Öinen leiri – käyttäjä 19.11.)
+- **Nuotio ei kuulunut:** 136 s nuotioääni soi, mutta tasolla 0,35 × taustaäänet (≈ 0,2) se jäi valikkomusiikin alle → `MBG_LEIRI_V` 0,8. Palatessa leiriin ääni alkoi vasta ~2 s viiveellä
+  (`MBG.lrT` ei nollautunut) ja joka kerta luotiin uusi `<audio>` (lataus + MediaElementSource).
+- **Nyt:** pysyvä suoratoisto `MBG_KEEP` (audio.js `mbgLongKeep`/`mbgLongPause`), joka ladataan valmiiksi hiljaisena heti valikossa (`mbgLongWarm`) → kuvan vaihtuessa nuotio alkaa
+  välittömästi 0,8 s häivytyksellä (`MBG_FADE_IN`), poistuessa häivytys 0,8 s ja tauko. Sirkkojen pätkät ja valikon kertaäänet ladataan valmiiksi.
+- **Sirkat useammin:** 1–3,5 s välein (ennen 2–7), 3–8 siritystä, taso 0,2 (ennen 0,1), 35 %:ssa toinen sirkka perään.
+- **Äänet heti kuvan vaihduttua:** ensimmäinen siritys / myrskyn pätkä 0,3–1,5 s (`MBG_FIRST`; ennen 1–5 s). Jos ääni ei ollut vielä ladattu, uusi yritys 0,3 s päästä
+  (`MBG_RETRY`; ennen ajastin nollautui ja hiljaisuutta tuli 5–14 s). Tarkistus: v3.17-rivi.
 
 ### v3.16 (TASOT 999, NIMIKKEET, DEV-VALIKOT, PIKAKALASTUS – käyttäjä 19.11.)
 - **Tasot 999** (`LVL_MAX`): tasoon 30 asti XP-tarve ennallaan, sen jälkeen `needXp(n)` = 1 270 + 45·(n−29) + ½·(n−29)² (taso 31 vaatii 1 361, taso 100 ≈ 6 990,
