@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.25, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.26, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +434,14 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.26 (lammet, DEV-paljastus, DEV-haku – käyttäjä 19.11., PR #50 yhdistetty → uusi PR)
+- **Kaikki lammet nimetään** (fish.js, vesivaiheen loppuun): ennen alle 5 ruudun (80 m²) ja matalat (pohja yli −0,45 m) lammet jäivät ilman nimeä ja kalastusvettä → DEV:n
+  kartan paljastus ei näyttänyt niitä. Uusi vaihe vanhojen jälkeen omalla satunnaisjonolla (`seedMix(77125+…)`) ja tunnuksilla `p0, p1 …` → vanhojen vesien nimet ja tunnukset
+  (`w*`, `s*`) eivät muutu (CLAUDE.md-sääntö). Raja `WB_POND_D` −0,04 m ruudun keskellä, `WB_POND_MIN` 1 ruutu; matala ranta nimetyn veden vieressä liitetään siihen.
+  Kartat: 0 → +2 lampea, 1–3 → 0, 4 → 5, 5 → 6. DEV-paljastus (`devRevealMap`) merkitsee kaikki vedet (myös uudet lammet) löydetyiksi → nimet kartalla.
+- **DEV-esinehaku** (Å) käyttää samaa parannettua hakua kuin reppu ja rakennus (nimi, `SRCH_RULES`-yleissanat, kategoria; nimiosumat ensin) ja kategoriapainikkeet
+  (`DEV_ICATS`, `itemCat`: myös reseptittömät – raa'at kalat Kalastus, juomat, ainesosat Materiaalit). Hakusanoihin kategoria myös reseptittömille esineille ja kalastusvarusteille.
 
 ### v3.25 (syötevirhe, intron usva, optimointi, käsi, äänet – käyttäjä 19.11., PR #49 yhdistetty → uusi PR)
 - **Virhe "openPanel is not defined" (KORJAUKSET 96):** näppäily (välilyönti, WASD …) skriptien latautuessa – input.js:n ja fishbook.js:n kuuntelijat viittasivat myöhemmin

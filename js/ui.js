@@ -196,7 +196,11 @@ function devLiveTick(dt){if(openPanel!=='dev')return;devLiveT-=dt;if(devLiveT>0)
   B.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('on',b.dataset.w===weather.cur));
   B.querySelectorAll('[data-spd]').forEach(b=>b.classList.toggle('on',+b.dataset.spd===worldSpd()));B.querySelectorAll('[data-tspd]').forEach(b=>b.classList.toggle('on',+b.dataset.tspd===timeSpd()));
   B.querySelectorAll('[data-big]').forEach(b=>{const on=!!DEVF[b.dataset.big];b.classList.toggle('on',on);const sp=b.querySelector('span');if(sp)sp.textContent=sp.textContent.replace(/^(PÄÄLLÄ|pois)/,on?'PÄÄLLÄ':'pois');});}
-let devQ='',devN=1;
+let devQ='',devN=1,devCat='';
+/* v3.25: esineen kategoria myös ilman reseptiä (kalat, materiaalit, avaimet) – käytetään DEV-haun painikkeissa ja hakusanoissa */
+const DEV_ICATS=[['tyokalut','Työkalut'],['aseet','Aseet'],['nuolet','Nuolet'],['varusteet','Varusteet'],['ruoka','Ruoka'],['pata','Pataruoat'],['juomat','Juomat'],['kalastus','Kalastus'],['viljely','Viljely'],['materiaalit','Materiaalit'],['muut','Muut']];
+function itemCat(id){const d=ITEMS[id];if(!d)return 'muut';if(d.potion)return 'juomat';if(typeof FISH_DEF!=='undefined'&&FISH_DEF[id])return 'kalastus';
+  const c=recipeCat((RECIPE_BY&&RECIPE_BY[id])||{id});if(c!=='muut')return c;if(!d.cat&&RECIPES.some(r=>r.req&&r.req[id]))return 'materiaalit';return 'muut';}
 const WIND_WARN=8;   // v2.01 tuulivaroituksen raja (m/s)
 /* v2.00 DEV-valikko Å: esineet. Pikavalinnat (yksi painallus antaa ehdotetun määrän, "Anna kaikki" kaikki kerralla) + esinehaku määrällä. */
 /* v3.16: pikavalinnat ryhmittäin (DEV_PICK_CATS); DEV_PICKS = kaikki yhdessä (Anna kaikki) */
@@ -208,16 +212,18 @@ const DEV_PICKS=DEV_PICK_CATS.flatMap(c=>c[1]);
 function renderDevI(){const B=$('#devIBody');if(!B)return;
   B.innerHTML=`<div class="devRow"><b>Pikavalinnat</b>${DEV_PICK_CATS.map(([cn,L])=>`<h4 class="devCat">${cn}</h4><div class="devList devPicks">${L.map(([id,n])=>`<div class="devIt"><span class="ic" style="background-image:url(${icon(id)})"></span><span class="nm">${esc(ITEMS[id].n)} × ${n}</span><button class="btn" data-pick="${id}" data-n="${n}">Anna</button></div>`).join('')}</div>`).join('')}
     <div class="devBtns"><button class="btn" id="devPickAll">Anna kaikki</button></div></div>
-  <div class="devRow"><b>Hae esine</b><div class="devGive"><input id="devQ" class="search" type="search" placeholder="Hae esinettä nimellä…" autocomplete="off" spellcheck="false" value="${esc(devQ)}">
-    <input id="devN" type="text" inputmode="numeric" maxlength="3" placeholder="1" value="${devN>1?devN:''}" title="Määrä (tyhjä = 1)"><button class="btn" id="devGo">Hae</button></div><div id="devList" class="devList"></div></div>`;
+  <div class="devRow"><b>Hae esine</b><div class="devGive"><input id="devQ" class="search" type="search" placeholder="Hae nimellä, yleissanalla tai kategorialla (esim. ase, kala, keitto)…" autocomplete="off" spellcheck="false" value="${esc(devQ)}">
+    <input id="devN" type="text" inputmode="numeric" maxlength="3" placeholder="1" value="${devN>1?devN:''}" title="Määrä (tyhjä = 1)"><button class="btn" id="devGo">Hae</button></div><div class="devCats">${DEV_ICATS.map(([k,nm])=>`<button class="tab${devCat===k?' on':''}" data-dcat="${k}">${nm}</button>`).join('')}</div><div id="devList" class="devList"></div></div>`;
   B.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>devGive(b.dataset.pick,+b.dataset.n));
   $('#devPickAll').onclick=()=>{for(const [id,n] of DEV_PICKS)devGive(id,n,true);msg(`DEV: kaikki pikavalinnat annettu (${DEV_PICKS.length} esinettä).`,'loot');};
   // v1.05 DEV-esinehaku: hakusana + määrä hakunapin vieressä, osumalista "Anna"-napeilla (lähtee pois DEV-tilan mukana)
   const listGive=()=>{const q=fold($('#devQ').value.trim()),L=$('#devList');devQ=$('#devQ').value;devN=Math.max(1,Math.min(999,Math.round(+$('#devN').value||1)));
-    const rank=id=>{const n=fold(ITEMS[id].n);return n===q||id===q?0:n.startsWith(q)||id.startsWith(q)?1:2;};
-  const ids=Object.keys(ITEMS).filter(id=>!q||searchHit(ITEMS[id].n,q)||id.includes(q)).sort((a,b)=>(q?rank(a)-rank(b):0)||ITEMS[a].n.localeCompare(ITEMS[b].n,'fi')).slice(0,q?40:200);
+    // v3.25 käyttäjä: sama parannettu haku kuin repussa ja rakennusvalikossa (nimi, yleissanat srchTag, kategoria) + kategoriapainikkeet; nimiosumat ensin
+    const rank=id=>{const n=fold(ITEMS[id].n);return n===q||id===q?0:n.startsWith(q)||id.startsWith(q)?1:searchHit(ITEMS[id].n,q)||id.includes(q)?2:3;};
+  const ids=Object.keys(ITEMS).filter(id=>(!devCat||itemCat(id)===devCat)&&(!q||searchHit(ITEMS[id].n,q)||id.includes(q)||srchTag('i',id,q))).sort((a,b)=>(q?rank(a)-rank(b):0)||ITEMS[a].n.localeCompare(ITEMS[b].n,'fi')).slice(0,q?60:250);
     L.innerHTML=ids.map(id=>`<div class="devIt"><span class="ic" style="background-image:url(${icon(id)})"></span><span class="nm">${esc(ITEMS[id].n)}</span><button class="btn" data-give="${id}">Anna ${devN}</button></div>`).join('')||'<div class="note">Ei osumia.</div>';
     L.querySelectorAll('[data-give]').forEach(b=>b.onclick=()=>devGive(b.dataset.give));};
+  B.querySelectorAll('[data-dcat]').forEach(b=>b.onclick=()=>{devCat=devCat===b.dataset.dcat?'':b.dataset.dcat;B.querySelectorAll('[data-dcat]').forEach(x=>x.classList.toggle('on',x.dataset.dcat===devCat));listGive();});
   $('#devGo').onclick=listGive;$('#devQ').oninput=listGive;$('#devN').oninput=listGive;$('#devQ').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const f=$('#devList [data-give]');if(f)devGive(f.dataset.give);}};listGive();}
 /* v1.94 EEPPINEN POMOPALKKI (kaikki pomot, ainoa paikka joka ohjaa #bossbar-elementtiä): lähin herännyt pomo samassa ulottuvuudessa (< 70 m).
    Teema pomon mukaan (väri, riimu, alaotsikko, koriste palkin alla: kivisärö / jääpuikot / veripisarat / köynnös), vaihemerkit palkissa,
@@ -423,7 +429,7 @@ const _srch=new Map();
 function srchTags(kind,id){const k=kind+id;let t=_srch.get(k);if(t!=null)return t;const isP=kind==='p',d=isP?PIECES[id]:ITEMS[id],base=fold(id+' '+(d?d.n:''));let w=[];
   for(const [re,ws] of SRCH_RULES)if(re.test(base))w.push(ws);
   if(isP){const c=BUILD_CATS.find(x=>x[0]===d.cat);if(c)w.push(c[1]);if(d.alku)w.push('alkupeli');w.push('rakennus');for(const m in d.req||{})if(ITEMS[m])w.push(ITEMS[m].n);}
-  else{if(d.food)w.push('ruoka syötävä syödä');if(d.potion)w.push('juoma juoda');if(SRCH_CAT[d.cat])w.push(SRCH_CAT[d.cat]);const r=RECIPE_BY&&RECIPE_BY[id];if(r){const c=CRAFT_CATS.find(x=>x[0]===recipeCat(r));if(c)w.push(c[1]);if(r.alku)w.push('alkupeli');}}
+  else{if(d.food)w.push('ruoka syötävä syödä');if(d.potion)w.push('juoma juoda');if(SRCH_CAT[d.cat])w.push(SRCH_CAT[d.cat]);const r=RECIPE_BY&&RECIPE_BY[id];if(r){const c=CRAFT_CATS.find(x=>x[0]===recipeCat(r));if(c)w.push(c[1]);if(r.alku)w.push('alkupeli');}else{const c=DEV_ICATS.find(x=>x[0]===itemCat(id));if(c&&c[0]!=='muut')w.push(c[1]);}if(d.tk)w.push('kalastus varuste');}
   t=fold(w.join(' '));_srch.set(k,t);return t;}
 const srchTag=(kind,id,q)=>srchTags(kind,id).split(/\s+/).some(x=>x.startsWith(q))||(q.length>=4&&srchTags(kind,id).includes(q));
 const recipeKnown=r=>Object.keys(r.req).some(id=>flags.seen[id])||!r.st;

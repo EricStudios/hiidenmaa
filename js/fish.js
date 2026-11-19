@@ -34,7 +34,7 @@ const ROD_LEN=2.05;   // vavan pituus (models.js)
 const FISH_JUNK=[['rauta',.01],['kupari',.02],['hiidensiru',.015],['saapas',.03],['pulloposti',.015],['ruostavain',.01]];
 /* v3.13 KORJAUKSET 87: suolammen tunnistus kutsui biomeAt(…, 1) → korkeus < 1,1 = aina 'beach', joten suolampia ei syntynyt koskaan (ruutana, suonsilmä, suutari
    eivät olleet saatavilla). WB_BOG_H 1,3 = rannan yläpuolella mutta aarnimetsän rajan (1,6) alla. */
-const WB_BOG_H=1.3,WB_BOG_MAX=200,WB_BOGG_K=.6;   // iso soinen järvi pysyy järvenä (nimi ennallaan), mutta siitä saa myös suokaloja (paino 0,6×)
+const WB_BOG_H=1.3,WB_BOG_MAX=200,WB_BOGG_K=.6;const WB_POND_D=-.04,WB_POND_MIN=1;   // v3.25 lampien vähimmäissyvyys ruudun keskellä ja koko (ruutuja à 16 m²)   // iso soinen järvi pysyy järvenä (nimi ennallaan), mutta siitä saa myös suokaloja (paino 0,6×)
 const WB_S=4,WB_N=Math.ceil(HALF*2/WB_S),WB_ID=new Int16Array(WB_N*WB_N).fill(-1),WBS=[],WB_SEA=[];
 const WB_LAKE={ahven:'Ahven',hauki:'Hauki',lahna:'Lahna',ruutana:'Ruutana',suonsilma:'Suonsilmän'},WB_SEAN={silakka:'Silakkalahti',turska:'Turskanselkä',lohi:'Lohisalmi'},WB_PRE=['','Pikku-','Iso-','Ala-','Ylä-','Musta-'];
 let SUNK=null;
@@ -68,7 +68,20 @@ let SUNK=null;
     const S0=LOC.spawn,okP=p=>dist2(p.x,p.z,S0.x,S0.z)>120*120&&!siteBlocked(p.x,p.z)&&terrainH(p.x,p.z)>.05&&terrainH(p.x,p.z)<1.2;let pick=null;
     for(const cells of isl.sort(()=>rs()-.5)){for(const c of cells){const p=pos(c);if(okP(p)){pick={x:p.x,z:p.z,isl:1};break;}}if(pick)break;}
     if(!pick){for(let t=0;t<4000&&!pick;t++){const k=Math.floor(rs()*N*N);if(W[k])continue;const i=k%N,j=(k/N)|0;let wn=false;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const m=(j+b)*N+i+a;if(m>=0&&m<N*N&&W[m])wn=true;}const p=pos(k);if(wn&&okP(p))pick={x:p.x,z:p.z,isl:0};}}
-    SUNK=pick;}})();
+    SUNK=pick;}
+  /* v3.25 käyttäjä: KAIKKI LAMMET NIMETÄÄN. Ennen alle 5 ruudun (80 m²) ja matalat (pohja yli −0,45 m) lammet jäivät ilman nimeä ja kalastusvettä → DEV-paljastus ei näyttänyt
+     niitä. Erillinen vaihe vanhojen jälkeen (oma satunnaisjono, tunnukset p0, p1 …) → vanhojen vesien nimet ja tunnukset eivät muutu. Matala ranta nimetyn veden vieressä
+     liitetään siihen; erillinen vähintään WB_POND_MIN ruudun allas on uusi lampi. */
+  {const rp=mulberry32(seedMix(77125+MAP_ID*31)),sh=k=>!W[k]&&terrainH(-HALF+(k%N+.5)*WB_S,-HALF+(((k/N)|0)+.5)*WB_S)<WB_POND_D,cand=k=>W[k]&&WB_ID[k]===-1||sh(k),seen=new Uint8Array(N*N);let pn=0;
+    for(let k=0;k<N*N;k++){if(seen[k]||!cand(k))continue;const q=[k],cells=[];seen[k]=1;let edge=false;const nb=new Set();
+      while(q.length){const c=q.pop(),i=c%N,j=(c/N)|0;cells.push(c);if(i===0||j===0||i===N-1||j===N-1)edge=true;
+        for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const x=i+a,y=j+b;if(x<0||y<0||x>=N||y>=N)continue;const m=y*N+x;if(WB_ID[m]>=0||WB_ID[m]===-2)nb.add(WB_ID[m]);else if(!seen[m]&&cand(m)){seen[m]=1;q.push(m);}}}
+      if(nb.size===1){const id=[...nb][0];for(const c of cells)WB_ID[c]=id;continue;}   // matala ranta kuuluu viereiseen veteen
+      if(edge||nb.size>1||cells.length<WB_POND_MIN)continue;
+      let sx=0,sz=0,bog=0;for(const c of cells){const p=pos(c);sx+=p.x;sz+=p.z;if(biomeAt(p.x,p.z,WB_BOG_H)==='suo')bog++;}
+      const cx=sx/cells.length,cz=sz/cells.length,type=bog>=cells.length*.4?'bog':'lake',L=type==='bog'?['ruutana','ruutana','suonsilma']:['ahven','hauki','lahna'],sp=L[Math.floor(rp()*L.length)];
+      let best=cells[0],bd=1e18;for(const c of cells){const p=pos(c),d=dist2(p.x,p.z,cx,cz);if(d<bd){bd=d;best=c;}}const lp=pos(best),ix=WBS.length;
+      WBS.push({id:'p'+pn++,name:uniq(WB_LAKE[sp]+'lampi'),type,sp,x:lp.x,z:lp.z,n:cells.length,bogg:0,pond:1});for(const c of cells)WB_ID[c]=ix;}}})();
 // v3.08: onko kohta sisämaan vettä (järvi/lampi) eikä merta – ruutujen tunnukset 2 ruudun säteellä (ei Meri-aluetta järvellä)
 function inlandWater(x,z){const i0=Math.floor((x+HALF)/WB_S),j0=Math.floor((z+HALF)/WB_S);let lake=false;for(let r=0;r<=4;r++){for(let dj=-r;dj<=r;dj++)for(let di=-r;di<=r;di++){if(Math.max(Math.abs(di),Math.abs(dj))!==r)continue;const i=i0+di,j=j0+dj;if(i<0||j<0||i>=WB_N||j>=WB_N)return false;const id=WB_ID[j*WB_N+i];if(id===-2)return false;if(id>=0)lake=true;}if(lake)return true;}return false;}
 function wbAt(x,z){const i=Math.floor((x+HALF)/WB_S),j=Math.floor((z+HALF)/WB_S);if(i<0||j<0||i>=WB_N||j>=WB_N)return null;const id=WB_ID[j*WB_N+i];
