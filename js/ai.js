@@ -114,8 +114,8 @@ function updateMobs(dt){
       else if(m.state==='flee'&&dist>(pr.safe||28)*(m.orphan?2:1)&&!m.fly)m.state='idle';
       else if(pr.curious&&m.state!=='flee'&&!P.dead&&!hid&&dist<26&&m.los)m.state='watch';
       else if(m.state==='watch')m.state='idle';
-      if(m.state==='freeze'){m.frzT-=dt;m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),Math.min(1,dt*3));if(m.frzT<=0)startFlee(m,dx,dz);moveMob(m,0,0,0,dt);animMob(m,dt);continue;}
-      if(m.state==='watch'){m.actSnd='nuuhkiminen';m.actT=playTime;   /* v2.23: nuuhkiminen soi silmukkana niin kauan kuin eläin katsoo sinua (tgTick) */m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),Math.min(1,dt*2.5));moveMob(m,0,0,0,dt);animMob(m,dt);continue;}
+      if(m.state==='freeze'){m.frzT-=dt;m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),kExp(3,dt));if(m.frzT<=0)startFlee(m,dx,dz);moveMob(m,0,0,0,dt);animMob(m,dt);continue;}
+      if(m.state==='watch'){m.actSnd='nuuhkiminen';m.actT=playTime;   /* v2.23: nuuhkiminen soi silmukkana niin kauan kuin eläin katsoo sinua (tgTick) */m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),kExp(2.5,dt));moveMob(m,0,0,0,dt);animMob(m,dt);continue;}
       if(m.fly){flyMob(m,dt);animMob(m,dt);continue;}}
     else if(hostile&&!P.dead&&!(P.spawnProt>0)&&!(m.forgetT>0)&&((m.los&&dist<aggroR)||hurt)&&Math.abs(P.pos.y-m.pos.y)<6){if(m.state!=='chase'){m.seenT=playTime;m.lastPX=P.pos.x;m.lastPZ=P.pos.z;packAlert(m);}m.state='chase';}
     /* v2.08: jahti jatkuu niin kauan kuin vihollinen muistaa pelaajan (MOB_MEM 30 s viimeisestä näkemisestä/osumasta), vaikka näköyhteys katkeaisi
@@ -155,7 +155,7 @@ function updateMobs(dt){
       m.siege=null;m.t-=dt;if(m.t<=0||!m.wander){m.t=3+Math.random()*5;if(Math.random()<.45){const a=Math.random()*TAU;m.wander={x:m.pos.x+Math.cos(a)*10,z:m.pos.z+Math.sin(a)*10};}else m.wander=null;}
       if(m.wander){tx=m.wander.x-m.pos.x;tz=m.wander.z-m.pos.z;if(Math.hypot(tx,tz)<1)m.wander=null;spd=d.walk;}
     }
-    if(atBorder&&spd>0){const ox=m.pos.x-m.guard.x,oz=m.pos.z-m.guard.z;if(tx*ox+tz*oz>0){spd=0;m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),Math.min(1,dt*6));}}   // rajalla: ei ulospäin
+    if(atBorder&&spd>0){const ox=m.pos.x-m.guard.x,oz=m.pos.z-m.guard.z;if(tx*ox+tz*oz>0){spd=0;m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),kExp(6,dt));}}   // rajalla: ei ulospäin
     moveMob(m,tx,tz,spd,dt);
     animMob(m,dt);
     if(m.archer)archerPose(m,dt);   // v1.88: jousen asento kuten pelaajalla
@@ -255,7 +255,7 @@ function famStep(m,dt,dist){const F=m.fam,sow=F.sow;
   else{const an=sow.yaw+(i-(F.kids.length-1)/2)*.9;tx=sow.pos.x+Math.sin(an)*1.2;tz=sow.pos.z+Math.cos(an)*1.2;face={pos:{x:sow.pos.x+Math.sin(sow.yaw)*.8,z:sow.pos.z+Math.cos(sow.yaw)*.8}};hd=(m.f.nk?0:.55)+Math.sin(t*7+i)*.15;}
   const fx=v=>v.pos?v.pos:v;let moving=false;
   if(tx!==null){const ex=tx-m.pos.x,ez=tz-m.pos.z;if(ex*ex+ez*ez>.12){moveMob(m,ex,ez,spd,dt);moving=true;}}
-  if(!moving){moveMob(m,0,0,0,dt);if(face){const q=fx(face);m.yaw=lerpAngle(m.yaw,Math.atan2(q.x-m.pos.x,q.z-m.pos.z),Math.min(1,dt*4));}}
+  if(!moving){moveMob(m,0,0,0,dt);if(face){const q=fx(face);m.yaw=lerpAngle(m.yaw,Math.atan2(q.x-m.pos.x,q.z-m.pos.z),kExp(4,dt));}}
   if(m===sow&&F.k==='root'){m.actSnd='syominen_tonkiminen';m.actT=playTime;}   // v2.23: tonkiminen silmukkana tonkimisen ajan (tgTick)
   if(F.k==='root'&&!moving)headDown(m);   // v2.24: tonkiessa kärsä maahan asti
   animMob(m,dt);if(!moving||F.k==='nuzzle'&&m===sow)m.f.head.rotation.x+=hd;if(hop)m.f.g.position.y+=hop;return true;}
@@ -300,7 +300,7 @@ function drinkStep(m,dt,dist){const D=m.drink;
       if((D.ck+=dt)>2){if(Math.hypot(m.pos.x-D.lx,m.pos.z-D.lz)<.4){m.drink=null;return false;}D.ck=0;D.lx=m.pos.x;D.lz=m.pos.z;}   // jumissa → luovuta
       return true;}
     D.k='drink';D.t=0;}
-  moveMob(m,0,0,0,dt);const ty=Math.atan2(D.fx-m.pos.x,D.fz-m.pos.z);m.yaw=lerpAngle(m.yaw,ty,Math.min(1,dt*3));
+  moveMob(m,0,0,0,dt);const ty=Math.atan2(D.fx-m.pos.x,D.fz-m.pos.z);m.yaw=lerpAngle(m.yaw,ty,kExp(3,dt));
   if(Math.abs(lerpAngle(0,ty-m.yaw,1))<.35)headDown(m,1);
   animMob(m,dt);const k=m.hdK||0;m.f.head.rotation.x+=Math.sin(playTime*9)*.05*k;
   if(k>.7){m.actSnd='juominen';m.actT=playTime;}
@@ -314,7 +314,7 @@ const LUNGE={c:.3,l:.36,r:.3},SHORE_CALM=3;
    ja alleen (pelaaja edessä f > .4 tai rungon alla). Hiidenkarhu kaataa myös aarnipuut (fellAhead). */
 const HK_LUNGE=1.5,lungeK=m=>m.type==='hiidenkarhu'?HK_LUNGE:1;
 function bearLunge(m,dt,dx,dz,dist){const L=m.lunge,d=m.def;L.t+=dt;const t=L.t,c=LUNGE.c,lp=c+LUNGE.l;
-  if(t<c){m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),Math.min(1,dt*10));return[0,0,0];}
+  if(t<c){m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),kExp(10,dt));return[0,0,0];}
   if(t<lp){if(!L.v)L.v=clamp((dist-d.range*.55)/LUNGE.l,2,15*lungeK(m));
     if(!L.hit&&t>=c+LUNGE.l*.72){L.hit=1;tgSnd(m,'huitaisu');
       if(mobReach(m,dist)<d.range+.6&&!P.dead&&losClear(m.pos.x,mobEyeY(m),m.pos.z,P.pos.x,P.pos.y+1.3,P.pos.z,true)){const f=(Math.sin(m.yaw)*dx+Math.cos(m.yaw)*dz)/(dist||1);
@@ -351,7 +351,7 @@ const MOB_SPD=.85;
 const _arF=new V3(),_arD=new V3(),_arX=new V3(),ARCH_DRAW=1.9,ARCH_SPD=32,ARCH_G=7,ARCH_TURN=1.0,ARCH_PITCH=.9;
 function archerAI(m,dt,dx,dz,dist){const d=m.def,los=!devOn('unseen')&&losClear(m.pos.x,mobEyeY(m),m.pos.z,P.pos.x,P.pos.y+1.3,P.pos.z,true);
   if(m.aimT>0){
-    const k=Math.min(1,dt*4);m.aimX+=(P.pos.x-m.aimX)*k;m.aimY+=(P.pos.y+1.15-m.aimY)*k;m.aimZ+=(P.pos.z-m.aimZ)*k;   // viive: tähtäyspiste seuraa pelaajaa hitaasti
+    const k=kExp(4,dt);m.aimX+=(P.pos.x-m.aimX)*k;m.aimY+=(P.pos.y+1.15-m.aimY)*k;m.aimZ+=(P.pos.z-m.aimZ)*k;   // viive: tähtäyspiste seuraa pelaajaa hitaasti
     const ax=m.aimX-m.pos.x,az=m.aimZ-m.pos.z,hd=Math.hypot(ax,az)||1e-4,t=hd/ARCH_SPD,ty=m.aimY-(m.pos.y+1.35)+.5*ARCH_G*t*t;   // painovoimakorjaus nuolen lentoajalle
     const wy=Math.atan2(ax,az),wp=Math.atan2(ty,hd),dy=((wy-m.yaw+Math.PI)%TAU+TAU)%TAU-Math.PI;
     m.yaw+=clamp(dy,-ARCH_TURN*dt,ARCH_TURN*dt);m.aimPitch+=clamp(wp-m.aimPitch,-ARCH_PITCH*dt,ARCH_PITCH*dt);
@@ -405,9 +405,9 @@ function moveMob(m,tx,tz,spd,dt){
   if(m.aarni&&(m.def.ai==='hostile'||m.angry))spd*=1.2;
   if(m.def.stride)spd*=1.1;   // v0.92 harppovat hirviöt 10 % nopeampia
   const l=Math.hypot(tx,tz);
-  if(l>.01){const ty=Math.atan2(tx,tz);m.yaw=lerpAngle(m.yaw,ty,Math.min(1,dt*8));}
+  if(l>.01){const ty=Math.atan2(tx,tz);m.yaw=lerpAngle(m.yaw,ty,kExp(8,dt));}
   let vx=0,vz=0;if(l>.01&&spd>0){const sx=Math.sin(m.yaw),sz=Math.cos(m.yaw),uk=m.dun||m.fly?1:uphillK(m.pos.x,m.pos.z,sx,sz);vx=sx*spd*uk;vz=sz*spd*uk;}   // v2.20: ylämäki hidastaa (90° = puolet)
-  if(m.dun&&!m.fly&&iceAt(m.pos.x,m.pos.z)){const k=Math.min(1,dt*ICE_GRIP);m.ivx=lerp(m.ivx??vx,vx,k);m.ivz=lerp(m.ivz??vz,vz,k);vx=m.ivx;vz=m.ivz;}else{m.ivx=vx;m.ivz=vz;}   // v3.06 jäällä olennotkin liukuvat
+  if(m.dun&&!m.fly&&iceAt(m.pos.x,m.pos.z)){const k=kExp(ICE_GRIP,dt);m.ivx=lerp(m.ivx??vx,vx,k);m.ivz=lerp(m.ivz??vz,vz,k);vx=m.ivx;vz=m.ivz;}else{m.ivx=vx;m.ivz=vz;}   // v3.06 jäällä olennotkin liukuvat
   m.vel.x*=Math.max(0,1-dt*6);m.vel.z*=Math.max(0,1-dt*6);
   const nx=m.pos.x+(vx+m.vel.x)*dt,nz=m.pos.z+(vz+m.vel.z)*dt;
   if(!m.dun&&terrainH(nx,nz)<-.7&&terrainH(m.pos.x,m.pos.z)>=-.7){m.wander=null;if(m.state!=='chase'){if(!(m.shoreW>0)){m.shoreT=SHORE_CALM;m.shoreYaw=m.yaw+Math.PI*(.8+Math.random()*.4);m.state='idle';m.fearT=0;}else m.shoreYaw+=Math.PI*.5;}return;}   // v2.99 vesiraja: pysähdys ja rauhoittuminen, sitten pois vedestä
@@ -423,7 +423,7 @@ function moveMob(m,tx,tz,spd,dt){
     tgSnd(m,hv?'tormays_raskas':'tormays_kevyt',{g:'tormaykset',p:hv?clamp(tgSize(m)*1.1,.75,1.05):clamp(tgSize(m),.85,1.3),v:clamp(spd0/6,.55,1)});}}
   // stuck at player's buildings -> attack them
   if(m.state==='chase'&&spd>0&&moved<spd*dt*.3){m.stuck+=dt;if(m.stuck>.8&&m.atkCd<=0){const c=_hitl.find(c=>c.owner&&c.owner.t&&PIECES[c.owner.t]);if(c){damagePiece(c.owner,m.def.dmg,'mob');m.atkCd=m.def.cd;m.anim=.4;if(c.owner.t==='aita'){damageMob(m,6,'pierce',-(c.owner.x-m.pos.x),-(c.owner.z-m.pos.z));}}}}else m.stuck=0;
-  const g=groundAt(m.pos.x,m.pos.z,m.def.r,m.pos.y);m.pos.y=lerp(m.pos.y,Math.max(g,m.dun?DUN.y:-1.4),Math.min(1,dt*10));
+  const g=groundAt(m.pos.x,m.pos.z,m.def.r,m.pos.y);m.pos.y=lerp(m.pos.y,Math.max(g,m.dun?DUN.y:-1.4),kExp(10,dt));
   m.speedNow=moved/dt;
 }
 function animMob(m,dt){
@@ -447,7 +447,7 @@ function animMob(m,dt){
       const hs=Math.sin(m.walkPh*.8),mvk=Math.min(1,(m.speedNow||0)/2.5);f.legs[0].rotation.x=f.legs[1].rotation.x=hs*.9*mvk;f.legs[2].rotation.x=f.legs[3].rotation.x=-hs*1.1*mvk;f.g.position.y+=Math.abs(Math.sin(m.walkPh*.8))*.22*mvk;}
     // nivelletyt jalat (makeAnimal): polvi koukistuu jalan noustessa (etujalat taaksepäin, takajalat eteenpäin), häntä heiluu
     if(f.animal){for(const l of f.legs){const a=l.rotation.x,kn=l.userData.knee;kn.rotation.x=l.userData.front?.05+Math.max(0,a)*1.1:-.05-Math.max(0,-a)*1.1;}if(f.tail)f.tail.rotation.y=Math.sin(playTime*(m.state==='chase'?9:3)+m.walkPh)*.25;}f.head.rotation.x=m.wind>0?-.5:(m.atkCd>m.def.cd-.2?.4:0);
-    if(f.nk){const on=playTime-(m.hdT??-9)<.25;m.hdK=lerp(m.hdK||0,on?1:0,Math.min(1,dt*(on?2.2:3.5)));const k=m.hdK>.002?sstep(0,1,m.hdK):0;f.nk.rotation.x=k*(m.hdA||0);f.head.rotation.x+=k*(NK_HP-(m.hdA||0));
+    if(f.nk){const on=playTime-(m.hdT??-9)<.25;m.hdK=lerp(m.hdK||0,on?1:0,kExp((on?2.2:3.5),dt));const k=m.hdK>.002?sstep(0,1,m.hdK):0;f.nk.rotation.x=k*(m.hdA||0);f.head.rotation.x+=k*(NK_HP-(m.hdA||0));
       const R=f.nkRig,e=R.E*k;f.head.position.set(0,R.hy+R.uy*e,R.hz+R.uz*e);const nt=R.nt;if(nt){nt.scale.y=(R.len+e)/R.len;nt.position.set(0,R.ty0+R.uy*e/2,R.tz0+R.uz*e/2);}}   // kaula venyy
     if(m.lunge&&m.state==='chase'&&!m.dead&&f.animal)bearLungePose(m,f);else{if(m.lunge&&m.state!=='chase')m.lunge=null;if(f.lgPose){f.lgPose=0;f.g.rotation.x=0;}}}   // v2.25 karhun syöksy   // v2.24 kaula alas (headDown)
   if(m.eyeFx)animEyes(m,dt);
@@ -502,7 +502,7 @@ function bossAI(m,dt,dx,dz,dist){
     if(m.t>=3){mobRemove(m);flags.altarSt=1;flags.bossHp=m.hp;syncAltar();/* v0.75: kivet jäävät alttarille pysyvästi (ei maahan katoavina esineinä), hp säilyy */circleStones.forEach(r=>r.material=new THREE.MeshBasicMaterial({color:0x2a3a39}));$('#bossbar').hidden=true;}return;}
   // v0.95: herätettäessä vartija nousee maasta 2,5 s:ssa (haavoittumaton), sitten nykyinen karjaisu (intro)
   // v1.89: nousu kestää 5 s (ennen 2,5 s + karjaisu): pää alhaalla ja kädet sivuilla, haavoittumaton; karjaisu vasta pystyssä
-  if(m.state==='rise'){m.t+=dt;const g=terrainH(m.pos.x,m.pos.z);if(m.t>5.9)m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),Math.min(1,dt*3));   // v1.90: 8 s, kääntyy vasta huomatessaan
+  if(m.state==='rise'){m.t+=dt;const g=terrainH(m.pos.x,m.pos.z);if(m.t>5.9)m.yaw=lerpAngle(m.yaw,Math.atan2(dx,dz),kExp(3,dt));   // v1.90: 8 s, kääntyy vasta huomatessaan
     if(bossRisePose(m,dt,g,7.5))return;
     m.pos.y=g;m.sinking=0;m.state='chase';m.t=0;bossWakeRoar(m);return;}
   if(P.dead){moveMob(m,L.x-m.pos.x,L.z-m.pos.z,m.def.walk,dt);animMob(m,dt);return;}// v0.75: iso pomo ei parane

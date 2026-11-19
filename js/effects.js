@@ -194,7 +194,7 @@ function bossDeathAnim(m,dt){const f=m.f,g=f.g,t=m.deadT,r=Math.max(.9,m.def.r),
     gl.position.set(m.pos.x,m.pos.y+r*1.6,m.pos.z);scene.add(gl);m.da.glow=gl;}
   const D=m.da,out=1-sstep(BD.dim,BD.dim+BD.dimLen,t),pale=sstep(0,4.2,t)*out;
   // 1) kohoaa ja levittää kädet (ennen repeämistä)
-  if(!D.parts){const lift=sstep(0,3.2,t)*(1.3+r*.5),sp=sstep(2.6,5.2,t),lk=Math.min(1,dt*2.5);
+  if(!D.parts){const lift=sstep(0,3.2,t)*(1.3+r*.5),sp=sstep(2.6,5.2,t),lk=kExp(2.5,dt);
     g.position.set(m.pos.x,D.y0+lift+Math.sin(t*1.7)*.06*sstep(2,3.2,t),m.pos.z);g.rotation.y+=dt*.22;
     if(f.head)f.head.rotation.x=lerp(f.head.rotation.x,.45*(1-sp)-.6*sp,lk);
     if(f.armL){const ax=lerp(f.armL.rotation.x,.15*(1-sp)-.15*sp,lk),az=lerp(f.armL.rotation.z,.35*(1-sp)+1.45*sp,lk);f.armL.rotation.set(ax,0,az);f.armR.rotation.set(ax,0,-az);}
@@ -344,7 +344,7 @@ function ashFlames(m){const g=new THREE.Group(),r=Math.max(.3,m.def.r*.8),h=(m.b
   for(let i=0;i<9;i++){const a=i/9*TAU,c=new THREE.Mesh(new THREE.ConeGeometry(.14*r*2,(.5+Math.random()*.4)*r*2,6),i%2?MAT.flame2:MAT.flame);c.position.set(Math.cos(a)*r*.6,h,Math.sin(a)*r*.6);g.add(c);}
   g.position.copy(m.pos);scene.add(g);return g;}
 function ashAnim(m,dt){const D=m.da,f=m.f,g=f.g,t=m.deadT,r=Math.max(.35,m.def.r);
-  if(t<1.6){const k=sstep(0,1.5,t);for(const mt of m.mats){mt.color.lerp(_ashC,Math.min(1,dt*2.2));mt.emissive.setRGB(.35*(1-k)*Math.random(),.08*(1-k),0);}
+  if(t<1.6){const k=sstep(0,1.5,t);for(const mt of m.mats){mt.color.lerp(_ashC,kExp(2.2,dt));mt.emissive.setRGB(.35*(1-k)*Math.random(),.08*(1-k),0);}
     g.rotation.z=D.dir*Math.PI/2*sstep(.3,1.3,t)*.9;g.scale.y=1-.25*sstep(.6,1.5,t);
     if(D.flames){D.flames.position.set(m.pos.x,m.pos.y,m.pos.z);D.flames.children.forEach((c,i)=>{c.scale.set(1,(.6+.5*Math.abs(Math.sin(playTime*10+i)))*(1-k*.4),1);});}
     if(Math.random()<dt*22)emitEmber(m.pos.x+(Math.random()-.5)*r,m.pos.y+Math.random()*r*1.6,m.pos.z+(Math.random()-.5)*r,'spark');
@@ -393,21 +393,21 @@ function startPlayerDeath(cause){const ash=!!P.ashDeath||(playTime-(P.lastFire||
   pDeath={t:0,ash:ash&&!P.waterDeath,water:!!P.waterDeath,void:cause==='void',dir:s,s,side,th:.03,w:w0,y:f.g.position.y,vy:Math.min(0,P.vy||0),yaw,fx:fx*s,fz:fz*s,
     bounced:false,rest:false,pool:false,poolS:null,saved:null,c:{x:P.pos.x,y:P.pos.y+.4,z:P.pos.z},y0:f.g.position.y};P.waterDeath=false;}
 function updatePlayerDeath(dt){const D=pDeath;if(!D)return;D.t+=dt;const t=D.t,f=fig;
-  if(D.water){const k=sstep(0,1.4,t),lk=Math.min(1,dt*2.5);f.g.rotation.x=-Math.PI/2*.5*k;f.g.rotation.z=D.dir*.3*k;
+  if(D.water){const k=sstep(0,1.4,t),lk=kExp(2.5,dt);f.g.rotation.x=-Math.PI/2*.5*k;f.g.rotation.z=D.dir*.3*k;
     const bot=groundAt(P.pos.x,P.pos.z,.38,P.pos.y);if(P.pos.y>bot)P.pos.y=Math.max(bot,P.pos.y-.63*dt);f.g.position.set(P.pos.x,P.pos.y+.4*k,P.pos.z);
     f.armL.rotation.x=lerp(f.armL.rotation.x,-2.1,lk);f.armR.rotation.x=lerp(f.armR.rotation.x,-1.7,lk);f.armL.rotation.z=lerp(f.armL.rotation.z,.5,lk);f.armR.rotation.z=lerp(f.armR.rotation.z,-.4,lk);
     f.legL.rotation.x=lerp(f.legL.rotation.x,.35,lk);f.legR.rotation.x=lerp(f.legR.rotation.x,.1,lk);if(f.kneeL){f.kneeL.rotation.x=lerp(f.kneeL.rotation.x,.6,lk);f.kneeR.rotation.x=lerp(f.kneeR.rotation.x,.4,lk);}f.head.rotation.x=lerp(f.head.rotation.x,.45,lk);
     if(t<2.5&&Math.random()<dt*(9-t*3))uwMouthBubble();return;}
-  if(D.void){D.vy-=DEATH_G*dt;D.y+=D.vy*dt;f.g.position.y=D.y;f.g.rotation.x=lerp(f.g.rotation.x,D.s*.9,Math.min(1,dt*2));if(t>1)f.g.visible=false;deathVig(Math.min(1,t/1.2));return;}
+  if(D.void){D.vy-=DEATH_G*dt;D.y+=D.vy*dt;f.g.position.y=D.y;f.g.rotation.x=lerp(f.g.rotation.x,D.s*.9,kExp(2,dt));if(t>1)f.g.visible=false;deathVig(Math.min(1,t/1.2));return;}
   const dun=P.inDun,gF=groundY(P.pos.x,P.pos.z,D.y,dun),L=1.6,hx=P.pos.x+D.fx*L,hz=P.pos.z+D.fz*L,gH=groundY(hx,hz,D.y,dun);
   const thEnd=clamp(Math.PI/2-Math.atan2(gH-gF,L),Math.PI/2-.55,Math.PI/2+.5);   // rinteessä pää lepää maassa
   if(!D.rest){D.w+=DEATH_G/DEATH_L*Math.sin(Math.max(.06,D.th))*dt;D.th+=D.w*dt;
     if(D.th>=thEnd){D.th=thEnd;if(!D.bounced&&D.w>1.5){D.bounced=true;D.w=-D.w*.2;shake(.12);}else{D.rest=true;D.w=0;}}}
-  else D.th=lerp(D.th,thEnd,Math.min(1,dt*3));
+  else D.th=lerp(D.th,thEnd,kExp(3,dt));
   if(D.y>gF+.01){D.vy-=DEATH_G*dt;D.y=Math.max(gF,D.y+D.vy*dt);}else{D.y=gF;D.vy=0;}   // ilmasta kuollessa putoaa maahan
   f.g.position.set(P.pos.x,D.y+DEATH_BACK*Math.sin(Math.min(D.th,Math.PI/2)),P.pos.z);f.g.rotation.x=D.s*D.th;f.g.rotation.z=D.side*Math.min(1,D.th/1.3);
   const sk=Math.sin(Math.min(D.th,Math.PI/2));D.c={x:P.pos.x+D.fx*.85*sk,y:D.y+.3,z:P.pos.z+D.fz*.85*sk};
-  const lk=Math.min(1,dt*5);f.armL.rotation.x=lerp(f.armL.rotation.x,-.6,lk);f.armR.rotation.x=lerp(f.armR.rotation.x,.2,lk);f.armL.rotation.z=lerp(f.armL.rotation.z,.6,lk);f.armR.rotation.z=lerp(f.armR.rotation.z,-.5,lk);
+  const lk=kExp(5,dt);f.armL.rotation.x=lerp(f.armL.rotation.x,-.6,lk);f.armR.rotation.x=lerp(f.armR.rotation.x,.2,lk);f.armL.rotation.z=lerp(f.armL.rotation.z,.6,lk);f.armR.rotation.z=lerp(f.armR.rotation.z,-.5,lk);
   f.legL.rotation.x=lerp(f.legL.rotation.x,.25,lk);f.legR.rotation.x=lerp(f.legR.rotation.x,-.1,lk);if(f.kneeL){f.kneeL.rotation.x=lerp(f.kneeL.rotation.x,.5,lk);f.kneeR.rotation.x=lerp(f.kneeR.rotation.x,.15,lk);}f.head.rotation.x=lerp(f.head.rotation.x,-.3,lk);
   deathVig(sstep(1.2,3,t)*.5);
   if(D.ash){if(!D.saved){D.saved=[];f.g.traverse(o=>{if(o.isMesh){D.saved.push([o,o.material]);o.material=_pAshMat;}});}

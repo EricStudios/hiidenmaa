@@ -1,7 +1,7 @@
 /* Hiidenmaa – core.js
    Apuvälineet: matematiikka, kohina, satunnaisluvut */
 'use strict';
-window.__JSV='3.21';   // v1.58: versiotarkistus (index.html vertaa window.HV:hen; eroaa → välimuisti antoi vanhoja tiedostoja)
+window.__JSV='3.22';   // v1.58: versiotarkistus (index.html vertaa window.HV:hen; eroaa → välimuisti antoi vanhoja tiedostoja)
 // KEHITYSTILA (v0.74; v1.82: oletus POIS, päälle Asetukset › Ohjaus ja ääni › alin rivi, localStorage hiidenmaa_devon, ?dev=1): DEV → kestävyys ei kulu, korkein taso (kaikki ohjeet auki), ei painorajaa,
 // V pohjassa liikkuu 10× nopeammin (v0.77; ennen Alt/Ö), Ä avaa DEV-valikon (sää, aika, terveys, kylläisyys), vasemmassa alakulmassa merkki "DEV-tila". Poista käytöstä: DEV=false.
 const DEV=(()=>{try{if(/[?&]dev=1/.test(location.search))localStorage.setItem('hiidenmaa_devon','1');return localStorage.getItem('hiidenmaa_devon')==='1';}catch(e){return false;}})();
@@ -23,6 +23,9 @@ function saveDevF(){try{localStorage.setItem('hiidenmaa_dev',JSON.stringify(DEVF
 const $=s=>document.querySelector(s);
 const TAU=Math.PI*2;
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
+/* v3.22 käyttäjä: animaatioiden pehmennys ruudunpäivitysnopeudesta riippumaton (esiasetus ei saa muuttaa ajoitusta). Vastaa 60 FPS:n kerrointa r/60 per ruutu,
+   mutta toimii samoin millä tahansa FPS:llä (ennen Math.min(1, dt·r) → matalalla FPS:llä pehmennys hyppäsi suoraan perille = nykäys). */
+function kExp(r,dt){return 1-Math.pow(Math.max(0,1-r/60),Math.max(0,dt)*60);}
 function sstep(e0,e1,x){const t=clamp((x-e0)/(e1-e0),0,1);return t*t*(3-2*t);}
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function hash2(x,z){let h=Math.imul(x|0,374761393)+Math.imul(z|0,668265263)+9371;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296;}

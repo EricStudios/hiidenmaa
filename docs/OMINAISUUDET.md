@@ -886,6 +886,13 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.22 – kirves, ajoitus ja reppu
+- Kirves ja hakku palaavat yksittäisen lyönnin jälkeen sivulle yhtenä sulavana liikkeenä (käsi ja kirveen kierto yhtä aikaa, 0,42 s), myös kun kestävyys loppuu kesken hakkuun.
+  Jatkuvassa hakkuussa kirves vaihtaa puolta pienessä kaaressa.
+- Grafiikan esiasetus ja ruudunpäivitys eivät muuta ajoitusta: iskutahti, viiveet, pehmennykset ja peliaika ovat samat kaikilla tasoilla (alle 20 FPS:llä osa-askeleet).
+- Reppu avattuna tavallisesti on kangasta, ja vasemmassa alanurkassa on vetoketju. Työpenkiltä ja ahjolta avattuna tausta on työpisteen mukainen.
+- Hautakiven risti on yksinkertainen risti. Tyhjällä kädellä tarkastellessa (F) hahmo ihmettelee ääneen useammin (30 %, viimeistään joka neljäs kerta).
+
 ## v3.21 – nappien ohjeet
 - Päävalikon nappien selitysrivit näkyvät vain siihen asti, kun nappia on käytetty kerran. Asetukset › Ohjaus › Näytä valikon nappien ohjeet aina (oletus pois).
 

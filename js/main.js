@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.21';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.22';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -416,13 +416,16 @@ const ptHours=()=>(Math.floor(PT.s/360)/10).toFixed(1).replace('.',',');
 function ptHTML(){ptLoad();const d=PT.first?new Date(PT.first).toLocaleDateString('fi-FI'):null;return `<div class="ptBox"><span>Pelattu yhteensä</span><b>${ptHours()} h</b>
   <small class="note">${d?'Ensimmäinen peli '+d+'. ':'Aika alkaa ensimmäisestä pelistä. '}Laskee, kun peli on käynnissä – tauolla ja päävalikossa ajastin on pysähdyksissä.${PT.seed?' Sisältää aiemmin tallennettujen maailmojen peliajan.':''}</small></div>`;}
 addEventListener('beforeunload',ptSave);document.addEventListener('visibilitychange',()=>{if(document.hidden)ptSave();});
-function worldStep(dt){const k=worldSpd();if(k===1){update(dt);return;}const tot=dt*k,n=Math.min(WSPD_MAX,Math.max(1,Math.ceil(tot/WSPD_STEP)));for(let i=0;i<n;i++)update(tot/n);}
+/* v3.22 käyttäjä: grafiikkataso ei saa muuttaa ajoitusta. Ennen dt rajattiin 0,05 s:iin → alle 20 FPS:llä peliaika (iskut, kestävyys, paluut) hidastui.
+   Nyt ruutu saa olla 0,1 s asti ja se ajetaan enintään 0,05 s:n osa-askelina (fysiikka pysyy vakaana), joten tahti on sama kaikilla tasoilla. */
+const WSTEP_MAX=.1;
+function worldStep(dt){const k=worldSpd();if(k===1){const n=Math.max(1,Math.ceil(dt/WSPD_STEP-1e-6));for(let i=0;i<n;i++)update(dt/n);return;}const tot=dt*k,n=Math.min(WSPD_MAX,Math.max(1,Math.ceil(tot/WSPD_STEP)));for(let i=0;i<n;i++)update(tot/n);}
 function frame(now){
   requestAnimationFrame(frame);
   const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;let skip3d=false;seeThruSync();
   if(state==='play'&&SET.autoAll&&!SET.noAuto)autoQuality(raw);   /* v2.65 noAuto: ei mitään automaattista säätöä */updateFps(raw);ptTick(raw);if(DEV)perfTick(raw);musicTick();if(typeof gameSndTick==='function')gameSndTick();   /* v2.83 valikossa pelin äänet häipyvät */try{ambTick(raw);}catch(err){}   /* v2.61 sää ja tunnelma */
   try{
-    if(state==='play'||state==='ui')worldStep(dt);   // v2.93 DEV maailman nopeus
+    if(state==='play'||state==='ui')worldStep(Math.min(WSTEP_MAX,raw));   // v2.93 DEV maailman nopeus
     if(typeof tutTick==='function')tutTick(dt);   // v2.71 opastus ja kertavinkit
     if(state==='dead')deathTick(dt);   // v2.73 kaatuminen, verilammikko ja kuolinkamera jatkuvat kuolinruudun takana
     else if(state==='menu'&&MENU_V2_OFF)menuCamOld(dt);

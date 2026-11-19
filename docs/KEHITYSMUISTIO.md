@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.21, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.22, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +434,20 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.22 (kirveen paluu, ajoitus kaikilla esiasetuksilla, reppu kangasta – käyttäjä 19.11.)
+- **Kirveen/hakun paluu sivulle (KORJAUKSET 93):** yksittäisen lyönnin jälkeen (ja kun hakkuu katkeaa kestävyyden loppuessa nappi pohjassa) IK-paino laski samaan aikaan
+  kun käsivarren Euler-asento palasi lepoon omalla 0,6 s pehmennyksellään → kirves pyörähti ja liukui (pahin matalilla esiasetuksilla/FPS:llä). Nyt paluu kokonaan IK:lla:
+  `chopRetOn` asettaa oikean käden Euler-asennon heti lepoon (IK peittää), `chopRestLive` laskee lepoasennon joka ruutu, käsi liukuu ja kirveen kierto (rigin koordinaateissa,
+  slerp) kääntyy lepoon `CHOP_RET` 0,42 s smootherstepillä, perillä paino häivytetään `CHOP_FADE` 7/s. Mitattu kirveen kulmanopeus paluussa ≤ 3–4,6 rad/s (ennen 11–71)
+  sekä 60 että 15 FPS:llä. Jatkuvassa hakkuussa sivun vaihto smootherstepillä pienessä kaaressa `CHOP_ARC` 0,07 m.
+- **Esiasetus ei muuta ajoitusta:** `kExp(r,dt)` (core.js) = `1-(1-r/60)^(dt·60)` korvaa `Math.min(1,dt*r)`:n (sama 60 FPS:llä, oikea muilla) player.js:ssä ja
+  ai/camera/dungeons/effects/environment/inspect/resin/state.js:ssä (62 kohtaa). Pääsilmukka: ruutu saa olla 0,1 s (`WSTEP_MAX`) ja ajetaan ≤ 0,05 s:n osa-askelina →
+  alle 20 FPS:llä peliaika ei enää hidastu. Pohjassa pidetyn iskun ylijäämä siirtyy seuraavaan (`P._atkOv`) → iskutahti sama joka FPS:llä.
+- **Reppu tavallisesti avattuna** (P/Tab, ei työpisteeltä): kangastausta (palttinakudos, tikkisauma `outline dashed`) ja vetoketju vasemmassa alanurkassa (`#inv[data-st=""]::after`, SVG).
+  Työpenkiltä ja ahjolta avattuna omat taustat kuten ennen.
+- **Hautakiven risti:** irrallinen vino alaviiva (tarkoitettu riimumaiseksi lisäviivaksi) pois; risti kiinni kiven pinnassa kiven kallistuksen mukana.
+- **Tyhjän käden F-tarkastelu:** ääni (wow/mmm) 30 % (`INSP_SND_PH`, esineillä edelleen 10 %) ja takuu: viimeistään joka 4. tyhjän käden tarkastelu (`INSP_SND_PITY`).
 
 ### v3.21 (valikon nappien ohjerivit – käyttäjä 19.11.)
 - Itsestäänselvät ohjerivit päävalikon napeissa (Uusi maailma "Aloita rannalta … pidä pohjassa = heti", Näppäimet, Asetukset, Tallenna nyt, Tila, Maailmat-napin

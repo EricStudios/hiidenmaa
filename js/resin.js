@@ -57,7 +57,7 @@ const BOWL_SPILL_Y=-.15,BOWL_SPILL_T=.12,BOWL_CURSE_D=2,BOWL_LEVEL_K=12,_spillQ=
 function bowlLevel(hm,dt){if(!hm.userData.q0)hm.userData.q0=hm.quaternion.clone();const q0=hm.userData.q0;
   if(P.insp){_spillT.copy(q0);}else{hm.parent.getWorldQuaternion(_spillPQ);_spillQ.copy(_spillPQ).multiply(q0);_spillV.set(0,1,0).applyQuaternion(_spillQ);
     _spillFix.setFromUnitVectors(_spillV,_spillUp);_spillQ.premultiply(_spillFix);_spillT.copy(_spillPQ.invert()).multiply(_spillQ);}
-  hm.quaternion.slerp(_spillT,Math.min(1,dt*BOWL_LEVEL_K));}
+  hm.quaternion.slerp(_spillT,kExp(BOWL_LEVEL_K,dt));}
 function bowlSpillTick(dt){if(heldId!=='vesikulho'||!heldMesh||P.dead){RES.spT=0;return;}bowlLevel(heldMesh,dt);heldMesh.getWorldQuaternion(_spillQ);const y=_spillV.set(0,1,0).applyQuaternion(_spillQ).y;
   if(y>=BOWL_SPILL_Y){RES.spT=0;return;}RES.spT=(RES.spT||0)+dt;if(RES.spT<BOWL_SPILL_T)return;RES.spT=0;bowlSpill();}
 function bowlSpill(){const s=heldBowl();if(!s||s.id!=='vesikulho')return;heldMesh.getWorldPosition(_spillV);s.id='kulho';invDirty=true;updateGear();bump('spills');

@@ -592,6 +592,25 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.22: reppu tavallisesti avattuna kangasta + vetoketju vasemmassa alanurkassa (työpisteeltä oma tausta), hautakiven risti ilman irtoviivaa, tyhjän käden tarkastelussa ääni 30 % + takuu',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    togglePanel('inv');const el=$('#inv'),cs=getComputedStyle(el),za=getComputedStyle(el,'::after');ck('kangas',el.dataset.st===''&&/dashed/.test(cs.outlineStyle)&&/svg/.test(za.backgroundImage)&&za.left==='0px'&&za.bottom==='0px');closePanels();
+    invCtx='tyopenkki';togglePanel('inv');ck('työpenkki',getComputedStyle(el,'::after').content==='none'||!/svg/.test(getComputedStyle(el,'::after').backgroundImage));closePanels();
+    const src=makeGrave.toString();ck('risti',!/\.16,\.04,-\.05,\.6/.test(src)&&/hs\.add\(r\)/.test(src));
+    ck('ääni',INSP_SND_PH>=.3&&INSP_SND_PITY<=4&&/INSP_SND_PITY/.test(inspectTick.toString()));
+    return e.length?'virhe: '+e.join(', '):true;});
+  t('v3.22: kirveen paluu sivulle sulava (IK + kierto lepoon) ja sama joka FPS:llä, pehmennys kExp, peliaika = oikea aika alle 20 FPS:llä (osa-askeleet)',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};const st=state;state='play';locked=true;const Q=new THREE.Quaternion(),Qr=new THREE.Quaternion();
+    ck('kExp',Math.abs(kExp(14,1/60)-14/60)<1e-9&&Math.abs((1-kExp(9,1/15))-Math.pow(1-kExp(9,1/60),4))<1e-9);
+    ck('osa-askeleet',WSTEP_MAX>=.1&&/WSPD_STEP/.test(worldStep.toString())&&/worldStep\(Math\.min\(WSTEP_MAX,raw\)\)/.test(frame.toString()));
+    let kv=inv.find(s=>s&&s.id==='kirves');if(!kv){invAdd('kirves',1);kv=inv.find(s=>s&&s.id==='kirves');}const eq0=kv.eq;if(!kv.eq)toggleEquip(kv);updateGear();
+    const res={};for(const dt of [1/60,1/15]){P.atk=null;mouseL=false;for(let i=0;i<40;i++)update(1/30);let prev=null,mx=0,t=0;
+      for(let i=0;t<1.7;i++){mouseL=i===0;P.stam=100;update(dt);t+=dt;heldMesh.getWorldQuaternion(Q);fig.rig.getWorldQuaternion(Qr);Q.premultiply(Qr.invert());
+        const ret=!P.atk||P.atk.t/P.atk.dur>P.atk.hitAt/P.atk.dur+.16;if(prev&&ret)mx=Math.max(mx,2*Math.acos(Math.min(1,Math.abs(prev.dot(Q))))/dt);prev=Q.clone();}
+      res[Math.round(1/dt)]={mx:+mx.toFixed(1),w:P.chopW};}
+    mouseL=false;state=st;P.atk=null;if(!eq0&&kv.eq){toggleEquip(kv);updateGear();}ck('paluu '+JSON.stringify(res),res[60].mx<8&&res[15].mx<8&&res[60].w===0&&res[15].w===0);
+    ck('sivun vaihto',CHOP_ARC>0&&CHOP_RET>.3&&typeof chopRetOn==='function');
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.21: valikon nappien ohjerivit vain kunnes nappia on käytetty, asetus Näytä valikon nappien ohjeet aina (oletus pois)',()=>{
     const o0=localStorage.getItem(BH_KEY),s0=SET.alwaysBtnHints;try{localStorage.removeItem(BH_KEY);bhApply();const b=$('#bKeys'),sm=b.querySelector('small.bh');const v1=getComputedStyle(sm).display!=='none';
       bhMark('bKeys');bhApply();const v2=getComputedStyle(sm).display==='none';SET.alwaysBtnHints=true;hintApply();const v3=getComputedStyle(sm).display!=='none';
@@ -1240,7 +1259,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('v2.33 avoimissa biomeissa varjot 40 % vaaleammat (osa auringosta tasaiseksi valoksi, hidas häivytys), metsissä ennallaan',()=>{
     const a=OPEN_SH===.4&&OPEN_BIOMES.has('meadow')&&OPEN_BIOMES.has('beach')&&!OPEN_BIOMES.has('forest')&&!OPEN_BIOMES.has('koivu')&&!OPEN_BIOMES.has('aarni')&&!OPEN_BIOMES.has('kangas');
     const b=typeof shAmb!=='undefined'&&shAmb.isAmbientLight&&scene.children.includes(shAmb);
-    const src=updateEnvironment.toString(),c=/openK=lerp\(openK,OPEN_BIOMES\.has\(zoneAt\(P\.pos\.x,P\.pos\.z\)\)\?1:0,Math\.min\(1,dt\*OPEN_RATE\)\)/.test(src)&&/sun\.shadow\.radius=SUN_SH_BASE\+1000\*Math\.round\(L\*100\)/.test(src)&&OPEN_RATE<1;   /* v2.42: vaalennus varjostimessa */
+    const src=updateEnvironment.toString(),c=/openK=lerp\(openK,OPEN_BIOMES\.has\(zoneAt\(P\.pos\.x,P\.pos\.z\)\)\?1:0,kExp\(OPEN_RATE,dt\)\)/.test(src)&&/sun\.shadow\.radius=SUN_SH_BASE\+1000\*Math\.round\(L\*100\)/.test(src)&&OPEN_RATE<1;   /* v2.42: vaalennus varjostimessa */
     return a&&b&&c||`virhe ${a} ${b} ${c}`;});
   t('v2.32 lukituksessa oikea vapautus tekee contextmenun itse (valitse + oikea klikkaus ruutuun = puolitus, Shift = slider)',()=>{
     const x=new XMLHttpRequest();x.open('GET','js/input.js?'+Date.now(),false);x.send();const src=x.responseText;

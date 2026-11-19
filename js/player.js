@@ -64,17 +64,17 @@ function updatePlayer(dt){
   P.stam=Math.max(0,P.stam);if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu
   // velocity
   P.onIce=P.inDun&&P.onGround&&iceAt(P.pos.x,P.pos.z);   // v3.06 Routaluolan jäälätäkkö: lähes kitkaton (ICE_GRIP)
-  {const gk=P.onIce?ICE_GRIP:P.onGround?12:3;P.vel.x=lerp(P.vel.x,dx*speed,Math.min(1,dt*gk));P.vel.z=lerp(P.vel.z,dz*speed,Math.min(1,dt*gk));}
+  {const gk=P.onIce?ICE_GRIP:P.onGround?12:3;P.vel.x=lerp(P.vel.x,dx*speed,kExp(gk,dt));P.vel.z=lerp(P.vel.z,dz*speed,kExp(gk,dt));}
   // v1.37 (lista 3, kohta 33): DEV-lento. Kun "Lento" on päällä, tuplahyppy (2 painallusta 0,35 s sisällä) aloittaa tai lopettaa lennon.
   // Lennossa välilyönti nousee, Shift laskee, Ctrl nopeampi; ei painovoimaa eikä putoamisvahinkoa.
   {const jd=state==='play'&&kd('jump');if(jd&&!P.jumpHeld){if(devOn('fly')&&playTime-(P.jumpTap||-9)<.35){P.flying=!P.flying;P.vy=0;msg(P.flying?'Lento päällä (välilyönti ylös, Shift alas).':'Lento pois.');P.jumpTap=-9;}else P.jumpTap=playTime;}P.jumpHeld=jd;if(!devOn('fly'))P.flying=false;}
   const vK=DEV&&keys.KeyV?6:1;   // v1.92: V pohjassa myös lento 6× nopeampi
-  if(P.flying){const fs=(keys.ControlLeft||keys.ControlRight?32:16)*vK;P.vel.x=lerp(P.vel.x,dx*fs,Math.min(1,dt*6));P.vel.z=lerp(P.vel.z,dz*fs,Math.min(1,dt*6));}
+  if(P.flying){const fs=(keys.ControlLeft||keys.ControlRight?32:16)*vK;P.vel.x=lerp(P.vel.x,dx*fs,kExp(6,dt));P.vel.z=lerp(P.vel.z,dz*fs,kExp(6,dt));}
   if(state==='play'&&kd('jump')&&P.onGround&&!P.swim&&P.stam>=8&&!over&&!P.flying&&!P.inTent){P.vy=7.2;P.onGround=false;P.stam-=8*(P.upK||1);P.stamDelay=.8;}
   const lad=!P.swim&&!P.dead&&ladderAt(P.pos);P.onLadder=!!lad;
-  if(P.flying){P.vy=lerp(P.vy,((kd('jump')?9:0)-(keys.ShiftLeft||keys.ShiftRight?9:0))*vK,Math.min(1,dt*6));P.onGround=false;}
-  else if(P.swim){if(P.swUp){const top=wy+waveAt(P.pos.x,P.pos.z)-1.3+Math.sin(playTime*1.7)*.06;P.vy=lerp(P.vy,clamp((top-P.pos.y)*2.2,-1.5,2.6),Math.min(1,dt*3));}
-    else P.vy=lerp(P.vy,-.42,Math.min(1,dt*1.5));}   // v2.18: hidas vajoaminen ilman välilyöntiä
+  if(P.flying){P.vy=lerp(P.vy,((kd('jump')?9:0)-(keys.ShiftLeft||keys.ShiftRight?9:0))*vK,kExp(6,dt));P.onGround=false;}
+  else if(P.swim){if(P.swUp){const top=wy+waveAt(P.pos.x,P.pos.z)-1.3+Math.sin(playTime*1.7)*.06;P.vy=lerp(P.vy,clamp((top-P.pos.y)*2.2,-1.5,2.6),kExp(3,dt));}
+    else P.vy=lerp(P.vy,-.42,kExp(1.5,dt));}   // v2.18: hidas vajoaminen ilman välilyöntiä
   else if(lad&&(kd('fwd')||kd('jump')||kd('back'))){P.vy=kd('back')&&!kd('fwd')&&!kd('jump')?-2.6:2.6;P.onGround=false;}
   else if(lad&&!P.onGround){P.vy=Math.max(P.vy,-1);}
   else P.vy-=22*dt;
@@ -97,30 +97,31 @@ function updatePlayer(dt){
   // world bounds
   if(!P.inDun){const R=Math.hypot(P.pos.x,P.pos.z),RM=seaBorder(P.pos.x,P.pos.z);if(R>RM){P.pos.x*=RM/R;P.pos.z*=RM/R;if(playTime-(P.edgeMsg||-99)>12){P.edgeMsg=playTime;msg('Avomeri on liian vaarallinen – käänny takaisin.','warn');}}}   // v2.18: raja 3× kauempana rannasta
   // facing
-  if(P.atk||P.blocking||P.drawing){P.yaw=lerpAngle(P.yaw,camYaw+Math.PI,Math.min(1,dt*((P.turnWait||0)>0?9:18)));}
-  else if(dl>0)P.yaw=lerpAngle(P.yaw,Math.atan2(P.vel.x,P.vel.z),Math.min(1,dt*10));
+  if(P.atk||P.blocking||P.drawing){P.yaw=lerpAngle(P.yaw,camYaw+Math.PI,kExp(((P.turnWait||0)>0?9:18),dt));}
+  else if(dl>0)P.yaw=lerpAngle(P.yaw,Math.atan2(P.vel.x,P.vel.z),kExp(10,dt));
   // attack
   if(P.atk&&(P.turnWait||0)>0){P.turnWait-=dt;if(P.turnWait<=0)P.yaw=camYaw+Math.PI;}
-  else if(P.atk){P.atk.t+=dt;if(!P.atk.done&&P.atk.t>=P.atk.hitAt){P.atk.done=true;if(P.atk.w&&P.atk.w.range)plSnd('lyonnit','huitaisu');doMeleeHit(P.atk.w);}if(P.atk.t>=P.atk.dur)P.atk=null;}
+  else if(P.atk){P.atk.t+=dt;if(!P.atk.done&&P.atk.t>=P.atk.hitAt){P.atk.done=true;if(P.atk.w&&P.atk.w.range)plSnd('lyonnit','huitaisu');doMeleeHit(P.atk.w);}if(P.atk.t>=P.atk.dur){P._atkOv=P.atk.t-P.atk.dur;P.atk=null;}}
   if(!P.atk&&mouseL&&state==='play'&&w.cat==='weapon'&&locked)startAttack();
+  if(P._atkOv!=null){if(P.atk&&P.atk.t===0)P.atk.t=Math.min(P._atkOv,.05);P._atkOv=null;}   // v3.22: pohjassa pidetyn iskun ylijäämä seuraavaan → sama tahti joka FPS:llä
   else if(mouseL&&state==='play'&&w.cat==='shovel'&&locked)useTool(false);
   else if(mouseR&&state==='play'&&w.cat==='shovel'&&locked)useTool(true);   // v0.96 oikea pohjassa: toissijainen (polku / värin palautus)
   if(P.drawing){P.drawT=(P.drawT||0)+dt;P.bowDraw=Math.min(1,P.bowDraw+dt/bowDrawTime());P.stam-=6*dt;P.stamDelay=.5;if(P.stam<=0){P.drawing=false;if(P.drawT>=BOW_MIN_T)fireBow();else bowCancel();P.drawT=0;}}
   // animate figure
   // v0.93 harppova juoksu: juoksukerroin runK 0 (kävely 4,6) → 1 (juoksu 8); askel pitenee ja tahti harvenee juostessa, kävelyssäkin hieman
   // v1.12 (välilisäys 3): runK pehmennetään (nousu 6/s, lasku 2,2/s), jotta juoksusta kävelyyn etukeno, askel ja kädet palautuvat rauhallisesti
-  const hv=Math.hypot(P.vel.x,P.vel.z),runK0=clamp((hv-4.8)/2.8,0,1)*(P.crouch||P.swim?0:1);P.runKs=lerp(P.runKs||0,runK0,Math.min(1,dt*(runK0>(P.runKs||0)?6:2.2)));
+  const hv=Math.hypot(P.vel.x,P.vel.z),runK0=clamp((hv-4.8)/2.8,0,1)*(P.crouch||P.swim?0:1);P.runKs=lerp(P.runKs||0,runK0,kExp((runK0>(P.runKs||0)?6:2.2),dt));
   const runK=P.runKs<.002?0:P.runKs;P.walkPh+=hv*dt*1.8*(1-.28*runK);
   const sw=Math.sin(P.walkPh)*Math.min(1,hv/4)*(.82+.2*runK);
   fig.g.position.copy(P.pos);if(P.swim)fig.g.position.y=P.pos.y-.2;fig.g.rotation.y=P.yaw;
-  P.crouchK=lerp(P.crouchK,P.crouch?1:0,Math.min(1,dt*9));
+  P.crouchK=lerp(P.crouchK,P.crouch?1:0,kExp(9,dt));
   // Jalat: lonkka + polvi. Kävely, ilma (hyppy), laskeutumisen joustaminen, iskun askel ja kyykky (polvet syvälle koukkuun, vartalo etukenoon).
   /* v1.68: elävä seisonta. Hengitys (4,2 s rytmi) aina paikallaan; AFK (ei näppäintä, hiirtä eikä kameran kääntöä 3 s) → pää katselee
      ympärilleen, kädet liikkuvat hieman, polvet joustavat ja paino siirtyy jalalta toiselle. idleK/afkK pehmennetään (ei hyppyjä). */
   {const act=mouseL||mouseR||Object.keys(keys).some(k=>keys[k])||Math.abs(camYaw-(P._cy||0))>.002||Math.abs(camPitch-(P._cp||0))>.002||hv>.3||state!=='play';
    P._cy=camYaw;P._cp=camPitch;P.afkT=act?0:(P.afkT||0)+dt;
    const still=P.onGround&&!P.swim&&hv<.3&&!P.atk&&!P.drawing&&!P.blocking&&P.crouchK<.1&&!P.dead;
-   P.idleK=lerp(P.idleK||0,still?1:0,Math.min(1,dt*3));P.afkK=lerp(P.afkK||0,still&&P.afkT>3?1:0,Math.min(1,dt*(P.afkT>3?.9:2.6)));
+   P.idleK=lerp(P.idleK||0,still?1:0,kExp(3,dt));P.afkK=lerp(P.afkK||0,still&&P.afkT>3?1:0,kExp((P.afkT>3?.9:2.6),dt));
    P.brPh=(P.brPh||0)+dt*TAU/4.2;P.afkPh=P.afkK>.01?(P.afkPh||0)+dt:0;}
   const brth=Math.sin(P.brPh)*P.idleK,aK=P.afkK,aP=P.afkPh,sway2=Math.sin(aP*.45);
   {let bobC=0;const K=P.crouchK;P.landT=Math.max(0,(P.landT||0)-dt);const land=Math.min(1,P.landT/.25);
@@ -156,7 +157,8 @@ function updatePlayer(dt){
       if(env>0&&g==='scratch'){tRx=lerp(tRx,-2.75,env);tRz=lerp(tRz,-.55,env);eRo=lerp(-.2,-2.25+Math.sin(aP*11)*.12*sstep(.7,1,u)*(1-sstep(2.3,2.6,u)),env);}
       if(env>0&&g==='stretch'){const o=1.25*env;tLz+=o;tRz-=o;tLx=lerp(tLx,-.15,env);tRx=lerp(tRx,-.15,env);eLo=lerp(-.15,-.05,env);eRo=lerp(-.15,-.05,env);}}}
   const hold=mouseL&&state==='play';
-  if(P.atk){const k=P.atk.t/P.atk.dur,hk=P.atk.hitAt/P.atk.dur,two=(P.atk.w.chop||P.atk.w.pick)&&!P.atk.offBusy,sd=P.atk.side||1;
+  const cRet=chopRetOn(hold);   // v3.22 kirveen paluu lepoon: oikea käsi suoraan lepoasentoon (IK peittää, chopRetApply)
+  if(P.atk&&!cRet){const k=P.atk.t/P.atk.dur,hk=P.atk.hitAt/P.atk.dur,two=(P.atk.w.chop||P.atk.w.pick)&&!P.atk.offBusy,sd=P.atk.side||1;
     if(P.atk.w.id==='keihas'){// työntö: nostokulma = kohteen suunta; käsi vedetään taakse ja ojennetaan
       const p=P.atk.aimP||0,tw=P.turnWait>0?0:1;let a;if(k<hk*.8)a=lerp(-.1,.5,sstep(0,1,k/(hk*.8)));else if(k<hk)a=lerp(.5,-p,sstep(0,1,(k-hk*.8)/(hk*.2)));else a=lerp(-p,0,Math.min(1,(k-hk)/.3));
       tRx=a;tRz=-.12;eRo=k<hk?Math.min(0,-p-a):Math.min(0,-p-a)*Math.max(0,1-(k-hk)/.3);}
@@ -180,20 +182,20 @@ function updatePlayer(dt){
   if(P._eOff){fig.armR.rotation.x-=P._eOff[0];fig.elbowR.rotation.x-=P._eOff[1];P._eOff=null;}   // v3.06 E-toiminnon käsiliike (lisäys poistetaan ennen pehmennystä)
   inspectRestore();   // v2.99 F-tarkastelun IK ei jää käsivarren perusasennoksi (nykiminen paluussa)
   chopRestore();   // v3.08 sama hakkuun IK:lle
-  const e=Math.min(1,dt*rate);
+  const e=kExp(rate,dt),eR=cRet?1:e;
   armSh+=(tSh-armSh)*e;fig.armL.position.x=armSh;fig.armR.position.x=-armSh;
-  fig.armR.rotation.y=lerpAngle(fig.armR.rotation.y,0,e);fig.armL.rotation.y=lerpAngle(fig.armL.rotation.y,0,e);fig.armR.rotation.x=lerpAngle(fig.armR.rotation.x,tRx,e);fig.armR.rotation.z=lerpAngle(fig.armR.rotation.z,tRz,e);
+  fig.armR.rotation.y=lerpAngle(fig.armR.rotation.y,0,eR);fig.armL.rotation.y=lerpAngle(fig.armL.rotation.y,0,e);fig.armR.rotation.x=lerpAngle(fig.armR.rotation.x,tRx,eR);fig.armR.rotation.z=lerpAngle(fig.armR.rotation.z,tRz,eR);
   fig.armL.rotation.x=lerpAngle(fig.armL.rotation.x,tLx,e);fig.armL.rotation.z=lerpAngle(fig.armL.rotation.z,tLz,e);
   // Kyynärpäät taipuvat sitä enemmän mitä korkeammalle käsivarsi nousee (jousella vetokäsi taipuu, jousikäsi suorana)
   {const bendR=-(.14+clamp(-fig.armR.rotation.x,0,2.8)*.28),bendL=-(.14+clamp(-fig.armL.rotation.x,0,2.8)*.28);
    let tR=eRo!==null?eRo:bendR,tL=eLo!==null?eLo:bendL;if(P.drawing){tL=-.05;tR=-(.5+P.bowDraw*.9);}
-   fig.elbowR.rotation.x=lerp(fig.elbowR.rotation.x,tR,Math.min(1,dt*(P.atk?20:8)));fig.elbowL.rotation.x=lerp(fig.elbowL.rotation.x,tL,Math.min(1,dt*(P.atk?20:8)));}
+   fig.elbowR.rotation.x=lerp(fig.elbowR.rotation.x,tR,cRet?1:kExp((P.atk?20:8),dt));fig.elbowL.rotation.x=lerp(fig.elbowL.rotation.x,tL,kExp((P.atk?20:8),dt));}
   // Jousi pysyy pystyssä (kämmenen kierto kumotaan käsivarren kulmalla); jänne ja nuoli seuraavat vetoa.
   // v1.22 (lista 2, kohta 14): levossa jousi heiluu käden mukana kuten muutkin esineet (ennen käden kierto kumottiin → jousi jäykkänä);
   // vedossa asento lasketaan alempana (bowAim).
   if(heldMesh&&ITEMS[heldId].cat==='bow'){heldMesh.rotation.set(P.drawing||P.drawK>.01?-.15:BOW_CARRY,0,0);heldMesh.position.set(0,0,-.12).applyQuaternion(heldMesh.quaternion);/* v1.57: ote rungon kahvasta (kaaren huippu z=.12 käteen; ennen käsi 12 cm rungon takana) */updateBowMesh(heldMesh,P.drawing?P.bowDraw:0);}
   // Kahden käden ote kirveestä: vasen käsi tarttuu varteen (IK, gripK pehmentää otteeseen menon ja irrotuksen).
-  P.gripK=lerp(P.gripK||0,grip&&heldMesh?1:0,Math.min(1,dt*(grip?22:10)));
+  P.gripK=lerp(P.gripK||0,grip&&heldMesh?1:0,kExp((grip?22:10),dt));
   if(!(P.drawK>.5))armClear(fig.armR,fig.elbowR,fig.hand);
   chopIK(dt);   // v1.37: kirves/hakku IK:lla (armClearin jälkeen, jotta varren suunta pysyy)
   if(P.gripK>.01&&heldMesh&&(ITEMS[heldId].chop||ITEMS[heldId].pick)){fig.g.updateMatrixWorld(true);
@@ -209,11 +211,11 @@ function updatePlayer(dt){
   {const ea=playTime-(P.eT??-9);if(ea>=0&&ea<E_ANIM_T&&!P.atk&&!P.carve&&!P.insp&&!P.drawing&&!P.dead){const k=Math.sin(ea/E_ANIM_T*Math.PI);P._eOff=[-.62*k,-.38*k];fig.armR.rotation.x+=P._eOff[0];fig.elbowR.rotation.x+=P._eOff[1];}}   // v3.06 (käyttäjä): E-toiminnossa käsi käy hieman eteen ja takaisin
   if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand);armWorldClear(fig.armL,fig.elbowL,fig.handL);}   // v2.88
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.
-  P.drawK=lerp(P.drawK||0,P.drawing&&heldMesh&&ITEMS[heldId].cat==='bow'?1:0,Math.min(1,dt*14));
+  P.drawK=lerp(P.drawK||0,P.drawing&&heldMesh&&ITEMS[heldId].cat==='bow'?1:0,kExp(14,dt));
   {const bk=P.drawK>.01&&heldMesh&&heldMesh.userData.bow?P.drawK:0;fig.rig.rotation.y=-.55*bk;fig.head.rotation.y=.55*bk+aK*(Math.sin(aP*.55)*.6+Math.sin(aP*1.3)*.12);if(bk)bowAim(heldMesh,bk);}   // v1.22 ampuja-asento: vartalo sivuttain, pää eteen
   inspectPose(dt);   // v2.98 F-tarkastelu (inspect.js): käsi IK:lla eteen, esine kääntyy, pää seuraa
   // Kilpi torjunnassa: käännetään (pehmeästi, blockK) osoittamaan eteenpäin – kämmenen kierto kumotaan niin että kilven normaali (x) on hahmon +z
-  if(offMesh&&offId&&ITEMS[offId].cat==='shield'){P.blockK=lerp(P.blockK||0,P.blocking?1:0,Math.min(1,dt*10));
+  if(offMesh&&offId&&ITEMS[offId].cat==='shield'){P.blockK=lerp(P.blockK||0,P.blocking?1:0,kExp(10,dt));
     if(P.blockK>.01){fig.g.updateMatrixWorld(true);fig.handL.getWorldQuaternion(_qh);fig.g.getWorldQuaternion(_qf);_qd.copy(_qf).multiply(_qt.setFromEuler(_eb.set(0,-Math.PI/2,0)));
       _qh.invert().multiply(_qd);offMesh.quaternion.identity().slerp(_qh,P.blockK);offMesh.position.set(0,0,P.blockK*.0);}
     else offMesh.quaternion.identity();}
@@ -235,7 +237,7 @@ function updatePlayer(dt){
       const still=Math.hypot(P.vel.x,P.vel.z)<.6;
       if(near&&!P.inWater&&!(wRain>.5&&!shelterCache&&!P.inDun)){if(torchIgn<=0){msg('Pysy paikallasi hetki – soihtu syttyy…');P.ignNeed=1+Math.random()*.5;}if(still)torchIgn+=dt;else torchIgn=Math.max(.001,torchIgn-dt);if(torchIgn>=(P.ignNeed||1.2)){ts.lit=true;torchIgn=0;msg('Sytytit soihdun!','loot');sfx('pickup');}}else torchIgn=0;}
     // Käsisoihdun varjo vain pimeässä (yö, sisällä, luolasto, synkkä sää, Aarnimetsä); päivänvalossa varjokameran kantama kutistuu nollaan (liukuu pois), pimeässä 2.4 m
-    {const dk=P.inDun?1:Math.max(1-lightK,indoorK,aarniK*.9,wDark>.55?.7:0);shDark+=(dk-shDark)*Math.min(1,dt*2.5);const far=.3+Math.max(0,shDark-.25)/.75*(torchSharpOn()?6.7:2.1);   /* v2.45 terävät: kantama 7 m */if(Math.abs(torchLight.shadow.camera.far-far)>.02){torchLight.shadow.camera.far=far;torchLight.shadow.camera.updateProjectionMatrix();}}
+    {const dk=P.inDun?1:Math.max(1-lightK,indoorK,aarniK*.9,wDark>.55?.7:0);shDark+=(dk-shDark)*kExp(2.5,dt);const far=.3+Math.max(0,shDark-.25)/.75*(torchSharpOn()?6.7:2.1);   /* v2.45 terävät: kantama 7 m */if(Math.abs(torchLight.shadow.camera.far-far)>.02){torchLight.shadow.camera.far=far;torchLight.shadow.camera.updateProjectionMatrix();}}
     torch=!!torchSlot()&&ts.lit&&ts.fuel>0;torchBarT-=dt;if(torchBarT<=0){torchBarT=1;invBarDirty=true;}   /* v2.46: vain palkit paikallaan (ei koko repun uudelleenpiirtoa) */
     const fl0=offMesh&&offMesh.userData.flame;if(fl0)for(const f of fl0)f.visible=torch;}
   if(torch){const u=torchFl||(torchFl={cur:1,target:1,t:0}),s=1+(flick(u,dt)-1)*.52+(Math.sin(playTime*1.7+torchPh[0])+Math.sin(playTime*3.1+torchPh[1]))*.02;{const kf=torchSharpOn()?.25:QUAL.pointShadow?.45:0;   /* v2.45: terävillä vähemmän täytevaloa */torchLight.intensity=2.6*s*(1-kf);torchFill.intensity=2.6*s*kf;}fig.handL.getWorldPosition(torchLight.position);torchLight.position.y+=.6;torchFill.position.copy(torchLight.position);
@@ -268,21 +270,42 @@ const CHOP_K={WR:{h:[-.24,1.30,.36],d:[-.25,.75,-.6]},WL:{h:[.10,1.30,.40],d:[.2
   ER:{h:[.08,.95,.46],d:[.55,-.4,.72]},EL:{h:[-.16,.95,.46],d:[-.55,-.4,.72]}};
 const _chH=new V3(),_chD=new V3(),_chB=new V3(),_chX=new V3(),_chY=new V3(),_chM=new THREE.Matrix4(),_chQ=new THREE.Quaternion(),_chQh=new THREE.Quaternion(),_chA=new V3(),_chC=new V3(),_poleChop=new V3(-.8,-1,.15),_poleChopX=new V3(-.4,-1,.5);
 function chopLerp(A,B,t){_chA.fromArray(A.h).lerp(_chC.fromArray(B.h),t);_chH.copy(_chA);_chA.fromArray(A.d).normalize();_chC.fromArray(B.d).normalize();_chD.copy(_chA).lerp(_chC,t).normalize();}
-function chopIK(dt){const w0=heldMesh&&ITEMS[heldId]&&(ITEMS[heldId].chop||ITEMS[heldId].pick)&&!(P.atk&&P.atk.offBusy);
+/* v3.22 käyttäjä: YKSITTÄISEN LYÖNNIN PALUU SIVULLE. Ennen IK-paino laski seurantaliikkeessä samaan aikaan kun käsivarren Euler-asento palasi lepoon
+   (oma 0,6 s pehmennys) → kirves "pyörähti" ja liukui vielä perille (pahin matalalla FPS:llä). Nyt paluu tehdään kokonaan IK:lla: käsivarren lepoasento lasketaan
+   joka ruutu (chopRestLive; player.js asettaa sen alla heti tavoitteeseen, chopRetOn), käden kohde liukuu loppuasennosta lepoon ja kirveen kierto rigin
+   koordinaateissa kääntyy loppukierrosta lepokiertoon (slerp) CHOP_RET s:ssa (smootherstep). Perillä IK- ja lepoasento ovat samat, joten painon häivytys
+   (CHOP_FADE/s) ei näy. Sama paluu, kun hakkuu katkeaa (kestävyys loppu, nappi pohjassa). Jatkuvassa hakkuussa sivun vaihto kulkee pienessä kaaressa (CHOP_ARC). */
+const CHOP_RET=.42,CHOP_FADE=7,CHOP_ARC=.07,_chR={h:new V3(),d:new V3(),q:new THREE.Quaternion()},_chRq=new THREE.Quaternion(),_chRq2=new THREE.Quaternion(),_chRq3=new THREE.Quaternion();
+const sstep5=x=>{x=clamp(x,0,1);return x*x*x*(x*(x*6-15)+10);};
+function isChopHeld(){return !!(heldMesh&&ITEMS[heldId]&&(ITEMS[heldId].chop||ITEMS[heldId].pick));}
+// onko kirveen paluu lepoon käynnissä (käsivarren Euler-asento asetetaan silloin suoraan lepoon, IK peittää sen)
+function chopRetOn(hold){if(!isChopHeld())return false;const a=P.atk;if(a){if(hold||a.offBusy||!(a.w&&(a.w.chop||a.w.pick)))return false;return a.t/a.dur>=a.hitAt/a.dur+.16;}return !!P._chRet&&P.chopW>.001;}
+function axeRigQ(out){heldMesh.getWorldQuaternion(out);fig.rig.getWorldQuaternion(_chRq);return out.premultiply(_chRq.invert());}
+function chopRestLive(){fig.g.updateMatrixWorld(true);fig.hand.getWorldPosition(_chR.h);fig.rig.worldToLocal(_chR.h);fig.hand.getWorldQuaternion(_chR.q);_chR.q.multiply(heldMesh.userData.q0);
+  fig.rig.getWorldQuaternion(_chRq);_chR.q.premultiply(_chRq.invert());_chR.d.set(0,0,1).applyQuaternion(_chR.q);}
+// paluu: rt 0–1 (alku P._chRet → lepo), w = IK-paino
+function chopRetApply(rt,w){const R=P._chRet;chopRestLive();_chH.copy(R.h).lerp(_chR.h,rt);_chD.copy(R.d).lerp(_chR.d,rt).normalize();P._chH.copy(_chH);P._chD.copy(_chD);
+  chopApply(w);_chRq3.copy(R.q).slerp(_chR.q,rt);fig.g.updateMatrixWorld(true);fig.rig.getWorldQuaternion(_chRq).multiply(_chRq3);fig.hand.getWorldQuaternion(_chRq2);heldMesh.quaternion.copy(_chRq2.invert().multiply(_chRq));}
+function chopRetInit(){if(P._chRet)return;P._chRet={h:P._chH.clone(),d:P._chD.clone(),q:(P._chAq||axeRigQ(new THREE.Quaternion())).clone(),t:0};}
+function chopIK(dt){chopIK0(dt);if(isChopHeld()&&P.chopW>.001){if(!P._chAq)P._chAq=new THREE.Quaternion();axeRigQ(P._chAq);}}
+function chopIK0(dt){const w0=isChopHeld()&&!(P.atk&&P.atk.offBusy);
   if(heldMesh&&!heldMesh.userData.q0)heldMesh.userData.q0=heldMesh.quaternion.clone();
-  // v1.57: iskun loputtua ei hypätä lepoasentoon (ennen kirves pyörähti) – viimeinen asento häivytetään pehmeästi (paino −5/s)
-  if(!w0||!P.atk){if(!w0||!P._chH||!(P.chopW>.001)){P.chopW=0;if(heldMesh&&heldMesh.userData.q0)heldMesh.quaternion.copy(heldMesh.userData.q0);return;}
-    P.chopW=Math.max(0,P.chopW-dt*5);_chH.copy(P._chH);_chD.copy(P._chD);chopApply(P.chopW);return;}
+  if(!w0||!P.atk){if(!w0||!P._chH||!(P.chopW>.001)){P.chopW=0;P._chRet=null;if(heldMesh&&heldMesh.userData.q0)heldMesh.quaternion.copy(heldMesh.userData.q0);return;}
+    chopRetInit();P._chRet.t+=dt;const rt=sstep5(P._chRet.t/CHOP_RET);
+    if(rt>=1)P.chopW=Math.max(0,P.chopW-dt*CHOP_FADE);
+    if(P.chopW<=.001){P.chopW=0;P._chRet=null;heldMesh.quaternion.copy(heldMesh.userData.q0);return;}
+    chopRetApply(rt,P.chopW);return;}
   const k=P.atk.t/P.atk.dur,hk=P.atk.hitAt/P.atk.dur,sd=P.atk.side||1,wk=hk*.55,W=sd>0?CHOP_K.WL:CHOP_K.WR,H=sd>0?CHOP_K.HL:CHOP_K.HR,E=sd>0?CHOP_K.EL:CHOP_K.ER,hold=mouseL&&state==='play';
-  // v1.57: jatkuvassa hakkuussa paino pysyy ja nosto alkaa edellisen iskun loppuasennosta (siirtymä koko nostovaiheen ajan,
-  // ennen 82–87° hyppy yhdessä ruudussa)
-  if(P._chAtk!==P.atk){P._chAtk=P.atk;P._chS=(P.chopW||0)>.5&&P._chH?{h:P._chH.clone(),d:P._chD.clone(),q:heldMesh.quaternion.clone()}:null;}
-  let w;if(k<wk){chopLerp(W,W,0);if(P._chS){const t=sstep(0,1,k/wk);_chH.lerpVectors(P._chS.h,_chH,t);P._chBl=t;w=1;}else w=sstep(0,1,k/(wk*.45));}
+  // v1.57: jatkuvassa hakkuussa paino pysyy ja nosto alkaa edellisen iskun loppuasennosta (siirtymä koko nostovaiheen ajan, ennen 82–87° hyppy yhdessä ruudussa)
+  if(P._chAtk!==P.atk){P._chAtk=P.atk;P._chS=(P.chopW||0)>.5&&P._chH?{h:P._chH.clone(),d:P._chD.clone(),q:heldMesh.quaternion.clone()}:null;P._chRet=null;}
+  const kr=hk+.16;
+  if(!hold&&k>=kr&&P._chH){chopRetInit();const ln=clamp((k-kr)/Math.max(.05,1-kr),0,1);P._chRet.t=ln*CHOP_RET;P.chopW=1;chopRetApply(sstep5(ln),1);return;}   // v3.22 yksittäinen lyönti: seurantaliikkeen jälkeen paluu lepoon
+  let w;if(k<wk){chopLerp(W,W,0);if(P._chS){const t=sstep5(k/wk);_chH.lerpVectors(P._chS.h,_chH,t);_chH.y+=CHOP_ARC*Math.sin(t*Math.PI);P._chBl=t;w=1;}else w=sstep(0,1,k/(wk*.45));}   // v3.22 sivun vaihto pienessä kaaressa
   else if(k<hk){chopLerp(W,H,sstep(0,1,(k-wk)/(hk-wk)));w=1;}
-  else{const kf=Math.min(1,(k-hk)/.16);chopLerp(H,E,sstep(0,1,kf));w=hold?1:1-sstep(0,1,Math.min(1,(k-hk-.16)/Math.max(.05,1-hk-.16)));}
+  else{const kf=Math.min(1,(k-hk)/.16);chopLerp(H,E,sstep(0,1,kf));w=1;}
   _chH.y+=.05;_chH.z+=.06;   // v1.57: kädet hieman ylempänä ja edempänä koko iskun ajan
-  // v1.57: kohde ja paino pehmennetään (14/s) → ei nykäisyä iskujen välissä eikä lopussa
-  {const a=Math.min(1,dt*14);if(!P._chH){P._chH=_chH.clone();P._chD=_chD.clone();}else if(!(P.chopW>.001)){P._chH.copy(_chH);P._chD.copy(_chD);}else{   /* v2.41: kopio, ei uutta oliota joka ruutu */P._chH.lerp(_chH,a);P._chD.lerp(_chD,a).normalize();}
+  // v1.57: kohde ja paino pehmennetään (14/s, v3.22 FPS:stä riippumaton) → ei nykäisyä iskujen välissä eikä lopussa
+  {const a=kExp(14,dt);if(!P._chH){P._chH=_chH.clone();P._chD=_chD.clone();}else if(!(P.chopW>.001)){P._chH.copy(_chH);P._chD.copy(_chD);}else{   /* v2.41: kopio, ei uutta oliota joka ruutu */P._chH.lerp(_chH,a);P._chD.lerp(_chD,a).normalize();}
    P.chopW=(P.chopW||0)+(w-(P.chopW||0))*a;w=P.chopW;_chH.copy(P._chH);_chD.copy(P._chD);}
   if(w<=.001){heldMesh.quaternion.copy(heldMesh.userData.q0);return;}chopApply(w);
   if(P._chS&&k<wk){_chQ.copy(heldMesh.quaternion);heldMesh.quaternion.copy(P._chS.q).slerp(_chQ,P._chBl);}}   // kirveen kierto kiertona (slerp), ei pyörähdystä
@@ -452,7 +475,8 @@ function makeGrave(g){const m=new THREE.Group(),st=mat(0x6e6c66),st2=mat(0x8a878
   const ir=mat(0x3d3a36,{metalness:.5,roughness:.6});for(const x of [-.27,.27])m.add(bx(.05,.6,.6,ir,x,.3,0));
   const hs=bx(.52,1.15,.18,st2,0,.57,-.62);hs.rotation.x=-.06;m.add(hs);
   if(!_graveRune)_graveRune=new THREE.MeshBasicMaterial({color:GRAVE_C,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false});
-  for(const [w,h,x,y] of [[.05,.5,0,.72],[.22,.04,0,.86],[.16,.04,-.05,.6]]){const r=new THREE.Mesh(new THREE.PlaneGeometry(w,h),_graveRune);r.position.set(x,y,-.525);m.add(r);}
+  // v3.22 käyttäjä: ristin alla ollut irrallinen vino viiva pois – siisti risti, kiinni kiven pinnassa (kiven kallistuksen mukana)
+  for(const [w,h,x,y] of [[.05,.56,0,.72],[.26,.045,0,.88]]){const r=new THREE.Mesh(new THREE.PlaneGeometry(w,h),_graveRune);r.position.set(x,y-.57,.092);hs.add(r);}
   const fancy=SET.detail==='high'&&+SET.mist>=1;g.fancy=fancy;   // Medium+ ja ylempänä
   if(fancy){const H=14,add=o=>new THREE.MeshBasicMaterial({color:GRAVE_C,map:beaconTex(),transparent:true,opacity:o,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,fog:false});
     const bg=new THREE.Group(),core=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,H,12,1,true),add(.9)),outer=new THREE.Mesh(new THREE.CylinderGeometry(.32,.2,H,20,1,true),add(.3));core.position.y=outer.position.y=H/2+.3;

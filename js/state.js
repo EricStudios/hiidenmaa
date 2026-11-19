@@ -264,7 +264,7 @@ function updateEmbers(dt){for(let i=embers.length-1;i>=0;i--){const e=embers[i];
   e.m.position.x+=(e.vx+Math.sin(e.t*7+i)*.25+WIND.x*wk)*dt;e.m.position.y+=e.vy*dt;e.m.position.z+=(e.vz+WIND.z*wk)*dt;
   e.m.scale.setScalar(e.sp?e.r*(1-k*.6):e.r*(1+k*2.6));e.m.material.opacity=e.sp?1-k:.35*(1-k);}}
 // Satunnaistettu välke: arvo hakeutuu satunnaisesti vaihtuvaan tavoitteeseen, joskus pieni "vajaus". Palauttaa kertoimen ~.82–1.04 (vain vähän eloa).
-function flick(u,dt){u.t-=dt;if(u.t<=0){u.t=.04+Math.random()*.16;u.target=.82+Math.random()*.28;if(Math.random()<.04)u.target=.55+Math.random()*.15;}u.cur+=(u.target-u.cur)*Math.min(1,dt*14);return 1+(u.cur-1)*.4;}
+function flick(u,dt){u.t-=dt;if(u.t<=0){u.t=.04+Math.random()*.16;u.target=.82+Math.random()*.28;if(Math.random()<.04)u.target=.55+Math.random()*.15;}u.cur+=(u.target-u.cur)*kExp(14,dt);return 1+(u.cur-1)*.4;}
 const fx=[];
 function updateFx(dt){updateEmbers(dt);
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.t-=dt;p.vy-=12*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;p.m.scale.setScalar(Math.max(.01,p.t));if(p.t<=0){scene.remove(p.m);parts.splice(i,1);}}

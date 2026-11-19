@@ -662,3 +662,11 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   uuden maailman aloitus talletetaan `NEWW.go`:hon ja sankarinappi kutsuu sitä suoraan.
 - Vinkkien apurille annettu nimi `tkTake` oli jo tackle.js:ssä (KORJAUKSET 85/88 toistui) → nimetty `tipTake`/`tipHas`/`tipEq`.
 - **Sääntö:** kun nappi muutetaan pito-napiksi, etsi kaikki sen `.click()`-kutsut (`grep -n "IDNIMI').click\|IDNIMI\").click"`).
+
+## 93. Animaatio riippui ruudunpäivityksestä – kirves pyörähti paluussa (v3.22)
+- Pehmennys `lerp(a,b,Math.min(1,dt*k))` on eri nopeus eri FPS:llä (15 FPS:llä k·dt jopa 4× suurempi askel ja lattia 1 → hyppy). Lisäksi `frame()` rajasi dt:n 0,05 s:iin →
+  alle 20 FPS:llä koko peliaika hidastui. Korjaus: `kExp(k,dt)` (core.js) ja osa-askeleet `worldStep`:ssa (`WSTEP_MAX` 0,1).
+- Kirveen paluussa kaksi eri pehmennystä (IK-paino alas + Euler-asento lepoon 0,6 s) taistelivat → kierto hyppäsi. **Sääntö:** kun IK luovuttaa asennon takaisin, vie IK-kohde ja
+  esineen kierto ensin perusasentoon (laske perusasento joka ruutu, aseta Euler suoraan tavoitteeseen IK:n alla) ja häivytä paino vasta, kun asennot ovat samat.
+- **Sääntö:** uusi pehmennys aina `kExp(nopeus,dt)`, ei `Math.min(1,dt*nopeus)`. Testaa animaatio sekä `update(1/60)` että `update(1/15)` -silmukalla.
+
