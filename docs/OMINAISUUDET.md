@@ -886,6 +886,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.23 – kalakirja ja rakennusvalikko
+- Kalakirjan sivua käännettäessä kuuluu kirjan avausääni hieman hiljempaa (−30 %). Kirja pysyy saman kokoisena käännön ajan.
+- Rakennusvalikon tietoikkuna aukeaa 0,6 s:ssa, kun hiiri on osan päällä. Kun hiiri ei ole minkään osan päällä, ikkuna häipyy 10 s:n kuluttua.
+- Rakennusikkuna on 15 % pidempi, joten tietoikkunaa ei yleensä tarvitse vierittää.
+
 ## v3.22 – kirves, ajoitus ja reppu
 - Kirves ja hakku palaavat yksittäisen lyönnin jälkeen sivulle yhtenä sulavana liikkeenä (käsi ja kirveen kierto yhtä aikaa, 0,42 s), myös kun kestävyys loppuu kesken hakkuun.
   Jatkuvassa hakkuussa kirves vaihtaa puolta pienessä kaaressa.

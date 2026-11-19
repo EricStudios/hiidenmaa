@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.22, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.23, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +434,16 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.23 (kalakirjan sivut, rakennuksen tietoikkuna – käyttäjä 19.11.)
+- **Kalakirjan sivun käännössä** soi kirjan avausääni (valikot/kartta) −30 % (`FB_TURN_V` 0,7; oma `sivun_kaanto`-ääni ohittaa sen, kun käyttäjä tuo sen).
+- **Kirja ei enää veny eikä tärähdä käännössä (KORJAUKSET 94):** kääntyvä lehti oli leveämpi kuin puoli kirjaa (`width:50%` + täyte, content-box) → paneeliin tuli hetkeksi
+  vierityspalkki; lisäksi kirjan korkeus vaihteli sivun sisällön mukaan. Nyt `.fbBook` kiinteä korkeus `min(70vh,640px)`, `.fbLeaf`/`.fbPg` border-box + overflow hidden,
+  `#fishP.fbPanel` overflow hidden. Mitattu: paneeli pysyy 1140×714 koko käännön ajan.
+- **Rakennusvalikon tietoikkuna** aukeaa 40 % nopeammin (`BINFO_DELAY` 1 → 0,6 s). Kun hiiri ei ole minkään kortin eikä ikkunan päällä, ikkuna pysyy 10 s (`BINFO_HIDE`, ennen 0,35 s)
+  ja häipyy pehmeästi (`BINFO_FADE` 0,6 s, luokka `biFade`). Korttien välissä liikkuva hiiri ei enää nollaa ajastinta.
+- **Rakennusikkuna 15 % pidempi** (käyttäjän valinta): `#build` min-height `min(560px, 100vh − 40px)` (tavallinen 487 px). Tietoikkuna on saman korkuinen → ei vierity yhdelläkään
+  74 osasta (Miten toimii? kiinni); välilehden vaihto ei enää muuta ikkunan korkeutta (paitsi Seinät ja lattiat, Kivirakennus, joissa kortteja on paljon).
 
 ### v3.22 (kirveen paluu, ajoitus kaikilla esiasetuksilla, reppu kangasta – käyttäjä 19.11.)
 - **Kirveen/hakun paluu sivulle (KORJAUKSET 93):** yksittäisen lyönnin jälkeen (ja kun hakkuu katkeaa kestävyyden loppuessa nappi pohjassa) IK-paino laski samaan aikaan

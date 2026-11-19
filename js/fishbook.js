@@ -134,7 +134,8 @@ function fishBookRender(){const el=document.getElementById('fishBody');if(!el)re
   el.querySelectorAll('[data-fb]').forEach(b=>b.onclick=()=>fbTurn(+b.dataset.fb));el.querySelectorAll('[data-go]').forEach(li=>li.onclick=()=>fbGo(+li.dataset.go));}
 function fbGo(n){const t=(n-1)-((n-1)%2);if(t===FB.page)return;fbTurn(t-FB.page);}
 // sivun kääntö: kääntyvä lehti animoidaan (CSS), sitten uusi aukeama
-function fbTurn(d){const P0=FB.pages||fbPages(),to=clamp(FB.page+d,0,P0.length-2);if(to===FB.page||FB.turn)return;const el=document.querySelector('#fishBody .fbBook');tkSnd('sivun_kaanto')||plSnd('valikot','sivu',{v:.5});
+const FB_TURN_V=.7;
+function fbTurn(d){const P0=FB.pages||fbPages(),to=clamp(FB.page+d,0,P0.length-2);if(to===FB.page||FB.turn)return;const el=document.querySelector('#fishBody .fbBook');tkSnd('sivun_kaanto')||plSnd('valikot','kartta',{v:FB_TURN_V});   /* v3.22 käyttäjä: sivun käännössä kirjan avausääni −30 % */
   if(!el){FB.page=to;fishBookRender();return;}const fw=d>0,lf=document.createElement('div');lf.className='fbLeaf '+(fw?'fw':'bw');lf.innerHTML=`<div class="fbIn">${(fw?P0[FB.page+1]:P0[FB.page])||''}</div>`;el.appendChild(lf);
   FB.turn=setTimeout(()=>{FB.turn=null;FB.page=to;fishBookRender();},380);}
 document.addEventListener('keydown',e=>{if(openPanel!=='fish')return;if(e.code==='ArrowRight'||e.code==='KeyD'){fbTurn(2);e.preventDefault();}else if(e.code==='ArrowLeft'||e.code==='KeyA'){fbTurn(-2);e.preventDefault();}});

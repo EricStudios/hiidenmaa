@@ -592,6 +592,14 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.23: kalakirjan sivun käännössä avausääni −30 %, kirja ei veny käännössä (kiinteä korkeus, lehti border-box), rakennuksen tietoikkuna 0,6 s / häipyy 10 s, rakennusikkuna 15 % pidempi',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('ääni',FB_TURN_V===.7&&/'kartta',\{v:FB_TURN_V\}/.test(fbTurn.toString()));
+    const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(er){return [];}}).join('\n');
+    ck('kirja',/\.fbBook \{[^}]*height: min\(70vh, 640px\)/.test(css)&&/\.fbLeaf \{[^}]*box-sizing: border-box/.test(css)&&/#fishP\.fbPanel \{[^}]*overflow: hidden/.test(css));
+    ck('tietoikkuna',BINFO_DELAY===.6&&BINFO_HIDE===10&&BINFO_FADE>0&&/biFade/.test(binfoHideSoon.toString())&&/if\(t\)\{clearTimeout/.test(binfoHover.toString()));
+    ck('koko',/#build \{[^}]*min-height: min\(560px/.test(css));
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.22: reppu tavallisesti avattuna kangasta + vetoketju vasemmassa alanurkassa (työpisteeltä oma tausta), hautakiven risti ilman irtoviivaa, tyhjän käden tarkastelussa ääni 30 % + takuu',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     togglePanel('inv');const el=$('#inv'),cs=getComputedStyle(el),za=getComputedStyle(el,'::after');ck('kangas',el.dataset.st===''&&/dashed/.test(cs.outlineStyle)&&/svg/.test(za.backgroundImage)&&za.left==='0px'&&za.bottom==='0px');closePanels();
@@ -783,7 +791,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     try{
       ck('kantokyky',W_BASE===60&&W_BASE+W_PACK*(PACK_UP.length-1)+ACH.reduce((a,c)=>a+(c.b&&c.b.w||0),0)+lvlBon(LVL_MAX).w===200&&ACH.some(a=>a.id==='kalamies'&&a.b.w===5));
       ck('ilmoitukset',SET_DEF.actMsg===true&&SET_PAGES.snd.includes('actMsg')&&(()=>{const v=SET.actMsg;SET.actMsg=false;const r=msgAct('+2 Puu','loot')&&!msgAct('Liian uupunut.','warn')&&!msgAct('Riimukivi: ...','quest');SET.actMsg=v;return r;})());
-      ck('tietoikkuna',BINFO_DELAY===1&&typeof binfoPinUi==='function');
+      ck('tietoikkuna',BINFO_DELAY<=1&&typeof binfoPinUi==='function');
       ck('pata',POT_FUEL_S===600&&!PIECES.patanuotio.noBench&&BOWL_CURSE_D===2&&ANGRY_FIRST===6&&WET_SHOE_K===.78);
       ck('kerääjä',PIECES.vedenkeraaja.lvl===6&&PIECES.vedenkeraaja.req.kupari===4&&PIECES.vedenkeraaja.req.rauta===2&&WATER_USES===20&&Math.abs(WATER_FILL*60-.1)<1e-9);
       ck('tuli',typeof fireGrainNew==='function'&&/fireGrainPump/.test(fireSndTick.toString())&&FIRE_GF>0);
@@ -855,7 +863,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       flags.xp=6650;flags.xpv=0;xpMigrate();ck('muunnos L20',playerLevel()===20&&flags.xpv===1);flags.xp=260;flags.xpv=0;xpMigrate();const L=lvlInfo();ck('muunnos osa',L.L===3&&Math.abs(L.xp/L.need-.5)<.02);
       ck('villikaura',nodes.filter(q=>q.type==='villikaura').length>20&&NODE.villikaura.item==='villikaura');
       const gi=id=>GOALS.findIndex(g=>g.id===id);ck('tavoitteet',gi('jaatar')<gi('pata')&&gi('pata')<gi('keitto')&&gi('keitto')<gi('kalmaherra')&&gi('haudu')<gi('aarnihirvio')&&gi('juhlapata')<gi('sirpaleet')&&ACH.some(a=>a.id==='padankaitsija')&&ACH.some(a=>a.id==='hillo'));
-      binfoShow('grilli');const bi=$('#binfo');ck('tietoikkuna',bi&&!bi.hidden&&/Grillinuotio/.test(bi.textContent)&&/Palaa hiileksi/.test(bi.textContent)&&$('#biMore')&&BINFO_DELAY===1);binfoHide();   /* v3.06 1 s */ck('tietoikkuna kiinni',bi.hidden);
+      binfoShow('grilli');const bi=$('#binfo');ck('tietoikkuna',bi&&!bi.hidden&&/Grillinuotio/.test(bi.textContent)&&/Palaa hiileksi/.test(bi.textContent)&&$('#biMore')&&BINFO_DELAY<=1);binfoHide();   /* v3.06 1 s, v3.23 0,6 s */ck('tietoikkuna kiinni',bi.hidden);
       const q=$('#bQuit');ck('poistu-ruksi',q&&q.parentElement===$('#menu')&&q.classList.contains('quitX')&&getComputedStyle(q).position==='fixed');
       ck('AudioNode',/if\(!CRE\.gain\)/.test(creRevOn.toString()));}
     finally{msg=om;if(n&&pieces.includes(n))removePiece(n);P.pos.copy(p0);[flags.xp,flags.xpv]=xs;P.buffs=JSON.parse(bf);P.hunger=hu;const I=JSON.parse(inv0);for(let q=0;q<inv.length;q++)inv[q]=I[q]||null;invDirty=true;}

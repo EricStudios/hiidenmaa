@@ -670,3 +670,9 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   esineen kierto ensin perusasentoon (laske perusasento joka ruutu, aseta Euler suoraan tavoitteeseen IK:n alla) ja häivytä paino vasta, kun asennot ovat samat.
 - **Sääntö:** uusi pehmennys aina `kExp(nopeus,dt)`, ei `Math.min(1,dt*nopeus)`. Testaa animaatio sekä `update(1/60)` että `update(1/15)` -silmukalla.
 
+## 94. Kalakirja venähti sivua käännettäessä (v3.23)
+- Kääntyvä lehti `.fbLeaf` oli `width:50%` + `padding` (content-box) → leveämpi kuin puoli kirjaa, ja 3D-kierto ulottui paneelin yli → `overflow:auto`-paneeliin ilmestyi
+  hetkeksi vierityspalkki (ikkuna venyi ja tärähti). Lisäksi kirjan korkeus määräytyi sisällöstä (min-height) → eri sivuilla eri korkeus.
+- Korjaus: kiinteä korkeus, `box-sizing:border-box` + `overflow:hidden` lehdelle ja sivuille, paneeli `overflow:hidden`.
+- **Sääntö:** animoitu absoluuttinen elementti, jolla on `width:%` ja täyte → aina border-box; animoidun paneelin koko kiinteäksi. Testaa mittaamalla paneelin koko animaation aikana.
+

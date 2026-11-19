@@ -6,7 +6,8 @@
    3D-kuva: oma pieni WebGLRenderer (luodaan ensimmäisellä avauksella), piirretään vain ikkunan ollessa auki. */
 /* v3.06 käyttäjä: aukeaa 1 s:ssa (BINFO_DELAY), luotettavasti: korttien hover delegoidaan #buildCards-säiliölle (mouseover kuplii, myös VC) → ajastin
    käynnistyy, vaikka kortit piirrettäisiin uudelleen hiiren alla. "Paina I" lukitsee ikkunan auki (BI.pin; I = repun varanäppäin vain muualla). */
-const BINFO_DELAY=1,BINFO_HIDE=.35,BI={pin:false,hovT:null,cur:null,show:0,hide:0,r:null,sc:null,cam:null,obj:null,raf:0,t0:0,last:0};
+/* v3.22 käyttäjä: aukeaa 40 % nopeammin (0,6 s); kun hiiri ei ole minkään kortin eikä ikkunan päällä, ikkuna pysyy BINFO_HIDE 10 s ja häipyy pehmeästi (BINFO_FADE). */
+const BINFO_DELAY=.6,BINFO_HIDE=10,BINFO_FADE=.6,BI={pin:false,hovT:null,cur:null,show:0,hide:0,r:null,sc:null,cam:null,obj:null,raf:0,t0:0,last:0};
 const fireRows=t=>[['Ruokapaikat',t==='grilli'?`${FIRE_SLOTS.grilli} (2 tankoa)`:`${FIRE_SLOTS.nuotio} (kivien päällä)`],['Kypsyminen',t==='grilli'?'30 % nopeampi':'normaali'],['Palaa hiileksi',`${FIRE_BURN_K[t]}× kypsymisaika`],['Hiilos',`${EMBER_T/60} min, paistaa −20 %`]];
 const PIECE_INFO={
   nuotio:{p:()=>[...fireRows('nuotio'),['Reseptit','lihakeitto, puuhiili']],d:'Lisää puuta, pihkaa tai hiiltä (E). Raaka liha paistuu kivien päällä – ota se ajoissa, muuten se palaa hiileksi. Kun polttoaine loppuu, tuli hiipuu 10 minuutiksi hiillokseksi: sillä voi vielä paistaa (−20 %), mutta reseptit eivät aukea. Sade sammuttaa katottoman tulen ja hiilloksen kolme kertaa nopeammin. Lähellä on lämmin ja olennot pelkäävät tulta.'},
@@ -26,20 +27,21 @@ function binfoRows(t){const d=PIECES[t],X=PIECE_INFO[t],o=[['Kestävyys',`${d.hp
   if(bt(t)==='ovi')o.push(['Ovi','E avaa ja sulkee']);if(d.glass)o.push(['Lasi','rikkoutuu iskusta']);if(isTorch(t))o.push(['Valo','palaa polttoaineella (E)']);if(d.poses)o.push(['Asennot',`${d.poses} (Shift+R)`]);return o;}
 function binfoEl(){let el=document.getElementById('binfo');if(el)return el;el=document.createElement('div');el.id='binfo';el.hidden=true;
   el.innerHTML='<div class="biPic"><canvas id="biCan" width="220" height="150"></canvas></div><h3 id="biName"></h3><div id="biCost" class="rq"></div><table class="props" id="biRows"></table><details id="biMore"><summary>Miten toimii?</summary><p id="biDesc"></p></details><div id="biPin" class="biPin">Paina I – pidä auki ja lue</div>';
-  el.addEventListener('mouseenter',()=>{clearTimeout(BI.hide);});el.addEventListener('mouseleave',()=>binfoHideSoon());document.body.appendChild(el);return el;}
+  el.addEventListener('mouseenter',()=>{clearTimeout(BI.hide);binfoUnfade();});el.addEventListener('mouseleave',()=>binfoHideSoon());document.body.appendChild(el);return el;}
 function binfoBind(card,t){}   // v3.06 delegoitu (binfoHover)
-function binfoHover(t){clearTimeout(BI.hide);if(t===BI.hovT)return;BI.hovT=t;clearTimeout(BI.show);if(!t){if(!BI.pin)binfoHideSoon();return;}
+function binfoUnfade(){const el=document.getElementById('binfo');if(el)el.classList.remove('biFade');}
+function binfoHover(t){if(t){clearTimeout(BI.hide);binfoUnfade();}   /* v3.22: hiiren liike korttien välissä ei nollaa häivytysajastinta */if(t===BI.hovT)return;BI.hovT=t;clearTimeout(BI.show);if(!t){if(!BI.pin)binfoHideSoon();return;}
   if(BI.cur===t&&!binfoEl().hidden)return;if(BI.pin&&BI.cur)return;if(BI.cur&&!binfoEl().hidden){binfoShow(t);return;}   /* v3.07 käyttäjä: ikkuna jo auki → vaihtuu heti toiseen korttiin */BI.show=setTimeout(()=>{if(openPanel==='build'&&BI.hovT===t)binfoShow(t);},BINFO_DELAY*1000);}
 {const bc=document.getElementById('buildCards');if(bc){const cardOf=e=>{const c=e.target&&e.target.closest&&e.target.closest('.card[data-piece]');return c?c.dataset.piece:null;};
   bc.addEventListener('mouseover',e=>binfoHover(cardOf(e)));bc.addEventListener('mousemove',e=>binfoHover(cardOf(e)));bc.addEventListener('mouseleave',()=>binfoHover(null));}}
 addEventListener('keydown',e=>{if(e.code!=='KeyI'||openPanel!=='build'||e.repeat)return;const t=BI.cur||BI.hovT;if(!t)return;e.preventDefault();e.stopImmediatePropagation();
   if(BI.pin&&BI.cur===t){BI.pin=false;binfoPinUi();if(BI.hovT!==t)binfoHideSoon();return;}if(BI.cur!==t||binfoEl().hidden)binfoShow(t);BI.pin=true;binfoPinUi();$('#biMore').open=true;},true);
 function binfoPinUi(){const h=$('#biPin');if(h){h.textContent=BI.pin?'Lukittu – I vapauttaa':'Paina I – pidä auki ja lue';h.classList.toggle('on',BI.pin);}}
-function binfoHideSoon(){if(BI.pin)return;clearTimeout(BI.hide);BI.hide=setTimeout(()=>binfoHide(),BINFO_HIDE*1000);}
-function binfoHide(){clearTimeout(BI.show);clearTimeout(BI.hide);const el=document.getElementById('binfo');if(el)el.hidden=true;BI.cur=null;BI.hovT=null;BI.pin=false;cancelAnimationFrame(BI.raf);BI.raf=0;}
+function binfoHideSoon(){if(BI.pin)return;clearTimeout(BI.hide);BI.hide=setTimeout(()=>{const el=document.getElementById('binfo');if(!el||el.hidden)return;el.classList.add('biFade');BI.hide=setTimeout(()=>binfoHide(),BINFO_FADE*1000);},BINFO_HIDE*1000);}
+function binfoHide(){clearTimeout(BI.show);clearTimeout(BI.hide);const el=document.getElementById('binfo');if(el){el.hidden=true;el.classList.remove('biFade');}BI.cur=null;BI.hovT=null;BI.pin=false;cancelAnimationFrame(BI.raf);BI.raf=0;}
 function binfoPlace(el){const b=$('#build');if(!b||b.hidden)return;const r=b.getBoundingClientRect(),w=236,left=r.left-w-10;
   el.style.top=r.top+'px';el.style.height=r.height+'px';el.style.width=w+'px';el.style.left=(left>=6?left:Math.max(6,r.left+8))+'px';el.classList.toggle('over',left<6);}
-function binfoShow(t){const el=binfoEl(),d=PIECES[t];BI.cur=t;binfoPlace(el);el.hidden=false;
+function binfoShow(t){const el=binfoEl(),d=PIECES[t];BI.cur=t;binfoPlace(el);el.hidden=false;el.classList.remove('biFade');clearTimeout(BI.hide);
   $('#biName').textContent=d.n;$('#biCost').innerHTML=costChips(d.req);$('#biRows').innerHTML=binfoRows(t).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
   const X=PIECE_INFO[t];$('#biDesc').textContent=X?X.d:CAT_DESC[d.cat]||'';$('#biMore').hidden=!$('#biDesc').textContent;$('#biMore').open=false;
   binfoPinUi();try{binfo3D(t);}catch(e){console.warn('binfo 3D',e);}}
