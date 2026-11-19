@@ -94,7 +94,7 @@ const GOALS=[
   {id:'sanky',t:'Rakenna sänky',d:'Sänky (puuta ja nahkaa) asettaa herätyspaikan ja antaa nukkua yöllä.',xp:15,ok:()=>anyP(p=>p.t==='sanky')},
   {id:'arkku',t:'Rakenna arkku',d:'Arkku säilyttää tavaroita. Sitä voi laajentaa kehitysnapista.',xp:10,ok:()=>anyP(p=>PIECES[p.t].store)},
   {id:'kupari',t:'Etsi kuparia',d:'Valmista piikivihakku työpenkillä (taso 2; piikiveä löytyy rannoilta) ja louhi oransseja kupariesiintymiä metsissä ja vuorten juurella.',xp:20,ok:()=>invCount('malmi')||invCount('kupari')||anyP(p=>p.t==='ahjo')},
-  {id:'sulata',t:'Sulata ja takoa',d:'Rakenna sulatusuuni, sulata malmi kupariksi ja rakenna ahjo.',xp:30,ok:()=>anyP(p=>p.t==='ahjo')},
+  {id:'sulata',t:'Sulata ja tao',d:'Rakenna sulatusuuni, sulata malmi kupariksi ja rakenna ahjo.',xp:30,ok:()=>anyP(p=>p.t==='ahjo')},
   {id:'varusta',t:'Varustaudu',d:'Takoa kuparimiekka (taso 3) tai kuparipanssari (taso 4) ahjolla. Nuija on hyvä kalmoja vastaan.',xp:30,ok:()=>invCount('miekka')||invCount('kuparipanssari')||invCount('kuparikilpi')},
   {id:'vihut',t:'Kaada kymmenen vihollista',d:'Kaikki kaadetut eläimet ja viholliset lasketaan.',xp:20,ok:()=>cnt('kills')>=10},
   {id:'jousi',t:'Ammu jousella',d:'Valmista jousi ja nuolia. Pidä hiiren vasenta pohjassa ja päästä irti.',xp:15,ok:()=>cnt('shots')>=5},
@@ -106,7 +106,7 @@ const GOALS=[
   {id:'routa',t:'Avaa Routaportti',get d(){return `Routaportti on ${dirIn('portal1')} tuntureilla. Siinä on kaksi lukkoa: Kalmon sinetti (Hautakummun ylimys, ${dirIn('barrow')}) ja Jääavain (jostain saaren vanhasta arkusta). Avaimen kätkijä vuorella neuvoo.`;},xp:40,ok:()=>!portalLocked('portal1')||!!fo('rb').portal1},
   {id:'jaatar',t:'Kukista Jäätär',d:'Routaluolan perimmäisessä kammiossa. Hän kantaa luuavainta.',xp:50,ok:()=>!!fo('rb').portal1},
   // v3.02 keittopata (taso 10) etenemisjärjestyksessä ulottuvuuksien väliin
-  {id:'pata',t:'Rakenna keittopata',d:'Tasolla 10: takoa keittopata ahjolla (rautaa ja kuparia), rakenna keittopatanuotio (Työpisteet) ja asenna pata siihen (E).',xp:30,ok:()=>!!flags.potBuilt||anyP(p=>p.t==='patanuotio'&&p.data.pot)},
+  {id:'pata',t:'Rakenna keittopata',d:'Tasolla 10: tao keittopata ahjolla (rautaa ja kuparia), rakenna keittopatanuotio (Työpisteet) ja asenna pata siihen (E).',xp:30,ok:()=>!!flags.potBuilt||anyP(p=>p.t==='patanuotio'&&p.data.pot)},
   {id:'keitto',t:'Keitä ensimmäinen pataruoka',d:'Sytytä tuli padan alle ja valitse resepti padan ikkunasta (E) tai repusta padan lähellä. Ota ruoka, kun höyryä nousee.',xp:25,ok:()=>(flags.potN||0)>=1},
   {id:'kalmaherra',t:'Kukista Kalmaherra',get d(){return `Kalmankammion portti on ${dirIn('portal2')}. Luuavain avaa sen.`;},xp:60,ok:()=>!!fo('rb').portal2},
   {id:'haudu',t:'Hauduta kansi kiinni',d:'Laita kansi padan päälle: ruoka kypsyy nopeammin (8× grilliaika, ilman kantta 10×), jatkaa ilman tultakin ja ei pilaannu.',xp:20,ok:()=>!!flags.potLid},

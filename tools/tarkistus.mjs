@@ -592,6 +592,22 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.18: valikon taustakuvien äänet (myrsky + ukkonen myrskykuviin, salaman isku välähdyksestä, muut sopivat kuvat), epätasaiset puunsyyt napeissa, hitaampi Aloita seikkailu, "tao"',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};const keys=new Set(Object.keys(CRE.man||{}).map(n=>n.replace(/_\d+$/,'')));
+    ck('kuvat',Object.keys(MBG_AMB).length>=19&&Object.keys(MBG_AMB).every(n=>MBG_SCENES.some(s=>s.n===n)));
+    ck('myrsky',['Myrsky','Myrskytuuli'].every(n=>MBG_AMB[n].L.some(l=>l[0]==='a/saa/myrsky')&&MBG_AMB[n].L.some(l=>l[0]==='a/saa/ukkonen'))&&MBG_AMB.Myrsky.flash&&/MBG\.flash=1/.test(MBG_SCENES.find(s=>s.n==='Myrsky').fx.toString()));
+    if(CRE.man)ck('äänet olemassa',Object.values(MBG_AMB).every(A=>A.L.every(l=>keys.has(l[0]))&&A.V.every(v=>v[0]==='#sirkat'||keys.has(v[0]))));
+    ck('moottori',/mbgAmbTick/.test(mbgSndTick.toString())&&/mbgAmbStop/.test(mbgSndStop.toString())&&typeof mbgLoopK==='function'&&typeof mbgVoiceK==='function');
+    const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(er){return [];}}).join('\n');
+    ck('puunsyyt',/feTurbulence/.test(css)&&!/rgba\(255, 255, 255, 0\.018\) 0px, rgba\(255, 255, 255, 0\.018\) 2px/.test(css));
+    ck('hitaampi',/5\.5s[^;]*heroBreath|heroBreath[^;]*5\.5s/.test(css)&&/9s[^;]*heroSpin\b|heroSpin 9s/.test(css)&&/4\.2s[^;]*heroSigil|heroSigil[^;]*4\.2s/.test(css));
+    ck('tao',/tao kuparista ase/.test(document.body.innerHTML));
+    return e.length?'virhe: '+e.join(', '):true;});
+  t('v3.18: pelattu aika yhteensä (Profiilit-sivun alaosa): laskee pelin ollessa käynnissä, ei tauolla eikä valikossa, tuntien tarkkuudella yhdellä desimaalilla',()=>{
+    const s0=PT.s,st0=state,sd=started;try{ptLoad();started=true;state='play';PT.s=0;ptTick(.5);const a=PT.s;state='paused';ptTick(.5);const b=PT.s;state='menu';ptTick(.5);const c=PT.s;state='ui';ptTick(.5);
+      PT.s=3600*12.34;const txt=ptHours();const t0=setTab;setTab='prof';renderSettings();const box=document.querySelector('#setBody .ptBox, .ptBox');setTab=t0;renderSettings();
+      const ok=a===.5&&b===.5&&c===.5&&PT.s>=0&&txt==='12,3'&&!!box&&/Pelattu yhteensä/.test(box.textContent)&&/ptTick\(raw\)/.test(frame.toString());
+      return ok||`a ${a} b ${b} c ${c} txt ${txt} box ${!!box}`;}finally{PT.s=s0;state=st0;started=sd;}});
   t('v3.17: valikon Öinen leiri – nuotio kuuluu (0,8) ja alkaa heti (pysyvä, valmiiksi ladattu suoratoisto), sirkat useammin ja kovempaa, äänet 0,3–1,5 s kuvan vaihdosta, lataamaton ääni yritetään 0,3 s päästä',()=>{
     const s=mbgSndTick.toString();const ok=MBG_LEIRI_V>=.7&&MBG_CR_V>=.2&&MBG_CR_MAX<=4&&MBG_FIRST[1]<=1.5&&MBG_RETRY<=.5&&typeof mbgLongKeep==='function'&&typeof mbgLongPause==='function'&&typeof mbgLongWarm==='function'
       &&/MBG\.lrT=0/.test(s)&&/mbgLongWarm/.test(s)&&/mbgLongPause/.test(mbgSndStop.toString())&&/MBG_RETRY/.test(s)&&/return true;\}$/.test(mbgChirps.toString())&&MBG_FADE_IN<=1;

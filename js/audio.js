@@ -388,7 +388,16 @@ function mLoad(){if(MSND.loaded||!CRE.ok)return;MSND.loaded=1;for(const n in CRE
    alipäästö (o.lp Hz) + kaiku (viive 0,22 s, palaute o.echo) + sävel o.p; o.off/o.len = satunnainen pätkä pidemmästä (häivytys 0,3 / 0,8 s).
    mbgLong = pitkä tausta (suoratoisto, satunnaisesta kohdasta, häivytys 2 s); mbgChirps = muutama heinäsirkan siritys hiljaa. */
 function mbgOut(a){if(!MSND.gain){MSND.gain=a.createGain();MSND.gain.connect(a.destination);}return MSND.gain;}
-function mbgVoice(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;mLoad();const L0=mRes(g,ev,'m');if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
+function mbgVoice(g,ev,o){creInit();if(!CRE.ok)return false;mLoad();return mbgVoiceL(mRes(g,ev,'m'),o);}
+/* v3.18 käyttäjä: taustakuvien äänet mistä tahansa olemassa olevasta äänestä avaimella (a/saa/myrsky, m/uusi_maailma/linnut, susi_idle …). mbgList = versiot,
+   mbgVoiceK = kertaääni (lataa puskurit; false = ei vielä ladattu → yritä pian; key puuttuu → true), mbgLoopK = silmukka (puskuri, häivytys sisään MBG_FADE_IN). */
+function mbgList(key){if(!CRE.man)return null;if(CRE.idxOf!==CRE.man)creIndex();return CRE.idx[key]||null;}
+function mbgVoiceK(key,o){creInit();if(!CRE.ok)return false;const L=mbgList(key);if(!L)return true;const B=L.filter(x=>!sndLong(x));for(const x of B)if(!CRE.buf[x])creBuf(x);return mbgVoiceL(B,o);}
+function mbgLoopK(key,v){creInit();if(!CRE.ok)return null;const a=actx;if(!a||a.state!=='running'||!soundOn)return null;const L=mbgList(key);if(!L)return {none:1};
+  const B=L.filter(x=>!sndLong(x));for(const x of B)if(!CRE.buf[x])creBuf(x);const ok=B.filter(x=>CRE.buf[x]);if(!ok.length)return null;
+  const name=ok[Math.random()*ok.length|0],src=a.createBufferSource();src.buffer=CRE.buf[name];src.loop=true;const lp=tgLoopPts(src.buffer);src.loopStart=lp[0];src.loopEnd=lp[1];
+  const gn=a.createGain(),t=a.currentTime;gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(volK('amb')*v,t+MBG_FADE_IN);src.connect(gn);gn.connect(mbgOut(a));src.start(0,Math.random()*Math.max(0,lp[1]-lp[0]-.1));return {src,g:gn,name};}
+function mbgVoiceL(L0,o){o=o||{};if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
   const a=actx;if(!a||a.state!=='running'||!soundOn)return false;const vol=volK('amb')*(o.v??1);if(!(vol>0))return false;
   const B=CRE.buf[L[Math.random()*L.length|0]],t=a.currentTime,off=Math.min(o.off||0,Math.max(0,B.duration-.5)),len=o.len?Math.min(o.len,B.duration-off):B.duration-off;
   const src=a.createBufferSource();src.buffer=B;src.playbackRate.value=o.p||1;const g0=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=o.lp||20000;lp.Q.value=.5;

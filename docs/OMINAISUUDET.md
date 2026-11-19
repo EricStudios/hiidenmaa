@@ -886,6 +886,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.18 – pelattu aika ja valikon äänet
+- **Asetukset › Profiilit:** alimpana pelattu aika yhteensä (tunnit, yksi desimaali). Laskee, kun peli on käynnissä; tauolla ja päävalikossa ajastin on pysähdyksissä.
+- **Päävalikon taustakuvat:** myrskykuvissa myrsky ja ukkonen (salaman välähdyksen perään isku), muissa sopivat äänet: aallot, linnut, tuuli, susien ulvonta, karhu,
+  hirvi, luolien ja kalmojen tunnelmat. Valikon napeissa epätasaiset puunsyyt, Aloita seikkailu -nappi rauhallisemmin.
+
 ## v3.17 – valikon taustaäänet
 - Päävalikon Öinen leiri: nuotio kuuluu selvästi ja alkaa heti, kun kuva vaihtuu; heinäsirkat sirittävät usein (1–3,5 s välein). Kaikki taustakuvien äänet alkavat
   0,3–1,5 s kuvan vaihtumisesta.

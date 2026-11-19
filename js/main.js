@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.17';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.18';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -378,11 +378,24 @@ function worldSpd(){return DEV&&DEVF.spd>0?DEVF.spd:1;}
 /* v2.93 DEV PELIN AJAN NOPEUS (yksinkertaisempi): vain kello ja siihen sidottu – vuorokausi, sään vaihtuminen, nälkä ja tehosteet (survival),
    tulet, soihdut, ruoan kypsyminen ja sulatus (updateStations), käsisoihdun polttoaine ja pihkan kertyminen. Liike, olennot ja animaatiot normaalisti. */
 function timeSpd(){return DEV&&DEVF.tspd>0?DEVF.tspd:1;}
+/* v3.18 käyttäjä: PELATTU AIKA YHTEENSÄ (kaikki maailmat, selainkohtainen localStorage PT_KEY). Laskee oikeaa aikaa, kun peli on käynnissä (pelissä, paneelit auki,
+   intro, kuolinruutu); EI tauolla (myöskään Käynnissä-tilassa), päävalikossa tai kun välilehti on piilossa. Alkaa ensimmäisestä pelistä (PT.first). Ensimmäisellä kerralla
+   mukaan lasketaan jo tallennettujen maailmojen peliaika (PT.seed). Näkyy Asetukset › Profiilit alimpana tuntien tarkkuudella yhdellä desimaalilla. Tallennus 10 s välein + sulkiessa. */
+const PT_KEY='hiidenmaa_playtotal',PT_STATES=['play','ui','intro','dead','win'],PT={s:0,first:0,seed:0,ld:0,saveT:0};
+function ptLoad(){if(PT.ld)return;PT.ld=1;let o=null;try{o=JSON.parse(localStorage.getItem(PT_KEY)||'null');}catch(e){}
+  if(o){PT.s=+o.s||0;PT.first=+o.first||0;PT.seed=+o.seed||0;return;}
+  try{let s=0;for(let i=0;i<SLOTS;i++){const d=JSON.parse(localStorage.getItem(slotKey(i))||'null');if(d&&d.playTime>0)s+=d.playTime;}if(s>0){PT.s=s;PT.seed=Math.round(s);}}catch(e){}}
+function ptSave(){if(!PT.ld)return;try{localStorage.setItem(PT_KEY,JSON.stringify({s:Math.round(PT.s),first:PT.first,seed:PT.seed}));}catch(e){}}
+function ptTick(raw){ptLoad();if(!started||!PT_STATES.includes(state)||document.hidden)return;if(!PT.first)PT.first=Date.now();PT.s+=Math.min(raw,1);PT.saveT+=raw;if(PT.saveT>=10){PT.saveT=0;ptSave();}}
+const ptHours=()=>(Math.floor(PT.s/360)/10).toFixed(1).replace('.',',');
+function ptHTML(){ptLoad();const d=PT.first?new Date(PT.first).toLocaleDateString('fi-FI'):null;return `<div class="ptBox"><span>Pelattu yhteensä</span><b>${ptHours()} h</b>
+  <small class="note">${d?'Ensimmäinen peli '+d+'. ':'Aika alkaa ensimmäisestä pelistä. '}Laskee, kun peli on käynnissä – tauolla ja päävalikossa ajastin on pysähdyksissä.${PT.seed?' Sisältää aiemmin tallennettujen maailmojen peliajan.':''}</small></div>`;}
+addEventListener('beforeunload',ptSave);document.addEventListener('visibilitychange',()=>{if(document.hidden)ptSave();});
 function worldStep(dt){const k=worldSpd();if(k===1){update(dt);return;}const tot=dt*k,n=Math.min(WSPD_MAX,Math.max(1,Math.ceil(tot/WSPD_STEP)));for(let i=0;i<n;i++)update(tot/n);}
 function frame(now){
   requestAnimationFrame(frame);
   const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;let skip3d=false;seeThruSync();
-  if(state==='play'&&SET.autoAll&&!SET.noAuto)autoQuality(raw);   /* v2.65 noAuto: ei mitään automaattista säätöä */updateFps(raw);if(DEV)perfTick(raw);musicTick();if(typeof gameSndTick==='function')gameSndTick();   /* v2.83 valikossa pelin äänet häipyvät */try{ambTick(raw);}catch(err){}   /* v2.61 sää ja tunnelma */
+  if(state==='play'&&SET.autoAll&&!SET.noAuto)autoQuality(raw);   /* v2.65 noAuto: ei mitään automaattista säätöä */updateFps(raw);ptTick(raw);if(DEV)perfTick(raw);musicTick();if(typeof gameSndTick==='function')gameSndTick();   /* v2.83 valikossa pelin äänet häipyvät */try{ambTick(raw);}catch(err){}   /* v2.61 sää ja tunnelma */
   try{
     if(state==='play'||state==='ui')worldStep(dt);   // v2.93 DEV maailman nopeus
     if(typeof tutTick==='function')tutTick(dt);   // v2.71 opastus ja kertavinkit

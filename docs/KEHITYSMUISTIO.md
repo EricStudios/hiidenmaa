@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.17, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.18, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -349,6 +349,8 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.18:** pelattu aika: tallennus 10 s, tilat play/ui/intro/dead/win · valikon kuvien äänitasot 0,08–0,55 × Taustaäänet, salaman viive 0,3–1,6 s.
+
 **v3.17:** valikon nuotio 0,8, sirkat 0,2 / 1–3,5 s, ensimmäiset äänet 0,3–1,5 s, uusi yritys 0,3 s, häivytys sisään 0,8 s.
 
 **v3.16:** tasot 999, XP n ≥ 30: 1 270 + 45·(n−29) + ½·(n−29)², palkinnot ≤ 30, nimikkeitä 20 · pikakalastus U (vain täpällä).
@@ -432,6 +434,20 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.18 (pelattu aika, valikon taustakuvien äänet, napit – käyttäjä 19.11.)
+- **Pelattu aika yhteensä** (main.js `PT`/`ptTick`/`ptHTML`, localStorage `hiidenmaa_playtotal`): Asetukset › Profiilit alimpana, tunnit yhdellä desimaalilla. Laskee oikeaa aikaa,
+  kun peli on käynnissä (play, ui, intro, kuolin-/voittoruutu), ei tauolla (myöskään Käynnissä-tilassa), päävalikossa eikä piilotetulla välilehdellä. Alkaa ensimmäisestä pelistä;
+  ensimmäisellä kerralla mukaan lasketaan tallennettujen maailmojen peliaika (`PT.seed`, kerrotaan sivulla). Tallennus 10 s välein + sulkiessa / välilehden piiloutuessa.
+- **Valikon 2D-taustakuvien äänet** (`MBG_AMB` menubg.js, audio.js `mbgLoopK`/`mbgVoiceK`/`mbgList`): 19 kuvaa saa silmukat ja satunnaiset äänet olemassa olevista äänistä
+  (ei uusia ääniä). Myrsky ja Myrskytuuli: myrsky + ukkonen (+ tuuli), Myrsky-kuvan salaman välähdys (`MBG.flash`) → salaman isku 0,3–1,6 s myöhemmin, Myrskytuulessa iskut 10–22 s.
+  Järvet ja rannat: rauhalliset aallot + linnut; tunturi: tuuli + kaukainen susi; aarnimetsä: puiden humina; kalmakuvat: tunnelma + kalmo kaikuen; luolat: ulottuvuuksien tunnelmat ja
+  satunnaisäänet; susilauma: ulvonta; karhu: karjaisut; hirvi: hirvi + linnut; Lumisade: lumi + tuuli; Ahjo: + sirkat. Kaikki × Taustaäänet ja hiljaa, alkavat 0,3–1,5 s kuvan vaihdosta.
+- **Valikon napit:** tasaiset vaaleat viivat → epätasaiset puunsyyt (SVG feTurbulence, vaaleat + tummat syyt, näkyvät katkonaisesti). Aloita seikkailu -napin animaatiot hitaammiksi:
+  hengitys 3,2 → 5,5 s, kehän pyörintä 4 → 9 s, sinetti 2,4 → 4,2 s, katkoviivakehä 9 → 18 s, välke 0,7 → 1,4 s.
+- **Kieli:** "takoa kuparista ase" → "tao kuparista ase" (käskymuoto; samoin tavoitteet "Sulata ja tao", "tao keittopata").
+- **Vastaus käyttäjälle (3D-valikkotausta):** päävalikon 3D-tausta (asetus, oletus 2D-kuvat) kuvaa saman saaren maaston kuin valittu kartta + seed, mutta ei pelaajan rakennuksia,
+  tavaroita eikä eläimiä; seurattava eläin on vain valikkoa varten luotu. Peli ei ole käynnissä (ei `update()`, ei aikaa, nälkää, vihollisia eikä tallennusta).
 
 ### v3.17 (valikon Öinen leiri – käyttäjä 19.11.)
 - **Nuotio ei kuulunut:** 136 s nuotioääni soi, mutta tasolla 0,35 × taustaäänet (≈ 0,2) se jäi valikkomusiikin alle → `MBG_LEIRI_V` 0,8. Palatessa leiriin ääni alkoi vasta ~2 s viiveellä
