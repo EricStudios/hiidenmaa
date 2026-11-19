@@ -87,6 +87,27 @@ function isChildOf(o,p){for(let a=o;a;a=a.parent)if(a===p)return true;return fal
 /* ---------------- SAVU (kohta 36) ---------------- */
 // Isot pehmeät savupilvet (palava mob, palokuolema): nousevat, laajenevat ja haalistuvat. Määrää rajoittaa hiukkasasetus PF.
 const puffs=[],_pfGeo=new THREE.IcosahedronGeometry(1,2);
+/* v3.24 käyttäjä: SAMMUNEEN TULEN SAVUPATSAS (nuotio, grilli, patanuotio). Kun liekit sammuvat (polttoaine loppuu, sade, tallaus), savua nousee
+   10–20 s (SMOKE_COL.dur), alussa voimakkaimmin. Hiukkaset nousevat hitaasti aarnipuiden latvojen korkeudelle (~25 m, vy · elinaika), laajenevat ja
+   haalistuvat elinaikansa mukaan. Tuuli kallistaa patsasta (WIND); mitä kauemmas sivulle hiukkanen ajautuu, sitä nopeammin se häipyy (SMOKE_COL.side).
+   Hiukkasmäärä grafiikan Partikkelit-asetuksen mukaan (PF), näkyy yhtä kauas kuin muutkin kohteet (sumu/piirtoetäisyys, fog). */
+const SMOKE_COL={dur:[10,20],rate:9,life:[24,34],vy:1.27,side:.07,max:240,a0:.5},smokeCols=[],smokeParts=[],_smkPool=[];let _smkTex=null;
+function smkTexGet(){if(_smkTex)return _smkTex;const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),gr=g.createRadialGradient(32,32,2,32,32,31);
+  gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.45,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);_smkTex=new THREE.CanvasTexture(c);return _smkTex;}
+function fireOutSmoke(x,y,z){if(!(PF>0))return;const far=(scene.fog?scene.fog.far:200)+25;if(dist2(x,z,P.pos.x,P.pos.z)>far*far)return;
+  smokeCols.push({x,y,z,t:0,dur:SMOKE_COL.dur[0]+Math.random()*(SMOKE_COL.dur[1]-SMOKE_COL.dur[0]),acc:0});}
+function smokeColTick(dt){
+  for(let i=smokeCols.length-1;i>=0;i--){const c=smokeCols[i];c.t+=dt;const k=c.t/c.dur;if(k>=1){smokeCols.splice(i,1);continue;}
+    c.acc+=dt*SMOKE_COL.rate*PF*Math.pow(1-k,1.3)*(1.2-.2*k);   // alussa voimakkaimmin
+    while(c.acc>=1&&smokeParts.length<SMOKE_COL.max*Math.max(.3,PF)){c.acc-=1;let sp=_smkPool.pop();
+      if(!sp){sp=new THREE.Sprite(new THREE.SpriteMaterial({map:smkTexGet(),transparent:true,depthWrite:false,opacity:0,fog:true}));sp.renderOrder=3;}
+      const gr=.5+Math.random()*.16;sp.material.color.setRGB(gr,gr,gr*1.02);sp.position.set(c.x+(Math.random()-.5)*.35,c.y+.45,c.z+(Math.random()-.5)*.35);scene.add(sp);
+      smokeParts.push({s:sp,x0:c.x,z0:c.z,t:0,life:SMOKE_COL.life[0]+Math.random()*(SMOKE_COL.life[1]-SMOKE_COL.life[0]),vy:SMOKE_COL.vy*(.85+Math.random()*.3),a:SMOKE_COL.a0*(1-.55*k),ph:Math.random()*TAU,sz:.5+Math.random()*.25});}}
+  for(let i=smokeParts.length-1;i>=0;i--){const q=smokeParts[i],s=q.s,side=Math.hypot(s.position.x-q.x0,s.position.z-q.z0);q.t+=dt*(1+side*SMOKE_COL.side);   // sivulle ajautunut häipyy nopeammin
+    const k=q.t/q.life;if(k>=1){scene.remove(s);_smkPool.push(s);smokeParts.splice(i,1);continue;}
+    const wk=WIND.spd*(.12+.3*Math.min(1,k*3));   // tuuli tarttuu sitä enemmän mitä ylempänä
+    s.position.x+=(WIND.x*wk+Math.sin(q.t*.7+q.ph)*.18)*dt;s.position.z+=(WIND.z*wk+Math.cos(q.t*.6+q.ph)*.18)*dt;s.position.y+=q.vy*(1-.45*k)*dt;
+    const sc=q.sz+k*6.5;s.scale.set(sc,sc,1);s.material.opacity=q.a*sstep(0,.05,k)*Math.pow(1-k,1.15);}}
 function smokePuff(x,y,z,size=1,dark=.25){if(puffs.length>48*PF||Math.random()>PF)return;const c=new THREE.Color().setScalar(dark+Math.random()*.12);
   const m=new THREE.Mesh(_pfGeo,new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.0,depthWrite:false}));m.position.set(x,y,z);m.scale.setScalar(.2*size);scene.add(m);
   puffs.push({m,t:0,life:2.2+Math.random()*1.4,size,vx:(Math.random()-.5)*.4+WIND.x*WIND.spd*.04,vz:(Math.random()-.5)*.4+WIND.z*WIND.spd*.04,vy:.9+Math.random()*.6});}

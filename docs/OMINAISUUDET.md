@@ -886,6 +886,16 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.24 – leiri, savu ja vesistöt
+- Hylätyssä leirissä on penkki jaloilla. Halkopino on aina teltan kylkeä vasten, muut esineet satunnaisesti nuotion ympärillä, eikä mikään ole päällekkäin tai ilmassa.
+- Kun nuotio, grilli tai patanuotio sammuu, siitä nousee 10–20 s ajan savupatsas aarnipuiden latvoihin asti; tuuli vie savua sivulle.
+- Vasara roikkuu vyöllä pienempänä ja tiiviisti selkää vasten.
+- Vesistön ensimmäinen löytö näkyy isolla ("Vesistö löydetty"), myöhemmin rannalle tullessa vain nimi, sama nimi aikaisintaan 5 päivän päästä. Alueiden ja vesistöjen
+  ilmoitukset tulevat vuorotellen.
+- Uusi vinkki, kun eläin jahtaa: kyykyssä olet huomaamattomampi.
+- Itsestään alkava tarkastelu loppuu, kun lähdet liikkeelle. Tähtäyspiste häipyy kuolinkamerassa.
+- Ruoho ilmestyy kaukaa pehmeästi näkyviin (häipyy ja kasvaa), ei enää kerralla.
+
 ## v3.23 – kalakirja ja rakennusvalikko
 - Kalakirjan sivua käännettäessä kuuluu kirjan avausääni hieman hiljempaa (−30 %). Kirja pysyy saman kokoisena käännön ajan.
 - Rakennusvalikon tietoikkuna aukeaa 0,6 s:ssa, kun hiiri on osan päällä. Kun hiiri ei ole minkään osan päällä, ikkuna häipyy 10 s:n kuluttua.

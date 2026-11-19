@@ -617,6 +617,7 @@ function updateStations(dt){
     // piirtoetäisyys: kaukana (sumun takana) olevia rakennuksia ei piirretä
     {const far=dist2(p.x,p.z,P.pos.x,P.pos.z)>(scene.fog.far+25)**2;if(far===p.mesh.visible)p.mesh.visible=!far;}
     if(isFirePiece(p.t)){const f=p.mesh.userData.flame,d=p.data;fireRainTick(p,dt);const lit=fireLit(p);f[0].visible=f[1].visible=lit;
+      if(p._lit===true&&!lit&&typeof fireOutSmoke==='function')fireOutSmoke(p.x,p.y,p.z);p._lit=lit;   // v3.24 käyttäjä: liekit sammuivat → savupatsas 10–20 s
       if(lit){const u=p.fl||(p.fl={cur:1,target:1,t:Math.random()*.2}),s=flick(u,dt);f[0].scale.set(.9+s*.12,.7+s*.45,.9+s*.12);f[1].scale.set(1,.8+s*.35,1);d.burn+=dt;
         if(dist2(p.x,p.z,P.pos.x,P.pos.z)<35*35){if(Math.random()<dt*3.2)emitEmber(p.x+(Math.random()-.5)*.4,p.y+.7,p.z+(Math.random()-.5)*.4,'spark');if(Math.random()<dt*.9)emitEmber(p.x+(Math.random()-.5)*.2,p.y+1.1,p.z+(Math.random()-.5)*.2,'smoke');}if(d.burn>=FIRE_UNIT){d.burn=0;d.fuel--;if(d.fuel<=0){d.fuel=0;d.ember=EMBER_T;}}   /* v3.02 polttoaine loppui → hiilos */if(p.t!=='patanuotio'){const ck=p.t==='grilli'?GRILL_COOK_K:1;for(const c of d.cook)c.t+=dt*ck;}}   // v3.00 grilli 30 % nopeampi
       emberTick(p,dt);if(p.t==='patanuotio')potTick(p,dt);   // v3.02 hiilos ja keittopata (pot.js)

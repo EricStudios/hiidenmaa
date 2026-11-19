@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.23, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.24, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +434,25 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.24 (leiri, savupatsas, vasara, vesistöt, vinkit – käyttäjä 19.11.)
+- **Hylätty leiri (KORJAUKSET 95):** istuin oli rakennusosa *palkki* 0,2 m maan yllä → leijuva tukki. Nyt staattinen **penkki jaloilla** (A-jalat maahan asti), vanhojen tallennusten
+  palkki poistetaan (`campSync`, tarkka paikka + suunta + korkeus). Uusi asettelu `campDress` leirin omassa suunnassa (`campFrame`): **halkopino aina teltan kylkeä vasten** (tukit teltan
+  suuntaisesti, puoli arvotaan), penkki nuotion kehälle, säkki, kuivausteline, ämpäri ja oksat/luut **satunnaisiin paikkoihin ja suuntiin**. `campFree` estää päällekkäisyydet
+  (teltta kiiloineen, oviaukko, nuotio, toiset esineet, kasvillisuus/kivet `nodesNear`), `campGround` = alin maastokohta jalanjäljen alla → mikään ei leiju rinteessä.
+- **Savupatsas sammuessa** (`fireOutSmoke`/`smokeColTick` effects.js, `SMOKE_COL`): nuotio, grilli ja patanuotio – kun liekit sammuvat (polttoaine, sade, tallaus; `p._lit`-siirtymä
+  ai.js), savua 10–20 s alussa voimakkaimmin, hiukkaset elävät 24–34 s ja nousevat ~25 m (aarnipuiden latvat, käyttäjä), laajenevat ja haalistuvat; tuuli vie sivulle (enemmän
+  ylempänä), sivulle ajautunut häipyy nopeammin (`side` 0,07 / m). Määrä `PF`:n mukaan, sumu (fog) → näkyy yhtä kauas kuin muut kohteet.
+- **Vasara vyöllä** (`HAM_BELT`): 20 % pienempi, selän pinnassa ilman rakoa (pinta mitattu säteellä: x 0,17 → z −0,086), kääntynyt selän kaarevuuden mukaan (ry −0,35).
+- **Repun kangas** pehmeämpi/epätarkempi kudos; **vetoketju** kokonaan 18 px reunuksen sisällä (ei Tilat-ruutujen päällä), värit taustan sävyissä.
+- **Opastusvinkki** `jahti`: kun eläin (hostile, makeAnimal) jahtaa 25 m sisällä → "Kyykyssä (C) olet huomaamattomampi".
+- **Vesistöjen nimet** (`wbArrive`, fish.js): ensimmäinen kerta isolla "Vesistö löydetty" + nimi alla, myöhemmin rannalle tultaessa vain nimi pienemmällä; sama nimi ei koskaan
+  kahdesti peräkkäin (`F.wbLast`) ja aikaisintaan 5 vuorokauden päästä (`WB_AGAIN_D`, `F.wbSeen`). **Aluebannerit ja vesistöt samassa jonossa** (`zoneQ`, `showWbBanner`) → eivät tule
+  päällekkäin; sama vesistö ei jonoon kahdesti.
+- **AFK-tarkastelu** (F-animaatio, joka alkaa itsestään AFK:na tai uudella esineellä) loppuu pehmeästi, kun pelaaja liikkuu (`inspMoving`), eikä ala liikkeessä; F:llä itse aloitettu jatkuu.
+- **Tähtäyspiste** häipyy kuolinkameran alkaessa (0,9 s) ja palaa heti herätessä (`crossDeathSync`).
+- **Ruohon reuna häipyy sisään** (käyttäjä): ruoho rakennetaan uudelleen 6 m välein, jolloin uloin rengas ilmestyi kerralla. Nyt varjostin (`grassCompile`,
+  `GRASS_U.uGF` = R − 14,5 … R − 6,5 m pelaajasta, `GRASS_FADE_W` 8) haalistaa ja madaltaa ruohon/korkean ruohon/rikkaruohot reunalla → kasvavat näkyviin pehmeästi lähestyessä.
 
 ### v3.23 (kalakirjan sivut, rakennuksen tietoikkuna – käyttäjä 19.11.)
 - **Kalakirjan sivun käännössä** soi kirjan avausääni (valikot/kartta) −30 % (`FB_TURN_V` 0,7; oma `sivun_kaanto`-ääni ohittaa sen, kun käyttäjä tuo sen).

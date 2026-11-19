@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.23';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.24';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -422,7 +422,7 @@ const WSTEP_MAX=.1;
 function worldStep(dt){const k=worldSpd();if(k===1){const n=Math.max(1,Math.ceil(dt/WSPD_STEP-1e-6));for(let i=0;i<n;i++)update(dt/n);return;}const tot=dt*k,n=Math.min(WSPD_MAX,Math.max(1,Math.ceil(tot/WSPD_STEP)));for(let i=0;i<n;i++)update(tot/n);}
 function frame(now){
   requestAnimationFrame(frame);
-  const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;let skip3d=false;seeThruSync();
+  const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;let skip3d=false;seeThruSync();crossDeathSync();
   if(state==='play'&&SET.autoAll&&!SET.noAuto)autoQuality(raw);   /* v2.65 noAuto: ei mitään automaattista säätöä */updateFps(raw);ptTick(raw);if(DEV)perfTick(raw);musicTick();if(typeof gameSndTick==='function')gameSndTick();   /* v2.83 valikossa pelin äänet häipyvät */try{ambTick(raw);}catch(err){}   /* v2.61 sää ja tunnelma */
   try{
     if(state==='play'||state==='ui')worldStep(Math.min(WSTEP_MAX,raw));   // v2.93 DEV maailman nopeus

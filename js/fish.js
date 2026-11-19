@@ -126,7 +126,7 @@ function fishTick(dt){const rod=rodDef();rodBendTick(dt);if(typeof heldMesh!=='u
     if(FS.dip>0)FS.dip=Math.max(0,FS.dip-dt*1.6);fishMeshUpd();fishHud();}
   // vesien nimet: rantaan tultaessa hienovaraisesti (kerran minuutissa samalle vedelle)
   FS.wbT-=dt;if(FS.wbT<=0){FS.wbT=1;if(!P.inDun){let wb=null;for(let a=0;a<8&&!wb;a++){const x=P.pos.x+Math.cos(a/8*TAU)*7,z=P.pos.z+Math.sin(a/8*TAU)*7;if(terrainH(x,z)<-.45)wb=wbAt(x,z);}
-      if(wb&&wb!==FS.last){const F=fishF();if(!F.wb[wb.id]){F.wb[wb.id]=1;wbShow(wb.name,true);}}FS.last=wb;}}}   // v3.07 käyttäjä: nimi näkyy vain kerran, kun vesi löytyy (ennen joka kerta pelin alkaessa)
+      if(wb&&wb!==FS.last)wbArrive(wb);FS.last=wb;}}}
 function fishFight(dt){const B=FISH_B[FS.sp],S=.45+.55*clamp((FS.kg-B.kg[0])/(B.kg[1]-B.kg[0]),0,1),hold=mouseL&&locked&&P.stam>0;FS.fightT+=dt;
   FS.pullT-=dt;if(FS.pullT<=0){FS.pullOn=!FS.pullOn;FS.pullT=FS.pullOn?.5+Math.random()*.9:1.2+Math.random()*1.8;if(FS.pullOn){FS.dip=1;plSnd('onkiminen','nykaisy',{v:.6,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});}}
   const RL=FS.rod.reel;if(hold){FS.prog+=dt*(FS.pullOn?.03:.16)/(.6+S*.6)*(RL?RL.fk:1);FS.ten+=dt*(FS.pullOn?1.05*S:.18*S)/FS.rod.ten*(RL?RL.tk:1);P.stam-=dt*4;P.stamDelay=Math.max(P.stamDelay,.5);FS.kelT-=dt;if(FS.kelT<=0){FS.kelT=.45;plSnd('onkiminen','kelaus',{v:.45});}}
@@ -176,7 +176,14 @@ function fishHud(){const el=document.getElementById('fishHud');if(!el)return;if(
   if(FS.st==='bite'){el.innerHTML='<b>!</b><span>Tärppää – vasen!</span>';return;}
   if(FS.st==='wait'){el.innerHTML=`<span>${FS.body?FS.body.name:''}${FS.bait?' · syötti: mato':''} · vasen kelaa sisään</span>`;return;}
   el.innerHTML=`<div class="fl">Väsytys: ${ITEMS[FS.sp].n}</div><div class="fb"><i class="ten${FS.ten>.8?' hi':''}" style="width:${Math.round(FS.ten*100)}%"></i></div><div class="fb"><i class="pr" style="width:${Math.round(FS.prog*100)}%"></i></div><div class="fh">${FS.pullOn?'Kala vetää – päästä irti!':'Kelaa: pidä vasenta'}</div>`;}
-function wbShow(name,isNew){const el=document.getElementById('wbName');if(!el)return;el.textContent=name;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');if(isNew)msg(`Löysit veden: ${name}`,'loot');}
+/* v3.24 käyttäjä: VESISTÖN NIMI. Ensimmäisellä kerralla isompi "Vesistö löydetty" + nimi alla; myöhemmin rannalle tultaessa vain nimi pienemmällä. Sama nimi ei
+   koskaan kahdesti peräkkäin (F.wbLast) ja näkyy uudelleen aikaisintaan WB_AGAIN_D (5) vuorokauden päästä (F.wbSeen). Kulkee aluebannerien jonossa (showWbBanner, ui.js). */
+const WB_AGAIN_D=5;
+function wbArrive(wb){const F=fishF(),now=dayN+dayT;F.wbSeen=F.wbSeen||{};
+  if(!F.wb[wb.id]){F.wb[wb.id]=1;F.wbSeen[wb.id]=now;F.wbLast=wb.id;showWbBanner(wb.name,true);return;}   // v3.07: löytö kerran
+  if(F.wbLast===wb.id||now-(F.wbSeen[wb.id]??-99)<WB_AGAIN_D)return;F.wbSeen[wb.id]=now;F.wbLast=wb.id;showWbBanner(wb.name,false);}
+function wbShow(name,isNew){const el=document.getElementById('wbName');if(!el)return;el.innerHTML=isNew?`<small>Vesistö löydetty</small><b>${name}</b>`:`<b>${name}</b>`;el.classList.toggle('big',!!isNew);
+  el.classList.remove('on');void el.offsetWidth;el.classList.add('on');if(isNew)msg(`Löysit veden: ${name}`,'loot');}
 // kartta: löydettyjen vesien nimet (kuten muut nimet, kursiivilla ja sinertävinä)
 function fishMapLabels(g,pt,sx){   /* v3.08 käyttäjä: nimet kaikilla zoomeilla (koko pienenee ulos zoomatessa) */const F=fishF();for(const w of WBS){if(!F.wb[w.id])continue;const [x,y]=pt(w.x,w.z);g.save();g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=3;g.shadowOffsetX=1;g.shadowOffsetY=1;
     g.fillStyle='#a9d8f2';g.font=`italic 600 ${sx>1.6?13:sx>1?12:10}px Alegreya Sans, sans-serif`;g.textAlign='center';g.fillText(w.name,x,y+4);g.restore();}

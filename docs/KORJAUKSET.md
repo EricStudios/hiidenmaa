@@ -676,3 +676,9 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Korjaus: kiinteä korkeus, `box-sizing:border-box` + `overflow:hidden` lehdelle ja sivuille, paneeli `overflow:hidden`.
 - **Sääntö:** animoitu absoluuttinen elementti, jolla on `width:%` ja täyte → aina border-box; animoidun paneelin koko kiinteäksi. Testaa mittaamalla paneelin koko animaation aikana.
 
+## 95. Leijuva tukki ja päällekkäiset esineet hylätyssä leirissä (v3.24)
+- Leirin istuin oli rakennusosa `palkki` asetettuna `terrainH + .2` → tukki leijui. Säkki, ämpäri ja teline olivat kiinteissä maailman koordinaateissa (ei leirin suunnan mukaan)
+  → osuivat teltan päälle joissain suunnissa.
+- Korjaus: staattinen penkki jaloilla, kaikki paikat leirin omassa suunnassa ja vapaan paikan haku (`campFree`), korkeus = alin maastokohta jalanjäljen alla (`campGround`).
+- **Sääntö:** koriste tai rakennelma maahan → korkeus jalanjäljen alimmasta kohdasta ja jalat/runko sinne asti; ei vakioita kuten `+.2`. Uusi esine leiriin → lisää `campFree`-tarkistus.
+

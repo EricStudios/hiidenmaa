@@ -450,11 +450,13 @@ function nightId(){return dayN-(dayT<.5?1:0);}
 //                     tiheys pituus  väri (tyvi → kärki)
 const GRASS_DEF=[[1,1,0x3d6a22,0x9ccf52],[.9,.95,0x3a6624,0x8cc04a],[.5,.8,0x2c4e1e,0x6e9a3a],[.75,1.35,0x40502a,0x9aa060],[.35,.55,0x5a6a3a,0xb8c08a],
   [.2,.9,0x1f3a1c,0x4f7a34],[.3,.75,0x4a4436,0x8a7f60],[.55,.55,0x5a5a30,0xa09a58],[.08,.5,0x5a5a3a,0x9a9a70],[.15,.6,0x50583a,0x8a9060],[.1,.8,0x8a8a5a,0xd0c890]];
-let grassC={x:1e9,z:1e9},grassIM=null;
+let grassC={x:1e9,z:1e9},grassIM=null;const GRASS_FADE_W=8;
 const GRASS_MAT=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide,transparent:true,opacity:.5,depthWrite:false});   // v1.02 läpikuultava, kevyt
-const GRASS_U={uPl:{value:new V3(0,-999,0)}};   // v3.06 pelaajan paikka: ruoho ja rikkaruohot taipuvat kulkijan tieltä
-const grassCompile=sh=>{sh.uniforms.uTime=SWAY.uTime;sh.uniforms.uWind=SWAY.uWind;sh.uniforms.uWDir=SWAY.uWDir;sh.uniforms.uLean=SWAY.uLean;sh.uniforms.uPl=GRASS_U.uPl;
-  sh.vertexShader='uniform float uTime;uniform float uWind;uniform vec3 uWDir;uniform float uLean;uniform vec3 uPl;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+const GRASS_U={uPl:{value:new V3(0,-999,0)},uGF:{value:new THREE.Vector2(1e4,1e4+1)}};   // v3.24 uGF: ruohon reunahäivytys (alku, loppu) m pelaajasta   // v3.06 pelaajan paikka: ruoho ja rikkaruohot taipuvat kulkijan tieltä
+const grassCompile=sh=>{sh.uniforms.uTime=SWAY.uTime;sh.uniforms.uWind=SWAY.uWind;sh.uniforms.uWDir=SWAY.uWDir;sh.uniforms.uLean=SWAY.uLean;sh.uniforms.uPl=GRASS_U.uPl;sh.uniforms.uGF=GRASS_U.uGF;
+  sh.fragmentShader='varying float vGF;\n'+sh.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\n  gl_FragColor.a*=vGF;');   // v3.24 reuna häipyy sisään
+  sh.vertexShader='uniform float uTime;uniform float uWind;uniform vec3 uWDir;uniform float uLean;uniform vec3 uPl;uniform vec2 uGF;varying float vGF;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+  vGF=1.-smoothstep(uGF.x,uGF.y,length(instanceMatrix[3].xz-uPl.xz));transformed.y*=.3+.7*vGF;
   float gPh=instanceMatrix[3].x*.31+instanceMatrix[3].z*.27;float gh=max(0.,position.y);float gk=gh*gh;
   mat3 gM=mat3(instanceMatrix);vec3 gL=vec3(dot(gM[0],uWDir),dot(gM[1],uWDir),dot(gM[2],uWDir));gL/=max(length(gL),1e-4);
   float gs=(.1+uWind*.25)*sin(uTime*2.3+gPh)+min(uLean,1.2)*(.35+.12*sin(uTime*1.7+gPh*1.3));
@@ -537,7 +539,7 @@ function rebuildGrass(){let lv=+(SET.grass??1);grassDirty=false;if(AUTO.fx>=2)lv
   // v1.38 (KORJAUKSET 28): ruohoton alue (kivinen vuori, kohteen ympäristö) → n = 0 eikä setColorAt-kutsua → instanceColor = null. Sama
   // GRASS_MAT on jo käännetty instanssiväreillä, joten three.js r128 kaatui piirrossa ("Script error"). Tyhjää ei lisätä näkymään.
   if(WIs)WIs.forEach((WI,k)=>{const wn=WN0[k];if(wn){WI.count=wn;WI.instanceMatrix.needsUpdate=true;if(WI.instanceColor)WI.instanceColor.needsUpdate=true;scene.add(WI);weedIMs.push(WI);if(!weedIM||wn>weedIM.count)weedIM=WI;}else WI.dispose();});   // KORJAUKSET 28: tyhjää ei lisätä
-  grassC={x:cx,z:cz};if(TI){if(tn){TI.count=tn;TI.instanceMatrix.needsUpdate=true;if(TI.instanceColor)TI.instanceColor.needsUpdate=true;scene.add(TI);tallIM=TI;}else TI.dispose();}   // KORJAUKSET 28: tyhjää ei lisätä
+  grassC={x:cx,z:cz};GRASS_U.uGF.value.set(R-GRASS_FADE_W-6.5,R-6.5);   /* v3.24 käyttäjä: uloin reuna (uudelleenrakennus 6 m välein) häipyy ja kasvaa näkyviin GRASS_FADE_W m:n matkalla – ei äkillistä ilmestymistä */if(TI){if(tn){TI.count=tn;TI.instanceMatrix.needsUpdate=true;if(TI.instanceColor)TI.instanceColor.needsUpdate=true;scene.add(TI);tallIM=TI;}else TI.dispose();}   // KORJAUKSET 28: tyhjää ei lisätä
   if(!n){im.dispose();return;}
   im.count=n;im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;scene.add(im);grassIM=im;}
 function updateGrass(){GRASS_U.uPl.value.set(P.pos.x,P.pos.y,P.pos.z);if(P.inDun){if(grassIM)grassIM.visible=false;if(tallIM)tallIM.visible=false;for(const w of weedIMs)w.visible=false;return;}if(grassIM)grassIM.visible=true;if(tallIM)tallIM.visible=true;for(const w of weedIMs)w.visible=true;

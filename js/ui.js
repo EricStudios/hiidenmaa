@@ -292,8 +292,13 @@ function updateZone(dt){zoneT-=dt;if(zoneT>0)return;zoneT=.4;if(P.inDun||P.dead)
 function zoneDeep(z){let n=0;for(let i=0;i<6;i++){const a=i/6*TAU;if(zoneAt(P.pos.x+Math.cos(a)*6,P.pos.z+Math.sin(a)*6)===z)n++;}return n>=5;}
 // v1.43: aluebannerit jonossa – pitkä häivytys sisään (2,2 s), näkyy 3 s, häivytys ulos (3 s), 1 s tauko ennen seuraavaa; ei päällekkäin.
 const ZONE_IN=2200,ZONE_HOLD=3000,ZONE_OUT=3000,ZONE_GAP=1000,zoneQ=[];let zoneBusy=false;
+/* v3.24 käyttäjä: aluebannerit ja vesistöjen nimet samassa jonossa (zoneQ) – eivät tule päällekkäin vaan viivästyttävät toisiaan. Alkio: nimi (alue) tai {wb,name,isNew}. */
+const WB_NEW_MS=5600,WB_OLD_MS=4200,WB_GAP=900;
 function showZoneBanner(name){zoneQ.push(name);if(!zoneBusy)nextZoneBanner();}
-function nextZoneBanner(){const name=zoneQ.shift();if(!name){zoneBusy=false;return;}zoneBusy=true;const el=$('#zoneBan');$('#zoneBanN').textContent=name;
+function showWbBanner(name,isNew){if(zoneQ.some(q=>q&&q.wb&&q.name===name))return;zoneQ.push({wb:1,name,isNew});if(!zoneBusy)nextZoneBanner();}
+function nextZoneBanner(){const name=zoneQ.shift();if(!name){zoneBusy=false;return;}zoneBusy=true;
+  if(name.wb){wbShow(name.name,name.isNew);clearTimeout(zoneBanT);zoneBanT=setTimeout(nextZoneBanner,(name.isNew?WB_NEW_MS:WB_OLD_MS)+WB_GAP);return;}
+  const el=$('#zoneBan');$('#zoneBanN').textContent=name;
   el.classList.add('on');sfx('discover');biomeSnd(Object.keys(BIOMES).find(k=>BIOMES[k].n===name));msg(`Uusi alue löydetty: ${name}`,'loot');
   clearTimeout(zoneBanT);zoneBanT=setTimeout(()=>{el.classList.remove('on');zoneBanT=setTimeout(nextZoneBanner,ZONE_OUT+ZONE_GAP);},ZONE_IN+ZONE_HOLD);}
 function renderBiome(){const B=$('#biomeBox');if(!B)return;if(P.inDun||!P.zone||!BIOMES[P.zone]){B.innerHTML='';return;}const b=BIOMES[P.zone],dg=['','Rauhallinen','Kohtalainen','Vaarallinen'][b.danger]||'';
@@ -854,3 +859,5 @@ addEventListener('keydown',e=>{if(!SPL.on)return;const m=/^(?:Digit|Numpad)([1-9
   if(m)splitDo(Math.min(+m[1],SPL.n));else if(e.code==='Enter'||e.code==='NumpadEnter')splitDo(SPL.v);else if(e.code==='Escape')splitCancel();
   else if(e.code==='ArrowLeft'||e.code==='ArrowDown')splitSet(SPL.v-1);else if(e.code==='ArrowRight'||e.code==='ArrowUp')splitSet(SPL.v+1);else ok=false;
   if(ok){e.preventDefault();e.stopImmediatePropagation();}},true);
+// v3.24 käyttäjä: tähtäyspiste häipyy kuolinkameran alkaessa (0,9 s) ja palaa heti, kun pelaaja herää (main.js frame)
+function crossDeathSync(){const cr=document.getElementById('cross');if(!cr)return;const dd=!!P.dead;if(cr._dd===dd)return;cr._dd=dd;cr.style.transition=dd?'opacity .9s ease':'none';cr.style.opacity=dd?'0':'';}

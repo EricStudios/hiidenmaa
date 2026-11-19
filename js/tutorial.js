@@ -88,12 +88,16 @@ function tutTick(dt){
 // Kun asia tulee ensimmäisen kerran vastaan, ruudun yläosaan tulee vinkki 10 s (yksi kerrallaan, väli vähintään 6 s). flags.tips[id] = näytetty.
 /* v3.20 käyttäjä: työkaluvinkki tulee heti, kun työkalu on valmistettu ja valikot suljettu (ennen vasta käteen otettuna); ohje kertoo, miten se otetaan käteen. */
 const tipHas=f=>inv.some(s=>s&&ITEMS[s.id]&&f(s.id,ITEMS[s.id])),tipEq=f=>{const w=equipped('weapon');return !!w&&f(w.id,ITEMS[w.id]);},tipTake=f=>tipEq(f)?'':'Ota se käteen pikapaikan numerolla (1–8). ';
+// v3.24: jahtaako jokin eläin (makeAnimal-malli, ei kalmot/hiidet) pelaajaa 25 m sisällä
+let _tipAnimals=null;function tipChased(){if(!_tipAnimals)_tipAnimals=new Set(Object.keys(MOBDEF).filter(k=>MOBDEF[k].ai==='hostile'&&/makeAnimal/.test(String(MOBDEF[k].fig))));
+  return !P.dead&&!P.inDun&&mobs.some(m=>!m.dead&&m.state==='chase'&&_tipAnimals.has(m.type)&&dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)<25*25);}
 const TIPS=[
   {id:'vasara',u:()=>openPanel==='build',c:()=>tipHas(id=>id==='vasara'),d:()=>`${tipTake(id=>id==='vasara')}Rakentaminen: ${kL('build')} tai hiiren oikea avaa rakennusvalikon, hiiren vasen asettaa. ${kL('rot')} kääntää (Shift = asento), ${kL('snap')}/${kL('vsnap')} kohdistus, ${kL('up')}/${kL('down')} nosta/laske, ${kL('remove')} pura, ${kL('repair')} korjaa. Työpisteet tarvitsevat työpenkin lähelleen.`},
   {id:'rakennusG',c:()=>{const w=equipped('weapon');return w&&w.id==='vasara'&&cnt('built')>=3;},d:()=>`Rakentaminen tuntuu hankalalta? Paina ${kL('snap')} vaihtaaksesi kohdistusta (ruudukko → 1 m → puoli → 3D → vapaa → reuna → jatko). Esim. <b>${kL('snap')}: vapaa</b> asettaa osan juuri sinne, minne katsot, ja <b>jatko</b> jatkaa portaita ja tikkaita edellisestä.`},   // v2.82 käyttäjän pyyntö
   {id:'jousi',u:()=>!!P.drawing,c:()=>tipHas((id,d)=>d.cat==='bow'),d:()=>`${tipTake((id,d)=>d.cat==='bow')}Jousi: pidä hiiren vasen pohjassa ja päästä irti. Kyykyssä (${kL('crouch')}) näet tarkan tähtäimen ja lentoradan. Nuolet ovat repussa.`},
   {id:'lapio',u:()=>typeof shovelCd!=='undefined'&&playTime<shovelCd,c:()=>tipHas(id=>id==='lapio'||id==='kuokka'),d:()=>`${tipTake(id=>id==='lapio'||id==='kuokka')}Lapio: hiiren vasen kaivaa, oikea tekee polun. Kuokka: vasen nostaa maata, oikea palauttaa maan värin ja kasvillisuuden (esim. polun kohdalle).`},
   {id:'kirves',u:()=>!!P.atk&&tipEq((id,d)=>d.chop),c:()=>tipHas((id,d)=>d.chop),d:()=>`${tipTake((id,d)=>d.chop)}Kirves kaataa puita (hiiren vasen). Kaatuneesta puusta jää tukki – lyö sitä, niin saat puuta.`},
+  {id:'jahti',c:()=>tipChased(),d:()=>`Eläin jahtaa sinua! Kyykyssä (${kL('crouch')}) olet huomaamattomampi – petojen on vaikeampi huomata sinua, ja paikallaan kyyristyvä ei säikytä riistaa.`},   // v3.24 käyttäjä
   {id:'uinti',u:()=>!P.swim,c:()=>P.swim,d:()=>`Uidessa ${kL('jump')} on veto pintaan (kuluttaa kestävyyttä). Veden alla happi loppuu – nouse ajoissa.`},
   {id:'yo',c:()=>typeof isNight==='function'&&isNight()&&!P.inDun,d:()=>`Yö laskeutuu: sudet ja hiidet liikkuvat. Rakenna suoja ja nuotio – katon alla tulen ääressä lepäät. Sängyssä (${kL('interact')}) voit nukkua yön yli.`},
   {id:'kuorma',u:()=>invWeight()<=MAXW,c:()=>typeof MAXW!=='undefined'&&invWeight()>MAXW,d:()=>`Ylikuorma: et voi juosta, ja kestävyys hupenee liikkuessa. Pudota tavaraa (${kL('up')}) tai vie se arkkuun.`},

@@ -592,6 +592,24 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.24: leiri (penkki jaloilla, ei leijuvaa palkkia, ei päällekkäisyyksiä, pino teltan kylkeä vasten), savupatsas sammuessa, vasara vyöllä, tähtäin kuolemassa, AFK-tarkastelu loppuu liikkeessä, jahtivinkki, vesistöjen nimet jonossa, vetoketju reunuksessa',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    for(const c of CAMPS){const F=campFrame(c),[lx,lz]=F.W(1.6,1.4);ck('palkki pois '+c.k,!pieces.some(q=>q.t==='palkki'&&Math.hypot(q.x-lx,q.z-lz)<.08));ck('penkki '+c.k,!!c.bench&&c.bench.y-terrainH(c.bench.x,c.bench.z)<.6);
+      const pts=[[c.pile.x,c.pile.z,.6],[c.bench.x,c.bench.z,.8],[c.sack.x,c.sack.z,.35],[c.rack.x,c.rack.z,.9]];for(let i=0;i<pts.length;i++){for(let j=i+1;j<pts.length;j++)ck('päällekkäin '+i+j,Math.hypot(pts[i][0]-pts[j][0],pts[i][1]-pts[j][1])>pts[i][2]+pts[j][2]);
+        if(i)ck('teltta '+i,campFree(c,F,[],pts[i][0],pts[i][1],0)||Math.hypot(pts[i][0]-c.x,pts[i][1]-c.z)>=1.05);}
+      const [pd,ps]=F.L(c.pile.x,c.pile.z);ck('pino teltan kyljessä',Math.abs(pd-CAMP_TENT_D)<.05&&Math.abs(Math.abs(ps)-(TENT.W/2+.77))<.05);}
+    ck('savu',typeof fireOutSmoke==='function'&&SMOKE_COL.dur[0]===10&&SMOKE_COL.dur[1]===20&&SMOKE_COL.vy*SMOKE_COL.life[0]*.75>20&&/fireOutSmoke/.test(updateStations.toString())&&/smokeColTick/.test(updateFx.toString()));
+    ck('vasara',HAM_BELT.s===.8&&HAM_BELT.z>-.17&&HAM_BELT.ry<0);
+    ck('tähtäin',typeof crossDeathSync==='function'&&/crossDeathSync/.test(frame.toString()));
+    ck('afk',typeof inspMoving==='function'&&/I\.afk\|\|I\.auto/.test(inspectTick.toString()));
+    ck('jahti',TIPS.some(t=>t.id==='jahti')&&typeof tipChased==='function');
+    ck('ruoho',GRASS_FADE_W>=6&&!!GRASS_U.uGF&&/uGF/.test(String(rebuildGrass))&&GRASS_MAT.onBeforeCompile===grassCompile&&/vGF/.test(String(grassCompile)));
+    ck('vesistöt',WB_AGAIN_D===5&&typeof showWbBanner==='function'&&/wbArrive/.test(String(fishTick))&&/name\.wb/.test(nextZoneBanner.toString()));
+    {const F=fishF(),o={wb:F.wb,s:F.wbSeen,l:F.wbLast},q0=zoneQ.slice(),w=WBS[0];try{F.wb={[w.id]:1};F.wbSeen={[w.id]:dayN+dayT-6};F.wbLast=w.id;zoneQ.length=0;zoneBusy=true;wbArrive(w);const a=zoneQ.length;
+      F.wbLast='x';F.wbSeen[w.id]=dayN+dayT-2;wbArrive(w);const b2=zoneQ.length;F.wbSeen[w.id]=dayN+dayT-6;wbArrive(w);const c2=zoneQ.length;ck('vesistösäännöt '+[a,b2,c2],a===0&&b2===0&&c2===1&&zoneQ[0].wb&&!zoneQ[0].isNew);}
+      finally{F.wb=o.wb;F.wbSeen=o.s;F.wbLast=o.l;zoneQ.length=0;zoneQ.push(...q0);zoneBusy=false;}}
+    const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(er){return [];}}).join('\n');ck('vetoketju',/M9 0V128/.test(css));
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.23: kalakirjan sivun käännössä avausääni −30 %, kirja ei veny käännössä (kiinteä korkeus, lehti border-box), rakennuksen tietoikkuna 0,6 s / häipyy 10 s, rakennusikkuna 15 % pidempi',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     ck('ääni',FB_TURN_V===.7&&/'kartta',\{v:FB_TURN_V\}/.test(fbTurn.toString()));

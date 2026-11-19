@@ -21,6 +21,9 @@ let state='menu';
 const fig=makePlayer();
 scene.add(fig.g);let heldMesh=null,heldId=null,offMesh=null,offId=null,armorId=null,heldKey=null,offKey=null;   // v3.14 avain = id + vavan osat / pakin taso (tackle.js)
 // Repussa olevat mutta käyttämättömät aseet, kilvet ja työkalut näkyvät pelaajan selässä (kilpi keskellä, jousi vinossa, työkalut varret ylöspäin).
+/* v3.24 käyttäjä: vasara vyöllä 20 % pienempi (s), kiinni vartalossa ilman rakoa (selän pinta x 0,17:ssä z −0,086, mitattu säteellä; pään puolipaksuus 0,056 + 1 cm)
+   ja kääntynyt selän kaarevuuden mukaan (pinnan kaltevuus 0,36 → ry −0,35), ei suoraan taaksepäin. */
+const HAM_BELT={x:.17,z:-.153,ry:-.35,s:.8};
 const backG=new THREE.Group();fig.rig.add(backG);let backKey='',backHang=null;
 const ARMOR_BACK={nahkavaatteet:{ch:.045,bt:.02},karhuhaarniska:{ch:.15,bt:.1},kuparipanssari:{ch:.055,bt:.025},rautapanssari:{ch:.05,bt:.025},hiidenpanssari:{ch:.065,bt:.025}};
 function hasArrows(){return typeof AMMO!=='undefined'&&AMMO.some(id=>invCount(id)>0);}
@@ -32,7 +35,7 @@ function updateBack(){const items=inv.filter(s=>s&&(!s.eq||(ITEMS[s.id].cat==='s
   const key=[sh,bo,hm,...tl].map(s=>s?s.id:'-').join()+'|'+(ar?ar.id:'')+'|'+(bo&&hasArrows()?'a':'');if(key===backKey)return;backKey=key;while(backG.children.length)backG.remove(backG.children[0]);backHang=null;
   // Vasara roikkuu vyöllä takana (v0.72): pää vyön päällä selän suuntaisesti (pää 90° pystyakselin ympäri aiemmasta), varsi alas.
   // Ripustuspiste = vyön yläreuna selän puolella (y 0,94, z −0,24); heiluu kävellessä (player.js, backHang).
-  if(hm){const m=makeHeld(hm.id),o=new THREE.Group();m.rotation.x=-Math.PI/2;m.position.set(0,-.47,0);o.add(m);o.position.set(.13,.94,-.24-AB.bt);o.rotation.y=.18;backG.add(o);backHang=o;}
+  if(hm){const m=makeHeld(hm.id),o=new THREE.Group();m.rotation.x=-Math.PI/2;m.position.set(0,-.47,0);o.add(m);o.position.set(HAM_BELT.x,.94,HAM_BELT.z-AB.bt);o.rotation.y=HAM_BELT.ry;o.scale.setScalar(HAM_BELT.s);backG.add(o);backHang=o;}
   if(sh){const m=makeShield(sh.id);const o=new THREE.Group();m.rotation.y=Math.PI/2;m.position.set(0,0,0);o.add(m);o.position.set(0,1.2,-.1-AB.ch);o.scale.setScalar(.85);backG.add(o);}
   const z0=(sh?-.29:-.19)-AB.ch;
   // v1.37 (lista 3, kohta 37): selkäesineet viistoon, pitkä osa sivulle (hakun piikit, kirveen terä) eikä selkää vasten:
@@ -266,7 +269,7 @@ function updateEmbers(dt){for(let i=embers.length-1;i>=0;i--){const e=embers[i];
 // Satunnaistettu välke: arvo hakeutuu satunnaisesti vaihtuvaan tavoitteeseen, joskus pieni "vajaus". Palauttaa kertoimen ~.82–1.04 (vain vähän eloa).
 function flick(u,dt){u.t-=dt;if(u.t<=0){u.t=.04+Math.random()*.16;u.target=.82+Math.random()*.28;if(Math.random()<.04)u.target=.55+Math.random()*.15;}u.cur+=(u.target-u.cur)*kExp(14,dt);return 1+(u.cur-1)*.4;}
 const fx=[];
-function updateFx(dt){updateEmbers(dt);
+function updateFx(dt){updateEmbers(dt);if(typeof smokeColTick==='function')smokeColTick(dt);   /* v3.24 sammuneen tulen savupatsas */
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.t-=dt;p.vy-=12*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;p.m.scale.setScalar(Math.max(.01,p.t));if(p.t<=0){scene.remove(p.m);parts.splice(i,1);}}
   for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;if(f.update(f,dt)){scene.remove(f.obj);fx.splice(i,1);}}
 }
