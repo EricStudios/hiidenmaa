@@ -886,6 +886,18 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.14 – kalastusvarusteet
+- **Kalastajan pöytä** (Viljely ja kalastus, taso 3, puu 6 + naru 2): E avaa – vavan osat vaihdetaan heti, ominaisuudet listana, yhdistelmät, perkaus ja pakin päivitys.
+  Pöydän ääressä valmistetaan siimat, koukut, kelat, kohot, viehteet ja kalastuspakki.
+- **Vapa = runko** (onki, kuparivapa +10 % isot kalat, hiidenvapa +20 %) + siima (pellava, jänne, punottu, hiidensiima – vahvempi kestää, mutta tärppää harvemmin) + koukku
+  (pieni, iso, väkä) + kela (ei, kupari, hiisi) + koho (puu, korkki, hehku) tai viehe (9 kpl). Siima kuluu ja voi katketa; vanha ehjä osa palaa reppuun, kulunut siima heitetään pois.
+- **Virveli** (kela + viehe): heitto 6–22 m (hiisikela 30 m), pidä vasenta kelataksesi, kala iskee kelatessa. Viehteillä parhaat kalat, vahvuudet ja heikkoudet (vesi, aika, sää, valo);
+  eivät sovi pikkukaloille, voivat (hyvin harvoin) tarttua pohjaan matalassa – viehe ja siima menetetään.
+- **Mato:** vapa kädessä E laittaa madon koukkuun. **Kalastuspakki** vasemmassa kädessä (paino 20 + sisältö, 12–24 paikkaa, vain kalastustarvikkeet, yksi kerrallaan):
+  vasen klikkaus laskee maahan tai pöydän pakkipaikalle, E avaa, vasen nostaa. Siiman voi vaihtaa pakista kentällä (30 s).
+- **Perkaus:** kalat → fileet (paistetaan) + perkeet (katiskan syötti, kuin kaksi matoa).
+- Kala sätkii koukussa 3 s, osat näkyvät vavassa, uudet madot, ensimmäisestä ongesta juhlava ilmoitus.
+
 ## v3.13 – maailmat, äänet, Käynnissä-tila ja intro (Early Access 1.2)
 - **Maailmoja 6** (3 × 2 korttia, ei vieritystä). Uusi maailma: napsautus = varmistus (iso Aloita-nappi), pidä pohjassa 0,6 s = aloita heti.
   Kortti: tuplaklikkaus = pelaa (tai jatka), pidä pohjassa 1 s = maailman tallennuskoodi leikepöydälle.

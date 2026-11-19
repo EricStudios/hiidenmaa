@@ -640,3 +640,9 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Korvauksessa `introCarpet(...);   // kommentti` päätyi rivin keskelle → rivin loppu (`return …;}`) kommentoitui pois → "Unexpected end of input". `node --check` paljasti.
 - `const MIST` oli jo käytössä (luolaston usva) → peli ei käynnistynyt (testissä `window.__game` ei valmistunut). Nimetty `IMIST`.
 - **Sääntö (kertaus):** korvaa aina vain kokonaisia rivejä tai käytä `/* */`; ennen uutta ylimmän tason nimeä `grep -n "\bNIMI\b" js/*.js`. Jos testi jää odottamaan `window.__game`:a, katso ensin pageerror.
+
+## 89. Tarkistus: uusi malli tai resepti rikkoi vanhan tarkistusrivin (v3.14)
+- `makeHeld('mato')` vaihtui yhteen putkimalliin → v3.08-rivi "siemenmallit" vaatii ≥ 3 meshiä → lisättiin toinen mato ja multamuruja (parempi ulkoasu).
+- Harvinainen hiisikela (taso 9) rikkoi v2.70-säännön "tavalliset reseptit enintään taso 7": suodatin luki vain `rare`-kenttää, esineissä käytetään `rar:'rare'` → suodatin korjattu.
+- Kommentti `(clitellum); burrow = …` tulkittiin koodiksi kommentin perässä (KORJAUKSET 49 -tarkistus) – kommentissa ei puolipistettä + sijoitusta.
+- **Sääntö:** aja `tools/tarkistus.mjs` heti uuden mallin/reseptin jälkeen; vanhan rivin vaatimus on yleensä oikea – korjaa ensin oma muutos, vasta sitten testi.

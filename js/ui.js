@@ -305,12 +305,12 @@ function refreshKeyHints(){const on=hintL2();for(const k in PANEL_KEY){const [se
   let g=$('#gameHint');if(!g){g=document.createElement('div');g.id='gameHint';$('#hud').appendChild(g);}g.hidden=!on;g.textContent=`Päävalikko: ${keyLabel(BIND.menu)}`;}
 let invCtx=null;   // v3.06 teemoitettu valikko: työpiste, josta reppu/valmistus avattiin (työpenkki, ahjo)
 function togglePanel(name){if(typeof tipDismiss==='function')tipDismiss();if(openPanel===name){closePanels();return;}if(P.dead)return;{const ev={inv:'reppu',build:'rakennusvalikko',map:'kartta'}[name];if(ev)plSnd('valikot',ev);}   /* v2.25 */panelOpenedAt=performance.now();closePanels(true);openPanel=name;state='ui';if(!locked)releaseLock();else{VC.x=innerWidth/2;VC.y=innerHeight/2;}mouseL=false;mouseR=false;P.drawing=false;
-  if(name==='inv'){$('#inv').dataset.st=invCtx||'';invCtx=null;$('#inv').hidden=false;fitInv();{const cs=$('#craftSearch');if(cs)cs.value='';}renderInv();renderBiome();}if(name==='build'){$('#build').hidden=false;{const bs=$('#buildSearch');if(bs)bs.value='';}renderBuild();}if(name==='map'){$('#mapP').hidden=false;mapZ=1;mapCX=P.pos.x;mapCZ=P.pos.z;if(!mapRAF)mapRAF=requestAnimationFrame(mapLoop);}if(name==='chest')$('#chest').hidden=false;if(name==='pot'){$('#potP').hidden=false;potRefresh(true);}if(name==='smelt'){$('#smeltP').hidden=false;smRefresh(true);}if(name==='fish'){$('#fishP').hidden=false;fishBookRender();}   /* v3.02 keittopata */if(name==='prog'){$('#progP').hidden=false;renderProg();}if(name==='log'){$('#logP').hidden=false;renderLog();}if(name==='dev'&&$('#devP')){$('#devP').hidden=false;renderDev();}if(name==='devi'&&$('#devIP')){devQ='';devN=1;$('#devIP').hidden=false;renderDevI();}if(name==='devm'&&$('#devMP')){$('#devMP').hidden=false;renderDevM();}refreshKeyHints();vcSync();}
+  if(name==='inv'){$('#inv').dataset.st=invCtx||'';invCtx=null;$('#inv').hidden=false;fitInv();{const cs=$('#craftSearch');if(cs)cs.value='';}renderInv();renderBiome();}if(name==='build'){$('#build').hidden=false;{const bs=$('#buildSearch');if(bs)bs.value='';}renderBuild();}if(name==='map'){$('#mapP').hidden=false;mapZ=1;mapCX=P.pos.x;mapCZ=P.pos.z;if(!mapRAF)mapRAF=requestAnimationFrame(mapLoop);}if(name==='chest')$('#chest').hidden=false;if(name==='pot'){$('#potP').hidden=false;potRefresh(true);}if(name==='smelt'){$('#smeltP').hidden=false;smRefresh(true);}if(name==='fish'){$('#fishP').hidden=false;fishBookRender();}if(name==='tk'){$('#tkP').hidden=false;tkRender();}   /* v3.14 Kalastajan pöytä */   /* v3.02 keittopata */if(name==='prog'){$('#progP').hidden=false;renderProg();}if(name==='log'){$('#logP').hidden=false;renderLog();}if(name==='dev'&&$('#devP')){$('#devP').hidden=false;renderDev();}if(name==='devi'&&$('#devIP')){devQ='';devN=1;$('#devIP').hidden=false;renderDevI();}if(name==='devm'&&$('#devMP')){$('#devMP').hidden=false;renderDevM();}refreshKeyHints();vcSync();}
 const REPPU_CLOSE_P=1.3,ARKKU_CLOSE_P=1.15,ARKKU_CLOSE_V=.8;   // v2.50 repun sulkeminen: sama reppu-ääni 8 % korkeammalta
 function closePanels(keep,skipLock){splitClose();if(openPanel&&typeof tipDismiss==='function')tipDismiss();if(typeof binfoHide==='function')binfoHide();upPrev=null;chestSel=null;if(openPanel){panelClosedAt=performance.now();if(!keep){const own=openPanel==='chest'&&curChest&&!curChest.found;   /* v2.28: reppu kiinni = sama ääni kuin auki, oma arkku oma sulkemisääni */
-    if(!(openPanel==='inv'?plSnd('valikot','reppu',{p:REPPU_CLOSE_P}):openPanel==='chest'?plSnd('kaytto','arkku_auki',{p:ARKKU_CLOSE_P,v:ARKKU_CLOSE_V}):false))plSnd('valikot','sulje');   /* v2.56: kaikki arkut: avausääni hiljempaa ja korkeammalta */}}for(const id of ['#inv','#build','#mapP','#chest','#potP','#smeltP','#fishP','#progP','#logP','#devP','#devMP','#devIP'])if($(id))$(id).hidden=true;openPanel=null;curChest=null;selSlot=-1;selHalf=false;selEq=null;slotDrag=null;hoverSlot=null;if(typeof updGhost==='function')updGhost();if(!keep){state='play';if(!skipLock&&!locked)requestLock();}vcSync();}
+    if(!(openPanel==='inv'?plSnd('valikot','reppu',{p:REPPU_CLOSE_P}):openPanel==='chest'?((curChest&&curChest.pakki&&typeof tkSnd==='function'&&tkSnd('pakki_kiinni'))||plSnd('kaytto','arkku_auki',{p:ARKKU_CLOSE_P,v:ARKKU_CLOSE_V})):false))plSnd('valikot','sulje');   /* v2.56: kaikki arkut: avausääni hiljempaa ja korkeammalta */}}for(const id of ['#inv','#build','#mapP','#chest','#potP','#smeltP','#fishP','#tkP','#progP','#logP','#devP','#devMP','#devIP'])if($(id))$(id).hidden=true;openPanel=null;curChest=null;selSlot=-1;selHalf=false;selEq=null;slotDrag=null;hoverSlot=null;if(typeof updGhost==='function')updGhost();if(!keep){state='play';if(!skipLock&&!locked)requestLock();}vcSync();}
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closePanels()));
-function nearStations(){const s={};for(const p of pieces){const k=isFirePiece(p.t)?'nuotio':p.t;if(['tyopenkki','nuotio','ahjo'].includes(k)&&dist2(p.x,p.z,P.pos.x,P.pos.z)<(k==='nuotio'?4:8)**2&&!P.inDun){if(k==='nuotio'&&p.data.fuel<=0)continue;s[k]=1;if(p.t==='grilli')s.grilli=1;if(p.t==='patanuotio'&&p.data.pot&&!p.data.spo&&fireLit(p))s.pata=1;}}return s;}   /* v3.02 pata: asennettu, ehjä, tuli palaa */   // v3.00 grilli = oma asema (varras, juhla-ateria) + kelpaa nuotioksi
+function nearStations(){const s={};for(const p of pieces){const k=isFirePiece(p.t)?'nuotio':p.t;if(['tyopenkki','nuotio','ahjo','kalapoyta'].includes(k)&&dist2(p.x,p.z,P.pos.x,P.pos.z)<(k==='nuotio'?4:8)**2&&!P.inDun){if(k==='nuotio'&&p.data.fuel<=0)continue;s[k]=1;if(p.t==='grilli')s.grilli=1;if(p.t==='patanuotio'&&p.data.pot&&!p.data.spo&&fireLit(p))s.pata=1;}}return s;}   /* v3.02 pata: asennettu, ehjä, tuli palaa */   // v3.00 grilli = oma asema (varras, juhla-ateria) + kelpaa nuotioksi
 let fxAt=0;
 // Tilat repun vieressä: nimi, jäljellä oleva aika ja vaikutus (osoita hiirellä tai lue suoraan).
 function renderEffects(fxs){fxs=fxs||effects();$('#effects').innerHTML=`<h3>Tilat</h3>`+(fxs.length?fxs.map(e=>`<div class="fx ${e.kind}" title="${e.desc}"><b>${e.name}${e.t?' · '+fmtT(e.t):''}</b><span>${e.desc}</span></div>`).join(''):'<div class="s">Ei erityisiä tiloja.</div>');}
@@ -350,7 +350,7 @@ function renderInv(){initSearch();renderEffects();
     if(s.id==='soihtu'&&(s.fuel??torchMax(s))<torchMax(s)){const x=document.createElement('button');x.className='btn';x.textContent=`Lisää pihkaa (+${fmtMin(TORCH_FUEL.pihka)})`;x.disabled=invCount('pihka')<1;x.onclick=()=>{if(invCount('pihka')<1)return;invRemove('pihka',1);s.fuel=Math.min(torchMax(s),(s.fuel??0)+TORCH_FUEL.pihka);sfx('build');renderInv();};b.appendChild(x);}
     // Ammus: valinta tai automaattinen (heikoimmasta parhaaseen); valitun napin uusi painallus palauttaa automaattiseen
     if(AMMO.includes(s.id)){const sel=flags.ammo===s.id,x=document.createElement('button');x.className='btn'+(sel?' on':'');x.textContent=sel?'Valittu ammus (paina: automaattinen)':'Käytä ammuksena';x.title='Automaattinen: heikoimmasta parhaaseen';x.onclick=()=>{flags.ammo=sel?null:s.id;invDirty=true;renderInv();};b.appendChild(x);}
-    const dr=document.createElement('button');dr.className='btn';dr.textContent='Pudota (Q / Shift+Q)';dr.onclick=()=>{inv[selSlot]=null;if(s.eq){s.eq=false;}playerDrop(s.id,s.n,s.q);invDirty=true;updateGear();selSlot=-1;selEq=null;renderInv();};b.appendChild(dr);}
+    const dr=document.createElement('button');dr.className='btn';dr.textContent='Pudota (Q / Shift+Q)';dr.onclick=()=>{inv[selSlot]=null;if(s.eq){s.eq=false;}playerDrop(s.id,s.n,s.q,s);invDirty=true;updateGear();selSlot=-1;selEq=null;renderInv();};b.appendChild(dr);}
   // crafting
   const st=nearStations();
   $('#stationLine').textContent='Lähellä: '+(Object.keys(st).map(k=>STATION_NAME[k]).join(', ')||'ei työpisteitä')+'. Uusia ohjeita aukeaa, kun löydät uusia aineita.';
@@ -496,6 +496,7 @@ function itemProps(s,q){const d=ITEMS[s.id],o=[],f1=v=>v.toFixed(1).replace('.',
   if(AMMO_STATS[s.id]){const a=AMMO_STATS[s.id],r=v=>v===1?'normaali':(v>1?'+':'−')+Math.round(Math.abs(v-1)*100)+' %';
     o.push(['Lentonopeus',r(a.spd)],['Kaaren pudotus',r(a.grav)],['Vahinko',r(a.dmg)],['Tuulen vaikutus',a.wind<1?'puolet':'normaali']);if(a.fire)o.push(['Sytyttää','5–10 s, '+FIRE_DPS_M+' terveyttä/s (sade sammuttaa)']);}
   if(d.cat==='shovel')o.push(...(s.id==='kuokka'?[['Vasen','nostaa maata 0,3 m'],['Oikea','palauttaa maan värin ja kasvillisuuden']]:[['Vasen','kaivaa kuoppaa 0,3 m'],['Oikea','ruskea polku']]),['Kestävyyttä / käyttö','6']);
+  if(typeof tkProps==='function')tkProps(s,o);   // v3.14 vavan osat, siimat, koukut, kelat, kohot, viehteet ja pakki listana (tackle.js)
   // v2.98 pihkan keräys esinetiedoissa (resin.js)
   if(s.id==='puukko')o.push(['Pihkan keräys','kaiverra pihkapuuhun kuvio (E rungon vieressä, '+CARVE_T+' s)'],['Pihkapuut','männyt ja kuuset, joiden kuoressa näkyy hieman kellertävää pihkaa (n. 3 % puista)'],['Pihkaa / puu','10–50 puun koon mukaan, kertyy noin tunnissa'],['Kaiverrus ja valuma',q>1?'+'+Math.round((resinFlowK(q)-1)*100)+' % nopeampi (★'+q+')':'normaali (★2 +10 %, ★3 +20 %)']);
   if(s.id==='kulho')o.push(['Pihka','kiinnitä narulla kaiverrettuun pihkapuuhun (naru toisessa kädessä)'],['Vesi','täytä vedessä (vasen hiiri)']);
@@ -521,8 +522,9 @@ function openFound(key,title,loot){if(loot&&!fo('fc')[key]){loot=wlLoot(key,loot
     if(title!=='Tynnyri'&&title!=='Hylätty säkki')for(const id of POTIONS)if(Math.random()<.1&&loot.length<8)loot.push([id,1]);}
   const items=foundItems(key,loot);if(openPanel)closePanels(true);togglePanel('chest');curChest={found:true,title,data:{items}};sfx('pickup');plSnd('kaytto','arkku_auki');renderChest();}
 const foundEmpty=key=>{const it=fo('fc')[key];return !!it&&!it.some(Boolean);};
-function renderChest(){{const el=$('#chest');if(el&&curChest)el.dataset.st=curChest.grave?'hauta':curChest.found?'loyto':PIECES[curChest.t]&&PIECES[curChest.t].stone?'kivi':(curChest.t||'');}   /* v3.06 teemoitettu tausta avauspaikan mukaan */if(!curChest)return;const items=curChest.data.items;$('#chestTitle').textContent=curChest.found?curChest.title:PIECES[curChest.t].n+(curChest.data.lv?` (taso ${curChest.data.lv+1})`:'');
-  if(curChest.found)$('#chestUp').innerHTML='';else
+function renderChest(){{const el=$('#chest');if(el&&curChest)el.dataset.st=curChest.grave?'hauta':curChest.pakki?'pakki':curChest.found?'loyto':PIECES[curChest.t]&&PIECES[curChest.t].stone?'kivi':(curChest.t||'');}   /* v3.06 teemoitettu tausta avauspaikan mukaan */if(!curChest)return;const items=curChest.data.items;$('#chestTitle').textContent=curChest.found?curChest.title:PIECES[curChest.t].n+(curChest.data.lv?` (taso ${curChest.data.lv+1})`:'');
+  if(curChest.pakki&&typeof tkPakkiFilter==='function')tkPakkiFilter();   // v3.14 kalastuspakki: vain kalastustarvikkeet
+  if(curChest.found){$('#chestUp').innerHTML='';if(curChest.pakki&&typeof tkPakkiPanel==='function')tkPakkiPanel($('#chestUp'));}else
   upBtn($('#chestUp'),STORE_UP[(curChest.data.lv||0)+1],`Laajenna (taso ${(curChest.data.lv||0)+2})`,()=>{curChest.data.lv=(curChest.data.lv||0)+1;while(items.length<storeSlots(curChest))items.push(null);msg('Säilytystila kasvoi.','loot');},'chest',
     [['Paikkoja',storeSlots(curChest),storeSlots(curChest)+8]],renderChest,PIECES[curChest.t].n);
   if(curChest.grave&&!items.some(Boolean)){const g=curChest.grave;closePanels();if(graves.includes(g)){graveVanish(g);msg('Hautakasa on tyhjä.','loot');}return;}
@@ -604,7 +606,7 @@ addEventListener('mouseup',e=>{const d=slotDrag;slotDrag=null;if(!d||!d.on)retur
   if((sl||hb)&&d.half&&e.shiftKey){const da=sl?uxArr(sl.dataset.g):inv,di=sl?+sl.dataset.i:[...hb.parentNode.children].indexOf(hb);if(splitOpen(src,d.i,da,di,e.clientX,e.clientY))return;}
   if(sl){mv(src,d.i,uxArr(sl.dataset.g),+sl.dataset.i);}
   else if(hb){mv(src,d.i,inv,[...hb.parentNode.children].indexOf(hb));}
-  else if(pan&&!pan.contains(t)){const k=d.half?Math.floor(a.n/2):a.n;if(a.eq&&k>=a.n){a.eq=false;}playerDrop(a.id,k,a.q);a.n-=k;if(a.n<=0)src[d.i]=null;sfx('pickup',.8,.5);msg(`Pudotit: ${ITEMS[a.id].n}${k>1?' ×'+k:''}`);}
+  else if(pan&&!pan.contains(t)){const k=d.half?Math.floor(a.n/2):a.n;if(a.eq&&k>=a.n){a.eq=false;}playerDrop(a.id,k,a.q,a);a.n-=k;if(a.n<=0)src[d.i]=null;sfx('pickup',.8,.5);msg(`Pudotit: ${ITEMS[a.id].n}${k>1?' ×'+k:''}`);}
   else{uxRerender();updGhost();return;}
   selSlot=-1;selHalf=false;chestSel=null;invDirty=true;updateGear();uxRerender();updGhost();});
 addEventListener('click',e=>{if(dragEat){dragEat=false;e.stopPropagation();e.preventDefault();}},true);
@@ -615,18 +617,18 @@ addEventListener('contextmenu',e=>{if(dragEat){e.stopPropagation();e.preventDefa
 addEventListener('mousedown',e=>{if(!openPanel||state!=='ui'||performance.now()-panelOpenedAt<250||dragEat)return;const t=e.target;
   if(t.closest&&t.closest('.panel,#keyDlg,#hotbar,.dlg,#settings,#splitDlg'))return;   // v2.30: sliderin napit eivät sulje reppua
   const cs=chestSel||(selSlot>=0&&inv[selSlot]?{g:'i',i:selSlot,half:selHalf}:null);
-  if(cs){const arr=uxArr(cs.g),s=arr[cs.i];if(s){const n=cs.half?Math.max(1,Math.floor(s.n/2)):s.n;if(s.eq&&n>=s.n){s.eq=false;}playerDrop(s.id,n,s.q);s.n-=n;if(s.n<=0)arr[cs.i]=null;sfx('pickup',.8,.5);msg(`Pudotit: ${ITEMS[s.id].n}${n>1?' ×'+n:''}`);}
+  if(cs){const arr=uxArr(cs.g),s=arr[cs.i];if(s){const n=cs.half?Math.max(1,Math.floor(s.n/2)):s.n;if(s.eq&&n>=s.n){s.eq=false;}playerDrop(s.id,n,s.q,s);s.n-=n;if(s.n<=0)arr[cs.i]=null;sfx('pickup',.8,.5);msg(`Pudotit: ${ITEMS[s.id].n}${n>1?' ×'+n:''}`);}
     selSlot=-1;selHalf=false;selEq=null;chestSel=null;invDirty=true;updateGear();uxRerender();updGhost();return;}
   closePanels(false);});
 function dropAt(g,i,all){const arr=uxArr(g),s=arr[i];if(!s)return false;const n=all?s.n:1;if(s.eq&&(all||s.n<=1)){s.eq=false;updateGear();}
-  playerDrop(s.id,n,s.q);s.n-=n;if(s.n<=0){arr[i]=null;if(g==='i'&&selSlot===i)selSlot=-1;if(chestSel&&chestSel.g===g&&chestSel.i===i)chestSel=null;}
+  playerDrop(s.id,n,s.q,s);s.n-=n;if(s.n<=0){arr[i]=null;if(g==='i'&&selSlot===i)selSlot=-1;if(chestSel&&chestSel.g===g&&chestSel.i===i)chestSel=null;}
   sfx('pickup',.8,.5);invDirty=true;uxRerender();updGhost();return true;}
 // v1.57: pikapaikan pudotus pelissä (Q yksi, Shift+Q koko pino)
 function dropHot(all){const s=inv[hotSel];if(!s){msg('Pikapaikka on tyhjä.');return;}const n=all?s.n:1;if(s.eq&&(all||s.n<=1)){s.eq=false;updateGear();}
-  playerDrop(s.id,n,s.q);s.n-=n;if(s.n<=0)inv[hotSel]=null;sfx('pickup',.8,.5);invDirty=true;}
+  playerDrop(s.id,n,s.q,s);s.n-=n;if(s.n<=0)inv[hotSel]=null;sfx('pickup',.8,.5);invDirty=true;}
 // Valitun esineen pudotus (Q yksi, Shift+Q kaikki).
 function dropSel(all){const s=inv[selSlot];if(!s)return;const n=all?s.n:1;if(s.eq&&(all||s.n<=1)){s.eq=false;updateGear();}
-  playerDrop(s.id,n,s.q);s.n-=n;if(s.n<=0){inv[selSlot]=null;selSlot=-1;selEq=null;}sfx('pickup',.8,.5);invDirty=true;renderInv();}
+  playerDrop(s.id,n,s.q,s);s.n-=n;if(s.n<=0){inv[selSlot]=null;selSlot=-1;selEq=null;}sfx('pickup',.8,.5);invDirty=true;renderInv();}
 
 /* ---------------- MAP ---------------- */
 const MAPW=HALF*2,MAPC=document.createElement('canvas');MAPC.width=MAPC.height=MAPW;

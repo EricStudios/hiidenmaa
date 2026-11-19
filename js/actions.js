@@ -9,6 +9,7 @@ function onPrimary(){
   if(P.dead||P.stagger>0)return;
   const w=curWeapon();
   if(w.cat==='bowl'){bowlUse();return;}   // v2.91 kulho / vesikulho
+  if(typeof tkPrimary==='function'&&tkPrimary(w))return;   // v3.14 kalastuspakki: lasku maahan/pöydälle ja nosto (tackle.js)
   if(w.cat==='rod'){fishClick();return;}   // v3.06 onki (fish.js)
   if(w.cat==='hammer'){placeBuild();return;}
   if(w.cat==='shovel'){useTool(false);return;}
@@ -264,7 +265,7 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   case 'patanuotio':return potLabel(p);   // v3.02
   case 'vedenkeraaja':return waterLabel(p);   // v3.06
   case 'pelto':case 'kohopenkki':return fieldLabel(p);   // v3.06 farm.js, v3.07 kohopenkki
-  case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':return nauLabel(p);   // v3.06 fish.js
+  case 'kalapoyta':return tkTableLabel(p);case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':return nauLabel(p);   // v3.06 fish.js
   case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),p)} – lisää`;
   case 'sanky':return isNight()?'Nuku':'Aseta herätyspaikka';
   case 'arkku':return 'Avaa arkku';
@@ -275,7 +276,7 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   default:return null;}}
 const E_ANIM_T=.42;   // v3.06 E-toiminnon käsiliike (player.js)
 function interact(){if(P.insp)inspectStop();
-  if(P.dead)return;const t=lookTarget;if(!t){resinNoTarget();return;}P.eT=playTime;
+  if(P.dead)return;const t=lookTarget;if(!t){if(typeof tkNoTarget==='function'&&tkNoTarget())return;resinNoTarget();return;}   /* v3.14 mato koukkuun vapa kädessä */P.eT=playTime;
   if(t.kind==='resin'){resinInteract(t.n);return;}   // v2.91
   if(t.kind==='care'){careInteract(t);return;}   // v3.08 farm.js
   if(t.kind==='node'){const n=t.n,d=n.def,own=n.planted&&CROP_SEED[n.type];const c=own?GROUND_YIELD:rint(rng,d.n[0],d.n[1]);   /* v3.07 maahan istutettu: 2 + siemen (siemen vasta onnistuneen poiminnan jälkeen) */const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);if(own)giveOrDrop(CROP_SEED[n.type],1,n.x,n.y+.5,n.z);return;}
@@ -290,7 +291,7 @@ function interact(){if(P.insp)inspectStop();
     case 'patanuotio':potOpen(p);break;   // v3.02 keittopadan ikkuna
     case 'vedenkeraaja':waterInteract(p);break;   // v3.06
     case 'pelto':case 'kohopenkki':fieldInteract(p);break;   // v3.06 farm.js, v3.07 kohopenkki
-    case 'katiska':katInteract(p);break;case 'savustin':savInteract(p);break;case 'kalanaulakko':nauInteract(p);break;   // v3.06 fish.js
+    case 'kalapoyta':tkTableOpen(p);break;case 'katiska':katInteract(p);break;case 'savustin':savInteract(p);break;case 'kalanaulakko':nauInteract(p);break;   // v3.06 fish.js
     case 'seinasoihtu':case 'soihtuteline':case 'kivisoihtu':torchFuelAdd(p);break;   // v2.91
     case 'sanky':sleepAt(p);break;
     case 'arkku':case 'tynnyri':openChest(p);break;

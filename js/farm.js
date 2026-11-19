@@ -125,7 +125,7 @@ const CARE_MAT={wet:null,rich:null,worm:null,grass:null};
 function careMats(){if(!CARE_MAT.wet){CARE_MAT.wet=mat(0x24180e,{roughness:.35,metalness:.05});CARE_MAT.rich=mat(0x2a1d12,{roughness:1});CARE_MAT.worm=mat(0xc07a78,{roughness:.6});CARE_MAT.grass=mat(0x5f9a3c);}return CARE_MAT;}
 function careDeco(g,c,W,y,seed,ox=0,oz=0){if(!c||!(c.w||c.pw||c.pm))return;const M=careMats(),own=m=>{m.userData.own=1;return m;};
   if(c.pw||c.w){const d=own(new THREE.Mesh(new THREE.BoxGeometry(W*.92,.012,W*.92),c.w?M.wet:M.rich));d.position.set(ox,y+.006,oz);g.add(d);}
-  if(c.pm){const r=mulberry32(seed|0);for(let i=0;i<Math.max(3,Math.round(W*5));i++){const w=own(new THREE.Mesh(new THREE.TorusGeometry(.04,.011,5,9,Math.PI*1.1),M.worm));
+  if(c.pm){const r=mulberry32(seed|0);for(let i=0;i<Math.max(3,Math.round(W*5));i++){const w=typeof tkWormMesh==='function'?own(tkWormMesh(.07+r()*.04,(seed|0)+i*13,true)):own(new THREE.Mesh(new THREE.TorusGeometry(.04,.011,5,9,Math.PI*1.1),M.worm));   /* v3.14 kaarevat madot, osin mullan sisällä */
       w.position.set(ox+(r()-.5)*W*.8,y+.004,oz+(r()-.5)*W*.8);w.rotation.y=r()*TAU;g.add(w);}}
   if(c.pw&&c.pm){const r=mulberry32((seed|0)+77),n=Math.max(6,Math.round(W*8));for(let i=0;i<n;i++){const e=r()*4|0,t=(r()-.5)*W*.88,h=W*.44,x=e<2?t:(e===2?h:-h),z=e<2?(e===0?h:-h):t;
       for(let k=0;k<3;k++){const hh=.14+r()*.1,b=own(new THREE.Mesh(new THREE.ConeGeometry(.022,hh,4),M.grass));b.position.set(ox+x+(k-1)*.03,y+hh/2,oz+z+(r()-.5)*.04);b.rotation.set((r()-.5)*.6,r()*3,(r()-.5)*.6);g.add(b);}}}}

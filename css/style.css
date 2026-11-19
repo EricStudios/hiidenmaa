@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.13';
+:root{--css-v:'3.14';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1064,7 +1064,7 @@ body.noActH #prompt{display:none!important}
 #menu .world .wTag.cur{background:#f0b45a;color:#2a1a0c;box-shadow:0 0 10px rgba(240,180,90,.45)}
 #menu .world .wTag.last{background:rgba(232,200,150,.16);color:#e8d4b0;border:1px solid rgba(232,200,150,.35)}
 /* v3.10 Ohjaus › Ammattilaisille ja vertailuun: harmaa ja läpikuultava */
-.proSec{margin-top:26px;opacity:.5;filter:grayscale(1);transition:opacity .2s}.proSec:hover{opacity:.8}
+.proSec{margin-top:26px;opacity:.5;filter:grayscale(1);transition:opacity .2s}.proSec:hover{opacity:.8} .proSec.soft{margin-top:14px}   /* v3.14 intron kevennykset harmaina */
 /* v3.13 maailmat: 6 paikkaa kiinteänä 3 × 2 -ruudukkona (ei vieritystä), pito-palkit, kopiointi-ilmoitus */
 @media (min-width:701px){#menu[data-view="worlds"] .mvBody{overflow:hidden;padding-top:12px;padding-bottom:14px}
   #menu .worlds{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
@@ -1076,3 +1076,35 @@ body.noActH #prompt{display:none!important}
 #menu .world .wToast{position:absolute;left:50%;bottom:58px;transform:translate(-50%,6px);padding:5px 12px;border-radius:12px;background:rgba(30,20,10,.92);border:1px solid #e8a44a;color:#ffe3b0;font:700 12px var(--font-b);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:4}
 #menu .world .wToast.on{opacity:1;transform:translate(-50%,0)}#menu .world .wToast.bad{border-color:#c0583a;color:#ffb09a}
 #keyDlgB .btn.big{padding:12px 34px;font-size:17px;min-width:150px}
+
+/* v3.14 Kalastajan pöytä, pakki, wow-ilmoitus (tackle.js) */
+#tkP{max-width:min(1180px,calc(100vw - 32px));width:1180px;background:linear-gradient(180deg,rgba(60,90,110,.14),transparent 45%),var(--panel)}
+#tkBody{display:grid;grid-template-columns:1.25fr 1fr .9fr;gap:14px;align-items:start}
+@media (max-width:900px){#tkBody{grid-template-columns:1fr}}
+#tkBody .ic{display:inline-block;width:26px;height:26px;background-size:contain;background-repeat:no-repeat;vertical-align:middle;flex:none}
+#tkBody .ic.q{background:none;text-align:center;color:var(--dim);line-height:26px}
+.tkRods{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.tkRod{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--fg);cursor:pointer;font:inherit}
+.tkRod small{color:var(--dim);margin-left:4px} .tkRod.on{border-color:#a9d8f2;box-shadow:0 0 0 1px #a9d8f2 inset}
+.tkSlots{display:flex;flex-direction:column;gap:6px}
+.tkSlot{background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+.tkCur{display:flex;align-items:center;gap:8px} .tkCur small{display:block;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em} .tkCur b i{font-style:normal;color:#d8b040;font-weight:600}
+.tkCur .btn.sm{margin-left:auto;padding:2px 8px;font-size:12px}
+.tkAv{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tkPart{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:3px;padding:2px 6px 2px 2px;color:var(--fg);font:inherit;font-size:12px;cursor:pointer}
+.tkPart:hover{border-color:#a9d8f2} .tkPart.cur{border-color:#d8b040;opacity:.65} .tkPart small{color:var(--dim)}
+.tkProps{width:100%;border-collapse:collapse;font-size:13px} .tkProps td{padding:3px 6px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top} .tkProps td:first-child{color:var(--dim);white-space:nowrap}
+.tkCombos{margin-top:8px;font-size:12.5px} .tkCombos summary{cursor:pointer;color:#a9d8f2} .tkCombos li{margin:3px 0}
+.tkR h3{margin-top:4px} .tkR .btn{margin:3px 0}
+.tkField{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0} .tkField .note{flex-basis:100%;margin:0}
+#chest[data-st="pakki"]{background:linear-gradient(180deg,rgba(60,90,110,.16),transparent 45%),var(--panel)}
+#fishHud.tkHint{opacity:.62;font-size:12px}
+#tkWow{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:60;text-align:center;pointer-events:none;padding:18px 34px 16px;border-radius:6px;
+  background:radial-gradient(ellipse at center,rgba(20,40,52,.92),rgba(12,18,22,.82));border:1px solid #6aa8c8;box-shadow:0 0 40px rgba(95,200,230,.35);animation:tkWowIn .9s cubic-bezier(.2,1.4,.4,1) both;max-width:calc(100vw - 32px)}
+#tkWow .tw1{font:400 34px 'Uncial Antiqua',serif;color:#e8f4fa;text-shadow:0 0 18px rgba(130,210,240,.8)}
+#tkWow .tw2{font-size:14px;color:#cfe0e8;margin:8px 0 10px;line-height:1.45}
+#tkWow .tw3{font:400 24px 'Uncial Antiqua',serif;color:#ffd24a;text-shadow:0 0 14px rgba(255,190,60,.8);animation:tkWowGlow 1.4s ease-in-out infinite alternate}
+#tkWow.out{animation:tkWowOut 1.2s ease forwards}
+@keyframes tkWowIn{0%{opacity:0;transform:translateX(-50%) scale(.6)}100%{opacity:1;transform:translateX(-50%) scale(1)}}
+@keyframes tkWowOut{to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
+@keyframes tkWowGlow{from{text-shadow:0 0 8px rgba(255,190,60,.5)}to{text-shadow:0 0 22px rgba(255,210,90,1)}}

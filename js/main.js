@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.13';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.14';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -299,7 +299,7 @@ function update(dt){
   playTime+=dt;if(!lkT){dayT+=td/DAY_LEN;if(dayT>=1){dayT-=1;dayN++;msg(`Päivä ${dayN}`);}}
   const wasNight=isNight();
   updatePlayer(dt);updateEffects(dt);updateDungeons(dt);updateStory(dt);
-  if(!fz){updateMobs(dt);creTick(dt);updateProjs(dt);updateDrops(dt);updateFx(dt);updateStations(td);doorTick(dt);spawner(dt);survival(td);resinTick(dt,td);fishTick(dt);}   /* v3.06 onkiminen (fish.js) */
+  if(!fz){updateMobs(dt);creTick(dt);updateProjs(dt);updateDrops(dt);updateFx(dt);updateStations(td);doorTick(dt);spawner(dt);survival(td);resinTick(dt,td);fishTick(dt);tkTick(dt);}   /* v3.06 onkiminen (fish.js) */
   if(!lkT){if(td>dt)weather.until-=td-dt;updateWeather();}else weather.until=Math.max(weather.until,playTime+1);
   updateEnvironment(dt);updateCamera(dt);updateBenchRings();updateChunkVis();updateGrass();
   if(state==='play'){lookTarget=findInteract();updateGhost();}else if(ghost)ghost.visible=false;

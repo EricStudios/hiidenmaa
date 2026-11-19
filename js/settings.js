@@ -296,9 +296,9 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       setRow('Kaukaiset puut kevyemmin','treeLod',[[0,'Pois'],[140,'Vain hyvin kaukana (140 m)'],[120,'Kaukana (120 m)'],[100,'Normaali kaukana (100 m)'],[80,'Normaali (80 m)'],[70,'Lähempänä (70 m)'],[60,'Lähellä (60 m)']],'koivut, männyt ja aarnipuut ilman ohuita oksia ja rungon taivutusjakoja – muoto ja värit samat')+
       setRow('Varjojen optimointi','shOpt',null,'varjoon piirretään vain varjoalueen puut ja kivet (ei koko ruutuja); maaston taakse jäävien varjot pois – ulkoasu sama')+
       setRow('Yksinkertaiset varjot alkaen','shLod',[[0,'Pois (kaikki tarkat)'],[90,'Kaukana (90 m)'],[70,'70 m'],[55,'55 m'],[45,'45 m'],[40,'Normaali (40 m)'],[30,'30 m'],[25,'Lähellä (25 m)']],'kauempana puiden varjot yksinkertaisemmista malleista')+
-      `<h4 class="setSub">Intro (kevennykset – eivät kuulu esiasetuksiin)</h4>`+
+      `</div><div class="proSec soft"><h4 class="setSub">Intro (kevennykset – eivät kuulu esiasetuksiin)</h4><div class="setGrid">`+   /* v3.14 käyttäjä: harmaana kuten Ammattilaisille-osio (ei oleellinen) */
       setRow('Käytä 2D-pilviä intron alussa','intro2d',null,'uuden maailman alussa kevyt 2D-pilviverho 3D-pilvien sijaan')+
-      setRow('Intron usva ja pilvikerrokset pois','introPlain',null,'ei pilvimattoa piirtorajan päällä, ei usvakerroksia syöksyssä eikä rajan sumua – yksinkertaisin ja kevein intro')
+      setRow('Intron usva ja pilvikerrokset pois','introPlain',null,'ei pilvimattoa piirtorajan päällä, ei usvakerroksia syöksyssä eikä rajan sumua – yksinkertaisin ja kevein intro')+'</div></div><div class="setGrid">'
     }</div><p class="note">Vaaleana näkyvä valinta on oletus. Asetukset tulevat voimaan heti ja tallentuvat selaimeen.</p>`+resetBtn;
     bindSet(SET_PAGES.gfx);$('#bPageReset').onclick=()=>resetPage('gfx');
     if(shUltraOn())for(const k of SHU_OVR){const el=$('#s_'+k),r=el&&el.closest('.setRow');if(!r)continue;r.classList.add('ovr');if(el.tagName==='SELECT')el.disabled=true;const n=r.querySelector('.note');if(n)n.textContent='ohitettu: erittäin tarkat varjot päällä';}   // v1.80

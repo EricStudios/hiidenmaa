@@ -471,7 +471,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('v2.70 tasopalkinnot (HP 3/5/10/15/20, kestävyys 4/8/12/16, muuten kantokyky +5) ja reseptit aiemmin',()=>{const B=lvlBon(20),b5=lvlBon(5);
     const a=B.hp===70&&B.stam===20&&B.w===45&&b5.hp===20&&b5.stam===5&&b5.w===18&&lvlBon(1).hp===0;   /* v3.06 kantokyky uudelleen (60 → 200) */
     const R={jousi:2,puunuolet:2,miekka:3,kuparihakku:3,kuparipanssari:4,rautakirves:5,rautamiekka:6,rautapanssari:7,hiidenjousi:10,hiidenmiekka:12,hiidenpanssari:14};
-    const c=Object.entries(R).every(([k,v])=>RECIPE_BY[k].lvl===v)&&Math.max(...RECIPES.filter(r=>!ITEMS[r.id].rare&&!/^hiiden/.test(r.id)&&r.st!=='pata'&&r.id!=='keittopata').map(r=>r.lvl||1))<=7;   // v3.02 keittopata ja pataruoat tasoilla 10–13
+    const c=Object.entries(R).every(([k,v])=>RECIPE_BY[k].lvl===v)&&Math.max(...RECIPES.filter(r=>!ITEMS[r.id].rare&&ITEMS[r.id].rar!=='rare'&&!/^hiiden/.test(r.id)&&r.st!=='pata'&&r.id!=='keittopata').map(r=>r.lvl||1))<=7;   // v3.02 keittopata ja pataruoat tasoilla 10–13
     const d=/Taso 20/.test(lvlUnlockRows())&&/lvlBon/.test(String(maxStam))&&/lvlBon/.test(String(recalcMaxW));
     return a&&c&&d||`virhe ${a}${c}${d}`;});
   t('v2.71 opastus: oma pysäytys (ei DEV freeze), vaiheet näppäimillä, ohitus varmistaa, liikkuminen viimeisenä, valinta uudessa maailmassa ja asetuksissa, kertavinkit',()=>{
@@ -592,6 +592,22 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.14: kalastusvarusteet – vavan osat (4 siimaa, 3 koukkua, 2 kelaa + ei, 3 kohoa, 9 viehettä, 8 yhdistelmää), virveli, kuluminen, mato E:llä, kalastuspakki, Kalastajan pöytä + perkaus, 3D-kala, wow, intron kevennykset harmaina',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('osat',Object.keys(TK_LINE).length===4&&Object.keys(TK_HOOK).length===3&&Object.keys(TK_REEL).length===2&&Object.keys(TK_FLOAT).length===3&&Object.keys(TK_LURE).length===9&&TK_COMBOS.length===8&&TK_COMBOS.every(c=>Object.values(c.need).every(v=>v.every(x=>x===0||ITEMS[x]))));
+    ck('reseptit',[...Object.keys(TK_LINE),...Object.keys(TK_HOOK),...Object.keys(TK_REEL),...Object.keys(TK_FLOAT),...Object.keys(TK_LURE),'kalapakki'].every(id=>RECIPE_BY[id]&&RECIPE_BY[id].st==='kalapoyta')&&STATION_NAME.kalapoyta&&/kalapoyta/.test(nearStations.toString()));
+    const s={id:'hiidenvapa',n:1};const A=rigStats(s);ck('oletus',s.rig.line==='pellavasiima'&&!A.spin&&A.big===.2&&A.cast[1]===FISH_CAST[1]);
+    s.rig.reel='hiisikela';s.rig.lure='hiidenhohtoviehe';s.rig.line='hiidensiima';const B=rigStats(s);ck('virveli',B.spin&&B.cast[0]===6&&B.cast[1]===30&&B.combo&&B.combo.id==='hiisi'&&rodName(s)==='Virveli'&&B.k>A.k);
+    ck('viehe pikkukaloille',tkSpK('muikku',B,{type:'lake'})<.5&&tkSpK('made',B,{type:'lake'})>2);
+    ck('kytkennät',/rigStats/.test(rodDef.toString())&&/tkSpinTick/.test(fishTick.toString())&&/tkSnapCheck/.test(fishHook.toString())&&/tkWear/.test(fishLand.toString())&&/tkDangle/.test(fishLand.toString())&&/rig\.bait/.test(fishCast.toString())&&!/invRemove\('mato'/.test(fishCast.toString()));
+    ck('mato E',/tkNoTarget/.test(interact.toString())&&typeof tkNoTarget==='function');
+    ck('pakki',ITEMS.kalapakki.w===20&&PAKKI_SLOTS.join()==='12,16,20,24'&&/s\.box/.test(invWeight.toString())&&/tkPakkiDrop/.test(playerDrop.toString())&&tkPakkiOk('kuparilusikka')&&!tkPakkiOk('kivi')&&!tkPakkiOk('kalapakki')&&/tkPrimary/.test(onPrimary.toString())&&/tkPakkiFilter/.test(renderChest.toString()));
+    ck('pöytä',PIECES.kalapoyta&&PIECES.kalapoyta.cat==='viljely'&&PIECES.kalapoyta.lvl===3&&PIECES.kalapoyta.req.puu===6&&PIECES.kalapoyta.req.naru===2&&/kalapoyta/.test(serialize.toString())&&!!$('#tkP')&&typeof tkGut==='function');
+    ck('3D',typeof tkFishMesh==='function'&&tkFishMesh('hauki',.5).isGroup&&typeof tkWormMesh==='function'&&/tkWormMesh/.test(careDeco.toString())&&/tkDressRod/.test(updateGear.toString()));
+    ck('kentällä',TK_FIELD_LINE===30&&/ikuisuuden/.test(tkFieldLine.toString()));ck('wow',/Kireitä siimoja/.test(tkWowTick.toString()));
+    ck('ominaisuudet',/tkProps/.test(itemProps.toString())&&tkPropsList(s).length>8&&tkLureList(TK_LURE.kuparilusikka).length===3);
+    ck('intro harmaana',(()=>{const t0=setTab;try{setTab='gfx';renderSettings();const el=document.getElementById('s_introPlain');return !!el&&!!el.closest('.proSec');}finally{setTab=t0;renderSettings();}})());
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.13: 6 maailmaa, Uusi maailma pito/varmistus, kortin tuplaklikkaus ja koodin kopiointi, pelaajan äänet mono, Käynnissä-tila aito (kuolema), syöksy + usvakerrokset, intro-kevennykset, suolammet',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     ck('6 paikkaa',SLOTS===6&&slotMeta().length===6);

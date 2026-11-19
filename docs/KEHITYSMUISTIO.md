@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.13, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.14, 19.11.2026)
 
 - **⏯️ KESKEN: KALASTUSPÄIVITYS v3.14–v3.16 (käyttäjä 19.11., kaikki samaan PR #49:ään, ei yhdistetty)** – jos keskeytyy, jatka tästä. Kaikki kysymykset kysytty (15 + 10 varmistusta + 10 mielipidettä).
   - **v3.14 VARUSTEET:** onki kootaan osista **Kalastajan pöydällä** (uusi rakennus, Viljely ja kalastus, taso 3, puu 6 + naru 2; perkuulauta + työkalut + paikka pakille):
@@ -365,6 +365,9 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.14:** siimat ten 1/1,25/1,55/1,9, kesto 12/25/45/80, näkyvyys 1/1,06/1,12/1,18 · koukut isku 0,65/0,75/0,88 · kelat 22/30 m, 1,4/1,8 m/s · virveli hazard /70 s,
+pohjaan 0,05 %/s (< 0,9 m) · iskukatko 0,6 % × (1,6 − kunto) · runko big 0/0,1/0,2 · pakki 12/16/20/24, paino 20 · kenttävaihto 30 s · filee 1/2/3 · dangle 3 s.
+
 **v3.13:** maailmoja 6 · Uusi maailma pito 0,6 s · koodin kopiointi 1 s · syöksy 2,6 s · usvakerrokset 78/46/24 m · suolampi < 200 ruutua, soisen järven suokalat 0,6× ·
 kalastus (simulaatio, taitava pelaaja): onki ~16–19 kalaa/h, madoilla ~21–23/h, hiidenvapa + madot ~29–38/h.
 
@@ -439,6 +442,37 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.14 (KALASTUSVARUSTEET – käyttäjä 19.11., uusi tiedosto `js/tackle.js`)
+- **Vapa kootaan osista** Kalastajan pöydällä (`kalapoyta`, Viljely ja kalastus, taso 3, puu 6 + naru 2; perkuulauta, puukko, koukkuteline, siimakelat, pakkipaikka). Osat ovat
+  esineitä (`ITEMS[id].tk`), vavan tila `s.rig` = {line, lw, hook, reel, float, lure, bait}; puuttuva = `TK_RIG0` (pellava + pieni koukku + puukoho) → vanhat vavat toimivat.
+  Arvot `rigStats(s)` → `FS.rod` (fish.js `rodDef`). Runko: onki / kuparivapa / hiidenvapa = isot kalat +0/+10/+20 % keskipaino (kg × (1 + big), enintään lajin max),
+  isot lajit ×1/1,1/1,2, tärppiväli ×1/0,95/0,9, siima ×1/1,1/1,2.
+- **Siimat** (`TK_LINE`): pellava / jänne / punottu / hiidensiima = kestävyys ×1 / 1,25 / 1,55 / 1,9, kesto 12 / 25 / 45 / 80 kalaa, näkyvyys (tärppi harvemmin) ×1 / 1,06 / 1,12 / 1,18.
+  Kuluminen (`tkWear`): heitto 0,25, kala 1 (iso 1,5), roska 0,5 yksikköä; loppuun kulunut siima katkeaa. Iskussa satunnainen katkeaminen 0,6 % × (1,6 − kunto) (`tkSnapCheck`).
+  Väsytyksessä katkeava siima lyhenee 30 % ja vie vieheen (`tkLineBreak`).
+- **Koukut** (`TK_HOOK`): pieni (isot ×0,85, pikkukalat ×1,2, isku 65 %), iso (isot ×1,3, pikkukalat ×0,7, 75 %), väkä (isot ×1,05, 88 %, syötti pysyy ×0,45, kala ei irtoa 120 s jälkeen).
+- **Kelat** (`TK_REEL`): kupari (heitto 22 m, kelaus 1,4 m/s, väsytys +15 %), hiisi (30 m, 1,8 m/s, +30 %, jännitys −15 %). Kela tekee vavasta **virvelin** (nimi `rodName`).
+  Virveli ilman viehettä = koho + mato, heitto 3–(0,8 × kelan matka) m.
+- **Kohot** (`TK_FLOAT`): puu, korkki (ikkuna +0,15 s, syötti ×0,8), hehku (ikkuna +0,05 s, yöllä +0,35 s, hohtaa).
+- **Viehteet** (`TK_LURE`, 9): kuparilusikka, rautapilkki, puuvaappu, hiidenhohtoviehe, Pohjolan lusikka (käyttäjän "kuusamolainen", yleisnimi), välkelippa, verilusikka, pintavaappu,
+  nahkajigi. Kullakin vesi/aika/sää/valo-kertoimet (`lureCond`, valo `tkBright`), parhaat kalat ×2,2, pikkukalat ×0,3 (`tkSpK`). Eivät kulu.
+- **Virvelin fysiikka** (`tkSpinTick`, FS.st `spin`): heitto 6–22/30 m, vasen pohjassa kelaa (viehe lähestyy), tärppi kelatessa: hazard = aktiivisuus × lajisopivuus × `lureCond`
+  / (70 s × k), isku tarttuu koukun todennäköisyydellä, muuten "kävi vieheessä". Matalassa (< 0,9 m) viehe tarttuu pohjaan 0,05 %/s (jigi 2×, pintavaappu ei) → viehe + siima menetetään.
+- **Yhdistelmät** (`TK_COMBOS`, 8): Perinneonki, Yön vartija, Suonkulkija, Haukimiehen virveli, Merikarhu, Kuparikuningas, Lohiretki, Hiiden valta (pieni etu, näkyy ominaisuuksissa).
+- **Ominaisuudet listana** (repun tietopaneeli `tkProps`, pöydän keskiosa `tkPropsList`, viehteet: vahvuudet / heikkoudet / parhaat kalat `tkLureList`).
+- **Mato:** vapa kädessä E (kun ei muuta E-kohdetta, `tkNoTarget`) laittaa madon koukkuun (`rig.bait`), ei enää automaattisesti repusta; mato näkyy koukussa. HUD-vihje "E: mato koukkuun".
+- **Kalastuspakki** (`kalapakki`, vasen käsi, paino 20 + sisältö, `invWeight`): 12 paikkaa → 16/20/24 päivityksin pöydällä (`PAKKI_UP`), väri/helat/koko tason mukaan
+  (`tkPakkiMesh`), vain kalastustarvikkeet (`tkPakkiOk`, `tkPakkiFilter`), vain yksi mukana. Vasen klikkaus laskee maahan (enintään 3,6 m, ei veteen, `flags.pakit`) tai
+  pöydän pakkipaikalle (`p.data.pk`, sen osat käytössä pöydällä); maassa E avaa (arkkuikkuna, `curChest.pakki`), vasen nostaa käteen (`tkPrimary`). Pudotus (Q) laskee pakin maahan.
+- **Siiman vaihto kentällä** pakin ikkunasta: 30 s (`TKA`, pysy paikallasi; "ilman pöytää tämä kestää ikuisuuden"). Pöydällä kaikki vaihdot heti.
+- **Perkaus** pöydällä (`tkGut`): kala → fileet (pieni 1, keskikokoinen 2, iso 3) + perkeet 1. Filee paistetaan (`filepaisti` 22 ravintoa). Perkeet = katiskan syötti (2 matoa).
+- **3D:** kala sätkii koukussa 3 s noston jälkeen (`tkDangle`, malli `tkFishMesh` FISH_SHAPE/FISH_DEF-väreistä), vavan kela/siiman väri/koho/viehe/mato näkyvät (`tkDressRod`,
+  `heldKey` state.js), kaareva rengastettu mato (`tkWormMesh`) kädessä, koukussa ja viljelylaatikon mullassa (osin mullan sisällä). Kuvakkeet `tkIcon`.
+- **Ensimmäinen onki:** wow-ilmoitus `#tkWow`, lopussa kultaisella "Kireitä siimoja!" (vain jos et ole vielä kalastanut).
+- **Äänet:** ensimmäinen `sounds2/`-projekti `sounds2/kalastus/` (11 paikkamerkkiä + AANILISTA.md); `tkSnd` → `plSnd('kalastus', …)`, varaäänet vanhoista kunnes käsittely tehdään.
+- **Muuta:** Grafiikka › Intro -asetukset harmaina kuten Ammattilaisille-osio (käyttäjä). Esineen lisätiedot säilyvät pudotettaessa (`d.ex`, `invAddEx`).
+- **Testi:** virveli + kuparilusikka järvellä 1 h: 23 kalaa, 257 heittoa, 17 iskua ohi; tarttumiset pohjaan säädetty harvinaisiksi (0,25 → 0,05 %/s). Tarkistus: v3.14-rivi.
 
 ### v3.13 (maailmat, äänet, Käynnissä-tila, intro, kalastussimulaatio – EARLY ACCESS 1.2, käyttäjän pyyntö)
 - **Maailmat:** 6 paikkaa (`SLOTS` 6, uusi avain `hiidenmaa_save_v1_5`), kiinteä 3 × 2 -asettelu ilman vieritystä (≥ 701 px leveä). **Uusi maailma:** napsautus = varmistus isolla
