@@ -886,6 +886,10 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.26 – lammet ja haku
+- Kaikki kartan lammet ovat nimettyjä kalastusvesiä (myös pienet ja matalat). DEV-valikon kartan paljastus näyttää kaikkien vesien nimet.
+- DEV-valikon esinehaku löytää yleissanoilla (esim. ase, kala, keitto) ja kategoriapainikkeilla, kuten repun ja rakennusvalikon haku.
+
 ## v3.25 – optimointi ja korjaukset
 - Latauksen aikana näppäily ei tee mitään eikä anna virhettä.
 - Intron usvapilvet liikkuvat koko ajan hiljaa kulkusuuntaansa.

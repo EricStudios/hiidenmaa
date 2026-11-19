@@ -592,6 +592,13 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.26: kaikki lammet nimetty (vanhat tunnukset ennallaan, lammet p*), DEV-kartan paljastus näyttää kaikki vedet, DEV-esinehaku yleissanoilla ja kategorioilla',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('lammet',WB_POND_MIN>=1&&WB_POND_D<0&&WBS.filter(w=>w.pond).every(w=>/^p\d+$/.test(w.id)&&/lampi$/.test(w.name))&&WBS.filter(w=>!w.pond).every(w=>/^[ws]\d+$/.test(w.id)));
+    {const F=fishF(),o=JSON.stringify(F.wb);try{devRevealMap();ck('paljastus',WBS.every(w=>F.wb[w.id]));}finally{F.wb=JSON.parse(o);}}
+    ck('kategoria',typeof itemCat==='function'&&itemCat('hauki')==='kalastus'&&itemCat('kirves')==='tyokalut'&&DEV_ICATS.length>=8&&srchTag('i','hauki','kala'));
+    ck('dev-haku',/srchTag\('i'/.test(renderDevI.toString())&&/devCat/.test(renderDevI.toString()));
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.25: syöte vasta kun peli ladattu (ei openPanel-virhettä), intron usva liikkuu koko ajan, osoitin sulava (3D harvemmin paneelin takana), ruohon sektorit + Ultra-LOD −30 % + rakennus ruuduille, sprite-esilataus, käden pehmeä irrotus, ihmisäänet −20 %, hengästys loppuu veden alla/kuollessa, vesistön nimi ei toistu valikosta palatessa',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     ck('syöte',typeof inReady==='function'&&inReady()&&/inReady\(\)/.test(vcSync.toString()));
