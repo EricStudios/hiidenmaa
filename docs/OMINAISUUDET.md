@@ -848,7 +848,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Teemoitetut valikot:** tausta työpisteen/säilytyksen mukaan.
 - **Routaluola:** jäälätäköt käytävissä – pelaaja ja olennot liukuvat.
 - **Onkiminen:** vedet nimetty kalalajin mukaan (kartta + rannalla); vavat onki (työpenkki), kuparivapa (ahjo, t5), hiidenvapa (3 sirua, t9); mato 2 % maanmuokkauksesta;
-  tärppi 1–5 min, vasen 0,6 s:ssa, iso kala väsytetään; 18 lajia (v3.08; järvi: ahven, hauki, lahna, kuha, made, muikku, särki, kiiski, toutain; meri: silakka, turska, lohi,
+  tärppi 1–5 min, vasen 0,6 s:ssa, iso kala väsytetään; 18 lajia (v3.08; v3.13 suolammet korjattu; järvi: ahven, hauki, lahna, kuha, made, muikku, särki, kiiski, toutain; meri: silakka, turska, lohi,
   siika, kampela, meritaimen; suolampi: ruutana, suonsilmä, suutari), aika ja sää vaikuttavat;
   kalat paistetaan nuotiolla/grillillä, savustimessa savukala, padassa keitot; katiska veteen, kalanaulakko seinään; muut saaliit (saapas, pulloposti, ruostunut avain → upponut arkku,
   hiidenkiven siru, rauta- ja kupariharkko); Kalastajan kirja (käytä) + tavoitteet.
@@ -885,6 +885,15 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   3 kaikki toimintovihjeet (E-kehotteet). Ylempi porras piilottaa myös alemmat; piilotus kysyy varmistuksen (2 punainen, 3 "Oletko IHAN varma?").
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
+
+## v3.13 – maailmat, äänet, Käynnissä-tila ja intro (Early Access 1.2)
+- **Maailmoja 6** (3 × 2 korttia, ei vieritystä). Uusi maailma: napsautus = varmistus (iso Aloita-nappi), pidä pohjassa 0,6 s = aloita heti.
+  Kortti: tuplaklikkaus = pelaa (tai jatka), pidä pohjassa 1 s = maailman tallennuskoodi leikepöydälle.
+- **Pelaajan omat äänet** (askeleet, keho, toiminnot) kuuluvat monona keskeltä; ympäristön ja olentojen äänet 3D.
+- **Käynnissä-tila:** päävalikon takana maailma on aito – nälkä, viholliset ja vahinko toimivat, pelaaja voi kuolla (valikko sulkeutuu).
+- **Intro:** pidempi ja pehmeämmin hidastuva syöksy, kamera laskeutuu ohuiden usvakerrosten läpi, 3D-pilvet kaikilla esiasetuksilla.
+  Grafiikka › Intro: *Käytä 2D-pilviä intron alussa*, *Intron usva ja pilvikerrokset pois* (oletus pois, eivät kuulu esiasetuksiin).
+- **Suolammet** syntyvät nyt oikein (ruutana, suonsilmä, suutari); isoista soisista järvistä saa myös suokaloja. Kalastuksen tilastot: `docs/testit/KALASTUS_SIMULAATIO.md`.
 
 ## v3.11–v3.12 – intron pilvet
 - Matalilla esiasetuksilla (Low–Medium+, heikosti High) intron yläkamerassa piirtoraja on liikkuvien, peittävien pilvien alla (95 m korkeudella): saari näkyy pilvien aukosta,

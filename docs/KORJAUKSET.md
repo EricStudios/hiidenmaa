@@ -629,3 +629,14 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 ## 86. Testissä setTimeout-ruutu ilmestyy hitaasti (v3.08, ei pelivika)
 - swiftshader-testissä pelisilmukka on hidas, joten `quitGame`:n 250 ms ajastin laukesi vasta usean sekunnin päästä → `#quitScr` puuttui 1,5 s odotuksen jälkeen.
   **Sääntö:** odota testissä `waitForFunction`-ehtoa (esim. elementin ilmestymistä), älä kiinteää aikaa.
+
+## 87. Suolampia ei syntynyt koskaan – suokalat saavuttamattomia (v3.06–v3.12, korjattu v3.13)
+- Vesien luokittelu (fish.js) kutsui `biomeAt(x,z,1)`. `biomeAt` palauttaa korkeudella < 1,1 aina `'beach'`, joten `'suo'`-ehto ei toteutunut koskaan → ei suolampia →
+  ruutana, suonsilmä ja suutari eivät olleet saatavilla. Löytyi kalastussimulaatiosta (ei yhtään suolampea millään kartalla). Korjaus: `WB_BOG_H` 1,3 (rannan yläpuolella,
+  aarnimetsän rajan alla); pienet soiset vedet (< `WB_BOG_MAX` 200 ruutua) suolammiksi, isot soiset järvet pysyvät järvinä (nimet ennallaan) mutta antavat myös suokaloja (`bogg`).
+- **Sääntö:** kun funktio luokittelee korkeuden perusteella, testaa tulos koko kartalla (montako kutakin tyyppiä) – nolla tarkoittaa vikaa. Lisää simulaatio/tilasto uudelle järjestelmälle.
+
+## 88. Toistuneet: //-kommentti keskellä riviä (KORJAUKSET 49/81) ja varattu nimi (KORJAUKSET 85) (v3.13)
+- Korvauksessa `introCarpet(...);   // kommentti` päätyi rivin keskelle → rivin loppu (`return …;}`) kommentoitui pois → "Unexpected end of input". `node --check` paljasti.
+- `const MIST` oli jo käytössä (luolaston usva) → peli ei käynnistynyt (testissä `window.__game` ei valmistunut). Nimetty `IMIST`.
+- **Sääntö (kertaus):** korvaa aina vain kokonaisia rivejä tai käytä `/* */`; ennen uutta ylimmän tason nimeä `grep -n "\bNIMI\b" js/*.js`. Jos testi jää odottamaan `window.__game`:a, katso ensin pageerror.

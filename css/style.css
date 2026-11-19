@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.12';
+:root{--css-v:'3.13';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1065,3 +1065,14 @@ body.noActH #prompt{display:none!important}
 #menu .world .wTag.last{background:rgba(232,200,150,.16);color:#e8d4b0;border:1px solid rgba(232,200,150,.35)}
 /* v3.10 Ohjaus › Ammattilaisille ja vertailuun: harmaa ja läpikuultava */
 .proSec{margin-top:26px;opacity:.5;filter:grayscale(1);transition:opacity .2s}.proSec:hover{opacity:.8}
+/* v3.13 maailmat: 6 paikkaa kiinteänä 3 × 2 -ruudukkona (ei vieritystä), pito-palkit, kopiointi-ilmoitus */
+@media (min-width:701px){#menu[data-view="worlds"] .mvBody{overflow:hidden;padding-top:12px;padding-bottom:14px}
+  #menu .worlds{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  #menu .world{min-height:0;padding:12px 14px 12px;gap:8px}#menu .world .wInfo b{font-size:18px}#menu .world .wInfo span{font-size:12px;margin-top:2px}
+  #menu .world .wBtns .btn{padding:6px 8px}#menu .wNew{padding:10px 12px;gap:10px}#menu .wNew input.search{height:40px}#menu .wNew .mbtn{min-height:52px}}
+#menu .world{user-select:none;cursor:pointer;overflow:hidden}
+#menu .world::before,.holdBtn::before{content:"";position:absolute;left:0;bottom:0;height:3px;width:calc(var(--qp,0)*100%);background:linear-gradient(90deg,#e8a44a,#ffd28a);box-shadow:0 0 10px rgba(255,190,100,.6);pointer-events:none;z-index:3}
+.holdBtn{position:relative;overflow:hidden}.holdBtn.holding{border-color:#ffd28a}
+#menu .world .wToast{position:absolute;left:50%;bottom:58px;transform:translate(-50%,6px);padding:5px 12px;border-radius:12px;background:rgba(30,20,10,.92);border:1px solid #e8a44a;color:#ffe3b0;font:700 12px var(--font-b);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:4}
+#menu .world .wToast.on{opacity:1;transform:translate(-50%,0)}#menu .world .wToast.bad{border-color:#c0583a;color:#ffb09a}
+#keyDlgB .btn.big{padding:12px 34px;font-size:17px;min-width:150px}

@@ -32,6 +32,9 @@ const FISH_PH=['aamulla','päivällä','illalla','yöllä'],FISH_WXN={selkea:'se
 const FISH_WAIT=[60,300],FISH_MIN=30,FISH_BAIT_K=.75,FISH_WIN=.6,FISH_CAST=[3,16],FISH_NAME_K=1.6,FISH_STEAL=.08,FISH_KEEP_R=5;
 const ROD_LEN=2.05;   // vavan pituus (models.js)
 const FISH_JUNK=[['rauta',.01],['kupari',.02],['hiidensiru',.015],['saapas',.03],['pulloposti',.015],['ruostavain',.01]];
+/* v3.13 KORJAUKSET 87: suolammen tunnistus kutsui biomeAt(…, 1) → korkeus < 1,1 = aina 'beach', joten suolampia ei syntynyt koskaan (ruutana, suonsilmä, suutari
+   eivät olleet saatavilla). WB_BOG_H 1,3 = rannan yläpuolella mutta aarnimetsän rajan (1,6) alla. */
+const WB_BOG_H=1.3,WB_BOG_MAX=200,WB_BOGG_K=.6;   // iso soinen järvi pysyy järvenä (nimi ennallaan), mutta siitä saa myös suokaloja (paino 0,6×)
 const WB_S=4,WB_N=Math.ceil(HALF*2/WB_S),WB_ID=new Int16Array(WB_N*WB_N).fill(-1),WBS=[],WB_SEA=[];
 const WB_LAKE={ahven:'Ahven',hauki:'Hauki',lahna:'Lahna',ruutana:'Ruutana',suonsilma:'Suonsilmän'},WB_SEAN={silakka:'Silakkalahti',turska:'Turskanselkä',lohi:'Lohisalmi'},WB_PRE=['','Pikku-','Iso-','Ala-','Ylä-','Musta-'];
 let SUNK=null;
@@ -45,10 +48,10 @@ let SUNK=null;
   const pos=c=>({x:-HALF+(c%N+.5)*WB_S,z:-HALF+(((c/N)|0)+.5)*WB_S}),used=new Set(),uniq=b=>{for(const p of WB_PRE){const n=p?p+b.toLowerCase():b;if(!used.has(n)){used.add(n);return n;}}return b;};
   const remap=new Int16Array(comps.length).fill(-1);
   comps.forEach((C,ci)=>{if(C.edge){remap[ci]=-2;return;}if(C.cells.length<5)return;let sx=0,sz=0,bog=0;const st=Math.max(1,Math.floor(C.cells.length/40));
-    for(let k=0;k<C.cells.length;k++){const p=pos(C.cells[k]);sx+=p.x;sz+=p.z;if(k%st===0&&biomeAt(p.x,p.z,1)==='suo')bog++;}
+    for(let k=0;k<C.cells.length;k++){const p=pos(C.cells[k]);sx+=p.x;sz+=p.z;if(k%st===0&&biomeAt(p.x,p.z,WB_BOG_H)==='suo')bog++;}
     const cx=sx/C.cells.length,cz=sz/C.cells.length;let best=C.cells[0],bd=1e18;for(const c of C.cells){const p=pos(c),d=dist2(p.x,p.z,cx,cz);if(d<bd){bd=d;best=c;}}
-    const type=bog>=Math.ceil(C.cells.length/st)*.4?'bog':'lake',L=type==='bog'?['ruutana','ruutana','suonsilma']:['ahven','hauki','lahna'],sp=L[Math.floor(rs()*L.length)];
-    const nm=uniq(WB_LAKE[sp]+(type==='bog'||C.cells.length<45?'lampi':'järvi')),lp=pos(best);remap[ci]=WBS.length;WBS.push({id:'w'+WBS.length,name:nm,type,sp,x:lp.x,z:lp.z,n:C.cells.length});});
+    const isBog=bog>=Math.ceil(C.cells.length/st)*.4,type=isBog&&C.cells.length<WB_BOG_MAX?'bog':'lake',L=type==='bog'?['ruutana','ruutana','suonsilma']:['ahven','hauki','lahna'],sp=L[Math.floor(rs()*L.length)];
+    const nm=uniq(WB_LAKE[sp]+(type==='bog'||C.cells.length<45?'lampi':'järvi')),lp=pos(best);remap[ci]=WBS.length;WBS.push({id:'w'+WBS.length,name:nm,type,sp,x:lp.x,z:lp.z,n:C.cells.length,bogg:isBog&&type==='lake'?1:0});});
   // meri: kolme nimettyä aluetta rannikolla (ensimmäinen lähimpänä aloitusta), kauimmaisen pisteen valinnalla
   const coast=[];for(let k=0;k<N*N;k++){if(!W[k]||remap[WB_ID[k]]!==-2)continue;const i=k%N,j=(k/N)|0;if(i<2||j<2||i>N-3||j>N-3)continue;let land=false;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(!W[(j+b)*N+i+a])land=true;if(land)coast.push(k);}
   if(coast.length){const S0=LOC.spawn,pts=[];let b=coast[0],bd=1e18;for(const c of coast){const p=pos(c),d=dist2(p.x,p.z,S0.x,S0.z);if(d<bd){bd=d;b=c;}}pts.push(pos(b));
@@ -73,7 +76,7 @@ function wbAt(x,z){const i=Math.floor((x+HALF)/WB_S),j=Math.floor((z+HALF)/WB_S)
 function fishF(){if(!flags.fish||typeof flags.fish!=='object')flags.fish={};const F=flags.fish;F.rec=F.rec||{};F.n=F.n||{};F.wb=F.wb||{};F.g=F.g||{};return F;}
 function fishPhase(){return dayT>=.19&&dayT<.3?0:dayT>=.3&&dayT<.72?1:dayT>=.72&&dayT<.83?2:3;}
 // lajin todennäköisyyspaino tässä vedessä nyt (aika ja sää)
-function fishW(sp,wb){const B=FISH_B[sp];if(!B||!wb||B.w!==wb.type)return 0;return B.b*B.t[fishPhase()]*(B.wx[weather.cur]||1)*(wb.sp===sp?FISH_NAME_K:1);}
+function fishW(sp,wb){const B=FISH_B[sp];if(!B||!wb)return 0;const bg=B.w==='bog'&&wb.bogg;if(B.w!==wb.type&&!bg)return 0;return (bg?WB_BOGG_K:1)*B.b*B.t[fishPhase()]*(B.wx[weather.cur]||1)*(wb.sp===sp?FISH_NAME_K:1);}
 function fishPick(wb){const L=Object.keys(FISH_B).map(sp=>[sp,fishW(sp,wb)]).filter(a=>a[1]>0);const tot=L.reduce((a,b)=>a+b[1],0);if(!tot)return null;let r=Math.random()*tot;for(const [sp,w] of L){r-=w;if(r<=0)return sp;}return L[L.length-1][0];}
 function fishActivity(wb){let a=0,b=0;for(const sp in FISH_B){const B=FISH_B[sp];if(B.w!==wb.type)continue;b+=B.b;a+=fishW(sp,wb)/(wb.sp===sp?FISH_NAME_K:1);}return b?clamp(a/b,.45,1.6):1;}
 /* ---------------- ONKI ---------------- */

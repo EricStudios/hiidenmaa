@@ -3,14 +3,16 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.12, 18.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.13, 19.11.2026)
 
-- **Versio 3.12** – intron oikeat pilvet piirtorajan päällä (matalat esiasetukset). PR #49 sisältää v3.08–v3.12.
+- **Versio 3.13 – Early Access 1.2** – 6 maailmaa, maailmakorttien pito/tuplaklikkaus, mono-pelaajaäänet, aito Käynnissä-tila, uusi syöksy + usvakerrokset,
+  intro-kevennykset, suolammet korjattu, kalastussimulaatio. **PR #49 sisältää v3.08–v3.13** (käyttäjä yhdistää 20.11. ja testaa).
+- **Versio 3.12** – intron oikeat pilvet piirtorajan päällä (matalat esiasetukset).
 - **Versio 3.11** – intron piirtorajan sumennus ja pilvimatto matalilla esiasetuksilla.
 - **Versio 3.10** – maailma valmiiksi latausruudussa + kevyt intron yläkamera, vanha tapa asetuksena (ks. versioloki). PR #49 sisältää v3.08–v3.10.
 - **Versio 3.09** – maailmalistan Pelaat nyt / Viimeksi pelattu -merkinnät.
 - **Versio 3.08** – käyttäjän 26 kohdan lista + 4 lisäystä (pihkan täyttyminen, kartan Sulje-teksti, 3 vihjeporrasta, tallennus suljettaessa), ks. versioloki v3.08.
-  Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`. **Testilinkit nyt EricStudios-muodossa:**
+  Early Access 1.2 (v3.13). Haara `claude/hiidenmaa-survival-game-fmxt0m`. **Testilinkit nyt EricStudios-muodossa:**
   `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html` (käyttäjänimi vaihtui; vanha erboiyprogamer-source-linkki ei enää päde).
 - **Käyttäjän työtapa (pysyvä):** kysy tarkentavat kysymykset alussa, sitten työ loppuun ilman keskeytyksiä; kinkkiset valinnat päätetään käyttäjän puolesta ja kerrotaan lopuksi.
   Kesken tulleet lisäykset: enintään 1–2 kysymystä per lisäys ja jatka heti.
@@ -55,7 +57,7 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
   haarniskat, olentojen luonteet, vaanivat, jousikalmot, auringossa palavat, eläinten perheet, syöminen/juominen, 4 pomoa (herätys, vaiheet, kuolema), Kalmanvartija.
 - **Eteneminen:** tasot 1–30 (palkinnot), XP, tavoitteet (GOALS), saavutukset, tehtävät, opastus + kertavinkit (vain uusille, lukuaika), avainketju ulottuvuuksiin
   (Kalmon sinetti, Jääavain, 3 ulottuvuutta: Routaluola jäälätäköineen, Kalmankammio, Aarnihauta), hiidenkivet 9, kruunusirpaleet.
-- **Onkiminen:** nimetyt vedet (kartta kaikilla zoomeilla, löytö; sisävesi ei avaa merta), 3 vapaa (taipuva kärki, koukku), mato, tärppi + väsytys, 18 lajia (omat kuvakkeet) aika/sää, ennätykset, kalaruoat, kalastajan kirja + tavoitteet, muut saaliit.
+- **Onkiminen:** nimetyt vedet (järvet, meri, v3.13 suolammet + soiset järvet; kartta kaikilla zoomeilla, löytö; sisävesi ei avaa merta), 3 vapaa (taipuva kärki, koukku), mato, tärppi + väsytys, 18 lajia (omat kuvakkeet) aika/sää, ennätykset, kalaruoat, kalastajan kirja + tavoitteet, muut saaliit.
 - **Käyttöliittymä:** HUD (skaala), kartta (zoom, sumu, tuulikompassi), reppu (raahaus, jako), teemoitetut valikot, omat vierityspalkit, ilmoitusasetus, F-tarkastelu
   (11 animaatiota), E-käsiliike, pikapaikat, näppäinasetukset, 5 tallennuspaikkaa + tallennuskoodi, päävalikko (21 taustaa, logoteemat), Poistu-ruksi (tallentaa aina),
   DEV-työkalut (ilmaiset materiaalit), valikkojen kategoriat + haku yleissanoilla, vihjeiden piilotus 3 portaassa (ohjetekstit, näppäinvihjeet, E-kehotteet).
@@ -344,6 +346,9 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.13:** maailmoja 6 · Uusi maailma pito 0,6 s · koodin kopiointi 1 s · syöksy 2,6 s · usvakerrokset 78/46/24 m · suolampi < 200 ruutua, soisen järven suokalat 0,6× ·
+kalastus (simulaatio, taitava pelaaja): onki ~16–19 kalaa/h, madoilla ~21–23/h, hiidenvapa + madot ~29–38/h.
+
 **v3.08:** puiden kasvuvaiheet kuusi .35/.55/.8/1.05/1.3, mänty .35/.55/.85/1.15/1.45, koivu .35/.55/.8/1.05/1.25, aarni .45/.6/.75/.92/1.1 (×0,94–1,06), 60 % joka 5. uni ·
 kastelu +5 %, mato +5 %, pysyvät +5 % (5 kastelua / 2 matoa) · aarnipihka 1 %, pihkaa 3×, kertymä 4×, kaato 3–5 · pihkan täyttyminen 10 % joka 5. uni → 30 % ·
 metso 0,6 · Käynnissä-valikko äänet 0,3 + LP 1 400 Hz · kuolinhämärä 40 s → 60 %, äänet häipyvät 2,2 s · veri 0x360404/0x4e0707, mahla 0x1f3410/0x31481a · sade sivuttain 0,7 ·
@@ -415,6 +420,22 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.13 (maailmat, äänet, Käynnissä-tila, intro, kalastussimulaatio – EARLY ACCESS 1.2, käyttäjän pyyntö)
+- **Maailmat:** 6 paikkaa (`SLOTS` 6, uusi avain `hiidenmaa_save_v1_5`), kiinteä 3 × 2 -asettelu ilman vieritystä (≥ 701 px leveä). **Uusi maailma:** napsautus = varmistus isolla
+  Aloita-napilla, pohjassa 0,6 s (`NEW_HOLD`) = aloitus heti (palkki + vihje napissa). **Kortti:** tuplaklikkaus = Pelaa / jatka, pohjassa 1 s (`CODE_HOLD`) = maailman
+  tallennuskoodi (HM2, sama kuin Asetukset › Tallennus) leikepöydälle (`worldCodeCopy`, ilmoitus kortissa). Yleinen pito-apuri `holdBtn`.
+- **Äänet:** pelaajasta lähtevät äänet MONO (`plSnd` ilman `o.pos` → gain, ei panneria; voimakkuus = sama etäisyysvaimennus kuin ennen); paikalliset (`o.pos`) 3D.
+- **Käynnissä-tila on aito:** valikon takana maailma vahingoittaa ja pelaaja voi kuolla (kuin AFK) – `hurtPlayer`/`playerDie` estävät vain Tauko-tilassa. Kuollessa valikko sulkeutuu (`closeAllForDeath`).
+- **Intro:** syöksy 2,6 s (`INTRO_DIVE`), käyrä `introEase` = (1−u)u³ + u(1 − (1−u)⁵) → pehmeä alku, pitkä sulava hidastus; kamera laskeutuu 3 ohuen usvakerroksen läpi
+  (`MIST_LAYERS` 78/46/24 m, 12 palloa/kerros, häipyy lähellä kameraa – ei valkoista huntua); sivuille vetäytyvät 3D-pilvet kaikilla esiasetuksilla; pilvimatto −10 % peittävyys,
+  luonnolliset raot, alueittain enintään 10 % tummempi, pysyy paikallaan kun kamera menee läpi ja häipyy vasta 45 m pilvikerroksen alla. **Asetukset** (Grafiikka, alin osio,
+  eivät kuulu esiasetuksiin, oletus pois): *Käytä 2D-pilviä intron alussa* (`SET.intro2d`), *Intron usva ja pilvikerrokset pois* (`SET.introPlain`).
+- **Korjattu (KORJAUKSET 87):** suolampia ei syntynyt koskaan (biomeAt kutsuttiin korkeudella 1 → aina ranta) → ruutana/suonsilmä/suutari saavuttamattomia. Nyt `WB_BOG_H` 1,3:
+  pienet soiset vedet (< 200 ruutua, `WB_BOG_MAX`) ovat suolampia; isot soiset järvet pysyvät järvinä (nimi ennallaan) ja niistä saa myös suokaloja (`bogg`, paino 0,6×).
+- **Testit:** kalastussimulaatio 5/25/30/120 min (onki, madot, hiidenvapa; järvi, meri, soinen järvi, suolampi) → `docs/testit/KALASTUS_SIMULAATIO.md`; katiska, savustin,
+  upponut arkku; poistettujen määrittelyjen tarkistus viimeisestä yhdistämisestä (6267d86) – ei yhtään kadonnutta funktiota/vakiota. Tarkistus: v3.13-rivi.
+- **Early Access 1.2** (käyttäjä).
 
 ### v3.12 (intron pilvet – käyttäjä: "kauhea vaalea sumu")
 - Litteä läpikuultava pilvimatto korvattu **oikeilla pilvillä**: `IE_N` 330 peittävää pilvipalloa (sprite, 4 satunnaista tekstuuria `introPuffTex`, varjostettu pohja), korkeudella

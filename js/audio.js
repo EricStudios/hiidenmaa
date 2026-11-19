@@ -437,6 +437,7 @@ function plLoad(){if(PLV.loaded||!CRE.ok)return;PLV.loaded=1;for(const n in CRE.
    tunneleissa paljon (PL_REV.dun, ennen .25), talon sisällä selvästi (PL_REV.home), vuoristossa vähän (PL_REV.mtn), muuten ei kaikua. */
 const PL_REV={dun:.55,home:.2,mtn:.08};
 function plRevAmt(){if(P.inDun)return PL_REV.dun;const ik=typeof indoorK==='number'?indoorK:0;if(ik>.3)return PL_REV.home*ik;const b=biomeHere(P.pos.x,P.pos.z);return b==='mountain'||b==='tunturi'||P.pos.y>24?PL_REV.mtn:0;}
+const _plMonoV=new THREE.Vector3();
 function plSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;plLoad();const L0=plRes(g,ev);if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
   const a=actx;if(!a||a.state!=='running'||!soundOn)return false;const vol=volK('pl');if(!(vol>0))return false;
   PLV.v=PLV.v.filter(v=>!v.done);if(!o.loop&&PLV.v.length>=6)return false;
@@ -445,8 +446,9 @@ function plSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;plLoad();const 
   if(!PLV.gain){PLV.gain=a.createGain();PLV.gain.connect(sndBus(a));}PLV.gain.gain.value=vol;
   const B=CRE.buf[name],q=o.pos||P.pos,src=a.createBufferSource();src.buffer=B;src.playbackRate.value=(o.p||1)*(o.loop?1:1+(Math.random()*2-1)*(o.pj??.05));   /* v2.56 o.pj: oma sävelvaihtelu */
   if(o.loop){src.loop=true;if(!PL_WHOLE.has(ev)){const lp=tgLoopPts(B);src.loopStart=lp[0];src.loopEnd=lp[1];}}   /* v2.76 PL_WHOLE: koko tiedosto silmukkana (käyttäjän saumaton tiedosto) */
-  const gn=a.createGain();gn.gain.value=o.loop?0:(o.v??1)*(1+(Math.random()*2-1)*(o.vj??.05));   /* v2.26: voimakkuus ±5 % joka kerta (o.vj: oma vaihtelu) */if(o.loop)gn.gain.linearRampToValueAtTime(o.v??1,a.currentTime+.4);const pn=a.createPanner();pn.panningModel='equalpower';pn.distanceModel='inverse';pn.refDistance=4*SND_DIST_K*(o.rk||1);pn.maxDistance=60*SND_DIST_K*(o.rk||1);pn.rolloffFactor=1;   /* v2.67 o.rk: kuuluvuuskerroin */
-  if(o.lp){const lf=a.createBiquadFilter();lf.type='lowpass';lf.frequency.value=o.lp;lf.Q.value=.6;src.connect(gn);gn.connect(lf);lf.connect(pn);}else{src.connect(gn);gn.connect(pn);}pn.connect(PLV.gain);   /* v2.31 o.lp: tumma alipäästö (Hz) */crePos(pn,q.x,(q.y??P.pos.y)+.2,q.z);
+  const gn=a.createGain();gn.gain.value=o.loop?0:(o.v??1)*(1+(Math.random()*2-1)*(o.vj??.05));   /* v2.26: voimakkuus ±5 % joka kerta (o.vj: oma vaihtelu) */if(o.loop)gn.gain.linearRampToValueAtTime(o.v??1,a.currentTime+.4);let pn;if(o.pos){pn=a.createPanner();pn.panningModel='equalpower';pn.distanceModel='inverse';pn.refDistance=4*SND_DIST_K*(o.rk||1);pn.maxDistance=60*SND_DIST_K*(o.rk||1);pn.rolloffFactor=1;}
+  else{pn=a.createGain();const ref=4*SND_DIST_K*(o.rk||1),d=camera.position.distanceTo(_plMonoV.set(P.pos.x,P.pos.y+1.2,P.pos.z));pn.gain.value=d<=ref?1:ref/d;}   /* v3.13 käyttäjä: pelaajasta lähtevät äänet MONO (ei 3D-panorointia olkakameran takia), sama voimakkuus kuin ennen; o.pos = 3D */   /* v2.67 o.rk: kuuluvuuskerroin */
+  if(o.lp){const lf=a.createBiquadFilter();lf.type='lowpass';lf.frequency.value=o.lp;lf.Q.value=.6;src.connect(gn);gn.connect(lf);lf.connect(pn);}else{src.connect(gn);gn.connect(pn);}pn.connect(PLV.gain);   /* v2.31 o.lp: tumma alipäästö (Hz) */if(o.pos)crePos(pn,q.x,(q.y??P.pos.y)+.2,q.z);
   let sd=null;{const rw=plRevAmt();if(rw>0){const R=creRevOn(a);sd=a.createGain();sd.gain.value=rw;pn.connect(sd);sd.connect(R.inp);}}   // v2.99 kaiku paikan mukaan (plRevAmt)
   if(!o.loop&&g!=='askeleet'&&g!=='vesi'&&g!=='keho')plActT=performance.now()/1000;   // v2.67 pelaajan toimintaääni (ilmoitusääni ei päälle)
   const v={src,sd,g:gn,loop:!!o.loop};if(!o.loop)PLV.v.push(v);src.onended=()=>{v.done=1;try{pn.disconnect();}catch(e){}if(sd)try{sd.disconnect();}catch(e){}};

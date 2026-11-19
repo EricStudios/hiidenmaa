@@ -7,7 +7,7 @@ const SKEY='hiidenmaa_save_v1';
 /* v1.36 (lista 3, kohdat 20–21): 5 tallennuspaikkaa. Paikka 0 = SKEY (vanha tallennus jatkuu siinä nimellä "Maailma 1"), paikat 1–4 =
    SKEY+'_1'…'_4'. Tiedot listaa varten avaimessa hiidenmaa_slots = [{name, at, day, lvl, mapId, min} | null] ×5. Nykyinen paikka curSlot
    säilyy kartanvaihdon uudelleenlatauksen yli (sessionStorage hiidenmaa_cur). */
-const SLOTS=5,slotKey=i=>i?SKEY+'_'+i:SKEY;
+const SLOTS=6,   /* v3.13 käyttäjä: 6 maailmaa (3 × 2 korttia) */slotKey=i=>i?SKEY+'_'+i:SKEY;
 let curSlot=-1;try{const c=sessionStorage.getItem('hiidenmaa_cur');if(c!==null)curSlot=+c;}catch(e){}
 function slotMeta(){let m=null;try{m=JSON.parse(localStorage.getItem('hiidenmaa_slots')||'null');}catch(e){}if(!Array.isArray(m))m=[];while(m.length<SLOTS)m.push(null);
   for(let i=0;i<SLOTS;i++)if(!m[i]){let d=null;try{d=JSON.parse(localStorage.getItem(slotKey(i))||'null');}catch(e){}if(d)m[i]={name:'Maailma '+(i+1),at:Date.now(),day:d.dayN||1,lvl:0,mapId:d.mapId||0,min:Math.round((d.playTime||0)/60)};}

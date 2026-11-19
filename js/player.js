@@ -375,7 +375,7 @@ function voidTick(dt){if(P.flying||devOn('noclip')){P.voidT=0;return;}
   for(let a=0;a<6;a++){const x=P.pos.x+Math.cos(a*1.047)*.7,z=P.pos.z+Math.sin(a*1.047)*.7;if(pointBlocked(x,P.pos.y+1,z))return;}
   P.safe={x:P.pos.x,y:P.pos.y,z:P.pos.z,dim:curDim()};}
 function lerpAngle(a,b,t){let d=((b-a+Math.PI)%TAU+TAU)%TAU-Math.PI;return a+d*t;}
-function playerDie(){if(state==='paused'||state==='intro'){P.hp=Math.max(P.hp,1);return;}
+function playerDie(){if((state==='paused'&&!pauseRun)||state==='intro'){P.hp=Math.max(P.hp,1);return;}
   if(devOn('god')&&!P.voidDeath){P.hp=Math.max(1,P.hp);return;}   // DEV: kuolemattomuus (tyhjyys tappaa silti)
   if(P.dead)return;P.dead=true;P.deaths++;P.hp=0;sfx('die');
   /* v1.81: pomokuolemat. Tappaja = lähin elossa oleva pomo ≤ 45 m (sama tila: maailma/ulottuvuus). flags.bossDeaths[tyyppi] tallentuu pelin

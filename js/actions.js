@@ -204,7 +204,7 @@ function fireBow(){
 }
 // v1.39 (lista 4, kohdat 8–9): vahinkokerroin sille, joka parhaillaan päivittyy (ai.js asettaa): pomot ×1,2, vartijat ×1,8.
 let HURT_K=1;
-function hurtPlayer(dmg,fx,fz){if(state==='paused'||state==='intro')return;   // v1.43: valikon takana käynnissä oleva maailma ei vahingoita
+function hurtPlayer(dmg,fx,fz){if((state==='paused'&&!pauseRun)||state==='intro')return;   /* v3.13 käyttäjä: Käynnissä-tilassa valikon takana maailma on aito (kuin AFK) – vahinko ja kuolema */   // v1.43: valikon takana käynnissä oleva maailma ei vahingoita
   dmg*=HURT_K;
   if(P.dead||P.invul>0||P.spawnProt>0||devOn('god'))return;
   let d=dmg;const dx=fx-P.pos.x,dz=fz-P.pos.z,l=Math.hypot(dx,dz)||1;
