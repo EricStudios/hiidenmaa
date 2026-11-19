@@ -86,12 +86,14 @@ function tutTick(dt){
 
 /* ---------------- KERTAVINKIT (opastuksen maailmassa) ---------------- */
 // Kun asia tulee ensimmäisen kerran vastaan, ruudun yläosaan tulee vinkki 10 s (yksi kerrallaan, väli vähintään 6 s). flags.tips[id] = näytetty.
+/* v3.20 käyttäjä: työkaluvinkki tulee heti, kun työkalu on valmistettu ja valikot suljettu (ennen vasta käteen otettuna); ohje kertoo, miten se otetaan käteen. */
+const tipHas=f=>inv.some(s=>s&&ITEMS[s.id]&&f(s.id,ITEMS[s.id])),tipEq=f=>{const w=equipped('weapon');return !!w&&f(w.id,ITEMS[w.id]);},tipTake=f=>tipEq(f)?'':'Ota se käteen pikapaikan numerolla (1–8). ';
 const TIPS=[
-  {id:'vasara',u:()=>openPanel==='build',c:()=>{const w=equipped('weapon');return w&&w.id==='vasara';},d:()=>`Rakentaminen: ${kL('build')} tai hiiren oikea avaa rakennusvalikon, hiiren vasen asettaa. ${kL('rot')} kääntää (Shift = asento), ${kL('snap')}/${kL('vsnap')} kohdistus, ${kL('up')}/${kL('down')} nosta/laske, ${kL('remove')} pura, ${kL('repair')} korjaa. Työpisteet tarvitsevat työpenkin lähelleen.`},
+  {id:'vasara',u:()=>openPanel==='build',c:()=>tipHas(id=>id==='vasara'),d:()=>`${tipTake(id=>id==='vasara')}Rakentaminen: ${kL('build')} tai hiiren oikea avaa rakennusvalikon, hiiren vasen asettaa. ${kL('rot')} kääntää (Shift = asento), ${kL('snap')}/${kL('vsnap')} kohdistus, ${kL('up')}/${kL('down')} nosta/laske, ${kL('remove')} pura, ${kL('repair')} korjaa. Työpisteet tarvitsevat työpenkin lähelleen.`},
   {id:'rakennusG',c:()=>{const w=equipped('weapon');return w&&w.id==='vasara'&&cnt('built')>=3;},d:()=>`Rakentaminen tuntuu hankalalta? Paina ${kL('snap')} vaihtaaksesi kohdistusta (ruudukko → 1 m → puoli → 3D → vapaa → reuna → jatko). Esim. <b>${kL('snap')}: vapaa</b> asettaa osan juuri sinne, minne katsot, ja <b>jatko</b> jatkaa portaita ja tikkaita edellisestä.`},   // v2.82 käyttäjän pyyntö
-  {id:'jousi',u:()=>!!P.drawing,c:()=>{const w=equipped('weapon');return w&&ITEMS[w.id].cat==='bow';},d:()=>`Jousi: pidä hiiren vasen pohjassa ja päästä irti. Kyykyssä (${kL('crouch')}) näet tarkan tähtäimen ja lentoradan. Nuolet ovat repussa.`},
-  {id:'lapio',u:()=>typeof shovelCd!=='undefined'&&playTime<shovelCd,c:()=>{const w=equipped('weapon');return w&&(w.id==='lapio'||w.id==='kuokka');},d:()=>`Lapio: hiiren vasen kaivaa, oikea tekee polun. Kuokka: vasen nostaa maata, oikea palauttaa maan värin ja kasvillisuuden (esim. polun kohdalle).`},
-  {id:'kirves',u:()=>!!P.atk,c:()=>{const w=equipped('weapon');return w&&ITEMS[w.id].chop;},d:()=>`Kirves kaataa puita (hiiren vasen). Kaatuneesta puusta jää tukki – lyö sitä, niin saat puuta.`},
+  {id:'jousi',u:()=>!!P.drawing,c:()=>tipHas((id,d)=>d.cat==='bow'),d:()=>`${tipTake((id,d)=>d.cat==='bow')}Jousi: pidä hiiren vasen pohjassa ja päästä irti. Kyykyssä (${kL('crouch')}) näet tarkan tähtäimen ja lentoradan. Nuolet ovat repussa.`},
+  {id:'lapio',u:()=>typeof shovelCd!=='undefined'&&playTime<shovelCd,c:()=>tipHas(id=>id==='lapio'||id==='kuokka'),d:()=>`${tipTake(id=>id==='lapio'||id==='kuokka')}Lapio: hiiren vasen kaivaa, oikea tekee polun. Kuokka: vasen nostaa maata, oikea palauttaa maan värin ja kasvillisuuden (esim. polun kohdalle).`},
+  {id:'kirves',u:()=>!!P.atk&&tipEq((id,d)=>d.chop),c:()=>tipHas((id,d)=>d.chop),d:()=>`${tipTake((id,d)=>d.chop)}Kirves kaataa puita (hiiren vasen). Kaatuneesta puusta jää tukki – lyö sitä, niin saat puuta.`},
   {id:'uinti',u:()=>!P.swim,c:()=>P.swim,d:()=>`Uidessa ${kL('jump')} on veto pintaan (kuluttaa kestävyyttä). Veden alla happi loppuu – nouse ajoissa.`},
   {id:'yo',c:()=>typeof isNight==='function'&&isNight()&&!P.inDun,d:()=>`Yö laskeutuu: sudet ja hiidet liikkuvat. Rakenna suoja ja nuotio – katon alla tulen ääressä lepäät. Sängyssä (${kL('interact')}) voit nukkua yön yli.`},
   {id:'kuorma',u:()=>invWeight()<=MAXW,c:()=>typeof MAXW!=='undefined'&&invWeight()>MAXW,d:()=>`Ylikuorma: et voi juosta, ja kestävyys hupenee liikkuessa. Pudota tavaraa (${kL('up')}) tai vie se arkkuun.`},
@@ -114,7 +116,7 @@ flags.tips=flags.tips||{};const el=tipEl();
     const html=T.d();el.querySelector('.tipD').innerHTML=html;el.classList.add('on');TUT.tipT=tipReadT(html);TUT.tipCur=T;TUT.tipCd=6;if(typeof mSnd==='function')mSnd('napit','hover');return;}}
 /* v3.07 käyttäjä: vinkki näkyy lukemiseen riittävän ajan (TIP_BASE + sanat × TIP_WORD, rajat TIP_MIN–TIP_MAX; ennen aina 10 s) ja katoaa TIP_USED_T:ssa,
    kun pelaaja tekee vinkin neuvon (TIPS[].u). Vinkit näkyvät vain uusille pelaajille / opastuksen kanssa (tipSeenG, flags.tipsRe – ennallaan). */
-const TIP_BASE=2,TIP_WORD=.28,TIP_MIN=4,TIP_MAX=9,TIP_USED_T=.7;
+const TIP_BASE=1.2,TIP_WORD=.27,TIP_MIN=2.6,TIP_MAX=9,TIP_USED_T=.7;   // v3.20 käyttäjä: lyhyet vinkit lähtevät nopeammin (esim. 8 sanaa 3,4 s, ennen 4,2 s)
 function tipDismiss(){if(TUT.tipT>0&&TUT.tipEl){TUT.tipT=0;TUT.tipEl.classList.remove('on');}}   // v3.08 käyttäjä: valikon avaus/sulku vie vinkin pois
 function tipReadT(html){const w=String(html).replace(/<[^>]+>/g,' ').trim().split(/\s+/).length;return clamp(TIP_BASE+w*TIP_WORD,TIP_MIN,TIP_MAX);}
 function tipEl(){if(TUT.tipEl)return TUT.tipEl;const d=document.createElement('div');d.id='tutTip';d.innerHTML='<b>Vinkki</b><span class="tipD"></span>';document.body.appendChild(d);TUT.tipEl=d;return d;}

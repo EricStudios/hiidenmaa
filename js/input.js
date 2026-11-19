@@ -5,7 +5,10 @@
 /* ---------------- INPUT ---------------- */
 const keys={};let mouseL=false,mouseR=false,locked=false,lockFailed=false,invertY=false;
 const canvas=renderer.domElement;
-addEventListener('keydown',e=>{
+/* v3.20 käyttäjä: latausruudun aikana (riimukivi näkyvissä) näppäimet ja napsautukset eivät liikuta hahmoa eivätkä tee mitään; jäljelle jääneet painallukset nollataan. */
+function ldBusy(){const b=window.__ldBusy;return !!b&&Date.now()-b<60000;}   // vain myöhemmät latausruudut (uusi maailma, tallennus), turvaraja 60 s
+function keysClear(){for(const k in keys)keys[k]=false;mouseL=false;mouseR=false;}
+addEventListener('keydown',e=>{if(ldBusy()&&!(typeof state!=='undefined'&&state==='menu')){e.preventDefault();return;}
   // v1.40 (kohta 4): tekstikentässä Enter lopettaa kirjoittamisen, Tab sulkee repun kuten ennen; muut näppäimet menevät tekstiin
   if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'||e.target.tagName==='SELECT'){if(e.code==='Enter'&&e.target.classList.contains('search')){e.target.blur();return;}if(e.code!=='Tab'||e.target.tagName==='TEXTAREA')return;e.target.blur();}
   // Paneelissa kirjoittaminen menee suoraan hakukenttään (ei tarvitse napsauttaa sitä ensin); toimintonäppäimet toimivat kuten ennen.
@@ -57,7 +60,7 @@ addEventListener('keyup',e=>{keys[e.code]=false;});
 // v2.30: ikkuna menettää kohdistuksen (Alt+Tab ym.) → nostotapahtuma jää tulematta; nollataan, ettei esim. Shift jää pohjaan (juoksu, siirtoslider)
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});document.addEventListener('visibilitychange',()=>{if(document.hidden)for(const k in keys)keys[k]=false;});
 let dragLook=null;
-canvas.addEventListener('mousedown',e=>{
+canvas.addEventListener('mousedown',e=>{if(ldBusy()&&state!=='menu')return;   // v3.20
   audio();if(actx&&actx.state!=='running')actx.resume();
   if(state!=='play')return;
   /* v2.80: lukituksen pyyntö ei enää niele painallusta jousella ja lähiaseilla (ennen ensimmäinen painallus esim. kuoleman tai valikon jälkeen

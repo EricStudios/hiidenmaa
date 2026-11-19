@@ -592,6 +592,16 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.20: Enter vahvistaa varmistuksen, Aloita seikkailu käynnistää ensimmäisen maailman, intron usva alusta asti ja pilvet pois vasta alhaalla, intron ohitus vain hiirellä (ensimmäistä ei voi), ei liikettä latauksessa, äänet −20/−40 %, työkaluvinkki heti, tasonimike vain repussa',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    let hit=0;keyDialog('Testi?',[['Vahvista',()=>{hit=1;}],['Peruuta',null]]);$('#keyDlg')._at=0;dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',code:'Enter'}));ck('enter',hit===1&&$('#keyDlg').hidden);
+    ck('aloita',/NEWW\.go/.test($('#bContinue').onclick.toString())&&!/bNewWorld'\)\.click/.test($('#bContinue').onclick.toString()));
+    ck('usva alusta',!/t<4/.test(introMistTick.toString())&&MIST_IN>3&&MIST_OUT_K>=.8&&IC_CLEAR_H<=20);
+    ck('ohitus',INTRO_SKIP_MIN>0&&(()=>{const i0=intro,ls=localStorage.getItem(INTRO_SEEN_K),m=slotMeta,c0=curSlot;try{intro={t:5,hold:false};localStorage.removeItem(INTRO_SEEN_K);slotMeta=()=>[{name:'a'}];curSlot=0;const a=introCanSkip();localStorage.setItem(INTRO_SEEN_K,'1');const b=introCanSkip();return a===false&&b===true;}finally{if(ls===null)localStorage.removeItem(INTRO_SEEN_K);else localStorage.setItem(INTRO_SEEN_K,ls);slotMeta=m;curSlot=c0;intro=i0;}})());
+    ck('näppäimet',typeof ldBusy==='function'&&typeof keysClear==='function'&&/keysClear/.test(endIntro.toString())&&/keysClear/.test(introRelease.toString()));
+    ck('vinkit',TIP_BASE<=1.5&&TIP_MIN<=3&&/tipHas/.test(TIPS.find(t=>t.id==='kirves').c.toString()));
+    ck('nimike',/showT/.test(updateHUD.toString()));
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.19: valikon kuvissa vain neljä lyhyttä hiljaista ääntä + pehmeät häivytykset, napeissa omat syykohdat ja himmeämmät syyt, ruskeat valikot ja napit tummemmiksi pyöreällä liu\'ulla nurkkaan',()=>{
     const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(er){return [];}}).join('\n');
     const b=[...document.querySelectorAll('#menu .menuBtns>.mbtn')].map(el=>getComputedStyle(el).getPropertyValue('--gx').trim());
@@ -967,7 +977,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       res=bad===0&&sb===0&&n>20||`virhe sade sisällä ${bad} lumi ${sb} ulkona ${n}`;}
     finally{for(const q of made)removePiece(q);msg=om;[WIND.x,WIND.z,WIND.spd,wRain]=sv;camera.position.copy(sv[4]);COVER.t=0;}
     return res;});
-  t('v2.89 latausnäytön ääni −20 %',()=>/BS_EVK\[ev\]/.test(String(window.__bootSnd))&&/lataus_valmis:\.8/.test(document.querySelector('script[src*="boot.js"]')?(()=>{const x=new XMLHttpRequest();x.open('GET',document.querySelector('script[src*="boot.js"]').src,false);x.send();return x.responseText;})():'')||'virhe');
+  t('v2.89 latausnäytön ääni −20 % (v3.20 vielä −20 % → 0,64)',()=>/BS_EVK\[ev\]/.test(String(window.__bootSnd))&&/lataus_valmis:\.64/.test(document.querySelector('script[src*="boot.js"]')?(()=>{const x=new XMLHttpRequest();x.open('GET',document.querySelector('script[src*="boot.js"]').src,false);x.send();return x.responseText;})():'')||'virhe');
   t('v2.88 kodin lämpö puuttuvalla seinällä naapurin vieressä, maanmuokkauksen sauma, kameran rako, oven kahvat ja äänet, raajojen törmäys',()=>{
     const made=[];const om=msg;msg=()=>{};let res;const p0=P.pos.clone();
     try{const cx=P.pos.x+90,cz=P.pos.z-60,y=terrainH(cx,cz)+.02,put=(t,x,z,r,yy)=>{const q=addPiece(t,x,yy===undefined?y:yy,z,r);made.push(q);return q;};

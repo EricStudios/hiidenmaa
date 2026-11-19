@@ -424,8 +424,11 @@ function devPwDialog(ok){const chk=()=>{const v=($('#devPw')||{}).value||'';if(v
   keyDialog('Otetaanko kehittäjätyökalut käyttöön?',[['Ota käyttöön',null],['Peruuta',null]],'');
   const N=$('#keyDlgN');N.innerHTML='Anna salasana (sivu ladataan uudelleen):<br><input id="devPw" type="password" inputmode="numeric" maxlength="12" autocomplete="off" style="margin-top:6px;width:9em;font:inherit;padding:4px 8px"> <span id="devPwN" class="warnTxt"></span>';
   const I=$('#devPw'),B=$('#keyDlgB').firstChild;B.onclick=()=>{if(chk())$('#keyDlg').hidden=true;};I.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){if(chk())$('#keyDlg').hidden=true;}else if(e.key==='Escape')$('#keyDlg').hidden=true;};setTimeout(()=>I.focus(),30);}
-function keyDialog(text,btns,note,warn){const d=$('#keyDlg');d.hidden=false;d.dataset.warn=warn||'';   /* v3.08 warn 1–2: punainen varoitus */if(btns.length>=2)mSnd('varmistus','varmistus');   /* v2.52 varmistuskysymys (ei näppäimen odotus) */$('#keyDlgT').textContent=text;$('#keyDlgN').textContent=note||'';
+function keyDialog(text,btns,note,warn){const d=$('#keyDlg');d.hidden=false;d._at=performance.now();d.dataset.warn=warn||'';   /* v3.08 warn 1–2: punainen varoitus */if(btns.length>=2)mSnd('varmistus','varmistus');   /* v2.52 varmistuskysymys (ei näppäimen odotus) */$('#keyDlgT').textContent=text;$('#keyDlgN').textContent=note||'';
   const b=$('#keyDlgB');b.innerHTML='';for(const [t,fn] of btns){const x=document.createElement('button');x.className='btn'+(t==='Vahvista'||t==='Palauta'?' pri':'');x.textContent=t;x.onclick=()=>{d.hidden=true;capture=null;if(fn)fn();};b.appendChild(x);}}
+/* v3.20 käyttäjä: Enter vahvistaa aina varmistusikkunan (ensisijainen nappi, muuten ensimmäinen); ei näppäimen sidonnassa eikä heti avautumisen jälkeen (sama painallus) */
+addEventListener('keydown',e=>{const d=$('#keyDlg');if(!d||d.hidden||capture||(e.key!=='Enter'&&e.code!=='NumpadEnter')||e.repeat)return;if(performance.now()-(d._at||0)<150)return;
+  const b=d.querySelector('#keyDlgB .btn.pri')||d.querySelector('#keyDlgB .btn');if(b){e.preventDefault();e.stopImmediatePropagation();b.click();}},true);
 function startCapture(a){const nm=ACTIONS.find(x=>x[0]===a)[1];capture={a,code:null};keyDialog(`Paina uutta näppäintä: ${nm}`,[['Peruuta',null]],'Esc peruu. Varatut ja jo käytössä olevat näppäimet hylätään.');}
 addEventListener('keydown',e=>{if(!capture||capture.code)return;e.preventDefault();e.stopImmediatePropagation();
   if(e.code==='Escape'){$('#keyDlg').hidden=true;capture=null;return;}

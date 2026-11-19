@@ -886,6 +886,12 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.20 – intro ja vinkit
+- Enter vahvistaa varmistusikkunat. Aloita seikkailu aloittaa ensimmäisen maailman yhdellä napsautuksella.
+- Intro: usva näkyy alusta asti ja lipuu sivulta paikalleen; pilvet häipyvät vasta kun kamera on alhaalla. Ensimmäistä introa ei voi ohittaa, myöhemmin vain hiiren
+  napsautuksella. Hahmo ei liiku latausruudun eikä intron aikana.
+- Työkaluvinkit heti valmistuksen jälkeen; lyhyet vinkit katoavat nopeammin. Tasonimike näkyy repussa tasomittarin yläpuolella.
+
 ## v3.19 – valikon ulkoasu
 - Päävalikon taustakuvissa vain neljä hiljaista ääntä: ukkosen salamat myrskykuvissa, ahjon alasin, nuotion tuli ja heinäsirkat. Äänet häipyvät pehmeästi ennen kuvan vaihtoa.
 - Valikon napeissa jokaisella omat, himmeämmät puunsyyt; ruskeat valikot ja napit hieman tummempia, kevyt pyöreä liukuväri nurkkaan.

@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.19, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.20, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +434,21 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.20 (intro, ohitus, napit, vinkit – käyttäjä 19.11.)
+- **Enter vahvistaa aina varmistusikkunan** (ensisijainen nappi, muuten ensimmäinen; ei näppäimen sidonnassa eikä 150 ms sisällä avautumisesta).
+- **Aloita seikkailu korjattu (KORJAUKSET 92):** pito-napiksi muuttunut Uusi maailma ei käynnistynyt `.click()`:llä. Nyt napsautus aloittaa ensimmäisen maailman suoraan
+  (`NEWW.go`); olemassa olevan maailman kanssa nappi on "Jatka seikkailua" ja avaa viimeisimmän.
+- **Intron usva koko ajan:** usvapallot syntyvät heti intron alussa syöksyn reitille (yläkameran paikka t = 4 s ennustetaan), tulevat hiljaa sivulta 4,4 s:ssa hidastuen
+  ja lipuvat sitten ohi; häivytys sisään 1,6 s; häipyvät vasta kun kamera on lähes alhaalla (k > 0,82). Pilvimatto (matalat esiasetukset) häipyy vasta 14–65 m korkeudella.
+- **Intron ohitus:** näppäimet eivät ohita introa eivätkä liikuta hahmoa; ensimmäistä introa (ei `hiidenmaa_introSeen` eikä muita maailmoja) ei voi ohittaa ollenkaan,
+  myöhemmin vain hiiren napsautuksella (0,6 s alusta). Ohjeteksti "Ohita: napsauta hiirellä" (ensimmäisessä piilossa).
+- **Ei liikettä latausruudussa:** `ldBusy` (`window.__ldBusy`, asetetaan `__ldShow`:ssa, nollataan häivytyksessä, turvaraja 60 s) estää näppäimet ja napsautukset latausruudun ajan, `keysClear` nollaa painallukset intron alussa ja lopussa sekä tallennuksen latauksen jälkeen.
+- **Äänet:** latausruudun ääni vielä −20 % (0,8 → 0,64), riimuvilinä (riimusiirtymä) −40 %.
+- **Vinkit:** työkaluvinkit (vasara, jousi, lapio/kuokka, kirves) tulevat heti kun työkalu on repussa ja valikot suljetaan (ennen vasta käteen otettuna), lisäohje "Ota se käteen
+  pikapaikan numerolla". Lyhyet vinkit lähtevät nopeammin (1,2 s + 0,27 s/sana, vähintään 2,6 s).
+- **Tasonimike** näkyy vain kun reppu on auki, tasomittarin yläpuolella; muuten HUDin tasolaatikko kuten ennen.
+- **Testi:** intro 6 kertaa (Low, Medium, High+ × 2): kameran kiihtyvyys, usvan peittävyyden muutosnopeus, pilvien poistuminen, ei virheitä (`t314/intro.mjs`).
 
 ### v3.19 (valikon kuvien äänet karsittu, napit ja ruskeat valikot – käyttäjä 19.11.)
 - **Käyttäjä muutti linjaa: 2D-taustakuviin vain neljä ääntä, lyhyitä, hiljaisia ja harvoin.** Ukkosen salamat myrskykuviin (Myrsky: välähdyksen perään 0,3–1,6 s,

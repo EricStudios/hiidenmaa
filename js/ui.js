@@ -126,7 +126,7 @@ function updateHUD(dt){
   hp.firstChild.style.width=(P.hp/maxHp()*100)+'%';hp.lastChild.textContent=`TERVEYS ${Math.ceil(P.hp)}/${maxHp()}`;hp.classList.toggle('low',P.hp<maxHp()*.25);
   st.firstChild.style.width=(P.stam/maxStam()*100)+'%';st.lastChild.textContent=`KESTÄVYYS ${Math.floor(P.stam)}`;
   hu.firstChild.style.width=P.hunger+'%';hu.lastChild.textContent=`KYLLÄISYYS ${Math.floor(P.hunger)}`;hu.classList.toggle('low',P.hunger<15);
-  {const li=lvlInfo(),h=`Taso ${li.L} <small class="lvlT">${lvlTitle(li.L)}</small><span class="track"><i style="width:${li.need?li.xp/li.need*100:100}%"></i></span>`;const lb=$('#lvlbox');if(lb._h!==h){lb._h=h;lb.innerHTML=h;}}   /* v3.16 nimike HUDissa */
+  {const li=lvlInfo(),h=`<small class="lvlT">${lvlTitle(li.L)}</small>Taso ${li.L}<span class="track"><i style="width:${li.need?li.xp/li.need*100:100}%"></i></span>`;const lb=$('#lvlbox');if(lb._h!==h){lb._h=h;lb.innerHTML=h;}lb.classList.toggle('showT',openPanel==='inv');}   /* v3.16 nimike; v3.20 käyttäjä: näkyy vain repussa, tasomittarin yläpuolella */
   const wt=invWeight();const we=$('#weight');we.textContent=`Paino ${wt.toFixed(0)}/${MAXW}`;we.classList.toggle('over',wt>MAXW);
   const t=lookTarget,pr=$('#prompt');
   if(t&&!P.dead&&hintL3()){const l=t.kind==='it'?t.it.label():t.label;pr.innerHTML=`<kbd>E</kbd>${l}`;}else pr.innerHTML='';   // v3.08 porras 3: ei E-kehotteita

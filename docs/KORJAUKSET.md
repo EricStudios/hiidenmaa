@@ -656,3 +656,9 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   pitkäksi (5–14 s), vaikka ääntä ei vielä ollut ladattu → pitkä hiljaisuus, (4) uusi suoratoisto joka kerta.
 - **Sääntö:** ajastettu ääni nollaa pitkän välin vain, jos ääni oikeasti soi (funktio palauttaa true), muuten lyhyt uusi yritys. Pitkät suoratoistot pidetään tallessa ja
   ladataan valmiiksi. Testaa toisto headless-selaimessa `--autoplay-policy=no-user-gesture-required` (gain-arvo, `el.paused`, `currentTime` etenee).
+
+## 92. Aloita seikkailu ei tehnyt mitään + nimitörmäys tkTake (v3.20)
+- Sankarinappi kutsui `$('#bNewWorld').click()`, mutta v3.13:sta Uusi maailma on pito-nappi (`holdBtn`, pointer-tapahtumat) – `.click()` ei käynnistä sitä. Korjaus:
+  uuden maailman aloitus talletetaan `NEWW.go`:hon ja sankarinappi kutsuu sitä suoraan.
+- Vinkkien apurille annettu nimi `tkTake` oli jo tackle.js:ssä (KORJAUKSET 85/88 toistui) → nimetty `tipTake`/`tipHas`/`tipEq`.
+- **Sääntö:** kun nappi muutetaan pito-napiksi, etsi kaikki sen `.click()`-kutsut (`grep -n "IDNIMI').click\|IDNIMI\").click"`).
