@@ -131,13 +131,52 @@ function updateStory(dt){
 // onnistuu) ja sänky sisällä, istuintukki ja säkki (löydetty säiliö). Paikka valitaan kasvillisuuden sijoittelun JÄLKEEN puista ja kivistä
 // vapaalta tasaiselta maalta (≥ 60 m muista paikoista), joten maiseman numerointi ja vanhat tallennukset eivät muutu. Rakennelmat ovat
 // tavallisia rakennusosia (tallentuvat, `flags.camps` = luotu); vanhaan tallennukseen ne luodaan latauksessa.
-/* v2.99 halkopinon paikka: ei palkin (istuin), teltan, nuotion, telineen, säkin eikä ämpärin päällä (ennen kiinteä siirtymä → saattoi osua palkkiin) */
-function campPileSpot(c){const A=c.rot*Math.PI/4,fw=(d,s)=>[c.x+Math.sin(A)*d+Math.cos(A)*s,c.z+Math.cos(A)*d-Math.sin(A)*s],[bx0,bz0]=fw(1.6,1.4),B=((c.rot+2)%8)*Math.PI/4,ex=Math.cos(B)*1.3,ez=-Math.sin(B)*1.3;
-  const segD=(x,z)=>{const vx=2*ex,vz=2*ez,t=clamp(((x-bx0+ex)*vx+(z-bz0+ez)*vz)/(vx*vx+vz*vz),0,1);return Math.hypot(x-(bx0-ex+vx*t),z-(bz0-ez+vz*t));};
-  const [tx,tz]=fw(-3.2,0),circ=[[tx,tz,2.1],[c.x,c.z,1.1],[c.x+1.6,c.z+2.4,1.1],[c.x+2.2,c.z-1.6,.6],[c.x+.9,c.z-1.1,.4]],ok=(x,z)=>segD(x,z)>1.1&&circ.every(([qx,qz,r])=>Math.hypot(x-qx,z-qz)>r+.85);
-  if(ok(c.x-2.4,c.z+1.8))return [c.x-2.4,c.z+1.8];
-  for(const R of [3,3.6,4.2])for(let i=0;i<16;i++){const a=i/16*Math.PI*2,x=c.x+Math.sin(a)*R,z=c.z+Math.cos(a)*R;if(ok(x,z)&&Math.abs(terrainH(x,z)-terrainH(c.x,c.z))<.6)return [x,z];}
-  return [c.x-2.4,c.z+1.8];}
+/* v3.24 käyttäjä: LEIRIN ASETTELU leirin omassa suunnassa (c.rot): halkopino aina teltan kylkeä vasten (tukit teltan suuntaisesti), muut esineet
+   (istuintukki jalkoineen, säkki, kuivausteline, ämpäri, oksat/luut) satunnaisesti nuotion ympärille satunnaiseen suuntaan. Mikään ei mene teltan, oviaukon,
+   nuotion eikä toistensa päälle (campFree), ja kaikki seisoo maassa (campGround: alin maastokohta jalanjäljen alla, jalat ulottuvat sinne – ei leijumista).
+   Vanha istuin (rakennusosa palkki 0,2 m maan yllä, "leijuva tukki") poistetaan campSyncissä; tilalle staattinen penkki. */
+const CAMP_TENT_D=-3.2,_campTmp=[];
+function campFrame(c){const A=c.rot*Math.PI/4,sn=Math.sin(A),cs=Math.cos(A);return {A,W:(d,s)=>[c.x+sn*d+cs*s,c.z+cs*d-sn*s],L:(x,z)=>{const dx=x-c.x,dz=z-c.z;return [sn*dx+cs*dz,cs*dx-sn*dz];}};}
+function campFree(c,F,busy,x,z,rad){const [d,s]=F.L(x,z);
+  if(Math.abs(d-CAMP_TENT_D)<TENT.L/2+.35+rad&&Math.abs(s)<TENT.W/2+.3+rad)return false;   // teltta (kiiloineen)
+  if(d>CAMP_TENT_D+TENT.L/2-.2&&d<CAMP_TENT_D+TENT.L/2+1.3+rad&&Math.abs(s)<1+rad)return false;   // oviaukko vapaaksi
+  if(Math.hypot(x-c.x,z-c.z)<1.05+rad)return false;   // nuotio
+  for(const b of busy)if(Math.hypot(x-b.x,z-b.z)<b.r+rad+.2)return false;
+  nodesNear(x,z,rad+.7,_campTmp);if(_campTmp.some(o=>o.alive!==false))return false;   // ei pensaiden, kivien eikä oksien päälle
+  return Math.abs(terrainH(x,z)-c.y)<.6;}
+function campPlace(c,F,busy,r,rad,d0,d1){for(let t=0;t<80;t++){const a=r()*TAU,d=d0+r()*(d1-d0),x=c.x+Math.sin(a)*d,z=c.z+Math.cos(a)*d;if(campFree(c,F,busy,x,z,rad)){busy.push({x,z,r:rad});return {x,z,a};}}
+  for(let t=0;t<64;t++){const a=t/64*TAU,d=d1+.6+(t%4)*.5,x=c.x+Math.sin(a)*d,z=c.z+Math.cos(a)*d;if(campFree(c,F,busy,x,z,rad)){busy.push({x,z,r:rad});return {x,z,a};}}
+  const x=c.x+d1+1.5,z=c.z;busy.push({x,z,r:rad});return {x,z,a:0};}
+// alin maastokohta jalanjäljen (säde rad) alla → esine ei leiju rinteessä
+function campGround(x,z,rad){let m=terrainH(x,z);for(let i=0;i<8;i++){const a=i/8*TAU;m=Math.min(m,terrainH(x+Math.cos(a)*rad,z+Math.sin(a)*rad));}return m;}
+function campDress(c,r){const F=campFrame(c),busy=[];
+  // halkopino teltan kylkeä vasten, tukit teltan suuntaisesti
+  {const side=r()<.5?-1:1,[wx,wz]=F.W(CAMP_TENT_D,side*(TENT.W/2+.15+.62)),wy=campGround(wx,wz,.55),wp=new THREE.Group();wp.position.set(wx,wy,wz);wp.rotation.y=F.A;busy.push({x:wx,z:wz,r:.7});
+    const lw=mat(0x6b4a2e),cut=mat(0xc08a52);c.pileLogs=[];wp.userData.noMerge=1;   /* v3.00 ei yhdistetä staattisiin (mergeStatics): muuten rikottu pino jäi näkyviin haamuna (KORJAUKSET 74) */
+    for(let row=0;row<3;row++)for(let q=0;q<4-row;q++){const lg=new THREE.Group(),cy=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,1.1,7),lw);cy.rotation.x=Math.PI/2;cy.castShadow=true;lg.add(cy);lg.position.set((q-(3-row)/2)*.23,.11+row*.2,0);wp.add(lg);c.pileLogs.push(lg);
+      for(const e of [-.555,.555]){const cap=new THREE.Mesh(new THREE.CircleGeometry(.105,7),cut);cap.position.set(0,0,e);cap.rotation.y=e>0?0:Math.PI;lg.add(cap);}}statics.add(wp);
+    const sA=Math.abs(Math.sin(F.A)),cA=Math.abs(Math.cos(F.A)),hx=.5*cA+.58*sA,hz=.5*sA+.58*cA;
+    c.pile={x:wx,y:wy,z:wz,g:wp,col:addBox(wx-hx,wy,wz-hz,wx+hx,wy+.62,wz+hz,'static')};}   // v2.98 kiinteä, kirveellä rikottava (campPileHit)
+  // istuintukki jaloilla nuotion vieressä, tukki nuotion kehän suuntaisesti
+  {const o=campPlace(c,F,busy,r,.85,1.7,2.3),ya=o.a+Math.PI/2+(r()-.5)*.35,gy=campGround(o.x,o.z,.8),top=Math.max(terrainH(o.x,o.z),gy)+.42,g=new THREE.Group(),wd=MAT.wood||mat(0x7a5434),lg=mat(0x6b4a2e);
+    g.position.set(o.x,gy,o.z);g.rotation.y=ya;const seat=new THREE.Mesh(new THREE.CylinderGeometry(.15,.16,1.6,8),lg);seat.rotation.z=Math.PI/2;seat.position.y=top-gy;seat.castShadow=true;seat.receiveShadow=true;g.add(seat);
+    for(const e of [-.82,.82]){const cap=new THREE.Mesh(new THREE.CircleGeometry(.15,8),mat(0xc08a52));cap.position.set(e,top-gy,0);cap.rotation.y=e>0?Math.PI/2:-Math.PI/2;g.add(cap);}
+    for(const lx of [-.55,.55])for(const sd of [-1,1]){const h=top-gy+.05,leg=bx(.07,h/Math.cos(.28),.07,lg,lx,h/2-.04,sd*Math.tan(.28)*h/2);leg.rotation.x=-sd*.28;g.add(leg);}   // A-jalat maahan asti
+    statics.add(g);const cs=Math.abs(Math.cos(ya)),sn=Math.abs(Math.sin(ya)),hx=.82*cs+.2*sn,hz=.82*sn+.2*cs;addBox(o.x-hx,gy,o.z-hz,o.x+hx,top+.15,o.z+hz,'static');c.bench={x:o.x,z:o.z,y:top};}
+  // säkki satunnaiseen suuntaan
+  {const o=campPlace(c,F,busy,r,.4,2.2,3.6),sy=campGround(o.x,o.z,.3),key='camp:'+c.k,sk=new THREE.Group();sk.position.set(o.x,sy,o.z);sk.rotation.y=r()*TAU;
+    sk.add(bx(.55,.52,.42,mat(0x8a7454),0,.26,0),bx(.2,.12,.2,mat(0x6a5434),0,.57,0));statics.add(sk);addCircle(o.x,o.z,.32,sy,sy+.63,'static');c.sack={x:o.x,z:o.z};   // säkki (v2.63 kiinteä)
+    interactables.push({x:o.x,y:sy+.5,z:o.z,r:2.4,label:()=>foundEmpty(key)?'Säkki (tyhjä)':'Tutki hylätty säkki',use:()=>{const first=!fo('fc')[key];openFound(key,'Hylätty säkki',[['liha',2],['nahka',2],['soihtu',1],['puu',6],['nuolet',8]]);if(first)addXp(15,'Hylätty leiri tutkittu');}});}
+  // nahankuivausteline (taljoja), satunnainen suunta
+  {const o=campPlace(c,F,busy,r,1,3.2,4.8),rk=new THREE.Group(),rx=o.x,rz=o.z,ra=r()*TAU,ry=campGround(rx,rz,.85);rk.position.set(rx,ry,rz);rk.rotation.y=ra;rk.userData.noMerge=1;   /* v3.00 otetut taljat katoavat (ei yhdistetä) */const st=mat(0x5a3d22),hide=mat(0x9a6a44);
+    const ph=1.5+(terrainH(rx,rz)-ry);for(const sx2 of [-.8,.8])rk.add(bx(.07,ph,.07,st,sx2,ph/2,0));rk.add(bx(1.7,.06,.06,st,0,ph-.05,0));const h1=bx(.7,.8,.03,hide,-.35,ph-.45,.02);h1.rotation.z=.08;rk.add(h1);const h2=bx(.55,.65,.03,mat(0x7a5232),.42,ph-.38,.02);h2.rotation.z=-.1;rk.add(h2);statics.add(rk);
+    for(const sx2 of [-.8,.8]){const px=rx+Math.cos(ra)*sx2,pz=rz-Math.sin(ra)*sx2;addCircle(px,pz,.09,ry,ry+ph,'static');}   // v2.98 kiinteät tolpat ja varastettavat taljat (campRackSteal)
+    const rkey='rack:'+c.k;c.rack={x:rx,y:ry,z:rz,hides:[h1,h2],key:rkey};
+    interactables.push({x:rx,y:ry+1.1,z:rz,r:2.2,off:()=>!!fo('campX')[rkey],label:()=>'Ota taljat kuivaustelineestä',use:()=>campRackSteal(c)});}
+  // kaatunut ämpäri ja oksia/luita maassa
+  {const o=campPlace(c,F,busy,r,.25,1.5,3.4),by=campGround(o.x,o.z,.15),bu=new THREE.Mesh(new THREE.CylinderGeometry(.16,.13,.3,9,1,true),Object.assign(mat(0x7b5434),{side:THREE.DoubleSide}));
+    bu.position.set(o.x,by+.14,o.z);bu.rotation.set(0,r()*TAU,Math.PI/2.2,'YXZ');bu.castShadow=true;statics.add(bu);addCircle(o.x,o.z,.18,by,by+.3,'static');   /* v2.98 kiinteä ämpäri */
+    for(let q=0;q<4;q++){let qx=0,qz=0;for(let t=0;t<20;t++){qx=c.x+(r()-.5)*4.4;qz=c.z+(r()-.5)*4.4;if(campFree(c,F,busy,qx,qz,.1))break;}const o2=bx(.05,.05,.5,mat(q%2?0xe2dccb:0x6b4527),qx,campGround(qx,qz,.25)+.025,qz,false);o2.rotation.y=r()*3;statics.add(o2);}}}
 const CAMPS=(function(){const r=mulberry32(seedMix(97531+MAP_ID*7919)),out=[],n=1+(r()<.5?1:0),tmp=[];
   // ensin tiukat ehdot (niitty/koivikko/metsä/kangas, tasainen, 60 m muista paikoista), jos ei löydy, väljemmät (vuoriset kartat)
   for(let t=0;t<8000&&out.length<n;t++){const loose=t>=4000,x=(r()-.5)*HALF*1.6,z=(r()-.5)*HALF*1.6,h=terrainH(x,z);if(h<2||h>(loose?30:18))continue;
@@ -146,23 +185,7 @@ const CAMPS=(function(){const r=mulberry32(seedMix(97531+MAP_ID*7919)),out=[],n=
     let far=true;for(const k in LOC){const L=LOC[k];if(dist2(x,z,L.x,L.z)<(loose?35:60)**2){far=false;break;}}for(const c of out)if(dist2(x,z,c.x,c.z)<(loose?80:120)**2)far=false;if(!far)continue;
     nodesNear(x,z,7,tmp);if(tmp.some(o=>o.def.kind==='tree'||o.def.kind==='rock'))continue;
     const k='camp'+(out.length+1);LOC[k]={x,z,name:'Hylätty leiri',kind:'camp'};out.push({k,x,z,y:h,rot:(r()*8)|0});}
-  for(const c of out){const sx=c.x+2.2,sz=c.z-1.6,sy=terrainH(sx,sz),key='camp:'+c.k,sk=new THREE.Group();sk.position.set(sx,sy,sz);
-    sk.add(bx(.55,.5,.42,mat(0x8a7454),0,.25,0),bx(.2,.12,.2,mat(0x6a5434),0,.55,0));statics.add(sk);addBox(sx-.28,sy,sz-.21,sx+.28,sy+.61,sz+.21,'static');   // säkki (v2.63 kiinteä)
-    // v1.04 leirin yksityiskohdat: puupino, nahankuivausteline (taljoja), kaatunut ämpäri ja luita/oksia maassa
-    {const [wx,wz]=campPileSpot(c),wp=new THREE.Group(),wy=terrainH(wx,wz);wp.position.set(wx,wy,wz);const lw=mat(0x6b4a2e),cut=mat(0xc08a52);c.pileLogs=[];wp.userData.noMerge=1;   /* v3.00 ei yhdistetä staattisiin (mergeStatics): muuten rikottu pino jäi näkyviin haamuna (KORJAUKSET 74) */
-      for(let row=0;row<3;row++)for(let q=0;q<4-row;q++){const lg=new THREE.Group(),cy=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,1.1,7),lw);cy.rotation.x=Math.PI/2;cy.castShadow=true;lg.add(cy);lg.position.set((q-(3-row)/2)*.23,.11+row*.2,0);wp.add(lg);c.pileLogs.push(lg);
-        for(const e of [-.555,.555]){const cap=new THREE.Mesh(new THREE.CircleGeometry(.105,7),cut);cap.position.set(0,0,e);cap.rotation.y=e>0?0:Math.PI;lg.add(cap);}}statics.add(wp);
-      c.pile={x:wx,y:wy,z:wz,g:wp,col:addBox(wx-.5,wy,wz-.58,wx+.5,wy+.62,wz+.58,'static')};}   // v2.98 kiinteä, kirveellä rikottava (campPileHit)
-
-    {const rk=new THREE.Group(),rx=c.x+1.6,rz=c.z+2.4,ry=terrainH(rx,rz),ra=r()*3;rk.position.set(rx,ry,rz);rk.rotation.y=ra;rk.userData.noMerge=1;   /* v3.00 otetut taljat katoavat (ei yhdistetä) */const st=mat(0x5a3d22),hide=mat(0x9a6a44);
-      for(const sx2 of [-.8,.8])rk.add(bx(.07,1.5,.07,st,sx2,.75,0));rk.add(bx(1.7,.06,.06,st,0,1.45,0));const h1=bx(.7,.8,.03,hide,-.35,1.05,.02);h1.rotation.z=.08;rk.add(h1);const h2=bx(.55,.65,.03,mat(0x7a5232),.42,1.12,.02);h2.rotation.z=-.1;rk.add(h2);statics.add(rk);
-      // v2.98 kiinteät tolpat ja varastettavat taljat (campRackSteal)
-      for(const sx2 of [-.8,.8]){const px=rx+Math.cos(ra)*sx2,pz=rz-Math.sin(ra)*sx2;addCircle(px,pz,.09,ry,ry+1.5,'static');}
-      const rkey='rack:'+c.k;c.rack={x:rx,y:ry,z:rz,hides:[h1,h2],key:rkey};
-      interactables.push({x:rx,y:ry+1.1,z:rz,r:2.2,off:()=>!!fo('campX')[rkey],label:()=>'Ota taljat kuivaustelineestä',use:()=>campRackSteal(c)});}
-    {const bu=new THREE.Mesh(new THREE.CylinderGeometry(.16,.13,.3,9,1,true),Object.assign(mat(0x7b5434),{side:THREE.DoubleSide}));const bx2=c.x+.9,bz=c.z-1.1;bu.position.set(bx2,terrainH(bx2,bz)+.14,bz);bu.rotation.z=Math.PI/2.2;bu.castShadow=true;statics.add(bu);addCircle(bx2,bz,.18,terrainH(bx2,bz),terrainH(bx2,bz)+.3,'static');   /* v2.98 kiinteä ämpäri */
-      for(let q=0;q<4;q++){const qx=c.x+(r()-.5)*3,qz=c.z+(r()-.5)*3;const o=bx(.05,.05,.5,mat(q%2?0xe2dccb:0x6b4527),qx,terrainH(qx,qz)+.03,qz,false);o.rotation.y=r()*3;statics.add(o);}}
-    interactables.push({x:sx,y:sy+.5,z:sz,r:2.4,label:()=>foundEmpty(key)?'Säkki (tyhjä)':'Tutki hylätty säkki',use:()=>{const first=!fo('fc')[key];openFound(key,'Hylätty säkki',[['liha',2],['nahka',2],['soihtu',1],['puu',6],['nuolet',8]]);if(first)addXp(15,'Hylätty leiri tutkittu');}});}
+  for(const c of out)campDress(c,r);
   return out;})();
 /* v2.98 hylätyn leirin halkopino: kirveellä rikottava (CAMP_PILE_HP), antaa CAMP_PILE_WOOD puuta; tukit katoavat sitä mukaa kuin pino vaurioituu.
    Tila flags.campX['pile:'+k] = jäljellä oleva kestävyys (0 = rikottu). Kuivausteline: taljat voi ottaa kerran (nahka / naru / nahkavaatteet). */
@@ -172,7 +195,9 @@ const CAMP_BED_Z=-.55,campBedPos=(tx,tz,rot)=>{const A=rot*Math.PI/4;return [tx+
 function campSync(){const F=fo('campX');
   for(const t of pieces.filter(q=>q.t==='teltta'&&CAMPS.some(c=>Math.hypot(q.x-c.x,q.z-c.z)<5))){const bd=pieces.find(q=>q.t==='sanky'&&Math.hypot(q.x-t.x,q.z-t.z)<.05);
     if(bd){const [x,z]=campBedPos(t.x,t.z,t.rot),hp=bd.hp,data=bd.data;removePiece(bd);addPiece('sanky',x,terrainH(x,z),z,t.rot,hp,data);}}for(const c of CAMPS){if(c.pile){const hp=F['pile:'+c.k]??CAMP_PILE_HP;campPileVis(c,hp);}if(c.rack){const t=!!F[c.rack.key];for(const h of c.rack.hides)h.visible=!t;}}
-  for(const p of pieces)if(p.t==='nuotio'&&CAMPS.some(c=>Math.hypot(p.x-c.x,p.z-c.z)<.6))p.data.camp=1;}   // vanhojen tallennusten leirinuotiot
+  for(const p of pieces)if(p.t==='nuotio'&&CAMPS.some(c=>Math.hypot(p.x-c.x,p.z-c.z)<.6))p.data.camp=1;
+  // v3.24: vanhojen tallennusten leiri-istuin (palkki 0,2 m maan yllä = leijuva tukki) pois – tilalle staattinen penkki jaloilla
+  for(const c of CAMPS){const [lx,lz]=campFrame(c).W(1.6,1.4);for(const p of pieces.filter(q=>q.t==='palkki'&&Math.hypot(q.x-lx,q.z-lz)<.08&&q.rot===(c.rot+2)%8&&Math.abs(q.y-terrainH(lx,lz)-.2)<.05))removePiece(p);}}   // vanhojen tallennusten leirinuotiot
 function campPileVis(c,hp){const L=c.pileLogs,n=Math.ceil(L.length*hp/CAMP_PILE_HP);L.forEach((g,i)=>g.visible=i<n);
   if(hp<=0&&c.pile.col){gridRemove(c.pile.col);c.pile.col=null;}}
 function campPileHit(w,fx,fz){const F=fo('campX');for(const c of CAMPS){const pl=c.pile;if(!pl||!pl.col)continue;const dx=pl.x-P.pos.x,dz=pl.z-P.pos.z,d=Math.hypot(dx,dz)-.55;
@@ -186,8 +211,7 @@ function campRackSteal(c){const F=fo('campX'),k=c.rack.key;if(F[k])return;F[k]=1
 function ensureCamps(){campSync();if(flags.camps)return;flags.camps=1;
   for(const c of CAMPS){const a=c.rot*Math.PI/4,fw=(d,s)=>[c.x+Math.sin(a)*d+Math.cos(a)*s,c.z+Math.cos(a)*d-Math.sin(a)*s];
     const [tx,tz]=fw(-3.2,0);addPiece('teltta',tx,terrainH(tx,tz),tz,c.rot);{const [bx3,bz3]=campBedPos(tx,tz,c.rot);addPiece('sanky',bx3,terrainH(bx3,bz3),bz3,c.rot);}
-    addPiece('nuotio',c.x,terrainH(c.x,c.z),c.z,0,undefined,{fuel:0,burn:0,camp:1});
-    const [lx,lz]=fw(1.6,1.4);addPiece('palkki',lx,terrainH(lx,lz)+.2,lz,(c.rot+2)%8);}}
+    addPiece('nuotio',c.x,terrainH(c.x,c.z),c.z,0,undefined,{fuel:0,burn:0,camp:1});}}   // v3.24: istuin on staattinen penkki (campDress), ei enää leijuvaa palkkia
 
 /* ---------------- KIVIRÖYKKIÖT (v1.03, käyttäjän pyyntö) ---------------- */
 // Perinteiset avoimet kivikasat, joissa arkku näkyy (v0.98:n tyyli): kivirengas kahdella vastakkaisella kulkuaukolla, matala laatta ja arkku

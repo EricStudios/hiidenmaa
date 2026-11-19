@@ -10,7 +10,7 @@ const ACTIONS=[
   ['interact','Poimi, avaa, käytä','Toiminnot','KeyE'],
   ['build','Rakennusvalikko (vasara)','Rakentaminen','KeyB'],['rot','Käännä rakennetta (Shift = asento)','Rakentaminen','KeyR'],['snap','Sivuttaiskohdistus','Rakentaminen','KeyG'],['vsnap','Pystykohdistus','Rakentaminen','KeyH'],
   ['up','Nosta haamua (rakentaessa) / pudota pikapaikasta (Shift = koko pino)','Rakentaminen','KeyQ'],['down','Laske haamua','Rakentaminen','KeyZ'],['remove','Pura','Rakentaminen','KeyX'],['repair','Korjaa (vasara) / tarkastele esinettä','Rakentaminen','KeyF'],
-  ['menu','Päävalikko / sulje valikot','Valikot ja paneelit','KeyP'],['inv','Reppu ja valmistus','Valikot ja paneelit','Tab'],['map','Kartta','Valikot ja paneelit','KeyM'],['prog','Taso, saavutukset, tavoitteet','Valikot ja paneelit','KeyJ'],['log','Viimeiset ilmoitukset','Valikot ja paneelit','KeyL'],['hud','Tehtävä ja tavoite näkyviin / piiloon','Valikot ja paneelit','KeyT'],
+  ['menu','Päävalikko / sulje valikot','Valikot ja paneelit','KeyP'],['inv','Reppu ja valmistus','Valikot ja paneelit','Tab'],['map','Kartta','Valikot ja paneelit','KeyM'],['prog','Taso, saavutukset, tavoitteet','Valikot ja paneelit','KeyJ'],['book','Kalastajan kirja','Valikot ja paneelit','KeyK'],['log','Viimeiset ilmoitukset','Valikot ja paneelit','KeyL'],['hud','Tehtävä ja tavoite näkyviin / piiloon','Valikot ja paneelit','KeyT'],
   ['minizoom','Minikartan zoom','Näkymä','KeyN'],   // v2.18: K (koko näyttö) poistettu kokonaan
 ];
 const BIND_DEF={};for(const a of ACTIONS)BIND_DEF[a[0]]=a[3];
@@ -37,11 +37,11 @@ function validateKey(action,code){
 // Oletukset = taso, jolla suurin osa pelaa. Varjot: sunRes = auringon varjokartta (px), shDist = auringon varjoalueen säde (m),
 // shRate = varjojen päivitystiheys, ptRes = tulien/soihtujen varjokartta (px). res = 3D-resoluution kerroin ('native' = näytön tarkkuus).
 const SET_DEF={actMsg:true,res:1,shadow:'high',sunRes:2048,shDist:55,shRate:'normal',ptShadow:true,ptRes:384,autoQ:true,sway:true,grass:1,tallGrass:false,weeds:false,particles:1,detail:'high',terrFine:false,biomeBlend:1,bldDetail:true,
-  renderDist:165,lights:6,lightDist:60,lightRange:17,mist:.6,clouds:1,drop3d:true,blood:1,bloodFx:true,keyHints:true,shafts:true,flare:false,wheelHotbar:false,zoom:5.5,sound:true,invY:false,
+  renderDist:165,lights:6,lightDist:60,lightRange:17,mist:.6,clouds:1,drop3d:true,blood:1,bloodFx:true,keyHints:true,helpTxt:true,actHints:true,alwaysBtnHints:false,oldLoad:false,intro2d:false,introPlain:false,shafts:true,flare:false,wheelHotbar:false,zoom:5.5,sound:true,invY:false,
   autoAll:true,autoRes:true,autoFx:true,autoDist:true,fps:'off',terrLod:false,mergeSt:true,shFar:false,treeLod:80,shOpt:true,shLod:40,sens:1,curSens:1,hudMode:0,hudScale:1,chatScale:1,raysQ:1,creVol:1,plVol:1,uiVol:1,volMaster:1,musicVol:1,ambVol:1,notifVol:1,btnVol:1,tutNext:false,musicOn:true,sfxOn:true,notifSnd:true,menuBgSnd:true,biomeSnd:true,realmSnd:true,ldSndM:'all',_sv:1,arrowLight:false,menuBg:'img',shUltra:'off',menuAnimKeep:false,waterFx:false,waterOpt:true,uwFx:false,waterMega:false,smokeUltra:false,noAuto:false,terrFineX:0,waterSmooth:false,torchSharp:false,waterHQ:false,shoreSpray:false};   // hudMode v1.18: 0 molemmat, 1 vain tehtävä, 2 vain tavoite, 3 piilossa   // v1.12 yleinen automaattisäätö (+ osa-alueet) ja FPS-näyttö
 // Asetussivujen avaimet (sivun "Palauta oletukset" palauttaa vain nämä)
 // v1.35 (lista 3, kohta 16): varjot ovat Grafiikka-sivun väliotsikko (ei omaa sivua).
-const SET_PAGES={gfx:['menuBg','res','autoAll','autoRes','renderDist','autoDist','fps','detail','terrFine','biomeBlend','grass','tallGrass','weeds','sway','clouds','lights','lightDist','lightRange','shafts','flare','raysQ','arrowLight','particles','mist','autoFx','bldDetail','drop3d','blood','bloodFx','waterFx','uwFx','waterOpt','shadow','sunRes','shDist','shRate','autoQ','ptShadow','ptRes','terrLod','mergeSt','shFar','treeLod','shOpt','shLod'],xgfx:['noAuto','shUltra','waterHQ','waterMega','shoreSpray','waterSmooth','smokeUltra','torchSharp','terrFineX'],ctl:['wheelHotbar','zoom','sens','curSens','invY','keyHints','tutNext','menuAnimKeep','hudScale','chatScale'],snd:['sound','musicOn','sfxOn','volMaster','musicVol','creVol','plVol','uiVol','ambVol','notifVol','btnVol','notifSnd','actMsg','biomeSnd','realmSnd','ldSndM','menuBgSnd']};
+const SET_PAGES={gfx:['menuBg','res','autoAll','autoRes','renderDist','autoDist','fps','detail','terrFine','biomeBlend','grass','tallGrass','weeds','sway','clouds','lights','lightDist','lightRange','shafts','flare','raysQ','arrowLight','particles','mist','autoFx','bldDetail','drop3d','blood','bloodFx','waterFx','uwFx','waterOpt','shadow','sunRes','shDist','shRate','autoQ','ptShadow','ptRes','terrLod','mergeSt','shFar','treeLod','shOpt','shLod','intro2d','introPlain'],xgfx:['noAuto','shUltra','waterHQ','waterMega','shoreSpray','waterSmooth','smokeUltra','torchSharp','terrFineX'],ctl:['wheelHotbar','zoom','sens','curSens','invY','alwaysBtnHints','helpTxt','keyHints','actHints','tutNext','menuAnimKeep','hudScale','chatScale'],snd:['sound','musicOn','sfxOn','volMaster','musicVol','creVol','plVol','uiVol','ambVol','notifVol','btnVol','notifSnd','actMsg','biomeSnd','realmSnd','ldSndM','menuBgSnd']};
 /* v1.35 (lista 3, kohta 17): esiasetukset Low … Ultra (8 tasoa, oletus Medium = SET_DEF:n grafiikka). Esiasetus muuttaa kaikki alla
    luetellut asetukset; Low–Medium kytkee automaattisäädön päälle, High–Ultra pois. Ultra ylittää aiemmat maksimit (piirtoetäisyys 520 m,
    ruoho Ultra, varjoalue 140 m, tulien varjot 1024). Jos jotain säädetään käsin, nimi on "Custom".
@@ -103,7 +103,7 @@ const HUD_MIN_W=1000,HUD_MIN_H=620;
 function hudK(){const k=clamp(+SET.hudScale||1,.6,1.5);return k>1?Math.max(1,Math.min(k,innerWidth/HUD_MIN_W,innerHeight/HUD_MIN_H)):k;}
 function hudScaleApply(){const k=hudK();document.documentElement.style.setProperty('--hudK',String(+k.toFixed(3)));document.documentElement.style.setProperty('--chatK',String(clamp(+SET.chatScale||1,.6,1.6)));}   // v2.99 --chatK: viestit (chat) ja ilmoitukset
 addEventListener('resize',()=>hudScaleApply());
-function applyGfx(){
+function applyGfx(){if(typeof hintApply==='function')hintApply();   /* v3.08 */
   hudScaleApply();
   if(typeof blendApply==='function')blendApply(+SET.biomeBlend||0);   // v2.65 biomien sekoitus
   if(+SET.terrFineX>8)SET.terrFineX='8';   // v2.65 16× poistettu (vanha tallennettu arvo → 8×)
@@ -171,7 +171,7 @@ const PFK={menuBg:v=>v==='3d'?2:0,res:v=>v==='native'?3:pfT(v,[.7,1]),autoAll:()
   drop3d:()=>0,bldDetail:v=>pfB(v)?1:0,shadow:v=>v==='high'?2:v==='low'?1:0,sunRes:v=>pfT(v,[2048,4096]),shDist:v=>pfT(v,[80,140]),shRate:v=>v==='fast'?2:v==='normal'?1:0,
   autoQ:()=>0,ptShadow:v=>pfB(v)?2:0,ptRes:v=>pfT(v,[384,1024]),terrLod:v=>pfB(v)?0:1,mergeSt:v=>pfB(v)?0:1,shFar:v=>pfB(v)?0:1,treeLod:v=>+v===0?2:pfT(v,[80,140]),
   shOpt:v=>pfB(v)?0:1,shLod:v=>+v===0?2:pfT(v,[55]),
-  noAuto:v=>pfB(v)?1:0,shUltra:v=>v==='off'||!v?0:3,torchSharp:v=>pfB(v)?2:0,waterHQ:v=>pfB(v)?2:0,waterMega:v=>pfB(v)?3:0,
+  noAuto:v=>pfB(v)?1:0,intro2d:v=>pfB(v)?0:1,introPlain:v=>pfB(v)?0:1,   /* v3.13 intron kevennykset */shUltra:v=>v==='off'||!v?0:3,torchSharp:v=>pfB(v)?2:0,waterHQ:v=>pfB(v)?2:0,waterMega:v=>pfB(v)?3:0,
   shoreSpray:v=>pfB(v)?1:0,waterSmooth:()=>0,smokeUltra:v=>pfB(v)?2:0,terrFineX:v=>pfT(v,[4,8])};
 const PF_X={autoAll:'keventää peliä tarvittaessa',autoRes:'keventää peliä tarvittaessa',autoDist:'keventää peliä tarvittaessa',autoFx:'keventää peliä tarvittaessa',autoQ:'keventää peliä tarvittaessa',
   biomeBlend:'lasketaan kerran, ei hidasta peliä',terrFine:'lasketaan taustalla kerran + yksi tekstuuri',terrFineX:'lasketaan taustalla kerran + iso tekstuuri',
@@ -186,6 +186,27 @@ function pfDot(k){const x=SET_PAGES.xgfx.includes(k),l=x?pfLvlRel(k):pfLvl(k);if
   return ` <span class="pf ${PF_C[l]}" data-pf="${l}" aria-label="${t}"><i></i><b class="pfTip">${t}</b></span>`;}
 const setRow=(label,key,opts,note='')=>row(label+pfDot(key)+(isDef(key)?' <span class="defTag">oletus</span>':''),opts?optSel('s_'+key,opts,SET[key],SET_DEF[key]):tglHTML('s_'+key,!!SET[key]),note);
 function bindSet(keys){for(const k of keys){const el=$('#s_'+k);if(!el||el.type==='range')continue;if(el.classList.contains('tgl')){el.onclick=()=>{SET[k]=!SET[k];saveSet();applyGfx();renderSettings();};continue;}el.onchange=()=>{const d=SET_DEF[k];SET[k]=el.type==='checkbox'?el.checked:typeof d==='boolean'?el.value==='true':(typeof d==='number'&&el.value!=='native'?+el.value:el.value);saveSet();applyGfx();renderSettings();};}}
+/* v3.08 käyttäjä: Extra-grafiikan pikanapit – Kevyin = kaikki pois (oletukset), Vaativin = kaikki raskaimmilleen (XGFX_MAX). Vaativin kysyy varmistuksen
+   ensimmäisellä kerralla (localStorage hiidenmaa_xmaxok). */
+const XGFX_MAX={noAuto:true,shUltra:'wide',waterHQ:true,waterMega:true,shoreSpray:true,waterSmooth:true,smokeUltra:true,torchSharp:true,terrFineX:'8'};
+function xgfxAll(max){const go=()=>{for(const k of SET_PAGES.xgfx)SET[k]=max&&k in XGFX_MAX?XGFX_MAX[k]:SET_DEF[k];saveSet();applyGfx();renderSettings();if(max)mSnd('esiasetus','ultra');};
+  let ok=false;try{ok=localStorage.getItem('hiidenmaa_xmaxok')==='1';}catch(e){}
+  if(!max||ok){go();return;}
+  keyDialog('Kaikki Extra-grafiikka raskaimmilleen?',[['Vahvista',()=>{try{localStorage.setItem('hiidenmaa_xmaxok','1');}catch(e){}go();}],['Peruuta',null]],'Vaativin kytkee päälle kaikki tämän sivun raskaat asetukset (erittäin tarkat varjot, mega-aallot, 8× maaston väritys ym.) ja sammuttaa automaattisäädön. Tämä on tarkoitettu vain hyvin tehokkaille koneille – peli voi hidastua selvästi. Kysymme tätä vain kerran.');}
+/* v3.08 käyttäjä: OHJEET JA VIHJEET kolmessa portaassa (Asetukset › Ohjaus, oletus kaikki näkyvissä). Ylempi porras piilottaa myös alemmat.
+   1 helpTxt: valikkojen .note-ohjetekstit (paitsi .keep) + kertavinkit (tipsTick). 2 keyHints: Sulje/Päävalikko-opasteet, #buildhint-näppäimet, jousen ohje.
+   3 actHints: E-kehote (#prompt). Piilotus kysyy varmistuksen (2: punainen, 3: punaisin). Body-luokat noHelp/noKeyH/noActH (hintApply). */
+function hintL1(){return SET.helpTxt!==false&&hintL2();}
+function hintL2(){return SET.keyHints!==false&&hintL3();}
+function hintL3(){return SET.actHints!==false;}
+function hintApply(){const b=document.body;if(!b)return;b.classList.toggle('noHelp',!hintL1());b.classList.toggle('noKeyH',!hintL2());b.classList.toggle('noActH',!hintL3());b.classList.toggle('showBH',!!SET.alwaysBtnHints);   /* v3.21 nappien ohjeet aina */if(typeof refreshKeyHints==='function')refreshKeyHints();}
+const HINT_CONF={helpTxt:['Piilotetaanko ohjetekstit?','Valikkojen selitysrivit ja ruudun yläreunan kertavinkit piilotetaan. Saat ne takaisin täältä (Asetukset › Ohjaus).',0],
+  keyHints:['Piilotetaanko näppäinvihjeet?','Myös näppäinvihjeet katoavat: Sulje: P / M, Päävalikko: P, B tai hiiren oikea: valitse rakennus ja rakentamisen näppäinohjeet. Myös ohjetekstit piilotetaan. Sinun pitää muistaa näppäimet itse.',1],
+  actHints:['Oletko IHAN varma? Kaikki vihjeet pois?','VAROITUS: tämä poistaa KAIKKI vihjeet – myös E-kehotteet kuten Avaa ovi, Istuta ja Avaa arkku. Peli ei enää kerro, mitä voit tehdä: sinun pitää muistaa kaikki itse. Suositellaan vain hyvin kokeneille pelaajille.',2]};
+function hintRowsBind(){for(const k in HINT_CONF){const el=$('#s_'+k);if(!el)continue;const r=el.closest('.setRow');if(r){const n=r.querySelector('.note');if(n)n.classList.add('keep');}
+    const go=v=>{SET[k]=v;saveSet();applyGfx();renderSettings();};
+    if(el.classList.contains('tgl'))el.onclick=()=>{if(!SET[k]){go(true);return;}const [t,n,w]=HINT_CONF[k];keyDialog(t,[['Piilota',()=>go(false)],['Peruuta',null]],n,w?String(w):'');};
+    else el.onchange=()=>{const v=el.type==='checkbox'?el.checked:el.value==='true';if(v){go(true);return;}renderSettings();const [t,n,w]=HINT_CONF[k];keyDialog(t,[['Piilota',()=>go(false)],['Peruuta',null]],n,w?String(w):'');};}}
 function resetPage(page){keyDialog('Palautetaanko tämän sivun asetukset oletuksiin?',[['Palauta',()=>{for(const k of SET_PAGES[page])SET[k]=SET_DEF[k];saveSet();applyGfx();renderSettings();}],['Peruuta',null]]);}
 const resetBtn=`<div class="row" style="margin-top:10px"><button class="btn" id="bPageReset">Palauta sivun oletusasetukset</button></div>`;
 // v1.35 (kohta 19): asetusprofiilit localStorage-avaimessa hiidenmaa_profiles = {nimi: {set, bind, at}}.
@@ -274,7 +295,10 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       setRow('Auringon varjot harvemmin paikallaan','shFar',null,'kun et liiku, auringon varjot päivittyvät joka 4. kuva (liikkeessä joka kuva)')+
       setRow('Kaukaiset puut kevyemmin','treeLod',[[0,'Pois'],[140,'Vain hyvin kaukana (140 m)'],[120,'Kaukana (120 m)'],[100,'Normaali kaukana (100 m)'],[80,'Normaali (80 m)'],[70,'Lähempänä (70 m)'],[60,'Lähellä (60 m)']],'koivut, männyt ja aarnipuut ilman ohuita oksia ja rungon taivutusjakoja – muoto ja värit samat')+
       setRow('Varjojen optimointi','shOpt',null,'varjoon piirretään vain varjoalueen puut ja kivet (ei koko ruutuja); maaston taakse jäävien varjot pois – ulkoasu sama')+
-      setRow('Yksinkertaiset varjot alkaen','shLod',[[0,'Pois (kaikki tarkat)'],[90,'Kaukana (90 m)'],[70,'70 m'],[55,'55 m'],[45,'45 m'],[40,'Normaali (40 m)'],[30,'30 m'],[25,'Lähellä (25 m)']],'kauempana puiden varjot yksinkertaisemmista malleista')
+      setRow('Yksinkertaiset varjot alkaen','shLod',[[0,'Pois (kaikki tarkat)'],[90,'Kaukana (90 m)'],[70,'70 m'],[55,'55 m'],[45,'45 m'],[40,'Normaali (40 m)'],[30,'30 m'],[25,'Lähellä (25 m)']],'kauempana puiden varjot yksinkertaisemmista malleista')+
+      `</div><div class="proSec soft"><h4 class="setSub">Intro (kevennykset – eivät kuulu esiasetuksiin)</h4><div class="setGrid">`+   /* v3.14 käyttäjä: harmaana kuten Ammattilaisille-osio (ei oleellinen) */
+      setRow('Käytä 2D-pilviä intron alussa','intro2d',null,'uuden maailman alussa kevyt 2D-pilviverho 3D-pilvien sijaan')+
+      setRow('Intron usva ja pilvikerrokset pois','introPlain',null,'ei pilvimattoa piirtorajan päällä, ei usvakerroksia syöksyssä eikä rajan sumua – yksinkertaisin ja kevein intro')+'</div></div><div class="setGrid">'
     }</div><p class="note">Vaaleana näkyvä valinta on oletus. Asetukset tulevat voimaan heti ja tallentuvat selaimeen.</p>`+resetBtn;
     bindSet(SET_PAGES.gfx);$('#bPageReset').onclick=()=>resetPage('gfx');
     if(shUltraOn())for(const k of SHU_OVR){const el=$('#s_'+k),r=el&&el.closest('.setRow');if(!r)continue;r.classList.add('ovr');if(el.tagName==='SELECT')el.disabled=true;const n=r.querySelector('.note');if(n)n.textContent='ohitettu: erittäin tarkat varjot päällä';}   // v1.80
@@ -282,7 +306,7 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
   }else if(setTab==='xgfx'){
     /* v2.20: Extra-grafiikka – asetukset, jotka ovat oletuksena pois kaikissa esiasetuksissa (eivät kuulu esiasetuksiin, laitetaan käsin).
        Violetti = vaativa, punainen = raskain. */
-    body.innerHTML=`<p class="note">Nämä asetukset eivät kuulu esiasetuksiin, ja ne ovat oletuksena pois. Ne on tarkoitettu tehokkaille koneille: <b style="color:#c8a8ff">violetti</b> = vaativa, <b style="color:#ff8a70">punainen</b> = raskain.</p><div class="setGrid">${
+    body.innerHTML=`<p class="note">Nämä asetukset eivät kuulu esiasetuksiin, ja ne ovat oletuksena pois. Ne on tarkoitettu tehokkaille koneille: <b style="color:#c8a8ff">violetti</b> = vaativa, <b style="color:#ff8a70">punainen</b> = raskain.</p><div class="xAll"><button class="btn" id="bXMin">Kevyin</button><button class="btn red" id="bXMax">Vaativin</button><span class="note">kaikki tämän sivun asetukset kerralla</span></div><div class="setGrid">${
       `<h4 class="setSub">Automatiikka</h4>`+
       xRow('Sammuta kaikki automaattiset grafiikkasäädöt','noAuto',[['false','Sallittu (asetusten mukaan)'],['true','Kaikki pois','']],'päällä grafiikka ei muutu koskaan itsestään: ei automaattista säätöä suorituskyvyn mukaan (resoluutio, piirtoetäisyys, hiukkaset, varjojen taso) eikä käynnistyksen suorituskykytestin esiasetusta – vain sinun valintasi')+
       `<h4 class="setSub">Varjot</h4>`+ultraShRow()+
@@ -298,6 +322,7 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       xRow('Ultra-savut','smokeUltra',[['false','Pois (kevennetty)'],['true','Ultra','red']],'porttien, arkkukivien, raunioiden ja kummun usva ja höyry ilman v2.43:n kevennystä: näkyy jo 60 m päästä, täysi määrä, erilliset spritet')
     }</div>`+resetBtn;
     $('#bPageReset').onclick=()=>resetPage('xgfx');
+    $('#bXMin').onclick=()=>xgfxAll(false);$('#bXMax').onclick=()=>xgfxAll(true);   // v3.08
     body.querySelectorAll('[data-ush]').forEach(b=>b.onclick=()=>{SET.shUltra=b.dataset.ush;saveSet();applyGfx();renderSettings();});
     body.querySelectorAll('[data-xk]').forEach(b=>b.onclick=()=>{const k=b.dataset.xk,v=b.dataset.xv,go=()=>{SET[k]=v==='true'?true:v==='false'?false:v;saveSet();applyGfx();renderSettings();};
       if(k==='terrFineX'&&v==='8'&&String(SET.terrFineX)!=='8')keyDialog('Maaston väritys 8× – oletko varma?',[['Vahvista',go],['Peruuta',null]],'Näin tarkka värivaihtelu ei ole pelin low poly -teeman mukainen ulkonäkö. Voit palauttaa asetuksen milloin tahansa.');
@@ -307,6 +332,7 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
     body.innerHTML=`<p class="note">Profiili tallentaa kaikki asetukset: grafiikan, varjot, ohjauksen, äänet ja näppäimet. Valitse nimi ja tallenna – profiiliin voi palata myöhemmin.</p>
       <div class="row"><input id="profName" class="search" style="max-width:260px" maxlength="32" placeholder="Profiilin nimi (esim. Kannettava)"><button class="btn pri" id="bProfSave">Tallenna nykyiset asetukset</button></div>
       <div id="profList">${names.length?names.map(n=>`<div class="profRow"><b>${esc(n)}</b><span class="note">${esc(P0[n].at||'')}${P0[n].set&&presetOf(P0[n].set)?' · '+presetOf(P0[n].set):''}</span><button class="btn pri" data-use="${esc(n)}">Ota käyttöön</button><button class="btn" data-del="${esc(n)}">Poista</button></div>`).join(''):'<div class="note" style="margin-top:10px">Ei tallennettuja profiileja.</div>'}</div>`;
+    if(typeof ptHTML==='function')body.insertAdjacentHTML('beforeend',ptHTML());   // v3.18 pelattu aika yhteensä (main.js)
     $('#bProfSave').onclick=()=>{const n=$('#profName').value.trim();if(!n){$('#profName').focus();return;}const doIt=()=>{const pr=loadProfiles();pr[n]={set:Object.assign({},SET),bind:Object.assign({},BIND),at:new Date().toLocaleString('fi-FI',{dateStyle:'short',timeStyle:'short'})};saveProfiles(pr);renderSettings();};
       if(P0[n])keyDialog(`Korvataanko profiili «${n}»?`,[['Vahvista',doIt],['Peruuta',null]]);else doIt();};
     body.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{const pr=loadProfiles()[b.dataset.use];if(!pr)return;Object.assign(SET,pr.set);if(pr.bind)Object.assign(BIND,pr.bind);saveSet();saveBinds();applyGfx();renderSettings();});
@@ -331,16 +357,23 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       row('Osoittimen herkkyys (pelin paneelit)'+(isDef('curSens')?' <span class="defTag">oletus</span>':''),sldHTML('sCur',.3,3,.05,SET.curSens),`<span id="sCurV">${(+SET.curSens).toFixed(2)}×</span>`)+
       `<div class="note" style="grid-column:1/-1;margin:-4px 0 4px">Osoittimen herkkyys koskee pelin sisäisiä paneeleja (reppu, rakentaminen, kartta…). Päävalikossa käytetään tietokoneen omaa osoitinta, jonka nopeuden selain ei anna muuttaa.</div>`+
       setRow('Käännä pystyhiiri','invY')+
-      setRow('Näppäinopasteet','keyHints',null,'pienet vihjeet paneeleissa ja ruudun nurkassa (esim. Päävalikko: P)')+
       setRow('Opastus seuraavassa uudessa maailmassa','tutNext',null,'näppäinopastus ja kertavinkit seuraavan uuden maailman alkuun (valinta näkyy myös uuden maailman luonnissa)')+
       setRow('Älä pysäytä valikon animaatioita pelin aikana','menuAnimKeep',null,'oletus: valikon partikkelit ja animaatiot pysähtyvät pelissä ja häivyttyvät esiin valikkoon palatessa (kevyempi)')
+    }</div><h4 class="setSub">Ohjeet ja vihjeet (kokeneille)</h4><div class="setGrid">${
+      setRow('1. Ohjetekstit','helpTxt',null,'valikkojen selitysrivit ja ruudun yläreunan kertavinkit')+
+      setRow('2. Näppäinvihjeet','keyHints',null,'Sulje: P / M, Päävalikko: P, B tai hiiren oikea: valitse rakennus, rakentamisen ja jousen näppäinohjeet (piilottaa myös 1.)')+
+      setRow('3. Kaikki toimintovihjeet','actHints',null,'E-kehotteet: Avaa ovi, Istuta, Avaa arkku … – kaikki pitää muistaa itse (piilottaa myös 1. ja 2.)')+
+      setRow('Näytä valikon nappien ohjeet aina','alwaysBtnHints',null,'oletuksena napin selitysrivi (esim. Uusi maailma: pidä pohjassa = heti) näkyy vain, kunnes olet käyttänyt nappia kerran')
     }</div><h4 class="setSub">HUD</h4><div class="setGrid">${
       row('HUD:n koko'+(isDef('hudScale')?' <span class="defTag">oletus</span>':''),sldHTML('sHud',.6,1.5,.05,SET.hudScale),`<span id="sHudV">${Math.round(SET.hudScale*100)} %</span>`)+
       row('Chatin ja ilmoitusten koko'+(isDef('chatScale')?' <span class="defTag">oletus</span>':''),sldHTML('sChat',.6,1.6,.05,SET.chatScale),`<span id="sChatV">${Math.round(SET.chatScale*100)} %</span>`)+   /* v2.99 */
       `<div class="note" style="grid-column:1/-1;margin:-4px 0 4px">Koko pelin näkymän päällä oleva HUD: palkit, pikapaikat, kartta, kello, tehtävä, tavoite, viestit, tähtäin, pomopalkki, bannerit ja olentojen palkit. Jokainen osa kasvaa omasta reunastaan, joten mikään ei mene päällekkäin reunan yli. Paneelit (reppu, rakentaminen, kartta) eivät muutu.</div>`
     }</div>`+resetBtn+
-      `<h4 class="setSub" style="margin-top:22px">Kehittäjä</h4><div class="setGrid">${row('Kehittäjätyökalut (DEV)',tglHTML('s_devOn',DEV),DEV?'DEV-valikko (Ä), 10× nopeus (V), jumalvoimat, kaikki ohjeet auki – vaihto lataa sivun uudelleen (peli tallennetaan)':'kehittäjien testityökalut – oletus pois; vaihto lataa sivun uudelleen (peli tallennetaan)')}</div>`;   /* v1.82 */
-    bindSet(SET_PAGES.ctl);$('#bPageReset').onclick=()=>resetPage('ctl');
+      `<h4 class="setSub" style="margin-top:22px">Kehittäjä</h4><div class="setGrid">${row('Kehittäjätyökalut (DEV)',tglHTML('s_devOn',DEV),DEV?'DEV-valikko (Ä), 10× nopeus (V), jumalvoimat, kaikki ohjeet auki – vaihto lataa sivun uudelleen (peli tallennetaan)':'kehittäjien testityökalut – oletus pois; vaihto lataa sivun uudelleen (peli tallennetaan)')}</div>`+
+      `<div class="proSec"><h4 class="setSub">Ammattilaisille ja vertailuun</h4><div class="setGrid">${row('Vanha maailman lataus (v3.09)',tglHTML('s_oldLoad',!!SET.oldLoad),'ennen v3.10:tä käytetty tapa: maailmaa ei piirretä valmiiksi latausruudussa, joten intro lataa näkyvästi – vain vertailuun ja testaukseen. Vaihto lataa pelin uudelleen (peli tallennetaan).')}</div></div>`;   /* v1.82; v3.10 vanha lataus */
+    bindSet(SET_PAGES.ctl);$('#bPageReset').onclick=()=>resetPage('ctl');hintRowsBind();
+    $('#s_oldLoad').onclick=()=>{const go=()=>{try{if(started&&!P.dead)saveGame(true);}catch(e){}SET.oldLoad=!SET.oldLoad;saveSet();location.reload();};   // v3.10
+      keyDialog(SET.oldLoad?'Palataanko uuteen maailman lataukseen?':'Otetaanko vanha maailman lataus (v3.09) käyttöön?',[['Vahvista',go],['Peruuta',null]],'Peli tallennetaan ja ladataan uudelleen.');};
     $('#s_devOn').onclick=()=>{const go=()=>{try{if(started&&!P.dead)saveGame(true);localStorage.setItem('hiidenmaa_devon',DEV?'0':'1');}catch(e){}location.reload();};
       if(DEV){keyDialog('Poistetaanko kehittäjätyökalut käytöstä?',[['Poista käytöstä',go],['Peruuta',null]],'Sivu ladataan uudelleen.');return;}
       devPwDialog(go);};
@@ -369,7 +402,7 @@ const ALL_KEYS=[
   ['Rakentaessa (vasara kädessä)',[['build',0,'rakennusvalikko'],[null,'Hiiren vasen','aseta rakennusosa'],[null,'Hiiren oikea','rakennusvalikko'],['rot',0,'käännä osaa'],[null,'Shift + R','osan asento / kaltevuus'],
     ['snap',0,'sivuttaiskohdistus (tilat)'],['vsnap',0,'pystykohdistus'],['up',0,'nosta haamua'],['down',0,'laske haamua'],['remove',0,'pura'],['repair',0,'korjaa']]],
   ['Lapio ja kuokka',[[null,'Hiiren vasen','lapio: kaiva · kuokka: nosta maata'],[null,'Hiiren oikea','lapio: tee polku · kuokka: palauta maasto']]],
-  ['Valikot ja paneelit',[['menu',0,'päävalikko / sulje avoin paneeli'],['inv',0,'reppu ja valmistus'],[null,'I','reppu (vaihtoehto)'],['map',0,'kartta'],['prog',0,'taso, saavutukset, tavoitteet'],['log',0,'viimeiset ilmoitukset'],
+  ['Valikot ja paneelit',[['menu',0,'päävalikko / sulje avoin paneeli'],['inv',0,'reppu ja valmistus'],[null,'I','reppu (vaihtoehto)'],['map',0,'kartta'],['book',0,'kalastajan kirja (jos sinulla on kirja)'],['prog',0,'taso, saavutukset, tavoitteet'],['log',0,'viimeiset ilmoitukset'],
     ['interact',0,'sulje avoin paneeli']]],
   ['Repussa ja arkussa',[[null,'Hiiren vasen','valitse / siirrä esine toiseen ruutuun, raahaa'],[null,'Hiiren oikea','ota puolet pinosta'],[null,'Shift + hiiren oikea','kohderuudussa: slider – valitse siirrettävä määrä (1–9 siirtää heti, napsautus ohi puolittaa)'],[null,'Q / Shift + Q','pudota hiiren alla oleva tai valittu esine (Shift = koko pino)'],[null,'Nuolet / Enter','siirtoslider: säädä määrää / vahvista'],
     [null,'Kirjoita','haku (valmistus- ja rakennusvalikko)'],[null,'Enter (haussa)','valmista ensimmäinen osuma / lopeta kirjoitus'],[null,'Esc (haussa)','tyhjennä haku'],[null,'Shift (pohjassa)','esineen lisätiedot vihjeessä']]],
@@ -392,8 +425,11 @@ function devPwDialog(ok){const chk=()=>{const v=($('#devPw')||{}).value||'';if(v
   keyDialog('Otetaanko kehittäjätyökalut käyttöön?',[['Ota käyttöön',null],['Peruuta',null]],'');
   const N=$('#keyDlgN');N.innerHTML='Anna salasana (sivu ladataan uudelleen):<br><input id="devPw" type="password" inputmode="numeric" maxlength="12" autocomplete="off" style="margin-top:6px;width:9em;font:inherit;padding:4px 8px"> <span id="devPwN" class="warnTxt"></span>';
   const I=$('#devPw'),B=$('#keyDlgB').firstChild;B.onclick=()=>{if(chk())$('#keyDlg').hidden=true;};I.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){if(chk())$('#keyDlg').hidden=true;}else if(e.key==='Escape')$('#keyDlg').hidden=true;};setTimeout(()=>I.focus(),30);}
-function keyDialog(text,btns,note){const d=$('#keyDlg');d.hidden=false;if(btns.length>=2)mSnd('varmistus','varmistus');   /* v2.52 varmistuskysymys (ei näppäimen odotus) */$('#keyDlgT').textContent=text;$('#keyDlgN').textContent=note||'';
+function keyDialog(text,btns,note,warn){const d=$('#keyDlg');d.hidden=false;d._at=performance.now();d.dataset.warn=warn||'';   /* v3.08 warn 1–2: punainen varoitus */if(btns.length>=2)mSnd('varmistus','varmistus');   /* v2.52 varmistuskysymys (ei näppäimen odotus) */$('#keyDlgT').textContent=text;$('#keyDlgN').textContent=note||'';
   const b=$('#keyDlgB');b.innerHTML='';for(const [t,fn] of btns){const x=document.createElement('button');x.className='btn'+(t==='Vahvista'||t==='Palauta'?' pri':'');x.textContent=t;x.onclick=()=>{d.hidden=true;capture=null;if(fn)fn();};b.appendChild(x);}}
+/* v3.20 käyttäjä: Enter vahvistaa aina varmistusikkunan (ensisijainen nappi, muuten ensimmäinen); ei näppäimen sidonnassa eikä heti avautumisen jälkeen (sama painallus) */
+addEventListener('keydown',e=>{const d=$('#keyDlg');if(!d||d.hidden||capture||(e.key!=='Enter'&&e.code!=='NumpadEnter')||e.repeat)return;if(performance.now()-(d._at||0)<150)return;
+  const b=d.querySelector('#keyDlgB .btn.pri')||d.querySelector('#keyDlgB .btn');if(b){e.preventDefault();e.stopImmediatePropagation();b.click();}},true);
 function startCapture(a){const nm=ACTIONS.find(x=>x[0]===a)[1];capture={a,code:null};keyDialog(`Paina uutta näppäintä: ${nm}`,[['Peruuta',null]],'Esc peruu. Varatut ja jo käytössä olevat näppäimet hylätään.');}
 addEventListener('keydown',e=>{if(!capture||capture.code)return;e.preventDefault();e.stopImmediatePropagation();
   if(e.code==='Escape'){$('#keyDlg').hidden=true;capture=null;return;}

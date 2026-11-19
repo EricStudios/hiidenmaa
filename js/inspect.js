@@ -21,8 +21,8 @@
 const INSP_AFK0=3,INSP_AFK_P=.1,INSP_CLOSE={long:'pitka_tera',heavy:'raskas_tera',small:'pieni_lahikatselu',knife:'pieni_lahikatselu'};
 function inspectAfkTick(){const a=P.afkT||0;if(a<INSP_AFK0){INS.afk=null;return;}
   if(!INS.afk)INS.afk={at:Math.random()<INSP_AFK_P?INSP_AFK0+(Math.random()<.5?.2:5+Math.random()*5):-1};
-  const A=INS.afk;if(A.at>0&&a>=A.at){A.at=-1;if(heldId&&!P.insp&&state==='play')inspectStart(INSP_CLOSE[INSP_TYPE(heldId)]);}}
-const INSP_SND_T=2,INSP_SND_P=.1,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_KNIFE_BOTTLE=.001,INSP_THROW_V=.7,INSP_THROW_VS=.4,INSP_SPIN_UP=.07,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
+  const A=INS.afk;if(A.at>0&&a>=A.at){A.at=-1;if(heldId&&!P.insp&&state==='play'&&!inspMoving())inspectStart(INSP_CLOSE[INSP_TYPE(heldId)],{afk:1});}}
+const INSP_SND_T=2,INSP_SND_P=.1,INSP_SND_PH=.3,INSP_SND_PITY=4,INSP_NEW_T=120,INSP_AFK_T=4,INSP_KNIFE_THROW=.05,INSP_KNIFE_FLIP=.1,INSP_KNIFE_BOTTLE=.001,INSP_THROW_V=.7,INSP_THROW_VS=.4,INSP_SPIN_UP=.07,INSP_IN=.55,INSP_OUT=.8,INSP_XF=.7;
 function INSP_TYPE(id){if(!id)return 'small';const d=ITEMS[id];if(!d)return 'small';if(id==='puukko')return 'knife';if(d.cat==='hammer')return 'heavy';
   if(/miekka/.test(id)||id==='keihas'||d.cat==='shovel')return 'long';if(d.chop||d.pick||id==='nuija')return 'heavy';return 'small';}
 const _ie=(a,b,k)=>a+(b-a)*k,_iv3=(a,b,k)=>[_ie(a[0],b[0],k),_ie(a[1],b[1],k),_ie(a[2],b[2],k)],_ism=x=>{x=clamp(x,0,1);return x*x*x*(x*(x*6-15)+10);};
@@ -105,7 +105,8 @@ function inspectStart(id,o={}){if(state!=='play'||P.dead||P.swim||P.atk||P.drawi
   if(!a)return false;
   // ristiinhäivytys: uusi animaatio alkaa edellisen (tai paluuta tekevän) asennon kohdalta
   const from=INS.pose&&INS.k>.02?{p:INS.pose.p.slice(),d:INS.pose.d.slice(),s:_iwr(INS.pose.s||0),g:_iwr(INS.pose.g||0)}:null;
-  P.insp={a,t:0,R:[.95+Math.random()*.25,1.2+Math.random()*.3,1.05+Math.random()*.25].sort(()=>Math.random()-.5),S:Math.random()<.5?-1:1,item:heldId,snd:false,auto:!!o.auto,from,fk:from?INS.k:0};return true;}
+  P.insp={a,t:0,R:[.95+Math.random()*.25,1.2+Math.random()*.3,1.05+Math.random()*.25].sort(()=>Math.random()-.5),S:Math.random()<.5?-1:1,item:heldId,snd:false,auto:!!o.auto,afk:!!o.afk,from,fk:from?INS.k:0};return true;}
+function inspMoving(){return state==='play'&&(Math.hypot(P.vel.x,P.vel.z)>.6||['fwd','back','left','right','jump'].some(a=>kd(a)));}
 function inspectStop(){if(P.insp)P.insp=null;}
 // joka ruutu (main.js update): keskeytys, ääni ja uuden esineen automaattinen tarkastelu
 /* v2.99 käyttäjä: F-vinkki – kun puukko otetaan käteen 10. kerran (INSP_TIP_N; vain tutoriaalin ulkopuolella, flags.knifeEqN), kerran maailmaa kohti
@@ -116,8 +117,10 @@ function inspectTipTick(){if(heldId===INS.lastHeld)return;INS.lastHeld=heldId;if
   msg(`Vinkki: paina ${k} – tutki esinettä kädessäsi.`,'loot');const el=tipEl();el.querySelector('.tipD').innerHTML=`Paina <kbd>${k}</kbd>, niin hahmo tarkastelee kädessä olevaa esinettä – puukolla on myös harvinaisia temppuja. Toimii muillakin työkaluilla ja aseilla (ei vasaralla – sillä ${k} korjaa).`;
   el.classList.add('on');TUT.tipT=14;if(typeof RES!=='undefined')RES.tipT=14;if(typeof mSnd==='function')mSnd('napit','hover');}
 function inspectTick(dt){inspectTipTick();const I=P.insp;
-  if(I){I.t+=dt;if(P.atk||P.drawing||P.blocking||P.carve||mouseL||mouseR||P.dead||P.swim||heldId!==I.item||state!=='play'&&state!=='ui'){inspectStop();return;}
-    if(!I.snd&&I.t>=INSP_SND_T){I.snd=true;if(Math.random()<INSP_SND_P)plSnd('f_ihmettely',Math.random()<.5?'wow':'mmm',{v:.85});   /* v3.05 käyttäjän äänet hieman hiljempaa */}
+  if(I){I.t+=dt;if((I.afk||I.auto)&&inspMoving()){inspectStop();return;}   // v3.24 käyttäjä: AFK-/automaattinen tarkastelu loppuu pehmeästi liikkeelle lähtiessä (F:llä itse aloitettu jatkuu)
+    if(P.atk||P.drawing||P.blocking||P.carve||mouseL||mouseR||P.dead||P.swim||heldId!==I.item||state!=='play'&&state!=='ui'){inspectStop();return;}
+    if(!I.snd&&I.t>=INSP_SND_T){I.snd=true;const em=!I.item;   /* v3.22 käyttäjä: tyhjällä kädellä ääni tuntui puuttuvan (10 %) → 30 % ja takuu: viimeistään joka INSP_SND_PITY. tyhjän käden tarkastelu */
+      INS.noSnd=em?(INS.noSnd|0)+1:INS.noSnd|0;if(Math.random()<(em?INSP_SND_PH:INSP_SND_P)||em&&INS.noSnd>=INSP_SND_PITY){if(em)INS.noSnd=0;plSnd('f_ihmettely',Math.random()<.5?'wow':'mmm',{v:.85});}   /* v3.05 käyttäjän äänet hieman hiljempaa */}
     if(I.t>=I.a.dur)inspectStop();return;}
   inspectAfkTick();
   const N=P.newItem;if(N&&!N.done&&state==='play'&&heldId&&heldId===N.id&&playTime-N.t<INSP_NEW_T&&(P.afkT||0)>INSP_AFK_T&&!P.atk&&!P.drawing){N.done=1;inspectStart(null,{auto:1});}}
@@ -151,6 +154,6 @@ function inspectPose(dt){const I=P.insp;INS.u=clamp(INS.u+(I?dt/INSP_IN:-dt/INSP
       if(pz.fly&&k>.5){fig.hand.updateMatrixWorld(true);heldMesh.position.copy(fig.hand.worldToLocal(fig.g.localToWorld(_ispA.set(pz.fly.p[0],pz.fly.p[1],pz.fly.p[2]))));}else heldMesh.position.copy(U.ip0);INS.flew=true;}}}
   // pää katsoo hieman alas ja seuraa esineen keskikohtaa (lennossa itse esinettä); oma pehmennys → ei hyppyjä
   const ty=INSP_TYPE(I?I.item:heldId),len=ty==='long'||ty==='heavy'?.42:.12,c=pz.fly?pz.fly.p:[pz.p[0]+_ispZ.x*len,pz.p[1]+_ispZ.y*len,pz.p[2]+_ispZ.z*len],hx=0,hy=1.62,hz=.06;
-  const yaw=clamp(Math.atan2(c[0]-hx,c[2]-hz),-.75,.75),pit=clamp(Math.atan2(hy-c[1],Math.hypot(c[0]-hx,c[2]-hz))*.85+.12,-.55,.7),hk=Math.min(1,dt*(pz.fly?9:4.5));
+  const yaw=clamp(Math.atan2(c[0]-hx,c[2]-hz),-.75,.75),pit=clamp(Math.atan2(hy-c[1],Math.hypot(c[0]-hx,c[2]-hz))*.85+.12,-.55,.7),hk=kExp((pz.fly?9:4.5),dt);
   if(INS.u<=dt/INSP_IN+1e-3&&I&&!I.from){INS.hy=yaw;INS.hp=pit;}INS.hy+=(yaw-INS.hy)*hk;INS.hp+=(pit-INS.hp)*hk;
   fig.head.rotation.y=_ie(fig.head.rotation.y,INS.hy,k);fig.head.rotation.x=_ie(fig.head.rotation.x,INS.hp,k);}

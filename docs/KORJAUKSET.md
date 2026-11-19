@@ -605,3 +605,80 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 ## 81. //-kommentti lisättiin rivin keskelle korvauksessa (v3.07, KORJAUKSET 49 uudelleen)
 - Python-korvauksessa lisätty `// selitys` päätyi rivin keskelle (savustimen malli: perässä `for`-silmukka ja `break;}` → syntaksivirhe; onkikoukku: fishTick:n loppurivi
   kommentoitui pois). `node --check` paljasti molemmat. **Sääntö:** kun lisäät koodia olemassa olevan rivin keskelle, käytä AINA `/* */`; `//` vain kun rivin loppu on varmasti tyhjä.
+
+## 82. Lapio/kuokka kaadetun puun vieressä: "Cannot read properties of undefined (reading 'setMatrixAt')" (v3.07, korjattu v3.08)
+- `terraTool` päivittää lähellä olevien solmujen korkeuden (`nodesNear` → `syncNodeY` → `setNodeMatrix`). `nodesNear` palauttaa myös kaadetun puun **tukit** (`isLog`, samassa
+  NGRID-ruudukossa), joilla ei ole instanssimeshiä (`n.im`) → virhe joka ruutu pelisilmukassa. Korjaus: `syncNodeY` ohittaa tukit ja solmut ilman `im`:ää, `setNodeMatrix` vartioi `n.im`.
+- **Sääntö:** `nodesNear`-tulos voi sisältää tukkeja – tarkista `n.isLog` ennen solmukohtaisia (instanssi-) operaatioita.
+
+## 83. Kirveen hakkuuanimaatio nykii (v3.08, sama syy kuin F-tarkastelussa v2.99)
+- `chopApply` kirjoitti oikean käden kvaternion ja kyynärpään suoraan asennon päälle, eikä seuraava kuva palauttanut perusasentoa ennen uutta laskua → käsi hyppäsi
+  edellisen kuvan IK-asennosta. Korjaus: `chopApply` tallentaa `armR.quaternion`/`elbowR` (`CHR`) ja `chopRestore()` palauttaa ne joka kuvan alussa (`inspectRestore`:n jälkeen).
+- **Sääntö:** jokainen asentoa suoraan kirjoittava IK/animaatio tallentaa ja palauttaa koskemansa luut (kuten `inspectRestore`, `chopRestore`).
+
+## 84. Intron varjojen reunat välkkyvät alemmilla asetuksilla (v3.08)
+- Auringon varjokamera seurasi pelaajaa liukuvasti (osa texeliä per kuva) ja aurinko liikkui hitaasti; varjokartta päivittyi vain joka n:s kuva (`shRate`/`shFar`). Korkealta
+  katsottuna varjokartan reuna ja varjot hyppivät. Korjaus: `shadowSnap()` siirtää varjokameran (aurinko + kohde) kokonaisiin texeleihin aina, intron ajan auringon suunta
+  lukitaan (`INTRO_SD`) ja kartta päivitetään joka kuva. **Sääntö:** varjokameran paikka pyöristetään aina texel-ruudukkoon (`sc.right-sc.left)/mapSize`).
+
+## 85. Ylimmän tason nimi oli jo käytössä toisessa tiedostossa / ominaisuuden nimi oli jo varattu (v3.08)
+- `const _shF` (environment.js, varjolukitus) oli jo resources.js:ssä → "Identifier '_shF' has already been declared", peli ei käynnistynyt (testissä `window.__game` ei
+  koskaan valmistunut). Samoin kasvuvaiheen kerroin `n.gk` törmäsi NGRID-ruudukon avaimeen `n.gk` (taulukko) → `ngridRemove` kaatui ("is not iterable"). Korjaukset:
+  `_ssR/_ssU/_ssF/_ssD`, `n.gsk`. **Sääntö:** ennen uutta ylimmän tason nimeä tai solmun kenttää aja `grep -n "\bnimi\b" js/*.js` – myös lyhyet `_xx`-apumuuttujat.
+
+## 86. Testissä setTimeout-ruutu ilmestyy hitaasti (v3.08, ei pelivika)
+- swiftshader-testissä pelisilmukka on hidas, joten `quitGame`:n 250 ms ajastin laukesi vasta usean sekunnin päästä → `#quitScr` puuttui 1,5 s odotuksen jälkeen.
+  **Sääntö:** odota testissä `waitForFunction`-ehtoa (esim. elementin ilmestymistä), älä kiinteää aikaa.
+
+## 87. Suolampia ei syntynyt koskaan – suokalat saavuttamattomia (v3.06–v3.12, korjattu v3.13)
+- Vesien luokittelu (fish.js) kutsui `biomeAt(x,z,1)`. `biomeAt` palauttaa korkeudella < 1,1 aina `'beach'`, joten `'suo'`-ehto ei toteutunut koskaan → ei suolampia →
+  ruutana, suonsilmä ja suutari eivät olleet saatavilla. Löytyi kalastussimulaatiosta (ei yhtään suolampea millään kartalla). Korjaus: `WB_BOG_H` 1,3 (rannan yläpuolella,
+  aarnimetsän rajan alla); pienet soiset vedet (< `WB_BOG_MAX` 200 ruutua) suolammiksi, isot soiset järvet pysyvät järvinä (nimet ennallaan) mutta antavat myös suokaloja (`bogg`).
+- **Sääntö:** kun funktio luokittelee korkeuden perusteella, testaa tulos koko kartalla (montako kutakin tyyppiä) – nolla tarkoittaa vikaa. Lisää simulaatio/tilasto uudelle järjestelmälle.
+
+## 88. Toistuneet: //-kommentti keskellä riviä (KORJAUKSET 49/81) ja varattu nimi (KORJAUKSET 85) (v3.13)
+- Korvauksessa `introCarpet(...);   // kommentti` päätyi rivin keskelle → rivin loppu (`return …;}`) kommentoitui pois → "Unexpected end of input". `node --check` paljasti.
+- `const MIST` oli jo käytössä (luolaston usva) → peli ei käynnistynyt (testissä `window.__game` ei valmistunut). Nimetty `IMIST`.
+- **Sääntö (kertaus):** korvaa aina vain kokonaisia rivejä tai käytä `/* */`; ennen uutta ylimmän tason nimeä `grep -n "\bNIMI\b" js/*.js`. Jos testi jää odottamaan `window.__game`:a, katso ensin pageerror.
+
+## 89. Tarkistus: uusi malli tai resepti rikkoi vanhan tarkistusrivin (v3.14)
+- `makeHeld('mato')` vaihtui yhteen putkimalliin → v3.08-rivi "siemenmallit" vaatii ≥ 3 meshiä → lisättiin toinen mato ja multamuruja (parempi ulkoasu).
+- Harvinainen hiisikela (taso 9) rikkoi v2.70-säännön "tavalliset reseptit enintään taso 7": suodatin luki vain `rare`-kenttää, esineissä käytetään `rar:'rare'` → suodatin korjattu.
+- Kommentti `(clitellum); burrow = …` tulkittiin koodiksi kommentin perässä (KORJAUKSET 49 -tarkistus) – kommentissa ei puolipistettä + sijoitusta.
+- **Sääntö:** aja `tools/tarkistus.mjs` heti uuden mallin/reseptin jälkeen; vanhan rivin vaatimus on yleensä oikea – korjaa ensin oma muutos, vasta sitten testi.
+
+## 90. Kaksi id-attribuuttia samassa elementissä → `$('#…')` palauttaa null (v3.16)
+- `tglHTML('dv_x',on,'id="devFF"')` tuotti `<button id="dv_x" id="devFF">` – selain käyttää ensimmäistä id:tä, joten `$('#devFF').onclick` kaatoi koko DEV-valikon renderöinnin.
+- **Sääntö:** `tglHTML`:n kolmas parametri on vain lisäattribuuteille (data-…); id annetaan aina ensimmäisenä parametrina. Testaa uusi paneeli avaamalla se testiskriptissä (virhe näkyy heti).
+
+## 91. Valikon taustaääni ei kuulunut / alkoi myöhään (v3.17)
+- Syyt: (1) taso 0,35 × taustaäänet jäi musiikin alle, (2) uudelleenyrityksen ajastin (`MBG.lrT` 2 s) ei nollautunut kuvan vaihtuessa, (3) kertaäänen ajastin nollattiin
+  pitkäksi (5–14 s), vaikka ääntä ei vielä ollut ladattu → pitkä hiljaisuus, (4) uusi suoratoisto joka kerta.
+- **Sääntö:** ajastettu ääni nollaa pitkän välin vain, jos ääni oikeasti soi (funktio palauttaa true), muuten lyhyt uusi yritys. Pitkät suoratoistot pidetään tallessa ja
+  ladataan valmiiksi. Testaa toisto headless-selaimessa `--autoplay-policy=no-user-gesture-required` (gain-arvo, `el.paused`, `currentTime` etenee).
+
+## 92. Aloita seikkailu ei tehnyt mitään + nimitörmäys tkTake (v3.20)
+- Sankarinappi kutsui `$('#bNewWorld').click()`, mutta v3.13:sta Uusi maailma on pito-nappi (`holdBtn`, pointer-tapahtumat) – `.click()` ei käynnistä sitä. Korjaus:
+  uuden maailman aloitus talletetaan `NEWW.go`:hon ja sankarinappi kutsuu sitä suoraan.
+- Vinkkien apurille annettu nimi `tkTake` oli jo tackle.js:ssä (KORJAUKSET 85/88 toistui) → nimetty `tipTake`/`tipHas`/`tipEq`.
+- **Sääntö:** kun nappi muutetaan pito-napiksi, etsi kaikki sen `.click()`-kutsut (`grep -n "IDNIMI').click\|IDNIMI\").click"`).
+
+## 93. Animaatio riippui ruudunpäivityksestä – kirves pyörähti paluussa (v3.22)
+- Pehmennys `lerp(a,b,Math.min(1,dt*k))` on eri nopeus eri FPS:llä (15 FPS:llä k·dt jopa 4× suurempi askel ja lattia 1 → hyppy). Lisäksi `frame()` rajasi dt:n 0,05 s:iin →
+  alle 20 FPS:llä koko peliaika hidastui. Korjaus: `kExp(k,dt)` (core.js) ja osa-askeleet `worldStep`:ssa (`WSTEP_MAX` 0,1).
+- Kirveen paluussa kaksi eri pehmennystä (IK-paino alas + Euler-asento lepoon 0,6 s) taistelivat → kierto hyppäsi. **Sääntö:** kun IK luovuttaa asennon takaisin, vie IK-kohde ja
+  esineen kierto ensin perusasentoon (laske perusasento joka ruutu, aseta Euler suoraan tavoitteeseen IK:n alla) ja häivytä paino vasta, kun asennot ovat samat.
+- **Sääntö:** uusi pehmennys aina `kExp(nopeus,dt)`, ei `Math.min(1,dt*nopeus)`. Testaa animaatio sekä `update(1/60)` että `update(1/15)` -silmukalla.
+
+## 94. Kalakirja venähti sivua käännettäessä (v3.23)
+- Kääntyvä lehti `.fbLeaf` oli `width:50%` + `padding` (content-box) → leveämpi kuin puoli kirjaa, ja 3D-kierto ulottui paneelin yli → `overflow:auto`-paneeliin ilmestyi
+  hetkeksi vierityspalkki (ikkuna venyi ja tärähti). Lisäksi kirjan korkeus määräytyi sisällöstä (min-height) → eri sivuilla eri korkeus.
+- Korjaus: kiinteä korkeus, `box-sizing:border-box` + `overflow:hidden` lehdelle ja sivuille, paneeli `overflow:hidden`.
+- **Sääntö:** animoitu absoluuttinen elementti, jolla on `width:%` ja täyte → aina border-box; animoidun paneelin koko kiinteäksi. Testaa mittaamalla paneelin koko animaation aikana.
+
+## 95. Leijuva tukki ja päällekkäiset esineet hylätyssä leirissä (v3.24)
+- Leirin istuin oli rakennusosa `palkki` asetettuna `terrainH + .2` → tukki leijui. Säkki, ämpäri ja teline olivat kiinteissä maailman koordinaateissa (ei leirin suunnan mukaan)
+  → osuivat teltan päälle joissain suunnissa.
+- Korjaus: staattinen penkki jaloilla, kaikki paikat leirin omassa suunnassa ja vapaan paikan haku (`campFree`), korkeus = alin maastokohta jalanjäljen alla (`campGround`).
+- **Sääntö:** koriste tai rakennelma maahan → korkeus jalanjäljen alimmasta kohdasta ja jalat/runko sinne asti; ei vakioita kuten `+.2`. Uusi esine leiriin → lisää `campFree`-tarkistus.
+

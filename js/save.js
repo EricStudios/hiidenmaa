@@ -7,7 +7,7 @@ const SKEY='hiidenmaa_save_v1';
 /* v1.36 (lista 3, kohdat 20–21): 5 tallennuspaikkaa. Paikka 0 = SKEY (vanha tallennus jatkuu siinä nimellä "Maailma 1"), paikat 1–4 =
    SKEY+'_1'…'_4'. Tiedot listaa varten avaimessa hiidenmaa_slots = [{name, at, day, lvl, mapId, min} | null] ×5. Nykyinen paikka curSlot
    säilyy kartanvaihdon uudelleenlatauksen yli (sessionStorage hiidenmaa_cur). */
-const SLOTS=5,slotKey=i=>i?SKEY+'_'+i:SKEY;
+const SLOTS=6,   /* v3.13 käyttäjä: 6 maailmaa (3 × 2 korttia) */slotKey=i=>i?SKEY+'_'+i:SKEY;
 let curSlot=-1;try{const c=sessionStorage.getItem('hiidenmaa_cur');if(c!==null)curSlot=+c;}catch(e){}
 function slotMeta(){let m=null;try{m=JSON.parse(localStorage.getItem('hiidenmaa_slots')||'null');}catch(e){}if(!Array.isArray(m))m=[];while(m.length<SLOTS)m.push(null);
   for(let i=0;i<SLOTS;i++)if(!m[i]){let d=null;try{d=JSON.parse(localStorage.getItem(slotKey(i))||'null');}catch(e){}if(d)m[i]={name:'Maailma '+(i+1),at:Date.now(),day:d.dayN||1,lvl:0,mapId:d.mapId||0,min:Math.round((d.playTime||0)/60)};}
@@ -18,10 +18,10 @@ function freeSlot(){const m=slotMeta();return m.findIndex(x=>!x);}
 function slotData(i){try{return JSON.parse(localStorage.getItem(slotKey(i))||'null');}catch(e){return null;}}
 function deleteSlot(i){try{localStorage.removeItem(slotKey(i));}catch(e){}const m=slotMeta();m[i]=null;setSlotMeta(m);if(curSlot===i&&!started)setCurSlot(-1);}
 function serialize(){return{v:12,seed:SEED,vdrops:drops.filter(d=>isValuable(d.id)).map(d=>({id:d.id,n:d.n,q:d.q})),mapId:MAP_ID,bossPending:!!(boss&&!boss.dead&&!flags.boss),playTime,dayT,dayN,weather,flags,P:{x:P.pos.x,y:P.pos.y,z:P.pos.z,hp:P.hp,stam:P.stam,hunger:P.hunger,buffs:P.buffs,spawn:P.spawn,deaths:P.deaths,kills:P.kills,inDun:P.inDun,realm:P.realm||null,packLv:P.packLv},cam:[camYaw,camPitch],inv,
-  pieces:pieces.map(p=>({t:p.t,x:p.x,y:p.y,z:p.z,r:p.rot,f:p.f||0,hp:p.hp,d:PIECES[p.t].store?{items:p.data.items,lv:p.data.lv}:isFirePiece(p.t)?Object.assign({fuel:p.data.fuel,burn:p.data.burn,cook:p.data.cook,full:p.data.full,ember:p.data.ember||0},p.t==='patanuotio'?{pot:p.data.pot,spo:p.data.spo,lid:p.data.lid,job:p.data.job,doneT:p.data.doneT,char:p.data.char}:{}):isTorch(p.t)?{burn:p.data.burn,full:p.data.full}:p.t==='sulatin'?{q:p.data.q,fuel:+(p.data.fuel||0).toFixed(1),lit:p.data.lit?1:0,coal:Math.round(p.data.coal||0),heat:+(p.data.heat||0).toFixed(3),prog:+(p.data.prog||0).toFixed(2),done:p.data.done,idone:p.data.idone,glass:p.data.glass||0,rh:p.data.rh||0}:p.t==='vedenkeraaja'?{w:p.data.w||0}:p.t==='pelto'?{c:p.data.c||null,g:p.data.g?1:0}:p.t==='kohopenkki'?{s:(p.data.s||[]).map(q=>({c:q.c||null,g:q.g?1:0}))}:p.t==='katiska'?{f:p.data.f||[],t:Math.round(p.data.t||0),b:p.data.b||0}:p.t==='savustin'?{q:p.data.q||[],t:Math.round(p.data.t||0),out:p.data.out||0}:p.t==='kalanaulakko'?{f:p.data.f||null,kg:p.data.kg||0}:bt(p.t)==='ovi'?{open:p.data.open,dir:p.data.dir}:{}})),
+  pieces:pieces.map(p=>({t:p.t,x:p.x,y:p.y,z:p.z,r:p.rot,f:p.f||0,hp:p.hp,d:PIECES[p.t].store?{items:p.data.items,lv:p.data.lv}:isFirePiece(p.t)?Object.assign({fuel:p.data.fuel,burn:p.data.burn,cook:p.data.cook,full:p.data.full,ember:p.data.ember||0},p.t==='patanuotio'?{pot:p.data.pot,spo:p.data.spo,lid:p.data.lid,job:p.data.job,doneT:p.data.doneT,char:p.data.char}:{}):isTorch(p.t)?{burn:p.data.burn,full:p.data.full}:p.t==='sulatin'?{q:p.data.q,fuel:+(p.data.fuel||0).toFixed(1),lit:p.data.lit?1:0,coal:Math.round(p.data.coal||0),heat:+(p.data.heat||0).toFixed(3),prog:+(p.data.prog||0).toFixed(2),done:p.data.done,idone:p.data.idone,glass:p.data.glass||0,rh:p.data.rh||0}:p.t==='vedenkeraaja'?{w:p.data.w||0}:p.t==='pelto'?{c:p.data.c||null,g:p.data.g?1:0}:p.t==='kohopenkki'?{s:(p.data.s||[]).map(q=>({c:q.c||null,g:q.g?1:0}))}:p.t==='katiska'?{f:p.data.f||[],t:Math.round(p.data.t||0),b:p.data.b||0}:p.t==='savustin'?{q:p.data.q||[],t:Math.round(p.data.t||0),out:p.data.out||0}:p.t==='kalanaulakko'?{f:p.data.f||null,kg:p.data.kg||0}:p.t==='kalapoyta'?{pk:p.data.pk||null}:bt(p.t)==='ovi'?{open:p.data.open,dir:p.data.dir}:{}})),
   moved:nodes.filter(n=>n.x!==n.ox||n.z!==n.oz||n.s!==n.s0).map(n=>[n.id,+n.x.toFixed(2),+n.z.toFixed(2),+n.s.toFixed(2)]),
   terra:terraList(),mud:mudList(),ft:ftList(),   /* v2.65 (v11) tarkat laikut */
-  planted:nodes.filter(n=>n.planted).map(n=>[n.type,+n.x.toFixed(2),+n.z.toFixed(2),+n.s.toFixed(2),n.rz?1:0]),   /* v3.06 rz pihkapuu; kuolleetkin (id:t pysyvät, paikka käytetään uudelleen) */
+  planted:nodes.filter(n=>n.planted).map(n=>n.gmx!=null?[n.type,+n.x.toFixed(2),+n.z.toFixed(2),+n.s.toFixed(2),n.rz?1:0,n.gst|0,n.gmx,+(n.gsk||1).toFixed(3)]:[n.type,+n.x.toFixed(2),+n.z.toFixed(2),+n.s.toFixed(2),n.rz?1:0]),   /* v3.08 kasvuvaihe gst/gmx/gsk (ei n.gk = NGRID-avain) */   /* v3.06 rz pihkapuu; kuolleetkin (id:t pysyvät, paikka käytetään uudelleen) */
   nodes:nodes.filter(n=>!n.alive&&!n.thin).map(n=>n.respD!=null?[n.id,0,+(n.respD-dayN-dayT).toFixed(3)]:[n.id,isFinite(n.respawnAt)?Math.round(n.respawnAt-playTime):-1]),   /* v2.99 kivet: jäljellä olevat päivät; -1 = kaukouusiutuva poiminta */graves:graves.map(g=>({x:g.x,y:g.y,z:g.z,items:g.items,dim:g.dim})),dk:dunKilled,
   explored:btoa(String.fromCharCode.apply(null,packBits(explored)))};}
 function packBits(a){const o=new Uint8Array(Math.ceil(a.length/8));for(let i=0;i<a.length;i++)if(a[i])o[i>>3]|=1<<(i&7);return Array.from(o);}
@@ -43,7 +43,7 @@ function loadData(s){
   if(!oldWorld){
     applyTerra(s.terra||[]);applyMud(s.mud||[]);ftApply(s.ft||[]);   // v2.65 tarkat laikut (vanhassa tallennuksessa ei ole)
     for(const p of s.pieces||[])addPiece(p.t,p.x,p.y,p.z,(s.v||1)<7?p.r*2:p.r,p.hp,p.d,p.f||0);
-    for(const [t,x,z,sc,rz] of s.planted||[]){const n=plantTree(t,x,z,sc);if(n){n.rz=rz?1:0;setNodeMatrix(n,true);}}
+    for(const [t,x,z,sc,rz,gst,gmx,gk] of s.planted||[]){const n=plantTree(t,x,z,sc);if(n){n.rz=rz?1:0;if(gmx!=null){n.gst=gst|0;n.gmx=gmx;n.gsk=gk||1;}setNodeMatrix(n,true);}}
     // v<5: maiseman solmujen numerointi muuttui (pensaat), joten kaadettujen lista ohitetaan.
     // v<9: biomit (v0.82) muuttivat maiseman solmujen numeroinnin → kaadettujen/siirrettyjen lista ohitetaan (puut ovat taas pystyssä).
     const nodesOk=(s.v||1)>=9;const byId=new Map(nodes.map(n=>[n.id,n]));for(const [id,x,z,sc] of nodesOk?s.moved||[]:[]){const n=byId.get(id);if(n)moveNode(n,x,z,sc);}
@@ -58,7 +58,7 @@ function loadData(s){
   if(!flags.wl)planLoot(true);else if(!flags.wlCap){capWlMetals(flags.wl);flags.wlCap=1;}   /* v2.99 arkkujen metallit */for(const d of s.vdrops||[])if(ITEMS[d.id])relocateValuable(d.id,d.n,d.q);   // v1.34: arvoesineiden suunnitelma ja maassa olleet arvoesineet arkkuun
   resetFog();invDirty=true;updateGear();goalShown=-1;syncAltar();ensureCamps();syncChests();
 }
-function resetWorld(){endPlayerDeath();for(const s of [...splats]){scene.remove(s.m);}splats.length=0;
+function resetWorld(){endPlayerDeath();if(P.gearLock&&typeof gearUnlock==='function')gearUnlock();   /* v3.08 kuoleman varustelukko pois (lataus/uusi peli kuolleena) */for(const s of [...splats]){scene.remove(s.m);}splats.length=0;
   for(const p of [...pieces])removePiece(p);for(const m of [...mobs])mobRemove(m);for(const d of [...drops])removeDrop(d);drops=[];for(const g of [...graves])removeGrave(g);graves=[];
   clearLogs();unplantAll();resetTerra();for(const n of nodes)restoreNode(n);for(const k in dunKilled)delete dunKilled[k];resetRealms();for(const m of [...mobs])mobRemove(m);explored.fill(0);
   for(const p of projs)scene.remove(p.m);projs.length=0;

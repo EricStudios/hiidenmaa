@@ -43,22 +43,23 @@ const PIECES={
   // v1.41 (lista 4, kohta 20): seinäsoihtu – kiinnitetään seinän tai muun rakennuksen pystypintaan (wallMount), palaa 15 min, pihka lisää
   seinasoihtu:{n:'Seinäsoihtu',req:{puu:2,pihka:1,rauta:1},hp:50,snap:'free',cat:'valo',wallMount:1},
   tyopenkki:{n:'Työpenkki',req:{puu:10},hp:200,snap:'free',noBench:1,cat:'tyopisteet',alku:1},
-  nuotio:{n:'Nuotio',req:{kivi:5,puu:2},hp:80,snap:'free',noBench:1,cat:'tyopisteet',alku:1},
-  grilli:{n:'Grillinuotio',req:{kivi:6,puu:4,kupari:2},hp:100,snap:'free',noBench:1,cat:'tyopisteet'},
-  patanuotio:{n:'Keittopatanuotio',req:{kivi:12,puu:6,rauta:2},hp:140,snap:'free',cat:'tyopisteet',lvl:10},   // v3.06 vaatii työpenkin lähelle   // v3.02 pata asennetaan erikseen (keittopata, ahjo)
-  katiska:{n:'Katiska',req:{puu:4,naru:1},hp:60,snap:'free',cat:'tyopisteet',lvl:4,noBench:1,water:1},   // v3.06 onkiminen (fish.js): pyydys veteen
-  savustin:{n:'Savustin',req:{kivi:8,puu:6},hp:140,snap:'free',cat:'tyopisteet',lvl:5},   // v3.06 savukala
-  kalanaulakko:{n:'Kalanaulakko',req:{puu:3,rauta:1},hp:40,snap:'free',cat:'kalusto',lvl:3,wallMount:1},   // v3.06 ennätyskala seinälle
-  pelto:{n:'Viljelylaatikko',req:{puu:4},hp:80,snap:'free',cat:'tyopisteet',lvl:3,noBench:1},   // v3.06 viljely (farm.js); v3.07 nimi: 1 kylvö, 60 %/uni, 9 + siemen
-  kohopenkki:{n:'Kohopenkki',req:{kivi:10,puu:4},hp:160,snap:'free',cat:'tyopisteet',lvl:6,noBench:1},   // v3.07 kivireunainen, 4 kylvöä, 70 %/uni
-  vedenkeraaja:{n:'Veden kerääjä',req:{kupari:4,rauta:2},hp:160,snap:'free',cat:'tyopisteet',lvl:6},   // v3.06 sadevesi (pot.js waterTick)
+  nuotio:{n:'Nuotio',req:{kivi:5,puu:2},hp:80,snap:'free',noBench:1,cat:'ruoka',alku:1},
+  grilli:{n:'Grillinuotio',req:{kivi:6,puu:4,kupari:2},hp:100,snap:'free',noBench:1,cat:'ruoka'},
+  patanuotio:{n:'Keittopatanuotio',req:{kivi:12,puu:6,rauta:2},hp:140,snap:'free',cat:'ruoka',lvl:10},   // v3.06 vaatii työpenkin lähelle   // v3.02 pata asennetaan erikseen (keittopata, ahjo)
+  katiska:{n:'Katiska',req:{puu:4,naru:1},hp:60,snap:'free',cat:'viljely',lvl:4,noBench:1,water:1},   // v3.06 onkiminen (fish.js): pyydys veteen
+  savustin:{n:'Savustin',req:{kivi:8,puu:6},hp:140,snap:'free',cat:'ruoka',lvl:5},   // v3.06 savukala
+  kalapoyta:{n:'Kalastajan pöytä',req:{puu:6,naru:2},hp:120,snap:'free',cat:'viljely',lvl:3},   // v3.14 vavan kokoaminen, perkaus, pakkipaikka (tackle.js)
+  kalanaulakko:{n:'Kalanaulakko',req:{puu:3,rauta:1},hp:40,snap:'free',cat:'viljely',lvl:3,wallMount:1},   // v3.06 ennätyskala seinälle
+  pelto:{n:'Viljelylaatikko',req:{puu:4},hp:80,snap:'free',cat:'viljely',lvl:3,noBench:1},   // v3.06 viljely (farm.js); v3.07 nimi: 1 kylvö, 60 %/uni, 9 + siemen
+  kohopenkki:{n:'Kohopenkki',req:{kivi:10,puu:4},hp:160,snap:'free',cat:'viljely',lvl:6,noBench:1},   // v3.07 kivireunainen, 4 kylvöä, 70 %/uni
+  vedenkeraaja:{n:'Veden kerääjä',req:{kupari:4,rauta:2},hp:160,snap:'free',cat:'viljely',lvl:6},   // v3.06 sadevesi (pot.js waterTick)
   sulatin:{n:'Sulatusuuni',req:{kivi:20,puu:4},hp:300,snap:'free',cat:'tyopisteet'},
   ahjo:{n:'Ahjo',req:{kivi:10,kupari:6,puu:4},hp:300,snap:'free',cat:'tyopisteet'},
   sanky:{n:'Sänky',req:{puu:8,nahka:4},hp:100,snap:'free',cat:'kalusto',alku:1,fine2:.28},
-  arkku:{n:'Arkku',req:{puu:10},hp:120,snap:'free',cat:'kalusto',alku:1,store:16},
+  arkku:{n:'Arkku',req:{puu:10},hp:120,snap:'free',cat:'sailytys',alku:1,store:16},
   teltta:{n:'Teltta',req:{nahka:6,puu:4},hp:90,snap:'free',cat:'kalusto',fine:.12},
   karhumatto:{n:'Karhuntaljamatto',req:{karhuntalja:1},hp:60,snap:'free',cat:'kalusto'},
-  tynnyri:{n:'Tynnyri',req:{puu:6},hp:90,snap:'free',cat:'kalusto',store:12},
+  tynnyri:{n:'Tynnyri',req:{puu:6},hp:90,snap:'free',cat:'sailytys',store:12},
   kiviseina:{n:'Kiviseinä',req:{kivi:5},hp:500,snap:'wall',cat:'kivi',alku:1},
   kivilattia:{n:'Kivilattia',req:{kivi:3},hp:400,snap:'floor',cat:'kivi',base:'lattia',stone:1},
   kiviikkuna:{n:'Kivinen aukkoikkuna',req:{kivi:5},hp:420,snap:'wall',cat:'kivi',base:'ikkunaseina',stone:1},
@@ -79,8 +80,8 @@ const PIECES={
   kivipylvas_pitka:{n:'Pitkä kivipylväs',req:{kivi:4},hp:400,snap:'free',cat:'kivi',base:'pylvas_pitka',stone:1},
   kivivinoseina:{n:'Kivivinoseinä',req:{kivi:2},hp:250,snap:'wall',cat:'kivi',base:'vinoseina',stone:1,flip:1},
   kivikolmio:{n:'Kivinen päätykolmio',req:{kivi:2},hp:250,snap:'wall',cat:'kivi',base:'kolmio',stone:1,flip:1},
-  kiviarkku:{n:'Kiviarkku',req:{kivi:8},hp:300,snap:'free',cat:'kivi',base:'arkku',stone:1,store:18},   // v2.83 kiviversio +2 paikkaa (arkku 16)
-  kivitynnyri:{n:'Kivitynnyri',req:{kivi:5},hp:250,snap:'free',cat:'kivi',base:'tynnyri',stone:1,store:14},   // v2.83 +2 (tynnyri 12)
+  kiviarkku:{n:'Kiviarkku',req:{kivi:8},hp:300,snap:'free',cat:'sailytys',base:'arkku',stone:1,store:18},   // v2.83 kiviversio +2 paikkaa (arkku 16)
+  kivitynnyri:{n:'Kivitynnyri',req:{kivi:5},hp:250,snap:'free',cat:'sailytys',base:'tynnyri',stone:1,store:14},   // v2.83 +2 (tynnyri 12)
   // v2.83 (käyttäjä): kiviversiot myös aidasta ja seisovasta soihdusta (kalusteiden kiviarkku ja kivitynnyri olivat jo)
   kiviaita:{n:'Kivimuuri',req:{kivi:6},hp:600,snap:'wall',cat:'kivi',base:'aita',stone:1,mobProof:1},
   kivisoihtu:{n:'Kivinen soihtupylväs',req:{kivi:3,pihka:1},hp:200,snap:'free',cat:'kivi',base:'soihtuteline',stone:1},
@@ -136,7 +137,8 @@ function potInit(p){const d=p.data;d.pot=d.pot?1:0;d.spo=d.spo?1:0;d.lid=d.lid?1
 const FUEL_MAX=40,COOKABLE={liha:'paisti',pienliha:'pienpaisti',suurliha:'suurpaisti'},COOK_T={pienliha:[7,3],liha:[9,5],suurliha:[14,5],sieni:[8,4]};   /* v3.02 sieni kypsyy vain keittopadassa (POT_COOK, pot.js) */   // v2.80 kypsymisaika [min, +satunnainen] s
 for(const d of Object.values(PIECES))if(d.base){const b=PIECES[d.base];for(const k of ['poses','flip','span2','noBench','store','col','dim'])if(d[k]===undefined&&b[k]!==undefined)d[k]=b[k];}
 const FIELD_W=2.4,BED_W=2.6;   // v3.06 viljelylaatikon sivu (m), v3.07 kohopenkin sivu; farm.js
-const BUILD_CATS=[['alku','Alkupeli'],['seinat','Seinät ja lattiat'],['katot','Katot'],['palkit','Palkit ja pylväät'],['portaat','Portaat ja tikkaat'],['kalusto','Kalusto'],['tyopisteet','Työpisteet'],['valo','Valo'],['puolustus','Puolustus'],['kivi','Kivirakennus'],['kivikatot','Kivikatot']];
+/* v3.08 käyttäjä: uudet kategoriat Säilytys, Ruoanlaitto, Viljely ja kalastus (ennen Kalusto/Työpisteet/Kivirakennus) */
+const BUILD_CATS=[['alku','Alkupeli'],['seinat','Seinät ja lattiat'],['katot','Katot'],['palkit','Palkit ja pylväät'],['portaat','Portaat ja tikkaat'],['kalusto','Kalusto'],['sailytys','Säilytys'],['tyopisteet','Työpisteet'],['ruoka','Ruoanlaitto'],['viljely','Viljely ja kalastus'],['valo','Valo'],['puolustus','Puolustus'],['kivi','Kivirakennus'],['kivikatot','Kivikatot']];
 // Portaiden geometria asennon mukaan: 0 tavallinen, 1 jyrkkä (puolet syvyydestä), 2 loiva (puolet korkeudesta).
 // v2.13 tikkaiden kulmat: asento f 0–2 = pysty, 1:3, 1:2. Jokainen tikas nousee WH:n ja siirtyy sivulle (yläpää taaksepäin, -z) G/3 tai G/2 →
 // 3 tai 2 tikasta jatkona = tasan yksi ruutu sivulle (3 tai 2 kerrosta ylös). Vanhat tallennukset: 15° → 1:3, 30° → 1:2 (lähimmät).
@@ -181,6 +183,7 @@ function pieceBoxes(t,f=0){const def=PIECES[t];t=bt(t);if(def.dim)return[[0,def.
   case 'sulatin':return[[0,1.3,0,1.4,2.6,1.4]];
   case 'pelto':return[[0,.06,0,FIELD_W,.12,FIELD_W]];
   case 'kohopenkki':return[[0,.22,0,BED_W,.44,BED_W]];   // v3.07 korotettu: päälle voi astua (alle STEPUP)
+  case 'kalapoyta':return[[0,.45,0,1.8,.9,.8]];   // v3.14
   case 'katiska':return[];case 'kalanaulakko':return[];case 'savustin':return[[0,.9,0,1.1,1.8,1.1]];   // v3.06   // v3.06 matala: päälle voi kävellä
   case 'vedenkeraaja':return[[0,.42,0,1.15,.84,1.15]];
   case 'ahjo':return[[0,.55,0,1.7,1.1,1]];
@@ -253,6 +256,7 @@ function buildPieceMesh(t,f=0){
       const fl=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),mat(0xd83a2a));fl.position.set(0,1.1,0);g.add(fl);g.add(bx(.02,.75,.02,mat(0xd8d0b8),0,.72,0));break;}
     case 'savustin':{g.add(bx(1.1,.5,1.1,MAT.stone,0,.25,0),bx(1,1.1,1,MAT.wood,0,1.05,0),bx(1.15,.1,1.15,MAT.wood,0,1.65,0),bx(.25,.3,.25,MAT.stone,.3,1.85,.3));   // v3.06 savustin: kivijalka, puinen kaappi, piippu
       {const gl=bx(.4,.25,.04,SMELT_DARK,0,.22,.56,false);g.add(gl);g.userData.glow=gl;}   /* v3.07 tulisuu hehkuu savustaessa (heatGlow) */for(let i=0;i<3;i++)g.add(bx(.86,.03,.03,mat(0x3a3a3a,{metalness:.5}),0,.7+i*.3,0));break;}
+    case 'kalapoyta':{if(typeof tkTableMesh==='function')tkTableMesh(g);break;}   // v3.14 tackle.js
     case 'kalanaulakko':{g.add(bx(.7,.36,.04,MAT.wood,0,0,.02));g.add(bx(.04,.04,.06,mat(0x3a3a3a,{metalness:.6}),0,.12,.06));const fm=new THREE.Group();fm.position.set(0,-.02,.1);g.add(fm);g.userData.fishM=fm;break;}   // v3.06 kalanaulakko
     case 'kohopenkki':{const st=MAT.stone,soil=mat(0x3a2a1a,{roughness:1}),ridge=mat(0x4a3622,{roughness:1});g.add(bx(BED_W-.3,.4,BED_W-.3,soil,0,.2,0));   // v3.07 kohopenkki: kivireunus, multakumpu, 4 lohkoa
       for(let i=0;i<10;i++){const t=(i+.5)/10*BED_W-BED_W/2;for(const [x,z] of [[t,BED_W/2-.12],[t,-BED_W/2+.12],[BED_W/2-.12,t],[-BED_W/2+.12,t]])g.add(bx(.26,.44,.26,st,x,.22,z));}
@@ -345,7 +349,7 @@ function addPiece(t,x,y,z,rot,hp,data,f=0){
   if(t==='tyopenkki')p.ring=makeBenchRing(x,z,y<DUN.y+5&&y>DUN.y-5&&Math.abs(y-terrainH(x,z))>3?y:null);
   if(def.store){p.data.lv=p.data.lv||0;p.data.items=p.data.items||[];while(p.data.items.length<storeSlots(p))p.data.items.push(null);}
   if(bt(t)==='ovi'){p.data.open=!!p.data.open;setDoor(p,p.data.open,p.data.dir||1,true);}
-  pieces.push(p);pieceRoots.push(mesh);setPieceDamage(p);markShadowDirty();if(t==='kalanaulakko'&&typeof nauVis==='function')nauVis(p);if((t==='pelto'||t==='kohopenkki')&&typeof fieldVis==='function')fieldVis(p);return p;
+  pieces.push(p);pieceRoots.push(mesh);setPieceDamage(p);markShadowDirty();if(t==='kalanaulakko'&&typeof nauVis==='function')nauVis(p);if(t==='kalapoyta'&&typeof tkTableVis==='function')tkTableVis(p);if((t==='pelto'||t==='kohopenkki')&&typeof fieldVis==='function')fieldVis(p);return p;
 }
 function removePiece(p){markShadowDirty();scene.remove(p.mesh);if(p.ring){scene.remove(p.ring);p.ring.geometry.dispose();}for(const c of p.cols)gridRemove(c);pieces.splice(pieces.indexOf(p),1);pieceRoots.splice(pieceRoots.indexOf(p.mesh),1);if(p.light){const i=lightSources.indexOf(p.light);if(i>=0)lightSources.splice(i,1);}}
 // Ovi aukeaa pelaajasta poispäin (dir ±1 = kummalle puolelle lehti kääntyy), sarana pysyy samassa kohdassa.
@@ -377,7 +381,7 @@ function nearPiece(t,x,z,r){for(const p of pieces)if(p.t===t&&dist2(p.x,p.z,x,z)
    joten lähellä kaikki toimii kuten ennen (osumat, purku, korjaus, ovet). Alkuperäiset meshit vain piilotetaan (säteen osumat toimivat
    piilotettuihinkin). Ei yhdistetä: tulet, säiliöt, ovet, lasit, hehkuvat ja renkaalliset osat. Vaurio tai osien muutos solussa → purku. */
 const BM_CELL=24,BM_FAR=70,BM_NEAR=60,BMC=new Map();
-function bmOk(p){if(p._bmOk!==undefined)return p._bmOk;let ok=!isFirePiece(p.t)&&!PIECES[p.t].store&&!p.ring&&p.t!=='pelto'&&p.t!=='kohopenkki'&&p.t!=='kalanaulakko'&&p.t!=='savustin';   /* v3.06 pellon kasvit vaihtuvat */
+function bmOk(p){if(p._bmOk!==undefined)return p._bmOk;let ok=!isFirePiece(p.t)&&!PIECES[p.t].store&&!p.ring&&p.t!=='pelto'&&p.t!=='kohopenkki'&&p.t!=='kalanaulakko'&&p.t!=='savustin'&&p.t!=='kalapoyta';   /* v3.06 pellon kasvit vaihtuvat */
   if(ok)p.mesh.traverse(o=>{const u=o.userData;if(u.flame||u.food||u.leaf||u.glass||u.glow||u.lid)ok=false;if(o.isMesh&&(Array.isArray(o.material)||o.material.transparent))ok=false;});return p._bmOk=ok;}
 const _bmN3=new THREE.Matrix3(),_bmV=new THREE.Vector3();
 function bmBuild(e){let n=0;const gs=e.list.map(o=>{const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry;n+=g.attributes.position.count;return g;});

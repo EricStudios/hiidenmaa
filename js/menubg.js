@@ -109,7 +109,7 @@ const MBG_SCENES=[
     mbgSoft(g,()=>{for(let i=0;i<9;i++){g.fillStyle=`rgba(${40+r()*30},${46+r()*30},${56+r()*30},.9)`;g.beginPath();g.ellipse(r()*W,H*(.05+r()*.25),(120+r()*120)*u,(30+r()*20)*u,0,0,TAU);g.fill();}});
     mbgHills(g,W,H,H*.68,H*.06,'#1e2a1c',r,true);mbgPoly(g,[[0,H*.8],[W,H*.78],[W,H],[0,H]],'#18221a');},
   fx(g,W,H,t,dt,s,u){const lean=.18+.08*Math.sin(t*1.7);for(let i=0;i<9;i++){const x=W*(.4+i*.07),y=H*(.8+(i%3)*.01),h=(130+(i*37)%60)*u;g.save();g.translate(x,y);g.transform(1,0,-lean*(1+.2*Math.sin(t*3+i)),1,0,0);mbgSpruce(g,0,0,h,'#0f1a12','#132016');g.restore();}
-    s.fl=(s.fl||0)-dt;if(s.fl<=0&&Math.random()<dt*.25){s.fl=.35;s.bx=W*(.5+Math.random()*.4);}if(s.fl>0){g.fillStyle=`rgba(220,230,255,${s.fl*1.2})`;g.fillRect(0,0,W,H);g.strokeStyle='rgba(240,245,255,.9)';g.lineWidth=2.5*u;g.beginPath();let x=s.bx,y=0;g.moveTo(x,y);while(y<H*.6){x+=(Math.random()-.5)*40*u;y+=20*u;g.lineTo(x,y);}g.stroke();}
+    s.fl=(s.fl||0)-dt;if(s.fl<=0&&Math.random()<dt*.25){s.fl=.35;MBG.flash=1;s.bx=W*(.5+Math.random()*.4);}if(s.fl>0){g.fillStyle=`rgba(220,230,255,${s.fl*1.2})`;g.fillRect(0,0,W,H);g.strokeStyle='rgba(240,245,255,.9)';g.lineWidth=2.5*u;g.beginPath();let x=s.bx,y=0;g.moveTo(x,y);while(y<H*.6){x+=(Math.random()-.5)*40*u;y+=20*u;g.lineTo(x,y);}g.stroke();}
     g.strokeStyle='rgba(180,195,215,.35)';g.lineWidth=1*u;g.beginPath();for(let i=0;i<160;i++){const x=((i*97+t*500*u*.6)%(W+100))-50,y=((i*61+t*700*u)%(H+40))-20;g.moveTo(x,y);g.lineTo(x+10*u,y+22*u);}g.stroke();}},   // v1.51: sade viistää tuulen (puiden kallistuksen) suuntaan
  {n:'Lumisade',bg(g,W,H,r,u){mbgGrad(g,0,H,[[0,'#5a6a80'],[.6,'#a8b4c4'],[1,'#dfe6ee']],W);mbgSoft(g,()=>mbgHills(g,W,H,H*.6,H*.08,'#c6d0dc',r,false));
     for(let i=0;i<16;i++){const x=r()*W,y=H*(.68+r()*.12),h=(80+r()*90)*u;mbgSpruce(g,x,y,h,'#2a3e36','#34483e');for(let k=0;k<3;k++)mbgPoly(g,[[x,y-h*(.4+k*.22)-h*.18],[x-h*.3*(1-k*.22),y-h*(k*.2)-h*.05],[x,y-h*(k*.2)-h*.12]],'#eef3f8');}
@@ -296,15 +296,40 @@ function mbgNext(){let j=MBG.i;while(j===MBG.i)j=(Math.random()*MBG_SCENES.lengt
    heinäsirkan siritys (MBG_CR_MIN–MAX s välein); Ahjo yöllä = alasimen isku kuvan iskun tahdissa (MBG.ahjoHit, 75 % iskuista), kaukainen
    (alipäästö) ja kaikuva; Myrsky = satunnainen 2,5–6 s pätkä myrskyäänestä kaukaa 5–14 s välein. Kaikki hyvin hiljaa. Asetus Äänet ›
    "Päävalikon taustakuvien äänet" (SET.menuBgSnd) mykistää. Taso Taustaäänet. */
-const MBG_SND={'Öinen leiri':'tausta_leiri','Myrsky':'tausta_myrsky','Ahjo yöllä':'tausta_ahjo'},MBG_SND_MIN=5,MBG_SND_MAX=14,MBG_SND_V=.7;
-const MBG_LEIRI_V=.35,MBG_AHJO_V=.22,MBG_MYR_V=.3,MBG_CR_V=.1,MBG_CR_MIN=2,MBG_CR_MAX=7;
-function mbgSndStop(){if(MBG.leiri){if(typeof mbgLongStop==='function')mbgLongStop(MBG.leiri,1);MBG.leiri=null;}}
-function mbgSndTick(dt){const S=MBG_SCENES[MBG.i],n=S&&S.n;if(MBG.sndI!==MBG.i){MBG.sndI=MBG.i;mbgSndStop();MBG.sndT=1+Math.random()*3;MBG.crT=2+Math.random()*3;MBG.ahjoHit=0;}
-  if(typeof mbgVoice!=='function'||(typeof SET!=='undefined'&&SET.menuBgSnd===false)||!MBG_SND[n]){mbgSndStop();return;}
-  if(n==='Öinen leiri'){if(!MBG.leiri){MBG.lrT=(MBG.lrT||0)-dt;if(MBG.lrT<=0){MBG.lrT=2;MBG.leiri=mbgLong('taustat','tausta_leiri',MBG_LEIRI_V);}}
-    MBG.crT-=dt;if(MBG.crT<=0){MBG.crT=MBG_CR_MIN+Math.random()*(MBG_CR_MAX-MBG_CR_MIN);mbgChirps(2+(Math.random()*5|0),MBG_CR_V);}}
-  else if(n==='Ahjo yöllä'){if(MBG.ahjoHit){MBG.ahjoHit=0;if(Math.random()<.75)mbgVoice('taustat','tausta_ahjo',{v:MBG_AHJO_V,lp:1700+Math.random()*900,echo:.32,p:.94+Math.random()*.1});}}
-  else if(n==='Myrsky'){MBG.sndT-=dt;if(MBG.sndT<=0){MBG.sndT=MBG_SND_MIN+Math.random()*(MBG_SND_MAX-MBG_SND_MIN);mbgVoice('taustat','tausta_myrsky',{v:MBG_MYR_V,lp:700+Math.random()*900,echo:.25,off:Math.random()*6,len:2.5+Math.random()*3.5,p:.9+Math.random()*.15});}}}
+const MBG_SND={'Öinen leiri':'tausta_leiri','Ahjo yöllä':'tausta_ahjo'},MBG_SND_MIN=5,MBG_SND_MAX=14,MBG_SND_V=.7;
+/* v3.17 käyttäjä: nuotio ei kuulunut (0,35 × taustaäänet jäi valikkomusiikin alle) ja sirkkoja liian harvoin → nuotio 0,8, sirkat 0,2 ja 1–3,5 s välein (3–8 siritystä,
+   välillä kaksi sirkkaa yhtä aikaa). Kuvan vaihduttua äänet alkavat heti: nuotio jatkuu valmiiksi ladatusta soittimesta (mbgLongKeep, häivytys 0,8 s), ensimmäinen
+   siritys / myrsky / ahjo 0,3–1,5 s kuluttua; jos ääni ei ollut vielä ladattu, yritetään 0,3 s päästä (ei pitkää hiljaisuutta). */
+const MBG_OUT_T=1.4;   // v3.19 häivytys ulos alkaa 1,4 s ennen kuvan vaihtoa
+const MBG_LEIRI_V=.8,MBG_AHJO_V=.22,MBG_MYR_V=.3,MBG_CR_V=.2,MBG_CR_MIN=1,MBG_CR_MAX=3.5,MBG_FIRST=[.3,1.5],MBG_RETRY=.3;
+function mbgSndStop(){mbgAmbStop();if(MBG.leiri){if(MBG.leiri.stream&&typeof mbgLongPause==='function')mbgLongPause(MBG.leiri,1.2);else if(typeof mbgLongStop==='function')mbgLongStop(MBG.leiri,1);MBG.leiri=null;}}
+/* v3.18 käyttäjä: 2D-taustakuviin äänet olemassa olevista äänistä, myrskykuviin myrsky ja ukkonen. MBG_AMB[kuva] = L: silmukat [avain, taso], V: kertaäänet
+   [avain, taso, min s, max s, asetukset (lp alipäästö, echo kaiku, seg = satunnainen pätkä [min, max] s, p sävel)]; '#sirkat' = heinäsirkkojen siritys.
+   Myrsky: salaman välähdys (MBG.flash) → salaman isku 0,3–1,6 s myöhemmin. Tasot × Taustaäänet; kaikki alkavat 0,3–1,5 s kuvan vaihdosta. */
+/* v3.19 käyttäjä: vain neljä ääntä, lyhyitä ja hiljaisia – ukkosen salamat myrskykuviin, ahjon alasin, nuotion tuli ja heinäsirkat (Öinen leiri). Ei muita kuvia.
+   Salama = 2,5–4,5 s pätkä (häivytys sisään 0,3 s, ulos 0,8 s); Myrskyssä välähdyksen perään, Myrskytuulessa 9–18 s välein. */
+const MBG_AMB={
+  'Myrsky':{L:[],V:[],flash:['a/saa/salama',.26,{seg:[2.5,4.5]}]},
+  'Myrskytuuli':{L:[],V:[['a/saa/salama',.2,9,18,{seg:[2.5,4.5],lp:2400}]]}};
+function mbgSegOpts(k,v,o){o=o||{};const sg=o.seg,L=mbgList(k),d=L&&L.length&&CRE.man[L[0]]?CRE.man[L[0]].dur||0:0,len=sg?sg[0]+Math.random()*(sg[1]-sg[0]):0;
+  return Object.assign({v:v*(.8+Math.random()*.4),p:o.p||(.92+Math.random()*.12),lp:o.lp||(1800+Math.random()*2500)},o.echo?{echo:o.echo}:{},sg&&d>len+.5?{off:Math.random()*(d-len),len}:{});}
+function mbgAmbStop(){for(const h of MBG.ambL||[])if(h&&!h.none)mbgLongStop(h,.8);MBG.ambL=null;}
+function mbgAmbTick(n,dt,fr){const A=MBG_AMB[n];if(!A||typeof mbgLoopK!=='function')return;
+  if(!MBG.ambL){MBG.ambLT=(MBG.ambLT||0)-dt;if(MBG.ambLT<=0){MBG.ambLT=MBG_RETRY;const hs=A.L.map(([k,v])=>mbgLoopK(k,v));if(hs.every(Boolean))MBG.ambL=hs;else for(const h of hs)if(h&&!h.none)mbgLongStop(h,.05);}}
+  if(!MBG.ambV)MBG.ambV=A.V.map((_,i)=>fr()+i*1.2);
+  A.V.forEach(([k,v,mn,mx,o],i)=>{MBG.ambV[i]-=dt;if(MBG.ambV[i]>0)return;o=o||{};let ok;
+    if(k==='#sirkat')ok=mbgChirps(3+(Math.random()*5|0),v*(.8+Math.random()*.4));
+    else ok=mbgVoiceK(k,mbgSegOpts(k,v,o));
+    MBG.ambV[i]=ok?mn+Math.random()*(mx-mn):MBG_RETRY;});
+  if(A.flash&&MBG.flash){MBG.flash=0;const [k,v,o]=A.flash;setTimeout(()=>{if(MBG_SCENES[MBG.i]&&MBG_SCENES[MBG.i].n===n&&!MBG.outF)mbgVoiceK(k,mbgSegOpts(k,v,o));},300+Math.random()*1300);}}
+function mbgSndTick(dt){const S=MBG_SCENES[MBG.i],n=S&&S.n,fr=()=>MBG_FIRST[0]+Math.random()*(MBG_FIRST[1]-MBG_FIRST[0]);if(MBG.sndI!==MBG.i){MBG.sndI=MBG.i;mbgSndStop();MBG.sndT=fr();MBG.crT=fr();MBG.lrT=0;MBG.ambLT=0;MBG.ambV=null;MBG.flash=0;MBG.outF=0;MBG.ahjoHit=0;}
+  if(typeof mbgLongWarm==='function'&&(typeof SET==='undefined'||SET.menuBgSnd!==false)){mbgLongWarm('taustat','tausta_leiri');if(typeof mbgChirps==='function'&&!MBG.crW)MBG.crW=mbgChirps(0,0);if(typeof mLoad==='function')mLoad();}   // v3.17 valmiiksi ladattu
+  if(typeof mbgVoice!=='function'||(typeof SET!=='undefined'&&SET.menuBgSnd===false)||!(MBG_SND[n]||MBG_AMB[n])){mbgSndStop();return;}
+  if(MBG.t>MBG_T-MBG_OUT_T){if(!MBG.outF){MBG.outF=1;mbgSndStop();}return;}   // v3.19 pehmeä häivytys ulos ennen mustaa siirtymää
+  mbgAmbTick(n,dt,fr);   // v3.18 silmukat ja kertaäänet
+  if(n==='Öinen leiri'){if(!MBG.leiri){MBG.lrT=(MBG.lrT||0)-dt;if(MBG.lrT<=0){MBG.lrT=MBG_RETRY;MBG.leiri=(typeof mbgLongKeep==='function'?mbgLongKeep:mbgLong)('taustat','tausta_leiri',MBG_LEIRI_V);}}
+    MBG.crT-=dt;if(MBG.crT<=0){const ok=mbgChirps(3+(Math.random()*6|0),MBG_CR_V*(.8+Math.random()*.4));if(ok&&Math.random()<.35)setTimeout(()=>mbgChirps(2+(Math.random()*4|0),MBG_CR_V*.7),150+Math.random()*500);   /* toinen sirkka */MBG.crT=ok?MBG_CR_MIN+Math.random()*(MBG_CR_MAX-MBG_CR_MIN):MBG_RETRY;}}
+  else if(n==='Ahjo yöllä'){if(MBG.ahjoHit){MBG.ahjoHit=0;if(Math.random()<.75)mbgVoice('taustat','tausta_ahjo',{v:MBG_AHJO_V,lp:1700+Math.random()*900,echo:.32,p:.94+Math.random()*.1});}}}
 function mbgShow(on){mbgInit();if(on===MBG.shown)return;MBG.shown=on;if(!on)mbgSndStop();MBG.cv.style.display=on?'block':'none';if(on&&MBG.i<0)mbgSet((Math.random()*MBG_SCENES.length)|0);   /* v1.31: aina arvottu (ennen avauksessa Öinen leiri) */MBG.last=performance.now();}
 function mbgFrame(now){mbgShow(true);const raw=Math.min(.25,(now-MBG.last)/1000);MBG.acc+=raw;MBG.last=now;if(MBG.acc<1/MBG_FPS)return;const dt=MBG.acc;MBG.acc=0;mbgSndTick(dt);
   MBG.t+=dt;if(MBG.t>MBG_T)mbgSet(mbgNext());

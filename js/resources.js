@@ -199,12 +199,12 @@ function cullStatics(){const cx=camera.position.x,cz=camera.position.z,f=scene.f
   for(const o of statics.children){let c=o.userData.cs;if(!c){if(o.isInstancedMesh){_sb.makeEmpty();for(let i=0;i<o.count;i++){o.getMatrixAt(i,_m4);_sb.expandByPoint(_sv.setFromMatrixPosition(_m4));}}else _sb.setFromObject(o);if(_sb.isEmpty()){o.userData.cs=c={x:o.position.x,z:o.position.z,r:1,dun:false};}else{_sb.getCenter(_sv);c=o.userData.cs={x:_sv.x,z:_sv.z,r:Math.min(400,_sb.getSize(_sv).length()/2),dun:_sb.min.y>DUN.y-5&&_sb.max.y<DUN.y+20&&Math.abs(_sb.min.x)>HALF+50};}}
     const vis=o.userData.mg?false:c.dun?P.inDun:(!P.inDun&&dist2(cx,cz,c.x,c.z)<(f+c.r)*(f+c.r));if(o.visible!==vis)o.visible=vis;}}
 function updateChunkVis(){statT-=1/30;if(statT<=0){statT=.5;cullStatics();mergeTick();if(typeof bmTick==='function')bmTick();}else if(bmDirty&&typeof bmTick==='function')bmTick();terrLodTick();
-  const cx=camera.position.x,cz=camera.position.z,f=scene.fog.far;
-  const lod=+SET.treeLod||0,h=CHS/2;
+  const ie=typeof introEdgeOn==='function'&&introEdgeOn(),cx=ie?P.pos.x:camera.position.x,cz=ie?P.pos.z:camera.position.z,f=ie?1e4:scene.fog.far;   // v3.10 intron pilvimatto: raja pelaajan ympäriltä
+  const lod=+SET.treeLod||0,h=CHS/2,dy=typeof introLight==='function'&&introLight()?Math.max(0,camera.position.y-P.pos.y):0,dy2=dy*dy;   // v3.10 intro: LOD 3D-etäisyydestä (yläkamerassa kevyt)
   for(const im of CHUNK_IMS){const R=Math.min(f,im.userData.vis*RDK*(im.userData.vis<80?DETK:1))+CHS*.72,on=im.count>0&&!P.inDun&&dist2(cx,cz,im.userData.cx,im.userData.cz)<R*R;im.userData.on=on;
     const low=im.userData.low;if(!low){im.visible=on;continue;}
     /* v2.41 LOD: koko ruutu kaukomalliin, kun sen lähin reuna on yli SET.treeLod m kamerasta (kaikki sen puut ovat vähintään niin kaukana) */
-    const ex=Math.max(0,Math.abs(cx-im.userData.cx)-h),ez=Math.max(0,Math.abs(cz-im.userData.cz)-h),far=on&&lod>0&&ex*ex+ez*ez>lod*lod;
+    const ex=Math.max(0,Math.abs(cx-im.userData.cx)-h),ez=Math.max(0,Math.abs(cz-im.userData.cz)-h),far=on&&lod>0&&ex*ex+ez*ez+dy2>lod*lod;
     im.visible=on&&!far;low.visible=far;low.count=im.count;}
   if(typeof shpTick==='function')shpTick();}
 /* v1.44 (lista 4, kohta 30): KAUKAISEN MAASTON LOD (asetus terrLod). Kärjet pysyvät samoina (lapion muokkaukset toimivat), vain
@@ -264,7 +264,7 @@ function initNode(n){n.ox=n.x;n.oz=n.z;n.s0=n.s;n.id=NODE_ID_XT.has(n.type)?NODE
    eivät jyrkillä rinteillä näytä vinoilta (pystyssä y-akselilla). Puut pysyvät pystyssä, mutta tyvi upotetaan rinteeseen (ei kellu alamäen
    puolella); kivet upotetaan hieman rinteen mukaan. NTILT = kallistuksen osuus lajeittain. */
 function groundSlope(x,z){const e=.8;return [(terrainH(x+e,z)-terrainH(x-e,z))/(2*e),(terrainH(x,z+e)-terrainH(x,z-e))/(2*e)];}
-function setNodeMatrix(n,vis){_q.setFromEuler(_e.set(0,n.rot,0));_s.setScalar(vis?n.s:0.0001);const kd=n.def.kind;let sink=kd==='pick'||kd==='deco'?0:.05;
+function setNodeMatrix(n,vis){if(!n.im)return;_q.setFromEuler(_e.set(0,n.rot,0));_s.setScalar(vis?n.s:0.0001);const kd=n.def.kind;let sink=kd==='pick'||kd==='deco'?0:.05;
   if(!n.dun&&!n.isLog){const [gx,gz]=groundSlope(n.x,n.z),sl=Math.hypot(gx,gz),tk=NTILT[kd]||0;
     if(tk>0&&sl>.02){_gtN.set(-gx,1,-gz).normalize();if(tk<1)_gtN.lerp(_gtU,1-tk).normalize();_q.premultiply(_gtQ.setFromUnitVectors(_gtU,_gtN));}
     if(kd==='tree')sink+=Math.min(.6,sl*(n.def.r||.3)*n.s*1.3);else if(kd==='rock')sink+=Math.min(.4,sl*(n.def.r||1)*n.s*.25);}
@@ -283,7 +283,7 @@ const WOOD_K=1.1,RESIN_DROP_K=.8;
 /* v2.95 käyttäjä: pihkaa kaadosta vain lajin suurimmista puista (koko ≥ lajin FELL_BIG_Q-kvantiili), enintään 1 ja todennäköisyydellä FELL_RESIN_P. */
 const FELL_BIG_Q=.75,FELL_RESIN_P=.25,FELL_BIG={};
 function fellBigS(type){if(FELL_BIG[type]===undefined){const a=nodes.filter(n=>n.type===type).map(n=>n.s0||n.s).sort((x,y)=>x-y);FELL_BIG[type]=a.length?a[Math.min(a.length-1,Math.floor(a.length*FELL_BIG_Q))]:99;}return FELL_BIG[type];}
-function fellResin(n){return n.s>=fellBigS(n.type)&&Math.random()<FELL_RESIN_P?1:0;}
+function fellResin(n){if(n.type==='aarnipuu'&&typeof RESIN_P_AARNI!=='undefined'&&resinHash(n.id)<RESIN_P_AARNI)return 3+Math.floor(Math.random()*3);   /* v3.08 pihkainen aarnipuu */return n.s>=fellBigS(n.type)&&Math.random()<FELL_RESIN_P?1:0;}
 function dropScale(id,c){if(id==='puu'||id==='tervaspuu'){const x=c*WOOD_K;return Math.floor(x)+(Math.random()<x-Math.floor(x)?1:0);}if(id==='pihka'){let k=0;for(let i=0;i<c;i++)if(Math.random()<RESIN_DROP_K)k++;return k;}return c;}
 nodes.forEach(ngridAdd);
 // Etäisyys solmuun: tukeille janan lähin piste, muille keskipiste.
@@ -328,7 +328,7 @@ function respawnNode(n){const kind=n.def.kind;
     moveNode(n,px,pz,ps);}
   syncNodeY(n);reviveNode(n);return true;}
 // Palauttaa solmun alkuperäiseen paikkaan ja kokoon (uusi peli / lataus).
-function syncNodeY(n){const y=terrainH(n.x,n.z);if(Math.abs(y-n.y)<.001)return;n.y=y;if(n.alive)setNodeMatrix(n,true);if(n.col){n.col.minY=y-1;n.col.maxY=n.def.kind==='tree'?y+6*n.s:y+1.2*n.s;}}
+function syncNodeY(n){if(n.isLog||!n.im)return;   /* v3.08 KORJAUKSET 82: maanmuokkaus kaadetun puun vieressä – tukeilla ei ole instanssia (n.im) → setMatrixAt-virhe */const y=terrainH(n.x,n.z);if(Math.abs(y-n.y)<.001)return;n.y=y;if(n.alive)setNodeMatrix(n,true);if(n.col){n.col.minY=y-1;n.col.maxY=n.def.kind==='tree'?y+6*n.s:y+1.2*n.s;}}
 // Maanmuokkaus (lapio): korkeuskartta, maastoverkko, solmujen korkeudet. Muokatut kärjet tallentuvat (`TERRA`).
 function terraSetVertex(i,h){if(Math.abs(h-HGT0[i])<.005){delete TERRA[i];h=HGT0[i];}else TERRA[i]=h;HGT[i]=h;terrainMesh.geometry.attributes.position.array[i*3+1]=h;waterDepSet(i);}
 function terraFlush(){terrainMesh.geometry.attributes.position.needsUpdate=true;WATER_DEP.needsUpdate=true;   /* v2.18: veden syvyyskartta seuraa lapiota */terrainMesh.geometry.computeBoundingSphere();}
@@ -436,7 +436,8 @@ function regrowForest(){let revived=0;
   for(const n of nodes){if(n.alive||n.thin||n.planted||n.isLog)continue;const k=n.def.kind;
     if(k==='tree'){if(Math.random()<REGROW_K&&!nearBase(n.x,n.z)&&respawnNode(n))revived++;}
     else if(k==='rock'){if(rockReady(n)&&Math.random()<REGROW_K&&!siteBlocked(n.x,n.z)&&!nearBase(n.x,n.z)&&respawnNode(n))revived++;}}
-  revived+=pickRoll();const planted=typeof farmGrow==='function'?farmGrow():0;
+  flags.sleepC=(flags.sleepC|0)+1;   // v3.08 yhteinen unilaskuri (joka 5. uni: pihkan täyttyminen, istutettujen puiden kasvuvaiheet)
+  revived+=pickRoll();const planted=typeof farmGrow==='function'?farmGrow():0;if(typeof treeStageSleep==='function')treeStageSleep();if(typeof resinRefillSleep==='function')resinRefillSleep();   // v3.08 pihkan uudelleentäyttyminen joka 5. uni
   return{revived,planted};}
 // Yön tunnus: illan tunnit kuuluvat kuluvaan päivään, aamuyö edelliseen (sänky: flags.sleptN).
 function nightId(){return dayN-(dayT<.5?1:0);}
@@ -449,11 +450,13 @@ function nightId(){return dayN-(dayT<.5?1:0);}
 //                     tiheys pituus  väri (tyvi → kärki)
 const GRASS_DEF=[[1,1,0x3d6a22,0x9ccf52],[.9,.95,0x3a6624,0x8cc04a],[.5,.8,0x2c4e1e,0x6e9a3a],[.75,1.35,0x40502a,0x9aa060],[.35,.55,0x5a6a3a,0xb8c08a],
   [.2,.9,0x1f3a1c,0x4f7a34],[.3,.75,0x4a4436,0x8a7f60],[.55,.55,0x5a5a30,0xa09a58],[.08,.5,0x5a5a3a,0x9a9a70],[.15,.6,0x50583a,0x8a9060],[.1,.8,0x8a8a5a,0xd0c890]];
-let grassC={x:1e9,z:1e9},grassIM=null;
+let grassC={x:1e9,z:1e9},grassIM=null;const GRASS_FADE_W=8;
 const GRASS_MAT=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide,transparent:true,opacity:.5,depthWrite:false});   // v1.02 läpikuultava, kevyt
-const GRASS_U={uPl:{value:new V3(0,-999,0)}};   // v3.06 pelaajan paikka: ruoho ja rikkaruohot taipuvat kulkijan tieltä
-const grassCompile=sh=>{sh.uniforms.uTime=SWAY.uTime;sh.uniforms.uWind=SWAY.uWind;sh.uniforms.uWDir=SWAY.uWDir;sh.uniforms.uLean=SWAY.uLean;sh.uniforms.uPl=GRASS_U.uPl;
-  sh.vertexShader='uniform float uTime;uniform float uWind;uniform vec3 uWDir;uniform float uLean;uniform vec3 uPl;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+const GRASS_U={uPl:{value:new V3(0,-999,0)},uGF:{value:new THREE.Vector2(1e4,1e4+1)}};   // v3.24 uGF: ruohon reunahäivytys (alku, loppu) m pelaajasta   // v3.06 pelaajan paikka: ruoho ja rikkaruohot taipuvat kulkijan tieltä
+const grassCompile=sh=>{sh.uniforms.uTime=SWAY.uTime;sh.uniforms.uWind=SWAY.uWind;sh.uniforms.uWDir=SWAY.uWDir;sh.uniforms.uLean=SWAY.uLean;sh.uniforms.uPl=GRASS_U.uPl;sh.uniforms.uGF=GRASS_U.uGF;
+  sh.fragmentShader='varying float vGF;\n'+sh.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\n  gl_FragColor.a*=vGF;');   // v3.24 reuna häipyy sisään
+  sh.vertexShader='uniform float uTime;uniform float uWind;uniform vec3 uWDir;uniform float uLean;uniform vec3 uPl;uniform vec2 uGF;varying float vGF;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+  vGF=1.-smoothstep(uGF.x,uGF.y,length(instanceMatrix[3].xz-uPl.xz));transformed.y*=.3+.7*vGF;
   float gPh=instanceMatrix[3].x*.31+instanceMatrix[3].z*.27;float gh=max(0.,position.y);float gk=gh*gh;
   mat3 gM=mat3(instanceMatrix);vec3 gL=vec3(dot(gM[0],uWDir),dot(gM[1],uWDir),dot(gM[2],uWDir));gL/=max(length(gL),1e-4);
   float gs=(.1+uWind*.25)*sin(uTime*2.3+gPh)+min(uLean,1.2)*(.35+.12*sin(uTime*1.7+gPh*1.3));
@@ -536,7 +539,7 @@ function rebuildGrass(){let lv=+(SET.grass??1);grassDirty=false;if(AUTO.fx>=2)lv
   // v1.38 (KORJAUKSET 28): ruohoton alue (kivinen vuori, kohteen ympäristö) → n = 0 eikä setColorAt-kutsua → instanceColor = null. Sama
   // GRASS_MAT on jo käännetty instanssiväreillä, joten three.js r128 kaatui piirrossa ("Script error"). Tyhjää ei lisätä näkymään.
   if(WIs)WIs.forEach((WI,k)=>{const wn=WN0[k];if(wn){WI.count=wn;WI.instanceMatrix.needsUpdate=true;if(WI.instanceColor)WI.instanceColor.needsUpdate=true;scene.add(WI);weedIMs.push(WI);if(!weedIM||wn>weedIM.count)weedIM=WI;}else WI.dispose();});   // KORJAUKSET 28: tyhjää ei lisätä
-  grassC={x:cx,z:cz};if(TI){if(tn){TI.count=tn;TI.instanceMatrix.needsUpdate=true;if(TI.instanceColor)TI.instanceColor.needsUpdate=true;scene.add(TI);tallIM=TI;}else TI.dispose();}   // KORJAUKSET 28: tyhjää ei lisätä
+  grassC={x:cx,z:cz};GRASS_U.uGF.value.set(R-GRASS_FADE_W-6.5,R-6.5);   /* v3.24 käyttäjä: uloin reuna (uudelleenrakennus 6 m välein) häipyy ja kasvaa näkyviin GRASS_FADE_W m:n matkalla – ei äkillistä ilmestymistä */if(TI){if(tn){TI.count=tn;TI.instanceMatrix.needsUpdate=true;if(TI.instanceColor)TI.instanceColor.needsUpdate=true;scene.add(TI);tallIM=TI;}else TI.dispose();}   // KORJAUKSET 28: tyhjää ei lisätä
   if(!n){im.dispose();return;}
   im.count=n;im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;scene.add(im);grassIM=im;}
 function updateGrass(){GRASS_U.uPl.value.set(P.pos.x,P.pos.y,P.pos.z);if(P.inDun){if(grassIM)grassIM.visible=false;if(tallIM)tallIM.visible=false;for(const w of weedIMs)w.visible=false;return;}if(grassIM)grassIM.visible=true;if(tallIM)tallIM.visible=true;for(const w of weedIMs)w.visible=true;

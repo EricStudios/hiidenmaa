@@ -19,8 +19,11 @@ const explored=new Uint8Array(EXN*EXN);
 let state='menu';
 
 const fig=makePlayer();
-scene.add(fig.g);let heldMesh=null,heldId=null,offMesh=null,offId=null,armorId=null;
+scene.add(fig.g);let heldMesh=null,heldId=null,offMesh=null,offId=null,armorId=null,heldKey=null,offKey=null;   // v3.14 avain = id + vavan osat / pakin taso (tackle.js)
 // Repussa olevat mutta käyttämättömät aseet, kilvet ja työkalut näkyvät pelaajan selässä (kilpi keskellä, jousi vinossa, työkalut varret ylöspäin).
+/* v3.24 käyttäjä: vasara vyöllä 20 % pienempi (s), kiinni vartalossa ilman rakoa (selän pinta x 0,17:ssä z −0,086, mitattu säteellä; pään puolipaksuus 0,056 + 1 cm)
+   ja kääntynyt selän kaarevuuden mukaan (pinnan kaltevuus 0,36 → ry −0,35), ei suoraan taaksepäin. */
+const HAM_BELT={x:.17,z:-.153,ry:-.35,s:.8};
 const backG=new THREE.Group();fig.rig.add(backG);let backKey='',backHang=null;
 const ARMOR_BACK={nahkavaatteet:{ch:.045,bt:.02},karhuhaarniska:{ch:.15,bt:.1},kuparipanssari:{ch:.055,bt:.025},rautapanssari:{ch:.05,bt:.025},hiidenpanssari:{ch:.065,bt:.025}};
 function hasArrows(){return typeof AMMO!=='undefined'&&AMMO.some(id=>invCount(id)>0);}
@@ -32,7 +35,7 @@ function updateBack(){const items=inv.filter(s=>s&&(!s.eq||(ITEMS[s.id].cat==='s
   const key=[sh,bo,hm,...tl].map(s=>s?s.id:'-').join()+'|'+(ar?ar.id:'')+'|'+(bo&&hasArrows()?'a':'');if(key===backKey)return;backKey=key;while(backG.children.length)backG.remove(backG.children[0]);backHang=null;
   // Vasara roikkuu vyöllä takana (v0.72): pää vyön päällä selän suuntaisesti (pää 90° pystyakselin ympäri aiemmasta), varsi alas.
   // Ripustuspiste = vyön yläreuna selän puolella (y 0,94, z −0,24); heiluu kävellessä (player.js, backHang).
-  if(hm){const m=makeHeld(hm.id),o=new THREE.Group();m.rotation.x=-Math.PI/2;m.position.set(0,-.47,0);o.add(m);o.position.set(.13,.94,-.24-AB.bt);o.rotation.y=.18;backG.add(o);backHang=o;}
+  if(hm){const m=makeHeld(hm.id),o=new THREE.Group();m.rotation.x=-Math.PI/2;m.position.set(0,-.47,0);o.add(m);o.position.set(HAM_BELT.x,.94,HAM_BELT.z-AB.bt);o.rotation.y=HAM_BELT.ry;o.scale.setScalar(HAM_BELT.s);backG.add(o);backHang=o;}
   if(sh){const m=makeShield(sh.id);const o=new THREE.Group();m.rotation.y=Math.PI/2;m.position.set(0,0,0);o.add(m);o.position.set(0,1.2,-.1-AB.ch);o.scale.setScalar(.85);backG.add(o);}
   const z0=(sh?-.29:-.19)-AB.ch;
   // v1.37 (lista 3, kohta 37): selkäesineet viistoon, pitkä osa sivulle (hakun piikit, kirveen terä) eikä selkää vasten:
@@ -45,9 +48,22 @@ function updateBack(){const items=inv.filter(s=>s&&(!s.eq||(ITEMS[s.id].cat==='s
     if(hasArrows()){for(let i=0;i<3;i++){const a=new THREE.Group(),sh=mat(0xc9b48a);a.add(bx(.02,.72,.02,sh,0,0,0,false));a.add(bx(.045,.09,.045,mat(0x4d535c),0,-.4,0,false));
       for(const sx of[-1,1])a.add(bx(.004,.12,.05,mat(0xe8e2d2),sx*.012,.3,0,false));a.position.set((i-1)*.035,-.02+i*.02,.03);a.rotation.z=(i-1)*.04;o.add(a);}}
     o.position.set(.02,1.15,z0+.01);o.rotation.set(0,0,-.55);o.scale.setScalar(.95);backG.add(o);}
+  if(sh||bo||tl.length)backG.add(backStrap(sh,AB));   // v3.08 olkahihna
   tl.forEach(s=>{const m=makeHeld(s.id),o=new THREE.Group(),P0=backPose(s.id);o.add(m);
     _bkD.fromArray(P0.d).normalize();_bkY.fromArray(P0.y);_bkY.addScaledVector(_bkD,-_bkY.dot(_bkD)).normalize();_bkX.crossVectors(_bkY,_bkD).normalize();_bkM.makeBasis(_bkX,_bkY,_bkD);
     o.quaternion.setFromRotationMatrix(_bkM);o.position.set(P0.p[0],P0.p[1],z0+(P0.dz||0));o.scale.setScalar(.85);backG.add(o);});}
+/* v3.08 käyttäjä: OLKAHIHNA, kun selässä on kilpi, jousi tai työkalu/ase: vasemmalta olalta oikealle lantiolle edessä ja takana + olan yli.
+   Puukilpi: vaalea hihna; muut tummempi nahka; rautakilpi: nahka + metallisolki edessä. (Vasara roikkuu vyöllä – ei hihnaa yksin.) */
+const STRAP={top:[.15,1.52],bot:[-.21,.86],w:.045,t:.012};
+function backStrap(sh,AB){const g=new THREE.Group(),light=sh&&sh.id==='kilpi',m=smat(light?0xb8915e:0x4a3020),dz=AB.ch||0;
+  const x0=STRAP.top[0],y0=STRAP.top[1],x1=STRAP.bot[0],y1=STRAP.bot[1],L=Math.hypot(x0-x1,y0-y1),a=-Math.atan2(x0-x1,y0-y1);
+  for(const [z,k] of [[.15+dz,1],[-.145-dz,-1]]){const b=new THREE.Mesh(new THREE.BoxGeometry(STRAP.w,L,STRAP.t),m);b.position.set((x0+x1)/2,(y0+y1)/2,z);b.rotation.z=a;b.castShadow=true;g.add(b);
+    const e=new THREE.Mesh(new THREE.BoxGeometry(STRAP.w*1.05,STRAP.t,.07),m);e.position.set(x1-.012,y1-.01,z-k*.03);e.rotation.y=k*.5;g.add(e);}   // lantion kääre sivulle
+  const top=new THREE.Mesh(new THREE.BoxGeometry(STRAP.w,STRAP.t,.3+dz*2),m);top.position.set(x0+.01,y0+.035,0);top.rotation.z=-.25;g.add(top);
+  if(sh&&sh.id==='rautakilpi'){const mm=mat(0x9aa3ad,{metalness:.7,roughness:.35}),cy=y0-(y0-y1)*.42,cx=x0+(x1-x0)*.42,z=.15+dz+.012;
+    const fr=new THREE.Mesh(new THREE.TorusGeometry(.03,.006,4,4),mm);fr.rotation.z=Math.PI/4+a;fr.position.set(cx,cy,z);g.add(fr);
+    const pin=new THREE.Mesh(new THREE.BoxGeometry(.006,.05,.006),mm);pin.position.set(cx,cy,z+.004);pin.rotation.z=a;g.add(pin);}
+  return g;}
 const _bkD=new V3(),_bkY=new V3(),_bkX=new V3(),_bkM=new THREE.Matrix4();
 function backPose(id){const d=ITEMS[id];
   if(d.chop||id==='nuija')return{p:[.2,.82],d:[-.55,.85,0],y:[.85,.55,0]};          // terä −y → alas oikealle (sivulle)
@@ -56,12 +72,22 @@ function backPose(id){const d=ITEMS[id];
   if(/miekka/.test(id))return{p:[-.2,1.42],d:[.45,-.9,0],y:[0,0,1]};   // v1.39 (lista 4, kohta 5): lappeellaan selkää vasten               // terä litteänä selkää vasten, alaspäin
   if(d.cat==='shovel')return{p:[-.22,1.48],d:[.42,-.9,0],y:[0,0,1]};
   return{p:[.15,.85],d:[-.4,.9,0],y:[.9,.4,0]};}
-function updateGear(){updateBack();
+/* v3.08 käyttäjä: kuollessa hahmo kaatuu panssari ja selkätavarat päällään (P.gearLock: ulkoasu ei päivity), käsissä olleet esineet lentävät viereen
+   satunnaiseen asentoon (vain ulkoasu – esineet ovat hautakasassa). Palautus respawnissa (gearUnlock). */
+const THROWN=[];
+function deathThrowGear(){const fly=(m)=>{if(!m||!m.parent)return;m.updateMatrixWorld(true);const p=new THREE.Vector3(),q=new THREE.Quaternion(),s=new THREE.Vector3();m.matrixWorld.decompose(p,q,s);m.parent.remove(m);
+    m.position.copy(p);m.quaternion.copy(q);scene.add(m);const a=Math.random()*TAU;THROWN.push({m,v:new THREE.Vector3(Math.cos(a)*(1.6+Math.random()*1.6),2.2+Math.random()*1.5,Math.sin(a)*(1.6+Math.random()*1.6)),w:new THREE.Vector3((Math.random()-.5)*14,(Math.random()-.5)*10,(Math.random()-.5)*14),rest:false,t:0});};
+  fly(heldMesh);fly(offMesh);heldMesh=null;offMesh=null;heldId=null;offId=null;heldKey=null;offKey=null;P.gearLock=true;}
+function thrownTick(dt){for(const o of THROWN){if(o.rest)continue;o.t+=dt;o.v.y-=14*dt;o.m.position.addScaledVector(o.v,dt);o.m.rotation.x+=o.w.x*dt;o.m.rotation.y+=o.w.y*dt;o.m.rotation.z+=o.w.z*dt;
+    const g=P.inDun?groundAt(o.m.position.x,o.m.position.z,.1,o.m.position.y+.5):terrainH(o.m.position.x,o.m.position.z);if(o.m.position.y<=g+.04){o.m.position.y=g+.04;if(Math.abs(o.v.y)<1.5||o.t>3){o.rest=true;o.m.rotation.x=Math.PI/2*(Math.random()<.5?1:-1)+(Math.random()-.5)*.3;o.m.rotation.z=(Math.random()-.5)*.6;}else{o.v.y*=-.3;o.v.x*=.5;o.v.z*=.5;o.w.multiplyScalar(.5);}}}}
+function gearUnlock(){for(const o of THROWN)scene.remove(o.m);THROWN.length=0;P.gearLock=false;updateGear();}
+function updateGear(){if(P.gearLock)return;updateBack();
   {const w0=equipped('weapon');if(!w0||w0.id!=='vasara')setBuildSel(null);}
-  const w=equipped('weapon'),wid=w?w.id:null;
-  if(wid!==heldId){if(heldMesh)heldMesh.parent.remove(heldMesh);heldMesh=null;heldId=wid;if(wid){heldMesh=makeHeld(wid);(ITEMS[wid].cat==='bow'?fig.handL:fig.hand).add(heldMesh);}}
-  const o=equipped('offhand'),oid=o&&!(ITEMS[o.id].cat==='shield'&&o.shBrk!=null)?o.id:null;   // v1.39 (kohta 18): rikki oleva kilpi ei ole kädessä
-  if(oid!==offId){if(offMesh)fig.handL.remove(offMesh);offMesh=null;offId=oid;if(oid){offMesh=ITEMS[oid].cat==='shield'?makeShield(oid):makeHeld(oid);fig.handL.add(offMesh);}}
+  const w=equipped('weapon'),o0=equipped('offhand'),bookR=!w&&!!o0&&o0.id==='kalakirja',wid=w?w.id:bookR?'kalakirja':null,wkey=wid&&ITEMS[wid].cat==='rod'&&typeof rigSig==='function'?wid+'#'+rigSig(w):wid;   // v3.14 vavan osat näkyvät (tackle.js)
+  if(wkey!==heldKey){if(heldMesh)heldMesh.parent.remove(heldMesh);heldMesh=null;heldId=wid;heldKey=wkey;if(wid){heldMesh=makeHeld(wid);if(ITEMS[wid].cat==='rod'&&typeof tkDressRod==='function')tkDressRod(heldMesh,w);(ITEMS[wid].cat==='bow'?fig.handL:fig.hand).add(heldMesh);}}
+  const o=equipped('offhand'),oid=o&&!bookR&&!(ITEMS[o.id].cat==='shield'&&o.shBrk!=null)?o.id:null;   // v3.15 pelkkä kirja on oikeassa kädessä   // v1.39 (kohta 18): rikki oleva kilpi ei ole kädessä
+  const okey=oid==='kalapakki'?oid+'#'+(o.lv||0):oid;   // v3.14 pakin ulkoasu tason mukaan
+  if(okey!==offKey){if(offMesh)fig.handL.remove(offMesh);offMesh=null;offId=oid;offKey=okey;if(oid){offMesh=ITEMS[oid].cat==='shield'?makeShield(oid):oid==='kalapakki'&&typeof tkPakkiHeld==='function'?tkPakkiHeld(o):makeHeld(oid);fig.handL.add(offMesh);}}
   const a=equipped('armor'),aid=a?a.id:null;
   if(aid!==armorId){armorId=aid;const c=aid==='rautapanssari'?0x6c747c:aid==='kuparipanssari'?0x8a5228:aid==='nahkavaatteet'||aid==='karhuhaarniska'?0x6a4a30:aid==='hiidenpanssari'?0x2a3036:0x8a6a46;const cm=smat(c);for(const m of fig.cloth)m.material=cm;buildArmor(fig,aid);}
 }
@@ -73,12 +99,14 @@ function invAdd(id,n,q=1){const d=ITEMS[id];if(!d)return n;
   for(let i=0;i<inv.length&&n>0;i++){if(!inv[i]){const k=Math.min(n,d.s);inv[i]={id,n:k,q};n-=k;}}
   if(!flags.seen[id])flags.seen[id]=1;if(d.cat&&d.cat!=='armor'&&d.cat!=='offhand'&&d.cat!=='shield'&&d.cat!=='bow'&&playTime>5)P.newItem={id,t:playTime};   /* v2.98 uusi esine → AFK-tarkastelu (inspect.js) */
   invDirty=true;return n;}
+// v3.14: esine lisätietoineen (vavan osat) vapaaseen paikkaan; palauttaa jäljelle jääneen määrän
+function invAddEx(d){const i=inv.indexOf(null);if(i<0)return d.n;inv[i]=Object.assign({id:d.id,n:d.n,q:d.q||1},d.ex);invDirty=true;return 0;}
 function invRemove(id,n){for(let i=inv.length-1;i>=0&&n>0;i--){const s=inv[i];if(s&&s.id===id){const k=Math.min(n,s.n);s.n-=k;n-=k;if(s.n<=0)inv[i]=null;}}invDirty=true;}
 // Mahtuvatko kaikki esineet reppuun (yhdistäminen pinoihin + vapaat paikat)? Ei muuta reppua.
 function fitsAll(list){const sim=inv.map(s=>s?{id:s.id,n:s.n}:null);
   for(const it of list){if(!it)continue;let n=it.n;const d=ITEMS[it.id];if(d.s>1)for(const s of sim){if(n<=0)break;if(s&&s.id===it.id&&s.n<d.s){const k=Math.min(n,d.s-s.n);s.n+=k;n-=k;}}
     for(let i=0;i<sim.length&&n>0;i++)if(!sim[i]){const k=Math.min(n,d.s);sim[i]={id:it.id,n:k};n-=k;}if(n>0)return false;}return true;}
-function invWeight(){let w=0;for(const s of inv)if(s)w+=ITEMS[s.id].w*s.n;return w;}
+function invWeight(){let w=0;for(const s of inv)if(s){w+=ITEMS[s.id].w*s.n;if(s.box)for(const b of s.box)if(b)w+=ITEMS[b.id].w*b.n;}return w;}   // v3.14 kalastuspakin sisältö painaa
 let MAXW=60;   // v3.06 alku 60 (recalcMaxW)
 const PACK_UP=[null,{nahka:6,puu:4},{nahka:12,kupari:4}];
 const invN=()=>32+8*P.packLv;
@@ -198,8 +226,8 @@ function beaconTick(d,dt){const B=d.beacon,m=d.mesh;if(!B)return;B.g.position.se
   if(Math.random()<dt*4&&typeof burst==='function')burst(m.position.x+(Math.random()-.5)*.3,m.position.y+Math.random()*1.5,m.position.z+(Math.random()-.5)*.3,B.c.getHex(),1,.8);}
 function removeDrop(d){scene.remove(d.mesh);if(d.beacon){scene.remove(d.beacon.g);d.beacon.g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose();});d.beacon=null;}const i=drops.indexOf(d);if(i>=0)drops.splice(i,1);if(d.light){const j=lightSources.indexOf(d.light);if(j>=0)lightSources.splice(j,1);d.light=null;}}
 // v1.32 (lista 3, kohta 26): pelaajan pudottama esine lentää aina kameran suuntaan eteenpäin, noin kaksi kertaa entistä kauemmas (~2,5–3 m).
-function playerDrop(id,n,q){const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw);spawnDrop(id,n,P.pos.x+fx*.6,P.pos.y+1.1,P.pos.z+fz*.6,q,false,true);
-  const d=drops[drops.length-1],j=(Math.random()-.5)*.6;d.vx=fx*4.2-fz*j;d.vz=fz*4.2+fx*j;d.vy=3.4+Math.random()*.6;}
+function playerDrop(id,n,q,src){const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw);if(id==='kalapakki'&&src&&typeof tkPakkiDrop==='function'&&tkPakkiDrop(src))return;   /* v3.14 pakki lasketaan maahan sisältöineen */spawnDrop(id,n,P.pos.x+fx*.6,P.pos.y+1.1,P.pos.z+fz*.6,q,false,true);
+  const d=drops[drops.length-1];if(src&&src.rig&&n===1)d.ex={rig:src.rig};   /* v3.14 vavan osat säilyvät */const j=(Math.random()-.5)*.6;d.vx=fx*4.2-fz*j;d.vz=fz*4.2+fx*j;d.vy=3.4+Math.random()*.6;}
 // v1.17: ulottuvuus, jossa pelaaja on ('world', 'barrow' = Hautakumpu tai ulottuvuuden id). Maassa olevan esineen katoamisajastin käy vain samassa ulottuvuudessa.
 function curDim(){return P.inDun?(P.realm||'barrow'):'world';}
 let dropFullT=0;
@@ -220,7 +248,7 @@ function updateDrops(dt){
     if(d.light){d.light.x=m.position.x;d.light.y=m.position.y+.4;d.light.z=m.position.z;d.light.i=.75+Math.sin(d.t*3.2)*.25;}
     if(d.halo){d.halo.material.opacity=.2+Math.sin(d.t*3.2)*.1;if(Math.random()<dt*5&&typeof emitEmber==='function')emitEmber(m.position.x+(Math.random()-.5)*.5,m.position.y+.1,m.position.z+(Math.random()-.5)*.5,'spark');}
     if(d.noPick&&m.position.distanceToSquared(_tmpV.set(P.pos.x,P.pos.y+.6,P.pos.z))>2.5*2.5)d.noPick=false;   // v1.31: itse pudotettu poimitaan vasta, kun on käyty kauempana
-    if(d.t>.5&&!(d.hold>0)&&!d.noPick&&!P.dead&&m.position.distanceToSquared(_tmpV.set(P.pos.x,P.pos.y+.6,P.pos.z))<2.2){const left=invAdd(d.id,d.n,d.q);if(left<d.n){msg(`+${d.n-left} ${ITEMS[d.id].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());}else if(dropFullT<=0){dropFullT=4;msg('Reppu on täynnä – et voi poimia.','warn');}d.n=left;if(left<=0){removeDrop(d);continue;}}
+    if(d.t>.5&&!(d.hold>0)&&!d.noPick&&!P.dead&&m.position.distanceToSquared(_tmpV.set(P.pos.x,P.pos.y+.6,P.pos.z))<2.2){const left=d.ex?invAddEx(d):invAdd(d.id,d.n,d.q);if(left<d.n){msg(`+${d.n-left} ${ITEMS[d.id].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());}else if(dropFullT<=0){dropFullT=4;msg('Reppu on täynnä – et voi poimia.','warn');}d.n=left;if(left<=0){removeDrop(d);continue;}}
     if(m.position.y<-20)removeDrop(d);
   }
 }
@@ -239,9 +267,9 @@ function updateEmbers(dt){for(let i=embers.length-1;i>=0;i--){const e=embers[i];
   e.m.position.x+=(e.vx+Math.sin(e.t*7+i)*.25+WIND.x*wk)*dt;e.m.position.y+=e.vy*dt;e.m.position.z+=(e.vz+WIND.z*wk)*dt;
   e.m.scale.setScalar(e.sp?e.r*(1-k*.6):e.r*(1+k*2.6));e.m.material.opacity=e.sp?1-k:.35*(1-k);}}
 // Satunnaistettu välke: arvo hakeutuu satunnaisesti vaihtuvaan tavoitteeseen, joskus pieni "vajaus". Palauttaa kertoimen ~.82–1.04 (vain vähän eloa).
-function flick(u,dt){u.t-=dt;if(u.t<=0){u.t=.04+Math.random()*.16;u.target=.82+Math.random()*.28;if(Math.random()<.04)u.target=.55+Math.random()*.15;}u.cur+=(u.target-u.cur)*Math.min(1,dt*14);return 1+(u.cur-1)*.4;}
+function flick(u,dt){u.t-=dt;if(u.t<=0){u.t=.04+Math.random()*.16;u.target=.82+Math.random()*.28;if(Math.random()<.04)u.target=.55+Math.random()*.15;}u.cur+=(u.target-u.cur)*kExp(14,dt);return 1+(u.cur-1)*.4;}
 const fx=[];
-function updateFx(dt){updateEmbers(dt);
+function updateFx(dt){updateEmbers(dt);if(typeof smokeColTick==='function')smokeColTick(dt);   /* v3.24 sammuneen tulen savupatsas */
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.t-=dt;p.vy-=12*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;p.m.scale.setScalar(Math.max(.01,p.t));if(p.t<=0){scene.remove(p.m);parts.splice(i,1);}}
   for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;if(f.update(f,dt)){scene.remove(f.obj);fx.splice(i,1);}}
 }
@@ -271,6 +299,7 @@ function fallTree(n,dir,crush,src){const g=new THREE.Group();const m=new THREE.M
       burst(n.x+Math.sin(a)*3,n.y+.5,n.z+Math.cos(a)*3,0x6b4527,10,4);
       for(const [id,lo,hi] of n.def.drops){if(id==='puu'&&!small)continue;const c=id==='pihka'?fellResin(n):Math.max(id==='puu'?1:0,dropScale(id,Math.round(rint(rng,lo,hi)*n.s)));for(let j=0;j<c;j++){const t=.8+j*H/(c+1);spawnDrop(id,1,n.x+Math.sin(a)*t,n.y+1,n.z+Math.cos(a)*t);}}
       g.updateMatrixWorld(true);for(const b of brs)if(!b.userData.off)dropBranch(b);
+      if(n._seed&&typeof seedDrop==='function'){const sd=n._seed;n._seed=null;seedDrop(n,sd.rz,n.x+Math.sin(a)*H*.6,n.z+Math.cos(a)*H*.6);}   // v3.08 käyttäjä: siemen putoaa vasta, kun puu kaatuu tukeiksi (latvan kohdalle)
       if(small){m.visible=false;for(let j=0;j<5;j++)burst(n.x+Math.sin(a)*H*j/5,n.y+.4,n.z+Math.cos(a)*H*j/5,WOOD_IN,5,3);}
       else spawnLogs(n,a);}
     return f.t>dur+.4;}});}

@@ -848,7 +848,8 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Teemoitetut valikot:** tausta työpisteen/säilytyksen mukaan.
 - **Routaluola:** jäälätäköt käytävissä – pelaaja ja olennot liukuvat.
 - **Onkiminen:** vedet nimetty kalalajin mukaan (kartta + rannalla); vavat onki (työpenkki), kuparivapa (ahjo, t5), hiidenvapa (3 sirua, t9); mato 2 % maanmuokkauksesta;
-  tärppi 1–5 min, vasen 0,6 s:ssa, iso kala väsytetään; 8 lajia (järvi: ahven, hauki, lahna; meri: silakka, turska, lohi; suolampi: ruutana, suonsilmä), aika ja sää vaikuttavat;
+  tärppi 1–5 min, vasen 0,6 s:ssa, iso kala väsytetään; 18 lajia (v3.08; v3.13 suolammet korjattu; järvi: ahven, hauki, lahna, kuha, made, muikku, särki, kiiski, toutain; meri: silakka, turska, lohi,
+  siika, kampela, meritaimen; suolampi: ruutana, suonsilmä, suutari), aika ja sää vaikuttavat;
   kalat paistetaan nuotiolla/grillillä, savustimessa savukala, padassa keitot; katiska veteen, kalanaulakko seinään; muut saaliit (saapas, pulloposti, ruostunut avain → upponut arkku,
   hiidenkiven siru, rauta- ja kupariharkko); Kalastajan kirja (käytä) + tavoitteet.
 
@@ -862,9 +863,124 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Vinkit:** näkyvät lukuajan (4–9 s) ja katoavat heti, kun neuvoa noudattaa. **Vierityspalkit** pelin teemassa. Tietoikkuna vaihtuu heti.
 - **Rikkaruohot (Ultra):** 3 lajia, biomeittain eri korkeus. Hakuissa umpinaiset kärjet, ongessa roikkuva koukku. Keittoon käytetty vesikulho vaihtuu tyhjäksi kädessä.
 
+## v3.08 – kasvu, kastelu, pihka, vihjeet ja korjaukset
+- **Istutetut puut kasvavat** 5 lajikohtaista kokovaihetta: taimesta tulee pieni puu (vaihe 1), joka 5. nukuttu yö 60 % → seuraava vaihe, kunnes lopullinen koko (viimeinen tai
+  toiseksi viimeinen vaihe). Pihkapuun pihkamäärä kasvaa koon mukana (pihkapuu vasta koosta 0,75). Luonnon puut eivät muutu.
+- **Kastelu ja madot:** vesikulho kädessä E taimen, kasvavan istutetun puun tai viljelylohkon kohdalla → seuraava kasvu +5 % (kulho tyhjenee). Kastemato toisessa kädessä E
+  (maassa kyykyssä, laatikossa/penkissä ilman) → +5 %. Kumpikin kerran kasvua kohti. 5 kastelua = pysyvästi +5 %, 2 matoa = pysyvästi +5 % (lohkokohtainen; taimen pysyvät
+  siirtyvät puulle) kunnes rakenne puretaan. Multa: kasteltu märkä, pysyvä vesi tummempi, madot kurkkivat, molemmat + ruohotupsut reunoilla.
+- **Siemenet** putoavat, kun puu kaatuu maahan tukeiksi. Kaikki istutettavat (kävyt, siemenet, varpu, rihmasto, kaura) ja kastemato näkyvät mallina vasemmassa kädessä.
+- **Aarnipuun pihka:** 1 % aarnipuista on pihkapuita (pihkaa 3×, kertymä tunnissa 4×, kaadettaessa 3–5 pihkaa). **Pihkan täyttyminen:** joka 5. nukuttu yö jokainen tyhjä
+  pihkapuu arpoo 10 % → 30 % täyteen; puu on taas pihkapuu ja kaiverretaan uudelleen (kiinni ollut kulho täyttyy vasta uuden kaiverruksen jälkeen).
+- **Kuolema:** äänet häipyvät ja kuva tummuu hitaasti (40 s); hahmo kaatuu varusteineen, käsitavarat lentävät viereen (esineet ovat hautakasassa). Veri tummempaa, ei hohda.
+- **Äänet:** liemiruoat (keitot, puurot, padat, risotto, hillo) syödään lusikalla – juomisääni 2–4 kertaa. Päävalikko Käynnissä-tilassa: äänet −70 % ja vaimeat. Metso −40 %.
+- **Sää:** sade tulee vinommin tuulen mukana; lumi ilmestyy pehmeästi noustessa 8–13 m.
+- **Kartta:** sisävesi ei avaa Meri-aluetta; vesien nimet kaikilla zoomeilla veden päällä; zoom ulos 0,8×; "Sulje: P / M" oikeassa alanurkassa.
+- **Onkivapa:** kärki taipuu kalan vetäessä, koukku kärjessä; vavoissa korkkikahva, kela ja renkaat, onki on yksinkertainen.
+- **Valikot:** rakennusvalikkoon Säilytys, Ruoanlaitto, Viljely ja kalastus; valmistukseen Nuolet, Pataruoat, Kalastus, Viljely. Haku löytää myös kategoriat ja yleissanat
+  (esim. kilpi, kala, keitto, kirves, siemen, valo, ruoka, ase, työkalu, juoma, tuli, säilytys, ovi, katto, puolustus, metalli). Nimiosumat ensin.
+- **Extra-grafiikka:** napit Kevyin (kaikki pois) ja Vaativin (kaikki raskaimmilleen + automaattisäätö pois; varmistus ensimmäisellä kerralla). Intron varjot eivät välky.
+- **Olkahihna:** kun selässä on kilpi, jousi tai työkalu – vasemmalta olalta oikealle lantiolle; puukilpi vaalea, muut tumma, rautakilpi nahka + metallisolki.
+- **Ohjeet ja vihjeet (Asetukset › Ohjaus):** 1 ohjetekstit (valikkojen selitykset + kertavinkit), 2 näppäinvihjeet (Sulje/Päävalikko, rakentamisen näppäimet, B-vihje, jousi),
+  3 kaikki toimintovihjeet (E-kehotteet). Ylempi porras piilottaa myös alemmat; piilotus kysyy varmistuksen (2 punainen, 3 "Oletko IHAN varma?").
+- **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
+- **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
+
+## v3.24 – leiri, savu ja vesistöt
+- Hylätyssä leirissä on penkki jaloilla. Halkopino on aina teltan kylkeä vasten, muut esineet satunnaisesti nuotion ympärillä, eikä mikään ole päällekkäin tai ilmassa.
+- Kun nuotio, grilli tai patanuotio sammuu, siitä nousee 10–20 s ajan savupatsas aarnipuiden latvoihin asti; tuuli vie savua sivulle.
+- Vasara roikkuu vyöllä pienempänä ja tiiviisti selkää vasten.
+- Vesistön ensimmäinen löytö näkyy isolla ("Vesistö löydetty"), myöhemmin rannalle tullessa vain nimi, sama nimi aikaisintaan 5 päivän päästä. Alueiden ja vesistöjen
+  ilmoitukset tulevat vuorotellen.
+- Uusi vinkki, kun eläin jahtaa: kyykyssä olet huomaamattomampi.
+- Itsestään alkava tarkastelu loppuu, kun lähdet liikkeelle. Tähtäyspiste häipyy kuolinkamerassa.
+- Ruoho ilmestyy kaukaa pehmeästi näkyviin (häipyy ja kasvaa), ei enää kerralla.
+
+## v3.23 – kalakirja ja rakennusvalikko
+- Kalakirjan sivua käännettäessä kuuluu kirjan avausääni hieman hiljempaa (−30 %). Kirja pysyy saman kokoisena käännön ajan.
+- Rakennusvalikon tietoikkuna aukeaa 0,6 s:ssa, kun hiiri on osan päällä. Kun hiiri ei ole minkään osan päällä, ikkuna häipyy 10 s:n kuluttua.
+- Rakennusikkuna on 15 % pidempi, joten tietoikkunaa ei yleensä tarvitse vierittää.
+
+## v3.22 – kirves, ajoitus ja reppu
+- Kirves ja hakku palaavat yksittäisen lyönnin jälkeen sivulle yhtenä sulavana liikkeenä (käsi ja kirveen kierto yhtä aikaa, 0,42 s), myös kun kestävyys loppuu kesken hakkuun.
+  Jatkuvassa hakkuussa kirves vaihtaa puolta pienessä kaaressa.
+- Grafiikan esiasetus ja ruudunpäivitys eivät muuta ajoitusta: iskutahti, viiveet, pehmennykset ja peliaika ovat samat kaikilla tasoilla (alle 20 FPS:llä osa-askeleet).
+- Reppu avattuna tavallisesti on kangasta, ja vasemmassa alanurkassa on vetoketju. Työpenkiltä ja ahjolta avattuna tausta on työpisteen mukainen.
+- Hautakiven risti on yksinkertainen risti. Tyhjällä kädellä tarkastellessa (F) hahmo ihmettelee ääneen useammin (30 %, viimeistään joka neljäs kerta).
+
+## v3.21 – nappien ohjeet
+- Päävalikon nappien selitysrivit näkyvät vain siihen asti, kun nappia on käytetty kerran. Asetukset › Ohjaus › Näytä valikon nappien ohjeet aina (oletus pois).
+
+## v3.20 – intro ja vinkit
+- Enter vahvistaa varmistusikkunat. Aloita seikkailu aloittaa ensimmäisen maailman yhdellä napsautuksella.
+- Intro: usva näkyy alusta asti ja lipuu sivulta paikalleen; pilvet häipyvät vasta kun kamera on alhaalla. Ensimmäistä introa ei voi ohittaa, myöhemmin vain hiiren
+  napsautuksella. Hahmo ei liiku latausruudun eikä intron aikana.
+- Työkaluvinkit heti valmistuksen jälkeen; lyhyet vinkit katoavat nopeammin. Tasonimike näkyy repussa tasomittarin yläpuolella.
+
+## v3.19 – valikon ulkoasu
+- Päävalikon taustakuvissa vain neljä hiljaista ääntä: ukkosen salamat myrskykuvissa, ahjon alasin, nuotion tuli ja heinäsirkat. Äänet häipyvät pehmeästi ennen kuvan vaihtoa.
+- Valikon napeissa jokaisella omat, himmeämmät puunsyyt; ruskeat valikot ja napit hieman tummempia, kevyt pyöreä liukuväri nurkkaan.
+
+## v3.18 – pelattu aika ja valikon äänet
+- **Asetukset › Profiilit:** alimpana pelattu aika yhteensä (tunnit, yksi desimaali). Laskee, kun peli on käynnissä; tauolla ja päävalikossa ajastin on pysähdyksissä.
+- **Päävalikon taustakuvat:** myrskykuvissa myrsky ja ukkonen (salaman välähdyksen perään isku), muissa sopivat äänet: aallot, linnut, tuuli, susien ulvonta, karhu,
+  hirvi, luolien ja kalmojen tunnelmat. Valikon napeissa epätasaiset puunsyyt, Aloita seikkailu -nappi rauhallisemmin.
+
+## v3.17 – valikon taustaäänet
+- Päävalikon Öinen leiri: nuotio kuuluu selvästi ja alkaa heti, kun kuva vaihtuu; heinäsirkat sirittävät usein (1–3,5 s välein). Kaikki taustakuvien äänet alkavat
+  0,3–1,5 s kuvan vaihtumisesta.
+
+## v3.16 – tasot ja nimikkeet
+- **Tasot 999:** tasoon 30 kaikki ennallaan (palkinnot terveys/kestävyys/kantokyky), sen jälkeen XP-tarve kasvaa tasaisesti eikä palkintoja ole.
+- **20 tasonimikettä** Haaksirikkoutuneesta (taso 1) Hiidenmaan legendaan (taso 999); taso 30 = Kokeneempi seikkailija. Nimike näkyy HUDissa ja edistymisessä (J).
+- DEV: Ä-valikko sivuina (Yleiset, Aika ja sää, Pelaaja ja kartta, Kalastus, Animaatiot), Å-pikavalinnat ryhmittäin, pikakalastus (täppä + U).
+
+## v3.15 – kalakirja
+- **Kalastajan kirja** on kuin oikea kirja: aukeama, yksi kala sivulla piirroskuvineen, sivunumerot, sivujen kääntö (napit, nuolinäppäimet, sisällysluettelo).
+- **Kalan arvo:** paino ja pituus verrataan lajin kaikkiin kaloihin → luokka Roskakala, Tavallinen, Hyvä, Harvinainen, Ennätysluokka, Legendaarinen, Ikijärkäle tai
+  Maailmanennätysvonkale (hiiri luokan päälle: "parempi kuin X % lajinsa kaloista"). Saaliista ilmoitus: "Sait: Hauki 6,1 kg, 99 cm (Harvinainen) – katso kalakirjan sivu 5".
+- **Toivekalat:** kolme toivetta (helppo, keskivaikea, vaikea), vaihtuvat 7 päivän välein, täytetystä XP:tä. Saavutukset: Toive täyttyi, Toiveiden kalastaja, Toiveiden täyttäjä,
+  Vaikea toive, Kirja täynnä, Ennätyskala.
+- **Tietosivut:** lajien osuudet vesityypeittäin, parhaat ajat ja sää, viehteet ja varusteet.
+- **Kirja kädessä:** vasempaan käteen; vasen klikkaus avaa (oikea käsi tyhjä), K avaa aina. Pelkkä kirja on oikeassa kädessä (F-tarkastelu). Lukiessa kirja molemmissa käsissä.
+
+## v3.14 – kalastusvarusteet
+- **Kalastajan pöytä** (Viljely ja kalastus, taso 3, puu 6 + naru 2): E avaa – vavan osat vaihdetaan heti, ominaisuudet listana, yhdistelmät, perkaus ja pakin päivitys.
+  Pöydän ääressä valmistetaan siimat, koukut, kelat, kohot, viehteet ja kalastuspakki.
+- **Vapa = runko** (onki, kuparivapa +10 % isot kalat, hiidenvapa +20 %) + siima (pellava, jänne, punottu, hiidensiima – vahvempi kestää, mutta tärppää harvemmin) + koukku
+  (pieni, iso, väkä) + kela (ei, kupari, hiisi) + koho (puu, korkki, hehku) tai viehe (9 kpl). Siima kuluu ja voi katketa; vanha ehjä osa palaa reppuun, kulunut siima heitetään pois.
+- **Virveli** (kela + viehe): heitto 6–22 m (hiisikela 30 m), pidä vasenta kelataksesi, kala iskee kelatessa. Viehteillä parhaat kalat, vahvuudet ja heikkoudet (vesi, aika, sää, valo);
+  eivät sovi pikkukaloille, voivat (hyvin harvoin) tarttua pohjaan matalassa – viehe ja siima menetetään.
+- **Mato:** vapa kädessä E laittaa madon koukkuun. **Kalastuspakki** vasemmassa kädessä (paino 20 + sisältö, 12–24 paikkaa, vain kalastustarvikkeet, yksi kerrallaan):
+  vasen klikkaus laskee maahan tai pöydän pakkipaikalle, E avaa, vasen nostaa. Siiman voi vaihtaa pakista kentällä (30 s).
+- **Perkaus:** kalat → fileet (paistetaan) + perkeet (katiskan syötti, kuin kaksi matoa).
+- Kala sätkii koukussa 3 s, osat näkyvät vavassa, uudet madot, ensimmäisestä ongesta juhlava ilmoitus.
+
+## v3.13 – maailmat, äänet, Käynnissä-tila ja intro (Early Access 1.2)
+- **Maailmoja 6** (3 × 2 korttia, ei vieritystä). Uusi maailma: napsautus = varmistus (iso Aloita-nappi), pidä pohjassa 0,6 s = aloita heti.
+  Kortti: tuplaklikkaus = pelaa (tai jatka), pidä pohjassa 1 s = maailman tallennuskoodi leikepöydälle.
+- **Pelaajan omat äänet** (askeleet, keho, toiminnot) kuuluvat monona keskeltä; ympäristön ja olentojen äänet 3D.
+- **Käynnissä-tila:** päävalikon takana maailma on aito – nälkä, viholliset ja vahinko toimivat, pelaaja voi kuolla (valikko sulkeutuu).
+- **Intro:** pidempi ja pehmeämmin hidastuva syöksy, kamera laskeutuu ohuiden usvakerrosten läpi, 3D-pilvet kaikilla esiasetuksilla.
+  Grafiikka › Intro: *Käytä 2D-pilviä intron alussa*, *Intron usva ja pilvikerrokset pois* (oletus pois, eivät kuulu esiasetuksiin).
+- **Suolammet** syntyvät nyt oikein (ruutana, suonsilmä, suutari); isoista soisista järvistä saa myös suokaloja. Kalastuksen tilastot: `docs/testit/KALASTUS_SIMULAATIO.md`.
+
+## v3.11–v3.12 – intron pilvet
+- Matalilla esiasetuksilla (Low–Medium+, heikosti High) intron yläkamerassa piirtoraja on liikkuvien, peittävien pilvien alla (95 m korkeudella): saari näkyy pilvien aukosta,
+  pilvet hajaantuvat ja häipyvät kameran syöksyessä. Maan tasolla vain kevyt usva.
+
+## v3.10 – maailman lataus
+- Latausruudun lopussa lähimaailma piirretään valmiiksi (pelikamera + intron puoliväli, varjostimet käännetty), joten intro ei lataa näkyvästi. Intron yläkamerassa puut
+  kaukomalleina ja ruoho piilossa yli 30 m korkeudelta; laatu nousee asetusten mukaiseksi laskeutuessa.
+- Asetukset › Ohjaus › Ammattilaisille ja vertailuun › **Vanha maailman lataus (v3.09)**: vanha tapa vertailuun (vaihto lataa pelin uudelleen, peli tallennetaan).
+
+## v3.09 – maailmalista
+- Maailmat-näkymässä pelissä oleva maailma: kirkas kultainen ääriviiva + "Pelaat nyt". Kun peli ei ole käynnissä, viimeksi pelattu maailma: vaalea ääriviiva + "Viimeksi pelattu".
+
 ## DEV-työkalut (vain DEV-tilassa)
 - Ä = DEV-valikko. Isot napit alussa (v1.92): Kuolemattomuus, Lento (alkaa heti), Seinien läpi, Lukitse aika ja sää, Näkymätön (v2.15: olennot eivät huomaa sinua, lyönti suututtaa), Pysäytä maailma
   (vain pelaaja liikkuu), Terveys täyteen. Lisäksi sää, aika, terveys, kylläisyys, pienet täpät, esinehaku, kartta.
+- v3.08 **Ilmaiset materiaalit** (`DEVF.free`): rakentaminen, valmistus, korjaus, päivitys ja pataruoat ilman aineita (aineita ei kuluteta).
 - V pohjassa = 10× kävelynopeus, lennossa 6× lentonopeus (vaaka ja pysty).
 - Ö = olennot ja pomot (v1.91): luo minkä tahansa olennon 3 m eteen (pomot nousevat herätysanimaatiolla), siirry ulottuvuuspomon huoneeseen tai
   ulottuvuuden portin eteen, elvytä kukistettu pomo, Kalmankehään. Apuväline: pomohuoneen ääriviiva seinien läpi (huoneen reuna, varaetäisyyden

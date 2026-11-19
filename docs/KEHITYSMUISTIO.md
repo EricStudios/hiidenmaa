@@ -3,13 +3,26 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.07, 18.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.24, 19.11.2026)
 
-- **Versio 3.07** – käyttäjän korjaukset ja ideat v3.06:een (16 kohtaa, ks. versioloki v3.07). Early Access 1.1 ennallaan. Haara `claude/hiidenmaa-survival-game-fmxt0m`;
-  PR #48 (v3.06) ja v3.07 samassa haarassa – muistuta käyttäjää yhdistämään.
-- **SEURAAVAKSI:** käyttäjä lähettää **erillisen ison päivityksen listan** (voi sisältää jo tehtyjä asioita – tarkista "Valmiit ominaisuudet" -listasta alta, ettei tehdä
-  tuplaan). Sen jälkeen uusi saari (Ideajono › C). Testilinkki aina muodossa `https://raw.githack.com/erboiyprogamer-source/hiidenmaa/<haara>/index.html`.
-- **Valmiit ominaisuudet** – tiivis lista koko pelistä: ks. osio "✅ VALMIIT OMINAISUUDET" heti tämän osion jälkeen.
+- **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
+  3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
+  arvo 8 luokkaa, toivekalat, saavutukset, kirja kädessä K), v3.16 tasot 999 + 20 nimikettä, DEV-sivut, pikakalastus (U). Ks. versioloki.
+- **Versio 3.13 – Early Access 1.2** – 6 maailmaa, maailmakorttien pito/tuplaklikkaus, mono-pelaajaäänet, aito Käynnissä-tila, uusi syöksy + usvakerrokset,
+  intro-kevennykset, suolammet korjattu, kalastussimulaatio. **PR #49 sisältää v3.08–v3.13** (käyttäjä yhdistää 20.11. ja testaa).
+- **Versio 3.12** – intron oikeat pilvet piirtorajan päällä (matalat esiasetukset).
+- **Versio 3.11** – intron piirtorajan sumennus ja pilvimatto matalilla esiasetuksilla.
+- **Versio 3.10** – maailma valmiiksi latausruudussa + kevyt intron yläkamera, vanha tapa asetuksena (ks. versioloki). PR #49 sisältää v3.08–v3.10.
+- **Versio 3.09** – maailmalistan Pelaat nyt / Viimeksi pelattu -merkinnät.
+- **Versio 3.08** – käyttäjän 26 kohdan lista + 4 lisäystä (pihkan täyttyminen, kartan Sulje-teksti, 3 vihjeporrasta, tallennus suljettaessa), ks. versioloki v3.08.
+  Early Access 1.2 (v3.13). Haara `claude/hiidenmaa-survival-game-fmxt0m`. **Testilinkit nyt EricStudios-muodossa:**
+  `https://raw.githack.com/EricStudios/hiidenmaa/<haara tai SHA>/index.html` (käyttäjänimi vaihtui; vanha erboiyprogamer-source-linkki ei enää päde).
+- **Käyttäjän työtapa (pysyvä):** kysy tarkentavat kysymykset alussa, sitten työ loppuun ilman keskeytyksiä; kinkkiset valinnat päätetään käyttäjän puolesta ja kerrotaan lopuksi.
+  Kesken tulleet lisäykset: enintään 1–2 kysymystä per lisäys ja jatka heti.
+- **SEURAAVAKSI:** uusi saari (Ideajono › C, kysy ensin 10 kysymystä), vene + laituri + pilkkiminen. Uudet äänet `sounds2/`.
+- **Valmiit ominaisuudet** – tiivis lista: ks. "✅ VALMIIT OMINAISUUDET" alla (päivitetty v3.08).
+
+- **Versio 3.07** – käyttäjän korjaukset ja ideat v3.06:een (16 kohtaa, ks. versioloki v3.07). PR #48 (v3.06–v3.07).
 
 - **Versio 3.06** – iso päivitys: lista A (16 kohtaa) + onkimispäivitys B toteutettu (ks. versioloki v3.06). Valikossa yhä **Early Access 1.1** (2.0 varattu uuden saaren
   päivitykseen). Haara `claude/hiidenmaa-survival-game-fmxt0m`, PR #47 (v3.05) yhdistetty; v3.06 uudessa PR:ssä. Pages päivittyy vasta Mergen jälkeen.
@@ -29,14 +42,16 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
   Asetussiirtojen järjestys v7/v8 – KORJAUKSET 76. v3.03: villikauran solmu-id:t siirsivat kasvaneiden puiden id:t – KORJAUKSET 77.
 - Testit: `tools/tarkistus.mjs` KAIKKI OK (v3.06-rivi kattaa kaikki uudet järjestelmät), full157 6/6 karttaa.
 
-## ✅ VALMIIT OMINAISUUDET (päivitetty v3.07 – tarkista ennen uutta työtä, ettei tehdä tuplaan; yksityiskohdat OMINAISUUDET.md)
+## ✅ VALMIIT OMINAISUUDET (päivitetty v3.08 – tarkista ennen uutta työtä, ettei tehdä tuplaan; yksityiskohdat OMINAISUUDET.md)
 - **Maailma:** 6 karttaa + seed (paikat ja kasvillisuus seedin mukaan), 13 biomia, päivä/yö, sää (sade, myrsky, sumu, lumi, ukkonen), tuuli, pilvet, vesi ja aallot,
   Kalmanummen usva, riimukivet, rauniot, linnakkeet, hylätyt leirit (teltta, halkopino, kuivausteline), kiviröykkiöt, kyltit, maailman arkut, upponut arkku.
 - **Selviytyminen:** nälkä, kylmä, lepo, kodin lämpö (kodin taso), uinti ja hukkuminen, kuolema + hautakasa + kuolinruutu syyn mukaan, tyhjyyteen putoaminen,
   kantokyky 60 → 200 (reppu, saavutukset, tasot), ylikuorma.
-- **Keräily ja uusiutuminen:** puut (kaato, tukit, pihkapuut 3 % + kaiverrus + kulho), kivet ja malmit, poimittavat (oksa, kivi, piikivi, hiekka, marjat, sieni, villikaura);
+- **Keräily ja uusiutuminen:** puut (kaato, tukit, pihkapuut 3 % + aarnipuista 1 % (pihkaa 3×, kertymä 4×) + kaiverrus + kulho; tyhjä pihkapuu täyttyy 10 %:n arvonnalla joka 5. uni → 30 %, kaiverretaan uudelleen), kivet ja malmit, poimittavat (oksa, kivi, piikivi, hiekka, marjat, sieni, villikaura);
   puut ja kivet uusiutuvat nukkuessa 20 %, poimittavat 10 min + 60 m + 20 %; myrsky kaataa puita; kaatuva puu vahingoittaa (aarnipuu 90 %, iso 60 %, pieni 40–50 %).
-- **Viljely:** siemenet (5 %, pihkapuu 70 %), taimet kuokalla kyykyssä (30 %/uni), viljelylaatikko (60 %/uni, 9 + siemen), kohopenkki (4 kylvöä, 70 %/uni), maahan 2 + siemen.
+- **Viljely:** siemenet (5 %, pihkapuu 70 %, putoavat kun puu kaatuu), siemenet mallina vasemmassa kädessä, taimet kuokalla kyykyssä (30 %/uni), istutetut puut kasvavat 5 kokovaihetta
+  (60 % joka 5. uni), viljelylaatikko (60 %/uni, 9 + siemen), kohopenkki (4 kylvöä, 70 %/uni), maahan 2 + siemen; kastelu vesikulholla ja mato multaan +5 % kumpikin
+  (5 kastelua / 2 matoa = pysyvä +5 %, multatekstuurit).
 - **Valmistus ja työpisteet:** työpenkki, ahjo, nuotio/grillinuotio (paisto, hiilos 10 min), keittopata (pataruoat, kansi, pilaantuminen, vesi), sulatusuuni (jono 5,
   polttoaine, lämpömittari, hehku, hiili +20 %), savustin, veden kerääjä, katiska, kalanaulakko, arkut/tynnyrit (kiviversiot), sänky, soihdut (teline, kivinen, seinä).
 - **Rakentaminen:** ruudukko + 7 kohdistustilaa (reuna, jatko), seinät, lattiat, katot (olki, kivi), palkit, portaat, tikkaat, ovet (animoitu), lasi-ikkunat, kivirakennus,
@@ -45,13 +60,15 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
   haarniskat, olentojen luonteet, vaanivat, jousikalmot, auringossa palavat, eläinten perheet, syöminen/juominen, 4 pomoa (herätys, vaiheet, kuolema), Kalmanvartija.
 - **Eteneminen:** tasot 1–30 (palkinnot), XP, tavoitteet (GOALS), saavutukset, tehtävät, opastus + kertavinkit (vain uusille, lukuaika), avainketju ulottuvuuksiin
   (Kalmon sinetti, Jääavain, 3 ulottuvuutta: Routaluola jäälätäköineen, Kalmankammio, Aarnihauta), hiidenkivet 9, kruunusirpaleet.
-- **Onkiminen:** nimetyt vedet (kartta, löytö), 3 vapaa, mato, tärppi + väsytys, 8 lajia aika/sää, ennätykset, kalaruoat, kalastajan kirja + tavoitteet, muut saaliit.
+- **Onkiminen:** nimetyt vedet (järvet, meri, v3.13 suolammet + soiset järvet; kartta kaikilla zoomeilla, löytö; sisävesi ei avaa merta), 3 vapaa (taipuva kärki, koukku), mato, tärppi + väsytys, 18 lajia (omat kuvakkeet) aika/sää, ennätykset, kalaruoat, kalastajan kirja + tavoitteet, muut saaliit.
 - **Käyttöliittymä:** HUD (skaala), kartta (zoom, sumu, tuulikompassi), reppu (raahaus, jako), teemoitetut valikot, omat vierityspalkit, ilmoitusasetus, F-tarkastelu
-  (11 animaatiota), E-käsiliike, pikapaikat, näppäinasetukset, 5 tallennuspaikkaa + tallennuskoodi, päävalikko (21 taustaa, logoteemat), Poistu-ruksi, DEV-työkalut.
+  (11 animaatiota), E-käsiliike, pikapaikat, näppäinasetukset, 5 tallennuspaikkaa + tallennuskoodi, päävalikko (21 taustaa, logoteemat), Poistu-ruksi (tallentaa aina),
+  DEV-työkalut (ilmaiset materiaalit), valikkojen kategoriat + haku yleissanoilla, vihjeiden piilotus 3 portaassa (ohjetekstit, näppäinvihjeet, E-kehotteet).
 - **Grafiikka:** esiasetukset Low…Ultra + High+, automaattisäätö, varjot (soihtuvarjot), auringonsäteet ja linssiheijastus, ruoho + korkeat tupsut + Ultra-rikkaruohot
-  (3 lajia, taipuvat), biomien sekoitus, maaston väritystarkkuus, veri ja haavat, savut, Extra-grafiikka.
+  (3 lajia, taipuvat), biomien sekoitus, maaston väritystarkkuus, veri ja haavat (tummat, eivät hohda), savut, Extra-grafiikka (Kevyin/Vaativin),
+  vakaat varjot (texel-lukitus), olkahihna selkävarusteille, kuoleman hämärä + varusteet ruumiissa.
 - **Äänet:** käyttäjän äänet (olennot, toiminnot, pelaaja, valikot, sää ja tunnelma, musiikki, ilmoitukset), 3D-äänet, kaiku, vedenalainen suodatus, rakeinen tulen
-  rätinä (myös käsisoihtu), paneeleissa −30 % + alipäästö; paikkamerkit odottavat (onkiminen ym.).
+  rätinä (myös käsisoihtu), paneeleissa −30 % + alipäästö, Käynnissä-tilan valikossa −70 %, liemiruoat juomisäänellä; paikkamerkit odottavat (onkiminen ym.).
 
 ## Peli lyhyesti
 
@@ -332,6 +349,25 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.18:** pelattu aika: tallennus 10 s, tilat play/ui/intro/dead/win · valikon kuvien äänitasot 0,08–0,55 × Taustaäänet, salaman viive 0,3–1,6 s.
+
+**v3.17:** valikon nuotio 0,8, sirkat 0,2 / 1–3,5 s, ensimmäiset äänet 0,3–1,5 s, uusi yritys 0,3 s, häivytys sisään 0,8 s.
+
+**v3.16:** tasot 999, XP n ≥ 30: 1 270 + 45·(n−29) + ½·(n−29)², palkinnot ≤ 30, nimikkeitä 20 · pikakalastus U (vain täpällä).
+
+**v3.15:** arvo 0,6 × paino + 0,4 × koko, luokkarajat 15/50/75/90/97/99,5/99,9 % · toiveet 3 / 7 päivää, XP 12–67 · sivu 4 = ensimmäinen laji · kirjan sulkuääni 1,35× / 0,55.
+
+**v3.14:** siimat ten 1/1,25/1,55/1,9, kesto 12/25/45/80, näkyvyys 1/1,06/1,12/1,18 · koukut isku 0,65/0,75/0,88 · kelat 22/30 m, 1,4/1,8 m/s · virveli hazard /70 s,
+pohjaan 0,05 %/s (< 0,9 m) · iskukatko 0,6 % × (1,6 − kunto) · runko big 0/0,1/0,2 · pakki 12/16/20/24, paino 20 · kenttävaihto 30 s · filee 1/2/3 · dangle 3 s.
+
+**v3.13:** maailmoja 6 · Uusi maailma pito 0,6 s · koodin kopiointi 1 s · syöksy 2,6 s · usvakerrokset 78/46/24 m · suolampi < 200 ruutua, soisen järven suokalat 0,6× ·
+kalastus (simulaatio, taitava pelaaja): onki ~16–19 kalaa/h, madoilla ~21–23/h, hiidenvapa + madot ~29–38/h.
+
+**v3.08:** puiden kasvuvaiheet kuusi .35/.55/.8/1.05/1.3, mänty .35/.55/.85/1.15/1.45, koivu .35/.55/.8/1.05/1.25, aarni .45/.6/.75/.92/1.1 (×0,94–1,06), 60 % joka 5. uni ·
+kastelu +5 %, mato +5 %, pysyvät +5 % (5 kastelua / 2 matoa) · aarnipihka 1 %, pihkaa 3×, kertymä 4×, kaato 3–5 · pihkan täyttyminen 10 % joka 5. uni → 30 % ·
+metso 0,6 · Käynnissä-valikko äänet 0,3 + LP 1 400 Hz · kuolinhämärä 40 s → 60 %, äänet häipyvät 2,2 s · veri 0x360404/0x4e0707, mahla 0x1f3410/0x31481a · sade sivuttain 0,7 ·
+lumi 8–13 m · kartan min-zoom 0,8 · kalat 18 (yleisyys b: muikku 5, särki 6, kiiski 3, kuha 1,5, made 0,8, toutain 0,7, siika 2, kampela 2,5, meritaimen 0,8, suutari 2).
+
 **v3.07:** puun isku pelaajalle aarnipuu 0,9 / iso 0,6 / pieni 0,4 × maxHP, eläimille × 67 (±25 %) · viljelylaatikko 60 %/uni 9 + siemen, kohopenkki 4 × 9 + siemen 70 %/uni, maahan 2 + siemen ·
 sulatusuuni hiilellä lämpenee 1,2× · savustin lämpenee 30 s · paneeleissa äänet 0,7 + LP 4 200 Hz · vinkit 4–9 s (2 + 0,28 s/sana) · F-äänet 10 % · käsisoihtu 0,2.
 **v3.06:** kantokyky 60 + reppu 2 × 15 + saavutukset 50 + tasot 60 = 200 · uusiutuminen: puut ja kivet (5 vrk jälkeen) 20 % / uni, poimittavat 10 min + 60 m + 20 % / min ·
@@ -398,6 +434,241 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.24 (leiri, savupatsas, vasara, vesistöt, vinkit – käyttäjä 19.11.)
+- **Hylätty leiri (KORJAUKSET 95):** istuin oli rakennusosa *palkki* 0,2 m maan yllä → leijuva tukki. Nyt staattinen **penkki jaloilla** (A-jalat maahan asti), vanhojen tallennusten
+  palkki poistetaan (`campSync`, tarkka paikka + suunta + korkeus). Uusi asettelu `campDress` leirin omassa suunnassa (`campFrame`): **halkopino aina teltan kylkeä vasten** (tukit teltan
+  suuntaisesti, puoli arvotaan), penkki nuotion kehälle, säkki, kuivausteline, ämpäri ja oksat/luut **satunnaisiin paikkoihin ja suuntiin**. `campFree` estää päällekkäisyydet
+  (teltta kiiloineen, oviaukko, nuotio, toiset esineet, kasvillisuus/kivet `nodesNear`), `campGround` = alin maastokohta jalanjäljen alla → mikään ei leiju rinteessä.
+- **Savupatsas sammuessa** (`fireOutSmoke`/`smokeColTick` effects.js, `SMOKE_COL`): nuotio, grilli ja patanuotio – kun liekit sammuvat (polttoaine, sade, tallaus; `p._lit`-siirtymä
+  ai.js), savua 10–20 s alussa voimakkaimmin, hiukkaset elävät 24–34 s ja nousevat ~25 m (aarnipuiden latvat, käyttäjä), laajenevat ja haalistuvat; tuuli vie sivulle (enemmän
+  ylempänä), sivulle ajautunut häipyy nopeammin (`side` 0,07 / m). Määrä `PF`:n mukaan, sumu (fog) → näkyy yhtä kauas kuin muut kohteet.
+- **Vasara vyöllä** (`HAM_BELT`): 20 % pienempi, selän pinnassa ilman rakoa (pinta mitattu säteellä: x 0,17 → z −0,086), kääntynyt selän kaarevuuden mukaan (ry −0,35).
+- **Repun kangas** pehmeämpi/epätarkempi kudos; **vetoketju** kokonaan 18 px reunuksen sisällä (ei Tilat-ruutujen päällä), värit taustan sävyissä.
+- **Opastusvinkki** `jahti`: kun eläin (hostile, makeAnimal) jahtaa 25 m sisällä → "Kyykyssä (C) olet huomaamattomampi".
+- **Vesistöjen nimet** (`wbArrive`, fish.js): ensimmäinen kerta isolla "Vesistö löydetty" + nimi alla, myöhemmin rannalle tultaessa vain nimi pienemmällä; sama nimi ei koskaan
+  kahdesti peräkkäin (`F.wbLast`) ja aikaisintaan 5 vuorokauden päästä (`WB_AGAIN_D`, `F.wbSeen`). **Aluebannerit ja vesistöt samassa jonossa** (`zoneQ`, `showWbBanner`) → eivät tule
+  päällekkäin; sama vesistö ei jonoon kahdesti.
+- **AFK-tarkastelu** (F-animaatio, joka alkaa itsestään AFK:na tai uudella esineellä) loppuu pehmeästi, kun pelaaja liikkuu (`inspMoving`), eikä ala liikkeessä; F:llä itse aloitettu jatkuu.
+- **Tähtäyspiste** häipyy kuolinkameran alkaessa (0,9 s) ja palaa heti herätessä (`crossDeathSync`).
+- **Ruohon reuna häipyy sisään** (käyttäjä): ruoho rakennetaan uudelleen 6 m välein, jolloin uloin rengas ilmestyi kerralla. Nyt varjostin (`grassCompile`,
+  `GRASS_U.uGF` = R − 14,5 … R − 6,5 m pelaajasta, `GRASS_FADE_W` 8) haalistaa ja madaltaa ruohon/korkean ruohon/rikkaruohot reunalla → kasvavat näkyviin pehmeästi lähestyessä.
+
+### v3.23 (kalakirjan sivut, rakennuksen tietoikkuna – käyttäjä 19.11.)
+- **Kalakirjan sivun käännössä** soi kirjan avausääni (valikot/kartta) −30 % (`FB_TURN_V` 0,7; oma `sivun_kaanto`-ääni ohittaa sen, kun käyttäjä tuo sen).
+- **Kirja ei enää veny eikä tärähdä käännössä (KORJAUKSET 94):** kääntyvä lehti oli leveämpi kuin puoli kirjaa (`width:50%` + täyte, content-box) → paneeliin tuli hetkeksi
+  vierityspalkki; lisäksi kirjan korkeus vaihteli sivun sisällön mukaan. Nyt `.fbBook` kiinteä korkeus `min(70vh,640px)`, `.fbLeaf`/`.fbPg` border-box + overflow hidden,
+  `#fishP.fbPanel` overflow hidden. Mitattu: paneeli pysyy 1140×714 koko käännön ajan.
+- **Rakennusvalikon tietoikkuna** aukeaa 40 % nopeammin (`BINFO_DELAY` 1 → 0,6 s). Kun hiiri ei ole minkään kortin eikä ikkunan päällä, ikkuna pysyy 10 s (`BINFO_HIDE`, ennen 0,35 s)
+  ja häipyy pehmeästi (`BINFO_FADE` 0,6 s, luokka `biFade`). Korttien välissä liikkuva hiiri ei enää nollaa ajastinta.
+- **Rakennusikkuna 15 % pidempi** (käyttäjän valinta): `#build` min-height `min(560px, 100vh − 40px)` (tavallinen 487 px). Tietoikkuna on saman korkuinen → ei vierity yhdelläkään
+  74 osasta (Miten toimii? kiinni); välilehden vaihto ei enää muuta ikkunan korkeutta (paitsi Seinät ja lattiat, Kivirakennus, joissa kortteja on paljon).
+
+### v3.22 (kirveen paluu, ajoitus kaikilla esiasetuksilla, reppu kangasta – käyttäjä 19.11.)
+- **Kirveen/hakun paluu sivulle (KORJAUKSET 93):** yksittäisen lyönnin jälkeen (ja kun hakkuu katkeaa kestävyyden loppuessa nappi pohjassa) IK-paino laski samaan aikaan
+  kun käsivarren Euler-asento palasi lepoon omalla 0,6 s pehmennyksellään → kirves pyörähti ja liukui (pahin matalilla esiasetuksilla/FPS:llä). Nyt paluu kokonaan IK:lla:
+  `chopRetOn` asettaa oikean käden Euler-asennon heti lepoon (IK peittää), `chopRestLive` laskee lepoasennon joka ruutu, käsi liukuu ja kirveen kierto (rigin koordinaateissa,
+  slerp) kääntyy lepoon `CHOP_RET` 0,42 s smootherstepillä, perillä paino häivytetään `CHOP_FADE` 7/s. Mitattu kirveen kulmanopeus paluussa ≤ 3–4,6 rad/s (ennen 11–71)
+  sekä 60 että 15 FPS:llä. Jatkuvassa hakkuussa sivun vaihto smootherstepillä pienessä kaaressa `CHOP_ARC` 0,07 m.
+- **Esiasetus ei muuta ajoitusta:** `kExp(r,dt)` (core.js) = `1-(1-r/60)^(dt·60)` korvaa `Math.min(1,dt*r)`:n (sama 60 FPS:llä, oikea muilla) player.js:ssä ja
+  ai/camera/dungeons/effects/environment/inspect/resin/state.js:ssä (62 kohtaa). Pääsilmukka: ruutu saa olla 0,1 s (`WSTEP_MAX`) ja ajetaan ≤ 0,05 s:n osa-askelina →
+  alle 20 FPS:llä peliaika ei enää hidastu. Pohjassa pidetyn iskun ylijäämä siirtyy seuraavaan (`P._atkOv`) → iskutahti sama joka FPS:llä.
+- **Reppu tavallisesti avattuna** (P/Tab, ei työpisteeltä): kangastausta (palttinakudos, tikkisauma `outline dashed`) ja vetoketju vasemmassa alanurkassa (`#inv[data-st=""]::after`, SVG).
+  Työpenkiltä ja ahjolta avattuna omat taustat kuten ennen.
+- **Hautakiven risti:** irrallinen vino alaviiva (tarkoitettu riimumaiseksi lisäviivaksi) pois; risti kiinni kiven pinnassa kiven kallistuksen mukana.
+- **Tyhjän käden F-tarkastelu:** ääni (wow/mmm) 30 % (`INSP_SND_PH`, esineillä edelleen 10 %) ja takuu: viimeistään joka 4. tyhjän käden tarkastelu (`INSP_SND_PITY`).
+
+### v3.21 (valikon nappien ohjerivit – käyttäjä 19.11.)
+- Itsestäänselvät ohjerivit päävalikon napeissa (Uusi maailma "Aloita rannalta … pidä pohjassa = heti", Näppäimet, Asetukset, Tallenna nyt, Tila, Maailmat-napin
+  "– pelaa, nimeä tai aloita uusi") näkyvät vain, kunnes nappia on käytetty kerran (`BH_KEY` localStorage, `bhMark`/`bhApply`, CSS `.bhUsed .bh`). Tietorivit (maailman nimi,
+  päivä, taso, maailmojen määrä) näkyvät aina. Asetukset › Ohjaus › *Näytä valikon nappien ohjeet aina* (`SET.alwaysBtnHints`, oletus pois, body `showBH`).
+
+### v3.20 (intro, ohitus, napit, vinkit – käyttäjä 19.11.)
+- **Enter vahvistaa aina varmistusikkunan** (ensisijainen nappi, muuten ensimmäinen; ei näppäimen sidonnassa eikä 150 ms sisällä avautumisesta).
+- **Aloita seikkailu korjattu (KORJAUKSET 92):** pito-napiksi muuttunut Uusi maailma ei käynnistynyt `.click()`:llä. Nyt napsautus aloittaa ensimmäisen maailman suoraan
+  (`NEWW.go`); olemassa olevan maailman kanssa nappi on "Jatka seikkailua" ja avaa viimeisimmän.
+- **Intron usva koko ajan:** usvapallot syntyvät heti intron alussa syöksyn reitille (yläkameran paikka t = 4 s ennustetaan), tulevat hiljaa sivulta 4,4 s:ssa hidastuen
+  ja lipuvat sitten ohi; häivytys sisään 1,6 s; häipyvät vasta kun kamera on lähes alhaalla (k > 0,82). Pilvimatto (matalat esiasetukset) häipyy vasta 14–65 m korkeudella.
+- **Intron ohitus:** näppäimet eivät ohita introa eivätkä liikuta hahmoa; ensimmäistä introa (ei `hiidenmaa_introSeen` eikä muita maailmoja) ei voi ohittaa ollenkaan,
+  myöhemmin vain hiiren napsautuksella (0,6 s alusta). Ohjeteksti "Ohita: napsauta hiirellä" (ensimmäisessä piilossa).
+- **Ei liikettä latausruudussa:** `ldBusy` (`window.__ldBusy`, asetetaan `__ldShow`:ssa, nollataan häivytyksessä, turvaraja 60 s) estää näppäimet ja napsautukset latausruudun ajan, `keysClear` nollaa painallukset intron alussa ja lopussa sekä tallennuksen latauksen jälkeen.
+- **Äänet:** latausruudun ääni vielä −20 % (0,8 → 0,64), riimuvilinä (riimusiirtymä) −40 %.
+- **Vinkit:** työkaluvinkit (vasara, jousi, lapio/kuokka, kirves) tulevat heti kun työkalu on repussa ja valikot suljetaan (ennen vasta käteen otettuna), lisäohje "Ota se käteen
+  pikapaikan numerolla". Lyhyet vinkit lähtevät nopeammin (1,2 s + 0,27 s/sana, vähintään 2,6 s).
+- **Tasonimike** näkyy vain kun reppu on auki, tasomittarin yläpuolella; muuten HUDin tasolaatikko kuten ennen.
+- **Testi:** intro 6 kertaa (Low, Medium, High+ × 2): kameran kiihtyvyys, usvan peittävyyden muutosnopeus, pilvien poistuminen, ei virheitä (`t314/intro.mjs`).
+
+### v3.19 (valikon kuvien äänet karsittu, napit ja ruskeat valikot – käyttäjä 19.11.)
+- **Käyttäjä muutti linjaa: 2D-taustakuviin vain neljä ääntä, lyhyitä, hiljaisia ja harvoin.** Ukkosen salamat myrskykuviin (Myrsky: välähdyksen perään 0,3–1,6 s,
+  Myrskytuuli: 9–18 s välein; 2,5–4,5 s pätkä, taso 0,2–0,26, häivytys sisään 0,3 / ulos 0,8 s), ahjon alasin, nuotion tuli ja heinäsirkat (Öinen leiri). v3.18:n muut kuvat
+  (aallot, linnut, tuuli, sudet, luolat …) ja Myrskyn vanha myrskyääni poistettu (`MBG_AMB` vain Myrsky + Myrskytuuli, `MBG_SND` leiri + ahjo).
+- **Pehmeät häivytykset:** äänet häipyvät jo 1,4 s ennen mustaa kuvan vaihtoa (`MBG_OUT_T`, `MBG.outF`), eikä mitään käynnistetä sen jälkeen; nuotio häivyttyy sisään 1,4 s
+  (`MBG_FADE_IN`) ja ulos 1,2 s.
+- **Valikon napit:** jokaisella napilla omat puunsyykohdat (`--gx`/`--gx2` nth-child), syyt himmeämmiksi (vaaleat 0,16 → 0,085, tummat 0,22 → 0,14).
+- **Ruskeat valikot ja napit tummemmiksi:** kaikkiin puupaneeleihin (reppu, rakennus, arkku, edistyminen, loki, näppäimet, asetuskortit, varmistukset, pata) ja `.btn`-nappeihin
+  sekä valikon nappeihin lähes huomaamaton pyöreä liukuväri oikeaan alanurkkaan (radial-gradient, 0,05–0,24 mustaa).
+
+### v3.18 (pelattu aika, valikon taustakuvien äänet, napit – käyttäjä 19.11.)
+- **Pelattu aika yhteensä** (main.js `PT`/`ptTick`/`ptHTML`, localStorage `hiidenmaa_playtotal`): Asetukset › Profiilit alimpana, tunnit yhdellä desimaalilla. Laskee oikeaa aikaa,
+  kun peli on käynnissä (play, ui, intro, kuolin-/voittoruutu), ei tauolla (myöskään Käynnissä-tilassa), päävalikossa eikä piilotetulla välilehdellä. Alkaa ensimmäisestä pelistä;
+  ensimmäisellä kerralla mukaan lasketaan tallennettujen maailmojen peliaika (`PT.seed`, kerrotaan sivulla). Tallennus 10 s välein + sulkiessa / välilehden piiloutuessa.
+- **Valikon 2D-taustakuvien äänet** (`MBG_AMB` menubg.js, audio.js `mbgLoopK`/`mbgVoiceK`/`mbgList`): 19 kuvaa saa silmukat ja satunnaiset äänet olemassa olevista äänistä
+  (ei uusia ääniä). Myrsky ja Myrskytuuli: myrsky + ukkonen (+ tuuli), Myrsky-kuvan salaman välähdys (`MBG.flash`) → salaman isku 0,3–1,6 s myöhemmin, Myrskytuulessa iskut 10–22 s.
+  Järvet ja rannat: rauhalliset aallot + linnut; tunturi: tuuli + kaukainen susi; aarnimetsä: puiden humina; kalmakuvat: tunnelma + kalmo kaikuen; luolat: ulottuvuuksien tunnelmat ja
+  satunnaisäänet; susilauma: ulvonta; karhu: karjaisut; hirvi: hirvi + linnut; Lumisade: lumi + tuuli; Ahjo: + sirkat. Kaikki × Taustaäänet ja hiljaa, alkavat 0,3–1,5 s kuvan vaihdosta.
+- **Valikon napit:** tasaiset vaaleat viivat → epätasaiset puunsyyt (SVG feTurbulence, vaaleat + tummat syyt, näkyvät katkonaisesti). Aloita seikkailu -napin animaatiot hitaammiksi:
+  hengitys 3,2 → 5,5 s, kehän pyörintä 4 → 9 s, sinetti 2,4 → 4,2 s, katkoviivakehä 9 → 18 s, välke 0,7 → 1,4 s.
+- **Kieli:** "takoa kuparista ase" → "tao kuparista ase" (käskymuoto; samoin tavoitteet "Sulata ja tao", "tao keittopata").
+- **Vastaus käyttäjälle (3D-valikkotausta):** päävalikon 3D-tausta (asetus, oletus 2D-kuvat) kuvaa saman saaren maaston kuin valittu kartta + seed, mutta ei pelaajan rakennuksia,
+  tavaroita eikä eläimiä; seurattava eläin on vain valikkoa varten luotu. Peli ei ole käynnissä (ei `update()`, ei aikaa, nälkää, vihollisia eikä tallennusta).
+
+### v3.17 (valikon Öinen leiri – käyttäjä 19.11.)
+- **Nuotio ei kuulunut:** 136 s nuotioääni soi, mutta tasolla 0,35 × taustaäänet (≈ 0,2) se jäi valikkomusiikin alle → `MBG_LEIRI_V` 0,8. Palatessa leiriin ääni alkoi vasta ~2 s viiveellä
+  (`MBG.lrT` ei nollautunut) ja joka kerta luotiin uusi `<audio>` (lataus + MediaElementSource).
+- **Nyt:** pysyvä suoratoisto `MBG_KEEP` (audio.js `mbgLongKeep`/`mbgLongPause`), joka ladataan valmiiksi hiljaisena heti valikossa (`mbgLongWarm`) → kuvan vaihtuessa nuotio alkaa
+  välittömästi 0,8 s häivytyksellä (`MBG_FADE_IN`), poistuessa häivytys 0,8 s ja tauko. Sirkkojen pätkät ja valikon kertaäänet ladataan valmiiksi.
+- **Sirkat useammin:** 1–3,5 s välein (ennen 2–7), 3–8 siritystä, taso 0,2 (ennen 0,1), 35 %:ssa toinen sirkka perään.
+- **Äänet heti kuvan vaihduttua:** ensimmäinen siritys / myrskyn pätkä 0,3–1,5 s (`MBG_FIRST`; ennen 1–5 s). Jos ääni ei ollut vielä ladattu, uusi yritys 0,3 s päästä
+  (`MBG_RETRY`; ennen ajastin nollautui ja hiljaisuutta tuli 5–14 s). Tarkistus: v3.17-rivi.
+
+### v3.16 (TASOT 999, NIMIKKEET, DEV-VALIKOT, PIKAKALASTUS – käyttäjä 19.11.)
+- **Tasot 999** (`LVL_MAX`): tasoon 30 asti XP-tarve ennallaan, sen jälkeen `needXp(n)` = 1 270 + 45·(n−29) + ½·(n−29)² (taso 31 vaatii 1 361, taso 100 ≈ 6 990,
+  taso 500 ≈ 133 000). Palkinnot vain tasoon 30 (`LVL_REW_MAX`, `lvlRew` → {} sen jälkeen) → kantokyvyn 200-katto ja terveys/kestävyys ennallaan. `lvlInfo` välimuistissa (`LVL_M`).
+- **20 nimikettä** (`LVL_TITLES`, `lvlTitle`): 1 Haaksirikkoutunut, 2 Rantaan ajautunut, 4 Tulentekijä, 6 Erämaan oppilas, 8 Metsänkävijä, 10 Eränkävijä, 12 Erämies,
+  15 Seikkailija, 20 Saaren tuntija, 25 Kokenut seikkailija, 30 Kokeneempi seikkailija, 50 Hiidenmaan kulkija, 75 Vanha konkari, 100 Saaren vartija, 150 Tarujen etsijä,
+  250 Kansantarujen sankari, 400 Hiiden kesyttäjä, 600 Muinainen mestari, 800 Elävä taru, 999 Hiidenmaan legenda. Näkyy HUDin tasolaatikossa ja edistymisessä (J, oma lista);
+  uusi nimike ilmoitetaan tason noustessa. Edistymisen tasolista: tasot 2–30 palkintoineen + "Tasot 31–999: ei palkintoja".
+- **DEV-valikko (Ä) sivuiksi** (`DEV_TABS`, `devTabsHTML`/`devTabsBind`): Yleiset, Aika ja sää, Pelaaja ja kartta, Kalastus, Animaatiot. Kalastus-sivu: Pikakalastus-täppä,
+  Paljasta kalakirja, Uudet toivekalat, Anna kaikki kalastusvarusteet. **Å:n pikavalinnat ryhmiksi** (`DEV_PICK_CATS`: Taistelu, Avaimet ja harvinaiset, Juomat ja materiaalit, Kalastus).
+- **Pikakalastus:** Ä › Kalastus › *Pikakalastus käytössä* (`DEVF.fishFastOK`) → näppäin **U** kytkee pikakalastuksen (`DEVF.fishFast`) päälle/pois. Ilman täppää U ei tee mitään
+  (eikä toimi, jos U on sidottu johonkin toimintoon). Päällä: tärppi ~3 s, virvelin isku ×30, kenttävaihto ×10; fysiikka ja väsytys ennallaan.
+
+### v3.15 (KALAKIRJA – käyttäjä 19.11., uusi tiedosto `js/fishbook.js`)
+- **Kirjamainen ulkoasu** (#fishP `fbPanel`): nahkakansi, kaksi pergamenttisivua aukeamana, 1 kala / sivu, sivunumerot alakulmissa, kääntyvä lehti (CSS rotateY 0,38 s, `fbTurn`,
+  paikkamerkki `kalastus/sivun_kaanto`), nuolinäppäimet / A–D kääntävät, sisällysluettelo hyppää sivulle (`fbGo`). 26 sivua: sisällys, arvoluokat, toivekalat, 18 lajia, vedet,
+  tavoitteet, tietoa: vedet (lajien osuudet vesityypeittäin), ajat ja sää (●-taulukko), viehteet ja varusteet. Saamattomat lajit siluettina + vihje (vesi, iso kala).
+- **Piirretty kuvitus** `fishArtDraw` (canvas): runkoprofiili lajin mittasuhteista, liukuväri selkä → vatsa, kuviot (raidat, täplät, pisteet, rastit, laikut, kylkiviiva), suomut,
+  evät ruotoineen (piikkievä, rasvaevä lohikaloilla, haarukkapyrstö), kiduskansi, silmä heijastuksella, suu, viiksisäie; suonsilmä hohtaa. Samalla piirroksella **repun kuvakkeet** (fishIcon).
+- **Arvo** (`fishValue`): lajikohtainen jakauma 3 000 näytettä (`fbDist`, sama painokaava kuin fishHook) → painopisteet + kokopisteet (pituus `fbLen` = maksimipituus × ∛(kg/max) × 0,93–1,07,
+  `FISH_LEN`), yhteispisteet 0,6 × paino + 0,4 × koko → persentiili → **8 luokkaa** `FB_CLS`: Roskakala < 15 %, Tavallinen, Hyvä ≥ 50, Harvinainen ≥ 75, Ennätysluokka ≥ 90,
+  Legendaarinen ≥ 97, Ikijärkäle ≥ 99,5, Maailmanennätysvonkale ≥ 99,9 % (värit, hover "parempi kuin X % lajinsa kaloista"). Lajin arvokkain yksilö `F.best`, luokkatilasto `F.cls`.
+- **Saalisviesti** (`fbCatch`): "Sait: Hauki 6,1 kg, 99 cm (Harvinainen) – uusi ennätys! – katso kalakirjan sivu 5".
+- **Toivekalat** (`fbWish`, `F.wish`): 3 toivetta (helppo: yleinen laji; keskivaikea: Hyvä+; vaikea: harvinaisempi laji, Harvinainen+), lukittu 7 päivää, vain maailmassa olevista
+  vesityypeistä. XP = 12 + 30 × harvinaisuus (1 − b/6) + 0/10/25 → 12–67.
+- **Saavutukset:** Toive täyttyi (1), Toiveiden kalastaja (5), Toiveiden täyttäjä (15), Vaikea toive, Kirja täynnä (18 lajia), Ennätyskala (Legendaarinen+). Ei kantokykybonusta
+  (kantokyvyn 200-katto säilyy), saavutuksen 50 XP normaalisti; teksti "kunniamaininta".
+- **Kirja kädessä:** `kalakirja` on vasemman käden esine (cat offhand, ei enää "Käytä"): vasen klikkaus avaa, kun oikea käsi on tyhjä (`fbPrimary`), pikanäppäin **K** (`book`) aina.
+  Pelkkä kirja → oikeaan käteen (`bookR`, F-tarkastelu toimii). Lukiessa molemmat kädet pitelevät avointa kirjaa (`bookPose`). Malli `fbBookMesh`: tummanruskeat nahkakannet,
+  kultainen kalakoriste ja reunanauhat. Avausääni = kartan ääni, sulkiessa sama 1,35× nopeampi ja hiljaisempi (0,55).
+- **DEV:** Ä › Kalastus › Paljasta kalakirja (`DEVF.fishReveal`).
+- Tarkistus: v3.15-rivi. Testi: 4 000 haukea → Roskakala 13 %, Tavallinen 35 %, Hyvä 25 %, Harvinainen 15 %, Ennätys 7 %, Legendaarinen 3 %, Ikijärkäle 0,9 %, vonkale 0,2 %.
+
+### v3.14 (KALASTUSVARUSTEET – käyttäjä 19.11., uusi tiedosto `js/tackle.js`)
+- **Vapa kootaan osista** Kalastajan pöydällä (`kalapoyta`, Viljely ja kalastus, taso 3, puu 6 + naru 2; perkuulauta, puukko, koukkuteline, siimakelat, pakkipaikka). Osat ovat
+  esineitä (`ITEMS[id].tk`), vavan tila `s.rig` = {line, lw, hook, reel, float, lure, bait}; puuttuva = `TK_RIG0` (pellava + pieni koukku + puukoho) → vanhat vavat toimivat.
+  Arvot `rigStats(s)` → `FS.rod` (fish.js `rodDef`). Runko: onki / kuparivapa / hiidenvapa = isot kalat +0/+10/+20 % keskipaino (kg × (1 + big), enintään lajin max),
+  isot lajit ×1/1,1/1,2, tärppiväli ×1/0,95/0,9, siima ×1/1,1/1,2.
+- **Siimat** (`TK_LINE`): pellava / jänne / punottu / hiidensiima = kestävyys ×1 / 1,25 / 1,55 / 1,9, kesto 12 / 25 / 45 / 80 kalaa, näkyvyys (tärppi harvemmin) ×1 / 1,06 / 1,12 / 1,18.
+  Kuluminen (`tkWear`): heitto 0,25, kala 1 (iso 1,5), roska 0,5 yksikköä; loppuun kulunut siima katkeaa. Iskussa satunnainen katkeaminen 0,6 % × (1,6 − kunto) (`tkSnapCheck`).
+  Väsytyksessä katkeava siima lyhenee 30 % ja vie vieheen (`tkLineBreak`).
+- **Koukut** (`TK_HOOK`): pieni (isot ×0,85, pikkukalat ×1,2, isku 65 %), iso (isot ×1,3, pikkukalat ×0,7, 75 %), väkä (isot ×1,05, 88 %, syötti pysyy ×0,45, kala ei irtoa 120 s jälkeen).
+- **Kelat** (`TK_REEL`): kupari (heitto 22 m, kelaus 1,4 m/s, väsytys +15 %), hiisi (30 m, 1,8 m/s, +30 %, jännitys −15 %). Kela tekee vavasta **virvelin** (nimi `rodName`).
+  Virveli ilman viehettä = koho + mato, heitto 3–(0,8 × kelan matka) m.
+- **Kohot** (`TK_FLOAT`): puu, korkki (ikkuna +0,15 s, syötti ×0,8), hehku (ikkuna +0,05 s, yöllä +0,35 s, hohtaa).
+- **Viehteet** (`TK_LURE`, 9): kuparilusikka, rautapilkki, puuvaappu, hiidenhohtoviehe, Pohjolan lusikka (käyttäjän "kuusamolainen", yleisnimi), välkelippa, verilusikka, pintavaappu,
+  nahkajigi. Kullakin vesi/aika/sää/valo-kertoimet (`lureCond`, valo `tkBright`), parhaat kalat ×2,2, pikkukalat ×0,3 (`tkSpK`). Eivät kulu.
+- **Virvelin fysiikka** (`tkSpinTick`, FS.st `spin`): heitto 6–22/30 m, vasen pohjassa kelaa (viehe lähestyy), tärppi kelatessa: hazard = aktiivisuus × lajisopivuus × `lureCond`
+  / (70 s × k), isku tarttuu koukun todennäköisyydellä, muuten "kävi vieheessä". Matalassa (< 0,9 m) viehe tarttuu pohjaan 0,05 %/s (jigi 2×, pintavaappu ei) → viehe + siima menetetään.
+- **Yhdistelmät** (`TK_COMBOS`, 8): Perinneonki, Yön vartija, Suonkulkija, Haukimiehen virveli, Merikarhu, Kuparikuningas, Lohiretki, Hiiden valta (pieni etu, näkyy ominaisuuksissa).
+- **Ominaisuudet listana** (repun tietopaneeli `tkProps`, pöydän keskiosa `tkPropsList`, viehteet: vahvuudet / heikkoudet / parhaat kalat `tkLureList`).
+- **Mato:** vapa kädessä E (kun ei muuta E-kohdetta, `tkNoTarget`) laittaa madon koukkuun (`rig.bait`), ei enää automaattisesti repusta; mato näkyy koukussa. HUD-vihje "E: mato koukkuun".
+- **Kalastuspakki** (`kalapakki`, vasen käsi, paino 20 + sisältö, `invWeight`): 12 paikkaa → 16/20/24 päivityksin pöydällä (`PAKKI_UP`), väri/helat/koko tason mukaan
+  (`tkPakkiMesh`), vain kalastustarvikkeet (`tkPakkiOk`, `tkPakkiFilter`), vain yksi mukana. Vasen klikkaus laskee maahan (enintään 3,6 m, ei veteen, `flags.pakit`) tai
+  pöydän pakkipaikalle (`p.data.pk`, sen osat käytössä pöydällä); maassa E avaa (arkkuikkuna, `curChest.pakki`), vasen nostaa käteen (`tkPrimary`). Pudotus (Q) laskee pakin maahan.
+- **Siiman vaihto kentällä** pakin ikkunasta: 30 s (`TKA`, pysy paikallasi; "ilman pöytää tämä kestää ikuisuuden"). Pöydällä kaikki vaihdot heti.
+- **Perkaus** pöydällä (`tkGut`): kala → fileet (pieni 1, keskikokoinen 2, iso 3) + perkeet 1. Filee paistetaan (`filepaisti` 22 ravintoa). Perkeet = katiskan syötti (2 matoa).
+- **3D:** kala sätkii koukussa 3 s noston jälkeen (`tkDangle`, malli `tkFishMesh` FISH_SHAPE/FISH_DEF-väreistä), vavan kela/siiman väri/koho/viehe/mato näkyvät (`tkDressRod`,
+  `heldKey` state.js), kaareva rengastettu mato (`tkWormMesh`) kädessä, koukussa ja viljelylaatikon mullassa (osin mullan sisällä). Kuvakkeet `tkIcon`.
+- **Ensimmäinen onki:** wow-ilmoitus `#tkWow`, lopussa kultaisella "Kireitä siimoja!" (vain jos et ole vielä kalastanut).
+- **Äänet:** ensimmäinen `sounds2/`-projekti `sounds2/kalastus/` (11 paikkamerkkiä + AANILISTA.md); `tkSnd` → `plSnd('kalastus', …)`, varaäänet vanhoista kunnes käsittely tehdään.
+- **Muuta:** Grafiikka › Intro -asetukset harmaina kuten Ammattilaisille-osio (käyttäjä). Esineen lisätiedot säilyvät pudotettaessa (`d.ex`, `invAddEx`).
+- **Testi:** virveli + kuparilusikka järvellä 1 h: 23 kalaa, 257 heittoa, 17 iskua ohi; tarttumiset pohjaan säädetty harvinaisiksi (0,25 → 0,05 %/s). Tarkistus: v3.14-rivi.
+
+### v3.13 (maailmat, äänet, Käynnissä-tila, intro, kalastussimulaatio – EARLY ACCESS 1.2, käyttäjän pyyntö)
+- **Maailmat:** 6 paikkaa (`SLOTS` 6, uusi avain `hiidenmaa_save_v1_5`), kiinteä 3 × 2 -asettelu ilman vieritystä (≥ 701 px leveä). **Uusi maailma:** napsautus = varmistus isolla
+  Aloita-napilla, pohjassa 0,6 s (`NEW_HOLD`) = aloitus heti (palkki + vihje napissa). **Kortti:** tuplaklikkaus = Pelaa / jatka, pohjassa 1 s (`CODE_HOLD`) = maailman
+  tallennuskoodi (HM2, sama kuin Asetukset › Tallennus) leikepöydälle (`worldCodeCopy`, ilmoitus kortissa). Yleinen pito-apuri `holdBtn`.
+- **Äänet:** pelaajasta lähtevät äänet MONO (`plSnd` ilman `o.pos` → gain, ei panneria; voimakkuus = sama etäisyysvaimennus kuin ennen); paikalliset (`o.pos`) 3D.
+- **Käynnissä-tila on aito:** valikon takana maailma vahingoittaa ja pelaaja voi kuolla (kuin AFK) – `hurtPlayer`/`playerDie` estävät vain Tauko-tilassa. Kuollessa valikko sulkeutuu (`closeAllForDeath`).
+- **Intro:** syöksy 2,6 s (`INTRO_DIVE`), käyrä `introEase` = (1−u)u³ + u(1 − (1−u)⁵) → pehmeä alku, pitkä sulava hidastus; kamera laskeutuu 3 ohuen usvakerroksen läpi
+  (`MIST_LAYERS` 78/46/24 m, 12 palloa/kerros, häipyy lähellä kameraa – ei valkoista huntua); sivuille vetäytyvät 3D-pilvet kaikilla esiasetuksilla; pilvimatto −10 % peittävyys,
+  luonnolliset raot, alueittain enintään 10 % tummempi, pysyy paikallaan kun kamera menee läpi ja häipyy vasta 45 m pilvikerroksen alla. **Asetukset** (Grafiikka, alin osio,
+  eivät kuulu esiasetuksiin, oletus pois): *Käytä 2D-pilviä intron alussa* (`SET.intro2d`), *Intron usva ja pilvikerrokset pois* (`SET.introPlain`).
+- **Korjattu (KORJAUKSET 87):** suolampia ei syntynyt koskaan (biomeAt kutsuttiin korkeudella 1 → aina ranta) → ruutana/suonsilmä/suutari saavuttamattomia. Nyt `WB_BOG_H` 1,3:
+  pienet soiset vedet (< 200 ruutua, `WB_BOG_MAX`) ovat suolampia; isot soiset järvet pysyvät järvinä (nimi ennallaan) ja niistä saa myös suokaloja (`bogg`, paino 0,6×).
+- **Testit:** kalastussimulaatio 5/25/30/120 min (onki, madot, hiidenvapa; järvi, meri, soinen järvi, suolampi) → `docs/testit/KALASTUS_SIMULAATIO.md`; katiska, savustin,
+  upponut arkku; poistettujen määrittelyjen tarkistus viimeisestä yhdistämisestä (6267d86) – ei yhtään kadonnutta funktiota/vakiota. Tarkistus: v3.13-rivi.
+- **Early Access 1.2** (käyttäjä).
+
+### v3.12 (intron pilvet – käyttäjä: "kauhea vaalea sumu")
+- Litteä läpikuultava pilvimatto korvattu **oikeilla pilvillä**: `IE_N` 330 peittävää pilvipalloa (sprite, 4 satunnaista tekstuuria `introPuffTex`, varjostettu pohja), korkeudella
+  `IC_H` 95 m pelaajan yllä. Aukko saaren kohdalla lasketaan kameran kautta (projektio pilvitasolle: keskus C + (P − C)·s, s = 1 − IC_H / kameran korkeus), joten aukko osuu
+  piirtorajaan kameran kiertäessä. Pilvet kiertävät ja aaltoilevat hitaasti, hajaantuvat ulospäin ja häipyvät syöksyssä (piiloon, kun kamera on alle IC_H + 25 m).
+  Maan tason usva vain kevyt (`IE_FOG` 0,4 × voimakkuus). Mittaus: Medium intro 7,8 ms keskim., pahin 19 ms; Low+ 7,3 / 18 ms. Tarkistus: v3.12-rivi.
+
+### v3.11 (intron piirtorajan sumennus ja pilvimatto – käyttäjän pyyntö, ratkaisu päätetty itse)
+- Matalilla esiasetuksilla yläkamerasta näkyi terävä raja, johon puut loppuvat. Voimakkuus `introEdgeK` = (230 − puiden piirtoetäisyys) / 120: Low–Medium- 1, Medium 0,83,
+  Medium+ 0,54, High 0,21, High+/Ultra 0. Intron sumu alkaa ennen rajaa ja voimistuu kauemmas (`introEdge`); rajan takana pehmeä **pilvimatto** (`introCarpet`, taso 16 m
+  pelaajan yllä, reikä = piirtoraja, vähintään 85 m), häipyy syöksyssä ja poistetaan `endIntro`:ssa. Intron ajan puut rajataan pelaajan ympäriltä (`introEdgeOn` →
+  `updateChunkVis`), koska yläkamera on 80 m sivussa eikä pelkkä etäisyyssumu erota rajaa pelaajasta. Korkeat vuoret nousevat maton läpi (näyttää vuorilta pilvien yllä).
+- Mittaus Low: intro keskim. 4,9 ms / ruutu, pahin 10 ms. Tarkistus: v3.11-rivi.
+
+### v3.10 (maailma valmiiksi latausruudussa – käyttäjän pyyntö ja hyväksymä suunnitelma)
+- **Esilataus** `ldPrewarm` (main.js) latausruudun lopussa (`worldLoad` + `saveLoad`): pelikamera ja intron puoliväli piirretään kerran latausruudun takana, kaikki varjostimet
+  käännetään (`renderer.compile`), näkyvyys/yhdistäminen/maaston LOD/varjomallit ajetaan heti. Kesto testiselaimessa ~0,13–0,19 s (`LD_PREWARM.ms`).
+- **Intron yläkamera kevyt** (`introLight`): puiden LOD lasketaan 3D-etäisyydestä (korkealta kaukomallit), ruohoa/tupsuja/rikkaruohoja ei piirretä yli 30 m (`INTRO_GRASS_H`,
+  `introGrassVis`); laatu palaa asetusten mukaiseksi laskeutuessa ja `endIntro` palauttaa ruohon.
+- **Mittaus** (swiftshader, kiinteä kulma, koko intro): yläkamera 693 000 vs 750 000 kolmiota, piirtokutsut 605 vs 795, intron keskimääräinen ruutu 7,3 vs 9,4 ms,
+  pahin nykäisy laskeutuessa (t 5,27 s, 36 m) 31 vs 66 ms. Latausaika ennallaan (esilataus < 0,2 s).
+- **Vanha tapa** asetuksena: Asetukset › Ohjaus › "Ammattilaisille ja vertailuun" (harmaa, läpikuultava `.proSec`) › **Vanha maailman lataus (v3.09)** (`SET.oldLoad`, oletus pois);
+  vaihto kysyy varmistuksen, tallentaa ja lataa sivun uudelleen. Tarkistus: v3.10-rivi.
+
+### v3.09 (maailmalista – käyttäjän pyyntö)
+- Maailmat-näkymässä pelissä oleva maailma saa kirkkaan kultaisen ääriviivan ja merkin **"Pelaat nyt"**; kun peli ei ole käynnissä, viimeksi pelattu maailma (`lastWorld`,
+  uusin `at`) saa vaalean ääriviivan ja merkin **"Viimeksi pelattu"** (`renderWorlds`, css `.world.cur/.last`, `.wTag`). Tarkistus: v3.09-rivi.
+- Vastaus käyttäjälle (pihkan täyttyminen): arvonta tehdään yhtä aikaa koko maailmassa joka 5. uni, mutta jokainen tyhjä puu arpoo itse 10 % → harva puu täyttyy kerralla.
+
+### v3.08 (käyttäjän 26 kohdan lista + 4 lisäystä – kysymykset alussa, sitten ilman keskeytyksiä)
+- **Korjaukset:** lapion `setMatrixAt`-virhe kaadetun puun vieressä (tukeilla ei `n.im` – KORJAUKSET 82); sisävesi ei enää avaa/ilmoita Meri-biomia (`inlandWater`), järvet/lammet
+  nimetty kalan mukaan, vesien nimet kartalla kaikilla zoomeilla veden päällä, DEV-paljastus näyttää kaikki vedet, kartta zoomaa ulos 0,8×; Windows-teksti + logo samalle keskilinjalle;
+  vinkki katoaa, kun valikko avataan/suljetaan (`tipDismiss`); kirveen hakkuun nykäisy (`chopRestore`, KORJAUKSET 83); onkivapa: 3 sisäkkäistä taipuvaa osaa (`RODB` jousi,
+  `userData.tip/bend`), koukku kärjessä, vavoissa korkkikahva, kela ja renkaat (onki yksinkertainen); metso −40 % (`CRE_TYPE_V`).
+- **Äänet ja kuolema:** liemiruoat (`LIQUID_FOOD`: keitot, puurot, padat, risotto, hillo) juomisääni 2–4×; päävalikko Käynnissä-tilassa −70 % + alipäästö 1,4 kHz (`RUN_G`/`RUN_LP`, `sndLive`);
+  kuolinkamerassa äänet häipyvät 2,2 s ja kuva tummuu 40 s → 60 % (`#deathDim`), palautuu herätessä; ruumis kaatuu panssari ja selkätavarat päällä, käsitavarat lentävät viereen
+  (`deathThrowGear`/`thrownTick`, vain ulkoasu – hautakasaan); kaikki veri tummempaa eikä hohda (Lambert, `BLEED_C`), myös vihreä.
+- **Sää:** sade vinommin tuulen mukaan (`RAIN_SIDE` 0,7), lumi ilmestyy pehmeästi korkeusrajalla (`sstep(8,13)`).
+- **Viljely ja puut:** siemen putoaa vasta kun puu kaatuu tukeiksi (`n._seed` → `fallTree`); kaikki istutettavat + kastemato mallina vasemmassa kädessä (`seedModel`);
+  **istutettujen puiden kasvuvaiheet** `TREE_STAGES` (5 lajikohtaista kokoa, lopullinen viimeinen/toiseksi viimeinen, ±6 % `n.gsk`), joka 5. uni (`flags.sleepC`) 60 % → seuraava
+  vaihe, pihka kasvaa koon mukana, luonnon puut eivät muutu; tallennus `planted[5..7]` (gst, gmx, gsk); **kastelu ja madot** (`careMode`/`careApply`, farm.js): vesikulho E tai mato
+  toisessa kädessä E (maassa kyykyssä) → +5 % kumpikin kerran kasvua kohti, 5 kastelua / 2 matoa → pysyvä +5 % (lohko/paikka, taimesta puulle `flags.care`), multatekstuurit
+  `careDeco` (märkä, tumma, madot, ruohotupsut). Kastemato on nyt toisen käden esine.
+- **Pihka:** aarnipuista 1 % pihkapuita (`RESIN_P_AARNI`, ei taattua), pihkaa 3× (`AARNI_CAP_K`), kertymä tunnissa 4× (`AARNI_FLOW_K`), kaadettaessa 3–5 pihkaa;
+  **täyttyminen** (`resinRefillSleep`): joka 5. uni (yhteinen laskuri) jokainen tyhjä pihkapuu arpoo 10 % → 30 % täyteen, muuttuu pihkapuuksi ja kaiverretaan uudelleen;
+  kiinni jäänyt kulho täyttyy vasta uuden kaiverruksen jälkeen (kulho näkyy, kaiverrus onnistuu kulho kiinni).
+- **Valikot ja grafiikka:** Extra-grafiikan napit **Kevyin / Vaativin** (`XGFX_MAX`, varmistus 1. kerralla `hiidenmaa_xmaxok`); intron varjojen välkyntä korjattu (varjokamera
+  texel-ruudukkoon `shadowSnap` aina, intron ajan auringon suunta lukittu `INTRO_SD` + varjokartta joka kuva – KORJAUKSET 84); uudet kategoriat: rakennus Säilytys, Ruoanlaitto,
+  Viljely ja kalastus; valmistus Nuolet, Pataruoat, Kalastus, Viljely; **haku** löytää kategoriat ja yleissanat (`SRCH_RULES`: kilpi, kala, keitto, kirves, siemen, valo, ruoka, ase,
+  työkalu, nuoli, haarniska, juoma, tuli, säilytys, lepo, ovi, ikkuna, katto, portaat, puolustus, metalli, vesi, viljely …; nimiosumat ensin); DEV › **Ilmaiset materiaalit**
+  (`DEVF.free`, `hasReq`/`payReq`); **olkahihna** selkävarusteille (`backStrap`: puukilpi vaalea, muut tumma, rautakilpi + metallisolki).
+- **Kalat:** 10 uutta lajia (kuha, made, muikku, särki, kiiski, toutain järvissä; siika, kampela, meritaimen meressä; suutari suolammissa) = 18 lajia, vesien nimet ennallaan;
+  lajikohtaiset kuvakkeet (`FISH_SHAPE`/`fishIcon`, myös paistetut) näkyvät myös kalastajan kirjassa; tavoite "Ongi kaikki 18 lajia".
+- **Lisäykset (käyttäjä kesken työn):** kartan "Sulje: P / M" oikeaan alanurkkaan (vastapäätä "Rulla = zoom"); **vihjeet 3 portaassa** (Asetukset › Ohjaus, oletus näkyvissä,
+  ylempi piilottaa myös alemmat, piilotus kysyy varmistuksen): 1 ohjetekstit (`.note`, ei `.keep`) + kertavinkit, 2 näppäinvihjeet (Sulje/Päävalikko, rakentamisen näppäimet,
+  "B tai hiiren oikea", jousi; punainen varmistus), 3 kaikki E-kehotteet (punaisin "Oletko IHAN varma?"); **Poistu-ruksi tallentaa aina** juuri ennen sulkemista (myös kuolleena),
+  sulkuruutu kertoo "Peli tallennettiin ennen sulkemista ✓".
+- Päätetty käyttäjän puolesta: pihkan arvonta yhteinen + uudelleenkaiverrus (A), hakusanat, sade 0,7, kastelu E:llä, siemenmallit, intron ratkaisu (lukitus kaikilla asetuksilla,
+  ei sumennusta tarvittu), porras 1 piilottaa myös kertavinkit (käyttäjä vahvisti), B-vihje portaaseen 2 (käyttäjä vahvisti).
+- Tarkistus: uusi v3.08-rivi (30 kohtaa); päivitetty v3.06 (siemen kaatuessa, taimi vaihe 0, 18 lajia) ja v3.07 (`sndLive`). full157 6/6.
 
 ### v3.07 (käyttäjän korjaukset ja ideat v3.06:een – 5 vastausta)
 - **Rikkaruohot:** 3 lajia (heinäkorsi, lehtevä putkikasvi valkoisella sarjalla, ohdake violetilla mykerolla), korsien leveys/pituus vaihtelee, biomeittain korkeus (`WEED_H`
@@ -4088,6 +4359,20 @@ kanssa; (3) Ultra-asetuksella jopa ~830 piirtokutsua.
 - Ensimmäinen pelattava versio yhtenä HTML-tiedostona.
 
 ## Ideajono
+
+### 💡 Ideat kalastuspäivityksen (v3.14–v3.16) jälkeen (ei tehty – ehdotuksia)
+- `sounds2/`-käsittely `process_sounds.py`:hin, kun ensimmäiset kalastusäänet tulevat (avaimet `kalastus/…`, `tkSnd`).
+- Kalakilpailu / päivän saalis: NPC-kalastaja tai ilmoitustaulu, joka ostaa harvinaisia luokkia; kalojen arvo kauppatavarana uuden saaren kanssa.
+- Vene ja laituri (jo jonossa), pilkkiminen jäältä talvella (rautapilkki valmiina), uistelu veneestä virvelillä.
+- Viehekotelo pakin sisään (omat lokerot), viehteiden maalaus pöydällä (väri vaikuttaa jo `lureCond`-kertoimiin).
+- Nimikkeen valinta itse saavutetuista (näkyy HUDissa), tasoille 31+ kosmeettisia palkintoja (värit, kehykset), ei tehoja.
+- Kalakirjaan muistiinpanot / tarrat (pelaajan oma teksti) ja kuva ennätyskalasta naulakkoon.
+
+### 💡 Ideat v3.08:n jälkeen (ei tehty – ehdotuksia, kysy käyttäjältä)
+- Istutetun puun kasvuvaihe ja kastelun/madon tila näkyviin (esim. katsoessa tai F-tarkastelussa) myös ilman vesikulhoa/matoa kädessä.
+- Kastelukannu (useampi kastelu yhdellä täytöllä), sadevesi kastelee ulkona olevat taimet ja lohkot automaattisesti.
+- Uudet kalat pataruokiin (kuhakeitto, muikkupaistos, savusiika) ja vesien nimet uusien lajien mukaan uusissa maailmoissa (vanhat nimet pidettävä ennallaan).
+- Vihjeportaille pikanäppäin tai valinta uuden maailman luonnissa ("kokenut pelaaja").
 
 ### ⏭️ SEURAAVAT ISOT TYÖT (käyttäjä 18.11.) – A ja B TOTEUTETTU v3.06; C (uusi saari) odottaa
 **Työjärjestys (käyttäjä):** 1) lista A (16 kohtaa nykyiseen peliin) + onkimispäivitys (B) → 2) uusi saari (C) myöhemmin. **Early Access 2.0** isoon päivitykseen.

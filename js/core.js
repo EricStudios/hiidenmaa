@@ -1,7 +1,7 @@
 /* Hiidenmaa – core.js
    Apuvälineet: matematiikka, kohina, satunnaisluvut */
 'use strict';
-window.__JSV='3.07';   // v1.58: versiotarkistus (index.html vertaa window.HV:hen; eroaa → välimuisti antoi vanhoja tiedostoja)
+window.__JSV='3.24';   // v1.58: versiotarkistus (index.html vertaa window.HV:hen; eroaa → välimuisti antoi vanhoja tiedostoja)
 // KEHITYSTILA (v0.74; v1.82: oletus POIS, päälle Asetukset › Ohjaus ja ääni › alin rivi, localStorage hiidenmaa_devon, ?dev=1): DEV → kestävyys ei kulu, korkein taso (kaikki ohjeet auki), ei painorajaa,
 // V pohjassa liikkuu 10× nopeammin (v0.77; ennen Alt/Ö), Ä avaa DEV-valikon (sää, aika, terveys, kylläisyys), vasemmassa alakulmassa merkki "DEV-tila". Poista käytöstä: DEV=false.
 const DEV=(()=>{try{if(/[?&]dev=1/.test(location.search))localStorage.setItem('hiidenmaa_devon','1');return localStorage.getItem('hiidenmaa_devon')==='1';}catch(e){return false;}})();
@@ -9,7 +9,11 @@ const DEV=(()=>{try{if(/[?&]dev=1/.test(location.search))localStorage.setItem('h
 // lvl = korkein taso, weight = ei painorajaa. Oletus: aiemmat DEV-edut päällä, uudet pois.
 // v1.91: bossLine = pomohuoneen ääriviiva ulottuvuudessa (Ö-valikko). v1.92: route = reittiviiva pomohuoneeseen (Ö), noclip = seinien ja
 // esineiden läpi, lockTW = aika ja sää lukittu, freeze = maailma pysähtyy (vain pelaaja liikkuu) – Ä-valikon isot napit.
-const DEVF=(()=>{const d={spd:1,tspd:1,god:0,food:0,stam:1,lvl:1,weight:1,fly:0,bossLine:0,route:0,noclip:0,lockTW:0,freeze:0,unseen:0,perf:0};if(!DEV)return d;try{Object.assign(d,JSON.parse(localStorage.getItem('hiidenmaa_dev')||'{}'));}catch(e){}d.spd=1;d.tspd=1;return d;})();   // v2.93 maailman ja pelin ajan nopeus alkavat aina 1×
+const DEVF=(()=>{const d={spd:1,tspd:1,free:0,god:0,food:0,stam:1,lvl:1,weight:1,fly:0,bossLine:0,route:0,noclip:0,lockTW:0,freeze:0,unseen:0,perf:0};if(!DEV)return d;try{Object.assign(d,JSON.parse(localStorage.getItem('hiidenmaa_dev')||'{}'));}catch(e){}d.spd=1;d.tspd=1;return d;})();   // v2.93 maailman ja pelin ajan nopeus alkavat aina 1×
+/* v3.08 käyttäjä: DEV › Ilmaiset materiaalit (DEVF.free) – rakentaminen, valmistus, korjaus ja päivitys eivät vaadi eivätkä kuluta aineita */
+function devFree(){return DEV&&!!DEVF.free;}
+function hasReq(req){return devFree()||Object.entries(req).every(([id,n])=>invCount(id)>=n);}
+function payReq(req){if(devFree())return;for(const [id,n] of Object.entries(req))invRemove(id,n);}
 function devOn(k){return DEV&&!!DEVF[k];}
 function saveDevF(){try{localStorage.setItem('hiidenmaa_dev',JSON.stringify(DEVF));}catch(e){}}
 
@@ -19,6 +23,9 @@ function saveDevF(){try{localStorage.setItem('hiidenmaa_dev',JSON.stringify(DEVF
 const $=s=>document.querySelector(s);
 const TAU=Math.PI*2;
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
+/* v3.22 käyttäjä: animaatioiden pehmennys ruudunpäivitysnopeudesta riippumaton (esiasetus ei saa muuttaa ajoitusta). Vastaa 60 FPS:n kerrointa r/60 per ruutu,
+   mutta toimii samoin millä tahansa FPS:llä (ennen Math.min(1, dt·r) → matalalla FPS:llä pehmennys hyppäsi suoraan perille = nykäys). */
+function kExp(r,dt){return 1-Math.pow(Math.max(0,1-r/60),Math.max(0,dt)*60);}
 function sstep(e0,e1,x){const t=clamp((x-e0)/(e1-e0),0,1);return t*t*(3-2*t);}
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function hash2(x,z){let h=Math.imul(x|0,374761393)+Math.imul(z|0,668265263)+9371;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296;}

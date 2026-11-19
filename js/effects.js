@@ -6,7 +6,7 @@
 // Jokainen osuma: pisaroita (määrä vahingon ja koon mukaan) ja läntti maahan, joka häipyy 10 s:ssa. Asetus SET.blood: 1 / .5 / 0.
 // Kivihahmot pölisevät kivisiruja, kalmot luupölyä, Jäätär jääsiruja, Suonäkki usvaa, hiidet ja Aarnihirviö vihreää mahlaa.
 const BLEED={kivivartija:'stone',vartija:'stone',kalmo:'bone',ylimys:'bone',kalmaherra:'bone',jaajattari:'ice',suonakki:'mist',hiisi:'sap',aarnihirvio:'sap'};
-const BLEED_C={blood:[0x5a0808,0x7e0e0e],stone:[0x6a6660,0x8d887f],bone:[0xd8d0bc,0xb8ae98],ice:[0xbfe6ff,0x8fd0ff],mist:[0x9aa8a0,0xc8d0c8],sap:[0x34501a,0x56722a]};
+const BLEED_C={blood:[0x360404,0x4e0707],stone:[0x6a6660,0x8d887f],bone:[0xd8d0bc,0xb8ae98],ice:[0xbfe6ff,0x8fd0ff],mist:[0x9aa8a0,0xc8d0c8],sap:[0x1f3410,0x31481a]};   // v3.08 käyttäjä: kaikki veri tummemmaksi (punainen ja vihreä)
 const bleedKind=t=>BLEED[t]||'blood';
 const splats=[],_spGeo=new THREE.CircleGeometry(1,16);
 /* v1.56: läikkä mukailee maaston kaltevuutta (maastonormaali, kun läikkä on maanpinnalla eikä rakennuksella/luolastossa).
@@ -22,7 +22,7 @@ function updateFlow(s,dt){const f=s.flow;f.t+=dt;if(f.t>10){s.flow=null;return;}
   if(g<.15){s.flow=null;return;}const sp=.35*(1-f.t/12);f.x-=hx/g*sp*dt;f.z-=hz/g*sp*dt;f.acc+=dt;
   if(f.acc>.12){f.acc=0;const r=splat(f.x,terrainH(f.x,f.z),f.z,.06+Math.random()*.03,f.c,40,.88);if(r){r.m.scale.y*=2.2;r.r1=r.m.scale.y;r.grow=.2;}}}
 function splat(x,y,z,r,color,life,op=.85,nx,nz){if(!(r>0))return null;
-  const mt=new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+  const mt=new THREE.MeshLambertMaterial({color,transparent:true,opacity:0,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});   // v3.08 valaistu – ei hohda pimeässä
   const m=new THREE.Mesh(_spGeo,mt);if(nx||nz){m.rotation.set(0,Math.atan2(nx,nz),Math.random()*TAU);m.position.set(x+nx*.03,y,z+nz*.03);}else{const n=slopeN(x,z,y);if(n){m.quaternion.setFromUnitVectors(_zAx,n);m.rotateZ(Math.random()*TAU);m.position.set(x+n.x*.03,y+n.y*.03,z+n.z*.03);}else{m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*TAU;m.position.set(x,y+.025,z);}}m.scale.set(r*(.8+Math.random()*.5),r*(.6+Math.random()*.5),1);m.renderOrder=1;scene.add(m);
   const s={m,t:0,life,op,r0:m.scale.x,r1:m.scale.y,grow:.35};splats.push(s);while(splats.length>140){const o=splats.shift();scene.remove(o.m);o.m.material.dispose();}return s;}
 function updateSplats(dt){for(let i=splats.length-1;i>=0;i--){const s=splats[i];s.t+=dt;if(s.flow)updateFlow(s,dt);
@@ -60,7 +60,7 @@ const groundY=(x,z,y,dun)=>dun?DUN.y:Math.max(-1,groundAt(x,z,.2,(y??terrainH(x,
 // v1.39 (lista 4, extra 1): veren fysiikka (SET.bloodFx, High+ ja Ultra): pisarat lentävät lyönnin suuntaan (hx,hz), putoavat ja jäävät
 // maahan pieniksi läikiksi (10 s). Kuoleman lammikko kasvaa hitaasti (kasvuaika 4 s).
 const drips=[],_drGeo=new THREE.SphereGeometry(.035,5,4),_drMat={};
-function dripMat(c){return _drMat[c]||(_drMat[c]=new THREE.MeshBasicMaterial({color:c}));}
+function dripMat(c){return _drMat[c]||(_drMat[c]=new THREE.MeshLambertMaterial({color:c}));}   // v3.08 valaistu (ei hohda pimeässä)
 function updateDrips(dt){for(let i=drips.length-1;i>=0;i--){const d=drips[i];d.vy-=14*dt;d.m.position.x+=d.vx*dt;d.m.position.y+=d.vy*dt;d.m.position.z+=d.vz*dt;
   const q=d.m.position,g=d.dun?Math.max(DUN.y,groundAt(q.x,q.z,.05,q.y+.3)):groundAt(q.x,q.z,.05,q.y+.3);
   if(q.y<=g+.02){scene.remove(d.m);drips.splice(i,1);splat(q.x,g,q.z,.05+Math.random()*.07,d.c,10,.9);}
@@ -75,7 +75,7 @@ function bleed(x,y,z,kind,size,dmg,dun,hx,hz,kb){const k=+(SET.blood??1);const C
   if(!k)return;const n=Math.round(clamp((3+dmg*.18)*(.6+size)*k*U,2,26*U));burst(x,y,z,C[Math.random()<.5?0:1],n,2.2+size*1.5);
   const gy=groundY(x,z,y,dun);for(let i=0,m=1+(size>.9?2:size>.6?1:0);i<m;i++)splat(x+(Math.random()-.5)*size*1.4,gy,z+(Math.random()-.5)*size*1.4,(.18+Math.min(.5,dmg*.012))*(.7+size*.6)*Math.sqrt(k),C[0],10);}
 // Haava: tummanpunainen läikkä mobin pintaan (enint. 6), häviää ruumiin mukana.
-const _wGeo=new THREE.BoxGeometry(1,1,1),_wMat=new THREE.MeshStandardMaterial({color:0x5a0808,roughness:.5,metalness:.1}),_wSap=new THREE.MeshStandardMaterial({color:0x34501a,roughness:.5});
+const _wGeo=new THREE.BoxGeometry(1,1,1),_wMat=new THREE.MeshStandardMaterial({color:0x3a0505,roughness:.6,metalness:.05}),_wSap=new THREE.MeshStandardMaterial({color:0x223812,roughness:.5});
 function addWound(m,force){if(!(+(SET.blood??1))||(m.wounds|0)>=(force?11:6))return null;const kind=bleedKind(m.type);if(kind!=='blood'&&kind!=='sap')return null;
   const ms=[];m.f.g.traverse(o=>{if(o.isMesh&&o.geometry&&!o.userData.wound&&!(m.fireFx&&isChildOf(o,m.fireFx))&&o.material&&o.material.isMeshStandardMaterial)ms.push(o);});if(!ms.length)return null;
   const o=ms[Math.random()*ms.length|0];if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();const b=o.geometry.boundingBox,ax=Math.random()*3|0,sg=Math.random()<.5?-1:1;
@@ -87,6 +87,27 @@ function isChildOf(o,p){for(let a=o;a;a=a.parent)if(a===p)return true;return fal
 /* ---------------- SAVU (kohta 36) ---------------- */
 // Isot pehmeät savupilvet (palava mob, palokuolema): nousevat, laajenevat ja haalistuvat. Määrää rajoittaa hiukkasasetus PF.
 const puffs=[],_pfGeo=new THREE.IcosahedronGeometry(1,2);
+/* v3.24 käyttäjä: SAMMUNEEN TULEN SAVUPATSAS (nuotio, grilli, patanuotio). Kun liekit sammuvat (polttoaine loppuu, sade, tallaus), savua nousee
+   10–20 s (SMOKE_COL.dur), alussa voimakkaimmin. Hiukkaset nousevat hitaasti aarnipuiden latvojen korkeudelle (~25 m, vy · elinaika), laajenevat ja
+   haalistuvat elinaikansa mukaan. Tuuli kallistaa patsasta (WIND); mitä kauemmas sivulle hiukkanen ajautuu, sitä nopeammin se häipyy (SMOKE_COL.side).
+   Hiukkasmäärä grafiikan Partikkelit-asetuksen mukaan (PF), näkyy yhtä kauas kuin muutkin kohteet (sumu/piirtoetäisyys, fog). */
+const SMOKE_COL={dur:[10,20],rate:9,life:[24,34],vy:1.27,side:.07,max:240,a0:.5},smokeCols=[],smokeParts=[],_smkPool=[];let _smkTex=null;
+function smkTexGet(){if(_smkTex)return _smkTex;const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),gr=g.createRadialGradient(32,32,2,32,32,31);
+  gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.45,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);_smkTex=new THREE.CanvasTexture(c);return _smkTex;}
+function fireOutSmoke(x,y,z){if(!(PF>0))return;const far=(scene.fog?scene.fog.far:200)+25;if(dist2(x,z,P.pos.x,P.pos.z)>far*far)return;
+  smokeCols.push({x,y,z,t:0,dur:SMOKE_COL.dur[0]+Math.random()*(SMOKE_COL.dur[1]-SMOKE_COL.dur[0]),acc:0});}
+function smokeColTick(dt){
+  for(let i=smokeCols.length-1;i>=0;i--){const c=smokeCols[i];c.t+=dt;const k=c.t/c.dur;if(k>=1){smokeCols.splice(i,1);continue;}
+    c.acc+=dt*SMOKE_COL.rate*PF*Math.pow(1-k,1.3)*(1.2-.2*k);   // alussa voimakkaimmin
+    while(c.acc>=1&&smokeParts.length<SMOKE_COL.max*Math.max(.3,PF)){c.acc-=1;let sp=_smkPool.pop();
+      if(!sp){sp=new THREE.Sprite(new THREE.SpriteMaterial({map:smkTexGet(),transparent:true,depthWrite:false,opacity:0,fog:true}));sp.renderOrder=3;}
+      const gr=.5+Math.random()*.16;sp.material.color.setRGB(gr,gr,gr*1.02);sp.position.set(c.x+(Math.random()-.5)*.35,c.y+.45,c.z+(Math.random()-.5)*.35);scene.add(sp);
+      smokeParts.push({s:sp,x0:c.x,z0:c.z,t:0,life:SMOKE_COL.life[0]+Math.random()*(SMOKE_COL.life[1]-SMOKE_COL.life[0]),vy:SMOKE_COL.vy*(.85+Math.random()*.3),a:SMOKE_COL.a0*(1-.55*k),ph:Math.random()*TAU,sz:.5+Math.random()*.25});}}
+  for(let i=smokeParts.length-1;i>=0;i--){const q=smokeParts[i],s=q.s,side=Math.hypot(s.position.x-q.x0,s.position.z-q.z0);q.t+=dt*(1+side*SMOKE_COL.side);   // sivulle ajautunut häipyy nopeammin
+    const k=q.t/q.life;if(k>=1){scene.remove(s);_smkPool.push(s);smokeParts.splice(i,1);continue;}
+    const wk=WIND.spd*(.12+.3*Math.min(1,k*3));   // tuuli tarttuu sitä enemmän mitä ylempänä
+    s.position.x+=(WIND.x*wk+Math.sin(q.t*.7+q.ph)*.18)*dt;s.position.z+=(WIND.z*wk+Math.cos(q.t*.6+q.ph)*.18)*dt;s.position.y+=q.vy*(1-.45*k)*dt;
+    const sc=q.sz+k*6.5;s.scale.set(sc,sc,1);s.material.opacity=q.a*sstep(0,.05,k)*Math.pow(1-k,1.15);}}
 function smokePuff(x,y,z,size=1,dark=.25){if(puffs.length>48*PF||Math.random()>PF)return;const c=new THREE.Color().setScalar(dark+Math.random()*.12);
   const m=new THREE.Mesh(_pfGeo,new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.0,depthWrite:false}));m.position.set(x,y,z);m.scale.setScalar(.2*size);scene.add(m);
   puffs.push({m,t:0,life:2.2+Math.random()*1.4,size,vx:(Math.random()-.5)*.4+WIND.x*WIND.spd*.04,vz:(Math.random()-.5)*.4+WIND.z*WIND.spd*.04,vy:.9+Math.random()*.6});}
@@ -194,7 +215,7 @@ function bossDeathAnim(m,dt){const f=m.f,g=f.g,t=m.deadT,r=Math.max(.9,m.def.r),
     gl.position.set(m.pos.x,m.pos.y+r*1.6,m.pos.z);scene.add(gl);m.da.glow=gl;}
   const D=m.da,out=1-sstep(BD.dim,BD.dim+BD.dimLen,t),pale=sstep(0,4.2,t)*out;
   // 1) kohoaa ja levittää kädet (ennen repeämistä)
-  if(!D.parts){const lift=sstep(0,3.2,t)*(1.3+r*.5),sp=sstep(2.6,5.2,t),lk=Math.min(1,dt*2.5);
+  if(!D.parts){const lift=sstep(0,3.2,t)*(1.3+r*.5),sp=sstep(2.6,5.2,t),lk=kExp(2.5,dt);
     g.position.set(m.pos.x,D.y0+lift+Math.sin(t*1.7)*.06*sstep(2,3.2,t),m.pos.z);g.rotation.y+=dt*.22;
     if(f.head)f.head.rotation.x=lerp(f.head.rotation.x,.45*(1-sp)-.6*sp,lk);
     if(f.armL){const ax=lerp(f.armL.rotation.x,.15*(1-sp)-.15*sp,lk),az=lerp(f.armL.rotation.z,.35*(1-sp)+1.45*sp,lk);f.armL.rotation.set(ax,0,az);f.armR.rotation.set(ax,0,-az);}
@@ -344,7 +365,7 @@ function ashFlames(m){const g=new THREE.Group(),r=Math.max(.3,m.def.r*.8),h=(m.b
   for(let i=0;i<9;i++){const a=i/9*TAU,c=new THREE.Mesh(new THREE.ConeGeometry(.14*r*2,(.5+Math.random()*.4)*r*2,6),i%2?MAT.flame2:MAT.flame);c.position.set(Math.cos(a)*r*.6,h,Math.sin(a)*r*.6);g.add(c);}
   g.position.copy(m.pos);scene.add(g);return g;}
 function ashAnim(m,dt){const D=m.da,f=m.f,g=f.g,t=m.deadT,r=Math.max(.35,m.def.r);
-  if(t<1.6){const k=sstep(0,1.5,t);for(const mt of m.mats){mt.color.lerp(_ashC,Math.min(1,dt*2.2));mt.emissive.setRGB(.35*(1-k)*Math.random(),.08*(1-k),0);}
+  if(t<1.6){const k=sstep(0,1.5,t);for(const mt of m.mats){mt.color.lerp(_ashC,kExp(2.2,dt));mt.emissive.setRGB(.35*(1-k)*Math.random(),.08*(1-k),0);}
     g.rotation.z=D.dir*Math.PI/2*sstep(.3,1.3,t)*.9;g.scale.y=1-.25*sstep(.6,1.5,t);
     if(D.flames){D.flames.position.set(m.pos.x,m.pos.y,m.pos.z);D.flames.children.forEach((c,i)=>{c.scale.set(1,(.6+.5*Math.abs(Math.sin(playTime*10+i)))*(1-k*.4),1);});}
     if(Math.random()<dt*22)emitEmber(m.pos.x+(Math.random()-.5)*r,m.pos.y+Math.random()*r*1.6,m.pos.z+(Math.random()-.5)*r,'spark');
@@ -393,21 +414,21 @@ function startPlayerDeath(cause){const ash=!!P.ashDeath||(playTime-(P.lastFire||
   pDeath={t:0,ash:ash&&!P.waterDeath,water:!!P.waterDeath,void:cause==='void',dir:s,s,side,th:.03,w:w0,y:f.g.position.y,vy:Math.min(0,P.vy||0),yaw,fx:fx*s,fz:fz*s,
     bounced:false,rest:false,pool:false,poolS:null,saved:null,c:{x:P.pos.x,y:P.pos.y+.4,z:P.pos.z},y0:f.g.position.y};P.waterDeath=false;}
 function updatePlayerDeath(dt){const D=pDeath;if(!D)return;D.t+=dt;const t=D.t,f=fig;
-  if(D.water){const k=sstep(0,1.4,t),lk=Math.min(1,dt*2.5);f.g.rotation.x=-Math.PI/2*.5*k;f.g.rotation.z=D.dir*.3*k;
+  if(D.water){const k=sstep(0,1.4,t),lk=kExp(2.5,dt);f.g.rotation.x=-Math.PI/2*.5*k;f.g.rotation.z=D.dir*.3*k;
     const bot=groundAt(P.pos.x,P.pos.z,.38,P.pos.y);if(P.pos.y>bot)P.pos.y=Math.max(bot,P.pos.y-.63*dt);f.g.position.set(P.pos.x,P.pos.y+.4*k,P.pos.z);
     f.armL.rotation.x=lerp(f.armL.rotation.x,-2.1,lk);f.armR.rotation.x=lerp(f.armR.rotation.x,-1.7,lk);f.armL.rotation.z=lerp(f.armL.rotation.z,.5,lk);f.armR.rotation.z=lerp(f.armR.rotation.z,-.4,lk);
     f.legL.rotation.x=lerp(f.legL.rotation.x,.35,lk);f.legR.rotation.x=lerp(f.legR.rotation.x,.1,lk);if(f.kneeL){f.kneeL.rotation.x=lerp(f.kneeL.rotation.x,.6,lk);f.kneeR.rotation.x=lerp(f.kneeR.rotation.x,.4,lk);}f.head.rotation.x=lerp(f.head.rotation.x,.45,lk);
     if(t<2.5&&Math.random()<dt*(9-t*3))uwMouthBubble();return;}
-  if(D.void){D.vy-=DEATH_G*dt;D.y+=D.vy*dt;f.g.position.y=D.y;f.g.rotation.x=lerp(f.g.rotation.x,D.s*.9,Math.min(1,dt*2));if(t>1)f.g.visible=false;deathVig(Math.min(1,t/1.2));return;}
+  if(D.void){D.vy-=DEATH_G*dt;D.y+=D.vy*dt;f.g.position.y=D.y;f.g.rotation.x=lerp(f.g.rotation.x,D.s*.9,kExp(2,dt));if(t>1)f.g.visible=false;deathVig(Math.min(1,t/1.2));return;}
   const dun=P.inDun,gF=groundY(P.pos.x,P.pos.z,D.y,dun),L=1.6,hx=P.pos.x+D.fx*L,hz=P.pos.z+D.fz*L,gH=groundY(hx,hz,D.y,dun);
   const thEnd=clamp(Math.PI/2-Math.atan2(gH-gF,L),Math.PI/2-.55,Math.PI/2+.5);   // rinteessä pää lepää maassa
   if(!D.rest){D.w+=DEATH_G/DEATH_L*Math.sin(Math.max(.06,D.th))*dt;D.th+=D.w*dt;
     if(D.th>=thEnd){D.th=thEnd;if(!D.bounced&&D.w>1.5){D.bounced=true;D.w=-D.w*.2;shake(.12);}else{D.rest=true;D.w=0;}}}
-  else D.th=lerp(D.th,thEnd,Math.min(1,dt*3));
+  else D.th=lerp(D.th,thEnd,kExp(3,dt));
   if(D.y>gF+.01){D.vy-=DEATH_G*dt;D.y=Math.max(gF,D.y+D.vy*dt);}else{D.y=gF;D.vy=0;}   // ilmasta kuollessa putoaa maahan
   f.g.position.set(P.pos.x,D.y+DEATH_BACK*Math.sin(Math.min(D.th,Math.PI/2)),P.pos.z);f.g.rotation.x=D.s*D.th;f.g.rotation.z=D.side*Math.min(1,D.th/1.3);
   const sk=Math.sin(Math.min(D.th,Math.PI/2));D.c={x:P.pos.x+D.fx*.85*sk,y:D.y+.3,z:P.pos.z+D.fz*.85*sk};
-  const lk=Math.min(1,dt*5);f.armL.rotation.x=lerp(f.armL.rotation.x,-.6,lk);f.armR.rotation.x=lerp(f.armR.rotation.x,.2,lk);f.armL.rotation.z=lerp(f.armL.rotation.z,.6,lk);f.armR.rotation.z=lerp(f.armR.rotation.z,-.5,lk);
+  const lk=kExp(5,dt);f.armL.rotation.x=lerp(f.armL.rotation.x,-.6,lk);f.armR.rotation.x=lerp(f.armR.rotation.x,.2,lk);f.armL.rotation.z=lerp(f.armL.rotation.z,.6,lk);f.armR.rotation.z=lerp(f.armR.rotation.z,-.5,lk);
   f.legL.rotation.x=lerp(f.legL.rotation.x,.25,lk);f.legR.rotation.x=lerp(f.legR.rotation.x,-.1,lk);if(f.kneeL){f.kneeL.rotation.x=lerp(f.kneeL.rotation.x,.5,lk);f.kneeR.rotation.x=lerp(f.kneeR.rotation.x,.15,lk);}f.head.rotation.x=lerp(f.head.rotation.x,-.3,lk);
   deathVig(sstep(1.2,3,t)*.5);
   if(D.ash){if(!D.saved){D.saved=[];f.g.traverse(o=>{if(o.isMesh){D.saved.push([o,o.material]);o.material=_pAshMat;}});}
@@ -440,9 +461,12 @@ function addSlash(m){if(!SET.bloodFx||!(+(SET.blood??1))||(m.slashes|0)>=5)retur
   m.bleedT=5;}
 function updateBleeders(dt){if(!SET.bloodFx)return;for(const m of mobs){if(!(m.bleedT>0)||m.dead)continue;m.bleedT-=dt;if(Math.random()<dt*5&&drips.length<120){const C=BLEED_C[bleedKind(m.type)]||BLEED_C.blood,h=(m.barH||m.def.r*2)*.5;
   const d=new THREE.Mesh(_drGeo,dripMat(C[0]));d.position.set(m.pos.x+(Math.random()-.5)*m.def.r,m.pos.y+h,m.pos.z+(Math.random()-.5)*m.def.r);scene.add(d);drips.push({m:d,c:C[0],dun:m.dun,vx:0,vz:0,vy:-.5});}}}
-function updateEffects(dt){updateSplats(dt);if(drips.length)updateDrips(dt);updateBleeders(dt);updatePuffs(dt);updatePlayerDeath(dt);corpseTick(dt);updateWaterFx(dt);}
+function updateEffects(dt){updateSplats(dt);if(drips.length)updateDrips(dt);updateBleeders(dt);updatePuffs(dt);updatePlayerDeath(dt);if(THROWN.length)thrownTick(dt);corpseTick(dt);updateWaterFx(dt);}
 // v2.73 kuolinruudun aikana (state 'dead', update() ei aja): kaatuminen, verilammikko ja kuolinkamera jatkuvat
-function deathTick(dt){updatePlayerDeath(dt);updateSplats(dt);updateCamera(dt);}
+/* v3.08 käyttäjä: kuolemaruudun takana kuva tummuu hyvin hitaasti (DEATH_DIM_T s → DEATH_DIM_MAX); äänet häipyvät (audio.js DEAD_FADE). Palaa ennalleen respawnissa. */
+const DEATH_DIM_T=40,DEATH_DIM_MAX=.6;let deathDimV=0;
+function deathTick(dt){updatePlayerDeath(dt);thrownTick(dt);updateSplats(dt);updateCamera(dt);deathDimV=Math.min(DEATH_DIM_MAX,deathDimV+dt*DEATH_DIM_MAX/DEATH_DIM_T);const el=document.getElementById('deathDim');if(el)el.style.opacity=deathDimV.toFixed(3);}
+function deathDimReset(){deathDimV=0;const el=document.getElementById('deathDim');if(el)el.style.opacity='0';}
 /* ---------------- VEDEN ALLA (v2.18) ----------------
    CAM_UW = kameran syvyys pinnan alla (m, 0 = pinnan yläpuolella; camera.js). Kun kamera on veden alla: ruutu sinertyy ja tummuu syvemmällä
    (#uwTint), sumu tihenee (camera.js). Asetuksella SET.uwFx (High+): vaaleat kuplat nousevat satunnaisesti pohjasta hiljaa vähän pinnan alle ja

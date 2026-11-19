@@ -9,6 +9,8 @@ function onPrimary(){
   if(P.dead||P.stagger>0)return;
   const w=curWeapon();
   if(w.cat==='bowl'){bowlUse();return;}   // v2.91 kulho / vesikulho
+  if(typeof tkPrimary==='function'&&tkPrimary(w))return;
+  if(typeof fbPrimary==='function'&&fbPrimary(w))return;   // v3.15 kalakirja kädessä → avaa   // v3.14 kalastuspakki: lasku maahan/pöydälle ja nosto (tackle.js)
   if(w.cat==='rod'){fishClick();return;}   // v3.06 onki (fish.js)
   if(w.cat==='hammer'){placeBuild();return;}
   if(w.cat==='shovel'){useTool(false);return;}
@@ -87,7 +89,7 @@ function doMeleeHit(w){
     n.hp-=(5+w.chop*4)*(1+.25*((w.q||1)-1));sfx(n.hp<=0?(n.isLog?'logBreak':'chopFinal'):n.isLog?'chopLog':'chop');shake(.08);{const q={x:n.isLog?P.pos.x+fx:n.x,y:n.y+1,z:n.isLog?P.pos.z+fz:n.z};plSnd('osumat','osuma_puu',{pos:q});if(n.hp<=0)plSnd('osumat',n.isLog?'tukki_hajoaa':'puu_kaatuu',n.isLog?{pos:q}:{pos:q,until:fallDur(n),fit:1,p:creakP(n),rk:TREE_RK});   /* v2.67 narina −50 % kuuluvuus */}   /* v2.25 */
     if(n.isLog)chopLog(n);else burst(n.x,n.y+1.2,n.z,0x8a5a32,5,3);
     if(n.hp<=0){if(n.isLog){removeLog(n);const c=Math.max(1,dropScale(n.dropId,Math.round(rint(rng,3,4)*n.s)));for(let j=0;j<c;j++){const t=(j+.5)/c;spawnDrop(n.dropId,1,n.ax+(n.bx-n.ax)*t,n.y+.8,n.az+(n.bz-n.az)*t);}burst(n.x,n.y+.4,n.z,0x6b4527,12,4);}
-      else{const rz=isResinTree(n);killNode(n);fallTree(n,undefined,true);bump('trees');seedDrop(n,rz);}}}   // v3.06 siemen 5 % / pihkapuu 70 %
+      else{const rz=isResinTree(n);killNode(n);fallTree(n,undefined,true);bump('trees');n._seed={rz};}}}   // v3.06 siemen 5 % / pihkapuu 70 %
   else if(n.def.kind==='rock'){if(!w.pick){if(!hitMob){msg('Tarvitset hakun louhiaksesi kiveä.','warn');sfx('hit');plSnd('osumat','ei_tehoa');}return;}
     if(w.pick<(n.def.tier||1)){if(!hitMob){msg('Tarvitset paremman hakun.','warn');sfx('hit');plSnd('osumat','ei_tehoa');}return;}
     n.hp-=(9+w.pick*3)*(1+.25*((w.q||1)-1));sfx(n.hp<=0?'rockBreak':'pick');{const q={x:n.x,y:n.y+.8,z:n.z};plSnd('osumat','osuma_kivi',{pos:q});if(n.hp<=0)plSnd('osumat','kivi_hajoaa',{pos:q});}   /* v2.25 */burst(n.x,n.y+.8,n.z,n.type==='kuparisuoni'?0xd9874a:n.type==='rautasuoni'?0x8a4f3c:0x8f8d86,6,4);shake(.08);
@@ -204,7 +206,7 @@ function fireBow(){
 }
 // v1.39 (lista 4, kohdat 8–9): vahinkokerroin sille, joka parhaillaan päivittyy (ai.js asettaa): pomot ×1,2, vartijat ×1,8.
 let HURT_K=1;
-function hurtPlayer(dmg,fx,fz){if(state==='paused'||state==='intro')return;   // v1.43: valikon takana käynnissä oleva maailma ei vahingoita
+function hurtPlayer(dmg,fx,fz){if((state==='paused'&&!pauseRun)||state==='intro')return;   /* v3.13 käyttäjä: Käynnissä-tilassa valikon takana maailma on aito (kuin AFK) – vahinko ja kuolema */   // v1.43: valikon takana käynnissä oleva maailma ei vahingoita
   dmg*=HURT_K;
   if(P.dead||P.invul>0||P.spawnProt>0||devOn('god'))return;
   let d=dmg;const dx=fx-P.pos.x,dz=fz-P.pos.z,l=Math.hypot(dx,dz)||1;
@@ -220,6 +222,7 @@ P.vel=new V3();
    täyteen syötynä täysi vatsa pysyy 60 s + KYL_FULL × kyl. */
 const KYL_K=.5,KYL_FULL=.25;
 // Ähky tulee vain, jos kylläisyys on jo täynnä (≥99) ja syö silti; palkin täyttyminen syödessä ei aiheuta sitä. Kesto 52 s (−30 %).
+const LIQUID_FOOD=/keitto|puuro|pata$|risotto|hillo/;   // v3.08 ruoat, joita ei tarvitse purra (keitot, puurot, padat, risotto, hillo)
 function eat(s){const f=ITEMS[s.id].food;
   if(P.hunger>=99&&!f.raw&&!f.buff){P.buffs.vatsakipu=52;msg('Söit vaikka olit jo täynnä – vatsaa kivistää.','warn');}
   P.hunger=Math.min(100,P.hunger+f.h);if(P.hunger>=99.5){P.hunger=100;P.buffs.taysi=Math.max(P.buffs.taysi||0,60+(f.kyl?f.kyl*KYL_FULL:0));if(f.kyl)flags.potFull=1;}   /* v3.02 pataruoka pitää täyden vatsan pidempään */
@@ -227,7 +230,7 @@ function eat(s){const f=ITEMS[s.id].food;
   if(f.hp)P.heal+=f.hp;if(f.st)P.stam=Math.min(maxStam(),P.stam+f.st);
   if(f.raw&&Math.random()<.45){P.buffs.pahoinvointi=40;msg('Raaka liha kääntää vatsaa.','warn');}   // kaikki raa'at lihat (v2.80)
   if(f.buff)P.buffs[f.buff]=300;if(!f.raw)flags.ate=1;
-  s.n--;if(s.n<=0)inv[inv.indexOf(s)]=null;invDirty=true;sfx('eat');plSnd('kaytto','syominen');msg(`Söit: ${ITEMS[s.id].n}`);
+  const liq=LIQUID_FOOD.test(s.id);s.n--;if(s.n<=0)inv[inv.indexOf(s)]=null;invDirty=true;sfx('eat');if(liq){const k=2+Math.floor(Math.random()*3);for(let i=0;i<k;i++)setTimeout(()=>plSnd('kaytto','juominen',{p:1+(Math.random()-.5)*.08}),i*520);}else plSnd('kaytto','syominen');msg(`${liq?'Söit lusikalla':'Söit'}: ${ITEMS[s.id].n}`);   /* v3.08 käyttäjä: nestemäinen ruoka → juomisääni 2–4 kertaa */
 }
 // v2.00 juomat: parannus = terveys heti täyteen; elpyminen = +1 terveys/s 60 s; sisu = kylläisyys täynnä 5 min (+ 60 s ennen pudotusta) ja kestävyys täynnä 30 s.
 function drink(s){const d=ITEMS[s.id],p=d.potion;
@@ -252,6 +255,7 @@ function findInteract(){
   for(const it of interactables)if(dist2(it.x,it.z,P.pos.x,P.pos.z)<it.r*it.r*1.6&&!(it.off&&it.off())){if(it.look===undefined){const l=String(typeof it.label==='function'?it.label():it.label||'');it.look=/arkku|tynnyri|kirstu|säkki/i.test(l);}consider(it.x,it.y,it.z,{kind:'it',it},it.r,it.look);}
   for(const p of pieces){const l=pieceLabel(p);if(l&&dist2(p.x,p.z,P.pos.x,P.pos.z)<12)consider(p.x,p.y+.7,p.z,{kind:'piece',p,label:l},3,!!PIECES[p.t].store);}
   resinConsider(consider);   // v2.91 pihkapuut (vain aivan rungon vieressä)
+  careConsider(consider);   // v3.08 kastelu ja madot (farm.js)
   for(const g of graves)if((g.dim||'world')===curDim())consider(g.x,g.y+.5,g.z,{kind:'grave',g,label:fitsAll(g.items)?'Kerää tavarasi hautakasasta':'Reppuun ei mahdu kaikkea – tee tilaa'},3.2,true);
   return best;
 }
@@ -262,7 +266,7 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   case 'patanuotio':return potLabel(p);   // v3.02
   case 'vedenkeraaja':return waterLabel(p);   // v3.06
   case 'pelto':case 'kohopenkki':return fieldLabel(p);   // v3.06 farm.js, v3.07 kohopenkki
-  case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':return nauLabel(p);   // v3.06 fish.js
+  case 'kalapoyta':return tkTableLabel(p);case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':return nauLabel(p);   // v3.06 fish.js
   case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),p)} – lisää`;
   case 'sanky':return isNight()?'Nuku':'Aseta herätyspaikka';
   case 'arkku':return 'Avaa arkku';
@@ -273,8 +277,9 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   default:return null;}}
 const E_ANIM_T=.42;   // v3.06 E-toiminnon käsiliike (player.js)
 function interact(){if(P.insp)inspectStop();
-  if(P.dead)return;const t=lookTarget;if(!t){resinNoTarget();return;}P.eT=playTime;
+  if(P.dead)return;const t=lookTarget;if(!t){if(typeof tkNoTarget==='function'&&tkNoTarget())return;resinNoTarget();return;}   /* v3.14 mato koukkuun vapa kädessä */P.eT=playTime;
   if(t.kind==='resin'){resinInteract(t.n);return;}   // v2.91
+  if(t.kind==='care'){careInteract(t);return;}   // v3.08 farm.js
   if(t.kind==='node'){const n=t.n,d=n.def,own=n.planted&&CROP_SEED[n.type];const c=own?GROUND_YIELD:rint(rng,d.n[0],d.n[1]);   /* v3.07 maahan istutettu: 2 + siemen (siemen vasta onnistuneen poiminnan jälkeen) */const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);if(own)giveOrDrop(CROP_SEED[n.type],1,n.x,n.y+.5,n.z);return;}
   if(t.kind==='it'){t.it.use();return;}
   // v0.93: hautakasa ei katoa koskaan itsestään. Jos kaikki mahtuu reppuun, tavarat otetaan kerralla; muuten kasa avautuu arkkuikkunaan
@@ -287,7 +292,7 @@ function interact(){if(P.insp)inspectStop();
     case 'patanuotio':potOpen(p);break;   // v3.02 keittopadan ikkuna
     case 'vedenkeraaja':waterInteract(p);break;   // v3.06
     case 'pelto':case 'kohopenkki':fieldInteract(p);break;   // v3.06 farm.js, v3.07 kohopenkki
-    case 'katiska':katInteract(p);break;case 'savustin':savInteract(p);break;case 'kalanaulakko':nauInteract(p);break;   // v3.06 fish.js
+    case 'kalapoyta':tkTableOpen(p);break;case 'katiska':katInteract(p);break;case 'savustin':savInteract(p);break;case 'kalanaulakko':nauInteract(p);break;   // v3.06 fish.js
     case 'seinasoihtu':case 'soihtuteline':case 'kivisoihtu':torchFuelAdd(p);break;   // v2.91
     case 'sanky':sleepAt(p);break;
     case 'arkku':case 'tynnyri':openChest(p);break;

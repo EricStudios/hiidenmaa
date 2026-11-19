@@ -71,14 +71,14 @@ const ITEMS={
   /* v2.91 PUUKKO JA PIHKANKERÄYS (käyttäjä). Puukko: isku kuin rautamiekalla, mutta ulottuu vain aivan lähelle. Kulho ↔ vesikulho (sama esine, nimi vaihtuu). */
   puukko:{n:'Puukko',w:.5,s:1,c:'#aab6c4',cat:'weapon',kb:.8,dmg:34,dt:'slash',range:1.2,st:5,spd:.3,d:'Lyhyt rautaterä: isku kuin rautamiekalla, mutta ulottuu vain aivan lähelle. PIHKANKERÄYS: osa männyistä ja kuusista kellertää rungosta – mene aivan kiinni ja paina E puukko kädessä, niin kaiverrat pihkakuvion (n. 10 s, jatkuu kesken jääneestä). Kiinnitä sitten kuvion alle kulho: kulho kädessä, naru toisessa kädessä, E. Pihkaa valuu tunnissa puun koon mukaan 10–50 (vain pelin ollessa käynnissä); E irrottaa kulhon ja pihkat. Parempi puukko (taso 3) kaivertaa ja valuttaa 20 % nopeammin.'},
   kulho:{n:'Kulho',w:.4,s:1,c:'#a8743e',cat:'bowl',d:'Puukulho. Täytä vedellä veden ääressä (hiiren vasen kädessä) tai kiinnitä narulla pihkapuuhun kaiverruksen alle.'},
-  vesikulho:{n:'Vesikulho',w:.9,s:1,c:'#5aa0c8',cat:'bowl',d:'Kulhollinen vettä. Hiiren vasen kädessä: juo (vatsakipu menee ohi 5× nopeammin) – tai jos palat, kaada vesi päällesi ja sammuta tuli. Vesi käytetään kerralla. Ole varovainen veden kanssa – vesi ei ole kiinteästi kulhossa kiinni :)'},
+  vesikulho:{n:'Vesikulho',w:.9,s:1,c:'#5aa0c8',cat:'bowl',d:'Kulhollinen vettä. Hiiren vasen kädessä: juo (vatsakipu menee ohi 5× nopeammin) – tai jos palat, kaada vesi päällesi ja sammuta tuli. E taimen, kasvavan puun tai viljelylohkon kohdalla: kastele (seuraava kasvu +5 %, 5 kastelua = +5 % pysyvästi). Vesi käytetään kerralla. Ole varovainen veden kanssa – vesi ei ole kiinteästi kulhossa kiinni :)'},
   /* v3.06 viljely (farm.js): siemenet toiseen käteen */
-  kuusenkapy:{n:'Kuusenkäpy',w:.1,s:20,c:'#7a5634',cat:'offhand',d:'Kuusen siemenkäpy. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö).'},
-  mannynkapy:{n:'Männynkäpy',w:.1,s:20,c:'#8a6a44',cat:'offhand',d:'Männyn siemenkäpy. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö).'},
-  koivunsiemen:{n:'Koivun siemen',w:.05,s:20,c:'#b8a66a',cat:'offhand',d:'Koivun siemenkuoma. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö).'},
-  aarnisiemen:{n:'Aarnipuun siemen',w:.2,s:10,c:'#4a7a3a',cat:'offhand',d:'Harvinainen aarnipuun siemen. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö).'},
-  pihkakapy:{n:'Pihkainen kuusenkäpy',w:.1,s:20,c:'#c08a2a',cat:'offhand',d:'Pihkapuusta pudonnut käpy – siitä kasvaa pihkapuu. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö).'},
-  pihkamannynkapy:{n:'Pihkainen männynkäpy',w:.1,s:20,c:'#d09a3a',cat:'offhand',d:'Pihkapuusta pudonnut käpy – siitä kasvaa pihkapuu. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö).'},
+  kuusenkapy:{n:'Kuusenkäpy',w:.1,s:20,c:'#7a5634',cat:'offhand',d:'Kuusen siemenkäpy. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö) ja siitä vaiheittain isommaksi (joka 5. yö 60 %).'},
+  mannynkapy:{n:'Männynkäpy',w:.1,s:20,c:'#8a6a44',cat:'offhand',d:'Männyn siemenkäpy. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö) ja siitä vaiheittain isommaksi (joka 5. yö 60 %).'},
+  koivunsiemen:{n:'Koivun siemen',w:.05,s:20,c:'#b8a66a',cat:'offhand',d:'Koivun siemenkuoma. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö) ja siitä vaiheittain isommaksi (joka 5. yö 60 %).'},
+  aarnisiemen:{n:'Aarnipuun siemen',w:.2,s:10,c:'#4a7a3a',cat:'offhand',d:'Harvinainen aarnipuun siemen. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö) ja siitä vaiheittain isommaksi (joka 5. yö 60 %).'},
+  pihkakapy:{n:'Pihkainen kuusenkäpy',w:.1,s:20,c:'#c08a2a',cat:'offhand',d:'Pihkapuusta pudonnut käpy – siitä kasvaa pihkapuu. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö) ja siitä vaiheittain isommaksi (joka 5. yö 60 %).'},
+  pihkamannynkapy:{n:'Pihkainen männynkäpy',w:.1,s:20,c:'#d09a3a',cat:'offhand',d:'Pihkapuusta pudonnut käpy – siitä kasvaa pihkapuu. Pidä toisessa kädessä, ota kuokka, kyyristy ja lyö maahan: istutat taimen, joka kasvaa puuksi nukkuessa (30 % / yö) ja siitä vaiheittain isommaksi (joka 5. yö 60 %).'},
   puolukanvarpu:{n:'Puolukan varpu',w:.1,s:20,c:'#4a7a34',cat:'offhand',d:'Juurineen nostettu puolukan varpu. Pidä toisessa kädessä ja paina pellolla E (tai kuokka + kyykky + lyönti maahan). Kasvaa nukkuessa (30 % / yö).'},
   sienirihma:{n:'Sienirihmasto',w:.1,s:20,c:'#e8dcc4',cat:'offhand',d:'Herkkutatin rihmastoa sammalen seassa. Pidä toisessa kädessä ja paina pellolla E (tai kuokka + kyykky + lyönti maahan). Kasvaa nukkuessa (30 % / yö).'},
   kauransiemen:{n:'Kauransiemen',w:.05,s:40,c:'#e0cc8a',cat:'offhand',d:'Villikauran jyviä kylvöön. Pidä toisessa kädessä ja paina pellolla E (tai kuokka + kyykky + lyönti maahan). Kasvaa nukkuessa (30 % / yö).'},
@@ -106,7 +106,19 @@ const ITEMS={
    1,5 keskikokoinen, 2 iso (enintään 2×). Paistetaan nuotiolla/grillillä (COOKABLE, fish.js), savustetaan savustimessa (savukala). */
 const FISH_DEF={ahven:{n:'Ahven',k:1,c:'#7d8c4a',c2:'#d86a2a'},hauki:{n:'Hauki',k:2,c:'#5d7a46',c2:'#c8c070'},lahna:{n:'Lahna',k:1.5,c:'#a8a27a',c2:'#6a6450'},
   silakka:{n:'Silakka',k:1,c:'#9ab0c0',c2:'#e8f0f4'},turska:{n:'Turska',k:1.5,c:'#8a7a5a',c2:'#e0d8c0'},lohi:{n:'Lohi',k:2,c:'#a8b8c4',c2:'#e88a6a'},
-  ruutana:{n:'Ruutana',k:1,c:'#b08a3a',c2:'#e0c070'},suonsilma:{n:'Suonsilmä',k:1.5,c:'#3a4a3a',c2:'#8fe6c8'}};
+  ruutana:{n:'Ruutana',k:1,c:'#b08a3a',c2:'#e0c070'},suonsilma:{n:'Suonsilmä',k:1.5,c:'#3a4a3a',c2:'#8fe6c8'},
+  /* v3.08 käyttäjä: 10 uutta lajia (FISH_B fish.js; kuvakkeen muoto FISH_SHAPE) */
+  kuha:{n:'Kuha',k:1.5,c:'#7a8a6a',c2:'#dfe4d4'},made:{n:'Made',k:1.5,c:'#5a5232',c2:'#b8ac7a'},muikku:{n:'Muikku',k:1,c:'#8fa8b8',c2:'#f0f4f6'},
+  siika:{n:'Siika',k:1.5,c:'#9aaab4',c2:'#eef2f4'},sarki:{n:'Särki',k:1,c:'#8a9aa0',c2:'#e8ecec'},kiiski:{n:'Kiiski',k:1,c:'#7a7448',c2:'#d0c89a'},
+  toutain:{n:'Toutain',k:2,c:'#7e909a',c2:'#e2e8ea'},kampela:{n:'Kampela',k:1,c:'#8a7a5a',c2:'#e8e0cc'},meritaimen:{n:'Meritaimen',k:2,c:'#98a8b4',c2:'#f0e8e0'},
+  suutari:{n:'Suutari',k:1.5,c:'#7a7a2e',c2:'#d8c870'}};
+/* v3.08 lajikohtaiset kuvakkeet: l/h = puolipituus/-korkeus, m = kuviointi (bars juovat, spots vaaleat täplät, dots tummat pilkut, xs ruksit, line kylkiviiva,
+   mottle laikut), fin = evien väri, eye = silmän väri, sn: 'duck' hauen kuono, bar = viiksisäie, spine = piikkievä, eel = ankeriasmainen, flat = kampela, glow = hehkuva silmä */
+const FISH_SHAPE={ahven:{l:14,h:7,m:'bars',fin:'#d84a2a',spine:1},hauki:{l:18,h:4.6,m:'spots',sn:'duck'},lahna:{l:12.5,h:9.5,m:'line'},silakka:{l:15,h:4.4,m:'line'},
+  turska:{l:15,h:6.5,m:'dots',bar:1},lohi:{l:16,h:6,m:'xs',fin:'#c87a6a'},ruutana:{l:12.5,h:8.5,fin:'#c8902a'},suonsilma:{l:14,h:6.5,glow:1},
+  kuha:{l:17,h:5.5,m:'bars',eye:'#cfe0e0',spine:1},made:{l:19,h:3.6,m:'mottle',bar:1,eel:1},muikku:{l:12,h:3.8,m:'line'},siika:{l:15,h:5.5,m:'line'},
+  sarki:{l:13,h:6,fin:'#d8442a',eye:'#d8442a',m:'line'},kiiski:{l:10.5,h:5.5,m:'dots',spine:1},toutain:{l:16,h:7,m:'line',fin:'#b8a8a0'},kampela:{l:13,h:10,m:'dots',flat:1},
+  meritaimen:{l:16,h:6,m:'xs'},suutari:{l:13,h:7.5,eye:'#d8442a',fin:'#8a8a3a'}};
 for(const [id,f] of Object.entries(FISH_DEF)){const k=f.k,big=k>=2?' Iso kala – täyttää kaksinkertaisesti.':k>1?' Keskikokoinen kala.':'';
   ITEMS[id]={n:f.n,w:k>=2?1.5:k>1?.8:.3,s:20,c:f.c,fishI:1,food:{h:Math.round(5*k),raw:true},d:`Tuore ${f.n.toLowerCase()}. Paista nuotiolla tai grillillä, savusta savustimessa tai keitä padassa.${big}`};
   ITEMS[id+'p']={n:'Paistettu '+f.n.toLowerCase(),w:k>=2?1.2:k>1?.6:.25,s:20,c:f.c,fishI:2,food:{h:Math.round(25*k),hp:Math.round(12*k)},d:`Nuotiolla paistettu ${f.n.toLowerCase()}.${big}`};}
@@ -118,12 +130,12 @@ Object.assign(ITEMS,{
   onki:{n:'Onki',w:1,s:1,c:'#9a7a4a',cat:'rod',dmg:2,dt:'blunt',range:1.5,st:3,spd:.6,rod:{k:1,ten:1},d:'Puusta ja narusta. Vasen heittää (katso veteen), vasen uudelleen kelaa sisään. Tärpätessä paina vasenta nopeasti; ison kalan väsytys: pidä vasenta pohjassa ja päästä irti, kun siima kiristyy.'},
   kuparivapa:{n:'Kuparivapa',w:1.2,s:1,c:'#d98a4e',cat:'rod',dmg:2,dt:'blunt',range:1.5,st:3,spd:.6,rod:{k:.8,ten:1.25},d:'Kuparikelalla: tärppää 20 % useammin ja siima kestää enemmän.'},
   hiidenvapa:{n:'Hiidenvapa',w:1.2,s:1,c:'#5fe6d9',cat:'rod',dmg:2,dt:'blunt',range:1.5,st:3,spd:.6,rod:{k:.65,ten:1.5},rar:'rare',d:'Hiidenkiven siruista taottu vapa: tärppää 35 % useammin, kestävin siima. (Harvinainen)'},
-  mato:{n:'Kastemato',w:.02,s:50,c:'#c87a7a',d:'Syötti: onkiessa käytetään automaattisesti (tärppää 25 % useammin). Voi kadota koukusta ilman saalista. Löytyy joskus maata kaivaessa tai kuokkiessa (2 %).'},
+  mato:{n:'Kastemato',w:.02,s:50,c:'#c87a7a',cat:'offhand',d:'Syötti: vapa kädessä E laittaa madon koukkuun (tärppi noin kolmanneksen useammin). Voi kadota koukusta ilman saalista. Viljelyyn: pidä toisessa kädessä ja paina E taimen, kasvavan puun tai viljelylohkon kohdalla (maassa kyykyssä) – seuraava kasvu +5 %, kaksi matoa samaan kohtaan = +5 % pysyvästi. Löytyy joskus maata kaivaessa tai kuokkiessa (2 %).'},
   saapas:{n:'Vanha saapas',w:.8,s:5,c:'#4a3a2a',d:'Ongesta noussut märkä saapas. Työpenkillä sen voi purkaa nahaksi.'},
   pulloposti:{n:'Pullopostia',w:.2,s:1,c:'#7ab8a0',use:1,d:'Pullossa on vanha kirje. Käytä (E reppussa / napsauta) lukeaksesi sen.'},
   ruostavain:{n:'Ruostunut avain',w:.1,s:1,c:'#9a5a3a',d:'Ongesta noussut ruosteinen avain. Se avaa jossain rannalla tai luodolla puoliksi uppoavan arkun.'},
   hiidensiru:{n:'Hiidenkiven siru',w:.1,s:20,c:'#5fe6d9',rar:'rare',d:'Pieni hohtava siru. Siruista ei saa ehjää hiidenkiveä, mutta kolmesta voi takoa hiidenvavan. (Harvinainen)'},
-  kalakirja:{n:'Kalastajan kirja',w:.3,s:1,c:'#6a4a2a',use:1,d:'Muistiinpanot saaliistasi: lajit, ennätyspainot, vedet, parhaat ajat ja säät. Käytä avataksesi.'},
+  kalakirja:{n:'Kalastajan kirja',w:.3,s:1,c:'#6a4a2a',cat:'offhand',d:'Nahkakantinen kirja saaliistasi: lajit kuvineen, kalojen arvo, toivekalat, vedet ja kalastustietoa. Vasempaan käteen: vasen klikkaus avaa (kun oikea käsi on tyhjä), pikanäppäin K avaa aina.'},   // v3.15
 });
 // lvl = pelaajan taso, jolla ohje aukeaa (ei kenttää = alusta asti). alku:1 = Alkupeli-välilehti.
 const RECIPES=[
@@ -186,13 +198,108 @@ const RECIPES=[
   {id:'hiidenmiekka',st:'ahjo',req:{rauta:10,hiidenkivi:3,sydan:1},lvl:12},
   {id:'hiidenpanssari',st:'ahjo',req:{rauta:14,hiidenkivi:4,nahka:8},lvl:14},
 ];
+/* v3.14 KALASTUSVARUSTEET (käyttäjä; logiikka tackle.js). Vapa = RUNKO (onki / kuparivapa / hiidenvapa), johon Kalastajan pöydällä kiinnitetään siima, koukku,
+   kela ja koho (+ viehe, kun vavassa on kela). Kela tekee vavasta VIRVELIN (heitto 6–30 m, kelaus pohjassa, tärppi kelatessa). Osat ovat esineitä (tk = osan tyyppi).
+   Rungon arvot: k = tärppiväli (pienempi = useammin), big = isojen kalojen keskipaino +%, bw = isojen lajien yleisyys, ten = siiman kestävyyden kerroin. */
+Object.assign(ITEMS.onki,{rod:{k:1,ten:1,big:0,bw:1},d:'Puinen vavan runko. Osat (siima, koukku, kela, koho, viehe) vaihdetaan Kalastajan pöydällä. Vasen heittää veteen, vasen uudelleen kelaa sisään; tärpätessä paina vasenta. Mato: E vapa kädessä.'});
+Object.assign(ITEMS.kuparivapa,{rod:{k:.95,ten:1.1,big:.1,bw:1.1},d:'Kuparisilattu runko: isot kalat keskimäärin 10 % painavampia ja isot lajit hieman yleisempiä. Osat vaihdetaan Kalastajan pöydällä.'});
+Object.assign(ITEMS.hiidenvapa,{rod:{k:.9,ten:1.2,big:.2,bw:1.2},d:'Hiidenkiven siruista taottu runko: isot kalat keskimäärin 20 % painavampia, isot lajit yleisempiä ja siima kestää enemmän. (Harvinainen)'});
+const TK_LINE={pellavasiima:{ten:1,dur:12,vis:1,col:0xe0d8c0},jannesiima:{ten:1.25,dur:25,vis:1.06,col:0xc8a070},punottusiima:{ten:1.55,dur:45,vis:1.12,col:0x6a8a5a},hiidensiima:{ten:1.9,dur:80,vis:1.18,col:0x5fe6d9}};
+const TK_HOOK={pienikoukku:{big:.85,small:1.2,hk:.65,steal:1},isokoukku:{big:1.3,small:.7,hk:.75,steal:1},vakakoukku:{big:1.05,small:1,hk:.88,steal:.45,keep:1}};
+const TK_REEL={kuparikela:{cast:22,spd:1.25,fk:1.15,tk:1,col:0xd98a4e},hiisikela:{cast:30,spd:1.6,fk:1.3,tk:.85,col:0x5fe6d9}};
+const TK_FLOAT={puukoho:{win:0,steal:1,col:0xd83a2a},korkkikoho:{win:.15,steal:.8,col:0xe8b04a},hehkukoho:{win:.05,night:.3,steal:1,col:0x7af0d0,glow:1}};
+/* Viehteet: w = vesi (järvi/meri/suo), ph = [aamu, päivä, ilta, yö], wx = sää, light = valo, jossa paras (bright kirkas päivä, dim hämärä/pilvi, dark yö/sumu), best = parhaat kalat ×2,2.
+   Pikkukalat (koko 1, enintään ~0,7 kg) ×0,3 – viehe ei sovi niille. Viehteet eivät kulu; matalassa voivat jäädä kiinni (viehe + siima menetetään, hyvin harvoin). */
+const TK_LURE={
+  kuparilusikka:{col:0xd98a4e,c2:0xf0c080,sh:'spoon',best:['ahven','hauki','meritaimen'],w:{lake:1.2,sea:1,bog:.7},ph:[1.1,1.2,1,.6],wx:{selkea:1.3,pilvi:.9,sade:.8},light:'bright',d:'Kirkas kuparinen lusikka välkehtii auringossa.'},
+  rautapilkki:{col:0x8a9098,c2:0xc8d0d8,sh:'jig',best:['turska','kuha','made'],w:{lake:.9,sea:1.4,bog:.6},ph:[1,1,1,1.1],wx:{tuuli:1.2,myrsky:1.3,selkea:.9},light:null,d:'Raskas rautapilkki uppoaa syvälle – merellä omimmillaan.'},
+  puuvaappu:{col:0x6a8a3a,c2:0xe8d890,sh:'plug',best:['hauki','kuha','toutain'],w:{lake:1.3,sea:.8,bog:1},ph:[1.3,.8,1.3,.8],wx:{pilvi:1.3,tihku:1.2,selkea:.85},light:'dim',d:'Veistetty ja maalattu vaappu ui kuin vaivainen kala.'},
+  hiidenhohtoviehe:{col:0x2a6a68,c2:0x5fe6d9,sh:'spoon',glow:1,best:['suonsilma','made','lohi'],w:{lake:1,sea:1.1,bog:1.3},ph:[.8,.6,1.1,1.6],wx:{sumu:1.5,sade:1.2,selkea:.8},light:'dark',d:'Hiidenkiven sirulla koristeltu viehe hohtaa pimeässä.'},
+  pohjolanlusikka:{col:0xc8ccd0,c2:0xd98a4e,sh:'spoon',thin:1,best:['lohi','meritaimen','siika'],w:{lake:.9,sea:1.3,bog:.6},ph:[1.4,.8,1.2,.7],wx:{tuuli:1.3,sade:1.3,tihku:1.2,selkea:.8},light:'dim',d:'Ohut kaksivärinen lusikka pohjoisen koskien tapaan – lohikalojen herkku.'},
+  valkelippa:{col:0xe0e4e8,c2:0xd84a3a,sh:'spin',best:['ahven','toutain','siika'],w:{lake:1.3,sea:.9,bog:.8},ph:[1,1.3,1,.4],wx:{selkea:1.3},light:'bright',d:'Pyörivä lippa ja lasihelmi – välke näkyy kauas kirkkaassa vedessä.'},
+  verilusikka:{col:0xa82a22,c2:0xe8d0a0,sh:'spoon',best:['hauki','suutari','kuha'],w:{lake:1.1,sea:.8,bog:1.4},ph:[1,1,1.2,.9],wx:{sade:1.3,sumu:1.2,pilvi:1.1},light:'dim',d:'Puolukalla punaiseksi värjätty lusikka erottuu sameassa vedessä.'},
+  pintavaappu:{col:0x3a3a2a,c2:0xd8c8a0,sh:'plug',top:1,best:['hauki','toutain','meritaimen'],w:{lake:1.3,sea:.9,bog:1},ph:[1.4,.6,1.5,.8],wx:{selkea:1.1,tuuli:.6,myrsky:.5},light:null,d:'Pinnalla pulputtava sulkavaappu – tyynellä säällä aamuin illoin.'},
+  nahkajigi:{col:0x8a5a32,c2:0xd8a060,sh:'jig',soft:1,best:['kuha','ahven','kampela'],w:{lake:1.2,sea:1.1,bog:.9},ph:[1,1,1.1,1.2],wx:{pilvi:1.2,tihku:1.1},light:null,d:'Pehmeä nahkajigi pomppii pohjaa pitkin.'}};
+/* Nimetyt yhdistelmät (pieni etu): osat = vaaditut (taulukko = jokin näistä); rod = runko, reel 0 = ei kelaa. */
+const TK_COMBOS=[
+  {id:'perinne',n:'Perinneonki',need:{rod:['onki'],line:['pellavasiima'],hook:['pienikoukku'],float:['puukoho'],reel:[0]},fx:{k:.92},t:'tärppi 8 % useammin'},
+  {id:'yo',n:'Yön vartija',need:{float:['hehkukoho'],line:['jannesiima','punottusiima'],hook:['isokoukku','vakakoukku']},fx:{win:.12},t:'tärppi-ikkuna +0,12 s'},
+  {id:'suo',n:'Suonkulkija',need:{float:['korkkikoho'],line:['jannesiima'],hook:['pienikoukku','vakakoukku']},fx:{steal:.7},t:'syötti katoaa 30 % harvemmin'},
+  {id:'hauki',n:'Haukimiehen virveli',need:{line:['punottusiima','hiidensiima'],hook:['vakakoukku'],lure:['puuvaappu','verilusikka','pintavaappu']},fx:{big:.05},t:'isot kalat +5 %'},
+  {id:'meri',n:'Merikarhu',need:{line:['punottusiima','hiidensiima'],hook:['isokoukku'],lure:['rautapilkki']},fx:{ten:.1},t:'siima kestää +10 %'},
+  {id:'kupari',n:'Kuparikuningas',need:{rod:['kuparivapa'],reel:['kuparikela'],lure:['kuparilusikka']},fx:{k:.92},t:'tärppi 8 % useammin'},
+  {id:'lohi',n:'Lohiretki',need:{line:['punottusiima','hiidensiima'],hook:['vakakoukku','isokoukku'],lure:['pohjolanlusikka']},fx:{hk:.08,ten:.05},t:'koukkuun tarttuu 8 % varmemmin, siima +5 %'},
+  {id:'hiisi',n:'Hiiden valta',need:{rod:['hiidenvapa'],reel:['hiisikela'],line:['hiidensiima'],lure:['hiidenhohtoviehe']},fx:{big:.05,ten:.1},t:'isot kalat +5 %, siima +10 %'}];
+const TK_SLOTS=[['line','Siima',TK_LINE],['hook','Koukku',TK_HOOK],['reel','Kela',TK_REEL],['float','Koho',TK_FLOAT],['lure','Viehe',TK_LURE]];
+const TK_RIG0={line:'pellavasiima',lw:1,hook:'pienikoukku',reel:null,float:'puukoho',lure:null,bait:0};   // uusi tai vanha vapa: pellava + pieni koukku + puukoho
+const PAKKI_SLOTS=[12,16,20,24],PAKKI_UP=[null,{puu:4,kupari:2},{rauta:3,nahka:2},{hiidensiru:2,rauta:2}],PAKKI_COL=[0x6a4a2a,0x2a5a7a,0x7a2a2a,0x2a6a5a];
+Object.assign(ITEMS,{
+  pellavasiima:{n:'Pellavasiima',w:.05,s:10,c:'#e0d8c0',tk:'line',d:'Kevyt ja huomaamaton siima. Ei kestä isojen kalojen rynnistystä kauan.'},
+  jannesiima:{n:'Jännesiima',w:.05,s:10,c:'#c8a070',tk:'line',d:'Kuivatusta jänteestä kierretty sitkeä siima.'},
+  punottusiima:{n:'Punottu siima',w:.05,s:10,c:'#6a8a5a',tk:'line',d:'Kolmesta narusta punottu ja pihkalla käsitelty vahva siima.'},
+  hiidensiima:{n:'Hiidensiima',w:.05,s:10,c:'#5fe6d9',tk:'line',rar:'rare',d:'Hiidenkiven pölyllä kyllästetty siima kestää lähes mitä tahansa – mutta kalat näkevät sen. (Harvinainen)'},
+  pienikoukku:{n:'Pieni koukku',w:.02,s:20,c:'#d8d0c0',tk:'hook',d:'Luusta veistetty pieni koukku: pikkukalat tarttuvat helposti, isot pääsevät useammin.'},
+  isokoukku:{n:'Iso koukku',w:.03,s:20,c:'#d98a4e',tk:'hook',d:'Kuparinen iso koukku: isot kalat yleisempiä, pikkukalat jäävät useammin tarttumatta.'},
+  vakakoukku:{n:'Väkäkoukku',w:.03,s:20,c:'#8a9098',tk:'hook',d:'Rautainen väkäkoukku: kala ei irtoa ja syötti pysyy paremmin.'},
+  kuparikela:{n:'Kuparikela',w:.4,s:1,c:'#d98a4e',tk:'reel',d:'Kela tekee vavasta virvelin: heitto jopa 22 m vieheellä ja kelaus vasemmalla.'},
+  hiisikela:{n:'Hiisikela',w:.4,s:1,c:'#5fe6d9',tk:'reel',rar:'rare',d:'Nopea ja tasainen kela: heitto jopa 30 m, kelaus ja väsytys selvästi tehokkaampia. (Harvinainen)'},
+  puukoho:{n:'Puukoho',w:.02,s:20,c:'#d83a2a',tk:'float',d:'Tavallinen punavalkoinen koho.'},
+  korkkikoho:{n:'Korkkikoho',w:.02,s:20,c:'#e8b04a',tk:'float',d:'Herkkä kaarnakoho näyttää varovaisenkin tärpin: tärppi-ikkuna pidempi.'},
+  hehkukoho:{n:'Hehkukoho',w:.02,s:20,c:'#7af0d0',tk:'float',rar:'unc',d:'Hiidensirulla hohtava koho näkyy yöllä: yöllä tärppi-ikkuna selvästi pidempi.'},
+  kalapakki:{n:'Kalastuspakki',w:20,s:1,c:'#6a4a2a',cat:'offhand',tk:'pakki',d:'Vain kalastustarvikkeille (vavat, osat, viehteet, madot, perkeet, kirja). Vasemmassa kädessä: vasen klikkaus laskee pakin maahan tai Kalastajan pöydän pakkipaikalle. Maassa E avaa, klikkaus nostaa. Vain yksi pakki mukana kerrallaan.'},
+  kalafilee:{n:'Kalafilee',w:.2,s:30,c:'#e8b0a0',food:{h:4,raw:true},d:'Perattu kalafilee. Paista nuotiolla tai grillillä.'},
+  filepaisti:{n:'Paistettu filee',w:.15,s:30,c:'#c8803a',food:{h:22,hp:12,st:5},d:'Nuotiolla paistettu kalafilee – kevyt ja ravitseva.'},
+  perkeet:{n:'Perkeet',w:.1,s:50,c:'#8a5a4a',d:'Kalan perkeet. Katiskan syötti: houkuttelee kaloja paremmin kuin mato.'}});
+for(const [id,L] of Object.entries(TK_LURE)){const nm={kuparilusikka:'Kuparilusikka',rautapilkki:'Rautapilkki',puuvaappu:'Puuvaappu',hiidenhohtoviehe:'Hiidenhohtoviehe',pohjolanlusikka:'Pohjolan lusikka',
+  valkelippa:'Välkelippa',verilusikka:'Verilusikka',pintavaappu:'Pintavaappu',nahkajigi:'Nahkajigi'}[id];ITEMS[id]={n:nm,w:.05,s:10,c:'#'+L.col.toString(16).padStart(6,'0'),tk:'lure',rar:id==='hiidenhohtoviehe'?'rare':undefined,d:L.d+' Viehe kiinnitetään virveliin (vapa + kela) Kalastajan pöydällä.'};}
+RECIPES.push({id:'kalapakki',st:'kalapoyta',req:{puu:8,nahka:2},lvl:3},
+  {id:'pellavasiima',st:'kalapoyta',req:{naru:2},lvl:3},{id:'jannesiima',st:'kalapoyta',req:{nahka:1,naru:1},lvl:4},{id:'punottusiima',st:'kalapoyta',req:{naru:3,pihka:1},lvl:6},{id:'hiidensiima',st:'kalapoyta',req:{hiidensiru:1,naru:2},lvl:9},
+  {id:'pienikoukku',st:'kalapoyta',req:{luu:1},lvl:3},{id:'isokoukku',st:'kalapoyta',req:{kupari:1},lvl:4},{id:'vakakoukku',st:'kalapoyta',req:{rauta:1},lvl:6},
+  {id:'kuparikela',st:'kalapoyta',req:{kupari:4,puu:1},lvl:5},{id:'hiisikela',st:'kalapoyta',req:{hiidensiru:2,rauta:2},lvl:9},
+  {id:'puukoho',st:'kalapoyta',req:{puu:1},lvl:3},{id:'korkkikoho',st:'kalapoyta',req:{puu:1,pihka:1},lvl:4},{id:'hehkukoho',st:'kalapoyta',req:{hiidensiru:1,pihka:1},lvl:7},
+  {id:'kuparilusikka',st:'kalapoyta',req:{kupari:1},lvl:5},{id:'rautapilkki',st:'kalapoyta',req:{rauta:1},lvl:6},{id:'puuvaappu',st:'kalapoyta',req:{puu:1,pihka:1},lvl:5},
+  {id:'hiidenhohtoviehe',st:'kalapoyta',req:{hiidensiru:1,kupari:1},lvl:9},{id:'pohjolanlusikka',st:'kalapoyta',req:{kupari:1,rauta:1},lvl:7},{id:'valkelippa',st:'kalapoyta',req:{kupari:1,lasi:1},lvl:6},
+  {id:'verilusikka',st:'kalapoyta',req:{kupari:1,marjat:3},lvl:5},{id:'pintavaappu',st:'kalapoyta',req:{puu:2,sulka:1},lvl:6},{id:'nahkajigi',st:'kalapoyta',req:{nahka:1,rauta:1},lvl:6});
 const RECIPE_BY={};RECIPES.forEach(r=>RECIPE_BY[r.id]=r);
-const STATION_NAME={tyopenkki:'Työpenkki',nuotio:'Nuotio',grilli:'Grillinuotio',ahjo:'Ahjo',pata:'Keittopata'};   // v3.02 pata: pataruoat   // v3.00 grilli: varras ja juhla-ateria
+const STATION_NAME={tyopenkki:'Työpenkki',nuotio:'Nuotio',grilli:'Grillinuotio',ahjo:'Ahjo',pata:'Keittopata',kalapoyta:'Kalastajan pöytä'};   // v3.02 pata: pataruoat   // v3.00 grilli: varras ja juhla-ateria
 // Valmistusvälilehdet: Alkupeli (alku:1) on oletus, muut ryhmitellään esineen tyypin mukaan.
-const CRAFT_CATS=[['alku','Alkupeli'],['tyokalut','Työkalut'],['aseet','Aseet'],['varusteet','Varusteet'],['ruoka','Ruoka'],['muut','Muut']];
-function recipeCat(r){const d=ITEMS[r.id];if(d.food)return 'ruoka';if(d.cat==='armor'||d.cat==='shield')return 'varusteet';if(d.cat==='weapon'&&(d.chop||d.pick))return 'tyokalut';if(d.cat==='shovel'||d.cat==='hammer')return 'tyokalut';if(d.cat==='weapon'||d.cat==='bow'||r.id==='nuolet'||r.id==='tulinuolet')return 'aseet';return 'muut';}
+/* v3.08 käyttäjä: uudet kategoriat Nuolet, Kalastus, Viljely ja Pataruoat (ennen Aseet/Muut/Ruoka) */
+const CRAFT_CATS=[['alku','Alkupeli'],['tyokalut','Työkalut'],['aseet','Aseet'],['nuolet','Nuolet'],['varusteet','Varusteet'],['ruoka','Ruoka'],['pata','Pataruoat'],['kalastus','Kalastus'],['viljely','Viljely'],['muut','Muut']];
+function recipeCat(r){const d=ITEMS[r.id];if(d.food)return r.st==='pata'?'pata':'ruoka';if(/nuolet$/.test(r.id))return 'nuolet';if(d.cat==='rod'||d.tk||r.id==='kalakirja')return 'kalastus';if(typeof SEEDS!=='undefined'?SEEDS[r.id]:/varpu|rihma|siemen/.test(r.id))return 'viljely';if(d.cat==='armor'||d.cat==='shield')return 'varusteet';if(d.cat==='weapon'&&(d.chop||d.pick))return 'tyokalut';if(d.cat==='shovel'||d.cat==='hammer')return 'tyokalut';if(d.cat==='weapon'||d.cat==='bow'||r.id==='nuolet'||r.id==='tulinuolet')return 'aseet';return 'muut';}
 
 /* ---------------- ICONS ---------------- */
+// v3.08 lajikohtainen kalakuvake (myös paistettu: ruskea, grillijuovat)
+function fishIcon(g,id,d,circ,line){if(typeof fishArtDraw==='function'){fishArtDraw(g,id.replace(/p$/,''),21,26,17,{ck:d.fishI===2,icon:1,rot:-.35});return;}   /* v3.15 piirretty kuvitus (fishbook.js) */const sp=id.replace(/p$/,''),f=FISH_DEF[sp],S=FISH_SHAPE[sp],ck=d.fishI===2,body=ck?'#a8642e':f.c,belly=ck?'#d89a5a':f.c2,fin=ck?'#7a4420':S.fin||body,ol='#1e1a14';
+  const L=S.l,H=S.h,cx=S.flat?0:-2;g.save();g.translate(24,25);g.rotate(S.flat?-.15:S.eel?-.2:-.35);g.lineJoin='round';
+  const outline=()=>{g.beginPath();if(S.eel){g.moveTo(-L,0);g.quadraticCurveTo(-L+3,-H,0,-H*.9);g.quadraticCurveTo(L*.8,-H*.7,L+2,0);g.quadraticCurveTo(L*.8,H*.7,0,H*.9);g.quadraticCurveTo(-L+3,H,-L,0);}
+    else g.ellipse(cx,0,L,H,0,0,TAU);};
+  // pyrstö ja evät (takana)
+  g.fillStyle=fin;if(!S.eel&&!S.flat){g.beginPath();g.moveTo(cx+L-3,0);g.lineTo(cx+L+7,-H*.95-1);g.lineTo(cx+L+4,0);g.lineTo(cx+L+7,H*.95+1);g.closePath();g.fill();g.strokeStyle=ol;g.lineWidth=.9;g.stroke();}
+  if(S.flat){g.beginPath();g.moveTo(L-1,0);g.lineTo(L+6,-4);g.lineTo(L+6,4);g.closePath();g.fill();g.globalAlpha=.75;g.beginPath();g.ellipse(0,0,L+2.2,H+2.2,0,0,TAU);g.fill();g.globalAlpha=1;}
+  if(S.eel){g.globalAlpha=.8;g.beginPath();g.moveTo(-2,-H*.85);g.quadraticCurveTo(L*.6,-H*1.5,L+2,0);g.quadraticCurveTo(L*.6,-H*.6,-2,-H*.85);g.fill();g.globalAlpha=1;}
+  else if(!S.flat){if(S.spine){g.beginPath();g.moveTo(cx-L*.45,-H*.8);for(let i=0;i<5;i++){g.lineTo(cx-L*.4+i*L*.13,-H-4.2);g.lineTo(cx-L*.34+i*L*.13,-H*.88);}g.lineTo(cx+L*.25,-H*.8);g.closePath();g.fill();g.strokeStyle=ol;g.lineWidth=.7;g.stroke();}
+    else{g.beginPath();g.moveTo(cx-L*.25,-H*.85);g.quadraticCurveTo(cx,-H-4.5,cx+L*.3,-H*.85);g.closePath();g.fill();}
+    g.beginPath();g.moveTo(cx+L*.25,H*.8);g.lineTo(cx+L*.4,H+3);g.lineTo(cx+L*.5,H*.75);g.closePath();g.fill();}
+  // runko + vatsa
+  g.fillStyle=body;outline();g.fill();g.save();outline();g.clip();g.fillStyle=belly;g.beginPath();g.ellipse(cx,H*.62,L*1.05,H*.6,0,0,TAU);g.fill();
+  const r=mulberry32(sp.length*977+sp.charCodeAt(0));g.fillStyle='rgba(20,18,12,.55)';
+  if(S.m==='bars')for(let i=0;i<6;i++){g.beginPath();g.ellipse(cx-L*.55+i*L*.24,-H*.25,1.4,H*.75,0,0,TAU);g.fill();}
+  if(S.m==='spots'){g.fillStyle='rgba(230,226,170,.75)';for(let i=0;i<14;i++)circ(cx+(r()-.5)*L*1.6,(r()-.7)*H*1.1,.9+r()*.6,g.fillStyle);}
+  if(S.m==='dots')for(let i=0;i<16;i++)circ(cx+(r()-.5)*L*1.6,(r()-.75)*H*1.1,.55+r()*.6,'rgba(30,24,14,.6)');
+  if(S.m==='xs'){g.strokeStyle='rgba(15,12,10,.75)';g.lineWidth=.8;for(let i=0;i<10;i++){const x=cx+(r()-.45)*L*1.3,y=(r()-.8)*H*.9;g.beginPath();g.moveTo(x-1,y-1);g.lineTo(x+1,y+1);g.moveTo(x+1,y-1);g.lineTo(x-1,y+1);g.stroke();}}
+  if(S.m==='mottle')for(let i=0;i<9;i++){g.beginPath();g.ellipse(cx+(r()-.5)*L*1.6,(r()-.6)*H,2+r()*2,1.2+r(),r()*3,0,TAU);g.fill();}
+  if(S.m==='line'){g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=1;g.beginPath();g.moveTo(cx-L*.75,-H*.1);g.quadraticCurveTo(cx,H*.05,cx+L*.85,-H*.05);g.stroke();}
+  if(ck)for(let i=-1;i<2;i++)line(cx-4+i*6,-H+1,cx-2+i*6,H-1,1.4,'#5a2a0c');
+  g.restore();g.strokeStyle=ol;g.lineWidth=1.2;outline();g.stroke();
+  // pää: silmä(t), suu, viiksisäie
+  const ex=S.flat?-L*.45:cx-L+(S.eel?4:4.2),ey=S.flat?-H*.35:-H*.2;
+  if(S.flat){circ(ex,ey,1.5,'#f4f0e0');circ(ex,ey,.75,'#111');circ(ex+3.4,ey-1.8,1.5,'#f4f0e0');circ(ex+3.4,ey-1.8,.75,'#111');}
+  else{circ(ex,ey,S.eel?1.3:1.8,ck?'#3a2010':S.eye||'#f4f0e0');if(!ck)circ(ex,ey,S.eel?.6:.9,'#111');}
+  if(S.glow&&!ck){g.globalAlpha=.6;circ(ex,ey,4,'#8fe6c8');g.globalAlpha=1;}
+  if(S.sn==='duck'){g.fillStyle=body;g.beginPath();g.moveTo(cx-L+1,-1.6);g.lineTo(cx-L-4.5,-.6);g.lineTo(cx-L-4.5,1);g.lineTo(cx-L+1,1.8);g.closePath();g.fill();g.strokeStyle=ol;g.lineWidth=.9;g.stroke();}
+  if(S.bar)line(cx-L+1.5,H*.35,cx-L-1,H+2.5,1,ol);
+  line(cx-L+(S.sn?-3:.6),.9,cx-L+3.4,1.6,.8,ol);
+  g.restore();}
 const ICON={};const ICONC={};   // v1.34: kuvakkeiden canvasit (maassa olevat 3D-kuvakkeet)
 function icon(id){
   if(ICON[id])return ICON[id];
@@ -201,7 +308,9 @@ function icon(id){
   const poly=(pts,col,out)=>{g.fillStyle=col;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();g.fill();if(out){g.strokeStyle=out;g.lineWidth=1.5;g.stroke();}};
   const circ=(x,y,r,col,out)=>{g.fillStyle=col;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();if(out){g.strokeStyle=out;g.lineWidth=1.5;g.stroke();}};
   const W='#8a5a32';
-  if(d&&d.fishI){const f=FISH_DEF[id.replace(/p$/,'')]||{c:'#a8742e',c2:'#e0b060'},ck=d.fishI===2,sm=d.fishI===3,body=sm?'#a8742e':ck?'#a8642e':f.c,belly=sm?'#d8a050':ck?'#d89a5a':f.c2;
+  if(d&&d.fishI&&FISH_SHAPE[id.replace(/p$/,'')]){fishIcon(g,id,d,circ,line);}
+  else if(d&&(d.tk||id==='kalafilee'||id==='filepaisti'||id==='perkeet')&&typeof tkIcon==='function')tkIcon(g,id,d,circ,line,poly);   // v3.14 kalastusvarusteet (tackle.js)
+  else if(d&&d.fishI){const f=FISH_DEF[id.replace(/p$/,'')]||{c:'#a8742e',c2:'#e0b060'},ck=d.fishI===2,sm=d.fishI===3,body=sm?'#a8742e':ck?'#a8642e':f.c,belly=sm?'#d8a050':ck?'#d89a5a':f.c2;
     g.save();g.translate(24,25);g.rotate(-.35);g.fillStyle=body;g.beginPath();g.ellipse(-2,0,15,7,0,0,TAU);g.fill();g.fillStyle=belly;g.beginPath();g.ellipse(-2,2.5,12,3.5,0,0,TAU);g.fill();
     g.fillStyle=body;g.beginPath();g.moveTo(11,0);g.lineTo(21,-7);g.lineTo(19,0);g.lineTo(21,7);g.closePath();g.fill();g.strokeStyle='#1e1a14';g.lineWidth=1.2;g.beginPath();g.ellipse(-2,0,15,7,0,0,TAU);g.stroke();
     circ(-11,-1.5,1.8,ck||sm?'#3a2010':'#f4f0e0');if(!ck&&!sm)circ(-11,-1.5,.9,'#111');if(ck||sm){line(-6,-5,-4,5,1.2,'#6a3a14');line(0,-6,2,5,1.2,'#6a3a14');line(6,-5,7,4,1.2,'#6a3a14');}

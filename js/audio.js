@@ -98,7 +98,8 @@ function creLpf(k){return 15000*Math.pow(1-k,4)+500;}
 function creDistFx(v,d){const k=v.tg?tgDistK(d):creDistK(d,v.far,v.rk),now=actx.currentTime;if(v.df)v.df.frequency.setTargetAtTime(creLpf(k),now,.1);
   if(v.dg)v.dg.gain.setTargetAtTime(1-(v.tg?TG_DG:.3)*k,now,.1);if(v.lg)v.lg.gain.setTargetAtTime(30*k,now,.2);if(v.sdo)v.sdo.gain.setTargetAtTime(.08+1.8*k,now,.1);}
 const CRE_PRI={idle:1,chase:2,aggro:3,hurt:4,death:5},CRE_G={idle:.75,chase:.9,aggro:1,hurt:1,death:1};
-const CRE_VK=.8;   // v2.24 (käyttäjä): kaikki olentojen äänet 20 % hiljempaa
+const CRE_VK=.8,CRE_TYPE_V={metso:.6};   // v3.08 käyttäjä: metson äänet −40 %
+   // v2.24 (käyttäjä): kaikki olentojen äänet 20 % hiljempaa
 // Kaiku (vain ulottuvuuksien ja luolaston olennoille m.dun): yksi yhteinen ConvolverNode + proseduraalinen vastaus (1,2 s; ConvolverNode vaatii saman näytetaajuuden kuin ääni-AudioContext),
 // pimeä (alipäästö 3,2 kHz). Kytkeytyy vain kun jokin kaiullinen ääni soi ja irtoaa 3 s sen jälkeen → ei kuormaa maailmassa.
 function creRevMake(a){if(CRE.rev)return CRE.rev;const sr=a.sampleRate,len=Math.floor(sr*1.2),buf=a.createBuffer(2,len,sr);
@@ -152,7 +153,7 @@ function creSnd(m,kind,o){if(!m)return false;if(kind==='idle'&&!realmIdleOk(m))r
   const src=a.createBufferSource(),g=a.createGain(),pn=a.createPanner();src.buffer=B;src.playbackRate.value=rate;
   const far=!ec&&creIsFar(name),md=Math.sqrt(dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)),rk=creRK(m.type,kind,far);
   pn.panningModel='equalpower';pn.distanceModel='inverse';pn.refDistance=(far?10:boss?6.4:2.4)*rk*SND_DIST_K;pn.maxDistance=(far?220:120)*rk*SND_DIST_K;pn.rolloffFactor=ec?.7:far?.8:1.1;
-  g.gain.value=(CRE_G[kind]||1)*(o&&o.v||1)*CRE_VK*(CRE_WOLF.has(m.type)&&CRE_WOLF_V[kind]||1)*(CRE_WOLF.has(m.type)&&far&&kind==='idle'?WOLF_HOWL_V:1);   /* v2.25 sudet; v2.57 ulvonta −30 % */src.connect(g);let df=null,dg=null,lfo=null,lg=null;
+  g.gain.value=(CRE_G[kind]||1)*(o&&o.v||1)*CRE_VK*(CRE_TYPE_V[m.type]||1)*(CRE_WOLF.has(m.type)&&CRE_WOLF_V[kind]||1)*(CRE_WOLF.has(m.type)&&far&&kind==='idle'?WOLF_HOWL_V:1);   /* v2.25 sudet; v2.57 ulvonta −30 % */src.connect(g);let df=null,dg=null,lfo=null,lg=null;
   if(ec){const lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1500;g.connect(lp);lp.connect(pn);}   // kaikuääni: tumma, kaukainen
   else{const k0=creDistK(md,far,rk);df=a.createBiquadFilter();df.type='lowpass';df.Q.value=.5;df.frequency.value=creLpf(k0);dg=a.createGain();dg.gain.value=1-.3*k0;g.connect(df);df.connect(dg);dg.connect(pn);   // v2.12/v2.14: etäisyys tummentaa ja hiljentää
     if(src.detune){lfo=a.createOscillator();lfo.frequency.value=.35+Math.random()*.3;lg=a.createGain();lg.gain.value=30*k0;lfo.connect(lg);lg.connect(src.detune);lfo.start();}}   // kaukana pieni huojunta (utuisuus)
@@ -183,7 +184,7 @@ function creTick(dt){const a=actx;if(!a||a.state!=='running'||typeof camera==='u
   creRevTick(dt);tgTick(dt);plTick(dt);
   for(const v of CRE.voices.slice())if(!creSpaceOk(v.m)){creStop(v,.15);CRE.voices.splice(CRE.voices.indexOf(v),1);}   // v2.58 tila vaihtui → ääni pois
   for(const v of CRE.voices){if(v.ec)creEchoPos(v.m,v.pn);else if(!v.m.dead){crePos(v.pn,v.m.pos.x,v.m.pos.y+(v.m.def.r||.5)*1.6,v.m.pos.z);creDistFx(v,Math.sqrt(dist2(v.m.pos.x,v.m.pos.z,P.pos.x,P.pos.z)));}}
-  if((state!=='play'&&state!=='ui')||!soundOn)return;   // v3.07 käyttäjä: äänet jatkuvat myös pelin paneeleissa (reppu, työpenkki…)
+  if(!sndLive()||!soundOn)return;   // v3.07 käyttäjä: äänet jatkuvat myös pelin paneeleissa (reppu, työpenkki…)
   vartijaEcho(dt);farHowl(dt);
   for(const m of mobs){if(m.dead||!creSpaceOk(m))continue;const d2=dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z),ai=m.def.ai,hs=CRE_CHASE.includes(ai),chasing=m.state==='chase',hasChase=hs&&chasing&&creRes(m.type,'chase');
     // rauhallinen ääntely 6–15 s välein alle 25 m päässä (ei jahdin aikana, jos olennolla on jahtiääni)
@@ -345,7 +346,7 @@ function fireSndTick(dt){for(const e of FSND.v){fireGrainPump(e.h);if(e.key==='_
   for(const c of sel){const e=FSND.v.find(x=>x.key===c.key);if(e){const k=tgDistK(c.d);try{e.h.df.frequency.value=creLpf(k);e.h.dg.gain.value=1-TG_DG*k;if(c.k==='kasi')crePos(e.h.pn,c.x,c.y+.3,c.z);}catch(err){}continue;}
     const h=fireGrainNew(c);   /* tunniste: 'palaminen','yhteiset' */if(h){fireGrainPump(h);FSND.v.push({key:c.key,h});}}}
 function fireSndOff(){for(const e of FSND.v)fireGrainStop(e.h);FSND.v.length=0;}
-function tgTick(dt){if(!CRE.ok||(state!=='play'&&state!=='ui')){if(FSND.v.length)fireSndOff();return;}fireSndTick(dt);
+function tgTick(dt){if(!CRE.ok||!sndLive()){if(FSND.v.length)fireSndOff();return;}fireSndTick(dt);
   for(const v of TGV.v.slice()){const m=v.m;if(m&&!creSpaceOk(m)){tgStop(v);continue;}   // v2.58
     if(v.loop&&!v.stat&&(!mobs.includes(m)||(m.dead&&v.ev!=='palaminen'))){tgStop(v);continue;}if(v.fixed)continue;crePos(v.pn,m.pos.x,m.pos.y+.3,m.pos.z);if(actx)creDistFx(v,Math.sqrt(dist2(m.pos.x,m.pos.z,P.pos.x,P.pos.z)));}
   const C=[];
@@ -387,7 +388,16 @@ function mLoad(){if(MSND.loaded||!CRE.ok)return;MSND.loaded=1;for(const n in CRE
    alipäästö (o.lp Hz) + kaiku (viive 0,22 s, palaute o.echo) + sävel o.p; o.off/o.len = satunnainen pätkä pidemmästä (häivytys 0,3 / 0,8 s).
    mbgLong = pitkä tausta (suoratoisto, satunnaisesta kohdasta, häivytys 2 s); mbgChirps = muutama heinäsirkan siritys hiljaa. */
 function mbgOut(a){if(!MSND.gain){MSND.gain=a.createGain();MSND.gain.connect(a.destination);}return MSND.gain;}
-function mbgVoice(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;mLoad();const L0=mRes(g,ev,'m');if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
+function mbgVoice(g,ev,o){creInit();if(!CRE.ok)return false;mLoad();return mbgVoiceL(mRes(g,ev,'m'),o);}
+/* v3.18 käyttäjä: taustakuvien äänet mistä tahansa olemassa olevasta äänestä avaimella (a/saa/myrsky, m/uusi_maailma/linnut, susi_idle …). mbgList = versiot,
+   mbgVoiceK = kertaääni (lataa puskurit; false = ei vielä ladattu → yritä pian; key puuttuu → true), mbgLoopK = silmukka (puskuri, häivytys sisään MBG_FADE_IN). */
+function mbgList(key){if(!CRE.man)return null;if(CRE.idxOf!==CRE.man)creIndex();return CRE.idx[key]||null;}
+function mbgVoiceK(key,o){creInit();if(!CRE.ok)return false;const L=mbgList(key);if(!L)return true;const B=L.filter(x=>!sndLong(x));for(const x of B)if(!CRE.buf[x])creBuf(x);return mbgVoiceL(B,o);}
+function mbgLoopK(key,v){creInit();if(!CRE.ok)return null;const a=actx;if(!a||a.state!=='running'||!soundOn)return null;const L=mbgList(key);if(!L)return {none:1};
+  const B=L.filter(x=>!sndLong(x));for(const x of B)if(!CRE.buf[x])creBuf(x);const ok=B.filter(x=>CRE.buf[x]);if(!ok.length)return null;
+  const name=ok[Math.random()*ok.length|0],src=a.createBufferSource();src.buffer=CRE.buf[name];src.loop=true;const lp=tgLoopPts(src.buffer);src.loopStart=lp[0];src.loopEnd=lp[1];
+  const gn=a.createGain(),t=a.currentTime;gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(volK('amb')*v,t+MBG_FADE_IN);src.connect(gn);gn.connect(mbgOut(a));src.start(0,Math.random()*Math.max(0,lp[1]-lp[0]-.1));return {src,g:gn,name};}
+function mbgVoiceL(L0,o){o=o||{};if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
   const a=actx;if(!a||a.state!=='running'||!soundOn)return false;const vol=volK('amb')*(o.v??1);if(!(vol>0))return false;
   const B=CRE.buf[L[Math.random()*L.length|0]],t=a.currentTime,off=Math.min(o.off||0,Math.max(0,B.duration-.5)),len=o.len?Math.min(o.len,B.duration-off):B.duration-off;
   const src=a.createBufferSource();src.buffer=B;src.playbackRate.value=o.p||1;const g0=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=o.lp||20000;lp.Q.value=.5;
@@ -399,12 +409,22 @@ function mbgVoice(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;mLoad();cons
 function mbgLong(g,ev,v){creInit();if(!CRE.ok)return null;const L=mRes(g,ev,'m');const a=actx;if(!L||!a||a.state!=='running'||!soundOn)return null;const name=L[Math.random()*L.length|0],d=CRE.man[name].dur||0,vol=volK('amb')*v;
   let h=null;if(sndLong(name))h=sndStream(a,name,mbgOut(a),{loop:true,off:Math.random()*Math.max(0,d-40)});
   else{mLoad();if(!CRE.buf[name])return null;const src=a.createBufferSource();src.buffer=CRE.buf[name];src.loop=true;const gn=a.createGain();gn.gain.value=0;src.connect(gn);gn.connect(mbgOut(a));src.start(0,Math.random()*Math.max(0,d-1));h={src,g:gn,name};}
-  if(h){const t=a.currentTime;h.g.gain.setValueAtTime(0,t);h.g.gain.linearRampToValueAtTime(vol,t+2);}return h;}
+  if(h){const t=a.currentTime;h.g.gain.setValueAtTime(0,t);h.g.gain.linearRampToValueAtTime(vol,t+MBG_FADE_IN);}return h;}
+/* v3.17 käyttäjä: valikon pitkä taustaääni (Öinen leiri, 136 s suoratoisto) alkaa heti kuvan vaihduttua: sama <audio> pidetään tallessa (MBG_KEEP) ja
+   ladataan valmiiksi hiljaisena jo ennen kuvaa (mbgLongWarm) → ei uutta latausta eikä MediaElementSourcea joka kerta. Pois → häivytys ja tauko (mbgLongPause). */
+const MBG_KEEP={},MBG_FADE_IN=1.4;   // v3.19 pehmeämpi
+function mbgLongKeep(g,ev,v){creInit();if(!CRE.ok)return null;const a=actx;if(!a||a.state!=='running'||!soundOn)return null;const key=g+'/'+ev;let h=MBG_KEEP[key];
+  if(!h){h=mbgLong(g,ev,v);if(h&&h.stream){MBG_KEEP[key]=h;h.live=1;}return h;}
+  const d=CRE.man[h.name]&&CRE.man[h.name].dur||0;if(h.el.paused){try{h.el.currentTime=Math.random()*Math.max(0,d-40);}catch(e){}const pr=h.el.play();if(pr&&pr.catch)pr.catch(()=>{});}
+  const t=a.currentTime;h.g.gain.cancelScheduledValues(t);h.g.gain.setValueAtTime(h.g.gain.value,t);h.g.gain.linearRampToValueAtTime(volK('amb')*v,t+MBG_FADE_IN);h.live=1;return h;}
+function mbgLongPause(h,f){if(!h||!actx)return;const a=actx,t=a.currentTime;h.live=0;try{h.g.gain.cancelScheduledValues(t);h.g.gain.setValueAtTime(h.g.gain.value,t);h.g.gain.linearRampToValueAtTime(0,t+f);}catch(e){}
+  setTimeout(()=>{if(!h.live)try{h.el.pause();}catch(e){}},f*1000+120);}
+function mbgLongWarm(g,ev){const key=g+'/'+ev;if(MBG_KEEP[key]||!actx||actx.state!=='running')return;const h=mbgLongKeep(g,ev,0);if(h&&h.stream)mbgLongPause(h,.05);}
 function mbgLongStop(h,f){if(!h||!actx)return;const a=actx,t=a.currentTime;f=f||1;try{h.g.gain.cancelScheduledValues(t);h.g.gain.setValueAtTime(h.g.gain.value,t);h.g.gain.linearRampToValueAtTime(0,t+f);h.src.stop(t+f+.05);}catch(e){}setTimeout(()=>{try{h.g.disconnect();}catch(e){}},f*1000+150);}
-function mbgChirps(n,v){creInit();if(!CRE.ok)return;const L0=mRes('luonto','heinasirkat','a');if(!L0)return;for(const x of L0)creBuf(x);const L=L0.filter(x=>CRE.buf[x]);const a=actx;if(!L.length||!a||a.state!=='running'||!soundOn)return;
-  const vol=volK('amb')*v;if(!(vol>0))return;const out=mbgOut(a),pan=(Math.random()*2-1)*.7,p=.94+Math.random()*.12,tp=.42+Math.random()*.14;let t=a.currentTime+.05;
+function mbgChirps(n,v){creInit();if(!CRE.ok)return false;const L0=mRes('luonto','heinasirkat','a');if(!L0)return false;for(const x of L0)creBuf(x);const L=L0.filter(x=>CRE.buf[x]);const a=actx;if(!L.length||!a||a.state!=='running'||!soundOn)return false;   // v3.17 false = ei vielä ladattu → yritä pian uudelleen
+  const vol=volK('amb')*v;if(!(vol>0))return true;const out=mbgOut(a),pan=(Math.random()*2-1)*.7,p=.94+Math.random()*.12,tp=.42+Math.random()*.14;let t=a.currentTime+.05;
   for(let i=0;i<n;i++){const src=a.createBufferSource();src.buffer=CRE.buf[L[Math.random()*L.length|0]];src.playbackRate.value=p;const g0=a.createGain();g0.gain.value=vol*(.75+Math.random()*.25);const lp=a.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;
-    let o2=lp;if(a.createStereoPanner){const pn=a.createStereoPanner();pn.pan.value=pan;lp.connect(pn);o2=pn;}src.connect(g0);g0.connect(lp);o2.connect(out);src.onended=()=>{try{o2.disconnect();lp.disconnect();g0.disconnect();}catch(e){}};src.start(t);t+=tp*(1+(Math.random()*2-1)*.05);}}
+    let o2=lp;if(a.createStereoPanner){const pn=a.createStereoPanner();pn.pan.value=pan;lp.connect(pn);o2=pn;}src.connect(g0);g0.connect(lp);o2.connect(out);src.onended=()=>{try{o2.disconnect();lp.disconnect();g0.disconnect();}catch(e){}};src.start(t);t+=tp*(1+(Math.random()*2-1)*.05);}return true;}
 const BTN_BASE=.8;   // v2.67: hover- ja klikkausäänien perustaso (−20 %)
 function mSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;mLoad();const L0=mRes(g,ev,o.pre);if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
   const a=actx;if(!a||a.state!=='running'||!soundOn)return false;const vol=volK(o.cat||'ui')*(g==='napit'?BTN_BASE*(SET.btnVol??1):1);   /* v2.67 napit: perustaso −20 % + oma säädin */if(!(vol>0))return false;
@@ -436,6 +456,7 @@ function plLoad(){if(PLV.loaded||!CRE.ok)return;PLV.loaded=1;for(const n in CRE.
    tunneleissa paljon (PL_REV.dun, ennen .25), talon sisällä selvästi (PL_REV.home), vuoristossa vähän (PL_REV.mtn), muuten ei kaikua. */
 const PL_REV={dun:.55,home:.2,mtn:.08};
 function plRevAmt(){if(P.inDun)return PL_REV.dun;const ik=typeof indoorK==='number'?indoorK:0;if(ik>.3)return PL_REV.home*ik;const b=biomeHere(P.pos.x,P.pos.z);return b==='mountain'||b==='tunturi'||P.pos.y>24?PL_REV.mtn:0;}
+const _plMonoV=new THREE.Vector3();
 function plSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;plLoad();const L0=plRes(g,ev);if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
   const a=actx;if(!a||a.state!=='running'||!soundOn)return false;const vol=volK('pl');if(!(vol>0))return false;
   PLV.v=PLV.v.filter(v=>!v.done);if(!o.loop&&PLV.v.length>=6)return false;
@@ -444,8 +465,9 @@ function plSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;plLoad();const 
   if(!PLV.gain){PLV.gain=a.createGain();PLV.gain.connect(sndBus(a));}PLV.gain.gain.value=vol;
   const B=CRE.buf[name],q=o.pos||P.pos,src=a.createBufferSource();src.buffer=B;src.playbackRate.value=(o.p||1)*(o.loop?1:1+(Math.random()*2-1)*(o.pj??.05));   /* v2.56 o.pj: oma sävelvaihtelu */
   if(o.loop){src.loop=true;if(!PL_WHOLE.has(ev)){const lp=tgLoopPts(B);src.loopStart=lp[0];src.loopEnd=lp[1];}}   /* v2.76 PL_WHOLE: koko tiedosto silmukkana (käyttäjän saumaton tiedosto) */
-  const gn=a.createGain();gn.gain.value=o.loop?0:(o.v??1)*(1+(Math.random()*2-1)*(o.vj??.05));   /* v2.26: voimakkuus ±5 % joka kerta (o.vj: oma vaihtelu) */if(o.loop)gn.gain.linearRampToValueAtTime(o.v??1,a.currentTime+.4);const pn=a.createPanner();pn.panningModel='equalpower';pn.distanceModel='inverse';pn.refDistance=4*SND_DIST_K*(o.rk||1);pn.maxDistance=60*SND_DIST_K*(o.rk||1);pn.rolloffFactor=1;   /* v2.67 o.rk: kuuluvuuskerroin */
-  if(o.lp){const lf=a.createBiquadFilter();lf.type='lowpass';lf.frequency.value=o.lp;lf.Q.value=.6;src.connect(gn);gn.connect(lf);lf.connect(pn);}else{src.connect(gn);gn.connect(pn);}pn.connect(PLV.gain);   /* v2.31 o.lp: tumma alipäästö (Hz) */crePos(pn,q.x,(q.y??P.pos.y)+.2,q.z);
+  const gn=a.createGain();gn.gain.value=o.loop?0:(o.v??1)*(1+(Math.random()*2-1)*(o.vj??.05));   /* v2.26: voimakkuus ±5 % joka kerta (o.vj: oma vaihtelu) */if(o.loop)gn.gain.linearRampToValueAtTime(o.v??1,a.currentTime+.4);let pn;if(o.pos){pn=a.createPanner();pn.panningModel='equalpower';pn.distanceModel='inverse';pn.refDistance=4*SND_DIST_K*(o.rk||1);pn.maxDistance=60*SND_DIST_K*(o.rk||1);pn.rolloffFactor=1;}
+  else{pn=a.createGain();const ref=4*SND_DIST_K*(o.rk||1),d=camera.position.distanceTo(_plMonoV.set(P.pos.x,P.pos.y+1.2,P.pos.z));pn.gain.value=d<=ref?1:ref/d;}   /* v3.13 käyttäjä: pelaajasta lähtevät äänet MONO (ei 3D-panorointia olkakameran takia), sama voimakkuus kuin ennen; o.pos = 3D */   /* v2.67 o.rk: kuuluvuuskerroin */
+  if(o.lp){const lf=a.createBiquadFilter();lf.type='lowpass';lf.frequency.value=o.lp;lf.Q.value=.6;src.connect(gn);gn.connect(lf);lf.connect(pn);}else{src.connect(gn);gn.connect(pn);}pn.connect(PLV.gain);   /* v2.31 o.lp: tumma alipäästö (Hz) */if(o.pos)crePos(pn,q.x,(q.y??P.pos.y)+.2,q.z);
   let sd=null;{const rw=plRevAmt();if(rw>0){const R=creRevOn(a);sd=a.createGain();sd.gain.value=rw;pn.connect(sd);sd.connect(R.inp);}}   // v2.99 kaiku paikan mukaan (plRevAmt)
   if(!o.loop&&g!=='askeleet'&&g!=='vesi'&&g!=='keho')plActT=performance.now()/1000;   // v2.67 pelaajan toimintaääni (ilmoitusääni ei päälle)
   const v={src,sd,g:gn,loop:!!o.loop};if(!o.loop)PLV.v.push(v);src.onended=()=>{v.done=1;try{pn.disconnect();}catch(e){}if(sd)try{sd.disconnect();}catch(e){}};
@@ -645,7 +667,7 @@ function ambStop(h,f){if(!h)return;const a=actx;if(f&&a){try{h.g.gain.cancelSche
 // salaman isku: salama-kertaääni d s myöhemmin (lähelle iskevä 0,05–0,3 s ja täysillä, kaukainen 0,5–3 s ja hiljempaa)
 function ambThunder(d){AMB.thT=Math.max(.05,d);AMB.thV=d<.35?1:clamp(1.1-d*.2,.45,1);}
 function ambTick(dt){const a=actx;if(!a||a.state!=='running'||!soundOn||!CRE.ok){for(const k in AMB.L){ambStop(AMB.L[k].h);delete AMB.L[k];}return;}
-  dt=Math.min(dt,.25);uwAudioTick();const vol=volK('amb'),now=a.currentTime,live=state==='play'||state==='ui';
+  dt=Math.min(dt,.25);uwAudioTick();const vol=volK('amb'),now=a.currentTime,live=sndLive();   /* v3.08 myös Käynnissä-tila */
   // taukovalikko: kaikki hiljenevät 1 s ja palaavat (silmukat jatkuvat)
   const dk=live||state==='paused'?(live?1:0):1;if(dk!==AMB.duck){AMB.duck=dk;if(AMB.gain)AMB.gain.gain.setTargetAtTime(dk,now,AMB_DUCK/3);}
   if(state==='paused')return;
@@ -673,9 +695,10 @@ function sndBus(a){if(!SBUS.f){SBUS.f=a.createBiquadFilter();SBUS.f.type='lowpas
    (state 'menu'/'paused'), ja palauttaa ~0,6 s:ssa, kun peli jatkuu. Silmukat jatkavat hiljaa samasta kohdasta. Valikon napit (MSND) ja musiikki
    eivät kulje tätä kautta. Kutsu: main.js frame() joka ruutu. */
 /* v3.07 käyttäjä: häivytys VAIN päävalikossa/tauolla. Pelin paneeleissa (reppu, työpenkki, arkku, pata…) äänet soivat, mutta UI_G (−30 %) ja pieni alipäästö UI_LP. */
-const UI_G=.7,UI_LP=4200;
-function gameSndTick(){const a=actx;if(!a||!SBUS.m)return;const on=state!=='menu'&&state!=='paused',tg=on?(state==='ui'?UI_G:1):0;if(tg===SBUS.tg)return;SBUS.tg=tg;
-  const t=a.currentTime;SBUS.m.gain.cancelScheduledValues(t);SBUS.m.gain.setValueAtTime(SBUS.m.gain.value,t);SBUS.m.gain.setTargetAtTime(tg,t,tg>0?.15:.2);}
-function uwAudioTick(){const a=actx;if(!a||!SBUS.f)return;const uw=typeof CAM_UW!=='undefined'&&CAM_UW>0&&!P.inDun&&(state==='play'||state==='ui'||state==='paused'),ui=state==='ui',key=(uw?1:0)+(ui?2:0);if(key===SBUS.uw)return;SBUS.uw=key;
-  const t=a.currentTime;SBUS.f.frequency.cancelScheduledValues(t);SBUS.f.frequency.setTargetAtTime(uw?UW_LP:ui?UI_LP:22000,t,.1);SBUS.g.gain.setTargetAtTime(uw?UW_G:1,t,.1);}   // v3.07 paneelissa pieni alipäästö
+const DEAD_FADE=2.2,UI_G=.7,UI_LP=4200,RUN_G=.3,RUN_LP=1400;   // v3.08 käyttäjä: päävalikko pelin pyöriessä taustalla (Käynnissä-tila) −70 % ja voimakkaampi alipäästö
+function sndLive(){return state==='play'||state==='ui'||(state==='paused'&&typeof pauseRun!=='undefined'&&pauseRun);}
+function gameSndTick(){const a=actx;if(!a||!SBUS.m)return;const run=state==='paused'&&typeof pauseRun!=='undefined'&&pauseRun,dead=state==='dead',on=run||(state!=='menu'&&state!=='paused'&&!dead),tg=on?(run?RUN_G:state==='ui'?UI_G:1):0;   /* v3.08 kuolemaruudussa hidas häivytys */if(tg===SBUS.tg)return;SBUS.tg=tg;
+  const t=a.currentTime;SBUS.m.gain.cancelScheduledValues(t);SBUS.m.gain.setValueAtTime(SBUS.m.gain.value,t);SBUS.m.gain.setTargetAtTime(tg,t,tg>0?.15:state==='dead'?DEAD_FADE:.2);}
+function uwAudioTick(){const a=actx;if(!a||!SBUS.f)return;const uw=typeof CAM_UW!=='undefined'&&CAM_UW>0&&!P.inDun&&(state==='play'||state==='ui'||state==='paused'),ui=state==='ui',run=state==='paused'&&typeof pauseRun!=='undefined'&&pauseRun,key=(uw?1:0)+(ui?2:0)+(run?4:0);if(key===SBUS.uw)return;SBUS.uw=key;
+  const t=a.currentTime;SBUS.f.frequency.cancelScheduledValues(t);SBUS.f.frequency.setTargetAtTime(uw?UW_LP:run?RUN_LP:ui?UI_LP:22000,t,.1);SBUS.g.gain.setTargetAtTime(uw?UW_G:1,t,.1);}   // v3.07 paneelissa pieni alipäästö
 creInit();   // v2.52: manifesti ja valikko-/introäänet heti (maailman intro sivun uudelleenlatauksen jälkeen)

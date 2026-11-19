@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.07';
+:root{--css-v:'3.24';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -98,7 +98,7 @@ button:focus-visible{outline:2px solid var(--frost);outline-offset:2px}
 .btn.on{outline:1px solid var(--frost)}
 #detail .s{color:var(--dim);font-size:13px;margin:3px 0 8px}
 .btns{display:flex;flex-wrap:wrap;gap:6px}
-.btn{background:var(--bark);border:1px solid var(--line2);color:var(--bone);padding:6px 12px;border-radius:3px;font-weight:700;font-size:13px}
+.btn{background:radial-gradient(circle at 100% 100%,rgba(0,0,0,.18),rgba(0,0,0,.05) 80%),var(--bark);border:1px solid var(--line2);color:var(--bone);padding:6px 12px;border-radius:3px;font-weight:700;font-size:13px}
 .btn:hover{border-color:var(--ember)}
 .btn.pri{background:#5a3417;border-color:var(--ember)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -149,8 +149,10 @@ textarea{width:100%;min-height:70px;background:rgba(0,0,0,.35);color:var(--bone)
 @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
 
 /* Erä 20: puuteemaiset, läpinäkymättömät rakennus-, reppu- ja säilytysvalikot */
-#build,#inv,#chest{background:repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7)}
+#build,#inv,#chest{background:radial-gradient(circle at 100% 100%,rgba(0,0,0,.2),rgba(0,0,0,.07) 75%),repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7)}
 #build .card,#inv .rec{background:#2f1d0e;border:1px solid #6e4a28}
+#build{box-sizing:border-box;min-height:min(560px,calc(100vh - 40px))}   /* v3.22 käyttäjä: rakennusikkuna 15 % pidempi (tavallinen 487 → 560 px) → tietoikkuna (sama korkeus) ei yleensä vierity, välilehden vaihto ei hypi */
+#binfo{transition:opacity .6s ease} #binfo.biFade{opacity:0}   /* v3.22: häipyy pehmeästi */
 #build .card:hover{border-color:#e8a44a;background:#3a2412}
 #build .card.na{opacity:1}
 #buildTabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 10px;max-width:min(680px,calc(100vw - 70px))}
@@ -177,7 +179,7 @@ textarea{width:100%;min-height:70px;background:rgba(0,0,0,.35);color:var(--bone)
 #lvlbox{position:absolute;right:16px;bottom:56px;font-size:12px;font-weight:700;color:var(--bone);text-shadow:0 1px 2px #000;display:flex;gap:8px;align-items:center}
 #lvlbox .track,#progP .track{display:inline-block;width:90px;height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden}
 #lvlbox .track i,#progP .track i{display:block;height:100%;background:#e8a44a}
-#progP{background:repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7);width:min(820px,calc(100vw - 32px))}
+#progP{background:radial-gradient(circle at 100% 100%,rgba(0,0,0,.2),rgba(0,0,0,.07) 75%),repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7);width:min(820px,calc(100vw - 32px))}
 #progP .lv{display:flex;gap:12px;align-items:center;margin-bottom:10px;font-size:18px}#progP .lv .track{width:220px;height:9px}
 #progP .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .ach{display:flex;flex-direction:column;background:rgba(0,0,0,.28);border-left:3px solid #6e4a28;padding:3px 8px;margin:4px 0;font-size:12px}
@@ -194,12 +196,12 @@ textarea{width:100%;min-height:70px;background:rgba(0,0,0,.35);color:var(--bone)
 .slot .fu i{display:block;height:100%;background:#ffa53a}.slot .fu.off i{background:#6a6560}
 
 /* Ilmoituslokki (T) */
-#logP{background:repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7);width:min(560px,calc(100vw - 32px))}
+#logP{background:radial-gradient(circle at 100% 100%,rgba(0,0,0,.2),rgba(0,0,0,.07) 75%),repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7);width:min(560px,calc(100vw - 32px))}
 #logBody .lg{display:flex;gap:10px;background:rgba(0,0,0,.28);border-left:3px solid #6e4a28;padding:5px 8px;margin:4px 0;font-size:13px}
 #logBody .lg .num{color:var(--dim);min-width:38px}#logBody .lg.warn{border-color:var(--bad)}#logBody .lg.loot{border-color:var(--moss)}
 
 /* Päävalikon näppäinlista */
-#keysBox{margin-top:12px;width:min(720px,calc(100vw - 40px));background:repeating-linear-gradient(180deg,rgba(74,46,24,.92) 0,rgba(74,46,24,.92) 22px,rgba(63,39,19,.92) 22px,rgba(63,39,19,.92) 24px);border:2px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28;padding:14px 16px;border-radius:3px;max-width:760px;max-height:none;overflow:visible}
+#keysBox{margin-top:12px;width:min(720px,calc(100vw - 40px));background:radial-gradient(circle at 100% 100%,rgba(0,0,0,.2),rgba(0,0,0,.07) 75%),repeating-linear-gradient(180deg,rgba(74,46,24,.92) 0,rgba(74,46,24,.92) 22px,rgba(63,39,19,.92) 22px,rgba(63,39,19,.92) 24px);border:2px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28;padding:14px 16px;border-radius:3px;max-width:760px;max-height:none;overflow:visible}
 .keysGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
 .keyCat h3{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#e8a44a;margin:0 0 6px}
 .keyRow{display:flex;gap:10px;align-items:baseline;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.25);font-size:13px}.keyRow .kb{min-width:92px;text-align:center;flex:none}
@@ -207,8 +209,8 @@ textarea{width:100%;min-height:70px;background:rgba(0,0,0,.35);color:var(--bone)
 /* Erä 29: hotbarin valinta, valikko ja asetukset */
 #hotbar .slot.hsel{outline:2px solid #e8a44a;outline-offset:1px;box-shadow:0 0 10px rgba(232,164,74,.5)}
 .dlg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:60}
-.dlgBox{background:repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7);padding:18px 22px;max-width:min(420px,92vw);font-size:15px}
-.setCard{position:relative;margin-top:6px;width:min(760px,calc(100vw - 40px));overflow:visible;background:repeating-linear-gradient(180deg,rgba(74,46,24,.94) 0,rgba(74,46,24,.94) 22px,rgba(63,39,19,.94) 22px,rgba(63,39,19,.94) 24px);border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 14px 40px rgba(0,0,0,.6);padding:14px 16px;border-radius:3px}
+.dlgBox{background:radial-gradient(circle at 100% 100%,rgba(0,0,0,.2),rgba(0,0,0,.07) 75%),repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7);padding:18px 22px;max-width:min(420px,92vw);font-size:15px}
+.setCard{position:relative;margin-top:6px;width:min(760px,calc(100vw - 40px));overflow:visible;background:radial-gradient(circle at 100% 100%,rgba(0,0,0,.2),rgba(0,0,0,.07) 75%),repeating-linear-gradient(180deg,rgba(74,46,24,.94) 0,rgba(74,46,24,.94) 22px,rgba(63,39,19,.94) 22px,rgba(63,39,19,.94) 24px);border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 14px 40px rgba(0,0,0,.6);padding:14px 16px;border-radius:3px}
 .setCard .close{position:absolute;right:8px;top:8px}
 .setTabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 36px 10px 0}
 .setGrid{display:flex;flex-direction:column;gap:8px;font-size:14px}.setRow{display:grid;grid-template-columns:minmax(230px,1fr) 180px 1fr;gap:12px;align-items:center;padding:5px 8px;background:rgba(0,0,0,.2);border-radius:3px}.setRow .note{color:#cfc6b0}
@@ -420,7 +422,8 @@ button:focus,select:focus{outline:none}
 #menu .menuBtns>.mbtn{max-width:400px}
 #menu .mbtn{position:relative;overflow:hidden;padding:10px 18px 10px 64px;min-height:54px;font:700 17px 'Cinzel',var(--font-b);letter-spacing:.03em;color:#f1e6cc;text-align:left;border-radius:4px;border:1px solid #5a3a1e;
   background:radial-gradient(circle at 7px 7px,#c8b08a 0 1.6px,#3a2a1a 2.2px,transparent 2.8px),radial-gradient(circle at calc(100% - 7px) 7px,#c8b08a 0 1.6px,#3a2a1a 2.2px,transparent 2.8px),radial-gradient(circle at 7px calc(100% - 7px),#c8b08a 0 1.6px,#3a2a1a 2.2px,transparent 2.8px),radial-gradient(circle at calc(100% - 7px) calc(100% - 7px),#c8b08a 0 1.6px,#3a2a1a 2.2px,transparent 2.8px),
-    repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 2px,transparent 2px 9px),linear-gradient(180deg,rgba(70,45,24,.94),rgba(34,22,13,.96));
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.22 0.006' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .86 0 0 0 0 .62 2.4 0 0 0 -1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.085' filter='url(%23g)'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.12 0.004' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .05 0 0 0 0 .03 0 0 0 0 .01 -2.2 0 0 0 1.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.14' filter='url(%23g)'/%3E%3C/svg%3E"),radial-gradient(circle at 100% 100%,rgba(0,0,0,.24),rgba(0,0,0,.08) 80%),linear-gradient(180deg,rgba(62,40,21,.95),rgba(30,19,11,.97));   /* v3.18 käyttäjä: epätasaiset puunsyyt; v3.19 tummempi + pyöreä liuku nurkkaan */
+  background-position:0 0,0 0,0 0,0 0,var(--gx,0px) 0,var(--gx2,0px) 0,0 0,0 0;
   box-shadow:inset 0 1px 0 rgba(255,220,170,.12),inset 0 -2px 0 rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.45);transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .2s,border-color .2s,background-color .2s}
 #menu .mbtn small{font:500 12.5px var(--font-b);letter-spacing:.01em;color:#b9aa8e;margin-top:2px}
 #menu .mbtn .mIco{position:absolute;left:12px;top:50%;width:38px;height:38px;margin-top:-19px;display:flex;align-items:center;justify-content:center;font:400 22px serif;font-style:normal;color:#e8a44a;border-radius:3px;
@@ -428,7 +431,7 @@ button:focus,select:focus{outline:none}
 #menu .mbtn .mSheen{position:absolute;top:0;bottom:0;left:0;width:45%;background:linear-gradient(100deg,transparent,rgba(255,225,170,.16),transparent);transform:translateX(-140%) skewX(-18deg);pointer-events:none}
 #menu .mbtn:hover,#menu .mbtn:focus-visible{transform:translateX(5px);border-color:#e8a44a;box-shadow:inset 0 1px 0 rgba(255,220,170,.2),0 0 0 1px rgba(232,164,74,.35),0 0 22px rgba(232,164,74,.28),0 8px 22px rgba(0,0,0,.5);outline:none}
 #menu .mbtn:hover .mIco,#menu .mbtn:focus-visible .mIco{color:#fff0d0;text-shadow:0 0 6px #ffb35a,0 0 14px #ff7a2a;transform:rotate(-6deg) scale(1.08)}
-#menu .mbtn:hover .mSheen{animation:mSheen .7s ease}
+#menu .mbtn:hover .mSheen{animation:mSheen .7s ease} #menu .mbtn.mHero:hover .mSheen{animation:mSheen 1.4s ease}   /* v3.18 sankarinappi hitaammin */
 #menu .mbtn:active{transform:translateX(5px) translateY(1px) scale(.985);box-shadow:inset 0 2px 8px rgba(0,0,0,.6),0 0 16px rgba(232,164,74,.3)}
 #menu .mbtn.on{border-color:#7fd0a0}#menu .mbtn.on .mIco{color:#9fffc0}
 @keyframes mSheen{from{transform:translateX(-140%) skewX(-18deg)}to{transform:translateX(330%) skewX(-18deg)}}
@@ -437,14 +440,14 @@ button:focus,select:focus{outline:none}
 /* Sankaripainike: jatka / aloita seikkailu – pyörivä hehkureunus, sykkivä riimusinetti, kultainen teksti */
 @property --ha{syntax:'<angle>';inherits:false;initial-value:0deg}
 #menu .mbtn.mHero{min-height:86px;padding:14px 22px 14px 92px;border:none;font:900 24px 'Cinzel',serif;letter-spacing:.06em;isolation:isolate;
-  background:linear-gradient(180deg,#3a210e,#1c0f07);box-shadow:0 0 28px rgba(255,140,50,.35),0 10px 30px rgba(0,0,0,.6);animation:heroBreath 3.2s ease-in-out infinite}
+  background:linear-gradient(180deg,#3a210e,#1c0f07);box-shadow:0 0 28px rgba(255,140,50,.35),0 10px 30px rgba(0,0,0,.6);animation:heroBreath 5.5s ease-in-out infinite}
 #menu .mbtn.mHero::before{content:"";position:absolute;inset:0;border-radius:5px;padding:2px;z-index:-1;background:conic-gradient(from var(--ha),#ff7a1a,#ffe2a0 12%,rgba(255,140,50,.1) 30%,#ffb35a 50%,#fff3d6 58%,rgba(255,140,50,.1) 75%,#ff7a1a);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:heroSpin 4s linear infinite}
-#menu .mbtn.mHero::after{content:"";position:absolute;inset:2px;border-radius:4px;z-index:-2;background:radial-gradient(ellipse at 20% 50%,rgba(255,140,50,.32),transparent 55%),repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 2px,transparent 2px 9px),linear-gradient(180deg,#4a2a12,#1e1008)}
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:heroSpin 9s linear infinite}
+#menu .mbtn.mHero::after{content:"";position:absolute;inset:2px;border-radius:4px;z-index:-2;background:radial-gradient(ellipse at 20% 50%,rgba(255,140,50,.32),transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.22 0.006' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .86 0 0 0 0 .62 2.4 0 0 0 -1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.085' filter='url(%23g)'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.12 0.004' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .05 0 0 0 0 .03 0 0 0 0 .01 -2.2 0 0 0 1.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.14' filter='url(%23g)'/%3E%3C/svg%3E"),radial-gradient(circle at 100% 100%,rgba(0,0,0,.22),rgba(0,0,0,.06) 80%),linear-gradient(180deg,#43260f,#1b0e07);background-position:0 0,-173px 0,-61px 0,0 0,0 0}
 #menu .mbtn.mHero .hTxt{display:block;background:linear-gradient(180deg,#fff6e0,#ffd08a 55%,#e8903a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(255,160,70,.55))}
 #menu .mbtn.mHero small{color:#e6cfa4;font-size:13px;letter-spacing:.02em}
-#menu .mbtn.mHero .mIco{left:16px;width:60px;height:60px;margin-top:-30px;border-radius:50%;font-size:32px;color:#fff1d0;background:radial-gradient(circle at 50% 45%,#7a3a12,#2a1408 70%);box-shadow:0 0 0 2px #e8a44a,0 0 18px #ff8a2a,inset 0 0 14px rgba(255,160,70,.6);text-shadow:0 0 8px #ffb35a,0 0 18px #ff7a2a;animation:heroSigil 2.4s ease-in-out infinite}
-#menu .mbtn.mHero .mIco::before{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px dashed rgba(255,190,110,.7);animation:heroSpin2 9s linear infinite}
+#menu .mbtn.mHero .mIco{left:16px;width:60px;height:60px;margin-top:-30px;border-radius:50%;font-size:32px;color:#fff1d0;background:radial-gradient(circle at 50% 45%,#7a3a12,#2a1408 70%);box-shadow:0 0 0 2px #e8a44a,0 0 18px #ff8a2a,inset 0 0 14px rgba(255,160,70,.6);text-shadow:0 0 8px #ffb35a,0 0 18px #ff7a2a;animation:heroSigil 4.2s ease-in-out infinite}
+#menu .mbtn.mHero .mIco::before{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px dashed rgba(255,190,110,.7);animation:heroSpin2 18s linear infinite}
 #menu .mbtn.mHero:hover{transform:translateX(5px) scale(1.015)}
 #menu .mbtn.mHero:hover .mIco{transform:scale(1.1)}
 @keyframes heroSpin{to{--ha:360deg}}
@@ -649,7 +652,8 @@ button:focus,select:focus{outline:none}
 /* v1.64: varoitusruudun alaosaan Windows-yhteensopivuus (valkoinen Windows 11 -tyylinen ikoni tekstin vieressä) */
 #splash .spWin{position:absolute;left:0;right:0;bottom:56px;display:flex;align-items:center;justify-content:center;gap:10px;font:600 14px var(--font-b);color:#e8e2d4;letter-spacing:.04em;opacity:0;transition:opacity 1s ease .6s}
 #splash .spWarn.on .spWin{opacity:.9}
-#splash .spWin svg{width:15px;height:15px;fill:#fff;vertical-align:-2px;margin:0 6px 0 2px}   /* v1.65: ikoni Windows-sanan edessä */
+#splash .spWin>span{display:inline-flex;align-items:center;line-height:1}   /* v3.08 käyttäjä: teksti ja logo samalla keskilinjalla (kirjainten keskiosa = logon keskikohta) */
+#splash .spWin svg{width:14px;height:14px;fill:#fff;flex:none;margin:0 7px 0 7px;position:relative;top:var(--winY,0px)}   /* v1.65: ikoni Windows-sanan edessä */
 #inv #craftSearch{max-width:300px}   /* v1.65: lyhyempi hakupalkki */
 /* v1.66: HIIDENMAA nousee mustasta pilvestä ja vajoaa mustaan. Studio häivyttyy ensin (se on päällimmäisenä), sitten --tw musta
    (0,5 s ruudun mustana), musta savu (8 pehmeää läiskää) väistyy ulospäin ja reunojen varjo (.spVig) avautuu keskeltä; lopussa varjo
@@ -975,7 +979,7 @@ button:focus,select:focus{outline:none}
 #quitScr .qRunes{letter-spacing:.4em;opacity:.45;font-size:18px}
 
 /* v3.02 keittopata (#potP, pot.js) */
-#potP{display:grid;grid-template-columns:minmax(260px,340px) minmax(280px,380px);gap:22px;background:repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7)}
+#potP{display:grid;grid-template-columns:minmax(260px,340px) minmax(280px,380px);gap:22px;background:radial-gradient(circle at 100% 100%,rgba(0,0,0,.2),rgba(0,0,0,.07) 75%),repeating-linear-gradient(180deg,#4a2e18 0,#4a2e18 22px,#3f2713 22px,#3f2713 24px),#47301a;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #6e4a28,0 20px 60px rgba(0,0,0,.7)}
 #potP .props{width:100%;font-size:13px} #potP .props td:first-child{color:var(--dim);padding-right:10px;white-space:nowrap;vertical-align:top}
 .potBar{height:10px;background:#1e130a;border:1px solid #6e4a28;border-radius:2px;margin:10px 0;overflow:hidden} .potBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#b8742c,#e8a44a);transition:width .35s}
 .potBtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
@@ -1013,6 +1017,9 @@ button:focus,select:focus{outline:none}
 /* v3.06 käyttäjä: TEEMOITETUT VALIKOT – tausta sen mukaan, mistä valikko avattiin (data-st) */
 #inv[data-st="tyopenkki"]{background:linear-gradient(180deg,rgba(255,220,160,.06),transparent 30%),repeating-linear-gradient(90deg,#3e2a18 0,#3e2a18 118px,#2e1f12 118px,#2e1f12 121px),#3a2716;border-color:#7a5a36;box-shadow:inset 0 0 0 2px #5a3e22,0 20px 60px rgba(0,0,0,.7)}
 #inv[data-st="ahjo"]{background:radial-gradient(ellipse at 50% 115%,rgba(255,110,30,.28),transparent 55%),linear-gradient(180deg,#22201f,#161413);border-color:#5a4a40;box-shadow:inset 0 0 0 2px #3a3230,inset 0 -30px 60px -30px rgba(255,90,20,.35),0 20px 60px rgba(0,0,0,.7)}
+/* v3.22 käyttäjä: reppu avattuna tavallisesti (ei työpisteeltä) – kangastausta (palttina, tikkisauma) ja vetoketju vasemmassa alanurkassa */
+#inv[data-st=""]{background:repeating-linear-gradient(0deg,rgba(255,240,200,.022) 0,rgba(255,240,200,.022) 1px,transparent 2.5px,transparent 4px),repeating-linear-gradient(90deg,rgba(0,0,0,.055) 0,rgba(0,0,0,.055) 1px,transparent 2.5px,transparent 4px),radial-gradient(ellipse at 30% 25%,rgba(255,230,180,.06),transparent 60%),radial-gradient(circle at 100% 100%,rgba(0,0,0,.24),rgba(0,0,0,.06) 75%),#4f3f2a;border:3px solid #2b2214;box-shadow:inset 0 0 0 2px #6b5a3c,inset 0 0 40px rgba(0,0,0,.35),0 20px 60px rgba(0,0,0,.7);outline:2px dashed rgba(200,170,110,.22);outline-offset:-9px}   /* v3.24 käyttäjä: kudos pehmeämpi, epätarkempi */
+#inv[data-st=""]::after{content:'';position:absolute;left:0;bottom:0;width:170px;height:170px;pointer-events:none;opacity:.8;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='170' height='170' viewBox='0 0 170 170'><path d='M9 0V128Q9 161 42 161H170' fill='none' stroke='%23382c1b' stroke-width='8' stroke-linecap='round'/><path d='M9 30V128Q9 161 42 161H170' fill='none' stroke='%237a6646' stroke-opacity='.75' stroke-width='3.4' stroke-dasharray='1.6 1.8'/><path d='M9 0V30' fill='none' stroke='%23261d12' stroke-width='1.6'/><rect x='4' y='23' width='10' height='9' rx='2' fill='%23735e3c' stroke='%23382a17' stroke-width='1'/><rect x='6' y='31' width='6' height='15' rx='3' fill='%23806a45' stroke='%23382a17' stroke-width='1'/></svg>") no-repeat}   /* v3.24: vetoketju kokonaan reunuksen (18 px) sisällä, ei Tilat-ruutujen päällä; värit taustan sävyissä */
 #chest[data-st="arkku"]{background:repeating-linear-gradient(180deg,#4a3018 0,#4a3018 34px,#3a240f 34px,#3a240f 37px),#432b16;border:3px solid #2a1a0c;box-shadow:inset 0 0 0 2px #7a6a5a,0 20px 60px rgba(0,0,0,.7)}
 #chest[data-st="tynnyri"]{background:repeating-linear-gradient(90deg,#3b2614 0,#3b2614 46px,#2a1a0c 46px,#2a1a0c 49px),#35220f;border:3px solid #1e140a;box-shadow:inset 0 22px 0 -16px #55575c,inset 0 -22px 0 -16px #55575c,0 20px 60px rgba(0,0,0,.7)}
 #chest[data-st="hauta"]{background:radial-gradient(ellipse at 30% 20%,rgba(90,110,70,.25),transparent 50%),repeating-linear-gradient(0deg,#2e2f2c 0,#2e2f2c 30px,#232421 30px,#232421 32px);border:3px solid #181915}
@@ -1028,6 +1035,8 @@ button:focus,select:focus{outline:none}
 #fishHud .fb{height:9px;background:#120e0c;border:1px solid #4a4540;border-radius:2px;margin:3px 0;overflow:hidden} #fishHud .fb i{display:block;height:100%}
 #fishHud .fb i.ten{background:linear-gradient(90deg,#4a8a5a,#d8b040)} #fishHud .fb i.ten.hi{background:#e04a3a} #fishHud .fb i.pr{background:linear-gradient(90deg,#4f8fb8,#a9d8f2)}
 #wbName{position:fixed;left:50%;top:18%;transform:translateX(-50%);font:italic 600 20px 'Alegreya Sans',sans-serif;color:#a9d8f2;text-shadow:0 1px 4px #000;opacity:0;pointer-events:none;letter-spacing:.06em}
+#wbName small{display:block;font:600 13px 'Alegreya Sans',sans-serif;letter-spacing:.32em;text-transform:uppercase;color:#d8ecf6;opacity:.85;font-style:normal;margin-bottom:2px} #wbName b{font-weight:600}   /* v3.24 */
+#wbName{text-align:center;font-size:17px}#wbName.big{font-size:30px;top:16%}#wbName.big.on{animation:wbFade 5.6s ease forwards}
 #wbName.on{animation:wbFade 4.5s ease forwards} @keyframes wbFade{0%{opacity:0}18%{opacity:.85}70%{opacity:.85}100%{opacity:0}}
 #fishP{max-width:min(720px,calc(100vw - 32px));background:linear-gradient(180deg,rgba(60,90,110,.12),transparent 40%),var(--panel)}
 .fishT{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0} .fishT th{text-align:left;color:var(--dim);font-weight:600;border-bottom:1px solid var(--line)} .fishT td{padding:3px 6px 3px 0;border-bottom:1px solid rgba(255,255,255,.05)}
@@ -1043,3 +1052,117 @@ button:focus,select:focus{outline:none}
 :where(:not(#devP):not(#devMP):not(#devIP))::-webkit-scrollbar-corner{background:transparent}
 html,body,.panel,#binfo,#potRec,#fishP,#smeltP,#chest,#inv *{scrollbar-color:#8a5a2a rgba(18,12,7,.55);scrollbar-width:thin}
 #binfo{overflow-x:hidden!important;overflow-y:auto} #binfo *{max-width:100%;overflow-wrap:anywhere;box-sizing:border-box}
+#deathDim{position:fixed;inset:0;background:#050403;opacity:0;pointer-events:none;z-index:4;transition:opacity 1.2s linear}   /* v3.08 kuolemaruudun hidas tummuminen (deadS sen päällä) */
+
+/* v3.08 Extra-grafiikan pikanapit */
+.xAll{display:flex;gap:10px;align-items:center;margin:6px 0 10px;flex-wrap:wrap}.xAll .btn{min-width:110px}.xAll .btn.red{border-color:#c0583a;color:#ffb09a}
+/* v3.08 käyttäjä: kartan "Sulje: P / M" kartan oikeaan alanurkkaan ("Rulla = zoom" on vasemmassa alanurkassa) */
+#mapP>.pHint{top:auto;bottom:20px;right:22px;color:rgba(238,229,211,.8);text-shadow:1px 1px 2px #000,0 0 3px #000;opacity:1}
+/* v3.08 ohjeet ja vihjeet: porras 1 ohjetekstit, 2 näppäinvihjeet, 3 E-kehotteet; varoitusdialogi */
+body.noHelp .note:not(.keep){display:none!important}
+body.noKeyH #buildhint .kb,body.noKeyH .pHint,body.noKeyH #gameHint,body.noKeyH #aimHint{display:none!important}
+body.noActH #prompt{display:none!important}
+#keyDlg[data-warn="1"] #keyDlgN{color:#ff8a70}#keyDlg[data-warn="2"] #keyDlgT,#keyDlg[data-warn="2"] #keyDlgN{color:#ff5a48;font-weight:700}
+#keyDlg[data-warn="2"] #keyDlgN{text-shadow:0 0 8px rgba(255,60,40,.35)}
+#quitScr .qSaved{color:#9fd88a;font-weight:700}#quitScr .qSaved.bad{color:#ff7a60}
+/* v3.08 maailmat: pelissä oleva (kirkas ääriviiva + Pelaat nyt), viimeksi pelattu (vaalea ääriviiva) */
+#menu .world.cur{border:2px solid #f0b45a;box-shadow:0 0 0 1px rgba(240,180,90,.35),0 0 24px rgba(240,180,90,.35),inset 0 0 18px rgba(240,180,90,.12)}
+#menu .world.last{border:2px solid rgba(232,200,150,.45);box-shadow:0 0 12px rgba(232,200,150,.12)}
+#menu .world .wTag{align-self:flex-start;margin:-4px 0 -6px;padding:2px 9px;border-radius:10px;font:700 11px 'Alegreya Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+#menu .world .wTag.cur{background:#f0b45a;color:#2a1a0c;box-shadow:0 0 10px rgba(240,180,90,.45)}
+#menu .world .wTag.last{background:rgba(232,200,150,.16);color:#e8d4b0;border:1px solid rgba(232,200,150,.35)}
+/* v3.10 Ohjaus › Ammattilaisille ja vertailuun: harmaa ja läpikuultava */
+.proSec{margin-top:26px;opacity:.5;filter:grayscale(1);transition:opacity .2s}.proSec:hover{opacity:.8} .proSec.soft{margin-top:14px}   /* v3.14 intron kevennykset harmaina */
+/* v3.13 maailmat: 6 paikkaa kiinteänä 3 × 2 -ruudukkona (ei vieritystä), pito-palkit, kopiointi-ilmoitus */
+@media (min-width:701px){#menu[data-view="worlds"] .mvBody{overflow:hidden;padding-top:12px;padding-bottom:14px}
+  #menu .worlds{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  #menu .world{min-height:0;padding:12px 14px 12px;gap:8px}#menu .world .wInfo b{font-size:18px}#menu .world .wInfo span{font-size:12px;margin-top:2px}
+  #menu .world .wBtns .btn{padding:6px 8px}#menu .wNew{padding:10px 12px;gap:10px}#menu .wNew input.search{height:40px}#menu .wNew .mbtn{min-height:52px}}
+#menu .world{user-select:none;cursor:pointer;overflow:hidden}
+#menu .world::before,.holdBtn::before{content:"";position:absolute;left:0;bottom:0;height:3px;width:calc(var(--qp,0)*100%);background:linear-gradient(90deg,#e8a44a,#ffd28a);box-shadow:0 0 10px rgba(255,190,100,.6);pointer-events:none;z-index:3}
+.holdBtn{position:relative;overflow:hidden}.holdBtn.holding{border-color:#ffd28a}
+#menu .world .wToast{position:absolute;left:50%;bottom:58px;transform:translate(-50%,6px);padding:5px 12px;border-radius:12px;background:rgba(30,20,10,.92);border:1px solid #e8a44a;color:#ffe3b0;font:700 12px var(--font-b);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:4}
+#menu .world .wToast.on{opacity:1;transform:translate(-50%,0)}#menu .world .wToast.bad{border-color:#c0583a;color:#ffb09a}
+#keyDlgB .btn.big{padding:12px 34px;font-size:17px;min-width:150px}
+
+/* v3.14 Kalastajan pöytä, pakki, wow-ilmoitus (tackle.js) */
+#tkP{max-width:min(1180px,calc(100vw - 32px));width:1180px;background:linear-gradient(180deg,rgba(60,90,110,.14),transparent 45%),var(--panel)}
+#tkBody{display:grid;grid-template-columns:1.25fr 1fr .9fr;gap:14px;align-items:start}
+@media (max-width:900px){#tkBody{grid-template-columns:1fr}}
+#tkBody .ic{display:inline-block;width:26px;height:26px;background-size:contain;background-repeat:no-repeat;vertical-align:middle;flex:none}
+#tkBody .ic.q{background:none;text-align:center;color:var(--dim);line-height:26px}
+.tkRods{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.tkRod{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--fg);cursor:pointer;font:inherit}
+.tkRod small{color:var(--dim);margin-left:4px} .tkRod.on{border-color:#a9d8f2;box-shadow:0 0 0 1px #a9d8f2 inset}
+.tkSlots{display:flex;flex-direction:column;gap:6px}
+.tkSlot{background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:4px;padding:6px 8px}
+.tkCur{display:flex;align-items:center;gap:8px} .tkCur small{display:block;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em} .tkCur b i{font-style:normal;color:#d8b040;font-weight:600}
+.tkCur .btn.sm{margin-left:auto;padding:2px 8px;font-size:12px}
+.tkAv{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tkPart{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:3px;padding:2px 6px 2px 2px;color:var(--fg);font:inherit;font-size:12px;cursor:pointer}
+.tkPart:hover{border-color:#a9d8f2} .tkPart.cur{border-color:#d8b040;opacity:.65} .tkPart small{color:var(--dim)}
+.tkProps{width:100%;border-collapse:collapse;font-size:13px} .tkProps td{padding:3px 6px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top} .tkProps td:first-child{color:var(--dim);white-space:nowrap}
+.tkCombos{margin-top:8px;font-size:12.5px} .tkCombos summary{cursor:pointer;color:#a9d8f2} .tkCombos li{margin:3px 0}
+.tkR h3{margin-top:4px} .tkR .btn{margin:3px 0}
+.tkField{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0} .tkField .note{flex-basis:100%;margin:0}
+#chest[data-st="pakki"]{background:linear-gradient(180deg,rgba(60,90,110,.16),transparent 45%),var(--panel)}
+#fishHud.tkHint{opacity:.62;font-size:12px}
+#tkWow{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:60;text-align:center;pointer-events:none;padding:18px 34px 16px;border-radius:6px;
+  background:radial-gradient(ellipse at center,rgba(20,40,52,.92),rgba(12,18,22,.82));border:1px solid #6aa8c8;box-shadow:0 0 40px rgba(95,200,230,.35);animation:tkWowIn .9s cubic-bezier(.2,1.4,.4,1) both;max-width:calc(100vw - 32px)}
+#tkWow .tw1{font:400 34px 'Uncial Antiqua',serif;color:#e8f4fa;text-shadow:0 0 18px rgba(130,210,240,.8)}
+#tkWow .tw2{font-size:14px;color:#cfe0e8;margin:8px 0 10px;line-height:1.45}
+#tkWow .tw3{font:400 24px 'Uncial Antiqua',serif;color:#ffd24a;text-shadow:0 0 14px rgba(255,190,60,.8);animation:tkWowGlow 1.4s ease-in-out infinite alternate}
+#tkWow.out{animation:tkWowOut 1.2s ease forwards}
+@keyframes tkWowIn{0%{opacity:0;transform:translateX(-50%) scale(.6)}100%{opacity:1;transform:translateX(-50%) scale(1)}}
+@keyframes tkWowOut{to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
+@keyframes tkWowGlow{from{text-shadow:0 0 8px rgba(255,190,60,.5)}to{text-shadow:0 0 22px rgba(255,210,90,1)}}
+
+/* v3.15 Kalastajan kirja: nahkakannet, aukeama, sivunumerot, kääntyvä lehti */
+#fishP.fbPanel{max-width:min(1100px,calc(100vw - 24px));width:1100px;overflow:hidden;padding:18px 18px 12px;background:radial-gradient(ellipse at 50% 40%,#4a2c18,#2a170c 75%);border:2px solid #6a4428;box-shadow:0 0 0 3px #1a0e06,0 12px 40px rgba(0,0,0,.7),inset 0 0 40px rgba(0,0,0,.6)}
+#fishP.fbPanel .close{z-index:5}
+.fbBook{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;perspective:2200px;min-height:min(70vh,640px);height:min(70vh,640px)}   /* v3.22 kiinteä korkeus: sivun vaihto ei venytä ikkunaa */
+.fbPg{position:relative;overflow:hidden;box-sizing:border-box;background:linear-gradient(90deg,#efe3c4,#f6ecd2 12%,#f3e7c8 88%,#e2d2ac);color:#2e2014;padding:22px 28px 34px;font-family:'Alegreya Sans',sans-serif;box-shadow:inset 0 0 30px rgba(120,80,30,.18)}
+.fbPg.L{border-radius:6px 0 0 6px;background:linear-gradient(90deg,#e8d9b6,#f3e8cc 10%,#f6ecd2 85%,#d8c49a)} .fbPg.R{border-radius:0 6px 6px 0;background:linear-gradient(90deg,#d8c49a,#f6ecd2 15%,#f3e8cc 90%,#e8d9b6)}
+.fbIn{height:100%;overflow:hidden} .fbIn h3{font:400 24px 'Uncial Antiqua',serif;color:#4a2a14;margin:0 0 8px;border-bottom:1px solid rgba(90,60,30,.3);padding-bottom:4px} .fbIn h4{margin:10px 0 4px;color:#5a3a1a}
+.fbNo{position:absolute;bottom:10px;font:600 13px 'Alegreya Sans',sans-serif;color:#7a5a3a} .fbPg.L .fbNo{left:18px} .fbPg.R .fbNo{right:18px}
+.fbSpine{position:absolute;left:50%;top:0;bottom:0;width:26px;transform:translateX(-50%);background:linear-gradient(90deg,rgba(60,35,15,0),rgba(60,35,15,.35),rgba(60,35,15,0));pointer-events:none}
+.fbTitle{font:400 34px 'Uncial Antiqua',serif;color:#4a2a14;text-align:center;margin-top:18px}
+.fbOrn{height:46px;margin:6px auto 4px;width:140px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 46'%3E%3Cpath d='M20 23c18-16 52-16 74 0-22 16-56 16-74 0z' fill='%23c8962e'/%3E%3Cpath d='M94 23l22-14v28z' fill='%23c8962e'/%3E%3Ccircle cx='34' cy='20' r='3' fill='%234a2a14'/%3E%3Cpath d='M2 23h14M124 23h14' stroke='%23c8962e' stroke-width='2'/%3E%3C/svg%3E")}
+.fbC{text-align:center;color:#6a4a2a} .fbS{color:#6a4a2a;font-size:13.5px;margin:4px 0}
+.fbToc{list-style:none;padding:0;margin:8px 0} .fbToc li{display:flex;align-items:baseline;gap:6px;cursor:pointer;padding:3px 0} .fbToc li:hover span{color:#a0521a;text-decoration:underline}
+.fbToc i{flex:1;border-bottom:1px dotted rgba(90,60,30,.5)}
+.fbArt{text-align:center;margin:2px 0 6px} .fbArt img{width:min(100%,300px);height:auto;filter:drop-shadow(2px 3px 2px rgba(60,40,20,.35))}
+.fbT{width:100%;border-collapse:collapse;font-size:14px} .fbT td{padding:3px 4px;border-bottom:1px solid rgba(90,60,30,.15);vertical-align:top} .fbT td:first-child{color:#7a5a3a;white-space:nowrap;width:30%}
+.fbTime{font-size:12.5px} .fbTime td,.fbTime th{text-align:center;padding:2px} .fbTime td:first-child{text-align:left} .fbTime th{color:#7a5a3a;font-weight:600}
+.fbCls{display:inline-block;padding:0 7px;border-radius:9px;font-weight:700;font-size:12.5px;color:#1a120a;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);cursor:help;white-space:nowrap}
+.fbCls.big{font-size:15px;padding:1px 10px}
+.fbClsT{width:100%;border-collapse:collapse;font-size:13.5px} .fbClsT td{padding:4px;border-bottom:1px solid rgba(90,60,30,.15)} .fbClsT td:last-child{text-align:right;font-weight:700}
+.fbWish{display:flex;gap:10px;align-items:center;padding:8px;margin:6px 0;border:1px solid rgba(90,60,30,.3);border-radius:4px;background:rgba(255,255,255,.25)}
+.fbWish img{width:120px;height:60px} .fbWish div{display:flex;flex-direction:column} .fbWish span{color:#6a4a2a;font-size:13px} .fbWish em{font-style:normal;font-weight:700;color:#a0521a}
+.fbWish.ok{opacity:.65} .fbWish.ok em{color:#3a7a2a}
+.fbL{padding-left:18px;margin:4px 0;font-size:14px} .fbL li{margin:3px 0} .fbL.fg li.ok{color:#3a7a2a}
+.fbBar{display:grid;grid-template-columns:42% 1fr 42px;align-items:center;gap:6px;font-size:12px;margin:0;line-height:1.25} .fbBar i{display:block;height:8px;background:linear-gradient(90deg,#4f8fb8,#a9d8f2);border-radius:4px}
+.fbBar b{text-align:right;color:#6a4a2a;font-weight:600}
+.fbEnd{text-align:center;font-size:40px;color:#c8962e;margin-top:40%}
+.fbNav{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:10px;color:#d8c8a8}
+.fbLeaf{position:absolute;top:0;bottom:0;width:50%;box-sizing:border-box;overflow:hidden;background:linear-gradient(90deg,#efe3c4,#f6ecd2);padding:22px 28px;color:#2e2014;box-shadow:0 0 20px rgba(0,0,0,.35);backface-visibility:hidden;z-index:3}
+.fbLeaf.fw{left:50%;transform-origin:left center;animation:fbFw .38s ease-in forwards} .fbLeaf.bw{left:0;transform-origin:right center;animation:fbBw .38s ease-in forwards}
+@keyframes fbFw{from{transform:rotateY(0)}to{transform:rotateY(-178deg)}} @keyframes fbBw{from{transform:rotateY(0)}to{transform:rotateY(178deg)}}
+@media (max-width:760px){.fbBook{grid-template-columns:1fr}.fbPg.R{display:none}}
+
+/* v3.16 tasonimikkeet, DEV-sivut */
+#lvlbox .lvlT{display:none;position:absolute;right:0;bottom:100%;margin-bottom:3px;white-space:nowrap;font-weight:600;color:#e8c890;font-style:italic;font-size:11.5px;opacity:.95}#lvlbox.showT .lvlT{display:block}   /* v3.20 vain repussa, mittarin yläpuolella */
+#progP .lvlT{color:#e8c890;font-weight:600;margin-left:6px} .lvlTH{margin:12px 0 4px;color:#e8c890}
+.devTabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)} .devTabs .btn.on{border-color:#e8a44a;color:#ffd890}
+.devCat{margin:8px 0 4px;color:#e8c890;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+
+/* v3.18 pelattu aika yhteensä (Asetukset › Profiilit) */
+.ptBox{margin-top:22px;padding:12px 14px;border-top:1px solid var(--line);display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline}
+.ptBox span{color:var(--dim);font-weight:600} .ptBox b{font:400 24px 'Uncial Antiqua',serif;color:#e8c890} .ptBox small{grid-column:1/-1;margin:0}
+
+/* v3.19 käyttäjä: valikon napeissa puunsyyt eri kohdissa (ei kopioituja) */
+#menu .menuBtns>.mbtn:nth-child(2){--gx:-137px;--gx2:-251px}#menu .menuBtns>.mbtn:nth-child(3){--gx:-293px;--gx2:-83px}#menu .menuBtns>.mbtn:nth-child(4){--gx:-59px;--gx2:-317px}
+#menu .menuBtns>.mbtn:nth-child(5){--gx:-211px;--gx2:-149px}#menu .menuBtns>.mbtn:nth-child(6){--gx:-367px;--gx2:-29px}#menu .menuBtns>.mbtn:nth-child(7){--gx:-101px;--gx2:-199px}
+
+/* v3.21 valikon nappien ohjerivit vain kunnes nappia on käytetty (SET.alwaysBtnHints → body.showBH) */
+body:not(.showBH) #menu .mbtn.bhUsed small.bh,body:not(.showBH) #menu .mbtn.bhUsed .bh{display:none}

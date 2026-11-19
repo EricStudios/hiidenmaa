@@ -328,18 +328,34 @@ function makeHeld(id){
       g.add(bx(.3,.05,.06,metalOf(0x8f5326),0,0,.17));
       g.add(poly([[.18,.05],[.18+L-.14,.05],[.18+L,0],[.18+L-.14,-.05],[.18,-.05]],.03,bm));break;}
     case 'lapio':{shaft(g,.95,W);g.add(poly([[.82,.1],[1.0,.1],[1.12,.0],[1.0,-.1],[.82,-.1]],.03,metalOf(0x8a96a3,{roughness:.5})));const gr=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.06),W);gr.position.set(0,0,-.08);g.add(gr);break;}
-    case 'onki':case 'kuparivapa':case 'hiidenvapa':{const c=id==='onki'?0x8a6a3a:id==='kuparivapa'?0xd98a4e:0x5fe6d9;shaft(g,ROD_LEN,smat(id==='onki'?0x9a7a4a:0x5a3a22),.018);   // v3.06 vapa: pitkä ohut varsi, kela, rengas kärjessä
-      const reel=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.04,10),mat(c,{metalness:id==='onki'?0:.5,roughness:.5}));reel.rotation.z=Math.PI/2;reel.position.set(0,-.06,.22);g.add(reel);
-      for(const z of [.8,1.4,ROD_LEN-.02]){const r=new THREE.Mesh(new THREE.TorusGeometry(.016,.004,4,8),mat(0xc8c8c8,{metalness:.6}));r.position.set(0,-.02,z);g.add(r);}
-      {const hk=new THREE.Group(),L=.28,ln=new THREE.Mesh(new THREE.CylinderGeometry(.0025,.0025,L,3),mat(0xe8e8e0));ln.position.y=-L/2;hk.add(ln);   // v3.07 käyttäjä: koukku roikkuu kärjestä (piiloon heiton ajaksi, fishTick)
-       const h=new THREE.Mesh(new THREE.TorusGeometry(.018,.003,4,10,Math.PI*1.4),mat(0xb8bcc4,{metalness:.7,roughness:.3}));h.position.set(.012,-L-.012,0);h.rotation.z=Math.PI*.8;hk.add(h);
-       const sk=new THREE.Mesh(new THREE.SphereGeometry(.012,6,4),mat(0x5a5a5a,{metalness:.6}));sk.position.y=-L*.55;hk.add(sk);hk.position.set(0,-.02,ROD_LEN-.1);g.add(hk);g.userData.hook=hk;}break;}
+    case 'onki':case 'kuparivapa':case 'hiidenvapa':{   // v3.08 käyttäjä: 3-osainen taipuva vapa (tyvi → keski → kärki, nivelet userData.bend), koukku kärjen päässä
+      const simple=id==='onki',c=id==='kuparivapa'?0xd98a4e:0x5fe6d9,wood=smat(simple?0x9a7a4a:0x5a3a22),L=ROD_LEN,segs=[[0,1.15,.019,.014],[1.15,.5,.014,.009],[1.65,L-1.65-.1,.009,.004]];
+      let parent=g;const bends=[];
+      segs.forEach(([z0,len,r0,r1],k)=>{const sg=new THREE.Group();sg.position.z=k?segs[k-1][1]:-.1;parent.add(sg);if(k)bends.push(sg);
+        const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,len,7),k===2&&!simple?mat(c,{metalness:.4,roughness:.4}):wood);m.rotation.x=Math.PI/2;m.position.z=len/2;m.castShadow=true;sg.add(m);parent=sg;});
+      const tip=new THREE.Object3D();tip.position.z=segs[2][1];parent.add(tip);
+      if(!simple){const grip=new THREE.Mesh(new THREE.CylinderGeometry(.024,.024,.3,8),mat(0xb08a5a,{roughness:1}));grip.rotation.x=Math.PI/2;grip.position.z=.05;g.add(grip);   // korkkikahva
+        const reel=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.04,12),mat(c,{metalness:.55,roughness:.4}));reel.rotation.z=Math.PI/2;reel.position.set(0,-.07,.24);reel.userData.tkReel=1;g.add(reel);{const rs=bx(.012,.05,.012,mat(0x3a3a3a),0,-.035,.24);rs.userData.tkReel=1;g.add(rs);}   /* v3.14 kela riippuu vavan osista (tackle.js tkDressRod) */
+        const ring=(sgi,z)=>{const r=new THREE.Mesh(new THREE.TorusGeometry(.013,.003,4,8),mat(0xc8c8c8,{metalness:.7}));r.position.set(0,-.018,z);(sgi?bends[sgi-1]:g.children.find(o=>o.isGroup)).add(r);};
+        ring(0,.75);ring(1,.25);ring(2,.12);if(id==='hiidenvapa'){ring(2,.26);for(const z of [.4,.9])g.children.find(o=>o.isGroup).add(bx(.03,.03,.03,mat(0x5fe6d9,{emissive:0x2a8a80,emissiveIntensity:.6}),0,0,z));}}
+      else{const knot=new THREE.Mesh(new THREE.SphereGeometry(.012,6,4),mat(0xd8d0b8));tip.add(knot);}   // onki: siima sidottu suoraan kärkeen
+      {const hk=new THREE.Group(),HL=.3,ln=new THREE.Mesh(new THREE.CylinderGeometry(.0022,.0022,HL,3),mat(0xe8e8e0));ln.position.y=-HL/2;hk.add(ln);   // koukku roikkuu kärjestä (pystyyn, fishTick)
+       const sk=new THREE.Mesh(new THREE.SphereGeometry(.011,6,4),mat(0x5a5a5a,{metalness:.6}));sk.position.y=-HL*.6;hk.add(sk);
+       const sh=new THREE.Mesh(new THREE.CylinderGeometry(.0022,.0022,.04,4),mat(0xb8bcc4,{metalness:.8,roughness:.25}));sh.position.y=-HL-.02;hk.add(sh);
+       const bend=new THREE.Mesh(new THREE.TorusGeometry(.013,.0025,4,10,Math.PI),mat(0xb8bcc4,{metalness:.8,roughness:.25}));bend.position.set(.013,-HL-.04,0);bend.rotation.z=Math.PI;hk.add(bend);
+       const pt=new THREE.Mesh(new THREE.ConeGeometry(.0035,.016,4),mat(0xd8dce4,{metalness:.8,roughness:.2}));pt.position.set(.026,-HL-.032,0);hk.add(pt);   // terävä kärki
+       tip.add(hk);g.userData.hook=hk;}
+      g.userData.bend=bends;g.userData.tip=tip;break;}
     case 'kuokka':{shaft(g,.95,W);g.add(bx(.06,.34,.16,mat(0x8a96a3,{metalness:.2,roughness:.55}),0,-.15,.86));g.add(bx(.08,.08,.12,mat(0x3a3a3a),0,0,.86));break;}
     case 'puukko':{/* v2.91 puukko: koivupahkakahva, messinkihela, kapea terä */const hw=smat(0x6b4527,{flatShading:true});const h=new THREE.Mesh(new THREE.CylinderGeometry(.024,.028,.13,8),hw);h.rotation.x=Math.PI/2;h.position.z=.0;g.add(h);
       g.add(bx(.05,.04,.012,mat(0xc9a24a,{metalness:.5,roughness:.4}),0,0,.07,false));const bl=metalOf(0xb8c2cc);g.add(poly([[.075,.013],[.24,.01],[.27,-.004],[.24,-.016],[.075,-.016]],.008,bl));break;}
     case 'kulho':case 'vesikulho':{const bw=smat(0xa8743e,{flatShading:true});const b=new THREE.Mesh(new THREE.CylinderGeometry(.12,.075,.08,10,1,true),bw);b.material.side=THREE.DoubleSide;b.position.set(0,.03,.08);g.add(b);
       const bot=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.012,10),bw);bot.position.set(0,-.006,.08);g.add(bot);
       if(id==='vesikulho'){const w=new THREE.Mesh(new THREE.CylinderGeometry(.105,.105,.006,12),mat(0x4f8fb8,{transparent:true,opacity:.8,roughness:.1}));w.position.set(0,.055,.08);g.add(w);}break;}
+    /* v3.08 käyttäjä: istutettavat näkyvät vasemmassa kädessä (seedModel) */
+    case 'kuusenkapy':case 'mannynkapy':case 'pihkakapy':case 'pihkamannynkapy':case 'koivunsiemen':case 'aarnisiemen':case 'puolukanvarpu':case 'sienirihma':case 'kauransiemen':seedModel(g,id);break;
+    case 'kalakirja':{if(typeof fbBookMesh==='function'){const b=fbBookMesh(false);b.position.set(0,-.02,.08);b.rotation.set(0,0,Math.PI/2);g.add(b);}break;}   // v3.15 nahkakannet + kultainen kalakoriste
+    case 'mato':{if(typeof tkWormMesh==='function'){const w=tkWormMesh(.1,7);w.position.set(0,.008,.06);w.rotation.y=.4;g.add(w);const w2=tkWormMesh(.07,19);w2.position.set(.015,.012,.075);w2.rotation.y=2.1;g.add(w2);const cr=mat(0x3a2818,{roughness:1});for(let i=0;i<3;i++){const c=new THREE.Mesh(new THREE.SphereGeometry(.006+i*.002,5,4),cr);c.position.set(-.02+i*.018,.004,.04+i*.02);g.add(c);}break;}   /* kaksi matoa ja multamuruja kämmenellä */   /* v3.14 kaareva, rengastettu mato */const wm=mat(0xc07a78,{roughness:.55});for(let i=0;i<7;i++){const s=new THREE.Mesh(new THREE.SphereGeometry(.012-Math.abs(i-3)*.0012,6,5),wm);s.position.set(Math.sin(i*.9)*.018,.005,.03+i*.013);s.scale.z=1.4;g.add(s);}break;}   // v3.08 kastemato kämmenellä
     case 'naru':{const nm=smat(0xb09a6c);for(const [r,y] of [[.07,0],[.06,.018],[.05,-.018]]){const t=new THREE.Mesh(new THREE.TorusGeometry(r,.012,5,14),nm);t.position.set(0,y,.06);t.rotation.x=Math.PI/2;g.add(t);}break;}
     case 'soihtu':{shaft(g,.6,W,.034);const wrap=new THREE.Mesh(new THREE.CylinderGeometry(.052,.04,.14,8),smat(0x3a2a1c));wrap.rotation.x=Math.PI/2;wrap.position.z=.56;g.add(wrap);
       const fa=new THREE.Mesh(new THREE.ConeGeometry(.095,.3,7),MAT.flame),fb=new THREE.Mesh(new THREE.ConeGeometry(.06,.22,7),MAT.flame2),fc=new THREE.Mesh(new THREE.ConeGeometry(.032,.14,6),new THREE.MeshBasicMaterial({color:0xfffbe0}));
@@ -358,6 +374,33 @@ function makeHeld(id){
   g.traverse(m=>{if(m.isMesh)m.castShadow=true;});if(g.userData.flame)for(const f of g.userData.flame)f.castShadow=false;
   return g;
 }
+// v3.08 siemenmallit kämmenessä (kämmenen +z = sormien suunta): kävyt suomuineen, pihkakävyissä pihkapisarat, koivun norkko, hehkuva aarnisiemen, puolukan varpu, sienirihma, kauran tähkä
+function seedModel(g,id){const Z=.07,add=(geo,m,x,y,z,rx,rz)=>{const me=new THREE.Mesh(geo,m);me.position.set(x,y,z+Z);if(rx)me.rotation.x=rx;if(rz)me.rotation.z=rz;g.add(me);return me;};
+  const cone=id==='kuusenkapy'||id==='pihkakapy'||id==='mannynkapy'||id==='pihkamannynkapy';
+  if(cone){const spruce=id==='kuusenkapy'||id==='pihkakapy',L=spruce?.15:.08,R=spruce?.03:.034,bm=smat(spruce?0x7a4e2a:0x6a4a30),dm=smat(spruce?0x553419:0x4a321e);
+    add(new THREE.CylinderGeometry(R*.45,R*.6,L,8),dm,0,0,0,Math.PI/2);   // ydin pitkittäin sormien suuntaan
+    const N=spruce?7:4;for(let i=0;i<N;i++){const t=i/(N-1),r=R*(spruce?(.75+.35*Math.sin(Math.PI*(t*.85+.1))):(1-.35*Math.abs(t-.45)*2)),z=-L/2+L*(t*.92+.04);
+      const sc=add(new THREE.CylinderGeometry(r*.55,r,L/N*1.05,8),i%2?bm:dm,0,0,z,Math.PI/2);sc.rotation.y=i*.4;}
+    add(new THREE.CylinderGeometry(.005,.005,.03,5),smat(0x4a3420),0,0,-L/2-.015,Math.PI/2);   // varsi
+    if(id==='pihkakapy'||id==='pihkamannynkapy'){const am=mat(0xe0a020,{roughness:.2,metalness:0,emissive:0x5a3600,emissiveIntensity:.35});
+      for(const [x,y,z,r] of [[R*.8,.004,.01,.011],[-R*.6,R*.6,-.02,.009],[.0,-R*.85,.025,.008],[R*.4,R*.75,.04,.007]])add(new THREE.SphereGeometry(r,7,6),am,x,y,z*(L/.15));}
+    return;}
+  if(id==='koivunsiemen'){const m=smat(0x8a6a3e),m2=smat(0x6e5230);add(new THREE.CylinderGeometry(.009,.011,.11,7),m,0,0,0,Math.PI/2);
+    for(let i=0;i<6;i++)add(new THREE.SphereGeometry(.0105,6,5),i%2?m2:m,Math.cos(i*2)*.006,Math.sin(i*2)*.006,-.045+i*.018);
+    add(new THREE.CylinderGeometry(.002,.002,.04,4),smat(0x5a4028),0,.0,-.075,Math.PI/2);return;}
+  if(id==='aarnisiemen'){const m=mat(0x3c5a2a,{roughness:.5,emissive:0x1f5a2a,emissiveIntensity:.55});add(new THREE.SphereGeometry(.04,12,10),m,0,0,0).scale.set(1,.85,1.25);
+    const v=mat(0x9adf8a,{emissive:0x56c060,emissiveIntensity:.9});for(let i=0;i<3;i++){const b=add(new THREE.TorusGeometry(.041,.003,4,14,Math.PI),v,0,0,0,0,i*1.05);b.rotation.y=Math.PI/2;b.scale.set(1.25,.85,1);}
+    add(new THREE.ConeGeometry(.012,.03,6),smat(0x2c4220),0,0,.055,Math.PI/2);return;}
+  if(id==='puolukanvarpu'){const st=smat(0x5a3c22),lf=smat(0x2f6a2a),br=mat(0xc0182a,{roughness:.35});add(new THREE.CylinderGeometry(.004,.005,.14,5),st,0,0,0,Math.PI/2);
+    for(let i=0;i<7;i++){const z=-.055+i*.017,sd=i%2?1:-1,l=add(new THREE.SphereGeometry(.014,6,4),lf,sd*.014,.004,z);l.scale.set(1,.35,.65);l.rotation.z=sd*.4;}
+    for(const [x,y,z] of [[.006,.012,.06],[-.008,.008,.068],[.0,.016,.074],[.01,.004,.074]])add(new THREE.SphereGeometry(.0085,7,6),br,x,y,z);
+    add(new THREE.BoxGeometry(.03,.012,.03),smat(0x3a2a1a),0,-.008,-.068);return;}   // multapaakku juurilla
+  if(id==='sienirihma'){const so=smat(0x3a2a1a),wh=smat(0xe8e0cc);const b=add(new THREE.SphereGeometry(.035,9,7),so,0,0,0);b.scale.set(1.2,.7,1);
+    for(let i=0;i<9;i++){const t=add(new THREE.TorusGeometry(.02+((i*7)%5)*.004,.0018,3,10),wh,Math.cos(i*1.7)*.018,.012+((i*3)%4)*.003,Math.sin(i*2.3)*.018);t.rotation.set(i*.7,i*1.3,i*.4);}
+    add(new THREE.CylinderGeometry(.006,.008,.03,6),wh,.01,.03,.0);add(new THREE.SphereGeometry(.018,9,6,0,Math.PI*2,0,Math.PI/2),smat(0x8a5a2a),.01,.044,.0);return;}
+  if(id==='kauransiemen'){const st=smat(0xc8b070),gr=smat(0xd8c488);add(new THREE.CylinderGeometry(.003,.004,.16,5),st,0,0,0,Math.PI/2);
+    for(let i=0;i<8;i++){const sd=i%2?1:-1,z=.0+i*.012,k=add(new THREE.SphereGeometry(.009,6,5),gr,sd*(.012+i*.0015),.006,z);k.scale.set(.7,.7,1.6);k.rotation.y=sd*.5;}
+    return;}}
 // Jousen jänne ja nuoli: k = vedon määrä 0–1 (0 = ei vedossa, jänne suorana).
 function updateBowMesh(g,k,nocked){const b=g.userData.bow;if(!b)return;const nz=b.tipZ-(k>0?.1+k*.32:0);   /* v1.22 veto .42 → .32 (käsi ylettyy, jänne posken kohdalle) */
   for(const [s,sy] of [[b.s1,1],[b.s2,-1]]){const dy=-sy*b.tipY,dz=nz-b.tipZ,L=Math.hypot(dy,dz);s.scale.y=L;s.position.set(0,sy*b.tipY+dy/2,b.tipZ+dz/2);s.rotation.x=Math.atan2(dz,dy);}   /* v1.57: etumerkki korjattu – ennen pätkät peilautuivat keskipisteensä ympäri (naru 180° väärin, kärki kahvalla) */

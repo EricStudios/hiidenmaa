@@ -5,7 +5,10 @@
 /* ---------------- INPUT ---------------- */
 const keys={};let mouseL=false,mouseR=false,locked=false,lockFailed=false,invertY=false;
 const canvas=renderer.domElement;
-addEventListener('keydown',e=>{
+/* v3.20 käyttäjä: latausruudun aikana (riimukivi näkyvissä) näppäimet ja napsautukset eivät liikuta hahmoa eivätkä tee mitään; jäljelle jääneet painallukset nollataan. */
+function ldBusy(){const b=window.__ldBusy;return !!b&&Date.now()-b<60000;}   // vain myöhemmät latausruudut (uusi maailma, tallennus), turvaraja 60 s
+function keysClear(){for(const k in keys)keys[k]=false;mouseL=false;mouseR=false;}
+addEventListener('keydown',e=>{if(ldBusy()&&!(typeof state!=='undefined'&&state==='menu')){e.preventDefault();return;}
   // v1.40 (kohta 4): tekstikentässä Enter lopettaa kirjoittamisen, Tab sulkee repun kuten ennen; muut näppäimet menevät tekstiin
   if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'||e.target.tagName==='SELECT'){if(e.code==='Enter'&&e.target.classList.contains('search')){e.target.blur();return;}if(e.code!=='Tab'||e.target.tagName==='TEXTAREA')return;e.target.blur();}
   // Paneelissa kirjoittaminen menee suoraan hakukenttään (ei tarvitse napsauttaa sitä ensin); toimintonäppäimet toimivat kuten ennen.
@@ -26,6 +29,7 @@ addEventListener('keydown',e=>{
   if(typeof tutKey==='function'&&tutKey(e))return;   // v2.71 opastus: Enter = jatka, pysäytyksessä vain vaiheen näppäimet
   if(DEV&&c==='Quote'){togglePanel('dev');return;}// DEV: Ä avaa/sulkee kehitysvalikon
   if(DEV&&(c==='Semicolon'||e.key==='ö'||e.key==='Ö')){togglePanel('devm');return;}
+  if(DEV&&c==='KeyU'&&DEVF.fishFastOK&&!Object.values(BIND).includes('KeyU')&&!openPanel){DEVF.fishFast=DEVF.fishFast?0:1;saveDevF();msg(`DEV: pikakalastus ${DEVF.fishFast?'PÄÄLLÄ (tärppi ~3 s)':'pois'}.`,'loot');return;}   // v3.16 vain kun Ä › Kalastus › Pikakalastus käytössä
   if(DEV&&(c==='BracketLeft'||e.key==='å'||e.key==='Å')){togglePanel('devi');return;}   // v2.00 DEV: Å avaa esinevalikon (pikavalinnat + haku)   // v1.91 DEV: Ö avaa olento- ja pomovalikon
   // v0.75: E sulkee avoimen valikon; repussa Q pudottaa valitusta yhden, Shift+Q kaikki
   if(openPanel&&c===BIND.interact){e.preventDefault();closePanels(false,true);return;}
@@ -35,6 +39,7 @@ addEventListener('keydown',e=>{
   else if(c===BIND.map)togglePanel('map');
   else if(c===BIND.minizoom)cycleMiniZoom();
   else if(c===BIND.prog)togglePanel('prog');
+  else if(c===BIND.book){if(invCount('kalakirja')||openPanel==='fish')fishBookOpen();else msg('Sinulla ei ole kalastajan kirjaa (saat sen ensimmäisestä kalasta, tai valmista työpenkillä).','warn');}   // v3.15
   else if(c===BIND.log)togglePanel('log');
   else if(c===BIND.hud){SET.hudMode=((SET.hudMode|0)+1)%4;saveSet();applyHudMode();}   // v1.18 (lista 2, kohta 8)
   else if(c===BIND.build){const w=equipped('weapon');if(w&&w.id==='vasara')togglePanel('build');else msg('Ota vasara käteen rakentaaksesi.','warn');}
@@ -55,7 +60,7 @@ addEventListener('keyup',e=>{keys[e.code]=false;});
 // v2.30: ikkuna menettää kohdistuksen (Alt+Tab ym.) → nostotapahtuma jää tulematta; nollataan, ettei esim. Shift jää pohjaan (juoksu, siirtoslider)
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});document.addEventListener('visibilitychange',()=>{if(document.hidden)for(const k in keys)keys[k]=false;});
 let dragLook=null;
-canvas.addEventListener('mousedown',e=>{
+canvas.addEventListener('mousedown',e=>{if(ldBusy()&&state!=='menu')return;   // v3.20
   audio();if(actx&&actx.state!=='running')actx.resume();
   if(state!=='play')return;
   /* v2.80: lukituksen pyyntö ei enää niele painallusta jousella ja lähiaseilla (ennen ensimmäinen painallus esim. kuoleman tai valikon jälkeen

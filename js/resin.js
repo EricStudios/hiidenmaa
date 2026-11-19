@@ -16,23 +16,31 @@ const RESIN_CAP_MIN=10,RESIN_CAP_MAX=50,RESIN_S_MAX=2.0;
 const RESIN_P=.03,RESIN_MIN_S=.75,RESIN_MAX=20,RESIN_T=3600,RESIN_FADE=120,CARVE_T=10,RESIN_G_R=80,RESIN_VIS_R=40;
 const RES={vis:new Map(),flagsRef:null,t:0,near:[],sndT:0,fallen:new Map()};
 function resinHash(id){let h=Math.imul((id|0)+1,2654435761)^Math.imul(((typeof SEED==='number'?SEED:0)|0)+7,40503);h^=h>>>15;h=Math.imul(h,2246822507);h^=h>>>13;h=Math.imul(h,3266489909);h^=h>>>16;return (h>>>0)/4294967296;}
-function resinKind(n){return !!n&&n.def&&n.def.kind==='tree'&&(n.type==='manty'||n.type==='kuusi')&&!n.isLog&&!n.dun;}
+/* v3.08 käyttäjä: AARNIPUUN PIHKA – 1 % aarnipuista pihkaisia (RESIN_P_AARNI, ei taattua), pihkaa 3× (AARNI_CAP_K) ja kertymä tunnissa 4× (AARNI_FLOW_K),
+   kaadettaessa 3–5 pihkaa. PIHKAN UUDELLEENTÄYTTYMINEN: joka 5. nukuttu yö (yhteinen laskuri flags.sleepC) jokainen tyhjentynyt pihkapuu arpoo 10 % → 30 % täyteen;
+   puu muuttuu taas pihkapuuksi ja pitää kaivertaa uudelleen (kiinni jäänyt kulho alkaa täyttyä vasta uuden kaiverruksen jälkeen). resinRefillSleep (regrowForest). */
+const RESIN_P_AARNI=.01,AARNI_CAP_K=3,AARNI_FLOW_K=4,RESIN_REFILL_N=5,RESIN_REFILL_P=.1,RESIN_REFILL_K=.3;
+function resinKind(n){return !!n&&n.def&&n.def.kind==='tree'&&(n.type==='manty'||n.type==='kuusi'||n.type==='aarnipuu')&&!n.isLog&&!n.dun;}
+function resinP(n){return n.type==='aarnipuu'?RESIN_P_AARNI:RESIN_P;}
+function resinRefillSleep(){if(!flags.sleepC||flags.sleepC%RESIN_REFILL_N)return 0;   /* laskuri flags.sleepC: regrowForest */let c=0;const st=flags.resin||{};
+  for(const id in st){const e=st[id];if(!e.done||Math.random()>=RESIN_REFILL_P)continue;const n=resinNode(id);if(!n||!n.alive)continue;
+    e.done=0;e.fade=0;e.c=0;e.tot=eCap(e)*(1-RESIN_REFILL_K);e.refill=(e.refill|0)+1;c++;}return c;}
 function resinEligible(n){return resinKind(n)&&n.s>=RESIN_MIN_S;}
 function resinStore(){if(!flags.resin)flags.resin={};return flags.resin;}
 function resinState(n){return n&&flags.resin?flags.resin[n.id]:null;}
 // pihkapuu (ei tyhjentynyt): 3 % tai maailman taattu puu
-function isResinTree(n){if(!resinEligible(n)||!n.alive)return false;const e=resinState(n);if(e&&e.done)return false;return resinHash(n.id)<RESIN_P||n.id===flags.resinG||!!n.rz;}   // v3.06 n.rz: pihkasiemenestä istutettu (farm.js)
+function isResinTree(n){if(!resinEligible(n)||!n.alive)return false;const e=resinState(n);if(e&&e.done)return false;return resinHash(n.id)<resinP(n)||n.id===flags.resinG||!!n.rz;}   // v3.06 n.rz: pihkasiemenestä istutettu (farm.js)
 // rungon puolileveys (laatikkorunko: kuusi 0,4 m, mänty 0,36 m) ja tyven korkeus (puu upotetaan rinteeseen kuten setNodeMatrix)
-function resinHW(n){return (n.type==='kuusi'?.2:.18)*n.s;}
-function resinTrunkH(n){return (n.type==='kuusi'?2.2:2.6)*n.s;}
+function resinHW(n){return (n.type==='aarnipuu'?.65:n.type==='kuusi'?.2:.18)*n.s;}
+function resinTrunkH(n){return (n.type==='aarnipuu'?3.2:n.type==='kuusi'?2.2:2.6)*n.s;}
 function resinBase(n){const [gx,gz]=groundSlope(n.x,n.z),sl=Math.hypot(gx,gz);return n.y-.05-Math.min(.6,sl*(n.def.r||.3)*n.s*1.3);}
 const RESIN_REACH=n=>resinHW(n)+.95;
-function resinCap(n){return Math.round(RESIN_CAP_MIN+(RESIN_CAP_MAX-RESIN_CAP_MIN)*clamp((n.s-RESIN_MIN_S)/(RESIN_S_MAX-RESIN_MIN_S),0,1));}
+function resinCap(n){return (n.type==='aarnipuu'?AARNI_CAP_K:1)*Math.round(RESIN_CAP_MIN+(RESIN_CAP_MAX-RESIN_CAP_MIN)*clamp((n.s-RESIN_MIN_S)/(RESIN_S_MAX-RESIN_MIN_S),0,1));}
 function eCap(e){return e.cap||RESIN_MAX;}
 function resinFlowK(q){return q>=3?1.2:q===2?1.1:1;}
 // maailman taattu pihkapuu aloituspaikan lähelle, jos 3 % ei osu yhteenkään (kerran maailmaa kohti)
 function resinEnsureG(){if(flags.resinG!==undefined||!nodes.length||!LOC.spawn)return;const sx=LOC.spawn.x,sz=LOC.spawn.z;let best=null,bd=1e9;
-  for(const n of nodes){if(!resinEligible(n)||!n.alive)continue;const d=Math.hypot(n.x-sx,n.z-sz);if(d<RESIN_G_R&&resinHash(n.id)<RESIN_P){flags.resinG=-1;return;}if(d<bd&&d>6){bd=d;best=n;}}
+  for(const n of nodes){if(!resinEligible(n)||!n.alive||n.type==='aarnipuu')continue;const d=Math.hypot(n.x-sx,n.z-sz);if(d<RESIN_G_R&&resinHash(n.id)<RESIN_P){flags.resinG=-1;return;}if(d<bd&&d>6){bd=d;best=n;}}
   flags.resinG=best?best.id:-1;}
 let _resNodeMap=null;
 function resinNode(id){if(!_resNodeMap||_resNodeMap.size!==nodes.length){_resNodeMap=new Map();for(const n of nodes)_resNodeMap.set(n.id,n);}return _resNodeMap.get(+id)||null;}
@@ -49,7 +57,7 @@ const BOWL_SPILL_Y=-.15,BOWL_SPILL_T=.12,BOWL_CURSE_D=2,BOWL_LEVEL_K=12,_spillQ=
 function bowlLevel(hm,dt){if(!hm.userData.q0)hm.userData.q0=hm.quaternion.clone();const q0=hm.userData.q0;
   if(P.insp){_spillT.copy(q0);}else{hm.parent.getWorldQuaternion(_spillPQ);_spillQ.copy(_spillPQ).multiply(q0);_spillV.set(0,1,0).applyQuaternion(_spillQ);
     _spillFix.setFromUnitVectors(_spillV,_spillUp);_spillQ.premultiply(_spillFix);_spillT.copy(_spillPQ.invert()).multiply(_spillQ);}
-  hm.quaternion.slerp(_spillT,Math.min(1,dt*BOWL_LEVEL_K));}
+  hm.quaternion.slerp(_spillT,kExp(BOWL_LEVEL_K,dt));}
 function bowlSpillTick(dt){if(heldId!=='vesikulho'||!heldMesh||P.dead){RES.spT=0;return;}bowlLevel(heldMesh,dt);heldMesh.getWorldQuaternion(_spillQ);const y=_spillV.set(0,1,0).applyQuaternion(_spillQ).y;
   if(y>=BOWL_SPILL_Y){RES.spT=0;return;}RES.spT=(RES.spT||0)+dt;if(RES.spT<BOWL_SPILL_T)return;RES.spT=0;bowlSpill();}
 function bowlSpill(){const s=heldBowl();if(!s||s.id!=='vesikulho')return;heldMesh.getWorldPosition(_spillV);s.id='kulho';invDirty=true;updateGear();bump('spills');
@@ -77,20 +85,21 @@ function resinConsider(consider){if(P.inDun)return;for(const n of nodesNear(P.po
     const by=resinBase(n);consider(n.x,by+1.1,n.z,{kind:'resin',n,label:l},RESIN_REACH(n),false);}}
 const _resNl=[];
 function resinLabel(n,e){const h=resinHeldIds(),pk=h.w==='puukko',tool=pk||h.w==='kulho'||h.w==='vesikulho'||h.o==='naru';
-  if(e&&e.b)return `Irrota kulho (pihkaa ${Math.floor(e.acc||0)})`;
+  if(e&&e.b&&!(pk&&(e.c||0)<1&&!e.done))return `Irrota kulho (pihkaa ${Math.floor(e.acc||0)})`;   // v3.08 täyttynyt puu: kiinni olevan kulhon kanssa voi kaivertaa uudelleen
   if(!isResinTree(n))return null;
   const c=e?e.c||0:0;
   if(c<1){if(pk)return c>0?`Jatka pihkakuvion kaiverrusta (${Math.floor(c*100)} %)`:'Kaiverra pihkakuvio';if(c>0||tool)return 'Kaiverra ensin pihkakuvio puukolla';return null;}
   if((e.tot||0)>=eCap(e))return null;
   return 'Kiinnitä kulho narulla';}
 function resinInteract(n){const st=resinStore(),h=resinHeldIds();let e=st[n.id];
-  if(e&&e.b){resinDetach(n,e);return;}
+  if(e&&e.b&&!(h.w==='puukko'&&(e.c||0)<1&&!e.done)){resinDetach(n,e);return;}
   if(!isResinTree(n))return;
   const c=e?e.c||0:0;
   if(c<1){if(h.w!=='puukko'){msg('Tarvitset puukon kädessä kaivertaaksesi pihkakuvion. Puukon voi takoa ahjolla (rautaa ja puuta).','warn');return;}
-    if(!e){e=st[n.id]={c:0,acc:0,tot:0,q:h.wq,a:resinFace(n),cap:resinCap(n)};}
+    if(!e){e=st[n.id]={c:0,acc:0,tot:0,q:h.wq,a:resinFace(n),cap:resinCap(n),ak:n.type==='aarnipuu'?1:0};}
     P.carve={id:n.id,last:c};msg(c>0?`Jatkat kaiverrusta (${Math.floor(c*100)} %). Pysy puun vieressä.`:'Kaiverrat pihkakuviota… pysy puun vieressä (noin 10 s).');return;}
   if((e.tot||0)>=eCap(e)){msg('Tästä puusta on valunut jo kaikki pihka.','warn');return;}
+  if(e.b){msg('Kulho on jo kiinni tässä puussa.','warn');return;}
   if(h.w==='vesikulho'){msg('Kulhossa on vettä – juo tai kaada se ensin, niin kulho on tyhjä.','warn');return;}
   if(h.w!=='kulho'&&h.o!=='naru'){msg('Kiinnittääksesi kulhon tarvitset tyhjän kulhon kädessä ja narun toisessa kädessä.','warn');return;}
   if(h.w!=='kulho'){msg('Ota tyhjä kulho käteen (pikapaikka) – naru on jo toisessa kädessä.','warn');return;}
@@ -104,8 +113,8 @@ function resinDetach(n,e){const k=Math.floor(e.acc||0);giveOrDrop('kulho',1,n.x,
   e.b=0;plSnd('pihka','kulho_kiinni');msg(k>0?`Irrotit kulhon: ${k} pihkaa.`:'Irrotit kulhon – pihkaa ei ollut vielä kertynyt.','loot');}
 // E ilman kohdetta: puukko kädessä aivan muun puun vieressä → selvä ilmoitus
 function resinNoTarget(){const h=resinHeldIds();if(h.w!=='puukko'&&h.w!=='kulho'&&h.o!=='naru')return;
-  for(const n of nodesNear(P.pos.x,P.pos.z,1.6,_resNl)){if(n.def.kind!=='tree'||n.isLog)continue;const hw=n.type==='kuusi'||n.type==='manty'?resinHW(n):(n.def.r||.3)*n.s;if(Math.hypot(n.x-P.pos.x,n.z-P.pos.z)>hw+.95)continue;
-    if(!resinKind(n)){msg('Pihkaa valutetaan vain männyistä ja kuusista.','warn');return;}
+  for(const n of nodesNear(P.pos.x,P.pos.z,1.6,_resNl)){if(n.def.kind!=='tree'||n.isLog)continue;const hw=resinKind(n)?resinHW(n):(n.def.r||.3)*n.s;if(Math.hypot(n.x-P.pos.x,n.z-P.pos.z)>hw+.95)continue;
+    if(!resinKind(n)){msg('Pihkaa valutetaan vain männyistä, kuusista ja aarnipuista.','warn');return;}
     if(n.s<RESIN_MIN_S){msg('Puu on liian nuori pihkankeräykseen.','warn');return;}
     const e=resinState(n);msg(e&&e.done?'Tästä puusta on valunut jo kaikki pihka.':'Tästä puusta ei valu tarpeeksi pihkaa. Etsi runko, joka kellertää.','warn');return;}}
 // kaiverruspinta: rungon sivu, joka on lähimpänä pelaajaa (laatikkorungon sivut n.rot + k·90°)
@@ -119,7 +128,7 @@ function carveTick(dt){const C=P.carve;if(!C)return;const n=resinNode(C.id),e=n&
   if(far||h.w!=='puukko'||P.dead||P.atk||P.swim){carveStop(`Kaiverrus keskeytyi (${Math.floor(e.c*100)} %). Jatka painamalla E puukko kädessä puun vieressä.`);return;}
   P.yaw=Math.atan2(n.x-P.pos.x,n.z-P.pos.z);e.q=Math.max(1,h.wq);
   e.c=Math.min(1,e.c+dt*resinFlowK(h.wq)/CARVE_T);RES.sndT-=dt;if(RES.sndT<=0){RES.sndT=1+Math.random()*.4;   /* v3.05 käyttäjän vedot ~1,2 s: ei päällekkäin */plSnd('pihka','kaiverrus',{pos:{x:n.x,y:resinBase(n)+1.1,z:n.z}});if(Math.random()<.6)burst(n.x+Math.sin(e.a)*(resinHW(n)+.05),resinBase(n)+.6+(1-e.c)*.9,n.z+Math.cos(e.a)*(resinHW(n)+.05),0xc89a5a,3,1.2);}
-  if(e.c>=1){P.carve=null;e.q=Math.max(1,h.wq);addXp(25,'Pihkakuvio');msg('Pihkakuvio valmis! Sido kuvion alle kulho: tyhjä kulho kädessä, naru toisessa kädessä, E.','loot');sfx('craft');}}
+  if(e.c>=1){P.carve=null;e.q=Math.max(1,h.wq);addXp(25,'Pihkakuvio');msg(e.b?'Pihkakuvio valmis! Kiinni oleva kulho alkaa taas täyttyä.':'Pihkakuvio valmis! Sido kuvion alle kulho: tyhjä kulho kädessä, naru toisessa kädessä, E.','loot');sfx('craft');}}
 // oikea käsi vetää puukkoa kuvion uria pitkin, vasen tukee runkoa
 function carvePose(){if(!P.carve)return;const t=playTime*8.5,s=Math.sin(t);
   fig.armR.rotation.x=-1.12+.2*s;fig.armR.rotation.z=.18+.08*Math.sin(t*.5);fig.elbowR.rotation.x=-.75+.3*Math.sin(t+1);
@@ -145,7 +154,7 @@ function resinTick(dt,td=dt){   // td = pelin ajan nopeus (kertymä ja hiipumine
  if(RES.flagsRef!==flags){RES.flagsRef=flags;resinClearVis();_resNodeMap=null;}
   resinEnsureG();carveTick(dt);knifeInfoTick(dt);inspectTick(dt);bowlSpillTick(dt);angryTick(dt);   // v3.04 vesikulho kaatuu, vihainen-ääni
   const st=flags.resin;if(st)for(const id in st){const e=st[id];
-    if(e.b&&(e.tot||0)<eCap(e)){const add=Math.min(eCap(e)-(e.tot||0),td*eCap(e)/RESIN_T*resinFlowK(e.q||1));e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;
+    if(e.b&&(e.c||0)>=1&&(e.tot||0)<eCap(e)){const add=Math.min(eCap(e)-(e.tot||0),td*eCap(e)/RESIN_T*resinFlowK(e.q||1)*(e.ak?AARNI_FLOW_K/AARNI_CAP_K:1));   /* v3.08 vain kaiverrettuna (uudelleentäyttyminen); aarnipuu 4×/h */e.acc=(e.acc||0)+add;e.tot=(e.tot||0)+add;
       e.dripT=(e.dripT??Math.random()*RESIN_DRIP_T[1])-dt;if(e.dripT<=0){e.dripT=RESIN_DRIP_T[0]+Math.random()*(RESIN_DRIP_T[1]-RESIN_DRIP_T[0]);const n=resinNode(id);if(n&&!P.inDun&&dist2(n.x,n.z,P.pos.x,P.pos.z)<RESIN_DRIP_R*RESIN_DRIP_R)plSnd('pihka','tippa',{pos:{x:n.x,y:resinBase(n)+.9,z:n.z},v:RESIN_DRIP_V,rk:.3});}}   // v3.02 tipan ääni
     if((e.tot||0)>=eCap(e)&&!e.done){e.fade=Math.min(1,(e.fade||0)+td/RESIN_FADE);if(e.fade>=1)e.done=1;}}
   RES.t-=dt;if(RES.t<=0){RES.t=.25;resinVisTick();for(const [id,r] of RES.fallen)if(playTime-r.t>30){if(r.v&&!r.v.attached)resinVisFree(r.v);RES.fallen.delete(id);}}
@@ -169,9 +178,9 @@ function resinVisTick(){if(P.inDun){if(RES.vis.size)resinClearVis();return;}
   for(const n of nodesNear(P.pos.x,P.pos.z,RESIN_VIS_R,_resNl)){if(!resinKind(n))continue;const e=resinState(n);if(!isResinTree(n)&&!(e&&(e.b||!e.done)))continue;want.add(n.id);
     const key=resinVisKey(n,e),v=RES.vis.get(n.id);if(v&&v.key===key)continue;if(v)resinVisFree(v);RES.vis.set(n.id,resinBuild(n,e,key));}
   for(const [id,v] of RES.vis)if(!want.has(id)){resinVisFree(v);RES.vis.delete(id);}}
-function resinVisKey(n,e){return e?[Math.floor((e.c||0)*24),e.b?1:0,Math.floor((e.fade||0)*10),Math.min(10,Math.floor((e.acc||0)/eCap(e)*10)),e.done?1:0,n.x.toFixed(2),n.z.toFixed(2)].join('|'):'h|'+n.x.toFixed(2)+'|'+n.z.toFixed(2);}
+function resinVisKey(n,e){return e?[n.s.toFixed(2),Math.floor((e.c||0)*24),e.b?1:0,Math.floor((e.fade||0)*10),Math.min(10,Math.floor((e.acc||0)/eCap(e)*10)),e.done?1:0,n.x.toFixed(2),n.z.toFixed(2)].join('|'):'h|'+n.x.toFixed(2)+'|'+n.z.toFixed(2);}
 // kuvion mitat (rungon pinnalla, korkeudet tyvestä)
-function resinGeom(n){const hw=resinHW(n),th=resinTrunkH(n),y0=Math.max(.4,Math.min(.55,th-1.2)),y1=Math.min(1.55,th-.15);return {hw,th,y0,y1,W:hw*2*.84};}
+function resinGeom(n){const hw=resinHW(n),th=resinTrunkH(n),y0=Math.max(.4,Math.min(.55,th-1.2)),y1=Math.min(1.55,th-.15);return {hw,th,y0,y1,W:Math.min(hw*2*.84,.8)};}
 /* v2.96 kaatuminen: kuvio ja kulho liitetään kaatuvaan puuhun (state.js fallTree) → kaatuvat mukana */
 function resinFallAttach(n,g){const r=RES.fallen.get(n.id);if(!r||!r.v)return;g.updateMatrixWorld(true);r.v.g.updateMatrixWorld(true);g.attach(r.v.g);r.v.attached=1;}
 /* v2.96 tukkiin jää kaiverruksen kohdalle tumma läiskä (resources.js spawnLogs → ensimmäinen tukki) */
@@ -190,7 +199,7 @@ function resinBuild(n,e,key){const g=new THREE.Group(),hw=resinHW(n),by=resinBas
   // kellertävä pinta: pienet pihkavalumat kahdella sivulla (ainoa tuntomerkki)
   if(!(e&&(e.done||(e.c||0)>0))){g.rotation.y=n.rot||0;for(const [k,y,x,h] of [[0,.95,-.05,.22],[1,1.3,.04,.18],[2,.75,-.05,.14]]){const a=k*Math.PI/2,c=Math.cos(a),s=Math.sin(a),zz=hw+.004,xx=x*n.s;
       const m=add(.034*n.s,h*n.s,.008,RES_MAT.hint,xx*c+zz*s,Math.min(th-.2,y*n.s),-xx*s+zz*c);m.rotation.y=a;}}
-  if(!e||!((e.c||0)>0)){scene.add(g);return {g,key};}
+  if(!e||!((e.c||0)>0||e.b)){scene.add(g);return {g,key};}   // v3.08 kulho näkyy myös uudelleen täyttyneessä (c=0) puussa
   // kuvio omassa ryhmässä kaiverrussivun suuntaan (paikallinen +z = ulospäin rungosta)
   const P0=new THREE.Group();P0.rotation.y=(e.a||0)-(g.rotation.y||0);g.add(P0);
   const fade=e.fade||0,op=1-fade,own=m=>{if(op>=.999)return m;const c=m.clone();c.transparent=true;c.opacity=op;c.depthWrite=false;c.userData.own=1;return c;};
