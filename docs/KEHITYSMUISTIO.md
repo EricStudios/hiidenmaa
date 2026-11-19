@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.20, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.21, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +434,11 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.21 (valikon nappien ohjerivit – käyttäjä 19.11.)
+- Itsestäänselvät ohjerivit päävalikon napeissa (Uusi maailma "Aloita rannalta … pidä pohjassa = heti", Näppäimet, Asetukset, Tallenna nyt, Tila, Maailmat-napin
+  "– pelaa, nimeä tai aloita uusi") näkyvät vain, kunnes nappia on käytetty kerran (`BH_KEY` localStorage, `bhMark`/`bhApply`, CSS `.bhUsed .bh`). Tietorivit (maailman nimi,
+  päivä, taso, maailmojen määrä) näkyvät aina. Asetukset › Ohjaus › *Näytä valikon nappien ohjeet aina* (`SET.alwaysBtnHints`, oletus pois, body `showBH`).
 
 ### v3.20 (intro, ohitus, napit, vinkit – käyttäjä 19.11.)
 - **Enter vahvistaa aina varmistusikkunan** (ensisijainen nappi, muuten ensimmäinen; ei näppäimen sidonnassa eikä 150 ms sisällä avautumisesta).

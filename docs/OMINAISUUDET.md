@@ -886,6 +886,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.21 – nappien ohjeet
+- Päävalikon nappien selitysrivit näkyvät vain siihen asti, kun nappia on käytetty kerran. Asetukset › Ohjaus › Näytä valikon nappien ohjeet aina (oletus pois).
+
 ## v3.20 – intro ja vinkit
 - Enter vahvistaa varmistusikkunat. Aloita seikkailu aloittaa ensimmäisen maailman yhdellä napsautuksella.
 - Intro: usva näkyy alusta asti ja lipuu sivulta paikalleen; pilvet häipyvät vasta kun kamera on alhaalla. Ensimmäistä introa ei voi ohittaa, myöhemmin vain hiiren

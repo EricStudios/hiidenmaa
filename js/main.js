@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.20';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.21';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -24,8 +24,16 @@ function refreshMenu(){const inGame=started;$('#bResume').hidden=!inGame;$('#bSa
   {const used=m.filter(Boolean).length,li=lastWorld(m),c=$('#bContinue');if(c){c.hidden=inGame;
     if(li>=0){const w=m[li];$('#bContT').textContent='Jatka seikkailua';$('#bContS').textContent=`${w.name} · päivä ${w.day||1} · taso ${w.lvl||1} · ${(MAPS[w.mapId||0]||MAPS[0]).name}`;}
     else{$('#bContT').textContent='Aloita seikkailu';$('#bContS').textContent='Uusi maailma – haaksirikko, ranta ja arvottu saari';}}
-   const ws=$('#bWorldsS');if(ws)ws.textContent=used?`${used} / ${SLOTS} maailmaa – pelaa, nimeä tai aloita uusi`:'Ei vielä maailmoja – aloita uusi';}
+   const ws=$('#bWorldsS');if(ws)ws.innerHTML=used?`${used} / ${SLOTS} maailmaa<span class="bh"> – pelaa, nimeä tai aloita uusi</span>`:'Ei vielä maailmoja<span class="bh"> – aloita uusi</span>';}
+  bhApply();
   $('#menu').classList.toggle('inGame',inGame);menuStagger();}
+/* v3.21 käyttäjä: valikon nappien itsestäänselvät ohjerivit (.bh) näkyvät vain siihen asti, kun nappia on käytetty kerran (localStorage BH_KEY, kaikille maailmoille).
+   Asetukset › Ohjaus › Näytä valikon nappien ohjeet aina (SET.alwaysBtnHints, body.showBH). */
+const BH_KEY='hiidenmaa_btnUsed',BH_IDS=['bRun','bSave','bWorlds','bKeys','bMenuToggle','bNewWorld'];
+function bhUsed(){try{return JSON.parse(localStorage.getItem(BH_KEY)||'{}')||{};}catch(e){return {};}}
+function bhMark(id){const o=bhUsed();if(o[id])return;o[id]=1;try{localStorage.setItem(BH_KEY,JSON.stringify(o));}catch(e){}}
+function bhApply(){const o=bhUsed();for(const id of BH_IDS){const b=document.getElementById(id);if(b)b.classList.toggle('bhUsed',!!o[id]);}}
+addEventListener('pointerup',e=>{const b=e.target&&e.target.closest&&e.target.closest('#menu .mbtn[id]');if(b&&BH_IDS.includes(b.id))setTimeout(()=>{bhMark(b.id);bhApply();},400);},true);
 function lastWorld(m){let b=-1,t=-1;m.forEach((w,i)=>{if(w&&(w.at||0)>t){t=w.at||0;b=i;}});return b;}
 /* v1.46: valikon näkymät. 'main' = päänäkymä ilman vieritystä; 'worlds' ja 'settings' (Asetukset/Näppäimet) korvaavat sen leveällä
    näkymällä tyhjään tilaan. Takaisin-painike tai P palaa. #settings-paneelin hidden-tila ohjaa settings-näkymää (MutationObserver). */
@@ -49,7 +57,7 @@ function renderWorlds(){const el=$('#worlds');if(!el)return;const m=slotMeta(),u
   el.innerHTML=`<h3>Maailmat <span class="note">${used} / ${SLOTS}</span></h3>`+m.map((w,i)=>!w?'':`<div class="world${started&&i===curSlot?' cur':i===lw?' last':''}" data-i="${i}" title="Tuplaklikkaus: pelaa · pidä pohjassa 1 s: kopioi maailman koodi">
     ${started&&i===curSlot?'<span class="wTag cur">Pelaat nyt</span>':i===lw?'<span class="wTag last">Viimeksi pelattu</span>':''}<div class="wInfo"><b class="wName">${esc(w.name)}</b><span>${fmtAt(w.at)} · päivä ${w.day||1} · taso ${w.lvl||1} · ${(MAPS[w.mapId||0]||MAPS[0]).name}${w.seed?` · seed ${w.seed}`:''}${w.min?` · ${w.min} min`:''}</span></div>
     <div class="wBtns"><button class="btn pri" data-play="${i}">${started&&i===curSlot?'Pelissä':'Pelaa'}</button><button class="btn" data-ren="${i}">Nimeä</button><button class="btn" data-del="${i}">Poista</button></div></div>`).join('')+
-    (free>=0?`<div class="wNew"><input id="newName" class="search" maxlength="28" placeholder="Maailma ${free+1}">${DEV?`<input id="newSeed" class="search" type="number" min="1" max="${SEED_MAX}" placeholder="Seed (DEV, tyhjä = satunnainen)">`:''}<label class="wTut"><input type="checkbox" id="newTut"${tutDefault()?' checked':''}> Opastus uuden maailman alkuun</label><button class="mbtn holdBtn" id="bNewWorld"><i class="mIco">ᚨ</i>Uusi maailma<small>Aloita rannalta ilman mitään – kartta arvotaan · pidä pohjassa = heti</small><b class="mSheen"></b></button></div>`
+    (free>=0?`<div class="wNew"><input id="newName" class="search" maxlength="28" placeholder="Maailma ${free+1}">${DEV?`<input id="newSeed" class="search" type="number" min="1" max="${SEED_MAX}" placeholder="Seed (DEV, tyhjä = satunnainen)">`:''}<label class="wTut"><input type="checkbox" id="newTut"${tutDefault()?' checked':''}> Opastus uuden maailman alkuun</label><button class="mbtn holdBtn" id="bNewWorld"><i class="mIco">ᚨ</i>Uusi maailma<small class="bh">Aloita rannalta ilman mitään – kartta arvotaan · pidä pohjassa = heti</small><b class="mSheen"></b></button></div>`
       :`<div class="note">Kaikki ${SLOTS} paikkaa ovat käytössä. Poista maailma tehdäksesi uuden.</div>`);
   el.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{const i=+b.dataset.play;if(started&&i===curSlot){$('#bResume').click();return;}
     const go=()=>{const d=slotData(i);if(!d){$('#saveMsg').textContent='Tallennus puuttuu tai on rikki.';return;}setCurSlot(i);playSave(d,`Tervetuloa takaisin: ${m[i].name}.`);};
@@ -67,7 +75,7 @@ function renderWorlds(){const el=$('#worlds');if(!el)return;const m=slotMeta(),u
     holdBtn(nb,NEW_HOLD,go,ask);NEWW.go=go;}
   // v3.13 käyttäjä: kortin tuplaklikkaus = Pelaa (tai jatka, jos käynnissä); kortti pohjassa 1 s = maailman tallennuskoodi leikepöydälle
   el.querySelectorAll('.world[data-i]').forEach(c=>{const i=+c.dataset.i;c.ondblclick=e=>{if(e.target.closest('button,input'))return;const b=c.querySelector('[data-play]');if(b)b.click();};
-    holdBtn(c,CODE_HOLD,()=>worldCodeCopy(i,c),null,e=>!e.target.closest('button,input'));});}
+    holdBtn(c,CODE_HOLD,()=>worldCodeCopy(i,c),null,e=>!e.target.closest('button,input'));});bhApply();}
 const NEW_HOLD=.6,CODE_HOLD=1,NEWW={go:null};   // v3.20 NEWW.go = uuden maailman aloitus (Aloita seikkailu -napille)
 // pito-nappi: --qp etenee nollasta ykköseen (CSS-palkki), lyhyt painallus kutsuu tap-funktiota, ok-ehto rajaa mistä painallus saa alkaa
 function holdBtn(b,T,done,tap,ok){let t0=0,raf=0,fired=false;const stop=()=>{t0=0;cancelAnimationFrame(raf);b.style.setProperty('--qp','0');b.classList.remove('holding');};

@@ -592,6 +592,11 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.21: valikon nappien ohjerivit vain kunnes nappia on käytetty, asetus Näytä valikon nappien ohjeet aina (oletus pois)',()=>{
+    const o0=localStorage.getItem(BH_KEY),s0=SET.alwaysBtnHints;try{localStorage.removeItem(BH_KEY);bhApply();const b=$('#bKeys'),sm=b.querySelector('small.bh');const v1=getComputedStyle(sm).display!=='none';
+      bhMark('bKeys');bhApply();const v2=getComputedStyle(sm).display==='none';SET.alwaysBtnHints=true;hintApply();const v3=getComputedStyle(sm).display!=='none';
+      return SET_DEF.alwaysBtnHints===false&&SET_PAGES.ctl.includes('alwaysBtnHints')&&v1&&v2&&v3&&!!document.querySelector('#bWorldsS .bh')||`${v1} ${v2} ${v3}`;}
+    finally{if(o0===null)localStorage.removeItem(BH_KEY);else localStorage.setItem(BH_KEY,o0);SET.alwaysBtnHints=s0;hintApply();bhApply();}});
   t('v3.20: Enter vahvistaa varmistuksen, Aloita seikkailu käynnistää ensimmäisen maailman, intron usva alusta asti ja pilvet pois vasta alhaalla, intron ohitus vain hiirellä (ensimmäistä ei voi), ei liikettä latauksessa, äänet −20/−40 %, työkaluvinkki heti, tasonimike vain repussa',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     let hit=0;keyDialog('Testi?',[['Vahvista',()=>{hit=1;}],['Peruuta',null]]);$('#keyDlg')._at=0;dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',code:'Enter'}));ck('enter',hit===1&&$('#keyDlg').hidden);
