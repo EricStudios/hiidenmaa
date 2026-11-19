@@ -205,6 +205,7 @@ function updatePlayer(dt){
 
   armClear(fig.armL,fig.elbowL,fig.handL);
   carvePose();   // v2.91 pihkakuvion kaiverrus
+  if(typeof bookPose==='function')bookPose();   // v3.15 kalakirja molemmissa käsissä lukiessa
   {const ea=playTime-(P.eT??-9);if(ea>=0&&ea<E_ANIM_T&&!P.atk&&!P.carve&&!P.insp&&!P.drawing&&!P.dead){const k=Math.sin(ea/E_ANIM_T*Math.PI);P._eOff=[-.62*k,-.38*k];fig.armR.rotation.x+=P._eOff[0];fig.elbowR.rotation.x+=P._eOff[1];}}   // v3.06 (käyttäjä): E-toiminnossa käsi käy hieman eteen ja takaisin
   if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand);armWorldClear(fig.armL,fig.elbowL,fig.handL);}   // v2.88
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.

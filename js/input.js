@@ -35,6 +35,7 @@ addEventListener('keydown',e=>{
   else if(c===BIND.map)togglePanel('map');
   else if(c===BIND.minizoom)cycleMiniZoom();
   else if(c===BIND.prog)togglePanel('prog');
+  else if(c===BIND.book){if(invCount('kalakirja')||openPanel==='fish')fishBookOpen();else msg('Sinulla ei ole kalastajan kirjaa (saat sen ensimmäisestä kalasta, tai valmista työpenkillä).','warn');}   // v3.15
   else if(c===BIND.log)togglePanel('log');
   else if(c===BIND.hud){SET.hudMode=((SET.hudMode|0)+1)%4;saveSet();applyHudMode();}   // v1.18 (lista 2, kohta 8)
   else if(c===BIND.build){const w=equipped('weapon');if(w&&w.id==='vasara')togglePanel('build');else msg('Ota vasara käteen rakentaaksesi.','warn');}

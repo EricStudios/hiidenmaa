@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.14';
+:root{--css-v:'3.15';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1108,3 +1108,36 @@ body.noActH #prompt{display:none!important}
 @keyframes tkWowIn{0%{opacity:0;transform:translateX(-50%) scale(.6)}100%{opacity:1;transform:translateX(-50%) scale(1)}}
 @keyframes tkWowOut{to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
 @keyframes tkWowGlow{from{text-shadow:0 0 8px rgba(255,190,60,.5)}to{text-shadow:0 0 22px rgba(255,210,90,1)}}
+
+/* v3.15 Kalastajan kirja: nahkakannet, aukeama, sivunumerot, kääntyvä lehti */
+#fishP.fbPanel{max-width:min(1100px,calc(100vw - 24px));width:1100px;padding:18px 18px 12px;background:radial-gradient(ellipse at 50% 40%,#4a2c18,#2a170c 75%);border:2px solid #6a4428;box-shadow:0 0 0 3px #1a0e06,0 12px 40px rgba(0,0,0,.7),inset 0 0 40px rgba(0,0,0,.6)}
+#fishP.fbPanel .close{z-index:5}
+.fbBook{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;perspective:2200px;min-height:min(70vh,640px)}
+.fbPg{position:relative;background:linear-gradient(90deg,#efe3c4,#f6ecd2 12%,#f3e7c8 88%,#e2d2ac);color:#2e2014;padding:22px 28px 34px;font-family:'Alegreya Sans',sans-serif;box-shadow:inset 0 0 30px rgba(120,80,30,.18)}
+.fbPg.L{border-radius:6px 0 0 6px;background:linear-gradient(90deg,#e8d9b6,#f3e8cc 10%,#f6ecd2 85%,#d8c49a)} .fbPg.R{border-radius:0 6px 6px 0;background:linear-gradient(90deg,#d8c49a,#f6ecd2 15%,#f3e8cc 90%,#e8d9b6)}
+.fbIn{height:100%;overflow:hidden} .fbIn h3{font:400 24px 'Uncial Antiqua',serif;color:#4a2a14;margin:0 0 8px;border-bottom:1px solid rgba(90,60,30,.3);padding-bottom:4px} .fbIn h4{margin:10px 0 4px;color:#5a3a1a}
+.fbNo{position:absolute;bottom:10px;font:600 13px 'Alegreya Sans',sans-serif;color:#7a5a3a} .fbPg.L .fbNo{left:18px} .fbPg.R .fbNo{right:18px}
+.fbSpine{position:absolute;left:50%;top:0;bottom:0;width:26px;transform:translateX(-50%);background:linear-gradient(90deg,rgba(60,35,15,0),rgba(60,35,15,.35),rgba(60,35,15,0));pointer-events:none}
+.fbTitle{font:400 34px 'Uncial Antiqua',serif;color:#4a2a14;text-align:center;margin-top:18px}
+.fbOrn{height:46px;margin:6px auto 4px;width:140px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 46'%3E%3Cpath d='M20 23c18-16 52-16 74 0-22 16-56 16-74 0z' fill='%23c8962e'/%3E%3Cpath d='M94 23l22-14v28z' fill='%23c8962e'/%3E%3Ccircle cx='34' cy='20' r='3' fill='%234a2a14'/%3E%3Cpath d='M2 23h14M124 23h14' stroke='%23c8962e' stroke-width='2'/%3E%3C/svg%3E")}
+.fbC{text-align:center;color:#6a4a2a} .fbS{color:#6a4a2a;font-size:13.5px;margin:4px 0}
+.fbToc{list-style:none;padding:0;margin:8px 0} .fbToc li{display:flex;align-items:baseline;gap:6px;cursor:pointer;padding:3px 0} .fbToc li:hover span{color:#a0521a;text-decoration:underline}
+.fbToc i{flex:1;border-bottom:1px dotted rgba(90,60,30,.5)}
+.fbArt{text-align:center;margin:2px 0 6px} .fbArt img{width:min(100%,300px);height:auto;filter:drop-shadow(2px 3px 2px rgba(60,40,20,.35))}
+.fbT{width:100%;border-collapse:collapse;font-size:14px} .fbT td{padding:3px 4px;border-bottom:1px solid rgba(90,60,30,.15);vertical-align:top} .fbT td:first-child{color:#7a5a3a;white-space:nowrap;width:30%}
+.fbTime{font-size:12.5px} .fbTime td,.fbTime th{text-align:center;padding:2px} .fbTime td:first-child{text-align:left} .fbTime th{color:#7a5a3a;font-weight:600}
+.fbCls{display:inline-block;padding:0 7px;border-radius:9px;font-weight:700;font-size:12.5px;color:#1a120a;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);cursor:help;white-space:nowrap}
+.fbCls.big{font-size:15px;padding:1px 10px}
+.fbClsT{width:100%;border-collapse:collapse;font-size:13.5px} .fbClsT td{padding:4px;border-bottom:1px solid rgba(90,60,30,.15)} .fbClsT td:last-child{text-align:right;font-weight:700}
+.fbWish{display:flex;gap:10px;align-items:center;padding:8px;margin:6px 0;border:1px solid rgba(90,60,30,.3);border-radius:4px;background:rgba(255,255,255,.25)}
+.fbWish img{width:120px;height:60px} .fbWish div{display:flex;flex-direction:column} .fbWish span{color:#6a4a2a;font-size:13px} .fbWish em{font-style:normal;font-weight:700;color:#a0521a}
+.fbWish.ok{opacity:.65} .fbWish.ok em{color:#3a7a2a}
+.fbL{padding-left:18px;margin:4px 0;font-size:14px} .fbL li{margin:3px 0} .fbL.fg li.ok{color:#3a7a2a}
+.fbBar{display:grid;grid-template-columns:42% 1fr 42px;align-items:center;gap:6px;font-size:12px;margin:0;line-height:1.25} .fbBar i{display:block;height:8px;background:linear-gradient(90deg,#4f8fb8,#a9d8f2);border-radius:4px}
+.fbBar b{text-align:right;color:#6a4a2a;font-weight:600}
+.fbEnd{text-align:center;font-size:40px;color:#c8962e;margin-top:40%}
+.fbNav{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:10px;color:#d8c8a8}
+.fbLeaf{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(90deg,#efe3c4,#f6ecd2);padding:22px 28px;color:#2e2014;box-shadow:0 0 20px rgba(0,0,0,.35);backface-visibility:hidden;z-index:3}
+.fbLeaf.fw{left:50%;transform-origin:left center;animation:fbFw .38s ease-in forwards} .fbLeaf.bw{left:0;transform-origin:right center;animation:fbBw .38s ease-in forwards}
+@keyframes fbFw{from{transform:rotateY(0)}to{transform:rotateY(-178deg)}} @keyframes fbBw{from{transform:rotateY(0)}to{transform:rotateY(178deg)}}
+@media (max-width:760px){.fbBook{grid-template-columns:1fr}.fbPg.R{display:none}}

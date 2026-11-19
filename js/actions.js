@@ -9,7 +9,8 @@ function onPrimary(){
   if(P.dead||P.stagger>0)return;
   const w=curWeapon();
   if(w.cat==='bowl'){bowlUse();return;}   // v2.91 kulho / vesikulho
-  if(typeof tkPrimary==='function'&&tkPrimary(w))return;   // v3.14 kalastuspakki: lasku maahan/pöydälle ja nosto (tackle.js)
+  if(typeof tkPrimary==='function'&&tkPrimary(w))return;
+  if(typeof fbPrimary==='function'&&fbPrimary(w))return;   // v3.15 kalakirja kädessä → avaa   // v3.14 kalastuspakki: lasku maahan/pöydälle ja nosto (tackle.js)
   if(w.cat==='rod'){fishClick();return;}   // v3.06 onki (fish.js)
   if(w.cat==='hammer'){placeBuild();return;}
   if(w.cat==='shovel'){useTool(false);return;}

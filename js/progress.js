@@ -48,6 +48,12 @@ const ACH=[
   {id:'padankaitsija',n:'Padankaitsija',d:'Ota keittopadasta 20 valmista pataruokaa.',pr:()=>[cnt('potDish'),20],b:{w:5}},   // v3.02
   {id:'hillo',n:'Hillomestari',d:'Keitä 10 puolukkahilloa.',pr:()=>[flags.hilloN||0,10],b:{stam:5}},   // v3.02
   {id:'kalamies',n:'Kalamies',d:'Ongi 25 kalaa.',pr:()=>[cnt('fish'),25],b:{w:5}},   // v3.06
+  {id:'toive1',n:'Toive täyttyi',d:'Täytä kalakirjan toive.',pr:()=>[fishF().wishN||0,1],b:{}},   // v3.15 kalakirjan toivekalat (XP tulee toiveista)
+  {id:'toive5',n:'Toiveiden kalastaja',d:'Täytä 5 kalakirjan toivetta.',pr:()=>[fishF().wishN||0,5],b:{}},
+  {id:'toive15',n:'Toiveiden täyttäjä',d:'Täytä 15 kalakirjan toivetta.',pr:()=>[fishF().wishN||0,15],b:{}},
+  {id:'toiveH',n:'Vaikea toive',d:'Täytä toive, joka vaatii vähintään Harvinainen-luokan kalan.',pr:()=>[fishF().wishH||0,1],b:{}},
+  {id:'kirjataysi',n:'Kirja täynnä',d:'Saa kalakirjaan kaikki lajit.',pr:()=>[FB_SP.filter(sp=>fishF().n[sp]).length,FB_SP.length],b:{}},
+  {id:'ennatyskala',n:'Ennätyskala',d:'Saa Legendaarinen tai parempi kala.',pr:()=>[fishF().legend||0,1],b:{}},
   {id:'vartija',n:'Kalmanvartijan voittaja',d:'Voita Kalmanvartija.',pr:()=>[flags.boss?1:0,1],b:{hp:5,stam:5}},
 ];
 const BON={hp:0,stam:0,w:0,spd:0};
@@ -56,7 +62,7 @@ const BON={hp:0,stam:0,w:0,spd:0};
 const W_BASE=60,W_PACK=15;
 function recalcMaxW(){MAXW=W_BASE+W_PACK*P.packLv+BON.w+lvlBon().w;}   // v2.70 + tasojen kantokyky
 function recalcBon(){fixFlags();BON.hp=BON.stam=BON.w=BON.spd=0;for(const a of ACH)if(flags.ach[a.id])for(const k in a.b)BON[k]+=a.b[k];recalcMaxW();}
-const bonText=b=>Object.entries(b).map(([k,v])=>({hp:`+${v} enimmäisterveys`,stam:`+${v} enimmäiskestävyys`,w:`+${v} kantokyky`,spd:`+${v} % nopeus`}[k])).join(', ');
+const bonText=b=>Object.entries(b).map(([k,v])=>({hp:`+${v} enimmäisterveys`,stam:`+${v} enimmäiskestävyys`,w:`+${v} kantokyky`,spd:`+${v} % nopeus`}[k])).join(', ')||'kunniamaininta';   // v3.15 kalakirjan saavutukset ilman bonusta
 function checkAch(){fixFlags();let any=false;
   for(const a of ACH){if(flags.ach[a.id])continue;const [c,m]=a.pr();if(c>=m){flags.ach[a.id]=1;any=true;msg(`Saavutus: ${a.n} (${bonText(a.b)})`,'loot');addXp(50,'saavutus');sfx('craft');}}
   if(any)recalcBon();}

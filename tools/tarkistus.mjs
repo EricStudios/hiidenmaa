@@ -592,6 +592,27 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.16: tasot 999 (ennallaan 30:een, sen jälkeen kasvava XP, ei palkintoja), 20 nimikettä (HUD + edistyminen), DEV-valikko sivuiksi, pikakalastus-täppä + U',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('tasot',LVL_MAX===999&&LVL_REW_MAX===30&&needXp(29)===1270&&needXp(30)>needXp(29)&&needXp(500)>needXp(100)&&JSON.stringify(lvlRew(31))==='{}'&&lvlBon(999).w===lvlBon(30).w&&lvlBon(999).hp===lvlBon(30).hp);
+    const x0=flags.xp;try{flags.xp=0;for(let i=1;i<200;i++)flags.xp+=needXp(i);ck('taso 200',lvlInfo().L===200);}finally{flags.xp=x0;}
+    ck('nimikkeet',LVL_TITLES.length===20&&lvlTitle(1)==='Haaksirikkoutunut'&&lvlTitle(30)==='Kokeneempi seikkailija'&&lvlTitle(999)==='Hiidenmaan legenda'&&/lvlTitle/.test(String(renderProg))&&/lvlTitle/.test(String(updateHUD)));
+    ck('dev sivut',DEV_TABS.length===5&&DEV_TABS.some(t=>t[0]==='kalastus')&&DEV_TABS.some(t=>t[0]==='anim')&&/devTabsBind/.test(renderDev.toString())&&DEV_PICK_CATS.length>=4);
+    ck('pikakalastus',/fishFastOK/.test(renderDev.toString())&&/DEVF\.fishFast\?30/.test(tkSpinTick.toString())&&/DEVF\.fishFast\)t=3/.test(fishWaitPlan.toString()));
+    return e.length?'virhe: '+e.join(', '):true;});
+  t('v3.15: kalakirja – aukeama + sivunumerot + kääntö, piirretty kuvitus, arvo (paino + koko → 8 luokkaa), saalisviesti sivunumerolla, 3 toivekalaa 7 päivää, saavutukset, kirja kädessä (K, klikkaus, oikea käsi, lukuasento), DEV paljastus',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('luokat',FB_CLS.length===8&&FB_CLS[0].n==='Roskakala'&&FB_CLS[6].n==='Ikijärkäle'&&FB_CLS[7].n==='Maailmanennätysvonkale');
+    const hi=fishValue('hauki',FISH_B.hauki.kg[1],FISH_LEN.hauki),lo=fishValue('hauki',FISH_B.hauki.kg[0],10);ck('arvo',hi.cls>=6&&lo.cls===0&&hi.pct>.99);
+    ck('saalisviesti',/katso kalakirjan sivu/.test(fbCatch.toString())&&/fbCatch/.test(fishLand.toString())&&fbPage(FB_SP[0])===FB_FIRST_SP);
+    const W=fbWish();ck('toiveet',W.L.length===3&&FB_WISH_DAYS===7&&W.L.every(w=>w.xp>=12&&w.xp<=70));
+    ck('saavutukset',['toive1','toive5','toive15','toiveH','kirjataysi','ennatyskala'].every(id=>ACH.some(a=>a.id===id)));
+    const P0=fbPages();ck('sivut',P0.length>=FB_SP.length+6&&P0.length%2===0&&/Tietoa: vedet/.test(P0.join(''))&&/Sisällys/.test(P0[0]));
+    ck('kuvitus',typeof fishArtDraw==='function'&&/^data:image\/png/.test(fishArt('hauki',80,40))&&/fishArtDraw/.test(fishIcon.toString()));
+    ck('kirja kädessä',ITEMS.kalakirja.cat==='offhand'&&!ITEMS.kalakirja.use&&BIND_DEF.book==='KeyK'&&/bookR/.test(updateGear.toString())&&/fbPrimary/.test(onPrimary.toString())&&typeof bookPose==='function'&&/bookPose/.test(updatePlayer.toString()));
+    ck('äänet',/fish:'kartta'/.test(togglePanel.toString())&&/openPanel==='fish'\?plSnd\('valikot','kartta'/.test(closePanels.toString())&&/sivun_kaanto/.test(fbTurn.toString()));
+    ck('dev',/fishReveal/.test(renderDev.toString()));
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.14: kalastusvarusteet – vavan osat (4 siimaa, 3 koukkua, 2 kelaa + ei, 3 kohoa, 9 viehettä, 8 yhdistelmää), virveli, kuluminen, mato E:llä, kalastuspakki, Kalastajan pöytä + perkaus, 3D-kala, wow, intron kevennykset harmaina',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     ck('osat',Object.keys(TK_LINE).length===4&&Object.keys(TK_HOOK).length===3&&Object.keys(TK_REEL).length===2&&Object.keys(TK_FLOAT).length===3&&Object.keys(TK_LURE).length===9&&TK_COMBOS.length===8&&TK_COMBOS.every(c=>Object.values(c.need).every(v=>v.every(x=>x===0||ITEMS[x]))));
@@ -771,7 +792,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       invAdd('puu',1);fireInteract(n);ck('syttyy',fireLit(n));updateStations(.1);ck('nollaus',n.data.ember===0);
       ck('ruoat',ITEMS.paisti.food.h===35&&ITEMS.juhla.food.h===70&&ITEMS.sieni.food.h===6&&ITEMS.juhlapata.food.h===100&&ITEMS.sienikeitto.food.h>ITEMS.lihakeitto.food.h);
       P.hunger=10;delete P.buffs.ravittu;invAdd('sienikeitto',1);eat(inv.find(s=>s&&s.id==='sienikeitto'));ck('kylläinen',P.buffs.ravittu===ITEMS.sienikeitto.food.kyl&&KYL_K===.5&&/ravittu/.test(survival.toString()));
-      ck('tasot',LVL_MAX===30&&needXp(1)===90&&needXp(20)===775&&lvlBon(30).hp===110&&lvlBon(30).stam===30&&/Taso 30/.test(lvlUnlockRows()));
+      ck('tasot',LVL_REW_MAX===30&&needXp(1)===90&&needXp(20)===775&&lvlBon(30).hp===110&&lvlBon(30).stam===30&&/Taso 30/.test(lvlUnlockRows()));   /* v3.16: LVL_MAX 999, palkinnot 30:een */
       flags.xp=6650;flags.xpv=0;xpMigrate();ck('muunnos L20',playerLevel()===20&&flags.xpv===1);flags.xp=260;flags.xpv=0;xpMigrate();const L=lvlInfo();ck('muunnos osa',L.L===3&&Math.abs(L.xp/L.need-.5)<.02);
       ck('villikaura',nodes.filter(q=>q.type==='villikaura').length>20&&NODE.villikaura.item==='villikaura');
       const gi=id=>GOALS.findIndex(g=>g.id===id);ck('tavoitteet',gi('jaatar')<gi('pata')&&gi('pata')<gi('keitto')&&gi('keitto')<gi('kalmaherra')&&gi('haudu')<gi('aarnihirvio')&&gi('juhlapata')<gi('sirpaleet')&&ACH.some(a=>a.id==='padankaitsija')&&ACH.some(a=>a.id==='hillo'));

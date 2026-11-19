@@ -146,7 +146,7 @@ function fishLand(){const id=FS.sp,F=fishF();if(!id){fishReset();return;}
   if(invAdd(id,1)>0){spawnDrop(id,1,P.pos.x,P.pos.y+1,P.pos.z);msg('Reppu on täynnä – kala putosi maahan.','warn');}
   const rec=F.rec[id]||0,first=!F.n[id];F.n[id]=(F.n[id]||0)+1;bump('fish');plSnd('onkiminen','saalis',{v:.85});
   const kgT=FS.kg.toFixed(2).replace('.',',');if(FS.kg>rec){F.rec[id]=FS.kg;}
-  msg(`${first?'Uusi laji! ':''}${ITEMS[id].n} ${kgT} kg${rec&&FS.kg>rec?' – uusi ennätys!':''}`,'loot');
+  msg(typeof fbCatch==='function'?fbCatch(id,FS.kg,first,rec&&FS.kg>rec):`${first?'Uusi laji! ':''}${ITEMS[id].n} ${kgT} kg${rec&&FS.kg>rec?' – uusi ennätys!':''}`,'loot');   // v3.15 "Sait: … (luokka) – katso kalakirjan sivu N"
   addXp(Math.round((FISH_DEF[id].k>=2?8:FISH_DEF[id].k>1?4:2)+(rec&&FS.kg>rec?3:0)+(first?5:0)),'kala');
   if(!invCount('kalakirja')&&!F.book){F.book=1;giveOrDrop('kalakirja',1,P.pos.x,P.pos.y+1,P.pos.z);msg('Aloitit kalastajan kirjan – kaikki saaliisi kirjataan siihen.','quest');}
   if(typeof tkWear==='function')tkWear(FISH_DEF[id].k>=2?1.5:1);if(typeof tkDangle==='function')tkDangle(id,FS.kg);   // v3.14 siima kuluu, kala sätkii koukussa 3 s
@@ -197,16 +197,7 @@ function sunkBuild(){if(!SUNK||sunkMesh)return;const y=terrainH(SUNK.x,SUNK.z),g
 function sunkOpen(){const F=fishF();if(F.sunkO){msg('Arkku on tyhjä.');return;}if(!invCount('ruostavain')){msg('Lukko on ruostunut kiinni. Tarvitset sopivan avaimen – ehkä se on jossain vedessä.','warn');return;}
   invRemove('ruostavain',1);F.sunkO=1;F.sunkK=1;for(const [id,n] of [['rauta',4],['kupari',6],['hiidensiru',1],['lasi',2],['savukala',3]])giveOrDrop(id,n,SUNK.x,terrainH(SUNK.x,SUNK.z)+1,SUNK.z);
   plSnd('kaytto','arkku_auki');sfx('pickup');msg('Ruosteinen lukko narahtaa auki – upponut arkku on täynnä aarteita!','loot');addXp(20,'arkku');fishGoals();}
-/* ---------------- KALASTAJAN KIRJA ---------------- */
-function fishBookOpen(){if(openPanel!=='fish')togglePanel('fish');else fishBookRender();}
-function fishBookRender(){const el=document.getElementById('fishBody');if(!el)return;const F=fishF(),tot=fishTotal(F);
-  const rows=Object.keys(FISH_B).map(sp=>{const B=FISH_B[sp],n=F.n[sp]||0,best=B.t.indexOf(Math.max(...B.t)),wx=Object.entries(B.wx).sort((a,b)=>b[1]-a[1])[0],wt={lake:'järvet',sea:'meri',bog:'suolammet'}[B.w];
-    return n?`<tr><td><span class="ic" style="background-image:url(${icon(sp)})"></span>${ITEMS[sp].n}</td><td>${n}</td><td>${(F.rec[sp]||0).toFixed(2).replace('.',',')} kg</td><td>${wt}</td><td>${FISH_PH[best]}${wx&&wx[1]>1?', '+FISH_WXN[wx[0]]:''}</td></tr>`
-      :`<tr class="na"><td><span class="ic q">?</span>???</td><td>0</td><td>–</td><td>${wt}</td><td>–</td></tr>`;}).join('');
-  const ws=WBS.filter(w=>F.wb[w.id]).map(w=>`<li>${w.name} <small>(${{lake:'järvi',sea:'meri',bog:'suolampi'}[w.type]})</small></li>`).join('')||'<li class="note">Et ole vielä löytänyt nimettyjä vesiä.</li>';
-  const gs=FISH_GOALS.map(g=>`<li class="${F.g[g.id]?'ok':''}">${F.g[g.id]?'✔':'○'} ${g.t} <small>+${g.xp} XP</small></li>`).join('');
-  el.innerHTML=`<p class="note keep">Saaliita yhteensä ${tot}. Syöttiä (matoja): ${invCount('mato')}. Paras aika ja sää paljastuvat, kun saat lajin.</p><table class="fishT"><tr><th>Laji</th><th>Saatu</th><th>Ennätys</th><th>Vesi</th><th>Parhaiten</th></tr>${rows}</table>
-    <div class="fishCols"><div><h3>Vedet</h3><ul>${ws}</ul></div><div><h3>Tavoitteet</h3><ul class="fg">${gs}</ul></div></div>${F.sunkK&&!F.sunkO?'<p class="note">Pullopostin arkku on merkitty karttaan (✕).</p>':''}`;}
+/* ---------------- KALASTAJAN KIRJA: v3.15 fishbook.js (fishBookOpen, fishBookRender, arvo, toiveet) ---------------- */
 /* ---------------- KATISKA, SAVUSTIN, KALANAULAKKO ---------------- */
 const SAV_HEAT_T=30,SAV_COOL_T=90,KAT_T=900,KAT_BAIT_K=.6,KAT_MAX=3,KAT_BAIT_MAX=5,SAV_T=180,SAV_MAX=6,SAV_WOOD=2;
 function katInWater(p){return terrainH(p.x,p.z)<water.position.y-.3;}

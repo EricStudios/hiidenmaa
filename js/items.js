@@ -135,7 +135,7 @@ Object.assign(ITEMS,{
   pulloposti:{n:'Pullopostia',w:.2,s:1,c:'#7ab8a0',use:1,d:'Pullossa on vanha kirje. Käytä (E reppussa / napsauta) lukeaksesi sen.'},
   ruostavain:{n:'Ruostunut avain',w:.1,s:1,c:'#9a5a3a',d:'Ongesta noussut ruosteinen avain. Se avaa jossain rannalla tai luodolla puoliksi uppoavan arkun.'},
   hiidensiru:{n:'Hiidenkiven siru',w:.1,s:20,c:'#5fe6d9',rar:'rare',d:'Pieni hohtava siru. Siruista ei saa ehjää hiidenkiveä, mutta kolmesta voi takoa hiidenvavan. (Harvinainen)'},
-  kalakirja:{n:'Kalastajan kirja',w:.3,s:1,c:'#6a4a2a',use:1,d:'Muistiinpanot saaliistasi: lajit, ennätyspainot, vedet, parhaat ajat ja säät. Käytä avataksesi.'},
+  kalakirja:{n:'Kalastajan kirja',w:.3,s:1,c:'#6a4a2a',cat:'offhand',d:'Nahkakantinen kirja saaliistasi: lajit kuvineen, kalojen arvo, toivekalat, vedet ja kalastustietoa. Vasempaan käteen: vasen klikkaus avaa (kun oikea käsi on tyhjä), pikanäppäin K avaa aina.'},   // v3.15
 });
 // lvl = pelaajan taso, jolla ohje aukeaa (ei kenttää = alusta asti). alku:1 = Alkupeli-välilehti.
 const RECIPES=[
@@ -269,7 +269,7 @@ function recipeCat(r){const d=ITEMS[r.id];if(d.food)return r.st==='pata'?'pata':
 
 /* ---------------- ICONS ---------------- */
 // v3.08 lajikohtainen kalakuvake (myös paistettu: ruskea, grillijuovat)
-function fishIcon(g,id,d,circ,line){const sp=id.replace(/p$/,''),f=FISH_DEF[sp],S=FISH_SHAPE[sp],ck=d.fishI===2,body=ck?'#a8642e':f.c,belly=ck?'#d89a5a':f.c2,fin=ck?'#7a4420':S.fin||body,ol='#1e1a14';
+function fishIcon(g,id,d,circ,line){if(typeof fishArtDraw==='function'){fishArtDraw(g,id.replace(/p$/,''),21,26,17,{ck:d.fishI===2,icon:1,rot:-.35});return;}   /* v3.15 piirretty kuvitus (fishbook.js) */const sp=id.replace(/p$/,''),f=FISH_DEF[sp],S=FISH_SHAPE[sp],ck=d.fishI===2,body=ck?'#a8642e':f.c,belly=ck?'#d89a5a':f.c2,fin=ck?'#7a4420':S.fin||body,ol='#1e1a14';
   const L=S.l,H=S.h,cx=S.flat?0:-2;g.save();g.translate(24,25);g.rotate(S.flat?-.15:S.eel?-.2:-.35);g.lineJoin='round';
   const outline=()=>{g.beginPath();if(S.eel){g.moveTo(-L,0);g.quadraticCurveTo(-L+3,-H,0,-H*.9);g.quadraticCurveTo(L*.8,-H*.7,L+2,0);g.quadraticCurveTo(L*.8,H*.7,0,H*.9);g.quadraticCurveTo(-L+3,H,-L,0);}
     else g.ellipse(cx,0,L,H,0,0,TAU);};

@@ -886,6 +886,15 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.15 – kalakirja
+- **Kalastajan kirja** on kuin oikea kirja: aukeama, yksi kala sivulla piirroskuvineen, sivunumerot, sivujen kääntö (napit, nuolinäppäimet, sisällysluettelo).
+- **Kalan arvo:** paino ja pituus verrataan lajin kaikkiin kaloihin → luokka Roskakala, Tavallinen, Hyvä, Harvinainen, Ennätysluokka, Legendaarinen, Ikijärkäle tai
+  Maailmanennätysvonkale (hiiri luokan päälle: "parempi kuin X % lajinsa kaloista"). Saaliista ilmoitus: "Sait: Hauki 6,1 kg, 99 cm (Harvinainen) – katso kalakirjan sivu 5".
+- **Toivekalat:** kolme toivetta (helppo, keskivaikea, vaikea), vaihtuvat 7 päivän välein, täytetystä XP:tä. Saavutukset: Toive täyttyi, Toiveiden kalastaja, Toiveiden täyttäjä,
+  Vaikea toive, Kirja täynnä, Ennätyskala.
+- **Tietosivut:** lajien osuudet vesityypeittäin, parhaat ajat ja sää, viehteet ja varusteet.
+- **Kirja kädessä:** vasempaan käteen; vasen klikkaus avaa (oikea käsi tyhjä), K avaa aina. Pelkkä kirja on oikeassa kädessä (F-tarkastelu). Lukiessa kirja molemmissa käsissä.
+
 ## v3.14 – kalastusvarusteet
 - **Kalastajan pöytä** (Viljely ja kalastus, taso 3, puu 6 + naru 2): E avaa – vavan osat vaihdetaan heti, ominaisuudet listana, yhdistelmät, perkaus ja pakin päivitys.
   Pöydän ääressä valmistetaan siimat, koukut, kelat, kohot, viehteet ja kalastuspakki.

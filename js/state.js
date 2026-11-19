@@ -80,9 +80,9 @@ function thrownTick(dt){for(const o of THROWN){if(o.rest)continue;o.t+=dt;o.v.y-
 function gearUnlock(){for(const o of THROWN)scene.remove(o.m);THROWN.length=0;P.gearLock=false;updateGear();}
 function updateGear(){if(P.gearLock)return;updateBack();
   {const w0=equipped('weapon');if(!w0||w0.id!=='vasara')setBuildSel(null);}
-  const w=equipped('weapon'),wid=w?w.id:null,wkey=wid&&ITEMS[wid].cat==='rod'&&typeof rigSig==='function'?wid+'#'+rigSig(w):wid;   // v3.14 vavan osat näkyvät (tackle.js)
+  const w=equipped('weapon'),o0=equipped('offhand'),bookR=!w&&!!o0&&o0.id==='kalakirja',wid=w?w.id:bookR?'kalakirja':null,wkey=wid&&ITEMS[wid].cat==='rod'&&typeof rigSig==='function'?wid+'#'+rigSig(w):wid;   // v3.14 vavan osat näkyvät (tackle.js)
   if(wkey!==heldKey){if(heldMesh)heldMesh.parent.remove(heldMesh);heldMesh=null;heldId=wid;heldKey=wkey;if(wid){heldMesh=makeHeld(wid);if(ITEMS[wid].cat==='rod'&&typeof tkDressRod==='function')tkDressRod(heldMesh,w);(ITEMS[wid].cat==='bow'?fig.handL:fig.hand).add(heldMesh);}}
-  const o=equipped('offhand'),oid=o&&!(ITEMS[o.id].cat==='shield'&&o.shBrk!=null)?o.id:null;   // v1.39 (kohta 18): rikki oleva kilpi ei ole kädessä
+  const o=equipped('offhand'),oid=o&&!bookR&&!(ITEMS[o.id].cat==='shield'&&o.shBrk!=null)?o.id:null;   // v3.15 pelkkä kirja on oikeassa kädessä   // v1.39 (kohta 18): rikki oleva kilpi ei ole kädessä
   const okey=oid==='kalapakki'?oid+'#'+(o.lv||0):oid;   // v3.14 pakin ulkoasu tason mukaan
   if(okey!==offKey){if(offMesh)fig.handL.remove(offMesh);offMesh=null;offId=oid;offKey=okey;if(oid){offMesh=ITEMS[oid].cat==='shield'?makeShield(oid):oid==='kalapakki'&&typeof tkPakkiHeld==='function'?tkPakkiHeld(o):makeHeld(oid);fig.handL.add(offMesh);}}
   const a=equipped('armor'),aid=a?a.id:null;

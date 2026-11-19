@@ -10,7 +10,7 @@ const ACTIONS=[
   ['interact','Poimi, avaa, käytä','Toiminnot','KeyE'],
   ['build','Rakennusvalikko (vasara)','Rakentaminen','KeyB'],['rot','Käännä rakennetta (Shift = asento)','Rakentaminen','KeyR'],['snap','Sivuttaiskohdistus','Rakentaminen','KeyG'],['vsnap','Pystykohdistus','Rakentaminen','KeyH'],
   ['up','Nosta haamua (rakentaessa) / pudota pikapaikasta (Shift = koko pino)','Rakentaminen','KeyQ'],['down','Laske haamua','Rakentaminen','KeyZ'],['remove','Pura','Rakentaminen','KeyX'],['repair','Korjaa (vasara) / tarkastele esinettä','Rakentaminen','KeyF'],
-  ['menu','Päävalikko / sulje valikot','Valikot ja paneelit','KeyP'],['inv','Reppu ja valmistus','Valikot ja paneelit','Tab'],['map','Kartta','Valikot ja paneelit','KeyM'],['prog','Taso, saavutukset, tavoitteet','Valikot ja paneelit','KeyJ'],['log','Viimeiset ilmoitukset','Valikot ja paneelit','KeyL'],['hud','Tehtävä ja tavoite näkyviin / piiloon','Valikot ja paneelit','KeyT'],
+  ['menu','Päävalikko / sulje valikot','Valikot ja paneelit','KeyP'],['inv','Reppu ja valmistus','Valikot ja paneelit','Tab'],['map','Kartta','Valikot ja paneelit','KeyM'],['prog','Taso, saavutukset, tavoitteet','Valikot ja paneelit','KeyJ'],['book','Kalastajan kirja','Valikot ja paneelit','KeyK'],['log','Viimeiset ilmoitukset','Valikot ja paneelit','KeyL'],['hud','Tehtävä ja tavoite näkyviin / piiloon','Valikot ja paneelit','KeyT'],
   ['minizoom','Minikartan zoom','Näkymä','KeyN'],   // v2.18: K (koko näyttö) poistettu kokonaan
 ];
 const BIND_DEF={};for(const a of ACTIONS)BIND_DEF[a[0]]=a[3];
@@ -400,7 +400,7 @@ const ALL_KEYS=[
   ['Rakentaessa (vasara kädessä)',[['build',0,'rakennusvalikko'],[null,'Hiiren vasen','aseta rakennusosa'],[null,'Hiiren oikea','rakennusvalikko'],['rot',0,'käännä osaa'],[null,'Shift + R','osan asento / kaltevuus'],
     ['snap',0,'sivuttaiskohdistus (tilat)'],['vsnap',0,'pystykohdistus'],['up',0,'nosta haamua'],['down',0,'laske haamua'],['remove',0,'pura'],['repair',0,'korjaa']]],
   ['Lapio ja kuokka',[[null,'Hiiren vasen','lapio: kaiva · kuokka: nosta maata'],[null,'Hiiren oikea','lapio: tee polku · kuokka: palauta maasto']]],
-  ['Valikot ja paneelit',[['menu',0,'päävalikko / sulje avoin paneeli'],['inv',0,'reppu ja valmistus'],[null,'I','reppu (vaihtoehto)'],['map',0,'kartta'],['prog',0,'taso, saavutukset, tavoitteet'],['log',0,'viimeiset ilmoitukset'],
+  ['Valikot ja paneelit',[['menu',0,'päävalikko / sulje avoin paneeli'],['inv',0,'reppu ja valmistus'],[null,'I','reppu (vaihtoehto)'],['map',0,'kartta'],['book',0,'kalastajan kirja (jos sinulla on kirja)'],['prog',0,'taso, saavutukset, tavoitteet'],['log',0,'viimeiset ilmoitukset'],
     ['interact',0,'sulje avoin paneeli']]],
   ['Repussa ja arkussa',[[null,'Hiiren vasen','valitse / siirrä esine toiseen ruutuun, raahaa'],[null,'Hiiren oikea','ota puolet pinosta'],[null,'Shift + hiiren oikea','kohderuudussa: slider – valitse siirrettävä määrä (1–9 siirtää heti, napsautus ohi puolittaa)'],[null,'Q / Shift + Q','pudota hiiren alla oleva tai valittu esine (Shift = koko pino)'],[null,'Nuolet / Enter','siirtoslider: säädä määrää / vahvista'],
     [null,'Kirjoita','haku (valmistus- ja rakennusvalikko)'],[null,'Enter (haussa)','valmista ensimmäinen osuma / lopeta kirjoitus'],[null,'Esc (haussa)','tyhjennä haku'],[null,'Shift (pohjassa)','esineen lisätiedot vihjeessä']]],

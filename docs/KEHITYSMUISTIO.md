@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.14, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.15, 19.11.2026)
 
 - **⏯️ KESKEN: KALASTUSPÄIVITYS v3.14–v3.16 (käyttäjä 19.11., kaikki samaan PR #49:ään, ei yhdistetty)** – jos keskeytyy, jatka tästä. Kaikki kysymykset kysytty (15 + 10 varmistusta + 10 mielipidettä).
   - **v3.14 VARUSTEET:** onki kootaan osista **Kalastajan pöydällä** (uusi rakennus, Viljely ja kalastus, taso 3, puu 6 + naru 2; perkuulauta + työkalut + paikka pakille):
@@ -365,6 +365,8 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.15:** arvo 0,6 × paino + 0,4 × koko, luokkarajat 15/50/75/90/97/99,5/99,9 % · toiveet 3 / 7 päivää, XP 12–67 · sivu 4 = ensimmäinen laji · kirjan sulkuääni 1,35× / 0,55.
+
 **v3.14:** siimat ten 1/1,25/1,55/1,9, kesto 12/25/45/80, näkyvyys 1/1,06/1,12/1,18 · koukut isku 0,65/0,75/0,88 · kelat 22/30 m, 1,4/1,8 m/s · virveli hazard /70 s,
 pohjaan 0,05 %/s (< 0,9 m) · iskukatko 0,6 % × (1,6 − kunto) · runko big 0/0,1/0,2 · pakki 12/16/20/24, paino 20 · kenttävaihto 30 s · filee 1/2/3 · dangle 3 s.
 
@@ -442,6 +444,26 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.15 (KALAKIRJA – käyttäjä 19.11., uusi tiedosto `js/fishbook.js`)
+- **Kirjamainen ulkoasu** (#fishP `fbPanel`): nahkakansi, kaksi pergamenttisivua aukeamana, 1 kala / sivu, sivunumerot alakulmissa, kääntyvä lehti (CSS rotateY 0,38 s, `fbTurn`,
+  paikkamerkki `kalastus/sivun_kaanto`), nuolinäppäimet / A–D kääntävät, sisällysluettelo hyppää sivulle (`fbGo`). 26 sivua: sisällys, arvoluokat, toivekalat, 18 lajia, vedet,
+  tavoitteet, tietoa: vedet (lajien osuudet vesityypeittäin), ajat ja sää (●-taulukko), viehteet ja varusteet. Saamattomat lajit siluettina + vihje (vesi, iso kala).
+- **Piirretty kuvitus** `fishArtDraw` (canvas): runkoprofiili lajin mittasuhteista, liukuväri selkä → vatsa, kuviot (raidat, täplät, pisteet, rastit, laikut, kylkiviiva), suomut,
+  evät ruotoineen (piikkievä, rasvaevä lohikaloilla, haarukkapyrstö), kiduskansi, silmä heijastuksella, suu, viiksisäie; suonsilmä hohtaa. Samalla piirroksella **repun kuvakkeet** (fishIcon).
+- **Arvo** (`fishValue`): lajikohtainen jakauma 3 000 näytettä (`fbDist`, sama painokaava kuin fishHook) → painopisteet + kokopisteet (pituus `fbLen` = maksimipituus × ∛(kg/max) × 0,93–1,07,
+  `FISH_LEN`), yhteispisteet 0,6 × paino + 0,4 × koko → persentiili → **8 luokkaa** `FB_CLS`: Roskakala < 15 %, Tavallinen, Hyvä ≥ 50, Harvinainen ≥ 75, Ennätysluokka ≥ 90,
+  Legendaarinen ≥ 97, Ikijärkäle ≥ 99,5, Maailmanennätysvonkale ≥ 99,9 % (värit, hover "parempi kuin X % lajinsa kaloista"). Lajin arvokkain yksilö `F.best`, luokkatilasto `F.cls`.
+- **Saalisviesti** (`fbCatch`): "Sait: Hauki 6,1 kg, 99 cm (Harvinainen) – uusi ennätys! – katso kalakirjan sivu 5".
+- **Toivekalat** (`fbWish`, `F.wish`): 3 toivetta (helppo: yleinen laji; keskivaikea: Hyvä+; vaikea: harvinaisempi laji, Harvinainen+), lukittu 7 päivää, vain maailmassa olevista
+  vesityypeistä. XP = 12 + 30 × harvinaisuus (1 − b/6) + 0/10/25 → 12–67.
+- **Saavutukset:** Toive täyttyi (1), Toiveiden kalastaja (5), Toiveiden täyttäjä (15), Vaikea toive, Kirja täynnä (18 lajia), Ennätyskala (Legendaarinen+). Ei kantokykybonusta
+  (kantokyvyn 200-katto säilyy), saavutuksen 50 XP normaalisti; teksti "kunniamaininta".
+- **Kirja kädessä:** `kalakirja` on vasemman käden esine (cat offhand, ei enää "Käytä"): vasen klikkaus avaa, kun oikea käsi on tyhjä (`fbPrimary`), pikanäppäin **K** (`book`) aina.
+  Pelkkä kirja → oikeaan käteen (`bookR`, F-tarkastelu toimii). Lukiessa molemmat kädet pitelevät avointa kirjaa (`bookPose`). Malli `fbBookMesh`: tummanruskeat nahkakannet,
+  kultainen kalakoriste ja reunanauhat. Avausääni = kartan ääni, sulkiessa sama 1,35× nopeampi ja hiljaisempi (0,55).
+- **DEV:** Ä › Kalastus › Paljasta kalakirja (`DEVF.fishReveal`).
+- Tarkistus: v3.15-rivi. Testi: 4 000 haukea → Roskakala 13 %, Tavallinen 35 %, Hyvä 25 %, Harvinainen 15 %, Ennätys 7 %, Legendaarinen 3 %, Ikijärkäle 0,9 %, vonkale 0,2 %.
 
 ### v3.14 (KALASTUSVARUSTEET – käyttäjä 19.11., uusi tiedosto `js/tackle.js`)
 - **Vapa kootaan osista** Kalastajan pöydällä (`kalapoyta`, Viljely ja kalastus, taso 3, puu 6 + naru 2; perkuulauta, puukko, koukkuteline, siimakelat, pakkipaikka). Osat ovat
