@@ -592,11 +592,16 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.19: valikon kuvissa vain neljä lyhyttä hiljaista ääntä + pehmeät häivytykset, napeissa omat syykohdat ja himmeämmät syyt, ruskeat valikot ja napit tummemmiksi pyöreällä liu\'ulla nurkkaan',()=>{
+    const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(er){return [];}}).join('\n');
+    const b=[...document.querySelectorAll('#menu .menuBtns>.mbtn')].map(el=>getComputedStyle(el).getPropertyValue('--gx').trim());
+    const ok=/--gx/.test(css)&&new Set(b.filter(Boolean)).size>=2&&/opacity='\.085'/.test(css)&&(css.match(/radial-gradient\(circle at 100% 100%/g)||[]).length>=9&&MBG_OUT_T>=1;
+    return ok||'napit/valikot: '+JSON.stringify(b);});
   t('v3.18: valikon taustakuvien äänet (myrsky + ukkonen myrskykuviin, salaman isku välähdyksestä, muut sopivat kuvat), epätasaiset puunsyyt napeissa, hitaampi Aloita seikkailu, "tao"',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};const keys=new Set(Object.keys(CRE.man||{}).map(n=>n.replace(/_\d+$/,'')));
-    ck('kuvat',Object.keys(MBG_AMB).length>=19&&Object.keys(MBG_AMB).every(n=>MBG_SCENES.some(s=>s.n===n)));
-    ck('myrsky',['Myrsky','Myrskytuuli'].every(n=>MBG_AMB[n].L.some(l=>l[0]==='a/saa/myrsky')&&MBG_AMB[n].L.some(l=>l[0]==='a/saa/ukkonen'))&&MBG_AMB.Myrsky.flash&&/MBG\.flash=1/.test(MBG_SCENES.find(s=>s.n==='Myrsky').fx.toString()));
-    if(CRE.man)ck('äänet olemassa',Object.values(MBG_AMB).every(A=>A.L.every(l=>keys.has(l[0]))&&A.V.every(v=>v[0]==='#sirkat'||keys.has(v[0]))));
+    ck('vain neljä ääntä (v3.19)',Object.keys(MBG_AMB).sort().join()==='Myrsky,Myrskytuuli'&&Object.values(MBG_AMB).every(A=>!A.L.length)&&MBG_AMB.Myrsky.flash[0]==='a/saa/salama'&&MBG_AMB.Myrsky.flash[1]<=.3
+      &&MBG_AMB.Myrskytuuli.V.every(v=>v[0]==='a/saa/salama'&&v[1]<=.3&&v[4].seg[1]<=5)&&Object.keys(MBG_SND).sort().join()==='Ahjo yöllä,Öinen leiri'&&/MBG\.flash=1/.test(MBG_SCENES.find(s=>s.n==='Myrsky').fx.toString()));
+    ck('pehmeät häivytykset',MBG_FADE_IN>=1.2&&MBG_OUT_T>=1&&/MBG\.outF/.test(mbgSndTick.toString())&&/mbgLongPause\(MBG\.leiri,1\.2\)/.test(mbgSndStop.toString()));
     ck('moottori',/mbgAmbTick/.test(mbgSndTick.toString())&&/mbgAmbStop/.test(mbgSndStop.toString())&&typeof mbgLoopK==='function'&&typeof mbgVoiceK==='function');
     const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(er){return [];}}).join('\n');
     ck('puunsyyt',/feTurbulence/.test(css)&&!/rgba\(255, 255, 255, 0\.018\) 0px, rgba\(255, 255, 255, 0\.018\) 2px/.test(css));
@@ -610,7 +615,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       return ok||`a ${a} b ${b} c ${c} txt ${txt} box ${!!box}`;}finally{PT.s=s0;state=st0;started=sd;}});
   t('v3.17: valikon Öinen leiri – nuotio kuuluu (0,8) ja alkaa heti (pysyvä, valmiiksi ladattu suoratoisto), sirkat useammin ja kovempaa, äänet 0,3–1,5 s kuvan vaihdosta, lataamaton ääni yritetään 0,3 s päästä',()=>{
     const s=mbgSndTick.toString();const ok=MBG_LEIRI_V>=.7&&MBG_CR_V>=.2&&MBG_CR_MAX<=4&&MBG_FIRST[1]<=1.5&&MBG_RETRY<=.5&&typeof mbgLongKeep==='function'&&typeof mbgLongPause==='function'&&typeof mbgLongWarm==='function'
-      &&/MBG\.lrT=0/.test(s)&&/mbgLongWarm/.test(s)&&/mbgLongPause/.test(mbgSndStop.toString())&&/MBG_RETRY/.test(s)&&/return true;\}$/.test(mbgChirps.toString())&&MBG_FADE_IN<=1;
+      &&/MBG\.lrT=0/.test(s)&&/mbgLongWarm/.test(s)&&/mbgLongPause/.test(mbgSndStop.toString())&&/MBG_RETRY/.test(s)&&/return true;\}$/.test(mbgChirps.toString())&&MBG_FADE_IN<=1.5;
     return ok||'valikon taustaäänet puuttuvat';});
   t('v3.16: tasot 999 (ennallaan 30:een, sen jälkeen kasvava XP, ei palkintoja), 20 nimikettä (HUD + edistyminen), DEV-valikko sivuiksi, pikakalastus-täppä + U',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};

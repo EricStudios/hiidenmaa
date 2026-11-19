@@ -412,7 +412,7 @@ function mbgLong(g,ev,v){creInit();if(!CRE.ok)return null;const L=mRes(g,ev,'m')
   if(h){const t=a.currentTime;h.g.gain.setValueAtTime(0,t);h.g.gain.linearRampToValueAtTime(vol,t+MBG_FADE_IN);}return h;}
 /* v3.17 käyttäjä: valikon pitkä taustaääni (Öinen leiri, 136 s suoratoisto) alkaa heti kuvan vaihduttua: sama <audio> pidetään tallessa (MBG_KEEP) ja
    ladataan valmiiksi hiljaisena jo ennen kuvaa (mbgLongWarm) → ei uutta latausta eikä MediaElementSourcea joka kerta. Pois → häivytys ja tauko (mbgLongPause). */
-const MBG_KEEP={},MBG_FADE_IN=.8;
+const MBG_KEEP={},MBG_FADE_IN=1.4;   // v3.19 pehmeämpi
 function mbgLongKeep(g,ev,v){creInit();if(!CRE.ok)return null;const a=actx;if(!a||a.state!=='running'||!soundOn)return null;const key=g+'/'+ev;let h=MBG_KEEP[key];
   if(!h){h=mbgLong(g,ev,v);if(h&&h.stream){MBG_KEEP[key]=h;h.live=1;}return h;}
   const d=CRE.man[h.name]&&CRE.man[h.name].dur||0;if(h.el.paused){try{h.el.currentTime=Math.random()*Math.max(0,d-40);}catch(e){}const pr=h.el.play();if(pr&&pr.catch)pr.catch(()=>{});}

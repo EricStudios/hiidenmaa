@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.18, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.19, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +434,16 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.19 (valikon kuvien äänet karsittu, napit ja ruskeat valikot – käyttäjä 19.11.)
+- **Käyttäjä muutti linjaa: 2D-taustakuviin vain neljä ääntä, lyhyitä, hiljaisia ja harvoin.** Ukkosen salamat myrskykuviin (Myrsky: välähdyksen perään 0,3–1,6 s,
+  Myrskytuuli: 9–18 s välein; 2,5–4,5 s pätkä, taso 0,2–0,26, häivytys sisään 0,3 / ulos 0,8 s), ahjon alasin, nuotion tuli ja heinäsirkat (Öinen leiri). v3.18:n muut kuvat
+  (aallot, linnut, tuuli, sudet, luolat …) ja Myrskyn vanha myrskyääni poistettu (`MBG_AMB` vain Myrsky + Myrskytuuli, `MBG_SND` leiri + ahjo).
+- **Pehmeät häivytykset:** äänet häipyvät jo 1,4 s ennen mustaa kuvan vaihtoa (`MBG_OUT_T`, `MBG.outF`), eikä mitään käynnistetä sen jälkeen; nuotio häivyttyy sisään 1,4 s
+  (`MBG_FADE_IN`) ja ulos 1,2 s.
+- **Valikon napit:** jokaisella napilla omat puunsyykohdat (`--gx`/`--gx2` nth-child), syyt himmeämmiksi (vaaleat 0,16 → 0,085, tummat 0,22 → 0,14).
+- **Ruskeat valikot ja napit tummemmiksi:** kaikkiin puupaneeleihin (reppu, rakennus, arkku, edistyminen, loki, näppäimet, asetuskortit, varmistukset, pata) ja `.btn`-nappeihin
+  sekä valikon nappeihin lähes huomaamaton pyöreä liukuväri oikeaan alanurkkaan (radial-gradient, 0,05–0,24 mustaa).
 
 ### v3.18 (pelattu aika, valikon taustakuvien äänet, napit – käyttäjä 19.11.)
 - **Pelattu aika yhteensä** (main.js `PT`/`ptTick`/`ptHTML`, localStorage `hiidenmaa_playtotal`): Asetukset › Profiilit alimpana, tunnit yhdellä desimaalilla. Laskee oikeaa aikaa,

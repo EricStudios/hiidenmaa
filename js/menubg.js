@@ -296,55 +296,40 @@ function mbgNext(){let j=MBG.i;while(j===MBG.i)j=(Math.random()*MBG_SCENES.lengt
    heinäsirkan siritys (MBG_CR_MIN–MAX s välein); Ahjo yöllä = alasimen isku kuvan iskun tahdissa (MBG.ahjoHit, 75 % iskuista), kaukainen
    (alipäästö) ja kaikuva; Myrsky = satunnainen 2,5–6 s pätkä myrskyäänestä kaukaa 5–14 s välein. Kaikki hyvin hiljaa. Asetus Äänet ›
    "Päävalikon taustakuvien äänet" (SET.menuBgSnd) mykistää. Taso Taustaäänet. */
-const MBG_SND={'Öinen leiri':'tausta_leiri','Myrsky':'tausta_myrsky','Ahjo yöllä':'tausta_ahjo'},MBG_SND_MIN=5,MBG_SND_MAX=14,MBG_SND_V=.7;
+const MBG_SND={'Öinen leiri':'tausta_leiri','Ahjo yöllä':'tausta_ahjo'},MBG_SND_MIN=5,MBG_SND_MAX=14,MBG_SND_V=.7;
 /* v3.17 käyttäjä: nuotio ei kuulunut (0,35 × taustaäänet jäi valikkomusiikin alle) ja sirkkoja liian harvoin → nuotio 0,8, sirkat 0,2 ja 1–3,5 s välein (3–8 siritystä,
    välillä kaksi sirkkaa yhtä aikaa). Kuvan vaihduttua äänet alkavat heti: nuotio jatkuu valmiiksi ladatusta soittimesta (mbgLongKeep, häivytys 0,8 s), ensimmäinen
    siritys / myrsky / ahjo 0,3–1,5 s kuluttua; jos ääni ei ollut vielä ladattu, yritetään 0,3 s päästä (ei pitkää hiljaisuutta). */
+const MBG_OUT_T=1.4;   // v3.19 häivytys ulos alkaa 1,4 s ennen kuvan vaihtoa
 const MBG_LEIRI_V=.8,MBG_AHJO_V=.22,MBG_MYR_V=.3,MBG_CR_V=.2,MBG_CR_MIN=1,MBG_CR_MAX=3.5,MBG_FIRST=[.3,1.5],MBG_RETRY=.3;
-function mbgSndStop(){mbgAmbStop();if(MBG.leiri){if(MBG.leiri.stream&&typeof mbgLongPause==='function')mbgLongPause(MBG.leiri,.8);else if(typeof mbgLongStop==='function')mbgLongStop(MBG.leiri,1);MBG.leiri=null;}}
+function mbgSndStop(){mbgAmbStop();if(MBG.leiri){if(MBG.leiri.stream&&typeof mbgLongPause==='function')mbgLongPause(MBG.leiri,1.2);else if(typeof mbgLongStop==='function')mbgLongStop(MBG.leiri,1);MBG.leiri=null;}}
 /* v3.18 käyttäjä: 2D-taustakuviin äänet olemassa olevista äänistä, myrskykuviin myrsky ja ukkonen. MBG_AMB[kuva] = L: silmukat [avain, taso], V: kertaäänet
    [avain, taso, min s, max s, asetukset (lp alipäästö, echo kaiku, seg = satunnainen pätkä [min, max] s, p sävel)]; '#sirkat' = heinäsirkkojen siritys.
    Myrsky: salaman välähdys (MBG.flash) → salaman isku 0,3–1,6 s myöhemmin. Tasot × Taustaäänet; kaikki alkavat 0,3–1,5 s kuvan vaihdosta. */
+/* v3.19 käyttäjä: vain neljä ääntä, lyhyitä ja hiljaisia – ukkosen salamat myrskykuviin, ahjon alasin, nuotion tuli ja heinäsirkat (Öinen leiri). Ei muita kuvia.
+   Salama = 2,5–4,5 s pätkä (häivytys sisään 0,3 s, ulos 0,8 s); Myrskyssä välähdyksen perään, Myrskytuulessa 9–18 s välein. */
 const MBG_AMB={
-  'Öinen leiri':{L:[],V:[]},   // nuotio + sirkat erikseen (v3.17)
-  'Iltarusko järvellä':{L:[['a/ranta/aallot_rauhallinen',.3]],V:[['m/uusi_maailma/linnut',.22,8,16,{seg:[3,6],lp:3000}],['#sirkat',.1,4,9]]},
-  'Revontulet tunturilla':{L:[['a/saa/tuuli',.28]],V:[['susi_idle',.1,22,40,{lp:900,echo:.35}]]},
-  'Sumuinen aarnimetsä':{L:[['a/luonto/puiden_humina',.3]],V:[['m/uusi_maailma/linnut',.12,10,20,{seg:[2,4],lp:1800,echo:.2}]]},
-  'Kalmankehä kuutamossa':{L:[['a/saa/tuuli',.2]],V:[['kalmo_idle',.18,8,18,{lp:1300,echo:.35}]]},
-  'Kivilinnake aamulla':{L:[['a/saa/tuuli',.12]],V:[['m/uusi_maailma/linnut',.3,5,12,{seg:[4,8]}]]},
-  'Riimukivi rannalla':{L:[['a/ranta/aallot_rauhallinen',.4]],V:[['m/uusi_maailma/linnut',.14,9,18,{seg:[2,5],lp:2600}]]},
-  'Myrsky':{L:[['a/saa/myrsky',.55],['a/saa/ukkonen',.4]],V:[],flash:['a/saa/salama',.5]},
-  'Lumisade':{L:[['a/saa/lumi',.45],['a/saa/tuuli',.25]],V:[]},
-  'Portaalin hehku':{L:[['a/tunnelma/tunnelma_hautakumpu',.25]],V:[]},
-  'Portaalin vartija':{L:[['a/tunnelma/tunnelma_hautakumpu',.3]],V:[['kivivartija_idle',.25,9,18,{echo:.3,lp:2200}]]},
-  'Myrskytuuli':{L:[['a/saa/myrsky',.5],['a/saa/tuuli',.4],['a/saa/ukkonen',.35]],V:[['a/saa/salama',.4,10,22,{lp:2400}]]},
-  'Karhun raivo':{L:[['a/luonto/puiden_humina',.2]],V:[['karhu_aggro',.35,6,12],['karhu_idle',.25,9,16]]},
-  'Routaluolan suu':{L:[['a/tunnelma/tunnelma_routaluola',.4],['a/saa/tuuli',.2]],V:[['a/satunnaiset/satunnainen_routaluola',.3,10,20,{seg:[3,7]}]]},
-  'Kalmankammion käytävä':{L:[['a/tunnelma/tunnelma_kalmankammio',.45]],V:[['a/satunnaiset/satunnainen_kalmankammio',.35,8,16],['kalmo_idle',.2,10,20,{lp:1500,echo:.4}]]},
-  'Aarnihaudan juurakko':{L:[['a/tunnelma/tunnelma_aarnihauta',.45]],V:[['a/satunnaiset/satunnainen_aarnihauta',.35,12,22,{seg:[4,9]}],['aarnihirvio_echo',.2,18,32,{lp:1200,echo:.4}]]},
-  'Susilauma kuutamossa':{L:[['a/saa/tuuli',.15]],V:[['susi_idle',.3,5,12,{lp:2500,echo:.3}],['#sirkat',.08,6,12]]},
-  'Hirvi aamujärvellä':{L:[['a/ranta/aallot_rauhallinen',.25]],V:[['m/uusi_maailma/linnut',.25,6,12,{seg:[3,6]}],['hirvi_idle',.3,10,20]]},
-  'Kalmanvartijan varjo':{L:[['a/tunnelma/tunnelma_hautakumpu',.45]],V:[['kalmo_idle',.25,8,15,{lp:1600,echo:.4}]]},
-  'Hautakummun usva':{L:[['a/tunnelma/tunnelma_hautakumpu',.4]],V:[['a/satunnaiset/satunnainen_hautakumpu',.3,10,20]]},
-  'Ahjo yöllä':{L:[],V:[['#sirkat',.08,6,12]]}};
+  'Myrsky':{L:[],V:[],flash:['a/saa/salama',.26,{seg:[2.5,4.5]}]},
+  'Myrskytuuli':{L:[],V:[['a/saa/salama',.2,9,18,{seg:[2.5,4.5],lp:2400}]]}};
+function mbgSegOpts(k,v,o){o=o||{};const sg=o.seg,L=mbgList(k),d=L&&L.length&&CRE.man[L[0]]?CRE.man[L[0]].dur||0:0,len=sg?sg[0]+Math.random()*(sg[1]-sg[0]):0;
+  return Object.assign({v:v*(.8+Math.random()*.4),p:o.p||(.92+Math.random()*.12),lp:o.lp||(1800+Math.random()*2500)},o.echo?{echo:o.echo}:{},sg&&d>len+.5?{off:Math.random()*(d-len),len}:{});}
 function mbgAmbStop(){for(const h of MBG.ambL||[])if(h&&!h.none)mbgLongStop(h,.8);MBG.ambL=null;}
 function mbgAmbTick(n,dt,fr){const A=MBG_AMB[n];if(!A||typeof mbgLoopK!=='function')return;
   if(!MBG.ambL){MBG.ambLT=(MBG.ambLT||0)-dt;if(MBG.ambLT<=0){MBG.ambLT=MBG_RETRY;const hs=A.L.map(([k,v])=>mbgLoopK(k,v));if(hs.every(Boolean))MBG.ambL=hs;else for(const h of hs)if(h&&!h.none)mbgLongStop(h,.05);}}
   if(!MBG.ambV)MBG.ambV=A.V.map((_,i)=>fr()+i*1.2);
   A.V.forEach(([k,v,mn,mx,o],i)=>{MBG.ambV[i]-=dt;if(MBG.ambV[i]>0)return;o=o||{};let ok;
     if(k==='#sirkat')ok=mbgChirps(3+(Math.random()*5|0),v*(.8+Math.random()*.4));
-    else{const sg=o.seg,L=mbgList(k),d=L&&L.length&&CRE.man[L[0]]?CRE.man[L[0]].dur||0:0,len=sg?sg[0]+Math.random()*(sg[1]-sg[0]):0;
-      ok=mbgVoiceK(k,Object.assign({v:v*(.8+Math.random()*.4),p:o.p||(.95+Math.random()*.1)},o.lp?{lp:o.lp}:{},o.echo?{echo:o.echo}:{},sg&&d>len+.5?{off:Math.random()*(d-len),len}:{}));}
+    else ok=mbgVoiceK(k,mbgSegOpts(k,v,o));
     MBG.ambV[i]=ok?mn+Math.random()*(mx-mn):MBG_RETRY;});
-  if(A.flash&&MBG.flash){MBG.flash=0;const [k,v]=A.flash;setTimeout(()=>{if(MBG_SCENES[MBG.i]&&MBG_SCENES[MBG.i].n===n)mbgVoiceK(k,{v:v*(.75+Math.random()*.5),lp:1800+Math.random()*2500,p:.9+Math.random()*.15});},300+Math.random()*1300);}}
-function mbgSndTick(dt){const S=MBG_SCENES[MBG.i],n=S&&S.n,fr=()=>MBG_FIRST[0]+Math.random()*(MBG_FIRST[1]-MBG_FIRST[0]);if(MBG.sndI!==MBG.i){MBG.sndI=MBG.i;mbgSndStop();MBG.sndT=fr();MBG.crT=fr();MBG.lrT=0;MBG.ambLT=0;MBG.ambV=null;MBG.flash=0;MBG.ahjoHit=0;}
+  if(A.flash&&MBG.flash){MBG.flash=0;const [k,v,o]=A.flash;setTimeout(()=>{if(MBG_SCENES[MBG.i]&&MBG_SCENES[MBG.i].n===n&&!MBG.outF)mbgVoiceK(k,mbgSegOpts(k,v,o));},300+Math.random()*1300);}}
+function mbgSndTick(dt){const S=MBG_SCENES[MBG.i],n=S&&S.n,fr=()=>MBG_FIRST[0]+Math.random()*(MBG_FIRST[1]-MBG_FIRST[0]);if(MBG.sndI!==MBG.i){MBG.sndI=MBG.i;mbgSndStop();MBG.sndT=fr();MBG.crT=fr();MBG.lrT=0;MBG.ambLT=0;MBG.ambV=null;MBG.flash=0;MBG.outF=0;MBG.ahjoHit=0;}
   if(typeof mbgLongWarm==='function'&&(typeof SET==='undefined'||SET.menuBgSnd!==false)){mbgLongWarm('taustat','tausta_leiri');if(typeof mbgChirps==='function'&&!MBG.crW)MBG.crW=mbgChirps(0,0);if(typeof mLoad==='function')mLoad();}   // v3.17 valmiiksi ladattu
   if(typeof mbgVoice!=='function'||(typeof SET!=='undefined'&&SET.menuBgSnd===false)||!(MBG_SND[n]||MBG_AMB[n])){mbgSndStop();return;}
+  if(MBG.t>MBG_T-MBG_OUT_T){if(!MBG.outF){MBG.outF=1;mbgSndStop();}return;}   // v3.19 pehmeä häivytys ulos ennen mustaa siirtymää
   mbgAmbTick(n,dt,fr);   // v3.18 silmukat ja kertaäänet
   if(n==='Öinen leiri'){if(!MBG.leiri){MBG.lrT=(MBG.lrT||0)-dt;if(MBG.lrT<=0){MBG.lrT=MBG_RETRY;MBG.leiri=(typeof mbgLongKeep==='function'?mbgLongKeep:mbgLong)('taustat','tausta_leiri',MBG_LEIRI_V);}}
     MBG.crT-=dt;if(MBG.crT<=0){const ok=mbgChirps(3+(Math.random()*6|0),MBG_CR_V*(.8+Math.random()*.4));if(ok&&Math.random()<.35)setTimeout(()=>mbgChirps(2+(Math.random()*4|0),MBG_CR_V*.7),150+Math.random()*500);   /* toinen sirkka */MBG.crT=ok?MBG_CR_MIN+Math.random()*(MBG_CR_MAX-MBG_CR_MIN):MBG_RETRY;}}
-  else if(n==='Ahjo yöllä'){if(MBG.ahjoHit){MBG.ahjoHit=0;if(Math.random()<.75)mbgVoice('taustat','tausta_ahjo',{v:MBG_AHJO_V,lp:1700+Math.random()*900,echo:.32,p:.94+Math.random()*.1});}}
-  else if(n==='Myrsky'){MBG.sndT-=dt;if(MBG.sndT<=0){MBG.sndT=MBG_SND_MIN+Math.random()*(MBG_SND_MAX-MBG_SND_MIN);if(!mbgVoice('taustat','tausta_myrsky',{v:MBG_MYR_V,lp:700+Math.random()*900,echo:.25,off:Math.random()*6,len:2.5+Math.random()*3.5,p:.9+Math.random()*.15}))MBG.sndT=MBG_RETRY;}}}   // v3.17 ei vielä ladattu → pian uudelleen
+  else if(n==='Ahjo yöllä'){if(MBG.ahjoHit){MBG.ahjoHit=0;if(Math.random()<.75)mbgVoice('taustat','tausta_ahjo',{v:MBG_AHJO_V,lp:1700+Math.random()*900,echo:.32,p:.94+Math.random()*.1});}}}
 function mbgShow(on){mbgInit();if(on===MBG.shown)return;MBG.shown=on;if(!on)mbgSndStop();MBG.cv.style.display=on?'block':'none';if(on&&MBG.i<0)mbgSet((Math.random()*MBG_SCENES.length)|0);   /* v1.31: aina arvottu (ennen avauksessa Öinen leiri) */MBG.last=performance.now();}
 function mbgFrame(now){mbgShow(true);const raw=Math.min(.25,(now-MBG.last)/1000);MBG.acc+=raw;MBG.last=now;if(MBG.acc<1/MBG_FPS)return;const dt=MBG.acc;MBG.acc=0;mbgSndTick(dt);
   MBG.t+=dt;if(MBG.t>MBG_T)mbgSet(mbgNext());
