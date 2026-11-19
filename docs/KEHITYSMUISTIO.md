@@ -5,6 +5,25 @@ uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
 ## ⭐ TÄRKEINTÄ NYT (päivitetty v3.13, 19.11.2026)
 
+- **⏯️ KESKEN: KALASTUSPÄIVITYS v3.14–v3.16 (käyttäjä 19.11., kaikki samaan PR #49:ään, ei yhdistetty)** – jos keskeytyy, jatka tästä. Kaikki kysymykset kysytty (15 + 10 varmistusta + 10 mielipidettä).
+  - **v3.14 VARUSTEET:** onki kootaan osista **Kalastajan pöydällä** (uusi rakennus, Viljely ja kalastus, taso 3, puu 6 + naru 2; perkuulauta + työkalut + paikka pakille):
+    runko (onki / kuparivapa / hiidenvapa: isot kalat +0/+10/+20 % keskipaino, isot lajit hieman useammin), **4 siimaa** (pellava, jänne, punottu, hiidensiima: vahvempi kestää mutta kalat
+    huomaavat → tärppi harvemmin; kuluminen + pieni satunnainen katkeaminen), **3 koukkua** (pieni / iso / väkäkoukku), **3 kelaa** (ei / kupari / hiisi – kela tekee vavasta VIRVELIN: eri fysiikka:
+    heitto 6–30 m vieheellä, vasen pohjassa kelaa, tärppi kelauksen aikana), **3 kohoa** (puu / korkki / hehku), **9 viehettä** (kuparilusikka, rautapilkki, puuvaappu, hiidenhohtoviehe +
+    5: kuusamolainen lusikka ym.; eivät kulu, voivat jäädä kiinni → viehe + siima menetetään hyvin harvoin; vahvuudet/heikkoudet/parhaat kalat listana; väri+tyyli vaikuttaa veden, sään, ajan ja
+    valon mukaan; ei sovi pikkukaloille). **6–8 nimettyä komboa** (pieni etu). Ominaisuudet listana kuten aseissa. Nimi vaihtuu (onki/virveli).
+    **Mato:** E vapa kädessä (jos ei muuta E-kohdetta) laittaa madon koukkuun; klikkaus heittää. **Siiman vaihto** kentällä pakista onnistuu mutta kestää 30 s kauemmin ("ilman pöytää tämä kestää ikuisuuden").
+    **Kalastuspakki** (vasen käsi, paino 20 + sisältö, vain kalastustarvikkeet, 12 → 16/20/24 paikkaa päivityksin pöydällä, väri ja yksityiskohdat/koko tason mukaan, vain yksi pakki kerrallaan):
+    vasen klikkaus laskee maahan tai pöydän pakkipaikalle (ei muille tasoille), E avaa, klikkaus nostaa käteen. **Perkaus** pöydällä: fileet + perkeet (katiskan syötti).
+    **3D-kala koukussa** sätkii 3 s noston jälkeen (piirroskuvan mukainen), paremmat kalakuvakkeet. Ensimmäinen onki: wow-ilmoitus, lopussa eri värillä "Kireitä siimoja!".
+    Madolle parempi 3D-malli (käsi, koukku) ja hienommat madot istutuslaatikon mullassa. Äänipaikkamerkit `sounds2/kalastus/`.
+  - **v3.15 KALAKIRJA:** kirjamainen (aukeama, 1 kala/sivu, sivunumerot alakulmissa, sivujen kääntö), piirretty korkealaatuinen kuvitus, kalan ARVO: paino-, koko- ja yhteispisteet →
+    8 luokkaa (Roskakala, Tavallinen, Hyvä, Harvinainen, Ennätysluokka, Legendaarinen, Ikijärkäle, Maailmanennätysvonkale; värit, selite "parempi kuin 99,7 % lajinsa kaloista"),
+    3 toivekalaa (lukittu 7 päivää, XP harvinaisuuden mukaan järkevästi), saavutukset Toive täyttyi 1/5/15, Vaikea toive, Kirja täynnä, Ennätyskala; viimeiset sivut tietokirjallisuutta
+    (lajit, ajat, alueet, miten saa). Kirja vasempaan käteen, klikkaus avaa (kaksi kättä kirjassa), oma pikanäppäin; pelkkä kirja kädessä → oikeaan käteen, F-animaatiot. Nahkakannet + kultainen
+    kalakoriste. Ääni = kartan ääni (sulkiessa nopeampi + hiljaisempi). Saalisviesti "Sait: Hauki 6,1 kg (Ennätysluokka) – katso kalakirjan sivu 7". DEV: paljasta kirja (Ä-valikko).
+  - **v3.16:** tasot 999 (XP-tarve kasvaa, ei muutoksia tasoon 30 asti, palkinnot vain 30:een), 20 tasonimikettä (alku esim. "Haaksirikkoutunut", taso 30 "Kokeneempi seikkailija",
+    999 "Hiidenmaan legenda"; HUD + edistyminen), DEV-valikon uudelleenjärjestely sivuiksi/kategorioiksi (Kalastus, Animaatiot, …), pikakalastus-täppä + käyttämätön pikanäppäin.
 - **Versio 3.13 – Early Access 1.2** – 6 maailmaa, maailmakorttien pito/tuplaklikkaus, mono-pelaajaäänet, aito Käynnissä-tila, uusi syöksy + usvakerrokset,
   intro-kevennykset, suolammet korjattu, kalastussimulaatio. **PR #49 sisältää v3.08–v3.13** (käyttäjä yhdistää 20.11. ja testaa).
 - **Versio 3.12** – intron oikeat pilvet piirtorajan päällä (matalat esiasetukset).
