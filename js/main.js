@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.24';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.25';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -199,18 +199,21 @@ function introEase(u){return (1-u)*u*u*u+u*(1-Math.pow(1-u,5));}
 /* v3.20 käyttäjä: usva näkyy koko intron ajan (ennen ilmestyi tyhjästä syöksyn alkaessa). Kerrokset lasketaan syöksyn reitille (yläkameran paikka t = 4 s ennustetaan),
    pallot tulevat hiljaa sivulta (MIST_IN s, hidastuen kuin ohi lipuva pilvi) ja jatkavat lipumista samaan suuntaan; ilmestyvät häivyttäen (MIST_FADE s). Lähellä kameraa
    häipyy (ei valkoista huntua); kokonaan pois vasta kun kamera on alhaalla (k > MIST_OUT_K). */
-const MIST_IN=4.4,MIST_FADE=1.6,MIST_OUT_K=.82;
+/* v3.25 käyttäjä: pilvi ei saa pysähtyä keskelle vaan liikkuu koko ajan hiljaa kulkusuuntaansa (näyttää sattumalta siinä olevalta): nopeus = MIST_VD (1,1–2 m/s)
+   + alun lisä, joka vaimenee (τ = MIST_TAU) – saapuu hitaammin (MIST_APP 32–55 m, ennen 70–140 m 4,4 s:ssa). Pallo on kohdallaan juuri kun kamera ohittaa kerroksen (tc),
+   joten ohituksessakin se on lähellä ruudun keskiosaa. Pallo 20 % pidempi liikkeen suunnassa (MIST_LONG). */
+const MIST_IN=4.4,MIST_FADE=1.6,MIST_OUT_K=.82,MIST_VD=[1.1,2],MIST_APP=[32,55],MIST_TAU=1.7,MIST_LONG=1.2;
 function introMistTick(t,k,px,py,pz){if(!intro||intro.hold||SET.introPlain||k>=1){return;}const C=camera.position;
   if(!IMIST.L){IMIST.L=[];const r=mulberry32(SEED*13+5),tex=introPuffTex(1),a4=intro.a0+4*.11,hx=px+Math.cos(a4)*80,hz=pz+Math.sin(a4)*80,
       dx=hx-_iP.x,dz=hz-_iP.z,dl=Math.hypot(dx,dz)||1,sd=r()<.5?1:-1,wx=-dz/dl*sd,wz=dx/dl*sd;IMIST.w=[wx,wz];   // tuulen suunta: kohtisuoraan syöksyn reittiä vasten
-    for(const h of MIST_LAYERS){let u=0;for(let j=1;j<=60;j++){const q=introEase(j/60);if(lerp(175,_iP.y,q)-py<=h){u=q;break;}}
+    for(const h of MIST_LAYERS){let u=0,tc=4+INTRO_DIVE;for(let j=1;j<=60;j++){const q=introEase(j/60);if(lerp(175,_iP.y,q)-py<=h){u=q;tc=4+j/60*INTRO_DIVE;break;}}   // tc = hetki, jolloin kamera ohittaa kerroksen
       const ox=lerp(hx,_iP.x,u),oz=lerp(hz,_iP.z,u);
       for(let i=0;i<MIST_N;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,fog:false,opacity:0}));m.renderOrder=6;const a=r()*TAU,d=Math.sqrt(r())*28,sz=26+r()*30;
-        const tx=ox+Math.cos(a)*d,tz=oz+Math.sin(a)*d,off=70+r()*70;m.userData={o:.2+r()*.1,tx,ty:py+h+(r()-.5)*5,tz,off,ti:MIST_IN*(.85+r()*.3),dr:.8+r()*.9,fd:r()*.6};
-        m.scale.set(sz*1.6,sz,1);scene.add(m);IMIST.L.push(m);}}}
+        const tx=ox+Math.cos(a)*d,tz=oz+Math.sin(a)*d,vd=MIST_VD[0]+r()*(MIST_VD[1]-MIST_VD[0]),A=(MIST_APP[0]+r()*(MIST_APP[1]-MIST_APP[0]))/MIST_TAU;
+        m.userData={o:.2+r()*.1,tx,ty:py+h+(r()-.5)*5,tz,vd,A,tc:tc+(r()-.5)*.6,fd:r()*.6};m.scale.set(sz*1.6*MIST_LONG,sz,1);scene.add(m);IMIST.L.push(m);}}}
   const tn=.62+.38*lightK,[wx,wz]=IMIST.w,out=k>MIST_OUT_K?clamp(1-(k-MIST_OUT_K)/(1-MIST_OUT_K),0,1):1;
-  for(const m of IMIST.L){const U=m.userData,e=clamp(t/U.ti,0,1),sl=(1-e)*(1-e)*(1-e)*U.off,dr=Math.max(0,t-U.ti)*U.dr;   // saapuu sivulta hidastuen, sitten lipuu hiljaa ohi
-    m.position.set(U.tx-wx*sl+wx*dr,U.ty,U.tz-wz*sl+wz*dr);
+  for(const m of IMIST.L){const U=m.userData,f=q=>U.vd*q+U.A*MIST_TAU*(1-Math.exp(-q/MIST_TAU)),s0=f(t)-f(U.tc);   // ei pysähdy: nopeus vd + A·e^(−t/τ) > 0 koko ajan, kohdalla (s0 = 0) kun kamera ohittaa
+    m.position.set(U.tx+wx*s0,U.ty,U.tz+wz*s0);
     const d=m.position.distanceTo(C),near=clamp((d-12)/30,0,1),far=clamp(1-(d-150)/90,0,1),fin=sstep(0,1,(t-U.fd)/MIST_FADE);
     m.material.opacity=U.o*near*far*fin*out;m.material.color.setRGB(tn*.92,tn*.92,tn*.95);}}
 function introMistClear(){if(!IMIST.L)return;for(const m of IMIST.L){scene.remove(m);m.material.dispose();}IMIST.L=null;}
@@ -222,10 +225,16 @@ function introHiQ(){const pi=presetIdx();return pi<0?(SET.shadow==='high'&&(+SET
 const INTRO_GRASS_H=30,LD_PREWARM={ms:0,n:0};
 function introLight(){return state==='intro'&&!SET.oldLoad;}
 function introGrassVis(on){for(const g of [typeof grassIM!=='undefined'?grassIM:null,typeof tallIM!=='undefined'?tallIM:null,...(typeof weedIMs!=='undefined'?weedIMs:[])])if(g&&g.visible!==on)g.visible=on;}
+/* v3.25 käyttäjä (nykäys ilmakuvassa): intron usvapallot luodaan vasta intron alkaessa ja sammuneen tulen savu vasta pelissä → niiden sprite-varjostin ja tekstuurit
+   käännettiin/ladattiin kesken intron tai pelin. Nyt esilatauksessa piirretään kerran näkymätön sprite kummallakin tekstuurilla (sumu päällä/pois). */
+function ldWarmSprites(){const W=[],fw=camera.getWorldDirection(new V3());
+  for(const [tex,fog] of [[typeof introPuffTex==='function'?introPuffTex(1):null,false],[typeof smkTexGet==='function'?smkTexGet():null,true]]){if(!tex)continue;
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,fog,opacity:.002}));sp.position.copy(camera.position).addScaledVector(fw,6);scene.add(sp);W.push(sp);}
+  return W;}
 function ldPrewarm(){if(SET.oldLoad)return 0;const t0=performance.now();
   try{const dsc=intro&&intro.dsc,it=intro&&intro.t;
     update(1/60);statT=0;updateChunkVis();if(typeof terrLodTick==='function')terrLodTick();if(typeof shpTick==='function')shpTick();   // pelikamera (update laski sen) ja normaali sumu
-    introGrassVis(true);sun.shadow.needsUpdate=true;renderer.compile(scene,camera);renderer.render(scene,camera);
+    introGrassVis(true);sun.shadow.needsUpdate=true;const W=ldWarmSprites();renderer.compile(scene,camera);renderer.render(scene,camera);for(const sp of W){scene.remove(sp);sp.material.dispose();}
     if(intro){intro.dsc=1;intro.t=4+INTRO_DIVE*.45;introCam(0);updateChunkVis();renderer.render(scene,camera);intro.t=it||0;intro.dsc=dsc;introCam(0);}   // intron puoliväli, sitten takaisin yläkameraan
     LD_PREWARM.n++;}catch(e){console.warn('ldPrewarm',e);}
   return LD_PREWARM.ms=Math.round(performance.now()-t0);}
@@ -420,6 +429,9 @@ addEventListener('beforeunload',ptSave);document.addEventListener('visibilitycha
    Nyt ruutu saa olla 0,1 s asti ja se ajetaan enintään 0,05 s:n osa-askelina (fysiikka pysyy vakaana), joten tahti on sama kaikilla tasoilla. */
 const WSTEP_MAX=.1;
 function worldStep(dt){const k=worldSpd();if(k===1){const n=Math.max(1,Math.ceil(dt/WSPD_STEP-1e-6));for(let i=0;i<n;i++)update(dt/n);return;}const tot=dt*k,n=Math.min(WSPD_MAX,Math.max(1,Math.ceil(tot/WSPD_STEP)));for(let i=0;i<n;i++)update(tot/n);}
+/* v3.25 käyttäjä: virtuaaliosoitin oli raskailla asetuksilla hidas – se päivittyy vain, kun selain ehtii piirtää ruudun. Paneelin ollessa auki 3D-tausta piirretään
+   enintään 30 kertaa sekunnissa (UI3D_GAP) ja osoitinta liikutettaessa enintään 15 (UI3D_GAP_MOVE, 0,2 s viimeisestä liikkeestä). Maailma päivittyy normaalisti. */
+const UI3D_GAP=1000/30,UI3D_GAP_MOVE=1000/15,UI3D_MOVE_HOLD=200;let ui3dT=0;
 function frame(now){
   requestAnimationFrame(frame);
   const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;let skip3d=false;seeThruSync();crossDeathSync();
@@ -441,7 +453,7 @@ function frame(now){
      esiin (.mfFade). Asetus "Älä pysäytä valikon animaatioita" (menuAnimKeep) pitää partikkelit käynnissä myös pelin aikana. */
   {const mv=!!(MENU_EL&&!MENU_EL.hidden);if(mv&&!menuVis&&!SET.menuAnimKeep){MENU_EL.classList.add('mfFade');MFX.last=now;requestAnimationFrame(()=>requestAnimationFrame(()=>MENU_EL.classList.remove('mfFade')));}
    menuVis=mv;if(mv||(SET.menuAnimKeep&&started)){try{mfxFrame(now);}catch(err){console.error(err);}}}
-  if(state==='ui'&&typeof VC!=='undefined'&&VC.on){uiAlt=!uiAlt;if(uiAlt)skip3d=true;}   // v1.76: paneelin ollessa auki 3D joka toinen ruutu → osoitin päivittyy useammin
+  if(state==='ui'&&typeof VC!=='undefined'&&VC.on){const mv=now-(VC.mvT||0)<UI3D_MOVE_HOLD;if(now-ui3dT<(mv?UI3D_GAP_MOVE:UI3D_GAP))skip3d=true;else ui3dT=now;}   // v1.76/v3.25: paneelin takana 3D harvemmin → osoitin sulava
   if(skip3d&&state!=='ui'&&RAYS.clr){RAYS.g.clearRect(0,0,RAYS.W,RAYS.H);RAYS.clr=false;}   // v2.35 valikon kuvissa ei vanhoja säteitä
   if(!skip3d){try{flameUpTick();}catch(err){}   // v2.43 liekit pystyyn ennen piirtoa
     RAYS.dt=dt;try{drawRays(dt);}catch(err){if(!RAYS.err){RAYS.err=1;console.error(err);}}try{renderer.render(scene,camera);try{raysPeek();}catch(e2){}}catch(err){console.error(err);if(!frameErrShown&&window.__bootBox){frameErrShown=true;window.__bootBox('Virhe piirrossa: '+(err&&err.message||err));}}}

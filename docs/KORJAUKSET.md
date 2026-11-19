@@ -682,3 +682,10 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Korjaus: staattinen penkki jaloilla, kaikki paikat leirin omassa suunnassa ja vapaan paikan haku (`campFree`), korkeus = alin maastokohta jalanjäljen alla (`campGround`).
 - **Sääntö:** koriste tai rakennelma maahan → korkeus jalanjäljen alimmasta kohdasta ja jalat/runko sinne asti; ei vakioita kuten `+.2`. Uusi esine leiriin → lisää `campFree`-tarkistus.
 
+## 96. Syöte latauksen aikana kaatoi, ja ilmoitusanimaatiot toistuivat valikosta palatessa (v3.25)
+- `ReferenceError: openPanel is not defined`: kuuntelija rekisteröidään tiedoston ladatessa (esim. fishbook.js, input.js), mutta se viittaa muuttujaan, joka määritellään vasta
+  myöhemmin ladattavassa tiedostossa (ui.js, main.js). Näppäily skriptien latautuessa → virhe. Korjaus: `inReady()` / `typeof x==='undefined'`-vahti.
+  **Sääntö:** ylimmän tason `addEventListener` saa viitata vain aiemmin ladattuihin muuttujiin tai sen on tarkistettava `inReady()`.
+- CSS-animaatio (`forwards`) käynnistyy alusta, kun elementti tai sen vanhempi palaa `display:none`:sta näkyviin (HUD piilotetaan valikossa) → "Vesistö löydetty" ja pikapaikan nimi
+  näkyivät uudelleen. Korjaus: `el.onanimationend=()=>el.classList.remove('on')`. **Sääntö:** kertaluonteinen animaatioluokka poistetaan animaation päätyttyä.
+

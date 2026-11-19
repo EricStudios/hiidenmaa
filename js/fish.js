@@ -183,7 +183,7 @@ function wbArrive(wb){const F=fishF(),now=dayN+dayT;F.wbSeen=F.wbSeen||{};
   if(!F.wb[wb.id]){F.wb[wb.id]=1;F.wbSeen[wb.id]=now;F.wbLast=wb.id;showWbBanner(wb.name,true);return;}   // v3.07: löytö kerran
   if(F.wbLast===wb.id||now-(F.wbSeen[wb.id]??-99)<WB_AGAIN_D)return;F.wbSeen[wb.id]=now;F.wbLast=wb.id;showWbBanner(wb.name,false);}
 function wbShow(name,isNew){const el=document.getElementById('wbName');if(!el)return;el.innerHTML=isNew?`<small>Vesistö löydetty</small><b>${name}</b>`:`<b>${name}</b>`;el.classList.toggle('big',!!isNew);
-  el.classList.remove('on');void el.offsetWidth;el.classList.add('on');if(isNew)msg(`Löysit veden: ${name}`,'loot');}
+  el.classList.remove('on');void el.offsetWidth;el.classList.add('on');el.onanimationend=()=>el.classList.remove('on');   /* v3.25 käyttäjä: animaatio ei toistu, kun HUD palaa valikosta (display none → näkyviin käynnisti sen alusta) */if(isNew)msg(`Löysit veden: ${name}`,'loot');}
 // kartta: löydettyjen vesien nimet (kuten muut nimet, kursiivilla ja sinertävinä)
 function fishMapLabels(g,pt,sx){   /* v3.08 käyttäjä: nimet kaikilla zoomeilla (koko pienenee ulos zoomatessa) */const F=fishF();for(const w of WBS){if(!F.wb[w.id])continue;const [x,y]=pt(w.x,w.z);g.save();g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=3;g.shadowOffsetX=1;g.shadowOffsetY=1;
     g.fillStyle='#a9d8f2';g.font=`italic 600 ${sx>1.6?13:sx>1?12:10}px Alegreya Sans, sans-serif`;g.textAlign='center';g.fillText(w.name,x,y+4);g.restore();}

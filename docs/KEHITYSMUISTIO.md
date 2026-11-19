@@ -3,7 +3,7 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.24, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.25, 19.11.2026)
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +434,25 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.25 (syötevirhe, intron usva, optimointi, käsi, äänet – käyttäjä 19.11., PR #49 yhdistetty → uusi PR)
+- **Virhe "openPanel is not defined" (KORJAUKSET 96):** näppäily (välilyönti, WASD …) skriptien latautuessa – input.js:n ja fishbook.js:n kuuntelijat viittasivat myöhemmin
+  ladattaviin muuttujiin. `inReady()` (input.js): mitään syötettä ei käsitellä ennen kuin main.js + ui.js ovat ladattu; myöhemmissä latausruuduissa `ldBusy` kuten ennen.
+- **Intron usva:** pallot eivät enää pysähdy keskelle – nopeus `MIST_VD` 1,1–2 m/s + vaimeneva lisä (τ `MIST_TAU` 1,7 s, saapuminen `MIST_APP` 32–55 m, ennen 70–140 m 4,4 s:ssa),
+  kohdallaan juuri kun kamera ohittaa kerroksen (`tc`) → ohituksessakin lähellä ruudun keskiosaa; 20 % pidempi liikkeen suunnassa (`MIST_LONG`).
+- **Optimointi (ei näkyvää muutosta):**
+  - Ruoho, korkea ruoho ja rikkaruohot jaetaan 8 suuntasektoriin + lähialue 12 m (`grassSplit`, `GRASS_SECT`, jaettu geometria `GPOOL` omalla rajauspallolla) → kameran takana
+    olevia ei piirretä (ennen `frustumCulled=false`, kaikki joka suuntaan).
+  - **Ultra:** kaukaiset (yli puolet säteestä, `GRASS_LOD_K`) kevyemmällä samannäköisellä mallilla (`GRASS_GEO_LOW` 2 leveämpää kortta, `TALL_GEO_LOW` 5, `WEED_GEOS_LOW`
+    puolet lehdistä/terälehdistä); määrä −30 % (`GRASS_ULTRA_C` 1,195 väli, `GRASS_ULTRA_D` 0,7). Mitattu: ruoho 4 117 → 2 885, korkea 1 296 → 603, rikat 1 512 → 751.
+  - **Ruohon uudelleenrakennus ruuduille** (`grassGen`-generaattori, `GRASS_BUDGET` 3 ms/ruutu, `GB.gen`): ennen 13–24 ms nykäys 6 m välein Ultralla, nyt suurin askel ~6 ms;
+    vanha ruoho näkyy kunnes uusi on valmis. Reunahäivytys siirretty 8 m sisään (`uGF` = R − 16 … R − 8).
+  - **Esilataus** `ldWarmSprites`: intron usvan ja sammuneen tulen savun sprite-varjostimet ja tekstuurit käännetään latausruudussa (ennen kesken intron/pelin → nykäys).
+  - **Virtuaaliosoitin:** paneelin takana 3D enintään 30 kuvaa/s ja osoitinta liikutettaessa 15 kuvaa/s (`UI3D_GAP`, `UI3D_GAP_MOVE`; ennen joka toinen ruutu) → osoitin sulava raskaillakin asetuksilla.
+- **Käsi ei nyi esinettä vasten** (`AWC`, `armWCRestore`): irrotus erillisenä kerroksena (nousee 24/s, laskee 3,5/s), poistetaan ennen pehmennystä → ei jää käden tilaan.
+- **Äänet:** pelaajan ihmismäiset äänet −20 % (`PL_HUMAN_K`: keho = hengästys, sydän, hytinä, haukkoo henkeä, vatsa, pahoinvointi …; F-ihmettely); kipu ennallaan.
+  Hengästys loppuu 0,35 s:ssa (`HENG_QUICK`) veden alla ja kuollessa eikä ala niiden aikana; kuollessa myös sydän.
+- **Vesistön nimi ja pikapaikan nimi eivät toistu** valikosta palatessa (CSS-animaatio käynnistyi uudelleen, kun HUD tuli näkyviin – `onanimationend` poistaa luokan, KORJAUKSET 96).
 
 ### v3.24 (leiri, savupatsas, vasara, vesistöt, vinkit – käyttäjä 19.11.)
 - **Hylätty leiri (KORJAUKSET 95):** istuin oli rakennusosa *palkki* 0,2 m maan yllä → leijuva tukki. Nyt staattinen **penkki jaloilla** (A-jalat maahan asti), vanhojen tallennusten

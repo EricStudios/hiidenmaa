@@ -182,6 +182,7 @@ function updatePlayer(dt){
   if(P._eOff){fig.armR.rotation.x-=P._eOff[0];fig.elbowR.rotation.x-=P._eOff[1];P._eOff=null;}   // v3.06 E-toiminnon käsiliike (lisäys poistetaan ennen pehmennystä)
   inspectRestore();   // v2.99 F-tarkastelun IK ei jää käsivarren perusasennoksi (nykiminen paluussa)
   chopRestore();   // v3.08 sama hakkuun IK:lle
+  armWCRestore();   // v3.25 käden irrotus esineestä ei jää perusasentoon (värinä)
   const e=kExp(rate,dt),eR=cRet?1:e;
   armSh+=(tSh-armSh)*e;fig.armL.position.x=armSh;fig.armR.position.x=-armSh;
   fig.armR.rotation.y=lerpAngle(fig.armR.rotation.y,0,eR);fig.armL.rotation.y=lerpAngle(fig.armL.rotation.y,0,e);fig.armR.rotation.x=lerpAngle(fig.armR.rotation.x,tRx,eR);fig.armR.rotation.z=lerpAngle(fig.armR.rotation.z,tRz,eR);
@@ -209,7 +210,7 @@ function updatePlayer(dt){
   carvePose();   // v2.91 pihkakuvion kaiverrus
   if(typeof bookPose==='function')bookPose();   // v3.15 kalakirja molemmissa käsissä lukiessa
   {const ea=playTime-(P.eT??-9);if(ea>=0&&ea<E_ANIM_T&&!P.atk&&!P.carve&&!P.insp&&!P.drawing&&!P.dead){const k=Math.sin(ea/E_ANIM_T*Math.PI);P._eOff=[-.62*k,-.38*k];fig.armR.rotation.x+=P._eOff[0];fig.elbowR.rotation.x+=P._eOff[1];}}   // v3.06 (käyttäjä): E-toiminnossa käsi käy hieman eteen ja takaisin
-  if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand);armWorldClear(fig.armL,fig.elbowL,fig.handL);}   // v2.88
+  if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand,dt);armWorldClear(fig.armL,fig.elbowL,fig.handL,dt);}else{AWC.R.e=AWC.R.a=AWC.L.e=AWC.L.a=0;}   // v2.88, v3.25 pehmeä kerros
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.
   P.drawK=lerp(P.drawK||0,P.drawing&&heldMesh&&ITEMS[heldId].cat==='bow'?1:0,kExp(14,dt));
   {const bk=P.drawK>.01&&heldMesh&&heldMesh.userData.bow?P.drawK:0;fig.rig.rotation.y=-.55*bk;fig.head.rotation.y=.55*bk+aK*(Math.sin(aP*.55)*.6+Math.sin(aP*1.3)*.12);if(bk)bowAim(heldMesh,bk);}   // v1.22 ampuja-asento: vartalo sivuttain, pää eteen
@@ -342,9 +343,18 @@ function limbPen(x,y,z,r,feet){_lp.x=_lp.z=0;let hit=false;gridQuery(x,z,r+.5,_c
       let ux,uz,dd;if(d2>1e-8){const d=Math.sqrt(d2);ux=dx/d;uz=dz/d;dd=r-d;}else{const l=x-c.minX,rr=c.maxX-x,b=z-c.minZ,f=c.maxZ-z,mn=Math.min(l,rr,b,f);ux=mn===l?-1:mn===rr?1:0;uz=mn===b?-1:mn===f?1:0;dd=mn+r;}
       if(Math.abs(ux*dd)>Math.abs(_lp.x))_lp.x=ux*dd;if(Math.abs(uz*dd)>Math.abs(_lp.z))_lp.z=uz*dd;}}return hit;}
 /* käsi seinän tai esineen sisällä → kyynärpää koukistuu ja käsivarsi laskee (ojennettu käsi ei mene läpi; pelaajaa ei työnnetä) */
-function armWorldClear(arm,elbow,hand){if(state!=='play'||P.swim)return;const feet=P.pos.y;
-  for(let i=0;i<14;i++){arm.updateMatrixWorld(true);hand.getWorldPosition(_lb);if(!limbPen(_lb.x,_lb.y,_lb.z,.06,feet)){elbow.getWorldPosition(_lb);if(!limbPen(_lb.x,_lb.y,_lb.z,.06,feet))return;}
-    if(elbow.rotation.x>-2.1)elbow.rotation.x-=.16;else if(arm.rotation.x<.2)arm.rotation.x+=.12;else return;}}
+/* v3.25 käyttäjä: KÄSI EI NYI ESINETTÄ VASTEN. Ennen korjaus (kyynärpää/olka irti seinästä) jäi käden tilaan, ja seuraavan ruudun pehmennys vei käden takaisin
+   seinään → värinä. Nyt korjaus on erillinen kerros AWC: tarve lasketaan puhtaasta asennosta, kerros nousee nopeasti (AWC_IN/s) ja laskee hitaasti (AWC_OUT/s),
+   ja se poistetaan ennen pehmennystä (armWCRestore, kuten chopRestore) → käsi liukuu pinnan mukaan tasaisesti. */
+const AWC_IN=24,AWC_OUT=3.5,AWC={R:{e:0,a:0,on:0},L:{e:0,a:0,on:0}};
+function armWCRestore(){for(const [k,arm,el] of [['R',fig.armR,fig.elbowR],['L',fig.armL,fig.elbowL]]){const s=AWC[k];if(!s.on)continue;el.rotation.x+=s.e;arm.rotation.x-=s.a;s.on=0;}}
+function armWorldNeed(arm,elbow,hand,feet){const e0=elbow.rotation.x,a0=arm.rotation.x;
+  for(let i=0;i<14;i++){arm.updateMatrixWorld(true);hand.getWorldPosition(_lb);if(!limbPen(_lb.x,_lb.y,_lb.z,.06,feet)){elbow.getWorldPosition(_lb);if(!limbPen(_lb.x,_lb.y,_lb.z,.06,feet))break;}
+    if(elbow.rotation.x>-2.1)elbow.rotation.x-=.16;else if(arm.rotation.x<.2)arm.rotation.x+=.12;else break;}
+  const r=[e0-elbow.rotation.x,arm.rotation.x-a0];elbow.rotation.x=e0;arm.rotation.x=a0;return r;}
+function armWorldClear(arm,elbow,hand,dt){const s=AWC[arm===fig.armL?'L':'R'];if(state!=='play'||P.swim){s.e=s.a=0;return;}const [ne,na]=armWorldNeed(arm,elbow,hand,P.pos.y),d=dt||1/60;
+  s.e+=(ne-s.e)*kExp(ne>s.e?AWC_IN:AWC_OUT,d);s.a+=(na-s.a)*kExp(na>s.a?AWC_IN:AWC_OUT,d);if(s.e<1e-4)s.e=0;if(s.a<1e-4)s.a=0;
+  if(s.e||s.a){elbow.rotation.x-=s.e;arm.rotation.x+=s.a;s.on=1;arm.updateMatrixWorld(true);}}
 function limbPush(feet){if(!LIMB.length||P.swim||P.onLadder||state!=="play")return;const armsBusy=!!(P.atk||P.chopW>.05||P.drawK>.2||P.drawing);let px=0,pz=0;
   for(const e of LIMB){if(e.arm&&armsBusy)continue;if(Math.hypot(e.x,e.z)<.3)continue;   /* rungon sisällä olevat (collideXZ hoitaa) */
     let ex=e.x,ez=e.z;if(e.arm){const h=Math.hypot(ex,ez);if(h>LIMB_ARM_R){ex*=LIMB_ARM_R/h;ez*=LIMB_ARM_R/h;}}   /* ojennettu käsi työntää enintään LIMB_ARM_R:n päästä (ei metrin päähän seinästä) */

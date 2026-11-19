@@ -457,7 +457,9 @@ function plLoad(){if(PLV.loaded||!CRE.ok)return;PLV.loaded=1;for(const n in CRE.
 const PL_REV={dun:.55,home:.2,mtn:.08};
 function plRevAmt(){if(P.inDun)return PL_REV.dun;const ik=typeof indoorK==='number'?indoorK:0;if(ik>.3)return PL_REV.home*ik;const b=biomeHere(P.pos.x,P.pos.z);return b==='mountain'||b==='tunturi'||P.pos.y>24?PL_REV.mtn:0;}
 const _plMonoV=new THREE.Vector3();
-function plSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;plLoad();const L0=plRes(g,ev);if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
+/* v3.25 käyttäjä: pelaajan ihmismäiset äänet −20 % (hengästys ja sydän silmukoina, hytinä, haukkoo henkeä, vatsa, pahoinvointi, F-ihmettely). Kipu ennallaan (osumapalaute). */
+const PL_HUMAN_K={keho:.8,f_ihmettely:.8};
+function plSnd(g,ev,o){o=o||{};if(PL_HUMAN_K[g])o=Object.assign({},o,{v:(o.v??1)*PL_HUMAN_K[g]});creInit();if(!CRE.ok)return false;plLoad();const L0=plRes(g,ev);if(!L0)return false;const L=L0.filter(n=>CRE.buf[n]);if(!L.length)return false;
   const a=actx;if(!a||a.state!=='running'||!soundOn)return false;const vol=volK('pl');if(!(vol>0))return false;
   PLV.v=PLV.v.filter(v=>!v.done);if(!o.loop&&PLV.v.length>=6)return false;
   const key=g+'/'+ev;let pick=L;if(o.v_ix){const w=L.filter(n=>o.v_ix.includes(+n.slice(n.lastIndexOf('_')+1)));if(w.length)pick=w;}   /* v2.50 o.v_ix: sallitut versionumerot (puuttuessa kaikki) */
@@ -478,7 +480,7 @@ function plSnd(g,ev,o){o=o||{};creInit();if(!CRE.ok)return false;plLoad();const 
   return o.loop?v:B.duration;}
 // v2.25 silmukka (sydämen syke): plLoop(avain, ryhmä, ääni, päällä, voimakkuus, sävel) – käynnistää, säätää tai häivyttää pois (0,4 s)
 function plLoop(k,g,ev,on,v,p,f){const L=PLV.loops[k];if(!on||!actx){if(L){const fo=f||.6;try{L.g.gain.cancelScheduledValues(actx.currentTime);L.g.gain.setTargetAtTime(0,actx.currentTime,fo/4);L.src.stop(actx.currentTime+fo+.2);}catch(e){}delete PLV.loops[k];}return;}   /* v2.67 f: häivytys ulos (s) */
-  if(L){L.g.gain.setTargetAtTime(v,actx.currentTime,.3);L.src.playbackRate.setTargetAtTime(p,actx.currentTime,.4);return;}
+  if(L){L.g.gain.setTargetAtTime(v*(PL_HUMAN_K[g]||1),actx.currentTime,.3);L.src.playbackRate.setTargetAtTime(p,actx.currentTime,.4);return;}
   if(playTime<(PLV.lpRetry[k]||0))return;const r=plSnd(g,ev,{loop:1,v,p});if(r&&r.src)PLV.loops[k]=r;else PLV.lpRetry[k]=playTime+1;}
 // alusta pelaajan jalkojen alla (sama jako kuin olentojen tgSurface)
 function plSurface(){if(P.inDun)return P.realm==='portal1'?'jaa':P.realm==='portal3'?'ruoho':'kivi';
@@ -519,7 +521,11 @@ const SYD_UP=.8,SYD_DOWN=.2,SYD_KEEP=3,SYD_FADE=2.5;
 const HENG_V=.64,HENG_KEEP=4,HENG_UP=1.5,HENG_DOWN=.35,PL_SCARY_R=35,HENG_END=.3,HENG_FADE=2.5,HENG_CD=1,FALL_ANKLE=.15;   // v2.99 nilkka yleisemmin (ennen .25)
 function plOverMoving(){return typeof MAXW!=='undefined'&&!devOn('weight')&&invWeight()>MAXW&&Math.hypot(P.vel.x,P.vel.z)>.6&&!P.swim;}
 function plCd(k,t){if(playTime<(PLV.cd[k]||0))return false;PLV.cd[k]=playTime+t;return true;}
-function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('sydan',null,null,false,0,1,SYD_FADE);if(S.syd)S.sCd=SYD_FADE+1;S.syd=false;S.sk=0;plLoop('heng',null,null,false,0,1,HENG_FADE);if(S.heng)S.hCd=HENG_FADE+HENG_CD;S.heng=false;return;}
+/* v3.25 käyttäjä: hengästys loppuu nopeasti (HENG_QUICK s), kun pelaaja menee veden alle tai kuolee, eikä ala niiden aikana; kuollessa myös sydän. */
+const HENG_QUICK=.35;
+function plBody(dt){const S=PLV.st,hq=P.dead||(P.underT||0)>0||!!P.subm,fq=P.dead?HENG_QUICK:HENG_FADE;
+  if(hq&&state==='play'){if(S.heng){plLoop('heng',null,null,false,0,1,HENG_QUICK);S.heng=false;S.hCd=HENG_QUICK+HENG_CD;}if(P.dead&&S.syd){plLoop('sydan',null,null,false,0,1,HENG_QUICK);S.syd=false;S.sk=0;}}
+  if(state!=='play'&&state!=='ui'){plLoop('sydan',null,null,false,0,1,P.dead?HENG_QUICK:SYD_FADE);if(S.syd)S.sCd=SYD_FADE+1;S.syd=false;S.sk=0;plLoop('heng',null,null,false,0,1,fq);if(S.heng)S.hCd=HENG_FADE+HENG_CD;S.heng=false;return;}
   if(P.dead){if(!S.dead){S.dead=1;plLoop('sydan',null,null,false,0,1,1.2);S.syd=false;S.sk=0;plSnd('kipu',P.deathCause==='drown'||P.waterDeath||(typeof pDeath!=='undefined'&&pDeath&&pDeath.water)?'kuolema_hukkuminen':'kuolema')||plSnd('kipu','kuolema');   /* v2.46: pDeath.water – syy ja lippu nollautuvat ennen tätä (KORJAUKSET 57) */}PLV.hp0=null;return;}S.dead=0;
   // kipu: terveyden lasku
   const hp=P.hp,mx=maxHp();if(PLV.hp0!==null&&hp<PLV.hp0-.01){const d=PLV.hp0-hp;
@@ -545,7 +551,7 @@ function plBody(dt){const S=PLV.st;if(state!=='play'&&state!=='ui'){plLoop('syda
      voimakkuus laskee vähitellen (0 % = täysi, 30 % = hiljaa) ja nousee taas, jos kestävyys putoaa – samaa ääntä EI aloiteta alusta. Silmukka
      pysähtyy vasta, kun kestävyys on ollut yli 30 % HENG_KEEP s (silloin ääni on jo hiljaa).
      Häivytys HENG_FADE 2,5 s, jonka jälkeen vähintään HENG_CD 1 s tauko ennen uutta alkua (alku häivyttyy sisään 0,4 s, plSnd). Tiedosto toistuu kokonaisena (WHOLE_LOOP). */
-  {const ovm=plOverMoving(),lim=maxStam()*HENG_END;S.hCd=Math.max(0,(S.hCd||0)-dt);if(!S.heng&&(P.stam<1||ovm)&&!S.hCd){S.heng=true;S.hv=HENG_V;S.hOff=0;}
+  {const ovm=plOverMoving(),lim=maxStam()*HENG_END;S.hCd=Math.max(0,(S.hCd||0)-dt);if(!S.heng&&(P.stam<1||ovm)&&!S.hCd&&!hq){S.heng=true;S.hv=HENG_V;S.hOff=0;}
    if(S.heng){if(P.stam>lim&&!ovm){S.hOff=(S.hOff||0)+dt;if(S.hOff>=HENG_KEEP){S.heng=false;S.hCd=HENG_FADE+HENG_CD;}}else S.hOff=0;
      const tv=ovm?HENG_V:HENG_V*clamp(1-P.stam/lim,0,1);S.hv=tv>S.hv?Math.min(tv,S.hv+dt*HENG_UP):Math.max(tv,S.hv-dt*HENG_DOWN);}
    plLoop('heng','keho','hengastys',S.heng,S.heng?S.hv:0,1,HENG_FADE);}S.stam=P.stam;

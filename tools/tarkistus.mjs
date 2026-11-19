@@ -92,7 +92,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
   t('v1.09 vartija palaa kävellen, 8 m keskeyttää, 1 %/s',()=>{const f=updateMobs.toString();return /d\.walk\|\|d\.run\*\.5/.test(f)&&/dist<8/.test(f)&&/m\.maxHp\*\.01\*dt/.test(f)&&/m\.intr/.test(f)||'vartijan paluu muuttunut';});
   t('v1.10 usva/höyry: Ultra/Korkea/Normaali/Matala/Pois (v1.35: oletus kevyempi .6)',()=>{const f=updateMist.toString();return SET_DEF.mist===.6&&/fxN/.test(f)&&/szK/.test(f)&&/opK/.test(f)||'usva-asetus muuttunut';});
   t('v1.11 ei muiden pelien mainintoja pelin teksteissä',()=>{const src=[renderSettings,renderInv,renderDev,drawBigMap].map(f=>f.toString()).join('')+document.body.innerHTML;return !/minecraft|valheim|fortnite|roblox/i.test(src)||'muun pelin nimi teksteissä';});
-  t('v1.12 automaattisäätö osa-alueittain + FPS + väliotsikot',()=>typeof AUTO==='object'&&typeof autoOn==='function'&&SET_PAGES.gfx.includes('autoQ')&&!!$('#fps')&&typeof updateFps==='function'&&/setSub/.test(renderSettings.toString())&&/AUTO\.fx/.test(rebuildGrass.toString())||'asetukset puuttuvat');
+  t('v1.12 automaattisäätö osa-alueittain + FPS + väliotsikot',()=>typeof AUTO==='object'&&typeof autoOn==='function'&&SET_PAGES.gfx.includes('autoQ')&&!!$('#fps')&&typeof updateFps==='function'&&/setSub/.test(renderSettings.toString())&&/AUTO\.fx/.test(grassGen.toString())||'asetukset puuttuvat');
   t('v1.12 huppu näyttää hiukset, rautakypärän verho kiinni',()=>{const f=makePlayer();buildArmor(f,'nahkavaatteet');const vis=f.hairTop.filter(h=>h.visible).length;buildArmor(f,'rautapanssari');return vis>=8&&f.hairTop.every(h=>!h.visible)||'hiukset: '+vis;});
   t('v1.13 sivukeinunta ja pehmennetty juoksukerroin',()=>{const f=updatePlayer.toString();return /P\.runKs/.test(f)&&/rig\.rotation\.z=tz/.test(f)||'keinunta puuttuu';});
   t('v1.14 "Toimii parhaiten" kerran yläkeskellä, ei valikossa',()=>!!$('#pcHint')&&![...document.querySelectorAll('#menu .note')].some(e=>/Toimii parhaiten/.test(e.textContent))||'vihje väärässä paikassa');
@@ -535,7 +535,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     sp.life=sp.t;updateSplats(.01);
     const a=off<.06&&dn>up&&sp.pool.k>.99&&sp.m.geometry.attributes.color.itemSize===4;
     const b=CORPSE_HOLD===0&&CORPSE_ROT===12&&/c\.pool\.fk=op/.test(corpseTick.toString())&&/bloodPool\(/.test(updatePlayerDeath.toString());
-    const c=typeof mudAt==='function'&&/mudAt\(ox,oz\)/.test(rebuildGrass.toString())&&/kasvillisuuden/.test(ITEMS.kuokka.d)&&/kasvillisuuden/.test(TIPS.find(t=>t.id==='lapio').d());
+    const c=typeof mudAt==='function'&&/mudAt\(ox,oz\)/.test(grassGen.toString())&&/kasvillisuuden/.test(ITEMS.kuokka.d)&&/kasvillisuuden/.test(TIPS.find(t=>t.id==='lapio').d());
     return a&&b&&c||`virhe ${a}${b}${c} off ${off.toFixed(3)} dn ${dn.toFixed(2)} up ${up.toFixed(2)}`;});
   t('v2.79 susien ulvonnan kantama = muiden eläinten ääntely (36 m), ei kaukaista yöulvontaa; ensimmäinen uni sängyssä vihjaa Kalmanummen ja Hautakummun; sää ja tunnelma −20 %',()=>{
     const a=Math.abs(CRE_FAR_R*creRK('susi','idle',1)-CRE_IDLE_R)<1e-9&&WOLF_FAR_AMB===false&&VOL_BASE.amb===.56;
@@ -592,6 +592,20 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.25: syöte vasta kun peli ladattu (ei openPanel-virhettä), intron usva liikkuu koko ajan, osoitin sulava (3D harvemmin paneelin takana), ruohon sektorit + Ultra-LOD −30 % + rakennus ruuduille, sprite-esilataus, käden pehmeä irrotus, ihmisäänet −20 %, hengästys loppuu veden alla/kuollessa, vesistön nimi ei toistu valikosta palatessa',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('syöte',typeof inReady==='function'&&inReady()&&/inReady\(\)/.test(vcSync.toString()));
+    ck('usva',MIST_VD[0]>0&&MIST_LONG>1.1&&/U\.vd\*q/.test(introMistTick.toString())&&!/U\.off/.test(introMistTick.toString()));
+    ck('osoitin',UI3D_GAP_MOVE>UI3D_GAP&&/UI3D_GAP_MOVE/.test(frame.toString()));
+    {const a=SET.grass,w=SET.weeds,tg=SET.tallGrass;try{SET.grass=3;SET.weeds=true;SET.tallGrass=true;rebuildGrass();ck('sektorit',!!grassIM&&grassIM.isGrassGroup&&grassIM.children.length>=4&&grassIM.children.every(m=>m.frustumCulled&&m.geometry.boundingSphere.radius<80)&&grassIM.children.some(m=>m.geometry.attributes.position===GRASS_GEO_LOW.attributes.position));}
+      finally{SET.grass=a;SET.weeds=w;SET.tallGrass=tg;rebuildGrass();}}
+    ck('ultra',GRASS_ULTRA_C>1.1&&GRASS_ULTRA_D<=.75&&WEED_GEOS_LOW.length===3&&WEED_GEOS_LOW[0].attributes.position.count<WEED_GEOS[0].attributes.position.count);
+    ck('jaettu rakennus',GRASS_BUDGET>0&&/GB\.gen/.test(updateGrass.toString()));
+    ck('esilataus',typeof ldWarmSprites==='function'&&/ldWarmSprites/.test(ldPrewarm.toString()));
+    ck('käsi',typeof armWCRestore==='function'&&AWC_OUT<AWC_IN);
+    ck('äänet',PL_HUMAN_K.keho===.8&&HENG_QUICK<.5&&/hq/.test(plBody.toString()));
+    ck('vesistö',/onanimationend/.test(wbShow.toString())&&/onanimationend/.test(showHotName.toString()));
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.24: leiri (penkki jaloilla, ei leijuvaa palkkia, ei päällekkäisyyksiä, pino teltan kylkeä vasten), savupatsas sammuessa, vasara vyöllä, tähtäin kuolemassa, AFK-tarkastelu loppuu liikkeessä, jahtivinkki, vesistöjen nimet jonossa, vetoketju reunuksessa',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     for(const c of CAMPS){const F=campFrame(c),[lx,lz]=F.W(1.6,1.4);ck('palkki pois '+c.k,!pieces.some(q=>q.t==='palkki'&&Math.hypot(q.x-lx,q.z-lz)<.08));ck('penkki '+c.k,!!c.bench&&c.bench.y-terrainH(c.bench.x,c.bench.z)<.6);
@@ -603,7 +617,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('tähtäin',typeof crossDeathSync==='function'&&/crossDeathSync/.test(frame.toString()));
     ck('afk',typeof inspMoving==='function'&&/I\.afk\|\|I\.auto/.test(inspectTick.toString()));
     ck('jahti',TIPS.some(t=>t.id==='jahti')&&typeof tipChased==='function');
-    ck('ruoho',GRASS_FADE_W>=6&&!!GRASS_U.uGF&&/uGF/.test(String(rebuildGrass))&&GRASS_MAT.onBeforeCompile===grassCompile&&/vGF/.test(String(grassCompile)));
+    ck('ruoho',GRASS_FADE_W>=6&&!!GRASS_U.uGF&&/uGF/.test(String(grassGen))&&GRASS_MAT.onBeforeCompile===grassCompile&&/vGF/.test(String(grassCompile)));
     ck('vesistöt',WB_AGAIN_D===5&&typeof showWbBanner==='function'&&/wbArrive/.test(String(fishTick))&&/name\.wb/.test(nextZoneBanner.toString()));
     {const F=fishF(),o={wb:F.wb,s:F.wbSeen,l:F.wbLast},q0=zoneQ.slice(),w=WBS[0];try{F.wb={[w.id]:1};F.wbSeen={[w.id]:dayN+dayT-6};F.wbLast=w.id;zoneQ.length=0;zoneBusy=true;wbArrive(w);const a=zoneQ.length;
       F.wbLast='x';F.wbSeen[w.id]=dayN+dayT-2;wbArrive(w);const b2=zoneQ.length;F.wbSeen[w.id]=dayN+dayT-6;wbArrive(w);const c2=zoneQ.length;ck('vesistösäännöt '+[a,b2,c2],a===0&&b2===0&&c2===1&&zoneQ[0].wb&&!zoneQ[0].isNew);}
