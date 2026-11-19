@@ -138,7 +138,7 @@ const FB_TURN_V=.7;
 function fbTurn(d){const P0=FB.pages||fbPages(),to=clamp(FB.page+d,0,P0.length-2);if(to===FB.page||FB.turn)return;const el=document.querySelector('#fishBody .fbBook');tkSnd('sivun_kaanto')||plSnd('valikot','kartta',{v:FB_TURN_V});   /* v3.22 käyttäjä: sivun käännössä kirjan avausääni −30 % */
   if(!el){FB.page=to;fishBookRender();return;}const fw=d>0,lf=document.createElement('div');lf.className='fbLeaf '+(fw?'fw':'bw');lf.innerHTML=`<div class="fbIn">${(fw?P0[FB.page+1]:P0[FB.page])||''}</div>`;el.appendChild(lf);
   FB.turn=setTimeout(()=>{FB.turn=null;FB.page=to;fishBookRender();},380);}
-document.addEventListener('keydown',e=>{if(openPanel!=='fish')return;if(e.code==='ArrowRight'||e.code==='KeyD'){fbTurn(2);e.preventDefault();}else if(e.code==='ArrowLeft'||e.code==='KeyA'){fbTurn(-2);e.preventDefault();}});
+document.addEventListener('keydown',e=>{if(typeof openPanel==='undefined'||openPanel!=='fish')return;   /* v3.25: ui.js ladataan myöhemmin */if(e.code==='ArrowRight'||e.code==='KeyD'){fbTurn(2);e.preventDefault();}else if(e.code==='ArrowLeft'||e.code==='KeyA'){fbTurn(-2);e.preventDefault();}});
 /* ---------------- KIRJA KÄDESSÄ ---------------- */
 // avoin kirja molemmissa käsissä lukiessa (player.js kutsuu bookPose)
 let fbOpen3D=null;

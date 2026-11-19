@@ -7,8 +7,11 @@ const keys={};let mouseL=false,mouseR=false,locked=false,lockFailed=false,invert
 const canvas=renderer.domElement;
 /* v3.20 käyttäjä: latausruudun aikana (riimukivi näkyvissä) näppäimet ja napsautukset eivät liikuta hahmoa eivätkä tee mitään; jäljelle jääneet painallukset nollataan. */
 function ldBusy(){const b=window.__ldBusy;return !!b&&Date.now()-b<60000;}   // vain myöhemmät latausruudut (uusi maailma, tallennus), turvaraja 60 s
+/* v3.25 käyttäjä: näppäily (välilyönti, WASD …) skriptien latautuessa antoi virheen "openPanel is not defined" – käsittelijät viittasivat myöhemmin ladattaviin
+   muuttujiin. inReady: syötettä ei käsitellä ennen kuin peli on ladattu (main.js ja ui.js). */
+function inReady(){return typeof state!=='undefined'&&typeof openPanel!=='undefined'&&typeof update==='function';}
 function keysClear(){for(const k in keys)keys[k]=false;mouseL=false;mouseR=false;}
-addEventListener('keydown',e=>{if(ldBusy()&&!(typeof state!=='undefined'&&state==='menu')){e.preventDefault();return;}
+addEventListener('keydown',e=>{if(!inReady()){e.preventDefault();return;}if(ldBusy()&&!(typeof state!=='undefined'&&state==='menu')){e.preventDefault();return;}
   // v1.40 (kohta 4): tekstikentässä Enter lopettaa kirjoittamisen, Tab sulkee repun kuten ennen; muut näppäimet menevät tekstiin
   if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'||e.target.tagName==='SELECT'){if(e.code==='Enter'&&e.target.classList.contains('search')){e.target.blur();return;}if(e.code!=='Tab'||e.target.tagName==='TEXTAREA')return;e.target.blur();}
   // Paneelissa kirjoittaminen menee suoraan hakukenttään (ei tarvitse napsauttaa sitä ensin); toimintonäppäimet toimivat kuten ennen.
@@ -60,7 +63,7 @@ addEventListener('keyup',e=>{keys[e.code]=false;});
 // v2.30: ikkuna menettää kohdistuksen (Alt+Tab ym.) → nostotapahtuma jää tulematta; nollataan, ettei esim. Shift jää pohjaan (juoksu, siirtoslider)
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});document.addEventListener('visibilitychange',()=>{if(document.hidden)for(const k in keys)keys[k]=false;});
 let dragLook=null;
-canvas.addEventListener('mousedown',e=>{if(ldBusy()&&state!=='menu')return;   // v3.20
+canvas.addEventListener('mousedown',e=>{if(!inReady())return;if(ldBusy()&&state!=='menu')return;   // v3.20
   audio();if(actx&&actx.state!=='running')actx.resume();
   if(state!=='play')return;
   /* v2.80: lukituksen pyyntö ei enää niele painallusta jousella ja lähiaseilla (ennen ensimmäinen painallus esim. kuoleman tai valikon jälkeen
@@ -69,24 +72,24 @@ canvas.addEventListener('mousedown',e=>{if(ldBusy()&&state!=='menu')return;   //
   if(e.button===0){mouseL=true;dragLook={x:e.clientX,y:e.clientY,moved:false};onPrimary();}
   if(e.button===2){mouseR=true;onSecondary();}
 });
-addEventListener('mouseup',e=>{if(e.button===0){mouseL=false;onPrimaryUp();}if(e.button===2)mouseR=false;dragLook=null;});
+addEventListener('mouseup',e=>{if(!inReady())return;if(e.button===0){mouseL=false;onPrimaryUp();}if(e.button===2)mouseR=false;dragLook=null;});
 addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('auxclick',e=>{if(e.button===2)e.preventDefault();});
 addEventListener('mousemove',e=>{
-  if(state!=='play')return;
+  if(!inReady()||state!=='play')return;
   let dx=0,dy=0;
   if(locked){dx=e.movementX;dy=e.movementY;}else if(lockFailed&&(e.buttons&1||e.buttons&2)){dx=e.movementX;dy=e.movementY;}
   if(Math.abs(dx)>200||Math.abs(dy)>200)return;
   const k=.0028*(+SET.sens||1);camYaw-=dx*k;camPitch=clamp(camPitch+dy*k*(invertY?-1:1),-.6,1.25);   // v1.54 kääntymisen herkkyys
 });
 // Rulla: zoom tai (asetus) pikapaikan vaihto – valittu pikapaikka varustetaan heti jos esine on varustettava
-canvas.addEventListener('wheel',e=>{if(state!=='play')return;
+canvas.addEventListener('wheel',e=>{if(!inReady()||state!=='play')return;
   if(SET.wheelHotbar){hotSel=((hotSel+Math.sign(e.deltaY))%8+8)%8;invDirty=true;const s=inv[hotSel];if(s&&ITEMS[s.id].cat&&!s.eq)toggleEquip(s);}
   else if(!P.subm)camDist=clamp(camDist+Math.sign(e.deltaY)*.6,2.2,10);},{passive:true});   // v2.18: veden alla zoomi lukittu lähimpään
 let lockFails=0;
 function lockFail(fromClick){if(!fromClick)return;lockFails++;if(lockFails>=2&&!lockFailed){lockFailed=true;msg('Hiiren lukitus ei ole käytössä: käännä kameraa vetämällä hiirellä.','warn');}}
 function requestLock(fromClick){if(typeof TUT!=='undefined'&&TUT.hold)return;   /* v2.71 opastuksen pysäytyksessä hiiri vapaana (kortin napit) */try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>lockFail(fromClick));}catch(e){lockFail(fromClick);}}
-document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;if(locked)lockFails=0;vcSync();if(!locked&&state==='play'&&!openPanel&&performance.now()-panelClosedAt<600)requestLock();   /* v1.36: yritetään heti takaisin */if(!locked&&state==='play'&&!openPanel&&!suppressPause&&performance.now()-panelClosedAt>600)pauseGame();suppressPause=false;});
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;if(!inReady())return;if(locked)lockFails=0;vcSync();if(!locked&&state==='play'&&!openPanel&&performance.now()-panelClosedAt<600)requestLock();   /* v1.36: yritetään heti takaisin */if(!locked&&state==='play'&&!openPanel&&!suppressPause&&performance.now()-panelClosedAt>600)pauseGame();suppressPause=false;});
 document.addEventListener('pointerlockerror',()=>{});
 let suppressPause=false,panelClosedAt=-9999,pausedAt=-9999;
 function releaseLock(){if(document.pointerLockElement){suppressPause=true;document.exitPointerLock();}}
@@ -98,7 +101,7 @@ function releaseLock(){if(document.pointerLockElement){suppressPause=true;docume
 // Esc vapauttaa lukituksen aina (selaimen sääntö), joten Esc-taukovalikon jälkeen tarvitaan yhä yksi napsautus.
 const VC={x:innerWidth/2,y:innerHeight/2,on:false,el:null,hov:null,down:null};
 (function(){const el=document.createElement('div');el.id='vcur';el.hidden=true;document.body.appendChild(el);VC.el=el;})();
-function vcSync(){const on=locked&&!!openPanel&&state==='ui';if(on!==VC.on){VC.on=on;VC.el.hidden=!on;if(!on)vcHover(null);else{VC.x=clamp(VC.x,0,innerWidth-1);VC.y=clamp(VC.y,0,innerHeight-1);vcMove(0,0,true);}}}
+function vcSync(){if(!inReady())return;const on=locked&&!!openPanel&&state==='ui';if(on!==VC.on){VC.on=on;VC.el.hidden=!on;if(!on)vcHover(null);else{VC.x=clamp(VC.x,0,innerWidth-1);VC.y=clamp(VC.y,0,innerHeight-1);vcMove(0,0,true);}}}
 const vcAt=()=>{const t=document.elementFromPoint(VC.x,VC.y);return t||document.body;};
 const vcInit=(e,extra)=>Object.assign({bubbles:true,cancelable:true,composed:true,view:window,clientX:VC.x,clientY:VC.y,screenX:VC.x,screenY:VC.y,button:e?e.button:0,buttons:e?e.buttons:0,shiftKey:e&&e.isTrusted?!!e.shiftKey:!!(e&&e.shiftKey)||!!(keys.ShiftLeft||keys.ShiftRight),ctrlKey:e&&e.isTrusted?!!e.ctrlKey:!!(e&&e.ctrlKey)||!!(keys.ControlLeft||keys.ControlRight),altKey:!!(e&&e.altKey),metaKey:!!(e&&e.metaKey)},extra||{});
 function vcFire(type,e,extra,tgt){const t=tgt||vcAt();t.dispatchEvent(type==='wheel'?new WheelEvent(type,vcInit(e,extra)):new MouseEvent(type,vcInit(e,extra)));return t;}
@@ -110,7 +113,7 @@ function vcHover(t){if(t===VC.hov)return;const old=new Set();for(let a=VC.hov;a&
 // v1.54: osoitin siirtyy heti (vain transform, GPU), mutta raskas osa – elementFromPoint (pakottaa asettelun), hover-luokat ja
 // keinotekoinen mousemove – tehdään kerran ruudunpäivitystä kohti kertyneellä liikkeellä (ennen joka hiiritapahtumalla → viive).
 let vcPend=null;
-function vcMove(dx,dy,quiet){VC.x=clamp(VC.x+dx,0,innerWidth-1);VC.y=clamp(VC.y+dy,0,innerHeight-1);VC.el.style.transform=`translate3d(${VC.x}px,${VC.y}px,0)`;
+function vcMove(dx,dy,quiet){if(dx||dy)VC.mvT=performance.now();VC.x=clamp(VC.x+dx,0,innerWidth-1);VC.y=clamp(VC.y+dy,0,innerHeight-1);VC.el.style.transform=`translate3d(${VC.x}px,${VC.y}px,0)`;
   if(quiet){vcHover(vcAt());return;}if(!vcPend){vcPend={dx:0,dy:0};requestAnimationFrame(vcFlush);}vcPend.dx+=dx;vcPend.dy+=dy;}
 function vcFlush(){const p=vcPend;vcPend=null;if(!p||!VC.on)return;const t=vcAt();vcHover(t);vcFire('mousemove',VC.down,{movementX:p.dx,movementY:p.dy,buttons:VC.down?VC.down.buttons:0},t);}
 // Oikeat tapahtumat pysäytetään ikkunan kaappausvaiheessa (ennen muita kuuntelijoita) ja korvataan osoittimen kohtaan lähetetyillä.

@@ -886,6 +886,15 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.25 – optimointi ja korjaukset
+- Latauksen aikana näppäily ei tee mitään eikä anna virhettä.
+- Intron usvapilvet liikkuvat koko ajan hiljaa kulkusuuntaansa.
+- Ruoho piirretään vain näkyvään suuntaan; Ultralla kaukainen ruoho on kevyempää ja sitä on 30 % vähemmän. Ruohon päivitys ei nykäise.
+- Valikoissa osoitin liikkuu sulavasti raskaillakin asetuksilla.
+- Käsi ei nyi seinää tai esinettä vasten.
+- Pelaajan hengitys- ja muut ihmisäänet ovat 20 % hiljempaa; hengästys loppuu heti veden alla ja kuollessa.
+- Vesistön nimi näkyy vain kerran eikä uudelleen valikosta palatessa.
+
 ## v3.24 – leiri, savu ja vesistöt
 - Hylätyssä leirissä on penkki jaloilla. Halkopino on aina teltan kylkeä vasten, muut esineet satunnaisesti nuotion ympärillä, eikä mikään ole päällekkäin tai ilmassa.
 - Kun nuotio, grilli tai patanuotio sammuu, siitä nousee 10–20 s ajan savupatsas aarnipuiden latvoihin asti; tuuli vie savua sivulle.

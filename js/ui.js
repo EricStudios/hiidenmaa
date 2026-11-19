@@ -95,7 +95,7 @@ function showAmmo(dur,small){const e=$('#ammoT');if(!e)return;const am=typeof am
 let hnSel=-1;
 function itemRarity(s){const id=s.id,r=RECIPE_BY[id],lv=r&&r.lvl||0;return isValuable(id)?'leg':ITEMS[id].potion?'rare':ITEMS[id].rar?ITEMS[id].rar:lv>=6?'rare':(lv>=3||(s.q||1)>=2)?'unc':'com';}
 function showHotName(i){const e=$('#hotName'),s=inv[i],sl=document.querySelectorAll('#hotbar .slot')[i];if(!e)return;e.className='';if(!s||!sl)return;
-  const r=sl.getBoundingClientRect();e.textContent=ITEMS[s.id].n+((s.q||1)>1?' ★'.repeat(s.q-1):'');e.style.left=((r.left+r.width/2)/hudK())+'px';void e.offsetWidth;   /* v2.63 HUD-skaala */e.className='on r_'+itemRarity(s);}
+  const r=sl.getBoundingClientRect();e.textContent=ITEMS[s.id].n+((s.q||1)>1?' ★'.repeat(s.q-1):'');e.style.left=((r.left+r.width/2)/hudK())+'px';void e.offsetWidth;   /* v2.63 HUD-skaala */e.className='on r_'+itemRarity(s);e.onanimationend=()=>e.classList.remove('on');}   // v3.25: ei toistu valikosta palatessa
 function updateHUD(dt){
   if(hotSel!==hnSel){if(hnSel>=0)showHotName(hotSel);hnSel=hotSel;}
   if(heldId!==ammoHeld){ammoHeld=heldId;if(heldId&&ITEMS[heldId].cat==='bow')showAmmo(2.5);}
@@ -636,7 +636,7 @@ addEventListener('contextmenu',e=>{if(dragEat){e.stopPropagation();e.preventDefa
 // v1.31: Q pudottaa hiiren alla olevan esineen (repussa ja arkussa) ilman valintaa: Q yksi, Shift+Q koko pino.
 // v1.40 (lista 4, kohdat 27 ja 29): napsautus paneelin reunojen ulkopuolelle – valittu esine pudotetaan (puolet jos puolikas valittu),
 // muuten paneeli sulkeutuu.
-addEventListener('mousedown',e=>{if(!openPanel||state!=='ui'||performance.now()-panelOpenedAt<250||dragEat)return;const t=e.target;
+addEventListener('mousedown',e=>{if(typeof state==='undefined'||!openPanel||state!=='ui'||performance.now()-panelOpenedAt<250||dragEat)return;const t=e.target;
   if(t.closest&&t.closest('.panel,#keyDlg,#hotbar,.dlg,#settings,#splitDlg'))return;   // v2.30: sliderin napit eivät sulje reppua
   const cs=chestSel||(selSlot>=0&&inv[selSlot]?{g:'i',i:selSlot,half:selHalf}:null);
   if(cs){const arr=uxArr(cs.g),s=arr[cs.i];if(s){const n=cs.half?Math.max(1,Math.floor(s.n/2)):s.n;if(s.eq&&n>=s.n){s.eq=false;}playerDrop(s.id,n,s.q,s);s.n-=n;if(s.n<=0)arr[cs.i]=null;sfx('pickup',.8,.5);msg(`Pudotit: ${ITEMS[s.id].n}${n>1?' ×'+n:''}`);}
