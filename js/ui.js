@@ -126,7 +126,7 @@ function updateHUD(dt){
   hp.firstChild.style.width=(P.hp/maxHp()*100)+'%';hp.lastChild.textContent=`TERVEYS ${Math.ceil(P.hp)}/${maxHp()}`;hp.classList.toggle('low',P.hp<maxHp()*.25);
   st.firstChild.style.width=(P.stam/maxStam()*100)+'%';st.lastChild.textContent=`KESTÄVYYS ${Math.floor(P.stam)}`;
   hu.firstChild.style.width=P.hunger+'%';hu.lastChild.textContent=`KYLLÄISYYS ${Math.floor(P.hunger)}`;hu.classList.toggle('low',P.hunger<15);
-  {const li=lvlInfo();$('#lvlbox').innerHTML=`Taso ${li.L}<span class="track"><i style="width:${li.need?li.xp/li.need*100:100}%"></i></span>`;}
+  {const li=lvlInfo(),h=`Taso ${li.L} <small class="lvlT">${lvlTitle(li.L)}</small><span class="track"><i style="width:${li.need?li.xp/li.need*100:100}%"></i></span>`;const lb=$('#lvlbox');if(lb._h!==h){lb._h=h;lb.innerHTML=h;}}   /* v3.16 nimike HUDissa */
   const wt=invWeight();const we=$('#weight');we.textContent=`Paino ${wt.toFixed(0)}/${MAXW}`;we.classList.toggle('over',wt>MAXW);
   const t=lookTarget,pr=$('#prompt');
   if(t&&!P.dead&&hintL3()){const l=t.kind==='it'?t.it.label():t.label;pr.innerHTML=`<kbd>E</kbd>${l}`;}else pr.innerHTML='';   // v3.08 porras 3: ei E-kehotteita
@@ -146,19 +146,22 @@ let panelOpenedAt=0;
 function renderDev(){const B=$('#devBody');if(!B)return;const clk=()=>{const h=dayT*24;return `${Math.floor(h)}:${String(Math.floor(h%1*60)).padStart(2,'0')}`;};
   const big=[['god','Kuolemattomuus','Ei kuole eikä ota vahinkoa'],['fly','Lento','V pohjassa 6× nopeampi'],['noclip','Seinien läpi','Seinät ja esineet eivät estä'],
     ['lockTW','Lukitse aika ja sää','Kello ja sää pysyvät'],['unseen','Näkymätön','Olennot eivät huomaa sinua (lyönti suututtaa)'],['freeze','Pysäytä maailma','Olennot, ammukset, aika ja nälkä seis'],['free','Ilmaiset materiaalit','Rakentaminen ja valmistus ilman aineita'],['perf','Suorituskykymittari','Piirtokutsut, kolmiot, ruudun aika ja optimoinnit (vasen yläkulma)']];
-  B.innerHTML=`<div class="devBig">${big.map(([k,n,d])=>`<button class="btn devBigB${DEVF[k]?' on':''}" data-big="${k}"><b>${n}</b><span>${DEVF[k]?'PÄÄLLÄ':'pois'} · ${d}</span></button>`).join('')}
+  B.innerHTML=`${devTabsHTML()}<div class="devSec" data-sec="yleiset"><div class="devBig">${big.map(([k,n,d])=>`<button class="btn devBigB${DEVF[k]?' on':''}" data-big="${k}"><b>${n}</b><span>${DEVF[k]?'PÄÄLLÄ':'pois'} · ${d}</span></button>`).join('')}
     <button class="btn devBigB act" data-heal="1"><b>Terveys täyteen</b><span>Terveys, kestävyys ja kylläisyys täyteen, palaminen pois</span></button></div>
-  <div class="devRow"><b>Sää</b><div class="devBtns">${Object.entries(WEATHERS).map(([k,w])=>`<button class="btn${weather.cur===k?' on':''}" data-w="${k}">${w.n}</button>`).join('')}</div></div>
+  </div><div class="devSec" data-sec="aika"><div class="devRow"><b>Sää</b><div class="devBtns">${Object.entries(WEATHERS).map(([k,w])=>`<button class="btn${weather.cur===k?' on':''}" data-w="${k}">${w.n}</button>`).join('')}</div></div>
   <div class="devRow"><b>Aika <span id="devClk">${clk()}</span></b>${sldHTML('devT',0,1,.005,dayT)}<div class="devBtns">${[['Aamu',.28],['Päivä',.5],['Ilta',.74],['Yö',.95]].map(([n,v])=>`<button class="btn" data-t="${v}">${n}</button>`).join('')}</div></div>
   <div class="devRow"><b>Maailman nopeus <span>${worldSpd()}×</span></b><div class="devBtns">${WSPD.map(v=>`<button class="btn${worldSpd()===v?' on':''}" data-spd="${v}">${String(v).replace('.',',')}×</button>`).join('')}</div></div>
   <div class="devRow"><b>Pelin ajan nopeus <span>${timeSpd()}×</span></b><div class="devBtns">${WSPD.map(v=>`<button class="btn${timeSpd()===v?' on':''}" data-tspd="${v}">${String(v).replace('.',',')}×</button>`).join('')}</div><small class="devNote">Vain kello ja siihen sidottu: vuorokausi, sää, nälkä ja tehosteet, tulet ja soihdut, ruoka, sulatus, pihka. Liike ja olennot normaalisti.</small></div>
-  <div class="devRow"><b>Terveys <span id="devHpV">${Math.round(P.hp)} / ${maxHp()}</span></b>${sldHTML('devHp',1,maxHp(),1,Math.round(P.hp))}</div>
+  </div><div class="devSec" data-sec="pelaaja"><div class="devRow"><b>Terveys <span id="devHpV">${Math.round(P.hp)} / ${maxHp()}</span></b>${sldHTML('devHp',1,maxHp(),1,Math.round(P.hp))}</div>
   <div class="devRow"><b>Kylläisyys <span id="devHuV">${Math.round(P.hunger)}</span></b>${sldHTML('devHu',0,100,1,Math.round(P.hunger))}</div>
   <div class="devRow"><b>Jumalvoimat</b><div class="devChk">${[['food','Ei nälkää'],['stam','Rajaton kestävyys'],['lvl','Korkein taso'],['weight','Ei painorajaa']].map(([k,n])=>`<label class="tglRow">${tglHTML('dv_'+k,!!DEVF[k],`data-dv="${k}"`)} ${n}</label>`).join('')}</div>
     <div class="devBtns"><button class="btn" data-dvall="1">Kaikki päälle</button><button class="btn" data-dvall="0">Kaikki pois</button></div></div>
   <div class="devRow"><b>Kartta</b><div class="devBtns"><button class="btn" id="devMap">Paljasta kartta ja kohteet</button></div></div>
-  <div class="devRow"><b>Kalastus</b><div class="devBtns"><button class="btn${DEVF.fishReveal?' on':''}" id="devFishRev">Paljasta kalakirja${DEVF.fishReveal?' (päällä)':''}</button></div></div>
-  <div class="devRow"><b>Tarkasteluanimaatiot (F)</b><div class="devBtns">${INSP_ANIMS.map(a=>`<button class="btn devInsp" data-insp="${a.id}" title="Toimii parhaiten: ${a.best}">${a.n}<small>${a.best}</small></button>`).join('')}</div><small class="devNote">Käynnistyy 0,2 s kuluttua, kun valikko on suljettu. Pieni teksti = esine, jolle animaatio on tehty (toimii millä tahansa, ei vasara eikä jousi).</small></div>`;
+  </div><div class="devSec" data-sec="kalastus"><div class="devRow"><b>Pikakalastus</b><div class="devChk"><label class="tglRow">${tglHTML('devFF',!!DEVF.fishFastOK)} Pikakalastus käytössä – U kytkee päälle/pois pelatessa${DEVF.fishFastOK?` (nyt ${DEVF.fishFast?'PÄÄLLÄ':'pois'})`:''}</label></div>
+    <small class="devNote">Päällä: tärppi noin 3 s heitosta, virvelissä isku heti kelatessa, kenttävaihto 10× nopeammin. Fysiikka ja väsytys ennallaan. Ilman tätä täppää U ei tee mitään.</small></div>
+  <div class="devRow"><b>Kalakirja</b><div class="devBtns"><button class="btn${DEVF.fishReveal?' on':''}" id="devFishRev">Paljasta kalakirja${DEVF.fishReveal?' (päällä)':''}</button><button class="btn" id="devWish">Uudet toivekalat</button></div></div>
+  <div class="devRow"><b>Varusteet</b><div class="devBtns"><button class="btn" id="devTackle">Anna kaikki kalastusvarusteet</button></div><small class="devNote">Vavat, kaikki osat ja viehteet, pakki, kirja ja 50 matoa.</small></div>
+  </div><div class="devSec" data-sec="anim"><div class="devRow"><b>Tarkasteluanimaatiot (F)</b><div class="devBtns">${INSP_ANIMS.map(a=>`<button class="btn devInsp" data-insp="${a.id}" title="Toimii parhaiten: ${a.best}">${a.n}<small>${a.best}</small></button>`).join('')}</div><small class="devNote">Käynnistyy 0,2 s kuluttua, kun valikko on suljettu. Pieni teksti = esine, jolle animaatio on tehty (toimii millä tahansa, ei vasara eikä jousi).</small></div></div>`;devTabsBind(B);
   B.querySelectorAll('[data-insp]').forEach(b=>b.onclick=()=>{const id=b.dataset.insp;closePanels();setTimeout(()=>{if(!inspectStart(id))msg('DEV: tarkastelu ei käynnisty (vasara tai jousi kädessä, uinti tai lyönti).','warn');},200);});   // v2.98
   B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{weather.cur=b.dataset.w;weather.until=playTime+600;renderDev();});
   B.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{dayT=+b.dataset.t;renderDev();});
@@ -173,8 +176,16 @@ function renderDev(){const B=$('#devBody');if(!B)return;const clk=()=>{const h=d
   B.querySelectorAll('[data-big]').forEach(b=>b.onclick=()=>{const k=b.dataset.big;DEVF[k]=DEVF[k]?0:1;saveDevF();if(k==='fly'){P.flying=!!DEVF.fly;P.vy=0;}
     if(k==='noclip'&&!DEVF.noclip&&!P.flying)P.vy=0;msg(`DEV: ${b.querySelector('b').textContent} ${DEVF[k]?'päällä':'pois'}.`,'loot');invDirty=true;renderDev();});
   B.querySelectorAll('[data-heal]').forEach(b=>b.onclick=()=>{P.hp=maxHp();P.stam=100;P.hunger=100;P.burnT=0;P.dead=false;msg('DEV: terveys, kestävyys ja kylläisyys täynnä.','loot');renderDev();});
+  $('#devFF').onclick=()=>{DEVF.fishFastOK=DEVF.fishFastOK?0:1;if(!DEVF.fishFastOK)DEVF.fishFast=0;saveDevF();renderDev();};   // v3.16
+  $('#devWish').onclick=()=>{fbWishMake();msg('DEV: uudet toivekalat.','loot');};
+  $('#devTackle').onclick=()=>{for(const id of ['onki','kuparivapa','hiidenvapa',...Object.keys(TK_LINE),...Object.keys(TK_HOOK),...Object.keys(TK_REEL),...Object.keys(TK_FLOAT),...Object.keys(TK_LURE)])devGive(id,1,true);if(!invCount('kalapakki'))devGive('kalapakki',1,true);if(!invCount('kalakirja'))devGive('kalakirja',1,true);devGive('mato',50,true);msg('DEV: kalastusvarusteet annettu.','loot');};
   $('#devFishRev').onclick=()=>{DEVF.fishReveal=DEVF.fishReveal?0:1;saveDevF();msg(`DEV: kalakirja ${DEVF.fishReveal?'paljastettu':'normaali'}.`,'loot');renderDev();};   // v3.15
   $('#devMap').onclick=()=>{devRevealMap();msg('Kartta ja kaikki kohteet paljastettu.','loot');};}
+/* v3.16 käyttäjä: DEV-valikko (Ä) sivuiksi – Yleiset, Aika ja sää, Pelaaja, Kalastus, Animaatiot (valittu sivu muistetaan istunnon ajan). */
+const DEV_TABS=[['yleiset','Yleiset'],['aika','Aika ja sää'],['pelaaja','Pelaaja ja kartta'],['kalastus','Kalastus'],['anim','Animaatiot']];let devTab='yleiset';
+function devTabsHTML(){return `<div class="devTabs">${DEV_TABS.map(([k,n])=>`<button class="btn${devTab===k?' on':''}" data-dtab="${k}">${n}</button>`).join('')}</div>`;}
+function devTabsBind(B){const show=()=>{B.querySelectorAll('.devSec').forEach(s=>s.hidden=s.dataset.sec!==devTab);B.querySelectorAll('[data-dtab]').forEach(b=>b.classList.toggle('on',b.dataset.dtab===devTab));};
+  B.querySelectorAll('[data-dtab]').forEach(b=>b.onclick=()=>{devTab=b.dataset.dtab;show();});show();}
 /* v2.96 DEV-valikon elävät arvot: kello, terveys, kylläisyys, sää, nopeudet ja isot kytkimet seuraavat peliä (5×/s), paitsi juuri vedettävä liukusäädin. */
 let devLiveT=0;
 function devLiveTick(dt){if(openPanel!=='dev')return;devLiveT-=dt;if(devLiveT>0)return;devLiveT=.2;const B=$('#devBody');if(!B)return;
@@ -188,10 +199,14 @@ function devLiveTick(dt){if(openPanel!=='dev')return;devLiveT-=dt;if(devLiveT>0)
 let devQ='',devN=1;
 const WIND_WARN=8;   // v2.01 tuulivaroituksen raja (m/s)
 /* v2.00 DEV-valikko Å: esineet. Pikavalinnat (yksi painallus antaa ehdotetun määrän, "Anna kaikki" kaikki kerralla) + esinehaku määrällä. */
-const DEV_PICKS=[['hiidenmiekka',1],['hiidenpanssari',1],['rautakilpi',1],['hiidenjousi',1],['sulkanuolet',100],['tulinuolet',100],['pihka',100],['puu',100],
-  ['hiidenkivi',3],['jaaavain',1],['sinetti',1],['luuavain',1],['aarniavain',1],['kruunusirpale',3],['parannusjuoma',5],['elpymisjuoma',5],['sisujuoma',5]];
+/* v3.16: pikavalinnat ryhmittäin (DEV_PICK_CATS); DEV_PICKS = kaikki yhdessä (Anna kaikki) */
+const DEV_PICK_CATS=[['Taistelu',[['hiidenmiekka',1],['hiidenpanssari',1],['rautakilpi',1],['hiidenjousi',1],['sulkanuolet',100],['tulinuolet',100]]],
+  ['Avaimet ja harvinaiset',[['hiidenkivi',3],['jaaavain',1],['sinetti',1],['luuavain',1],['aarniavain',1],['kruunusirpale',3]]],
+  ['Juomat ja materiaalit',[['parannusjuoma',5],['elpymisjuoma',5],['sisujuoma',5],['pihka',100],['puu',100]]],
+  ['Kalastus',[['hiidenvapa',1],['hiisikela',1],['hiidensiima',3],['vakakoukku',3],['hiidenhohtoviehe',1],['pohjolanlusikka',1],['kalapakki',1],['mato',30]]]];
+const DEV_PICKS=DEV_PICK_CATS.flatMap(c=>c[1]);
 function renderDevI(){const B=$('#devIBody');if(!B)return;
-  B.innerHTML=`<div class="devRow"><b>Pikavalinnat</b><div class="devList devPicks">${DEV_PICKS.map(([id,n])=>`<div class="devIt"><span class="ic" style="background-image:url(${icon(id)})"></span><span class="nm">${esc(ITEMS[id].n)} × ${n}</span><button class="btn" data-pick="${id}" data-n="${n}">Anna</button></div>`).join('')}</div>
+  B.innerHTML=`<div class="devRow"><b>Pikavalinnat</b>${DEV_PICK_CATS.map(([cn,L])=>`<h4 class="devCat">${cn}</h4><div class="devList devPicks">${L.map(([id,n])=>`<div class="devIt"><span class="ic" style="background-image:url(${icon(id)})"></span><span class="nm">${esc(ITEMS[id].n)} × ${n}</span><button class="btn" data-pick="${id}" data-n="${n}">Anna</button></div>`).join('')}</div>`).join('')}
     <div class="devBtns"><button class="btn" id="devPickAll">Anna kaikki</button></div></div>
   <div class="devRow"><b>Hae esine</b><div class="devGive"><input id="devQ" class="search" type="search" placeholder="Hae esinettä nimellä…" autocomplete="off" spellcheck="false" value="${esc(devQ)}">
     <input id="devN" type="text" inputmode="numeric" maxlength="3" placeholder="1" value="${devN>1?devN:''}" title="Määrä (tyhjä = 1)"><button class="btn" id="devGo">Hae</button></div><div id="devList" class="devList"></div></div>`;

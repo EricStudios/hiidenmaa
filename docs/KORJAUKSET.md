@@ -646,3 +646,7 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Harvinainen hiisikela (taso 9) rikkoi v2.70-säännön "tavalliset reseptit enintään taso 7": suodatin luki vain `rare`-kenttää, esineissä käytetään `rar:'rare'` → suodatin korjattu.
 - Kommentti `(clitellum); burrow = …` tulkittiin koodiksi kommentin perässä (KORJAUKSET 49 -tarkistus) – kommentissa ei puolipistettä + sijoitusta.
 - **Sääntö:** aja `tools/tarkistus.mjs` heti uuden mallin/reseptin jälkeen; vanhan rivin vaatimus on yleensä oikea – korjaa ensin oma muutos, vasta sitten testi.
+
+## 90. Kaksi id-attribuuttia samassa elementissä → `$('#…')` palauttaa null (v3.16)
+- `tglHTML('dv_x',on,'id="devFF"')` tuotti `<button id="dv_x" id="devFF">` – selain käyttää ensimmäistä id:tä, joten `$('#devFF').onclick` kaatoi koko DEV-valikon renderöinnin.
+- **Sääntö:** `tglHTML`:n kolmas parametri on vain lisäattribuuteille (data-…); id annetaan aina ensimmäisenä parametrina. Testaa uusi paneeli avaamalla se testiskriptissä (virhe näkyy heti).

@@ -7,23 +7,30 @@
 // flags.ach = avatut saavutukset, flags.first = ensimmäiset kerrat (XP vain kerran).
 /* v3.02 käyttäjä: huipputaso 30 (ennen 20) ja tasot hieman vaikeampia: 55 + 35n (ennen 50 + 30n), tasosta 20 alkaen lisäksi +20 × (n − 19).
    XP on maailmakohtainen (flags.xp). Vanha tallennus muunnetaan kerran (flags.xpv): taso ja tason sisäinen osuus säilyvät (xpMigrate). */
-const LVL_MAX=30,needXp=n=>55+35*n+(n>=20?20*(n-19):0),NEED_XP_OLD=n=>50+30*n,LVL_MAX_OLD=20; // XP tasolta n tasolle n+1
+/* v3.16 käyttäjä: tasot 999 asti. Tasoon 30 asti ennallaan (needXp sama), sen jälkeen XP-tarve kasvaa tasaisesti (1 270 + 45·(n−29) + ½·(n−29)²).
+   Palkinnot (terveys, kestävyys, kantokyky) vain tasoon 30 (LVL_REW_MAX) – kantokyvyn 200-katto säilyy. Tasoilla on 20 nimikettä (LVL_TITLES). */
+const LVL_MAX=999,LVL_REW_MAX=30,needXp=n=>n<30?55+35*n+(n>=20?20*(n-19):0):1270+45*(n-29)+Math.round(.5*(n-29)**2),NEED_XP_OLD=n=>50+30*n,LVL_MAX_OLD=20; // XP tasolta n tasolle n+1
 function xpMigrate(){fixFlags();if(flags.xpv)return;let xp=flags.xp||0,L=1;while(L<LVL_MAX_OLD&&xp>=NEED_XP_OLD(L)){xp-=NEED_XP_OLD(L);L++;}
   let nx=0;for(let i=1;i<L;i++)nx+=needXp(i);nx+=L<LVL_MAX_OLD?Math.floor(xp/NEED_XP_OLD(L)*needXp(L)):xp;flags.xp=nx;flags.xpv=1;}
 function fixFlags(){flags.xp=flags.xp||0;flags.cnt=flags.cnt||{};flags.ach=flags.ach||{};flags.first=flags.first||{};}
 const cnt=k=>(flags.cnt&&flags.cnt[k])||0;
 function bump(k,n=1){fixFlags();flags.cnt[k]=(flags.cnt[k]||0)+n;}
+const LVL_M={xp:-1,r:null};   // v3.16 välimuisti (999 tasoa)
 function lvlInfo(){if(devOn('lvl'))return{L:LVL_MAX,xp:0,need:0};// DEV: korkein taso
-  let xp=flags.xp||0,L=1;while(L<LVL_MAX&&xp>=needXp(L)){xp-=needXp(L);L++;}return{L,xp,need:L>=LVL_MAX?0:needXp(L)};}
+  const x0=flags.xp||0;if(LVL_M.xp===x0&&LVL_M.r)return LVL_M.r;let xp=x0,L=1;while(L<LVL_MAX&&xp>=needXp(L)){xp-=needXp(L);L++;}LVL_M.xp=x0;return LVL_M.r={L,xp,need:L>=LVL_MAX?0:needXp(L)};}
+const LVL_TITLES=[[1,'Haaksirikkoutunut'],[2,'Rantaan ajautunut'],[4,'Tulentekijä'],[6,'Erämaan oppilas'],[8,'Metsänkävijä'],[10,'Eränkävijä'],[12,'Erämies'],[15,'Seikkailija'],
+  [20,'Saaren tuntija'],[25,'Kokenut seikkailija'],[30,'Kokeneempi seikkailija'],[50,'Hiidenmaan kulkija'],[75,'Vanha konkari'],[100,'Saaren vartija'],[150,'Tarujen etsijä'],
+  [250,'Kansantarujen sankari'],[400,'Hiiden kesyttäjä'],[600,'Muinainen mestari'],[800,'Elävä taru'],[999,'Hiidenmaan legenda']];
+function lvlTitle(L){let t=LVL_TITLES[0][1];for(const [l,n] of LVL_TITLES)if((L||playerLevel())>=l)t=n;return t;}
 const playerLevel=()=>lvlInfo().L;
 /* v2.70 TASOPALKINNOT (käyttäjä: "Tasainen"): joka tasolla jotain, HP harvoin. HP +10 (3, 5), +15 (10, 15), +20 (20) = +70 → 130;
    kestävyys +5 (4, 8, 12, 16) = +20; muilla tasoilla kantokyky +5 (10 tasoa = +50). Lisäksi reseptit (RECIPES lvl). */
 const LVL_REW={2:{w:10},3:{hp:10,w:8},4:{stam:5},5:{hp:10},8:{stam:5},10:{hp:15},12:{stam:5},15:{hp:15},16:{stam:5},20:{hp:20},22:{stam:5},24:{hp:10},26:{stam:5},28:{hp:10},30:{hp:20}},LVL_W=3;   // v3.06 kantokyky: taso 2 +10, 3 +8, muut +3   // v3.02 tasot 21–30
-const lvlRew=L=>L<2?{}:LVL_REW[L]||{w:LVL_W};
-function lvlBon(L){const o={hp:0,stam:0,w:0};for(let i=2;i<=(L||playerLevel());i++){const r=lvlRew(i);for(const k in r)o[k]+=r[k];}return o;}
+const lvlRew=L=>L<2||L>LVL_REW_MAX?{}:LVL_REW[L]||{w:LVL_W};   // v3.16 tason 30 jälkeen ei palkintoja
+function lvlBon(L){const o={hp:0,stam:0,w:0};for(let i=2;i<=Math.min(LVL_REW_MAX,L||playerLevel());i++){const r=lvlRew(i);for(const k in r)o[k]+=r[k];}return o;}
 function addXp(n,why){if(!n||P.dead)return;fixFlags();const b=playerLevel(),h0=maxHp();flags.xp+=n;const a=playerLevel();if(maxHp()>h0)P.hp+=maxHp()-h0;   /* v1.20: terveyslisä heti */
   if(n>=10&&why)msg(`+${n} XP · ${why}`,'xp');
-  if(a>b){sfx('craft');recalcMaxW();const rw=[];for(let i=b+1;i<=a;i++){const r=lvlRew(i);for(const k in r)rw.push(bonText({[k]:r[k]}));}msg(`Taso ${a}!${rw.length?' '+rw.join(', '):''}`,'loot');const un=RECIPES.filter(r=>r.lvl>b&&r.lvl<=a).map(r=>ITEMS[r.id].n);if(un.length)msg(`Uusia ohjeita: ${un.join(', ')}`,'loot');}}
+  if(a>b){sfx('craft');recalcMaxW();const rw=[];for(let i=b+1;i<=a;i++){const r=lvlRew(i);for(const k in r)rw.push(bonText({[k]:r[k]}));}msg(`Taso ${a}!${rw.length?' '+rw.join(', '):''}`,'loot');if(lvlTitle(a)!==lvlTitle(b))msg(`Uusi nimike: ${lvlTitle(a)}`,'quest');const un=RECIPES.filter(r=>r.lvl>b&&r.lvl<=a).map(r=>ITEMS[r.id].n);if(un.length)msg(`Uusia ohjeita: ${un.join(', ')}`,'loot');}}
 function xpFirst(key,n,why){fixFlags();if(flags.first[key])return;flags.first[key]=1;addXp(n,why);}
 const recipeOpen=r=>!r.lvl||playerLevel()>=r.lvl;
 
@@ -132,10 +139,12 @@ function updateGoals(){fixFlags();
 /* ---------------- EDISTYMISPANEELI (J) ---------------- */
 function renderProg(){const li=lvlInfo(),el=$('#progP');
   const done=ACH.filter(a=>flags.ach[a.id]).length;
-  el.querySelector('#progBody').innerHTML=`<div class="lv"><b>Taso ${li.L}</b><span class="num note">${li.need?`${li.xp} / ${li.need} XP`:'huipputaso'}</span><div class="track"><i style="width:${li.need?li.xp/li.need*100:100}%"></i></div></div>
+  el.querySelector('#progBody').innerHTML=`<div class="lv"><b>Taso ${li.L}</b> <i class="lvlT">${lvlTitle(li.L)}</i><span class="num note">${li.need?`${li.xp} / ${li.need} XP`:'huipputaso'}</span><div class="track"><i style="width:${li.need?li.xp/li.need*100:100}%"></i></div></div>
   <div class="cols"><div><h3>Saavutukset ${done}/${ACH.length}</h3>${ACH.map(a=>{const ok=!!flags.ach[a.id],[c,m]=a.pr();return `<div class="ach ${ok?'ok':''}"><b>${ok?'✔ ':''}${a.n}</b><span>${a.d} ${ok?'':`(${Math.min(c,m)}/${m})`}</span><em>${bonText(a.b)}</em></div>`;}).join('')}</div>
   <div><h3>Tavoitteet</h3>${GOALS.map((g,i)=>`<div class="ach ${i<flags.goal?'ok':i===flags.goal?'cur':'fut'}"><b>${i<flags.goal?'✔ ':i===flags.goal?'▶ ':''}${g.t}</b>${i===flags.goal?`<span>${g.d}</span>`:''}</div>`).join('')}
   <h3 style="margin-top:12px">Taso avaa</h3>${lvlUnlockRows()}</div></div>`;}
 // v2.70 tasoittain: palkinto + aukeavat reseptit
-function lvlUnlockRows(){const L=playerLevel(),o=[];for(let i=2;i<=LVL_MAX;i++){const rs=RECIPES.filter(r=>r.lvl===i).map(r=>ITEMS[r.id].n+(ITEMS[r.id].rare?' ★':'')),rw=bonText(lvlRew(i));
-  o.push(`<div class="ach ${L>=i?'ok':'fut'}"><b>${L>=i?'✔ ':''}Taso ${i}</b><span>${[rw,...rs].filter(Boolean).join(' · ')}</span></div>`);}return o.join('');}
+function lvlUnlockRows(){const L=playerLevel(),o=[];for(let i=2;i<=LVL_REW_MAX;i++){const rs=RECIPES.filter(r=>r.lvl===i).map(r=>ITEMS[r.id].n+(ITEMS[r.id].rare?' ★':'')),rw=bonText(lvlRew(i));
+  o.push(`<div class="ach ${L>=i?'ok':'fut'}"><b>${L>=i?'✔ ':''}Taso ${i}</b><span>${[rw,...rs].filter(Boolean).join(' · ')}</span></div>`);}
+  o.push(`<div class="ach ${L>30?'ok':'fut'}"><b>Tasot 31–${LVL_MAX}</b><span>ei palkintoja – vain kunnia ja nimikkeet</span></div>`);   // v3.16
+  o.push(`<h4 class="lvlTH">Nimikkeet</h4>`+LVL_TITLES.map(([l,n])=>`<div class="ach ${L>=l?'ok':'fut'}"><b>${L>=l?'✔ ':''}${n}</b><span>taso ${l}</span></div>`).join(''));return o.join('');}

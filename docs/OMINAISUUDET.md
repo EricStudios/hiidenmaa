@@ -886,6 +886,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.16 – tasot ja nimikkeet
+- **Tasot 999:** tasoon 30 kaikki ennallaan (palkinnot terveys/kestävyys/kantokyky), sen jälkeen XP-tarve kasvaa tasaisesti eikä palkintoja ole.
+- **20 tasonimikettä** Haaksirikkoutuneesta (taso 1) Hiidenmaan legendaan (taso 999); taso 30 = Kokeneempi seikkailija. Nimike näkyy HUDissa ja edistymisessä (J).
+- DEV: Ä-valikko sivuina (Yleiset, Aika ja sää, Pelaaja ja kartta, Kalastus, Animaatiot), Å-pikavalinnat ryhmittäin, pikakalastus (täppä + U).
+
 ## v3.15 – kalakirja
 - **Kalastajan kirja** on kuin oikea kirja: aukeama, yksi kala sivulla piirroskuvineen, sivunumerot, sivujen kääntö (napit, nuolinäppäimet, sisällysluettelo).
 - **Kalan arvo:** paino ja pituus verrataan lajin kaikkiin kaloihin → luokka Roskakala, Tavallinen, Hyvä, Harvinainen, Ennätysluokka, Legendaarinen, Ikijärkäle tai

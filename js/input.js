@@ -26,6 +26,7 @@ addEventListener('keydown',e=>{
   if(typeof tutKey==='function'&&tutKey(e))return;   // v2.71 opastus: Enter = jatka, pysäytyksessä vain vaiheen näppäimet
   if(DEV&&c==='Quote'){togglePanel('dev');return;}// DEV: Ä avaa/sulkee kehitysvalikon
   if(DEV&&(c==='Semicolon'||e.key==='ö'||e.key==='Ö')){togglePanel('devm');return;}
+  if(DEV&&c==='KeyU'&&DEVF.fishFastOK&&!Object.values(BIND).includes('KeyU')&&!openPanel){DEVF.fishFast=DEVF.fishFast?0:1;saveDevF();msg(`DEV: pikakalastus ${DEVF.fishFast?'PÄÄLLÄ (tärppi ~3 s)':'pois'}.`,'loot');return;}   // v3.16 vain kun Ä › Kalastus › Pikakalastus käytössä
   if(DEV&&(c==='BracketLeft'||e.key==='å'||e.key==='Å')){togglePanel('devi');return;}   // v2.00 DEV: Å avaa esinevalikon (pikavalinnat + haku)   // v1.91 DEV: Ö avaa olento- ja pomovalikon
   // v0.75: E sulkee avoimen valikon; repussa Q pudottaa valitusta yhden, Shift+Q kaikki
   if(openPanel&&c===BIND.interact){e.preventDefault();closePanels(false,true);return;}

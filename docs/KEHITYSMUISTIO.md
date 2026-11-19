@@ -3,27 +3,11 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.15, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.16, 19.11.2026)
 
-- **⏯️ KESKEN: KALASTUSPÄIVITYS v3.14–v3.16 (käyttäjä 19.11., kaikki samaan PR #49:ään, ei yhdistetty)** – jos keskeytyy, jatka tästä. Kaikki kysymykset kysytty (15 + 10 varmistusta + 10 mielipidettä).
-  - **v3.14 VARUSTEET:** onki kootaan osista **Kalastajan pöydällä** (uusi rakennus, Viljely ja kalastus, taso 3, puu 6 + naru 2; perkuulauta + työkalut + paikka pakille):
-    runko (onki / kuparivapa / hiidenvapa: isot kalat +0/+10/+20 % keskipaino, isot lajit hieman useammin), **4 siimaa** (pellava, jänne, punottu, hiidensiima: vahvempi kestää mutta kalat
-    huomaavat → tärppi harvemmin; kuluminen + pieni satunnainen katkeaminen), **3 koukkua** (pieni / iso / väkäkoukku), **3 kelaa** (ei / kupari / hiisi – kela tekee vavasta VIRVELIN: eri fysiikka:
-    heitto 6–30 m vieheellä, vasen pohjassa kelaa, tärppi kelauksen aikana), **3 kohoa** (puu / korkki / hehku), **9 viehettä** (kuparilusikka, rautapilkki, puuvaappu, hiidenhohtoviehe +
-    5: kuusamolainen lusikka ym.; eivät kulu, voivat jäädä kiinni → viehe + siima menetetään hyvin harvoin; vahvuudet/heikkoudet/parhaat kalat listana; väri+tyyli vaikuttaa veden, sään, ajan ja
-    valon mukaan; ei sovi pikkukaloille). **6–8 nimettyä komboa** (pieni etu). Ominaisuudet listana kuten aseissa. Nimi vaihtuu (onki/virveli).
-    **Mato:** E vapa kädessä (jos ei muuta E-kohdetta) laittaa madon koukkuun; klikkaus heittää. **Siiman vaihto** kentällä pakista onnistuu mutta kestää 30 s kauemmin ("ilman pöytää tämä kestää ikuisuuden").
-    **Kalastuspakki** (vasen käsi, paino 20 + sisältö, vain kalastustarvikkeet, 12 → 16/20/24 paikkaa päivityksin pöydällä, väri ja yksityiskohdat/koko tason mukaan, vain yksi pakki kerrallaan):
-    vasen klikkaus laskee maahan tai pöydän pakkipaikalle (ei muille tasoille), E avaa, klikkaus nostaa käteen. **Perkaus** pöydällä: fileet + perkeet (katiskan syötti).
-    **3D-kala koukussa** sätkii 3 s noston jälkeen (piirroskuvan mukainen), paremmat kalakuvakkeet. Ensimmäinen onki: wow-ilmoitus, lopussa eri värillä "Kireitä siimoja!".
-    Madolle parempi 3D-malli (käsi, koukku) ja hienommat madot istutuslaatikon mullassa. Äänipaikkamerkit `sounds2/kalastus/`.
-  - **v3.15 KALAKIRJA:** kirjamainen (aukeama, 1 kala/sivu, sivunumerot alakulmissa, sivujen kääntö), piirretty korkealaatuinen kuvitus, kalan ARVO: paino-, koko- ja yhteispisteet →
-    8 luokkaa (Roskakala, Tavallinen, Hyvä, Harvinainen, Ennätysluokka, Legendaarinen, Ikijärkäle, Maailmanennätysvonkale; värit, selite "parempi kuin 99,7 % lajinsa kaloista"),
-    3 toivekalaa (lukittu 7 päivää, XP harvinaisuuden mukaan järkevästi), saavutukset Toive täyttyi 1/5/15, Vaikea toive, Kirja täynnä, Ennätyskala; viimeiset sivut tietokirjallisuutta
-    (lajit, ajat, alueet, miten saa). Kirja vasempaan käteen, klikkaus avaa (kaksi kättä kirjassa), oma pikanäppäin; pelkkä kirja kädessä → oikeaan käteen, F-animaatiot. Nahkakannet + kultainen
-    kalakoriste. Ääni = kartan ääni (sulkiessa nopeampi + hiljaisempi). Saalisviesti "Sait: Hauki 6,1 kg (Ennätysluokka) – katso kalakirjan sivu 7". DEV: paljasta kirja (Ä-valikko).
-  - **v3.16:** tasot 999 (XP-tarve kasvaa, ei muutoksia tasoon 30 asti, palkinnot vain 30:een), 20 tasonimikettä (alku esim. "Haaksirikkoutunut", taso 30 "Kokeneempi seikkailija",
-    999 "Hiidenmaan legenda"; HUD + edistyminen), DEV-valikon uudelleenjärjestely sivuiksi/kategorioiksi (Kalastus, Animaatiot, …), pikakalastus-täppä + käyttämätön pikanäppäin.
+- **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
+  3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
+  arvo 8 luokkaa, toivekalat, saavutukset, kirja kädessä K), v3.16 tasot 999 + 20 nimikettä, DEV-sivut, pikakalastus (U). Ks. versioloki.
 - **Versio 3.13 – Early Access 1.2** – 6 maailmaa, maailmakorttien pito/tuplaklikkaus, mono-pelaajaäänet, aito Käynnissä-tila, uusi syöksy + usvakerrokset,
   intro-kevennykset, suolammet korjattu, kalastussimulaatio. **PR #49 sisältää v3.08–v3.13** (käyttäjä yhdistää 20.11. ja testaa).
 - **Versio 3.12** – intron oikeat pilvet piirtorajan päällä (matalat esiasetukset).
@@ -365,6 +349,8 @@ koukku tiedostoääneen – älä koskaan tee ääntä itse. Puuttuva ääni = h
 
 ## Tasapainoarvot (päivitä kun muutat)
 
+**v3.16:** tasot 999, XP n ≥ 30: 1 270 + 45·(n−29) + ½·(n−29)², palkinnot ≤ 30, nimikkeitä 20 · pikakalastus U (vain täpällä).
+
 **v3.15:** arvo 0,6 × paino + 0,4 × koko, luokkarajat 15/50/75/90/97/99,5/99,9 % · toiveet 3 / 7 päivää, XP 12–67 · sivu 4 = ensimmäinen laji · kirjan sulkuääni 1,35× / 0,55.
 
 **v3.14:** siimat ten 1/1,25/1,55/1,9, kesto 12/25/45/80, näkyvyys 1/1,06/1,12/1,18 · koukut isku 0,65/0,75/0,88 · kelat 22/30 m, 1,4/1,8 m/s · virveli hazard /70 s,
@@ -444,6 +430,18 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.16 (TASOT 999, NIMIKKEET, DEV-VALIKOT, PIKAKALASTUS – käyttäjä 19.11.)
+- **Tasot 999** (`LVL_MAX`): tasoon 30 asti XP-tarve ennallaan, sen jälkeen `needXp(n)` = 1 270 + 45·(n−29) + ½·(n−29)² (taso 31 vaatii 1 361, taso 100 ≈ 6 990,
+  taso 500 ≈ 133 000). Palkinnot vain tasoon 30 (`LVL_REW_MAX`, `lvlRew` → {} sen jälkeen) → kantokyvyn 200-katto ja terveys/kestävyys ennallaan. `lvlInfo` välimuistissa (`LVL_M`).
+- **20 nimikettä** (`LVL_TITLES`, `lvlTitle`): 1 Haaksirikkoutunut, 2 Rantaan ajautunut, 4 Tulentekijä, 6 Erämaan oppilas, 8 Metsänkävijä, 10 Eränkävijä, 12 Erämies,
+  15 Seikkailija, 20 Saaren tuntija, 25 Kokenut seikkailija, 30 Kokeneempi seikkailija, 50 Hiidenmaan kulkija, 75 Vanha konkari, 100 Saaren vartija, 150 Tarujen etsijä,
+  250 Kansantarujen sankari, 400 Hiiden kesyttäjä, 600 Muinainen mestari, 800 Elävä taru, 999 Hiidenmaan legenda. Näkyy HUDin tasolaatikossa ja edistymisessä (J, oma lista);
+  uusi nimike ilmoitetaan tason noustessa. Edistymisen tasolista: tasot 2–30 palkintoineen + "Tasot 31–999: ei palkintoja".
+- **DEV-valikko (Ä) sivuiksi** (`DEV_TABS`, `devTabsHTML`/`devTabsBind`): Yleiset, Aika ja sää, Pelaaja ja kartta, Kalastus, Animaatiot. Kalastus-sivu: Pikakalastus-täppä,
+  Paljasta kalakirja, Uudet toivekalat, Anna kaikki kalastusvarusteet. **Å:n pikavalinnat ryhmiksi** (`DEV_PICK_CATS`: Taistelu, Avaimet ja harvinaiset, Juomat ja materiaalit, Kalastus).
+- **Pikakalastus:** Ä › Kalastus › *Pikakalastus käytössä* (`DEVF.fishFastOK`) → näppäin **U** kytkee pikakalastuksen (`DEVF.fishFast`) päälle/pois. Ilman täppää U ei tee mitään
+  (eikä toimi, jos U on sidottu johonkin toimintoon). Päällä: tärppi ~3 s, virvelin isku ×30, kenttävaihto ×10; fysiikka ja väsytys ennallaan.
 
 ### v3.15 (KALAKIRJA – käyttäjä 19.11., uusi tiedosto `js/fishbook.js`)
 - **Kirjamainen ulkoasu** (#fishP `fbPanel`): nahkakansi, kaksi pergamenttisivua aukeamana, 1 kala / sivu, sivunumerot alakulmissa, kääntyvä lehti (CSS rotateY 0,38 s, `fbTurn`,
@@ -4261,6 +4259,14 @@ kanssa; (3) Ultra-asetuksella jopa ~830 piirtokutsua.
 - Ensimmäinen pelattava versio yhtenä HTML-tiedostona.
 
 ## Ideajono
+
+### 💡 Ideat kalastuspäivityksen (v3.14–v3.16) jälkeen (ei tehty – ehdotuksia)
+- `sounds2/`-käsittely `process_sounds.py`:hin, kun ensimmäiset kalastusäänet tulevat (avaimet `kalastus/…`, `tkSnd`).
+- Kalakilpailu / päivän saalis: NPC-kalastaja tai ilmoitustaulu, joka ostaa harvinaisia luokkia; kalojen arvo kauppatavarana uuden saaren kanssa.
+- Vene ja laituri (jo jonossa), pilkkiminen jäältä talvella (rautapilkki valmiina), uistelu veneestä virvelillä.
+- Viehekotelo pakin sisään (omat lokerot), viehteiden maalaus pöydällä (väri vaikuttaa jo `lureCond`-kertoimiin).
+- Nimikkeen valinta itse saavutetuista (näkyy HUDissa), tasoille 31+ kosmeettisia palkintoja (värit, kehykset), ei tehoja.
+- Kalakirjaan muistiinpanot / tarrat (pelaajan oma teksti) ja kuva ennätyskalasta naulakkoon.
 
 ### 💡 Ideat v3.08:n jälkeen (ei tehty – ehdotuksia, kysy käyttäjältä)
 - Istutetun puun kasvuvaihe ja kastelun/madon tila näkyviin (esim. katsoessa tai F-tarkastelussa) myös ilman vesikulhoa/matoa kädessä.
