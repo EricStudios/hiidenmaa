@@ -150,5 +150,26 @@ function lappu(img,html,o){o=o||{};let box=document.getElementById('lappuBox');i
   setTimeout(()=>{el.classList.remove('on');el.classList.add('off');setTimeout(()=>el.remove(),450);},T);return el;}
 // ennätyskalan teema (music/raw/tapahtumat/ennatyskala; main.js musicCtx 'rec' soi kerran loppuun) – ei pomotaistelun aikana
 function fpRecordMusic(){const M=window.__mus;if(!M||!M.has||!M.has('mu/tapahtumat/ennatyskala_'))return;if(typeof BB!=='undefined'&&BB.m&&!BB.m.dead)return;MUS_FB.rec={t:playTime,seen:false};}
+/* ---------------- VIRVELIN ASENTO (player.js kutsuu bookPosen jälkeen) ----------------
+   Vapa vasemmassa kädessä (state.js virvHeld), vavan suunta maailmassa: katseen suunta, kallistus 26° ylös; latauksessa vapa kallistuu taakse,
+   heitossa piiskaa eteen. Oikea käsi tarttuu kelan kammen nuppiin (IK) ja pyörittää sitä kelatessa; kampi pyörii käden mukana. */
+const VIRV={crank:0,side:0,key:null},_vq=new THREE.Quaternion(),_vq2=new THREE.Quaternion(),_vX=new THREE.Vector3(),_vY=new THREE.Vector3(),_vZ=new THREE.Vector3(),_vM=new THREE.Matrix4(),_vK=new THREE.Vector3(),_vS=new THREE.Vector3(),_vPole=new THREE.Vector3(-.4,-1,-.3);
+function virvReeling(){if(!(mouseL&&locked&&state==='play'))return false;const st=FS.st;return st==='spin'||st==='pull'||st==='fight'||st==='retr'||(st==='land'&&FS.rod&&FS.rod.reel);}
+function virvPose(dt){const hm=typeof heldMesh!=='undefined'?heldMesh:null;const on=!!(hm&&hm.userData.virv&&hm.parent===fig.handL&&!P.dead&&!P.insp);
+  P.virvK=lerp(P.virvK||0,on?1:0,kExp(10,dt));if(!on||P.virvK<.02)return;const k=P.virvK;
+  // vasen käsi eteen (vavan kahva), kyynärvarsi vaakaan
+  fig.g.updateMatrixWorld(true);fig.armL.getWorldPosition(_vS);fig.armR.getWorldPosition(_vK);const lx=_vS.x-_vK.x,lz=_vS.z-_vK.z,ll=Math.hypot(lx,lz)||1;   // vasen käsi rinnan eteen (molemmat kädet ylettyvät kelalle)
+  _vX.set((_vS.x+_vK.x)/2+Math.sin(P.yaw)*.34+lx/ll*.07,(_vS.y+_vK.y)/2-.2,(_vS.z+_vK.z)/2+Math.cos(P.yaw)*.34+lz/ll*.07);armIK(fig.armL,fig.elbowL,_vX,k,_poleBowL);
+  // vavan suunta: kallistus (rad) heiton vaiheen mukaan
+  let pa=.45;if(FS.st==='charge')pa=.45+1.05*sstep(0,1,fpChargeK());else if(FS.st==='fly'&&FS.t<.45)pa=FS.t<.12?lerp(1.5,-.05,FS.t/.12):lerp(-.05,.45,(FS.t-.12)/.33);
+  else if(FS.st==='fight')pa=.75+(FS.pullOn?.25:0);else if(FS.st==='pull')pa=.6;else if(FS.st==='hang'||FS.st==='unhook')pa=.85;
+  VIRV.pa=lerp(VIRV.pa??pa,pa,kExp(FS.st==='fly'?40:9,dt));const fx=Math.sin(P.yaw),fz=Math.cos(P.yaw),cp=Math.cos(VIRV.pa);
+  _vZ.set(fx*cp,Math.sin(VIRV.pa),fz*cp).normalize();_vX.set(0,1,0).cross(_vZ).normalize();_vY.crossVectors(_vZ,_vX);_vM.makeBasis(_vX,_vY,_vZ);_vq.setFromRotationMatrix(_vM);
+  fig.g.updateMatrixWorld(true);hm.parent.getWorldQuaternion(_vq2);_vq.premultiply(_vq2.invert());hm.quaternion.slerp(_vq,k);hm.position.set(0,0,-.2*k).applyQuaternion(hm.quaternion);   /* ote kelan yläpuolelta */
+  // kampi: oikealle puolelle (lähemmäs oikeaa olkaa) – tarkistetaan kerran per malli
+  const cr=hm.userData.crank,kn=hm.userData.knob;if(!cr||!kn)return;if(VIRV.key!==hm.uuid){VIRV.key=hm.uuid;hm.updateMatrixWorld(true);kn.getWorldPosition(_vK);fig.armR.getWorldPosition(_vS);const d1=_vK.distanceTo(_vS);
+      cr.position.x=-cr.position.x;hm.updateMatrixWorld(true);kn.getWorldPosition(_vK);const d2=_vK.distanceTo(_vS);if(d2>d1){cr.position.x=-cr.position.x;}VIRV.side=Math.sign(cr.position.x);kn.position.x=Math.abs(kn.position.x)*VIRV.side;}
+  if(virvReeling()){const K=FS.rod&&FS.rod.reel;VIRV.crank+=dt*TAU*2.2*(K?K.spd:1);}cr.rotation.x=VIRV.crank;
+  hm.updateMatrixWorld(true);kn.getWorldPosition(_vK);if(!P.atk||FS.st!=='idle')armIK(fig.armR,fig.elbowR,_vK,k,_vPole);}
 /* ---------------- PÄÄSILMUKKA (fish.js fishTick kutsuu) ---------------- */
 function fpTick(dt){fpFlopTick(dt);if(FS.fm&&(FS.st==='pull'||FS.st==='fight'))fpFishUpd(dt);else if(FS.fm&&FS.st!=='pull'&&FS.st!=='fight')fpFishDrop();}

@@ -76,7 +76,10 @@ function tkWormMesh(len,seed,burrow){const m=new THREE.Mesh(tkWormGeo(len,seed||
 function tkDressRod(g,s){const r=rigOf(s),hk=g.userData.hook;g.traverse(o=>{if(o.userData.tkReel)o.visible=false;});
   if(r.reel){const K=TK_REEL[r.reel],m=tkMat('reel'+r.reel,K.col,{metalness:.6,roughness:.35}),reel=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.045,14),m);reel.rotation.z=Math.PI/2;reel.position.set(0,-.07,.24);g.add(reel);
     const sp=new THREE.Mesh(new THREE.CylinderGeometry(.034,.034,.05,12),tkMat('spool',r.line?TK_LINE[r.line].col:0x555555,{roughness:.6}));sp.rotation.z=Math.PI/2;sp.position.set(.004,-.07,.24);g.add(sp);
-    g.add(bx(.012,.05,.012,tkMat('rstem',0x3a3a3a),0,-.035,.24));const hd=bx(.05,.008,.008,tkMat('rhd',0x2a2a2a),.035,-.07,.24);g.add(hd);g.add(bx(.008,.02,.008,tkMat('rkn',0xd8c8a0),.06,-.08,.24));}
+    g.add(bx(.012,.05,.012,tkMat('rstem',0x3a3a3a),0,-.035,.24));
+    /* v3.27 kampi pyörii kelatessa (fishphys.js virvPose): nivel kelan akselilla, varsi + nuppi; oikea käsi seuraa nuppia (IK) */
+    const cr=new THREE.Group();cr.position.set(.03,-.07,.24);g.add(cr);cr.add(bx(.008,.05,.008,tkMat('rhd',0x2a2a2a),0,-.022,0));const kn=bx(.022,.014,.014,tkMat('rkn',0xd8c8a0),.012,-.046,0);cr.add(kn);
+    g.userData.crank=cr;g.userData.knob=kn;g.userData.virv=1;}
   if(!hk)return;const base=[...hk.children],ln=base[0];if(ln&&r.line)ln.material=tkMat('ln'+r.line,TK_LINE[r.line].col);if(ln)ln.visible=!!r.line;
   if(!r.line){for(const c of base)c.visible=false;return;}
   if(r.reel&&r.lure){const U=TK_LURE[r.lure],L=tkLureMesh(U,.7);L.position.y=-.33;hk.add(L);base.forEach((c,i)=>{if(i>1)c.visible=false;});}   // viehe korvaa koukun (vieheessä oma koukku)
@@ -150,7 +153,7 @@ function tkPakkiSpawn(o){pakkiNorm(o);const m=tkPakkiMesh(o.lv);m.position.set(o
   const it={x:o.x,y:o.y+.3,z:o.z,r:2,pakki:o,label:()=>`Kalastuspakki (taso ${o.lv+1}) – E avaa · vasen nostaa`,use:()=>tkPakkiOpen(o),off:()=>P.inDun};interactables.push(it);PKW.list.push({o,m,it});}
 function tkPakkiOpen(o){pakkiNorm(o);if(openPanel)closePanels(true);togglePanel('chest');curChest={found:true,pakki:o,title:`Kalastuspakki (taso ${o.lv+1}, ${pakkiSlots(o.lv)} paikkaa)`,data:{items:o.box}};tkSnd('pakki_auki')||plSnd('kaytto','arkku_auki',{v:.7,p:1.15});renderChest();}
 function tkPakkiCarry(o,from){if(invCount('kalapakki')){msg('Voit kantaa vain yhden kalastuspakin kerrallaan.','warn');return false;}const i=inv.indexOf(null);if(i<0){msg('Reppu on täynnä.','warn');return false;}
-  const s={id:'kalapakki',n:1,q:1,box:o.box,lv:o.lv||0};inv[i]=s;for(const x of inv)if(x&&x!==s&&x.eq&&equipGroup(ITEMS[x.id].cat)==='offhand')x.eq=false;{const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='bow')w.eq=false;}s.eq=true;
+  const s={id:'kalapakki',n:1,q:1,box:o.box,lv:o.lv||0};inv[i]=s;for(const x of inv)if(x&&x!==s&&x.eq&&equipGroup(ITEMS[x.id].cat)==='offhand')x.eq=false;{const w=equipped('weapon');if(w&&(ITEMS[w.id].cat==='bow'||virvHeld(w)))w.eq=false;}s.eq=true;
   if(from==='ground'){const L=pakkiList(),j=L.indexOf(o);if(j>=0)L.splice(j,1);const e=PKW.list.find(e=>e.o===o);if(e){scene.remove(e.m);const k=interactables.indexOf(e.it);if(k>=0)interactables.splice(k,1);PKW.list.splice(PKW.list.indexOf(e),1);}}
   invDirty=true;updateGear();sfx('pickup');msg('Nostit kalastuspakin vasempaan käteen.');return true;}
 // laske pakki maahan (pisteeseen) – vain maastoon, ei vedeen tai rakennusten päälle

@@ -208,7 +208,8 @@ function updatePlayer(dt){
 
   armClear(fig.armL,fig.elbowL,fig.handL);
   carvePose();   // v2.91 pihkakuvion kaiverrus
-  if(typeof bookPose==='function')bookPose();   // v3.15 kalakirja molemmissa käsissä lukiessa
+  if(typeof bookPose==='function')bookPose();
+  if(typeof virvPose==='function')virvPose(dt);   // v3.27 virveli vasemmassa kädessä, oikea veivaa (fishphys.js)   // v3.15 kalakirja molemmissa käsissä lukiessa
   {const ea=playTime-(P.eT??-9);if(ea>=0&&ea<E_ANIM_T&&!P.atk&&!P.carve&&!P.insp&&!P.drawing&&!P.dead){const k=Math.sin(ea/E_ANIM_T*Math.PI);P._eOff=[-.62*k,-.38*k];fig.armR.rotation.x+=P._eOff[0];fig.elbowR.rotation.x+=P._eOff[1];}}   // v3.06 (käyttäjä): E-toiminnossa käsi käy hieman eteen ja takaisin
   if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand,dt);armWorldClear(fig.armL,fig.elbowL,fig.handL,dt);}else{AWC.R.e=AWC.R.a=AWC.L.e=AWC.L.a=0;}   // v2.88, v3.25 pehmeä kerros
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.

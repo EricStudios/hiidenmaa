@@ -84,7 +84,8 @@ function gearUnlock(){for(const o of THROWN)scene.remove(o.m);THROWN.length=0;P.
 function updateGear(){if(P.gearLock)return;updateBack();
   {const w0=equipped('weapon');if(!w0||w0.id!=='vasara')setBuildSel(null);}
   const w=equipped('weapon'),o0=equipped('offhand'),bookR=!w&&!!o0&&o0.id==='kalakirja',wid=w?w.id:bookR?'kalakirja':null,wkey=wid&&ITEMS[wid].cat==='rod'&&typeof rigSig==='function'?wid+'#'+rigSig(w):wid&&ITEMS[wid].cat==='fish'?wid+'#'+(w.kg||0):wid;   // v3.27 kala kädessä painon kokoisena   // v3.14 vavan osat näkyvät (tackle.js)
-  if(wkey!==heldKey){if(heldMesh)heldMesh.parent.remove(heldMesh);heldMesh=null;heldId=wid;heldKey=wkey;if(wid){heldMesh=makeHeld(wid);if(ITEMS[wid].cat==='rod'&&typeof tkDressRod==='function')tkDressRod(heldMesh,w);(ITEMS[wid].cat==='bow'?fig.handL:fig.hand).add(heldMesh);}}
+  if(wkey!==heldKey){if(heldMesh)heldMesh.parent.remove(heldMesh);heldMesh=null;heldId=wid;heldKey=wkey;if(wid){heldMesh=makeHeld(wid);if(ITEMS[wid].cat==='rod'&&typeof tkDressRod==='function')tkDressRod(heldMesh,w);(ITEMS[wid].cat==='bow'||virvHeld(w)?fig.handL:fig.hand).add(heldMesh);}}   // v3.27 virveli vasemmassa kädessä
+  if(virvHeld(w)&&o0&&o0.eq){o0.eq=false;msg('Virveli vaatii molemmat kädet – toinen käsi vapautettiin.');}   // v3.27
   const o=equipped('offhand'),oid=o&&!bookR&&!(ITEMS[o.id].cat==='shield'&&o.shBrk!=null)?o.id:null;   // v3.15 pelkkä kirja on oikeassa kädessä   // v1.39 (kohta 18): rikki oleva kilpi ei ole kädessä
   const okey=oid==='kalapakki'?oid+'#'+(o.lv||0):oid;   // v3.14 pakin ulkoasu tason mukaan
   if(okey!==offKey){if(offMesh)fig.handL.remove(offMesh);offMesh=null;offId=oid;offKey=okey;if(oid){offMesh=ITEMS[oid].cat==='shield'?makeShield(oid):oid==='kalapakki'&&typeof tkPakkiHeld==='function'?tkPakkiHeld(o):makeHeld(oid);fig.handL.add(offMesh);}}
@@ -116,10 +117,12 @@ function equipGroup(cat){return ['weapon','bow','hammer','shovel','bowl','rod','
 function equipped(cat){const grouped=cat==='weapon'||cat==='offhand';
   for(const s of inv){if(!s||!s.eq)continue;const c=ITEMS[s.id].cat;if(grouped?equipGroup(c)===cat:c===cat)return s;}
   return null;}
+// v3.27 virveli (vapa + kela) pidetään vasemmassa kädessä, oikea veivaa – toinen käsi ei voi pitää muuta
+function virvHeld(s){return !!(s&&s.eq!==false&&ITEMS[s.id]&&ITEMS[s.id].cat==='rod'&&s.rig&&s.rig.reel);}
 function toggleEquip(s){const cat=ITEMS[s.id].cat;if(!cat)return;
   if(s.eq){s.eq=false;}else{const g=equipGroup(cat);for(const o of inv)if(o&&o.eq&&equipGroup(ITEMS[o.id].cat)===g)o.eq=false;s.eq=true;}
-  if(cat==='bow'&&s.eq){for(const o of inv)if(o&&o.eq&&equipGroup(ITEMS[o.id].cat)==='offhand')o.eq=false;}
-  if(equipGroup(cat)==='offhand'&&s.eq){const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='bow')w.eq=false;}
+  if((cat==='bow'||virvHeld(s))&&s.eq){for(const o of inv)if(o&&o.eq&&equipGroup(ITEMS[o.id].cat)==='offhand')o.eq=false;}
+  if(equipGroup(cat)==='offhand'&&s.eq){const w=equipped('weapon');if(w&&(ITEMS[w.id].cat==='bow'||virvHeld(w)))w.eq=false;}
   invDirty=true;updateGear();if(cat!=='hammer'||!s.eq)setBuildSel(null);sfx('pickup');}
 // v1.32 (lista 3, kohdat 3 ja 29): pikapaikan numero syö ruoan (ainoa tapa syödä), ottaa nuolet käyttöön (pysyvät valittuina) tai varustaa.
 function useSlot(i){const s=inv[i];if(!s)return;const d=ITEMS[s.id];if(d.cat==='fish')toggleEquip(s);   /* v3.27 kala käteen, oikea syö */else if(d.food)eat(s);else if(d.potion)drink(s);else if(AMMO.includes(s.id)){if(flags.ammo!==s.id){flags.ammo=s.id;msg(`Ammus: ${d.n}`);sfx('pickup',1.2,.4);}invDirty=true;}else if(d.use)itemUse(s);   /* v3.06 pulloposti, kalastajan kirja (fish.js) */else if(d.cat)toggleEquip(s);}
