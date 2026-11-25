@@ -175,3 +175,12 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
    - jos zoom on silti muuttunut (selaimen valikosta), se kompensoidaan: piirtoresoluutio lasketaan fyysisistä pikseleistä (`renderer.setPixelRatio` rajattuna), ja HUD skaalataan
      käänteisesti (`--hudK` × 1 / zoom), jolloin HUD ja suorituskyky pysyvät samoina.
    - Selaimen omaa zoomia ei voi kokonaan poistaa – vain estää pikanäppäimet ja kompensoida.
+
+### Lisäykset v3.29-suunnitelmaan (käyttäjä 25.11., toinen viesti)
+8. **Ongen siima on kiinteästi kiinni (ei kelaa):** kala nostetaan vedestä nostamalla vapa ylös. Kalan voi myös **raahata pois vedestä kävelemällä taaksepäin**, eikä se irtoa.
+   Kala irtoaa vain, jos **kädessä oleva esine vaihdetaan**, kun kala on raahattu maalle. (Korvaa v3.27:n säännön "3 m kävely pudottaa kalan".)
+9. **Suorituskyky:** kalastukseen ja veteen liittyvät asiat optimoidaan (siima, koho, kala, roiskeet, lappu, veden varjostin ja aallot) niin, ettei ulkonäkö juuri kärsi.
+10. **Saalisilmoitus (lappu) hieman ylemmäs.** Myös "Kireitä siimoja" -ilmoitus tulee jatkossa tällä tyylillä (kohta 4).
+11. **Kala rimpuilee enemmän** maalla ja koukussa (roikkuessa).
+12. **Täysi reppu:** kalat eivät putoa maahan esineinä, vaan tulee ilmoitus "Reppu on täynnä".
+13. **Kala voi karata koukusta 10–30 sekunnissa:** se pomppaa irti maalle, josta se voi sätkiä takaisin veteen (sama pudotusfysiikka kuin v3.27:ssä).
