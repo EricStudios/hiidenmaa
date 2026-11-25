@@ -1,6 +1,6 @@
 # Kalastuksen uudistus (v3.28–) – suunnitelma ja työstöprompti
 
-Tila: **suunnitteilla**. Käyttäjän toiveet 25.11.2026, kirjoitettu selkeäksi työohjeeksi. Avoimet kysymykset ovat lopussa:
+Tila: **suunniteltu, odottaa aloituslupaa**. Käyttäjän toiveet 25.11.2026, kirjoitettu selkeäksi työohjeeksi. Avoimet kysymykset ovat lopussa:
 kun käyttäjä vastaa, päivitä vastaus kohtaan "Päätetty" ja poista kysymys. Pohjana on v3.27 (commit `c053d40`), jossa on jo
 yksilökalat (paino ja pituus), kala kädessä, loinen, värillinen saalisilmoitus ja pohjaan vajoava viehe.
 
@@ -82,16 +82,52 @@ yksilökalat (paino ja pituus), kala kädessä, loinen, värillinen saalisilmoit
 
 ---
 
-## Päätetty (käyttäjä 25.11.)
-- Optimikulma noin +35°, vapa vaikuttaa matkaan, heitto aina sallittu.
-- Maalla siima katkeaa hieman herkemmin; katkenneen siiman viehe jää maahan.
-- Pohjassa 20 % / s kiinnijäämisriski; pinnalla tärppi −5 %, pohjassa −30 %.
-- Virveli vasemmassa kädessä, oikea veivaa, kelan rumpu ja kampi pyörivät.
-- Kala näkyy siimassa jo vedossa (kyljellään), rimpuilee kärjessä, klikkaus ottaa → vasta sitten uusi heitto.
-- Ilmoitus vasta irrotuksessa: vasemmalta liukuva lappu 6 s, kalan kuva ja värilliset tekstit.
-- Sama paino + pituus pinoutuu; käsin pinoaminen säilyttää yksilöt järjestyksessä; ei monistusta.
-- Naulakko: kädessä oleva kala, oikea muoto, kultainen laatta, katsomalla tiedot, vaihto/purku ei kadota kalaa.
-- Pakin kyljissä roikkuvat vieheet ja syötit, jos niitä on sisällä.
+## Päätetty (käyttäjä 25.11., kysymykset 1–23)
+Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen kanssa.
 
-## Avoimet kysymykset
-Ks. keskustelu 25.11. (15 + lisäkysymykset). Vastausten jälkeen siirrä ne kohtaan "Päätetty".
+**Heitto (erä A)**
+1. **Virveli:** voima ladataan pitämällä vasenta pohjassa 0,2–1,2 s (voimapalkki). **Tavallinen onki:** ei latausta,
+   voima aina sama, mutta katseen kulma vaikuttaa (+35° pisin, alas katsominen lyhyt).
+2. Maksimimatkat +35°:ssa täydellä voimalla: onki 16 m, kuparivapa 20 m, hiidenvapa 24 m; virveli kuparikelalla 22 m,
+   hiisikelalla 30 m.
+3. Maalle laskeutunut koho tai viehe kelataan vain takaisin (maalta ei saa kalaa).
+4. Maata pitkin kelatessa siima katkeaa noin **5 % / 10 m**; viehe jää katkeamiskohtaan poimittavaksi.
+19. Tuuli siirtää heittoa, kohoa ja vieheen lentoa kevyesti (kova tuuli ja myrsky selvästi, tyynellä ei).
+
+**Virveli (erä B)**
+5. Pohjassa 0,5 s armonaika, sen jälkeen 20 % / s kiinnijäämisriski.
+
+**Saalis (erä C)**
+6. Kala vedossa: **taistelee painonsa ja kokonsa mukaan** (pieni kala lähes suoraan, iso ui sivuille, vaihtaa suuntaa ja
+   nykii siimaa).
+7. Jos pelaaja kävelee pois tai vaihtaa esinettä kalan roikkuessa: kala **putoaa maahan ja pomppii** (fysiikka: painovoima,
+   kimpoaminen, rinteessä vierii). Jos se päätyy veteen ja on vedessä 0,5 s, se kääntyy pehmeästi uintisuuntaan ja ui
+   nopeasti pois, ja tulee viesti "Kala pääsi karkuun". (Maasta sen voi poimia, ennen kuin se pomppii veteen.)
+8. Saalislappu vasempaan reunaan kohtaan, jossa ei ole muita HUD-elementtejä (tarkistetaan toteutuksessa kaikilla
+   HUD-skaaloilla); kuvana kalakirjan piirros.
+9. Laput allekkain, enintään 3 (uusin ylimpänä).
+10. Syvälle nielty koukku **3–10 %** kalan arvon mukaan (arvokkaampi kala = useammin).
+11. Minipeli: mittari täyttyy, kun viiva on punaisella alueella, ja tyhjenee, kun ei ole. Täysi mittari irrottaa koukun.
+12. Epäonnistuminen: **uusi yritys**, jossa punainen alue liikkuu nopeammin.
+
+**Kalat ja naulakko (erä D)**
+13. 70 % kaloista on "tavallisen kokoisia", ja niiden pyöristys on karkeampi: **0,1 kg / 2 cm**. Loput 30 % arvotaan
+    tarkemmin (0,01 kg / 1 cm) laajemmalla jakaumalla, ja ääripäät ovat harvinaisia.
+14. Kalanaulakko 1 kalalle + uusi **iso palkintotaulu** 3 kalalle.
+15. Kalastajan nimi kysytään ensimmäisellä ripustuksella, tallennetaan maailmaan, ja sitä voi vaihtaa asetuksista.
+16. Pinon tooltip: kevyin, raskain ja keskiarvo + 5 päällimmäistä kalaa (paino, pituus, arvoluokan väri).
+17. **Raaka kala pilaantuu 4 pelipäivässä** (paistettu ja savukala säilyvät). Tuoreus on jokaisella yksilöllä (`fl`:n kenttä
+    = pyyntiaika). Pilaantunut kala muuttuu omaksi esineekseen (pilaantunut kala), joka sairastuttaa varmasti.
+    Automaattinen pinoutuminen edellyttää saman painon ja pituuden; pinon tooltip näyttää myös tuoreimman ja vanhimman.
+18. Vapautus (E, kala kädessä veden äärellä – **on jo pelissä v3.27:stä**): +1 XP ja seuraava tärppi samassa vedessä
+    10 % nopeammin. Ilmoitus on **yksi vaihteleva repliikki**, esim. "Käy hakemassa isovanhempasi.", "Annetaan sen vielä
+    kasvaa.", "Ei tuosta olisi syötävää ollut.", "Nämä isot ovat yleensä pahanmakuisia." (10–15 repliikkiä, osa
+    koon mukaan: pikkukala / iso kala).
+20. Kalakirjaan jokaisen lajin sivulle **palkintolaatta** lajin parhaasta kalasta (sama sisältö kuin naulakon laatassa).
+22. Pakin kyljissä roikkuvat **vieheet ja koukut**, jos niitä on pakissa.
+
+**Äänet ja toteutus**
+21. Paikkamerkit kansioon `sounds2/kalastus/`: veivaus, kelan räikkä, kala rimpuilee, kala pomppii maassa, lapun liuku,
+    koukun irrotus, viehe pohjaan, kala ui karkuun, vapautus. **Lisäksi musiikin paikkamerkki "ennätyskala"-teemalle**
+    (`music/`-kansioon, soi uuden ennätyksen saalislapun kanssa). Ääniä ei generoida.
+23. **Kaikki erät A–D yhteen PR:ään** (erät tehdään ja testataan silti erikseen, commit jokaisen jälkeen).
