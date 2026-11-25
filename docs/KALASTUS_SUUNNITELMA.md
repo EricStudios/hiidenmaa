@@ -153,3 +153,25 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 - Pilaantuminen koskee reppua ja arkkuja (2 s välein). Naulakossa kala ei pilaannu, ja alas otettu kala säilyttää pyyntiaikansa.
 - Saalislappu sijoittuu vasempaan reunaan 41 % korkeudelle, tila- ja chat-alueiden väliin.
 
+
+---
+
+## Seuraava erä (v3.29) – suunniteltu, ei vielä toteutettu (käyttäjä 25.11.)
+**Kalastus:**
+1. **Koho pois näkyvistä, kun kala on koukussa.** Nyt koho jää maahan tai veteen, kun kala tulee onkeen ja nousee kärkeen. Koho piilotetaan vedon ja roikkumisen ajaksi
+   (`fishMeshes`/`FS.bob`: myös `hang`/`unhook`-tiloissa ja kun kala on siimassa), tai se seuraa siimaa kalan suun yläpuolella.
+2. **Onki ei vedä kalaa rantaan, vaan nostaa vavan korkeammalle.** Ongen vedossa (`pull`) kala nousee vedestä ilmaan, kun vapa kallistuu ylös (`rodCastPose`, kallistus
+   0,45 → noin 1,2 rad). Koukku ei ole enää vedessä, eikä kalaa raahata maata pitkin. Virveli kelaa edelleen kärkeen asti.
+3. **Onki hieman pidemmäksi**, jotta nosto riittää kalan saamiseen vedestä (`ROD_LEN` 2,05 → noin 2,6 m ongelle; tarkista kärjen paikka, siima ja kuvake).
+4. **"Kireitä siimoja" -ikkuna** (ensimmäisen ongen keskelle tuleva `tkWow`) pois: tilalle sama vasemmalta kurkistava lappu (`lappu`) kuin saaliissa.
+
+**Muut (ei kalastus):**
+5. **Seikkailijan nimi** asetuksiin kalastajan nimen tilalle: yleinen pelaajan nimi (Asetukset › Ohjaus), jota laatat ja kirja käyttävät (`flags.angler` → esim. `flags.pname`, vanha nimi siirretään).
+6. **Koko näyttö: valikon taustan vesi- ja sadeanimaatio käyttäytyy oudosti** (valikon taustakuva `menubg.js`, kuva käyttäjältä 25.11.: sade, lehdet ja vesi venyvät tai siirtyvät).
+   Tarkista kaikki koko näytön asettelut ja piirrot (kankaan koko vs. `innerWidth`/`devicePixelRatio`, `resize`-tapahtuma, taustan skaalaus ja rajaus).
+7. **Selaimen zoom (Ctrl + rulla / Ctrl ±) pois pelistä.** Pienempi zoom kasvattaa piirtoresoluutiota → peli hidastuu, ja zoom muuttaa HUD:ia.
+   Ehdotettu ratkaisu:
+   - pelissä Ctrl + rulla ja Ctrl + / − / 0 estetään (`preventDefault`, `wheel` `passive:false`);
+   - jos zoom on silti muuttunut (selaimen valikosta), se kompensoidaan: piirtoresoluutio lasketaan fyysisistä pikseleistä (`renderer.setPixelRatio` rajattuna), ja HUD skaalataan
+     käänteisesti (`--hudK` × 1 / zoom), jolloin HUD ja suorituskyky pysyvät samoina.
+   - Selaimen omaa zoomia ei voi kokonaan poistaa – vain estää pikanäppäimet ja kompensoida.
