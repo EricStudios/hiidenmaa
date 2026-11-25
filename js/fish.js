@@ -28,8 +28,17 @@ const FISH_B={   // w: vesi, b: perusyleisyys, kg: paino, t: [aamu, päivä, ilt
   kampela:{w:'sea',b:2.5,kg:[.2,1.5],t:[.8,1.2,1,.8],wx:{}},
   meritaimen:{w:'sea',b:.8,kg:[1,10],t:[1.8,.6,1.4,.6],wx:{sade:1.5,tihku:1.3,tuuli:1.2},big:1},
   suutari:{w:'bog',b:2,kg:[.3,2.5],t:[1,.8,1.3,1.2],wx:{sade:1.3,pilvi:1.2},big:1}};
+/* v3.27 käyttäjä: SYVYYS. Syötin syvyys (ongen kohon säätö 0–2 m pöydällä, rig.fd) tai vieheen syvyys (FS.ld) vaikuttaa lajeihin.
+   'b' = pohjakala: syötti pohjassa ×1,6, irti pohjasta ×0,35 (syvällä ×0,6). [a,b] = viihtyy a–b m syvyydellä: sisällä ×1,4, ulkona −1,2 / m (vähintään ×0,3);
+   pohjassa makaava syötti ×0,8 muille kuin pohjakaloille. */
+const FISH_Z={ahven:[.5,2],hauki:[.2,1.5],lahna:'b',silakka:[.8,2],turska:'b',lohi:[.3,1.5],ruutana:'b',suonsilma:[0,.6],kuha:'b',made:'b',muikku:[1,2],sarki:[.2,1.2],
+  kiiski:'b',toutain:[0,.8],siika:[1,2],kampela:'b',meritaimen:[0,1.2],suutari:'b'};
+function fishDepthK(sp,d,bot){const Z=FISH_Z[sp];if(!Z||d==null)return 1;if(Z==='b')return bot?1.6:d>1.4?.6:.35;const o=d<Z[0]?Z[0]-d:d>Z[1]?d-Z[1]:0;return Math.max(.3,1.4-o*1.2)*(bot?.8:1);}
+function fishDepthText(sp){const Z=FISH_Z[sp];return !Z?'kaikki syvyydet':Z==='b'?'pohjan tuntumassa (syötti pohjassa)':`${String(Z[0]).replace('.',',')}–${String(Z[1]).replace('.',',')} m syvyydellä`;}
+// syvyyden sopivuus kaikille vedessä viihtyville lajeille (tärppiväli): painotettu keskiarvo, ×0,4–1,4
+function fishDepthFit(wb,bd){let a=0,t=0;for(const sp in FISH_B){const w=fishW(sp,wb);if(!w)continue;t+=w;a+=w*fishDepthK(sp,bd.d,bd.bot);}return t?clamp(a/t,.4,1.4):1;}
 const FISH_PH=['aamulla','päivällä','illalla','yöllä'],FISH_WXN={selkea:'selkeällä',pilvi:'pilvisellä',tuuli:'tuulella',tihku:'tihkusateella',sade:'sateella',myrsky:'myrskyllä',sumu:'sumussa',lumi:'lumisateella'};
-const FISH_WAIT=[60,300],FISH_MIN=30,FISH_BAIT_K=.75,FISH_WIN=.6,FISH_CAST=[3,16],FISH_NAME_K=1.6,FISH_STEAL=.08,FISH_KEEP_R=5;
+const FISH_REL_K=.9,FISH_WAIT=[60,300],FISH_MIN=30,FISH_BAIT_K=.75,FISH_WIN=.6,FISH_CAST=[3,16],FISH_NAME_K=1.6,FISH_STEAL=.08,FISH_KEEP_R=5;
 const ROD_LEN=2.05;   // vavan pituus (models.js)
 const FISH_JUNK=[['rauta',.01],['kupari',.02],['hiidensiru',.015],['saapas',.03],['pulloposti',.015],['ruostavain',.01]];
 /* v3.13 KORJAUKSET 87: suolammen tunnistus kutsui biomeAt(…, 1) → korkeus < 1,1 = aina 'beach', joten suolampia ei syntynyt koskaan (ruutana, suonsilmä, suutari
@@ -86,11 +95,12 @@ let SUNK=null;
 function inlandWater(x,z){const i0=Math.floor((x+HALF)/WB_S),j0=Math.floor((z+HALF)/WB_S);let lake=false;for(let r=0;r<=4;r++){for(let dj=-r;dj<=r;dj++)for(let di=-r;di<=r;di++){if(Math.max(Math.abs(di),Math.abs(dj))!==r)continue;const i=i0+di,j=j0+dj;if(i<0||j<0||i>=WB_N||j>=WB_N)return false;const id=WB_ID[j*WB_N+i];if(id===-2)return false;if(id>=0)lake=true;}if(lake)return true;}return false;}
 function wbAt(x,z){const i=Math.floor((x+HALF)/WB_S),j=Math.floor((z+HALF)/WB_S);if(i<0||j<0||i>=WB_N||j>=WB_N)return null;const id=WB_ID[j*WB_N+i];
   if(id>=0)return WBS[id];if(id===-2){let b=null,bd=1e18;for(const s of WB_SEA){const d=dist2(x,z,s.x,s.z);if(d<bd){bd=d;b=s;}}return b;}return null;}
+const fishNow=()=>dayN+dayT;   // v3.27 pelin aika päivinä (kalan tuoreus, laatan päiväys)
 function fishF(){if(!flags.fish||typeof flags.fish!=='object')flags.fish={};const F=flags.fish;F.rec=F.rec||{};F.n=F.n||{};F.wb=F.wb||{};F.g=F.g||{};return F;}
 function fishPhase(){return dayT>=.19&&dayT<.3?0:dayT>=.3&&dayT<.72?1:dayT>=.72&&dayT<.83?2:3;}
 // lajin todennäköisyyspaino tässä vedessä nyt (aika ja sää)
 function fishW(sp,wb){const B=FISH_B[sp];if(!B||!wb)return 0;const bg=B.w==='bog'&&wb.bogg;if(B.w!==wb.type&&!bg)return 0;return (bg?WB_BOGG_K:1)*B.b*B.t[fishPhase()]*(B.wx[weather.cur]||1)*(wb.sp===sp?FISH_NAME_K:1);}
-function fishPick(wb,rod){const L=Object.keys(FISH_B).map(sp=>[sp,fishW(sp,wb)*(rod&&typeof tkSpK==='function'?tkSpK(sp,rod,wb):1)]).filter(a=>a[1]>0);const tot=L.reduce((a,b)=>a+b[1],0);if(!tot)return null;let r=Math.random()*tot;for(const [sp,w] of L){r-=w;if(r<=0)return sp;}return L[L.length-1][0];}
+function fishPick(wb,rod,bd){const L=Object.keys(FISH_B).map(sp=>[sp,fishW(sp,wb)*(rod&&typeof tkSpK==='function'?tkSpK(sp,rod,wb):1)*(bd?fishDepthK(sp,bd.d,bd.bot):1)]).filter(a=>a[1]>0);const tot=L.reduce((a,b)=>a+b[1],0);if(!tot)return null;let r=Math.random()*tot;for(const [sp,w] of L){r-=w;if(r<=0)return sp;}return L[L.length-1][0];}
 function fishActivity(wb){let a=0,b=0;for(const sp in FISH_B){const B=FISH_B[sp];if(B.w!==wb.type)continue;b+=B.b;a+=fishW(sp,wb)/(wb.sp===sp?FISH_NAME_K:1);}return b?clamp(a/b,.45,1.6):1;}
 /* ---------------- ONKI ---------------- */
 const FS={st:'idle',t:0,bob:null,line:null,body:null,ox:0,oz:0,bx:0,bz:0,bait:false,biteAt:0,nibAt:0,win:0,sp:null,kg:0,ten:0,prog:0,pullT:0,pullOn:false,fightT:0,wbT:0,last:null,lastT:{},kelT:0,rod:null};
@@ -98,48 +108,55 @@ function rodDef(){const w=equipped('weapon');return w&&ITEMS[w.id]&&ITEMS[w.id].
 function fishWaterPoint(){const {o,d}=camRay();const wy=water.position.y;if(d.y>-.02)return null;const t=(wy-o.y)/d.y;if(t<0)return null;const x=o.x+d.x*t,z=o.z+d.z*t;return {x,z,y:wy};}
 /* v3.27 käyttäjä: ONGEN FYSIIKKA. Tärppi näkyy vain kohon liikkeenä (ei huutomerkkiä eikä ilmoitusta). Klikkaus nostaa siiman: jos kala on tarttunut, se nousee
    vedestä ja roikkuu ilmassa vavan kärjessä (tila 'hang'), kunnes klikkaat ja otat sen – vasta sitten voi heittää uudelleen. Ilman tärppiä nosto tuo koukun tyhjänä. */
-function fishClick(){if(P.dead||state!=='play')return;if(FS.st==='idle')fishCast();else if(FS.st==='wait'||FS.st==='cast')fishReset();else if(FS.st==='bite')fishHook();else if(FS.st==='hang')fishTake();}
-function fishCast(){const rod=rodDef();if(!rod)return;if(P.inDun){msg('Täällä ei ole kalavettä.','warn');return;}if(P.swim){msg('Et voi onkia uidessa.','warn');return;}
+function fishClick(){if(P.dead||state!=='play')return;const st=FS.st;   // v3.27 fysiikka (fishphys.js): kela → voiman lataus, onki → heitto heti
+  if(st==='idle'){const rod=rodDef();if(rod&&rod.reel&&rod.line!==null)fpChargeStart();else fishCast(1);}
+  else if(st==='wait'){if(fpOnkiSnag())return;FS.E.y=water.position.y;fpRetrStart();}else if(st==='bite'){if(fpOnkiSnag())return;fishHook();}
+  else if(st==='land'&&!(FS.rod&&FS.rod.reel))fpRetrStart();else if(st==='hang')fishTake();}
+function fishCast(pw){const rod=rodDef();if(!rod)return;if(P.inDun){msg('Täällä ei ole kalavettä.','warn');return;}if(P.swim){msg('Et voi onkia uidessa.','warn');return;}
   if(rod.line===null){msg('Vavassa ei ole siimaa – kiinnitä siima Kalastajan pöydällä (tai pakista kentällä, hitaasti).','warn');return;}   // v3.14
   if(typeof TKA!=='undefined'&&TKA.on){msg('Vaihdat vielä siimaa – odota tai liiku keskeyttääksesi.','warn');return;}
-  const C=rod.cast||FISH_CAST,p=fishWaterPoint(),d=p?Math.sqrt(dist2(p.x,p.z,P.pos.x,P.pos.z)):0;
-  if(!p||d<C[0]||d>C[1]){msg(`Heitä veteen: katso vedenpintaa ${C[0]}–${C[1]} m päähän.`,'warn');return;}
-  if(terrainH(p.x,p.z)>p.y-.45){msg('Liian matalaa – heitä syvemmälle.','warn');return;}
-  const wb=wbAt(p.x,p.z);if(!wb){msg('Tässä lätäkössä ei ole kaloja.','warn');return;}
   if(P.stam<3){msg('Liian uupunut.','warn');return;}P.stam-=3;P.stamDelay=1;
+  /* v3.27 käyttäjä: heiton voi tehdä aina ja mihin suuntaan tahansa – ballistinen lento vavan kärjestä katseen suuntaan (fishphys.js) */
+  const tip=fpTip(new THREE.Vector3()),dir=camRay().d,v0=fpV0(rod.dmax||16)*(pw==null?1:pw);
   const slot=equipped('weapon');   // v3.14: mato laitetaan koukkuun E:llä (rig.bait), ei enää automaattisesti repusta
-  Object.assign(FS,{st:'cast',t:0,body:wb,ox:P.pos.x,oz:P.pos.z,bx:p.x,bz:p.z,bait:!rod.spin&&!!(slot.rig&&slot.rig.bait),rod,slot,spin:!!rod.spin,sp:null,ten:0,prog:0,reelT:0,tired:0,ld:0});
-  if(!FS.spin)fishWaitPlan(true);if(typeof tkWear==='function')tkWear(.25);P.atk={t:0,dur:.5,hitAt:.25,done:true,w:{},offBusy:true};P.yaw=camYaw+Math.PI;
+  Object.assign(FS,{st:'fly',t:0,body:null,ox:P.pos.x,oz:P.pos.z,bx:tip.x,bz:tip.z,E:{x:tip.x,y:tip.y,z:tip.z},V:{x:dir.x*v0,y:dir.y*v0,z:dir.z*v0},where:'air',noFish:false,drift:0,landM:0,fin:0,botT:0,
+    bait:!rod.spin&&!!(slot.rig&&slot.rig.bait),rod,slot,spin:!!rod.spin,sp:null,ten:0,prog:0,reelT:0,tired:0,ld:0,cm:0,kelT:0});if(typeof tkWear==='function')tkWear(.25);P.atk={t:0,dur:.5,hitAt:.25,done:true,w:{},offBusy:true};P.yaw=camYaw+Math.PI;
   if(!(FS.spin&&typeof tkSnd==='function'&&tkSnd('virveli_heitto')))plSnd('onkiminen','heitto',{v:.8});fishMeshes(true);}
 function fishWaitPlan(first){const wb=FS.body,base=FISH_WAIT[0]+Math.random()*(FISH_WAIT[1]-FISH_WAIT[0]);let t=base*FS.rod.k*(FS.bait?FISH_BAIT_K:1)/fishActivity(wb);
+  if(typeof fpBaitDepth==='function'&&FS.E)t/=fishDepthFit(wb,fpBaitDepth());   /* v3.27 syvyys */{const F=fishF();if(F.relB&&F.relB[wb.id]){t*=FISH_REL_K;delete F.relB[wb.id];}}   /* v3.27 vapautus: seuraava tärppi 10 % nopeammin */
   if(!first)t*=.45;if(DEV&&typeof DEVF!=='undefined'&&DEVF.fishFast)t=3;FS.biteAt=FS.t+Math.max(DEV&&DEVF.fishFast?3:FISH_MIN,t);FS.nibAt=FS.t+4+Math.random()*12;}
 function fishHook(spin){FS.st='hooked';const r=Math.random();let acc=0,junk=null;const F=fishF(),have=id=>invCount(id)>0;
   if(typeof tkSnapCheck==='function'&&tkSnapCheck())return;   // v3.14 siima voi katketa iskussa (kuluminen + pieni satunnainen)
   if(!spin)for(const [id,p] of FISH_JUNK){let q=p;if(id==='pulloposti'&&(F.sunkO||F.sunkK||have('pulloposti')||!SUNK))q=0;if(id==='ruostavain'){if(F.sunkO||have('ruostavain')||!SUNK)q=0;else if(F.sunkK)q=.03;}acc+=q;if(r<acc){junk=id;break;}}
-  if(junk){FS.sp=junk;FS.kg=0;FS.st='reel';FS.t2=0;plSnd('onkiminen','kelaus',{v:.6});return;}
-  const sp=fishPick(FS.body,FS.rod)||'ahven',B=FISH_B[sp],q=Math.random();FS.sp=sp;FS.kg=+(B.kg[0]+(B.kg[1]-B.kg[0])*q*q*(.6+.4*Math.random())).toFixed(2);
+  if(junk){FS.sp=junk;FS.kg=0;FS.st='pull';fpPullStart();plSnd('onkiminen','kelaus',{v:.6});return;}
+  const sp=fishPick(FS.body,FS.rod,typeof fpBaitDepth==='function'?fpBaitDepth():null)||'ahven',B=FISH_B[sp],q=Math.random();FS.sp=sp;FS.kg=+(B.kg[0]+(B.kg[1]-B.kg[0])*q*q*(.6+.4*Math.random())).toFixed(2);
   if(FS.rod.big&&B.big)FS.kg=+Math.min(B.kg[1],FS.kg*(1+FS.rod.big)).toFixed(2);   // v3.14 runko: isot kalat painavampia
-  if(B.big&&FS.kg>B.kg[0]+(B.kg[1]-B.kg[0])*.18){FS.st='fight';FS.ten=.15;FS.prog=.08;FS.pullT=1+Math.random();FS.pullOn=false;FS.fightT=0;msg(`Iso kala koukussa! Pidä vasenta pohjassa kelataksesi – päästä irti, kun siima kiristyy.`,'quest');}
-  else{FS.st='reel';FS.t2=0;}plSnd('onkiminen','kelaus',{v:.6});}
+  if(B.big&&FS.kg>B.kg[0]+(B.kg[1]-B.kg[0])*.18){FS.st='fight';FS.ten=.15;FS.prog=.08;FS.pullT=1+Math.random();FS.pullOn=false;FS.fightT=0;msg(`Iso kala koukussa! Pidä vasenta pohjassa kelataksesi – päästä irti, kun siima kiristyy.`,'quest');fpPullStart();}
+  else{FS.st='pull';fpPullStart();}plSnd('onkiminen','kelaus',{v:.6});}
 function fishLoseBait(p){if(FS.bait&&Math.random()<p){FS.bait=false;return true;}return false;}
-function fishReset(m,cls){if(m)msg(m,cls);if(typeof tkBaitSync==='function')tkBaitSync();FS.st='idle';FS.sp=null;fishMeshes(false);fishHud();}
+function fishReset(m,cls){if(m)msg(m,cls);if(typeof fpFishDrop==='function')fpFishDrop();if(typeof HG!=='undefined'&&HG.on)fpUnhookEnd();if(typeof tkBaitSync==='function')tkBaitSync();FS.st='idle';FS.sp=null;fishMeshes(false);fishHud();}
 // v3.08 käyttäjä: vavan kärki taipuu alaspäin – levossa hieman, kääntyessä/liikkuessa heilahtaen, tärpissä nykäisten ja väsytyksessä jännityksen mukaan
 const RODB={b:0,v:0,yaw:null};
 function rodBendTick(dt){const h=typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.bend;if(!h||!h.length)return;const yw=camYaw,dy=RODB.yaw==null?0:Math.atan2(Math.sin(yw-RODB.yaw),Math.cos(yw-RODB.yaw));RODB.yaw=yw;
   const tg=.05+(FS.st==='fight'?.25+FS.ten*.55:0)+(FS.st==='bite'?.22:0)+(FS.dip||0)*.15+Math.min(.25,Math.hypot(P.vel.x,P.vel.z)*.012);
   RODB.v+=((tg-RODB.b)*60-RODB.v*7)*dt+Math.abs(dy)*4;RODB.b+=RODB.v*dt;RODB.b=clamp(RODB.b,-.1,.9);h[0].rotation.x=RODB.b*.35;if(h[1])h[1].rotation.x=RODB.b*.65;}
-function fishTick(dt){const rod=rodDef();rodBendTick(dt);if(typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.hook){const hk=heldMesh.userData.hook;hk.visible=FS.st==='idle';if(hk.visible&&hk.parent){hk.parent.updateMatrixWorld();hk.quaternion.copy(hk.parent.getWorldQuaternion(_fsQ).invert());}}   /* v3.07 koukku roikkuu pystyyn */if(FS.st!=='idle'){FS.t+=dt;
-    if(FS.st==='hang'&&(!rod||(FS.slot&&equipped('weapon')!==FS.slot)||P.dead||P.swim)){fishTake(true);return;}   // v3.27 vapa pois kädestä: kala otetaan talteen
-    if(FS.st!=='hang'&&(!rod||(FS.slot&&equipped('weapon')!==FS.slot)||P.dead||P.inDun||P.swim||state==='dead'||dist2(P.pos.x,P.pos.z,FS.ox,FS.oz)>FISH_KEEP_R*FISH_KEEP_R)){fishReset(rod&&!P.dead?'Siima kelautui sisään – pysy paikallasi onkiessa.':null);return;}
-    if(FS.st==='cast'&&FS.t>.55){FS.st=FS.spin?'spin':'wait';plSnd('onkiminen','loiskahdus',{v:.7,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});}
+function fishTick(dt){const rod=rodDef();rodBendTick(dt);fpTick(dt);if(typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.hook){const hk=heldMesh.userData.hook;hk.visible=FS.st==='idle';if(hk.visible&&hk.parent){hk.parent.updateMatrixWorld();hk.quaternion.copy(hk.parent.getWorldQuaternion(_fsQ).invert());}}   /* v3.07 koukku roikkuu pystyyn */if(FS.st!=='idle'){FS.t+=dt;
+    /* v3.27 tilat (fishphys.js): charge → fly → wait/bite | spin | land → retr | pull/fight → hang → unhook */
+    if(FS.st==='hang'){if(fpHangCheck())return;}
+    else if(FS.st==='unhook'){fpUnhookTick(dt);if(FS.st!=='unhook')return;}
+    else if(FS.st==='charge'){if(!rod||(FS.slot&&equipped('weapon')!==FS.slot)||P.dead||P.swim||P.inDun){FS.st='idle';fishHud();return;}fpChargeTick(dt);fishHud();return;}
+    else if(!rod||(FS.slot&&equipped('weapon')!==FS.slot)||P.dead||P.inDun||P.swim||state==='dead'||dist2(P.pos.x,P.pos.z,FS.ox,FS.oz)>FISH_KEEP_R*FISH_KEEP_R){fishReset(rod&&!P.dead?'Siima kelautui sisään – pysy paikallasi kalastaessa.':null);return;}
+    if(FS.st==='fly')fpFly(dt);
     else if(FS.st==='wait'){if(FS.t>=FS.nibAt){FS.nibAt=FS.t+5+Math.random()*18;FS.dip=.35;plSnd('onkiminen','nykaisy',{v:.35,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});
         if(FS.bait&&Math.random()<FISH_STEAL*(FS.rod.steal||1)){FS.bait=false;FS.biteAt=FS.t+(FS.biteAt-FS.t)/FISH_BAIT_K;msg('Syötti katosi koukusta.');}}
-      if(FS.t>=FS.biteAt){FS.st='bite';FS.win=FISH_WIN+(FS.rod.win||0)+(fishPhase()===3?FS.rod.night||0:0);FS.dip=1;plSnd('onkiminen','tarppays',{v:.55,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});}}   // v3.27 ei ilmoitusta – koho kertoo
+      if(FS.t>=FS.biteAt){FS.st='bite';FS.win=FISH_WIN+(FS.rod.win||0)+(fishPhase()===3?FS.rod.night||0:0);FS.dip=1;plSnd('onkiminen','tarppays',{v:.55,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});}   // v3.27 ei ilmoitusta – koho kertoo
+      fpWaitDrift(dt);}
     else if(FS.st==='bite'){FS.win-=dt;FS.dip=Math.max(FS.dip,.55+.45*Math.abs(Math.sin(FS.t*11)));   /* koho painuu ja nykii tärpin ajan */if(FS.win<=0){const lost=fishLoseBait(.5);msg(lost?'Kala pääsi karkuun – ja vei syötin.':'Kala pääsi karkuun. Odota uutta tärppiä.','warn');FS.st='wait';fishWaitPlan(false);}}
-    else if(FS.st==='reel'){FS.t2+=dt;const T=FS.spin?.9:FISH_LIFT_T,k=Math.min(1,FS.t2/T);FS.bx=lerp(FS.bx,P.pos.x,k*.12);FS.bz=lerp(FS.bz,P.pos.z,k*.12);if(FS.t2>=T)fishLift();}
-    else if(FS.st==='hang'){}   // kala roikkuu ilmassa (tkDangle), odottaa klikkausta
-    else if(FS.st==='fight')fishFight(dt);
-    else if(FS.st==='spin'){if(typeof tkSpinTick==='function'&&tkSpinTick(dt))return;}   // v3.14 virveli: kelaus ja tärppi kelatessa
+    else if(FS.st==='land'){if(FS.rod&&FS.rod.reel&&mouseL&&locked&&state==='play')fpRetrStart();}
+    else if(FS.st==='retr'){fpRetr(dt);if(FS.st==='idle')return;}
+    else if(FS.st==='pull'){fpPull(dt);if(FS.st==='idle')return;}
+    else if(FS.st==='fight'){fishFight(dt);if(FS.st==='fight')fpFightPos();else if(FS.st==='idle')return;}
+    else if(FS.st==='spin'){if(fpSpin(dt))return;}
     if(FS.dip>0)FS.dip=Math.max(0,FS.dip-dt*1.6);fishMeshUpd();fishHud();}
   // vesien nimet: rantaan tultaessa hienovaraisesti (kerran minuutissa samalle vedelle)
   FS.wbT-=dt;if(FS.wbT<=0){FS.wbT=1;if(!P.inDun){let wb=null;for(let a=0;a<8&&!wb;a++){const x=P.pos.x+Math.cos(a/8*TAU)*7,z=P.pos.z+Math.sin(a/8*TAU)*7;if(terrainH(x,z)<-.45)wb=wbAt(x,z);}
@@ -148,15 +165,16 @@ function fishFight(dt){const B=FISH_B[FS.sp],S=.45+.55*clamp((FS.kg-B.kg[0])/(B.
   FS.pullT-=dt;if(FS.pullT<=0){FS.pullOn=!FS.pullOn;FS.pullT=FS.pullOn?.5+Math.random()*.9:1.2+Math.random()*1.8;if(FS.pullOn){FS.dip=1;plSnd('onkiminen','nykaisy',{v:.6,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});}}
   const RL=FS.rod.reel;if(hold){FS.prog+=dt*(FS.pullOn?.03:.16)/(.6+S*.6)*(RL?RL.fk:1);FS.ten+=dt*(FS.pullOn?1.05*S:.18*S)/FS.rod.ten*(RL?RL.tk:1);P.stam-=dt*4;P.stamDelay=Math.max(P.stamDelay,.5);FS.kelT-=dt;if(FS.kelT<=0){FS.kelT=.45;plSnd('onkiminen','kelaus',{v:.45});}}
   else{FS.ten-=dt*.55;FS.prog-=dt*(FS.pullOn?.06:.015)*S;}
-  FS.ten=clamp(FS.ten,0,1.01);FS.prog=clamp(FS.prog,0,1);const k=FS.prog;FS.bx=lerp(FS.bx,P.pos.x,dt*k*.4);FS.bz=lerp(FS.bz,P.pos.z,dt*k*.4);
+  FS.ten=clamp(FS.ten,0,1.01);FS.prog=clamp(FS.prog,0,1);
   if(FS.ten>=1){fishLoseBait(1);plSnd('onkiminen','siima_katkeaa',{v:.9});const ex=typeof tkLineBreak==='function'?tkLineBreak():'';fishReset(`Siima katkesi! ${ITEMS[FS.sp].n} pääsi karkuun.${ex}`,'warn');return;}
   if(FS.fightT>120){if(FS.rod.keep){if(!FS.tired){FS.tired=1;FS.pullOn=false;FS.pullT=1e9;msg('Kala väsyi – väkäkoukku pitää sen kiinni.','quest');}}else{fishLoseBait(.5);fishReset('Kala irtosi koukusta.','warn');return;}}   // v3.14 väkäkoukku ei päästä
   if(FS.prog>=1)fishLift();}
 const FISH_LIFT_T=.4;
 // v3.27: kala nousee ilmaan vavan kärkeen ja jää roikkumaan (roska tulee suoraan reppuun kuten ennen)
-function fishLift(){const id=FS.sp;if(!id||!FISH_B[id]){fishLand();return;}FS.st='hang';fishMeshes(false);plSnd('onkiminen','saalis',{v:.55});
+function fishLift(){const id=FS.sp;if(!id||!FISH_B[id]){fishLand();return;}FS.st='hang';fishMeshes(false);fpFishDrop();FS.hx=P.pos.x;FS.hz=P.pos.z;if(!FS.cm)FS.cm=typeof fbLen==='function'?fbLen(id,FS.kg,Math.random()):0;plSnd('onkiminen','saalis',{v:.55});
   if(typeof tkDangle==='function')FS.dg=tkDangle(id,FS.kg,true);fishHud();}
-function fishTake(auto){if(FS.dg){FS.dg.hold=false;FS.dg.t=1e9;FS.dg=null;}fishLand();}
+// v3.27: otto klikillä; joskus koukku on syvällä (3–10 % arvon mukaan) → minipeli (fishphys.js), onnistuessa fishTake(false,true)
+function fishTake(auto,unhooked){if(!unhooked&&FISH_B[FS.sp]&&Math.random()<fpHookP()){fpUnhookStart();return;}if(FS.dg){FS.dg.hold=false;FS.dg.t=1e9;FS.dg=null;}fishLand();}
 function fishLand(){const id=FS.sp,F=fishF();if(!id){fishReset();return;}
   if(!FISH_B[id]){giveOrDrop(id,1,P.pos.x,P.pos.y+1,P.pos.z);plSnd('onkiminen','roska',{v:.7});
     if(id==='saapas'){setTimeout(()=>plSnd('moka','kirous',{v:.9}),500);msg('Vanha saapas… ei ihan sitä mitä toivoit.','warn');}
@@ -165,10 +183,10 @@ function fishLand(){const id=FS.sp,F=fishF();if(!id){fishReset();return;}
     else if(id==='hiidensiru')msg('Koukussa hohtaa hiidenkiven siru!','loot');
     else msg(`Koukkuun oli tarttunut ${ITEMS[id].n.toLowerCase()}!`,'loot');
     if(FS.bait&&Math.random()<.5)FS.bait=false;if(typeof tkWear==='function')tkWear(.5);fishReset();return;}
-  const cm=typeof fbLen==='function'?fbLen(id,FS.kg,Math.random()):0;if(fishGive(id,FS.kg,cm)>0)msg('Reppu on täynnä – kala putosi maahan.','warn');   // v3.27 kala yksilönä (paino + pituus)
+  const cm=FS.cm||(typeof fbLen==='function'?fbLen(id,FS.kg,Math.random()):0);if(fishGive(id,FS.kg,cm)>0)msg('Reppu on täynnä – kala putosi maahan.','warn');   // v3.27 kala yksilönä (paino + pituus)
   const rec=F.rec[id]||0,first=!F.n[id];F.n[id]=(F.n[id]||0)+1;bump('fish');plSnd('onkiminen','saalis',{v:.85});
   const kgT=FS.kg.toFixed(2).replace('.',',');if(FS.kg>rec){F.rec[id]=FS.kg;}
-  if(typeof fbCatch==='function'){const H=fbCatch(id,FS.kg,first,rec&&FS.kg>rec,cm);msgH(H.html,H.text,'loot');}else msg(`${first?'Uusi laji! ':''}${ITEMS[id].n} ${kgT} kg${rec&&FS.kg>rec?' – uusi ennätys!':''}`,'loot');   // v3.15 "Sait: … (luokka) – katso kalakirjan sivu N"
+  if(typeof fbCatch==='function'){const H=fbCatch(id,FS.kg,first,rec&&FS.kg>rec,cm);lappu(fishArt(id,150,70),H.html,{cls:rec&&FS.kg>rec?'rec':''});if(rec&&FS.kg>rec)fpRecordMusic();}else msg(`${first?'Uusi laji! ':''}${ITEMS[id].n} ${kgT} kg${rec&&FS.kg>rec?' – uusi ennätys!':''}`,'loot');   // v3.15 "Sait: … (luokka) – katso kalakirjan sivu N"
   addXp(Math.round((FISH_DEF[id].k>=2?8:FISH_DEF[id].k>1?4:2)+(rec&&FS.kg>rec?3:0)+(first?5:0)),'kala');
   if(!invCount('kalakirja')&&!F.book){F.book=1;giveOrDrop('kalakirja',1,P.pos.x,P.pos.y+1,P.pos.z);msg('Aloitit kalastajan kirjan – kaikki saaliisi kirjataan siihen.','quest');}
   if(typeof tkWear==='function')tkWear(FISH_DEF[id].k>=2?1.5:1);   // v3.14 siima kuluu (v3.27 kala roikkui jo ilmassa ennen ottoa)
@@ -195,17 +213,26 @@ function fishGoals(){const F=fishF();for(const g of FISH_GOALS)if(!F.g[g.id]&&g.
 /* ---------------- 3D: koho ja siima ---------------- */
 function fishMeshes(on){if(on&&!FS.bob){const g=new THREE.Group(),t=new THREE.Mesh(new THREE.SphereGeometry(.07,10,6,0,TAU,0,Math.PI/2),mat(0xd83a2a)),b=new THREE.Mesh(new THREE.SphereGeometry(.07,10,6,0,TAU,Math.PI/2,Math.PI/2),mat(0xf2f0e8));
     const st=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.14,4),mat(0x2a2a2a));st.position.y=.1;g.add(t,b,st);scene.add(g);FS.bob=g;
-    const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(10*3),3));FS.line=new THREE.Line(lg,new THREE.LineBasicMaterial({color:0xe8e8e0,transparent:true,opacity:.75}));FS.line.frustumCulled=false;scene.add(FS.line);}
+    const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(FP_LN*3),3));FS.line=new THREE.Line(lg,new THREE.LineBasicMaterial({color:0xe8e8e0,transparent:true,opacity:.75}));FS.line.frustumCulled=false;scene.add(FS.line);}
   if(FS.bob){FS.bob.visible=on;FS.line.visible=on;if(on&&typeof tkBobDress==='function')tkBobDress();}}   // v3.14 koho/viehe vavan osien mukaan
 const _fsTip=new THREE.Vector3(),_fsQ=new THREE.Quaternion();
-function fishMeshUpd(){if(!FS.bob)return;const wy=water.position.y;let bx=FS.bx,bz=FS.bz,by=FS.spin&&FS.st!=='cast'?wy-Math.min(FS.ld||.12,1.6)+Math.sin(playTime*6)*.02:wy+.02+Math.sin(playTime*2.2)*.012-(FS.dip||0)*.12-(FS.st==='fight'?.08:0);   /* v3.14 viehe uppoaa hieman, v3.27 vieheen syvyys FS.ld */
-  if(typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.tip){heldMesh.updateMatrixWorld(true);heldMesh.userData.tip.getWorldPosition(_fsTip);}else if(typeof heldMesh!=='undefined'&&heldMesh){heldMesh.updateMatrixWorld(true);_fsTip.set(0,0,ROD_LEN-.1);heldMesh.localToWorld(_fsTip);}else _fsTip.set(P.pos.x,P.pos.y+1.6,P.pos.z);
-  if(FS.st==='reel'&&!FS.spin){const k=sstep(0,1,FS.t2/FISH_LIFT_T);bx=lerp(bx,_fsTip.x,k*.7);bz=lerp(bz,_fsTip.z,k*.7);by=lerp(by,_fsTip.y-.45,k);}   // v3.27 nosto ilmaan
-  if(FS.st==='cast'){const k=Math.min(1,FS.t/.55);bx=lerp(_fsTip.x,FS.bx,k);bz=lerp(_fsTip.z,FS.bz,k);by=lerp(_fsTip.y,by,k)+Math.sin(k*Math.PI)*2.2;}
-  FS.bob.position.set(bx,by,bz);const a=FS.line.geometry.attributes.position,sag=FS.st==='fight'?.05:FS.spin?.18:.6;
-  for(let i=0;i<10;i++){const t=i/9;a.setXYZ(i,lerp(_fsTip.x,bx,t),lerp(_fsTip.y,by+.1,t)-Math.sin(t*Math.PI)*sag*(FS.st==='cast'?0:1),lerp(_fsTip.z,bz,t));}a.needsUpdate=true;}
+const FP_LN=16;
+/* v3.27: koho/viehe päätteen FS.E kohdalla; siima taipuvana kaarena (löysä odottaessa, kireä kelatessa ja väsyttäessä); kalan suu siiman päässä */
+function fishMeshUpd(){if(!FS.bob||!FS.E)return;const wy=water.position.y,E=FS.E;fpTip(_fsTip);let bx=E.x,by=E.y,bz=E.z;
+  if(FS.st==='wait'||FS.st==='bite')by=wy+.02+Math.sin(playTime*2.2)*.012-(FS.dip||0)*.12;else if(FS.st==='spin')by=E.y+Math.sin(playTime*6)*.02;
+  FS.bob.position.set(bx,by,bz);FS.bob.visible=!FS.fm;if(FS.fm){bx=FS.fm.position.x;by=FS.fm.position.y;bz=FS.fm.position.z;}
+  const hold=mouseL&&locked,d=Math.hypot(bx-_fsTip.x,by-_fsTip.y,bz-_fsTip.z),st=FS.st,
+    sl=st==='fly'?.02:st==='wait'||st==='bite'?.06:st==='land'?.05:st==='spin'?(hold?.012:.035):st==='retr'?(hold||!FS.rod.reel?.015:.04):st==='fight'?.004*(1-FS.ten):st==='pull'?.008:.03,sag=Math.min(2.5,d*sl);
+  const a=FS.line.geometry.attributes.position;for(let i=0;i<FP_LN;i++){const t=i/(FP_LN-1);a.setXYZ(i,lerp(_fsTip.x,bx,t),lerp(_fsTip.y,by+(FS.fm?0:.1),t)-4*t*(1-t)*sag,lerp(_fsTip.z,bz,t));}a.needsUpdate=true;}
 /* ---------------- HUD: tärppi ja väsytys ---------------- */
-function fishHud(){const el=document.getElementById('fishHud');if(!el)return;if(typeof tkHud==='function'&&tkHud(el))return;   /* v3.14 virveli, siiman vaihto, mato-vihje */if(FS.st==='hang'){el.hidden=false;el.className='wait';el.innerHTML=`<span>${ITEMS[FS.sp].n} koukussa · vasen: ota kala</span>`;return;}   // v3.27
+function fishHud(){const el=document.getElementById('fishHud');if(!el)return;if(typeof tkHud==='function'&&tkHud(el))return;
+  {const st=FS.st,sh=t=>{el.hidden=false;el.className='wait';el.innerHTML=t;return true;};   // v3.27 uudet tilat
+    if(st==='charge'){const k=fpChargeK();el.hidden=false;el.className='wait';el.innerHTML=`<span>Heiton voima ${Math.round((FP_PW_MIN+(1-FP_PW_MIN)*k)*100)} % · päästä irti heittääksesi (katso noin 35° ylös = pisin)</span><div class="fb"><i class="pr" style="width:${Math.round(k*100)}%"></i></div>`;return;}
+    if(st==='fly'){el.hidden=true;return;}
+    if(st==='land'||st==='retr'){if(FS.rod&&FS.rod.reel){sh(`<span>${st==='land'?'Viehe on maassa – ':''}pidä vasenta kelataksesi</span>`);return;}if(st==='land'){sh('<span>Koho on maassa – vasen vetää sen takaisin</span>');return;}el.hidden=true;return;}
+    if(st==='pull'){if(FS.spin&&FISH_B[FS.sp]){sh(`<span>Kala siimassa – pidä vasenta kelataksesi</span>`);return;}el.hidden=true;return;}
+    if(st==='unhook'){el.hidden=true;return;}
+    if((st==='wait'||st==='bite')&&FS.noFish){sh('<span>Täällä ei näytä olevan kaloja – heitä syvempään, nimettyyn veteen · vasen nostaa</span>');return;}}   /* v3.14 virveli, siiman vaihto, mato-vihje */if(FS.st==='hang'){el.hidden=false;el.className='wait';el.innerHTML=`<span>${ITEMS[FS.sp].n} koukussa · vasen: ota kala</span>`;return;}   // v3.27
   if(FS.st==='idle'&&fishHeldHint(el))return;
   const on=FS.st==='bite'||FS.st==='fight'||FS.st==='wait';el.hidden=!on;if(!on)return;
   el.className=FS.st==='bite'?'bite':FS.st==='fight'?'fight':'wait';

@@ -80,6 +80,7 @@ addEventListener('mousemove',e=>{
   let dx=0,dy=0;
   if(locked){dx=e.movementX;dy=e.movementY;}else if(lockFailed&&(e.buttons&1||e.buttons&2)){dx=e.movementX;dy=e.movementY;}
   if(Math.abs(dx)>200||Math.abs(dy)>200)return;
+  if(typeof HG!=='undefined'&&HG.on&&locked){fpUnhookMove(dx);return;}   // v3.27 koukun irrotuksen minipeli: hiiri liikuttaa viivaa, kamera pysyy
   const k=.0028*(+SET.sens||1);camYaw-=dx*k;camPitch=clamp(camPitch+dy*k*(invertY?-1:1),-.6,1.25);   // v1.54 kääntymisen herkkyys
 });
 // Rulla: zoom tai (asetus) pikapaikan vaihto – valittu pikapaikka varustetaan heti jos esine on varustettava

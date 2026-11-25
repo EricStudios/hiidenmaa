@@ -68,8 +68,8 @@ window.__BJV='3.26';
   var muRnd=function(a,b){return a+Math.random()*(b-a);};
   /* v2.86 'vboss' = viimeinen pomo alle puolet terveydestä (vartija_puolivali, silmukkana VB_GAP tauolla); 'vend' = viimeinen pomo kuolee
      (vartija_kuolema, kerran loppuun – main.js musicCtx pitää kontekstin, kunnes kappale on soinut). */
-  function muType(c){return !c?null:c==='valikko'||c==='tauko'?'menu':c==='boss'||c==='vboss'?'boss':c==='vend'?'once':c.charAt(0)==='w'?'bio':'dun';}
-  function muKeys(c){if(!BS.man)return [];var pre=c==='valikko'?(MU.m1?'mu/valikko/menu2_':'mu/valikko/menu1_'):c==='tauko'?'mu/valikko/menu2_':c==='boss'?'mu/ulottuvuudet/pomotaistelu_':c==='vboss'?'mu/ulottuvuudet/vartija_puolivali_':c==='vend'?'mu/ulottuvuudet/vartija_kuolema_':
+  function muType(c){return !c?null:c==='valikko'||c==='tauko'?'menu':c==='boss'||c==='vboss'?'boss':c==='vend'||c==='rec'?'once':c.charAt(0)==='w'?'bio':'dun';}
+  function muKeys(c){if(!BS.man)return [];var pre=c==='rec'?'mu/tapahtumat/ennatyskala_':c==='valikko'?(MU.m1?'mu/valikko/menu2_':'mu/valikko/menu1_'):c==='tauko'?'mu/valikko/menu2_':c==='boss'?'mu/ulottuvuudet/pomotaistelu_':c==='vboss'?'mu/ulottuvuudet/vartija_puolivali_':c==='vend'?'mu/ulottuvuudet/vartija_kuolema_':
       c.charAt(0)==='w'?'mu/biomit/'+c.slice(2)+'_':'mu/ulottuvuudet/'+c.slice(2)+'_',L=[],k;
     for(k in BS.man)if(k.indexOf(pre)===0)L.push(k);if(!L.length&&c==='valikko'&&!MU.m1){MU.m1=true;return muKeys(c);}return L;}
   function muVol(){return bsVolK('music');}

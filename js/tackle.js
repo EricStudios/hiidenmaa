@@ -9,7 +9,7 @@
    PAKKI: esine kalapakki (s.box, s.lv); maassa flags.pakit [{x,y,z,ry,box,lv}], pöydällä p.data.pk {box,lv}. Vain kalastustarvikkeet (tkPakkiOk).
    PÖYTÄ (kalapoyta): ikkuna #tkP – vavan osat, ominaisuudet, perkaus (fileet + perkeet), pakin päivitys. Siiman vaihto kentällä pakista TKA (30 s). */
 'use strict';
-const TK_SINK=.22,TK_RISE=.5,TK_LURE_MIN=.25,TK_BOTTOM_SNAG=.3,TK_SHORE=.3,TK_SPIN_MIN=6,TK_SPIN_T=70,TK_SNAG=.0005,TK_REEL_V=1.1,TK_FIELD_LINE=30,TK_SNAP=.006,TK_DANGLE=3;
+const TK_FD_DEF=.8,TK_FD=[0,2],TK_FD_STEP=.1,TK_ONKI_SNAG=.06,TK_SINK=.22,TK_RISE=.5,TK_LURE_MIN=.25,TK_BOTTOM_SNAG=.3,TK_SHORE=.3,TK_SPIN_MIN=6,TK_SPIN_T=70,TK_SNAG=.0005,TK_REEL_V=1.1,TK_FIELD_LINE=30,TK_SNAP=.006,TK_DANGLE=3;
 const TKA={on:false,t:0,T:TK_FIELD_LINE,line:null,src:null,slot:null};   // siiman vaihto kentällä
 /* ---------------- VAPA: osat ja arvot ---------------- */
 function rigOf(s){if(!s)return null;if(!s.rig)s.rig=Object.assign({},TK_RIG0);return s.rig;}
@@ -19,7 +19,7 @@ function rigStats(s){const R=ITEMS[s.id].rod,r=rigOf(s),L=r.line?TK_LINE[r.line]
     U=K&&r.lure?TK_LURE[r.lure]:null,C=rigCombo(s.id,r),fx=C?C.fx:{};
   return {k:R.k*(L?L.vis:1)*(fx.k||1),ten:R.ten*(L?L.ten:1)*(1+(fx.ten||0)),big:(R.big||0)+(fx.big||0),bw:(R.bw||1)*H.big,sw:H.small,hk:Math.min(.97,H.hk+(fx.hk||0)),
     steal:H.steal*(F?F.steal:1)*(fx.steal||1),keep:!!H.keep,win:(F?F.win:0)+(fx.win||0),night:F&&F.night||0,spin:!!U,reel:K,lure:U,lureId:U?r.lure:null,
-    cast:U?[TK_SPIN_MIN,K.cast]:K?[FISH_CAST[0],Math.round(K.cast*.8)]:FISH_CAST,line:L,combo:C,virveli:!!K};}
+    cast:[1,K?K.cast:(FP_ROD_D[s.id]||16)],dmax:K?K.cast:(FP_ROD_D[s.id]||16),fd:r.fd!=null?r.fd:TK_FD_DEF,float:F,line:L,combo:C,virveli:!!K};}   // v3.27 heittomatka 35°:ssa (fishphys.js)
 function rodName(s){return s.rig&&s.rig.reel?'Virveli':'Onki';}
 const fishSmall=sp=>FISH_DEF[sp]&&FISH_DEF[sp].k===1&&!FISH_B[sp].big;
 // lajin painokerroin vavan osien mukaan (fishPick): koukku (isot / pikkukalat), runko (isot lajit), viehe (parhaat ×2,2, pikkukalat ×0,3)
@@ -38,21 +38,7 @@ function tkSnapCheck(){const r=tkRig();if(!r||!r.line)return false;if(Math.rando
   plSnd('onkiminen','siima_katkeaa',{v:.9});FS.bait=false;const ex=tkLineBreak();fishReset('Siima napsahti poikki iskussa!'+ex,'warn');return true;}
 function tkBaitSync(){const r=tkRig();if(r&&!FS.spin&&FS.st!=='idle'){if(r.bait&&!FS.bait){r.bait=0;updateGear();}}}
 /* ---------------- VIRVELI: kelaus ja tärppi kelatessa ---------------- */
-function tkSpinTick(dt){const hold=mouseL&&locked&&state==='play',dx=P.pos.x-FS.bx,dz=P.pos.z-FS.bz,d=Math.hypot(dx,dz)||1,R=FS.rod;
-  if(hold){const v=TK_REEL_V*R.reel.spd;FS.bx+=dx/d*v*dt;FS.bz+=dz/d*v*dt;FS.reelT+=dt;FS.kelT-=dt;if(FS.kelT<=0){FS.kelT=.5;tkSnd('virveli_kelaus')||plSnd('onkiminen','kelaus',{v:.35});}
-    const wb=FS.body;let act=fishActivity(wb),tot=0,fit=0;for(const sp in FISH_B){const w=fishW(sp,wb);if(!w)continue;tot+=w;fit+=w*tkSpK(sp,R,wb);}
-    const rate=act*(tot?fit/tot:1)*lureCond(R.lure,wb)/(TK_SPIN_T*R.k)*(DEV&&typeof DEVF!=='undefined'&&DEVF.fishFast?30:1);
-    if(FS.reelT>1.2&&Math.random()<dt*rate){FS.dip=1;plSnd('onkiminen','tarppays',{v:.9,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});
-      if(Math.random()<R.hk){msg('Isku! Kala tarttui vieheeseen.','quest');fishHook(true);return true;}
-      msg('Kala kävi vieheessä, mutta ei tarttunut.');FS.reelT=0;}
-    }
-  /* v3.27 käyttäjä: viehe vajoaa hitaasti, kun ei kelata (TK_SINK m/s, jigi 2×, pintavaappu kelluu); kelatessa nousee kohti pintaa (TK_RISE). Pohjaan ennen rantaa:
-     TK_BOTTOM_SNAG (30 %) tarttuu kiinni ja siima katkeaa, muuten viehe on pohjassa → heitä uudelleen. Matalassa rannassa (alle TK_SHORE m) viehe vain tulee rantaan. */
-  const deep=water.position.y-terrainH(FS.bx,FS.bz);
-  if(!R.lure.top){if(hold)FS.ld=Math.max(TK_LURE_MIN,(FS.ld||0)-TK_RISE*dt);else FS.ld=(FS.ld||0)+TK_SINK*(R.lure.sh==='jig'?2:1)*dt;}else FS.ld=.05;
-  if(d<2.6||deep<TK_SHORE){fishReset('Viehe tuli rantaan – heitä uudelleen.');return true;}
-  if(FS.ld>=deep-.04){if(Math.random()<TK_BOTTOM_SNAG){tkSnag();return true;}plSnd('onkiminen','nykaisy',{v:.4,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});fishReset('Viehe painui pohjaan – kelaa nopeammin ja heitä uudelleen.');return true;}
-  return false;}
+function tkSpinTick(dt){return fpSpin(dt);}   // v3.27 viehe vedessä: fishphys.js fpSpin (FS.ld, pohja, syvyyskerroin)
 function tkSnag(){const r=tkRig();let t='Viehe tarttui pohjaan';if(r){const ln=r.line?ITEMS[r.line].n.toLowerCase():'siima';t+=` – ${r.lure?ITEMS[r.lure].n.toLowerCase():'viehe'} ja ${ln} menetettiin.`;r.lure=null;r.line=null;r.lw=1;invDirty=true;updateGear();}
   plSnd('onkiminen','siima_katkeaa',{v:.8});fishReset(t,'warn');}
 /* ---------------- MATO KOUKKUUN (E vapa kädessä) ---------------- */
@@ -212,10 +198,10 @@ const tkFmt=v=>String(Math.round(v*100)/100).replace('.',',');
 function tkPropsList(s){const r=rigOf(s),S=rigStats(s),o=[],R=ITEMS[s.id].rod,pc=v=>(v>=0?'+':'−')+Math.abs(Math.round(v*100))+' %';
   o.push(['Tyyppi',S.virveli?(S.spin?'Virveli (viehe: kelaa vasen pohjassa)':'Virveli (koho ja syötti, pitkä heitto)'):'Onki (koho ja syötti)']);
   o.push(['Siima',r.line?`${ITEMS[r.line].n} – kunto ${Math.round((r.lw??1)*100)} %`:'ei siimaa!'],['Koukku',ITEMS[r.hook]?ITEMS[r.hook].n:'–'],['Kela',r.reel?ITEMS[r.reel].n:'ei kelaa']);
-  if(S.spin)o.push(['Viehe',ITEMS[r.lure].n]);else o.push(['Koho',r.float?ITEMS[r.float].n:'–'],['Syötti',r.bait?'mato koukussa':'ei syöttiä (E vapa kädessä)']);
+  if(S.spin)o.push(['Viehe',ITEMS[r.lure].n]);else o.push(['Koho',r.float?ITEMS[r.float].n:'–'],['Syötin syvyys',`${tkFmt(S.fd)} m kohon alla (säädä pöydällä)`],['Syötti',r.bait?'mato koukussa':'ei syöttiä (E vapa kädessä)']);
   if(S.combo)o.push(['Yhdistelmä',`${S.combo.n}: ${S.combo.t}`]);
   o.push(['Tärppiväli',S.k<1?`${Math.round((1-S.k)*100)} % lyhyempi`:S.k>1?`${Math.round((S.k-1)*100)} % pidempi (siima näkyy)`:'perus'],['Isojen kalojen keskipaino',S.big?pc(S.big):'perus'],
-    ['Isot lajit',S.bw===1?'perus':pc(S.bw-1)],['Pikkukalat',S.sw===1?'perus':pc(S.sw-1)],['Siiman kestävyys',`×${tkFmt(S.ten)}`],['Heittomatka',`${S.cast[0]}–${S.cast[1]} m`]);
+    ['Isot lajit',S.bw===1?'perus':pc(S.bw-1)],['Pikkukalat',S.sw===1?'perus':pc(S.sw-1)],['Siiman kestävyys',`×${tkFmt(S.ten)}`],['Heittomatka',`enintään ${S.dmax} m (katse ~35° ylös${S.virveli?', täysi lataus':''})`]);
   if(S.win||S.night)o.push(['Tärppi-ikkuna',`+${tkFmt(S.win)} s${S.night?`, yöllä +${tkFmt(S.win+S.night)} s`:''}`]);
   if(S.virveli&&R)o.push(['Tarttuminen iskussa (virveli)',Math.round(S.hk*100)+' %']);if(S.keep)o.push(['Väkä','kala ei irtoa pitkässäkään väsytyksessä']);
   return o;}
@@ -260,7 +246,7 @@ function tkGut(){let fil=0,per=0;for(const id of Object.keys(FISH_DEF)){const n=
   if(!per)return;giveOrDrop('kalafilee',fil,P.pos.x,P.pos.y+1,P.pos.z);giveOrDrop('perkeet',per,P.pos.x,P.pos.y+1,P.pos.z);tkSnd('perkaus')||sfx('craft');msg(`Perkasit ${per} kalaa: ${fil} fileetä ja ${per} perkeet.`,'loot');bump('gut');}
 /* ---------------- HUD ---------------- */
 function tkHud(el){if(TKA.on){el.hidden=false;el.className='wait';el.innerHTML=`<span>Vaihdetaan siimaa… ilman pöytää tämä kestää ikuisuuden · ${Math.ceil(TKA.T-TKA.t)} s</span><div class="fb"><i class="pr" style="width:${Math.round(TKA.t/TKA.T*100)}%"></i></div>`;return true;}
-  if(FS.st==='spin'){el.hidden=false;el.className='wait';const d=Math.hypot(FS.bx-P.pos.x,FS.bz-P.pos.z);el.innerHTML=`<span>${FS.body?FS.body.name:''} · ${ITEMS[FS.rod.lureId].n} · ${Math.round(d)} m · pidä vasenta kelataksesi</span>`;return true;}
+  if(FS.st==='spin'){el.hidden=false;el.className='wait';const d=Math.hypot(FS.bx-P.pos.x,FS.bz-P.pos.z),bd=fpBaitDepth();el.innerHTML=`<span>${FS.body?FS.body.name+' · ':''}${ITEMS[FS.rod.lureId].n} · ${Math.round(d)} m · syvyys ${tkFmt(Math.round(bd.d*10)/10)} m${bd.bot?' (pohjassa!)':''} · pidä vasenta kelataksesi</span>`;return true;}
   if(FS.st==='idle'){const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='rod'&&state==='play'){const r=rigOf(w);let t='';
       if(!r.line)t='Vavassa ei ole siimaa – vaihda siima pöydällä tai pakista';else if(!r.bait&&!(r.reel&&r.lure)&&invCount('mato'))t='E: mato koukkuun · vasen heittää';
       if(t){el.hidden=false;el.className='wait tkHint';el.innerHTML=`<span>${t}</span>`;return true;}}
