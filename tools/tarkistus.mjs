@@ -592,6 +592,18 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const a=need.every(k=>M[k]),b=/r\.req\.vesikulho\?'pata_vesi':'pata_aloitus'/.test(potCraft.toString())&&POT_SND_V<1&&POT_BUB_V<POT_SND_V&&/POT_BUB_V/.test(potTick.toString());
     const kv=Object.keys(M).filter(k=>k.startsWith('p/pihka/kaiverrus_')),c=kv.length>=8&&kv.every(k=>M[k].dur>=.8&&M[k].dur<=1.35&&Math.abs(M[k].gain)<12)&&/RES\.sndT=1\+Math\.random\(\)\*\.4/.test(carveTick.toString());
     return a&&b&&c||`virhe manifest ${a} (${need.filter(k=>!M[k])}) pata ${b} kaiverrus ${c}`;});
+  t('v3.27: onki (tärppi vain kohossa, nosto ilmaan, otto klikillä), kala yksilönä (paino/pituus, ei pinoudu, käteen, oikea syö, E vapauttaa), raaka kala + loinen, virvelin vajoava viehe 30 % kiinni, värillinen saalisviesti',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('onki',/fishTake/.test(fishClick.toString())&&!/Tärppää/.test(fishTick.toString())&&/hang/.test(fishTick.toString())&&typeof fishLift==='function'&&/tkDangle/.test(fishLift.toString()));
+    ck('hud',!/<b>!<\/b>/.test(fishHud.toString()));
+    ck('yksilö',ITEMS.hauki.s===1&&ITEMS.hauki.cat==='fish'&&equipGroup('fish')==='weapon'&&typeof fishGive==='function'&&/kg/.test(itemProps.toString()));
+    {const i0=inv.map(x=>x);try{for(let q=0;q<inv.length;q++)inv[q]=null;fishGive('ahven',.31,20);fishGive('ahven',.42,24);const L=inv.filter(x=>x&&x.id==='ahven');ck('ei pinoudu',L.length===2&&L.every(x=>x.n===1&&x.kg>0&&x.cm>0));}finally{for(let q=0;q<inv.length;q++)inv[q]=i0[q];invDirty=true;updateGear();}}
+    ck('käsi',/cat==='fish'/.test(onSecondary.toString())&&/fishRelease/.test(interact.toString())&&/FISH_DEF\[id\]/.test(makeHeld.toString()));
+    ck('loinen',RAW_FISH_SICK>.45&&RAW_FISH_LOINEN>0&&LOINEN_T[0]===60&&LOINEN_T[1]===600&&LOINEN_K===1.2&&/loinen/.test(effects.toString()));
+    ck('virveli',TK_BOTTOM_SNAG===.3&&TK_SINK>0&&TK_SINK<.5&&/FS\.ld/.test(tkSpinTick.toString()));
+    ck('ei viehettä ongessa',/!r\.reel/.test(tkSetPart.toString()));
+    ck('viesti',typeof msgH==='function'&&/mG/.test(fbCatch.toString())&&/C\.c/.test(fbCatch.toString()));
+    return e.length?'virhe: '+e.join(', '):true;});
   t('v3.26: kaikki lammet nimetty (vanhat tunnukset ennallaan, lammet p*), DEV-kartan paljastus näyttää kaikki vedet, DEV-esinehaku yleissanoilla ja kategorioilla',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     ck('lammet',WB_POND_MIN>=1&&WB_POND_D<0&&WBS.filter(w=>w.pond).every(w=>/^p\d+$/.test(w.id)&&/lampi$/.test(w.name))&&WBS.filter(w=>!w.pond).every(w=>/^[ws]\d+$/.test(w.id)));
@@ -726,7 +738,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     const s={id:'hiidenvapa',n:1};const A=rigStats(s);ck('oletus',s.rig.line==='pellavasiima'&&!A.spin&&A.big===.2&&A.cast[1]===FISH_CAST[1]);
     s.rig.reel='hiisikela';s.rig.lure='hiidenhohtoviehe';s.rig.line='hiidensiima';const B=rigStats(s);ck('virveli',B.spin&&B.cast[0]===6&&B.cast[1]===30&&B.combo&&B.combo.id==='hiisi'&&rodName(s)==='Virveli'&&B.k>A.k);
     ck('viehe pikkukaloille',tkSpK('muikku',B,{type:'lake'})<.5&&tkSpK('made',B,{type:'lake'})>2);
-    ck('kytkennät',/rigStats/.test(rodDef.toString())&&/tkSpinTick/.test(fishTick.toString())&&/tkSnapCheck/.test(fishHook.toString())&&/tkWear/.test(fishLand.toString())&&/tkDangle/.test(fishLand.toString())&&/rig\.bait/.test(fishCast.toString())&&!/invRemove\('mato'/.test(fishCast.toString()));
+    ck('kytkennät',/rigStats/.test(rodDef.toString())&&/tkSpinTick/.test(fishTick.toString())&&/tkSnapCheck/.test(fishHook.toString())&&/tkWear/.test(fishLand.toString())&&/tkDangle/.test(fishLift.toString())&&/rig\.bait/.test(fishCast.toString())&&!/invRemove\('mato'/.test(fishCast.toString()));
     ck('mato E',/tkNoTarget/.test(interact.toString())&&typeof tkNoTarget==='function');
     ck('pakki',ITEMS.kalapakki.w===20&&PAKKI_SLOTS.join()==='12,16,20,24'&&/s\.box/.test(invWeight.toString())&&/tkPakkiDrop/.test(playerDrop.toString())&&tkPakkiOk('kuparilusikka')&&!tkPakkiOk('kivi')&&!tkPakkiOk('kalapakki')&&/tkPrimary/.test(onPrimary.toString())&&/tkPakkiFilter/.test(renderChest.toString()));
     ck('pöytä',PIECES.kalapoyta&&PIECES.kalapoyta.cat==='viljely'&&PIECES.kalapoyta.lvl===3&&PIECES.kalapoyta.req.puu===6&&PIECES.kalapoyta.req.naru===2&&/kalapoyta/.test(serialize.toString())&&!!$('#tkP')&&typeof tkGut==='function');
@@ -855,7 +867,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       {let spot=null;for(let i=0;i<20000&&!spot;i++){const x=(Math.random()-.5)*600,z=(Math.random()-.5)*600;if(terrainH(x,z)<-1&&wbAt(x,z)){for(let a=0;a<16;a++){const px=x+Math.cos(a/16*TAU)*8,pz=z+Math.sin(a/16*TAU)*8;if(terrainH(px,pz)>.5){spot={x,z,px,pz};break;}}}}
        if(spot){state='play';P.swim=false;P.inDun=false;P.stam=100;P.pos.set(spot.px,terrainH(spot.px,spot.pz),spot.pz);invAdd('onki',1);const o=inv.find(q=>q&&q.id==='onki');if(!o.eq)toggleEquip(o);updateGear();camRay=()=>{const a=new THREE.Vector3(P.pos.x,P.pos.y+1.7,P.pos.z),t=new THREE.Vector3(spot.x,water.position.y,spot.z);return {o:a,d:t.sub(a).normalize()};};
          fishClick();const c1=FS.st==='cast';for(let i=0;i<20;i++)fishTick(1/30);FS.biteAt=FS.t;fishTick(1/30);const c2=FS.st==='bite';const n0=fishTotal(fishF());const old=Math.random;let k=0;Math.random=()=>(++k===1?.9:old());try{fishClick();}finally{Math.random=old;}
-         if(FS.st==='fight'){FS.prog=2;FS.ten=0;fishTick(1/30);}   /* v3.08: 2 → clamp 1 (ilman pitoa prog laskee ennen tarkistusta; isoja lajeja nyt enemmän) */else for(let i=0;i<40;i++)fishTick(1/30);ck(`onki ${c1} ${c2} ${FS.st} ${fishTotal(fishF())-n0}`,c1&&c2&&FS.st==='idle'&&fishTotal(fishF())===n0+1);}
+         if(FS.st==='fight'){FS.prog=2;FS.ten=0;fishTick(1/30);}   /* v3.08: 2 → clamp 1 (ilman pitoa prog laskee ennen tarkistusta; isoja lajeja nyt enemmän) */else for(let i=0;i<40;i++)fishTick(1/30);const hg=FS.st==='hang';if(hg)fishClick();   /* v3.27 kala roikkuu ilmassa → klikkaus ottaa */ck(`onki ${c1} ${c2} ${hg} ${FS.st} ${fishTotal(fishF())-n0}`,c1&&c2&&hg&&FS.st==='idle'&&fishTotal(fishF())===n0+1);}
        else ck('onki (ei vettä)',false);}
       {const r=new XMLHttpRequest();r.open('GET','sounds/extra/raw/onkiminen/tarppays.mp3',false);r.send();ck('onkiäänet',r.status===200);}
       res=e.length?'virhe: '+e.join(', '):true;}

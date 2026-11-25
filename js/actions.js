@@ -38,7 +38,7 @@ function useTool(alt){const w=curWeapon();if(w.cat!=='shovel')return;if(!alt&&pl
 const BOW_MIN_T=.4;   // v2.03: 0,7 → 0,4 s
 function bowCancel(){if(playTime-(P.bowCancelMsg||-99)>4){P.bowCancelMsg=playTime;msg('Ampuminen peruuntui – jännitä jousta vähintään 0,4 s.','warn');}}
 function onPrimaryUp(){if(P.drawing){P.drawing=false;if((P.drawT||0)<BOW_MIN_T)bowCancel();else if(P.bowDraw>.15&&ammoId())fireBow();P.bowDraw=0;P.drawT=0;}}
-function onSecondary(){const w=curWeapon();if(w.cat==='hammer'){togglePanel('build');}else if(w.cat==='shovel')useTool(true);}
+function onSecondary(){const w=curWeapon();if(w.cat==='fish'){const s=equipped('weapon');if(s){eat(s);updateGear();}return;}   /* v3.27 kala kädessä: oikea syö */if(w.cat==='hammer'){togglePanel('build');}else if(w.cat==='shovel')useTool(true);}
 function startAttack(){
   if(P.atk||P.inWater&&P.swim)return;
   const w=curWeapon();
@@ -223,12 +223,15 @@ P.vel=new V3();
 const KYL_K=.5,KYL_FULL=.25;
 // Ähky tulee vain, jos kylläisyys on jo täynnä (≥99) ja syö silti; palkin täyttyminen syödessä ei aiheuta sitä. Kesto 52 s (−30 %).
 const LIQUID_FOOD=/keitto|puuro|pata$|risotto|hillo/;   // v3.08 ruoat, joita ei tarvitse purra (keitot, puurot, padat, risotto, hillo)
+/* v3.27 käyttäjä: raaka kala sairastuttaa todennäköisemmin (RAW_FISH_SICK) ja voi tuoda loisen (RAW_FISH_LOINEN): LOINEN_T s, nälkä kuluu LOINEN_K× nopeammin. */
+const RAW_FISH_SICK=.75,RAW_FISH_LOINEN=.5,LOINEN_T=[60,600],LOINEN_K=1.2;
 function eat(s){const f=ITEMS[s.id].food;
   if(P.hunger>=99&&!f.raw&&!f.buff){P.buffs.vatsakipu=52;msg('Söit vaikka olit jo täynnä – vatsaa kivistää.','warn');}
   P.hunger=Math.min(100,P.hunger+f.h);if(P.hunger>=99.5){P.hunger=100;P.buffs.taysi=Math.max(P.buffs.taysi||0,60+(f.kyl?f.kyl*KYL_FULL:0));if(f.kyl)flags.potFull=1;}   /* v3.02 pataruoka pitää täyden vatsan pidempään */
   if(f.kyl)P.buffs.ravittu=Math.max(P.buffs.ravittu||0,f.kyl);   /* v2.00: täyteen syöty = 100, ja ensimmäinen pudotus vasta 60 s:n kuluttua */
   if(f.hp)P.heal+=f.hp;if(f.st)P.stam=Math.min(maxStam(),P.stam+f.st);
-  if(f.raw&&Math.random()<.45){P.buffs.pahoinvointi=40;msg('Raaka liha kääntää vatsaa.','warn');}   // kaikki raa'at lihat (v2.80)
+  if(f.raw&&Math.random()<(f.fish?RAW_FISH_SICK:.45)){P.buffs.pahoinvointi=40;msg(f.fish?'Raaka kala kääntää vatsaa.':'Raaka liha kääntää vatsaa.','warn');}   // kaikki raa'at lihat (v2.80)
+  if(f.fish&&f.raw&&Math.random()<RAW_FISH_LOINEN){const t=LOINEN_T[0]+Math.random()*(LOINEN_T[1]-LOINEN_T[0]);P.buffs.loinen=Math.max(P.buffs.loinen||0,t);msg(`Raa'assa kalassa oli loinen – ruoka kuluu nopeammin (${Math.round(t/60)} min).`,'warn');}   // v3.27
   if(f.buff)P.buffs[f.buff]=300;if(!f.raw)flags.ate=1;
   const liq=LIQUID_FOOD.test(s.id);s.n--;if(s.n<=0)inv[inv.indexOf(s)]=null;invDirty=true;sfx('eat');if(liq){const k=2+Math.floor(Math.random()*3);for(let i=0;i<k;i++)setTimeout(()=>plSnd('kaytto','juominen',{p:1+(Math.random()-.5)*.08}),i*520);}else plSnd('kaytto','syominen');msg(`${liq?'Söit lusikalla':'Söit'}: ${ITEMS[s.id].n}`);   /* v3.08 käyttäjä: nestemäinen ruoka → juomisääni 2–4 kertaa */
 }
@@ -277,7 +280,7 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   default:return null;}}
 const E_ANIM_T=.42;   // v3.06 E-toiminnon käsiliike (player.js)
 function interact(){if(P.insp)inspectStop();
-  if(P.dead)return;const t=lookTarget;if(!t){if(typeof tkNoTarget==='function'&&tkNoTarget())return;resinNoTarget();return;}   /* v3.14 mato koukkuun vapa kädessä */P.eT=playTime;
+  if(P.dead)return;const t=lookTarget;if(!t){if(typeof fishRelease==='function'&&fishRelease())return;   /* v3.27 kala kädessä veden äärellä → vapautus */if(typeof tkNoTarget==='function'&&tkNoTarget())return;resinNoTarget();return;}   /* v3.14 mato koukkuun vapa kädessä */P.eT=playTime;
   if(t.kind==='resin'){resinInteract(t.n);return;}   // v2.91
   if(t.kind==='care'){careInteract(t);return;}   // v3.08 farm.js
   if(t.kind==='node'){const n=t.n,d=n.def,own=n.planted&&CROP_SEED[n.type];const c=own?GROUND_YIELD:rint(rng,d.n[0],d.n[1]);   /* v3.07 maahan istutettu: 2 + siemen (siemen vasta onnistuneen poiminnan jälkeen) */const left=invAdd(d.item,c);if(left>0){if(left<c)invRemove(d.item,c-left);msg('Reppu on täynnä – et voi poimia.','warn');return;}   /* v1.17: ei osittaista poimintaa (ennen loput hävisivät) */bump('picked');msg(`+${c-left} ${ITEMS[d.item].n}`,'loot');sfx('pickup');plSnd('kaytto','poiminta',PL_PICK());killNode(n);if(own)giveOrDrop(CROP_SEED[n.type],1,n.x,n.y+.5,n.z);return;}

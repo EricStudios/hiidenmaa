@@ -29,10 +29,14 @@ function fbClsTag(i,pct,big){const C=FB_CLS[i];return `<span class="fbCls${big?'
 function fbPage(sp){return FB_FIRST_SP+FB_SP.indexOf(sp);}
 /* ---------------- SAALIS (fish.js fishLand) ---------------- */
 // kirjaa saaliin: pituus, arvo, paras yksilö, luokkatilasto, toiveet ja saavutukset → palauttaa ilmoitustekstin
-function fbCatch(sp,kg,first,rec){const F=fishF(),cm=fbLen(sp,kg,Math.random()),V=fishValue(sp,kg,cm);F.best=F.best||{};F.cls=F.cls||{};F.cls[V.cls]=(F.cls[V.cls]||0)+1;
+function fbCatch(sp,kg,first,rec,cm0){const F=fishF(),cm=cm0||fbLen(sp,kg,Math.random()),V=fishValue(sp,kg,cm);F.best=F.best||{};F.cls=F.cls||{};F.cls[V.cls]=(F.cls[V.cls]||0)+1;
   const b=F.best[sp];if(!b||V.s>b.s)F.best[sp]={kg,cm,s:+V.s.toFixed(4),pct:+V.pct.toFixed(4),cls:V.cls,d:dayN};
   if(V.cls>=5)F.legend=(F.legend||0)+1;fbWishCheck(sp,V);
-  return `Sait: ${ITEMS[sp].n} ${fbKg(kg)} kg, ${cm} cm (${FB_CLS[V.cls].n})${first?' – uusi laji!':''}${rec?' – uusi ennätys!':''} – katso kalakirjan sivu ${fbPage(sp)}`;}
+  const C=FB_CLS[V.cls],text=`Sait: ${ITEMS[sp].n} ${fbKg(kg)} kg, ${cm} cm (${C.n})${first?' – uusi laji!':''}${rec?' – uusi ennätys!':''} – katso kalakirjan sivu ${fbPage(sp)}`;
+  /* v3.27 käyttäjä: värillinen saalisviesti – muu teksti harmaa, laji valkoinen, paino ja harvinaisuus arvoluokan värillä */
+  const g=t=>`<span class="mG">${t}</span>`,c=t=>`<b style="color:${C.c}">${t}</b>`;
+  const html=`${g('Sait:')} <b class="mW">${ITEMS[sp].n}</b> ${c(fbKg(kg)+' kg')}${g(', '+cm+' cm')} ${c(C.n)}${first?g(' – ')+'<b class="mW">uusi laji!</b>':''}${rec?g(' – ')+c('uusi ennätys!'):''}${g(' – kalakirja s. '+fbPage(sp))}`;
+  return {html,text};}
 /* ---------------- TOIVEKALAT ---------------- */
 function fbWorldTypes(){const t={};for(const w of WBS){t[w.type]=1;if(w.bogg)t.bog=1;}return t;}
 function fbWishMake(){const F=fishF(),T=fbWorldTypes(),rnd=mulberry32(seedMix(9071+dayN)),pool=FB_SP.filter(sp=>T[FISH_B[sp].w]),pick=(L)=>L[Math.floor(rnd()*L.length)];

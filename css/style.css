@@ -53,6 +53,7 @@ button:focus-visible{outline:2px solid var(--frost);outline-offset:2px}
 #msgs{position:absolute;left:16px;bottom:120px;display:flex;flex-direction:column;gap:3px;align-items:flex-start;zoom:var(--chatK,1);max-width:min(46vw,640px)}   /* v2.99 koko asetuksista (Chatin ja ilmoitusten koko), pitkät rivit rivittyvät */
 #msgs div{font-size:14px;font-weight:600;background:rgba(19,17,14,.7);padding:3px 10px;border-radius:2px;transition:opacity .6s}
 #msgs div.loot{color:var(--frost)} #msgs div.warn{color:var(--ember)}
+#msgs div.rich{color:#a8a294} #msgs .mG{color:#a8a294;font-weight:500} #msgs .mW{color:#fff}   /* v3.27 värillinen saalisviesti */
 #bossbar{position:absolute;left:50%;top:calc(22px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(520px,70vw);text-align:center}
 #bossbar .name{font-family:var(--font-d);font-size:22px;color:var(--frost);text-shadow:0 2px 6px #000}
 #bossbar .track{height:12px;margin-top:4px;background:rgba(19,17,14,.85);border:1px solid var(--line2)}

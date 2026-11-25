@@ -301,6 +301,8 @@ function poly(pts,thick,m){const sh=new THREE.Shape();sh.moveTo(pts[0][0],pts[0]
   const geo=new THREE.ExtrudeGeometry(sh,{depth:thick,bevelEnabled:false});geo.translate(0,0,-thick/2);geo.rotateY(-Math.PI/2);const me=new THREE.Mesh(geo,m);me.castShadow=true;return me;}
 function shaft(g,len,m,r=.032,z0=-.1){const me=new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.1,len,8),m);me.rotation.x=Math.PI/2;me.position.z=z0+len/2;me.castShadow=true;g.add(me);return me;}
 function makeHeld(id){
+  if(typeof FISH_DEF!=='undefined'&&FISH_DEF[id]&&typeof tkFishMesh==='function'){const w=typeof equipped==='function'?equipped('weapon'):null,kg=w&&w.id===id&&w.kg!=null?w.kg:.4,L=Math.min(.95,.16+Math.cbrt(Math.max(.02,kg))*.24);
+    const g=new THREE.Group(),f=tkFishMesh(id,L);f.rotation.set(Math.PI/2,0,Math.PI/2);f.position.set(0,-.02,L*.18);g.add(f);g.userData.fish=1;return g;}   // v3.27 raaka kala kädessä painonsa kokoisena (tackle.js tkFishMesh)
   const g=new THREE.Group(),W=smat(0x7b4f2b),metalOf=(c,o)=>mat(c,Object.assign({metalness:.2,roughness:.55},o||{}));
   switch(id){
     case 'piikivikirves':{shaft(g,.85,W);const fm=mat(0x3e444c,{roughness:.35,metalness:.1});   // v1.53 lohkottu piikiviterä, nahkasidos ristiin

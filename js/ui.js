@@ -31,6 +31,8 @@ const MUS_HOLD_MAX=12;
 const ACT_MSG=/^\s*\+|^Valmistit|^Söit|^Joit|^Sytytit|tuli palaa|^Uuniin|^Pataan|kiehuu padassa|paistuu|^Otit|^Irrotit|^Täytit kulhon|^Asensit|^Hiilos leimahti|^Laitoit|^Istutit|^Kylvit|^Poimit/;
 function msgAct(t,cls){return SET.actMsg===false&&cls!=='warn'&&cls!=='boss'&&cls!=='quest'&&(cls==='xp'||ACT_MSG.test(t));}
 function msg(t,cls=''){if(msgAct(t,cls))return;msgLog.push({t,cls,at:playTime});msgSnd(t,cls);if(msgLog.length>10)msgLog.shift();const el=$('#msgs');const d=document.createElement('div');d.textContent=t;if(cls)d.className=cls;el.appendChild(d);d._life=clamp(3+t.length*.07,4,13);msgEls.push(d);while(msgEls.length>7){const o=msgEls.shift();o.remove();}}
+// v3.27: värillinen ilmoitus – html on koottu omista teksteistä, text menee lokiin, äänen tunnistukseen ja kestoon
+function msgH(html,text,cls=''){if(msgAct(text,cls))return;msgLog.push({t:text,cls,at:playTime});msgSnd(text,cls);if(msgLog.length>10)msgLog.shift();const el=$('#msgs');const d=document.createElement('div');d.innerHTML=html;d.className=(cls?cls+' ':'')+'rich';el.appendChild(d);d._life=clamp(3+text.length*.07,4,13);msgEls.push(d);while(msgEls.length>7){const o=msgEls.shift();o.remove();}}
 function updateMsgs(dt){for(let i=msgEls.length-1;i>=0;i--){const d=msgEls[i];d._life-=dt;if(d._life<1)d.style.opacity=Math.max(0,d._life);if(d._life<=0){d.remove();msgEls.splice(i,1);}}}
 const floaters=[];
 function floatText(t,x,y,z,color){const el=document.createElement('div');el.className='floater';el.textContent=t;el.style.color=color||'#eee';$('#floaters').appendChild(el);floaters.push({el,p:new V3(x,y,z),t:0});if(floaters.length>24){const o=floaters.shift();o.el.remove();}}
@@ -95,7 +97,7 @@ function showAmmo(dur,small){const e=$('#ammoT');if(!e)return;const am=typeof am
 let hnSel=-1;
 function itemRarity(s){const id=s.id,r=RECIPE_BY[id],lv=r&&r.lvl||0;return isValuable(id)?'leg':ITEMS[id].potion?'rare':ITEMS[id].rar?ITEMS[id].rar:lv>=6?'rare':(lv>=3||(s.q||1)>=2)?'unc':'com';}
 function showHotName(i){const e=$('#hotName'),s=inv[i],sl=document.querySelectorAll('#hotbar .slot')[i];if(!e)return;e.className='';if(!s||!sl)return;
-  const r=sl.getBoundingClientRect();e.textContent=ITEMS[s.id].n+((s.q||1)>1?' ★'.repeat(s.q-1):'');e.style.left=((r.left+r.width/2)/hudK())+'px';void e.offsetWidth;   /* v2.63 HUD-skaala */e.className='on r_'+itemRarity(s);e.onanimationend=()=>e.classList.remove('on');}   // v3.25: ei toistu valikosta palatessa
+  const r=sl.getBoundingClientRect();e.textContent=ITEMS[s.id].n+((s.q||1)>1?' ★'.repeat(s.q-1):'')+(s.kg!=null?' '+s.kg.toFixed(2).replace('.',',')+' kg':'');   /* v3.27 kalan paino */e.style.left=((r.left+r.width/2)/hudK())+'px';void e.offsetWidth;   /* v2.63 HUD-skaala */e.className='on r_'+itemRarity(s);e.onanimationend=()=>e.classList.remove('on');}   // v3.25: ei toistu valikosta palatessa
 function updateHUD(dt){
   if(hotSel!==hnSel){if(hnSel>=0)showHotName(hotSel);hnSel=hotSel;}
   if(heldId!==ammoHeld){ammoHeld=heldId;if(heldId&&ITEMS[heldId].cat==='bow')showAmmo(2.5);}
@@ -515,6 +517,7 @@ function upBtn(el,cost,label,fn,key,chg,rerender,what,prevEl){if(!cost){el.inner
 // Tavaran ominaisuudet listana [nimi, arvo] annetulla ★-tasolla (tietopaneeli ja päivityksen vertailu).
 function itemProps(s,q){const d=ITEMS[s.id],o=[],f1=v=>v.toFixed(1).replace('.',','),pc=v=>Math.round(v*100)+' %',mss=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')} min`,mq=d.cat&&d.cat!=='hammer'&&RECIPE_BY[s.id];
   if(mq)o.push(['Taso','★'+q+' / ★3']);
+  if(s.kg!=null){o.push(['Paino',s.kg.toFixed(2).replace('.',',')+' kg']);if(s.cm)o.push(['Pituus',s.cm+' cm']);if(typeof fishValue==='function'&&FISH_DEF[s.id]){const V=fishValue(s.id,s.kg,s.cm||fbLen(s.id,s.kg,.5));o.push(['Arvo',FB_CLS[V.cls].n]);}}   // v3.27 yksilö
   if(d.cat==='weapon'){const w={...d,q};o.push(['Vahinko',weaponDmg(w).toFixed(0)],['Vahinkotyyppi',{slash:'viiltävä',blunt:'murskaava',pierce:'pistävä',fire:'tuli'}[d.dt]||'–'],['Kestävyyttä / isku',f1(d.st*matStamK(s.id))+(matStamK(s.id)<1?` (−${Math.round((1-matStamK(s.id))*100)} %)`:'')]);
     if(d.chop)o.push(['Hakkuuteho',((5+d.chop*4)*(1+.25*(q-1))).toFixed(0)]);if(d.pick)o.push(['Louhintateho',((9+d.pick*3)*(1+.25*(q-1))).toFixed(0)]);if(d.range)o.push(['Ulottuvuus',f1(d.range)+' m']);if(d.kb)o.push(['Tönäisy',String(d.kb).replace('.',',')+(d.kb>=5?' (vahva)':'')]);   /* v1.31: arvo ilman yksikköä, 10 = 5 m */}
   if(d.cat==='bow'){const b=bowStats(s);o.push(['Vahinko enintään',weaponDmg({...d,q}).toFixed(0)],['Jännitysaika',f1(b.draw/(1+.25*(q-1)))+' s'],['Nuolen nopeus',((14+36)*(1+.1*(q-1))*b.spd).toFixed(0)+' m/s'],

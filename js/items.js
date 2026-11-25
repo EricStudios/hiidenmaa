@@ -120,7 +120,7 @@ const FISH_SHAPE={ahven:{l:14,h:7,m:'bars',fin:'#d84a2a',spine:1},hauki:{l:18,h:
   sarki:{l:13,h:6,fin:'#d8442a',eye:'#d8442a',m:'line'},kiiski:{l:10.5,h:5.5,m:'dots',spine:1},toutain:{l:16,h:7,m:'line',fin:'#b8a8a0'},kampela:{l:13,h:10,m:'dots',flat:1},
   meritaimen:{l:16,h:6,m:'xs'},suutari:{l:13,h:7.5,eye:'#d8442a',fin:'#8a8a3a'}};
 for(const [id,f] of Object.entries(FISH_DEF)){const k=f.k,big=k>=2?' Iso kala – täyttää kaksinkertaisesti.':k>1?' Keskikokoinen kala.':'';
-  ITEMS[id]={n:f.n,w:k>=2?1.5:k>1?.8:.3,s:20,c:f.c,fishI:1,food:{h:Math.round(5*k),raw:true},d:`Tuore ${f.n.toLowerCase()}. Paista nuotiolla tai grillillä, savusta savustimessa tai keitä padassa.${big}`};
+  ITEMS[id]={n:f.n,w:k>=2?1.5:k>1?.8:.3,s:1,cat:'fish',c:f.c,fishI:1,food:{h:Math.round(5*k),raw:true,fish:1},d:`Tuore ${f.n.toLowerCase()}. Paista nuotiolla tai grillillä, savusta savustimessa tai keitä padassa. Käteen otettuna: hiiren oikea syö (raakana riskialtista), E veden äärellä vapauttaa.${big}`};   // v3.27 yksilö (paino/pituus paikassa), käteen
   ITEMS[id+'p']={n:'Paistettu '+f.n.toLowerCase(),w:k>=2?1.2:k>1?.6:.25,s:20,c:f.c,fishI:2,food:{h:Math.round(25*k),hp:Math.round(12*k)},d:`Nuotiolla paistettu ${f.n.toLowerCase()}.${big}`};}
 Object.assign(ITEMS,{
   savukala:{n:'Savukala',w:.15,s:30,c:'#a8742e',fishI:3,food:{h:30,hp:15,st:10},rar:'unc',d:'Savustimessa kuivattu kala: kevyt ja säilyy. Iso kala antaa kaksi.'},
