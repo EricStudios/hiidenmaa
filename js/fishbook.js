@@ -3,7 +3,7 @@
    ARVO: jokaisella saaliilla paino (kg) ja pituus (cm). Lajikohtainen jakauma (FB_N näytettä, sama painokaava kuin fishHook) → painopisteet (persentiili) ja kokopisteet;
    yhteispisteet 0,6 × paino + 0,4 × koko → "parempi kuin X % lajinsa kaloista" → 8 luokkaa FB_CLS (Roskakala … Maailmanennätysvonkale).
    KIRJA (#fishP): aukeama, 1 kala / sivu, sivunumerot alakulmissa, sivujen kääntö (animaatio + paikkamerkki sivun_kaanto). Sivut: sisällys, arvoluokat, 18 lajia,
-   toivekalat, vedet, tavoitteet, tietokirjallisuus (vedet ja todennäköisyydet, ajat ja sää, viehteet ja varusteet).
+   toivekalat, vedet, tavoitteet, tietokirjallisuus (vedet ja todennäköisyydet, ajat ja sää, vieheet ja varusteet).
    TOIVEKALAT: 3 kpl (helppo, keskivaikea, vaikea), lukittu 7 päivää (flags.fish.wish), XP lajin harvinaisuuden ja vaatimuksen mukaan.
    Kirja vasemmassa kädessä (cat offhand): vasen klikkaus avaa (kun oikea käsi on tyhjä), oma pikanäppäin (K). Pelkkä kirja → oikeaan käteen (F-tarkastelu toimii).
    Lukiessa molemmat kädet pitelevät avointa kirjaa (bookPose). DEV: Paljasta kalakirja (DEVF.fishReveal). */
@@ -102,7 +102,7 @@ function fishArt(sp,W,H,sil){const k=sp+W+'x'+H+(sil?'s':'');if(FB_ART[k])return
 /* ---------------- KIRJA ---------------- */
 function fbKnown(sp){const F=fishF();return !!F.n[sp]||(DEV&&typeof DEVF!=='undefined'&&!!DEVF.fishReveal);}
 function fbPages(){const F=fishF(),P0=[],tot=fishTotal(F),known=FB_SP.filter(fbKnown).length,W=fbWish();
-  const toc=[['Arvoluokat',2],['Toivekalat',3],['Kalat',FB_FIRST_SP],['Vedet',FB_FIRST_SP+FB_SP.length],['Tavoitteet',FB_FIRST_SP+FB_SP.length+1],['Tietoa: vedet',FB_FIRST_SP+FB_SP.length+2],['Tietoa: ajat ja sää',FB_FIRST_SP+FB_SP.length+3],['Tietoa: viehteet ja varusteet',FB_FIRST_SP+FB_SP.length+4]];
+  const toc=[['Arvoluokat',2],['Toivekalat',3],['Kalat',FB_FIRST_SP],['Vedet',FB_FIRST_SP+FB_SP.length],['Tavoitteet',FB_FIRST_SP+FB_SP.length+1],['Tietoa: vedet',FB_FIRST_SP+FB_SP.length+2],['Tietoa: ajat ja sää',FB_FIRST_SP+FB_SP.length+3],['Tietoa: vieheet ja varusteet',FB_FIRST_SP+FB_SP.length+4]];
   P0.push(`<div class="fbTitle">Kalastajan kirja</div><div class="fbOrn"></div><p class="fbC">Saaliita ${tot} · lajeja ${known}/${FB_SP.length}${F.wishN?` · toiveita täytetty ${F.wishN}`:''}</p>
     <h4>Sisällys</h4><ol class="fbToc">${toc.map(([t,p])=>`<li data-go="${p}"><span>${t}</span><i></i><b>${p}</b></li>`).join('')}</ol>`);
   const cnt=F.cls||{};P0.push(`<h3>Arvoluokat</h3><p class="fbS">Jokaisen kalan arvo lasketaan painosta ja pituudesta lajin omaa jakaumaa vasten (paino 60 %, koko 40 %).</p>
@@ -115,7 +115,7 @@ function fbPages(){const F=fishF(),P0=[],tot=fishTotal(F),known=FB_SP.filter(fbK
     P0.push(k?`<h3>${ITEMS[sp].n}</h3><div class="fbArt"><img src="${fishArt(sp,280,130)}"></div>
       <table class="fbT"><tr><td>Saatu</td><td>${n} kpl</td></tr><tr><td>Ennätys</td><td>${fbKg(F.rec[sp]||0)} kg</td></tr>${b?`<tr><td>Arvokkain</td><td>${fbKg(b.kg)} kg · ${b.cm} cm ${fbClsTag(b.cls,b.pct)}</td></tr><tr><td></td><td class="fbS">parempi kuin ${fbPct(b.pct)} % lajinsa kaloista (päivä ${b.d})</td></tr>`:''}
       <tr><td>Vesi</td><td>${wt}</td></tr><tr><td>Parhaiten</td><td>${FISH_PH[best]}${wx&&wx[1]>1?', '+FISH_WXN[wx[0]]:''}</td></tr><tr><td>Koko</td><td>${fbKg(B.kg[0])}–${fbKg(B.kg[1])} kg, enintään ~${FISH_LEN[sp]} cm${B.big?' · väsytettävä':''}</td></tr>
-      ${lures.length?`<tr><td>Viehteet</td><td>${lures.join(', ')}</td></tr>`:''}</table>`
+      ${lures.length?`<tr><td>Vieheet</td><td>${lures.join(', ')}</td></tr>`:''}</table>`
       :`<h3>???</h3><div class="fbArt"><img src="${fishArt(sp,280,130,1)}"></div><p class="fbS">Et ole vielä saanut tätä lajia. Vihje: ${wt}${B.big?', iso kala':''}.</p>`);}
   const ws=WBS.filter(w=>F.wb[w.id]);P0.push(`<h3>Vedet</h3>${ws.length?`<ul class="fbL">${ws.map(w=>`<li>${w.name} <small>(${{lake:'järvi',sea:'meri',bog:'suolampi'}[w.type]}${w.bogg?', soinen':''})</small></li>`).join('')}</ul>`:'<p class="fbS">Et ole vielä löytänyt nimettyjä vesiä.</p>'}
     ${F.sunkK&&!F.sunkO?'<p class="fbS">Pullopostin arkku on merkitty karttaan (✕).</p>':''}`);
@@ -127,7 +127,7 @@ function fbPages(){const F=fishF(),P0=[],tot=fishTotal(F),known=FB_SP.filter(fbK
     ${[['lake','Järvet ja lammet'],['sea','Meri'],['bog','Suolammet']].map(([t,n])=>`<h4>${n}</h4>${share(t).map(([sp,v])=>bar(sp,v)).join('')}`).join('')}`);
   P0.push(`<h3>Tietoa: ajat ja sää</h3><table class="fbT fbTime"><tr><th></th><th>aamu</th><th>päivä</th><th>ilta</th><th>yö</th><th>sää</th></tr>${FB_SP.map(sp=>{const B=FISH_B[sp],k=fbKnown(sp),m=Math.max(...B.t);
       return `<tr><td>${k?ITEMS[sp].n:'???'}</td>${B.t.map(v=>`<td>${k?'●'.repeat(Math.max(0,Math.round(v/m*3))):'·'}</td>`).join('')}<td>${k?Object.entries(B.wx).filter(e=>e[1]>1).map(e=>FISH_WXN[e[0]]).join(', ')||'–':'?'}</td></tr>`;}).join('')}</table>`);
-  P0.push(`<h3>Tietoa: viehteet ja varusteet</h3><p class="fbS">Kela tekee vavasta virvelin. Viehteet eivät sovi pikkukaloille. Vahvempi siima kestää, mutta kalat huomaavat sen.</p>
+  P0.push(`<h3>Tietoa: vieheet ja varusteet</h3><p class="fbS">Kela tekee vavasta virvelin. Vieheet eivät sovi pikkukaloille. Vahvempi siima kestää, mutta kalat huomaavat sen.</p>
     <ul class="fbL">${Object.entries(TK_LURE).map(([id,U])=>`<li><b>${ITEMS[id].n}</b>: ${U.best.map(sp=>fbKnown(sp)?ITEMS[sp].n:'???').join(', ')} <small>(${{bright:'kirkas valo',dim:'hämärä',dark:'pimeä'}[U.light]||'kaikki valot'})</small></li>`).join('')}</ul>
     <p class="fbS">Koukut: pieni = pikkukalat, iso = isot kalat, väkä = kala ei irtoa. Kohot: korkki näyttää arat tärpit, hehku näkyy yöllä.</p>`);
   if(P0.length%2)P0.push('<div class="fbEnd">✦</div>');return P0;}

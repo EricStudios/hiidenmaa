@@ -954,15 +954,15 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   Maailmanennätysvonkale (hiiri luokan päälle: "parempi kuin X % lajinsa kaloista"). Saaliista ilmoitus: "Sait: Hauki 6,1 kg, 99 cm (Harvinainen) – katso kalakirjan sivu 5".
 - **Toivekalat:** kolme toivetta (helppo, keskivaikea, vaikea), vaihtuvat 7 päivän välein, täytetystä XP:tä. Saavutukset: Toive täyttyi, Toiveiden kalastaja, Toiveiden täyttäjä,
   Vaikea toive, Kirja täynnä, Ennätyskala.
-- **Tietosivut:** lajien osuudet vesityypeittäin, parhaat ajat ja sää, viehteet ja varusteet.
+- **Tietosivut:** lajien osuudet vesityypeittäin, parhaat ajat ja sää, vieheet ja varusteet.
 - **Kirja kädessä:** vasempaan käteen; vasen klikkaus avaa (oikea käsi tyhjä), K avaa aina. Pelkkä kirja on oikeassa kädessä (F-tarkastelu). Lukiessa kirja molemmissa käsissä.
 
 ## v3.14 – kalastusvarusteet
 - **Kalastajan pöytä** (Viljely ja kalastus, taso 3, puu 6 + naru 2): E avaa – vavan osat vaihdetaan heti, ominaisuudet listana, yhdistelmät, perkaus ja pakin päivitys.
-  Pöydän ääressä valmistetaan siimat, koukut, kelat, kohot, viehteet ja kalastuspakki.
+  Pöydän ääressä valmistetaan siimat, koukut, kelat, kohot, vieheet ja kalastuspakki.
 - **Vapa = runko** (onki, kuparivapa +10 % isot kalat, hiidenvapa +20 %) + siima (pellava, jänne, punottu, hiidensiima – vahvempi kestää, mutta tärppää harvemmin) + koukku
   (pieni, iso, väkä) + kela (ei, kupari, hiisi) + koho (puu, korkki, hehku) tai viehe (9 kpl). Siima kuluu ja voi katketa; vanha ehjä osa palaa reppuun, kulunut siima heitetään pois.
-- **Virveli** (kela + viehe): heitto 6–22 m (hiisikela 30 m), pidä vasenta kelataksesi, kala iskee kelatessa. Viehteillä parhaat kalat, vahvuudet ja heikkoudet (vesi, aika, sää, valo);
+- **Virveli** (kela + viehe): heitto 6–22 m (hiisikela 30 m), pidä vasenta kelataksesi, kala iskee kelatessa. Vieheillä parhaat kalat, vahvuudet ja heikkoudet (vesi, aika, sää, valo);
   eivät sovi pikkukaloille, voivat (hyvin harvoin) tarttua pohjaan matalassa – viehe ja siima menetetään.
 - **Mato:** vapa kädessä E laittaa madon koukkuun. **Kalastuspakki** vasemmassa kädessä (paino 20 + sisältö, 12–24 paikkaa, vain kalastustarvikkeet, yksi kerrallaan):
   vasen klikkaus laskee maahan tai pöydän pakkipaikalle, E avaa, vasen nostaa. Siiman voi vaihtaa pakista kentällä (30 s).

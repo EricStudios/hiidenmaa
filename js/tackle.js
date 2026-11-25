@@ -172,7 +172,7 @@ function tkPakkiPlace(s,x,z){const y=terrainH(x,z);if(y<water.position.y+.05){ms
   const o=pakkiNorm({x,y,z,ry:camYaw+Math.PI,box:s.box||[],lv:s.lv||0});pakkiList().push(o);tkPakkiSpawn(o);const i=inv.indexOf(s);if(i>=0)inv[i]=null;s.eq=false;invDirty=true;updateGear();tkSnd('pakki_kiinni')||plSnd('kaytto','poiminta',{v:.5,p:.8});return true;}
 function tkPakkiDrop(s){if(P.inDun)return false;const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw);return tkPakkiPlace(s,P.pos.x+fx*.9,P.pos.z+fz*.9);}
 function tkPakkiFilter(){const o=curChest&&curChest.pakki;if(!o)return;let bad=0;o.box.forEach((b,i)=>{if(b&&!tkPakkiOk(b.id)){const j=inv.indexOf(null);if(j>=0){inv[j]=b;o.box[i]=null;bad++;}}});
-  if(bad){msg('Kalastuspakkiin mahtuu vain kalastustarvikkeita (vavat, osat, viehteet, madot, perkeet, kirja).','warn');invDirty=true;}
+  if(bad){msg('Kalastuspakkiin mahtuu vain kalastustarvikkeita (vavat, osat, vieheet, madot, perkeet, kirja).','warn');invDirty=true;}
   let n=0;inv.forEach((b,i)=>{if(b&&b.id==='kalapakki'){n++;if(n>1){const j=o.box.indexOf(null);if(j>=0){o.box[j]=b;inv[i]=null;}}}});}
 // pakkiikkunan lisäosa: siiman vaihto kentällä (30 s)
 function tkPakkiPanel(el){const o=curChest.pakki,w=equipped('weapon'),lines=[...new Set(o.box.filter(b=>b&&ITEMS[b.id].tk==='line').map(b=>b.id))];
@@ -238,7 +238,7 @@ function tkRender(){const el=document.getElementById('tkBody');if(!el||!tkCur)re
   let L=`<div class="tkRods">${rods.length?rods.map((r,i)=>`<button class="tkRod${i===tkSel?' on':''}" data-r="${i}">${ic(r.id)}<b>${ITEMS[r.id].n}</b><small>${rodName(r)}${r.eq?' · kädessä':''}</small></button>`).join(''):'<div class="note">Ei vapoja repussa tai pöydän pakissa.</div>'}</div>`;
   if(s){const r=rigOf(s);L+='<div class="tkSlots">';for(const [k,nm,DEF] of TK_SLOTS){if(k==='lure'&&!r.reel)continue;if(k==='float'&&r.reel&&r.lure)continue;const cur=r[k],av=tkAvail(k);
       L+=`<div class="tkSlot"><div class="tkCur">${cur?ic(cur):'<span class="ic q">–</span>'}<div><small>${nm}</small><b>${cur?ITEMS[cur].n:'ei'}${k==='line'&&cur?` <i>${Math.round((r.lw??1)*100)} %</i>`:''}</b></div>${cur&&k!=='line'&&k!=='hook'?`<button class="btn sm" data-off="${k}">Irrota</button>`:''}</div>`+
-        `<div class="tkAv">${Object.keys(av).length?Object.entries(av).map(([id,n])=>`<button class="tkPart${id===cur?' cur':''}" data-k="${k}" data-id="${id}" title="${ITEMS[id].d}">${ic(id)}<span>${ITEMS[id].n}</span><small>×${n}</small></button>`).join(''):`<span class="note">Ei muita ${{Siima:'siimoja',Koukku:'koukkuja',Kela:'keloja',Koho:'kohoja',Viehe:'viehteitä'}[nm]} – valmista niitä pöydän ääressä (valmistus).</span>`}</div></div>`;}
+        `<div class="tkAv">${Object.keys(av).length?Object.entries(av).map(([id,n])=>`<button class="tkPart${id===cur?' cur':''}" data-k="${k}" data-id="${id}" title="${ITEMS[id].d}">${ic(id)}<span>${ITEMS[id].n}</span><small>×${n}</small></button>`).join(''):`<span class="note">Ei muita ${{Siima:'siimoja',Koukku:'koukkuja',Kela:'keloja',Koho:'kohoja',Viehe:'vieheitä'}[nm]} – valmista niitä pöydän ääressä (valmistus).</span>`}</div></div>`;}
     L+='</div>';}
   const M=s?`<h3>${ITEMS[s.id].n}: ${rodName(s)}</h3><table class="tkProps">${tkPropsList(s).map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>`+
     `<details class="tkCombos"><summary>Yhdistelmät (${TK_COMBOS.length})</summary><ul>${TK_COMBOS.map(c=>`<li><b>${c.n}</b>: ${Object.entries(c.need).map(([k,v])=>v.map(x=>x===0?'ei kelaa':ITEMS[x].n).join(' / ')).join(' + ')} → ${c.t}</li>`).join('')}</ul></details>`:'';
@@ -247,7 +247,7 @@ function tkRender(){const el=document.getElementById('tkBody');if(!el||!tkCur)re
     <p class="note keep">Fileet paistetaan nuotiolla. Perkeet ovat katiskan syötti (vastaavat kahta matoa).</p><h3>Pakki</h3>`;
   if(pk){const up=PAKKI_UP[(pk.lv||0)+1];R+=`<p>Pöydällä: kalastuspakki, taso ${pk.lv+1} (${pk.box.filter(Boolean).length}/${pakkiSlots(pk.lv)} paikkaa). Sen osat ovat käytössä yllä.</p><button class="btn" id="tkOpenPk">Avaa pakki</button>`+
     (up?` <button class="btn" id="tkUpPk"${hasReq(up)?'':' disabled'}>Päivitä tasolle ${pk.lv+2} (${pakkiSlots(pk.lv+1)} paikkaa): ${Object.entries(up).map(([k,v])=>`${ITEMS[k].n} ${v}`).join(', ')}</button>`:'<p class="note">Pakki on korkeimmalla tasolla.</p>');}
-  else R+=`<p class="note">${invCount('kalapakki')?'Ota pakki vasempaan käteen ja napsauta pöydän pakkipaikkaa – pöydällä sen voi päivittää ja sen osat ovat käytössä.':'Valmista kalastuspakki pöydällä (valmistus) – siihen mahtuvat vavat, osat ja viehteet.'}</p>`;
+  else R+=`<p class="note">${invCount('kalapakki')?'Ota pakki vasempaan käteen ja napsauta pöydän pakkipaikkaa – pöydällä sen voi päivittää ja sen osat ovat käytössä.':'Valmista kalastuspakki pöydällä (valmistus) – siihen mahtuvat vavat, osat ja vieheet.'}</p>`;
   el.innerHTML=`<div class="tkL">${L}</div><div class="tkM">${M}</div><div class="tkR">${R}</div>`;
   el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{tkSel=+b.dataset.r;tkRender();});
   el.querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>{tkSetPart(s,b.dataset.off,null);tkSnd('koukun_vaihto');tkRender();});
