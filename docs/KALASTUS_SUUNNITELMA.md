@@ -184,3 +184,16 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 11. **Kala rimpuilee enemmän** maalla ja koukussa (roikkuessa).
 12. **Täysi reppu:** kalat eivät putoa maahan esineinä, vaan tulee ilmoitus "Reppu on täynnä".
 13. **Kala voi karata koukusta 10–30 sekunnissa:** se pomppaa irti maalle, josta se voi sätkiä takaisin veteen (sama pudotusfysiikka kuin v3.27:ssä).
+
+### Kysyttävä käyttäjältä ennen v3.29:n toteutusta (ehdotukseni suluissa)
+- **Raahaus:** mitä tapahtuu, kun nostettua kalaa raahataan kävelemällä kauas? (Ehdotus: kala raahautuu maata pitkin, siima ei katkea, ei etäisyysrajaa.
+  Vaihtoehdot: kala roikkuu aina ilmassa, tai yli 8 m raahaus voi katkaista siiman.)
+- **Karkausajastin (10–30 s):** milloin se käy? (Ehdotus: vain kun kala roikkuu tai sitä raahataan, ei vedossa eikä väsytyksessä.
+  Vaihtoehdot: koko ajan koukussa, tai vain täyden repun kanssa.)
+- **Täysi reppu:** mitä kalalle tapahtuu, kun reppu on täynnä? (Ehdotus: ilmoitus "Reppu on täynnä", ja kala jää roikkumaan koukkuun, kunnes teet tilaa; karkausajastin käy.
+  Vaihtoehdot: kala putoaa elävänä maahan sätkimään, tai se vapautuu veteen.)
+- **Lapun korkeus:** kuinka paljon ylemmäs? (Ehdotus: 41 % → 33 %, tilarivin alapuolelle. Vaihtoehdot: 37 %, tai vasempaan yläkulmaan tavoitteen alle.)
+- **Rimpuilu:** kuinka paljon enemmän? (Ehdotus: maalla hypyt noin 1,5× korkeammiksi ja tiheämmiksi, roikkuessa heilunta noin 2× ja pyrstö nopeammin.)
+- **Virveli:** koskeeko kiinteä siima ja raahaus myös virveliä? (Ehdotus: ei – virveli kelaa kärkeen kuten nyt, mutta raahaus kävelemällä toimii myös sillä.)
+- **Optimointi:** saako matalilla esiasetuksilla keventää näkyvästi (esim. roiskeet, siiman pisteet, kalan varjo)? (Ehdotus: Ultra ja High ennallaan, Medium ja Low kevyempiä.)
+- **Pidempi onki:** riittääkö 2,6 m, vai koskeeko pidennys myös kupari- ja hiidenvapaa? (Ehdotus: kaikki vavat +0,5 m.)
