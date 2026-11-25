@@ -886,6 +886,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.28 – tasonimike repussa
+- Tasonimike ja taso näkyvät repun oikeassa alakulmassa (`#invLvl`, ui.js `updateHUD`). HUD:n tasomittari oikeassa alakulmassa ilman nimikettä.
+
 ## v3.27 – kalastuksen fysiikka (js/fishphys.js; päätökset docs/KALASTUS_SUUNNITELMA.md)
 - **Heitto:** aina sallittu, ballistinen (painovoima 9,8, ilmanvastus `FP_DRAG` 0,38, tuuli `FP_WIND_K` 0,25 × tuulen nopeus). Lähtönopeus `fpV0(D)`: 35° täydellä voimalla = D.
   D: onki 16, kuparivapa 20, hiidenvapa 24, kuparikela 22, hiisikela 30 m. Onki heittää heti täydellä voimalla (kiskaisu 0,5 s); kela: vasen pohjassa 0,2–1,2 s → voima 25–100 %.

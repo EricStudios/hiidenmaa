@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.27, 25.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.28, 25.11.2026)
+
+- **Versio 3.28** – tasonimike ja taso repun oikeaan alakulmaan (ei peity koko näytöllä).
 
 - **Versio 3.27 – KALASTUKSEN UUSI FYSIIKKA** (`js/fishphys.js`, suunnitelma ja kaikki päätökset `docs/KALASTUS_SUUNNITELMA.md` – lue se ennen kalastusmuutoksia):
   ballistinen heitto (35° pisin), virvelin lataus ja vasen käsi + veivaus, maalle lasku, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m + lajien syvyys, kala näkyy vedossa,
@@ -439,6 +441,10 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.28 (tasonimike repun kulmaan – käyttäjä 25.11.)
+- Tasonimike (esim. "Haaksirikkoutunut") näkyi vain repun ollessa auki HUD:n tasomittarin yläpuolella, ja koko näytöllä isompi reppu peitti sen. Nyt nimike ja taso ovat
+  **repun oikeassa alakulmassa** (`#invLvl`, reunasisennyksessä 7 px alareunasta, ei peitä mitään). HUD:n tasomittari (`#lvlbox`) pysyy paikallaan ilman nimikettä. Tarkistusrivi v3.16 › nimike päivitetty.
 
 ### v3.27 (KALASTUKSEN UUSI FYSIIKKA + korjaukset – käyttäjä 25.11., suunnitelma `docs/KALASTUS_SUUNNITELMA.md`, 23 vastausta + lisäykset; uusi tiedosto `js/fishphys.js`)
 - **Korjaukset:** (1) Virtuaalinen osoitin (v3.25) lähetti `click`-tapahtuman myös estettyyn (`disabled`) nappiin → **valmistus ilman aineita ilman DEV-tilaa**.

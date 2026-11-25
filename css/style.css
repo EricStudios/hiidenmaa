@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.27';
+:root{--css-v:'3.28';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1153,7 +1153,8 @@ body.noActH #prompt{display:none!important}
 @media (max-width:760px){.fbBook{grid-template-columns:1fr}.fbPg.R{display:none}}
 
 /* v3.16 tasonimikkeet, DEV-sivut */
-#lvlbox .lvlT{display:none;position:absolute;right:0;bottom:100%;margin-bottom:3px;white-space:nowrap;font-weight:600;color:#e8c890;font-style:italic;font-size:11.5px;opacity:.95}#lvlbox.showT .lvlT{display:block}   /* v3.20 vain repussa, mittarin yläpuolella */
+#invLvl{position:absolute;right:16px;bottom:7px;display:flex;gap:8px;align-items:baseline;font-size:12px;white-space:nowrap;pointer-events:none;color:var(--bone);text-shadow:0 1px 2px #000}   /* v3.28 nimike + taso repun oikeassa alakulmassa (reunasisennyksessä, ei peitä mitään) */
+#invLvl .lvlT{font-weight:600;color:#e8c890;font-style:italic;font-size:11.5px;opacity:.95}#invLvl b{font-weight:700}
 #progP .lvlT{color:#e8c890;font-weight:600;margin-left:6px} .lvlTH{margin:12px 0 4px;color:#e8c890}
 .devTabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)} .devTabs .btn.on{border-color:#e8a44a;color:#ffd890}
 .devCat{margin:8px 0 4px;color:#e8c890;font-size:12px;text-transform:uppercase;letter-spacing:.05em}

@@ -697,7 +697,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('ohitus',INTRO_SKIP_MIN>0&&(()=>{const i0=intro,ls=localStorage.getItem(INTRO_SEEN_K),m=slotMeta,c0=curSlot;try{intro={t:5,hold:false};localStorage.removeItem(INTRO_SEEN_K);slotMeta=()=>[{name:'a'}];curSlot=0;const a=introCanSkip();localStorage.setItem(INTRO_SEEN_K,'1');const b=introCanSkip();return a===false&&b===true;}finally{if(ls===null)localStorage.removeItem(INTRO_SEEN_K);else localStorage.setItem(INTRO_SEEN_K,ls);slotMeta=m;curSlot=c0;intro=i0;}})());
     ck('näppäimet',typeof ldBusy==='function'&&typeof keysClear==='function'&&/keysClear/.test(endIntro.toString())&&/keysClear/.test(introRelease.toString()));
     ck('vinkit',TIP_BASE<=1.5&&TIP_MIN<=3&&/tipHas/.test(TIPS.find(t=>t.id==='kirves').c.toString()));
-    ck('nimike',/showT/.test(updateHUD.toString()));
+    ck('nimike',/invLvl/.test(updateHUD.toString())&&/lvlTitle/.test(updateHUD.toString())&&!!document.getElementById('invLvl'));   /* v3.28 nimike repun oikeassa alakulmassa */
     return e.length?'virhe: '+e.join(', '):true;});
   t('v3.19: valikon kuvissa vain neljä lyhyttä hiljaista ääntä + pehmeät häivytykset, napeissa omat syykohdat ja himmeämmät syyt, ruskeat valikot ja napit tummemmiksi pyöreällä liu\'ulla nurkkaan',()=>{
     const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText);}catch(er){return [];}}).join('\n');
