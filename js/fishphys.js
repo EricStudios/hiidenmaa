@@ -159,7 +159,11 @@ function virvPose(dt){const hm=typeof heldMesh!=='undefined'?heldMesh:null;const
   P.virvK=lerp(P.virvK||0,on?1:0,kExp(10,dt));if(!on||P.virvK<.02)return;const k=P.virvK;
   // vasen käsi eteen (vavan kahva), kyynärvarsi vaakaan
   fig.g.updateMatrixWorld(true);fig.armL.getWorldPosition(_vS);fig.armR.getWorldPosition(_vK);const lx=_vS.x-_vK.x,lz=_vS.z-_vK.z,ll=Math.hypot(lx,lz)||1;   // vasen käsi rinnan eteen (molemmat kädet ylettyvät kelalle)
-  _vX.set((_vS.x+_vK.x)/2+Math.sin(P.yaw)*.34+lx/ll*.07,(_vS.y+_vK.y)/2-.2,(_vS.z+_vK.z)/2+Math.cos(P.yaw)*.34+lz/ll*.07);armIK(fig.armL,fig.elbowL,_vX,k,_poleBowL);
+  // lataus nostaa kädet ylös ja taakse, heitto heilauttaa ne eteen (0,15 s) ja takaisin
+  const ck=FS.st==='charge'?sstep(0,1,fpChargeK()):0,ct=playTime-(P.castT??-9),sw=FS.rod&&FS.rod.reel&&ct<.5?(ct<.12?ct/.12:1-(ct-.12)/.38):0;VIRV.up=lerp(VIRV.up||0,ck,kExp(FS.st==='charge'?8:30,dt));
+  const up=VIRV.up*.3-sw*.08,fw=.34-VIRV.up*.16+sw*.16;
+  _vX.set((_vS.x+_vK.x)/2+Math.sin(P.yaw)*fw+lx/ll*.07,(_vS.y+_vK.y)/2-.2+up,(_vS.z+_vK.z)/2+Math.cos(P.yaw)*fw+lz/ll*.07);armIK(fig.armL,fig.elbowL,_vX,k,_poleBowL);
+  if(FS.st==='charge'||sw>0)P.yaw=lerpAngle(P.yaw,camYaw+Math.PI,kExp(18,dt));
   // vavan suunta: kallistus (rad) heiton vaiheen mukaan
   let pa=.45;if(FS.st==='charge')pa=.45+1.05*sstep(0,1,fpChargeK());else if(FS.st==='fly'&&FS.t<.45)pa=FS.t<.12?lerp(1.5,-.05,FS.t/.12):lerp(-.05,.45,(FS.t-.12)/.33);
   else if(FS.st==='fight')pa=.75+(FS.pullOn?.25:0);else if(FS.st==='pull')pa=.6;else if(FS.st==='hang'||FS.st==='unhook')pa=.85;
@@ -171,5 +175,16 @@ function virvPose(dt){const hm=typeof heldMesh!=='undefined'?heldMesh:null;const
       cr.position.x=-cr.position.x;hm.updateMatrixWorld(true);kn.getWorldPosition(_vK);const d2=_vK.distanceTo(_vS);if(d2>d1){cr.position.x=-cr.position.x;}VIRV.side=Math.sign(cr.position.x);kn.position.x=Math.abs(kn.position.x)*VIRV.side;}
   if(virvReeling()){const K=FS.rod&&FS.rod.reel;VIRV.crank+=dt*TAU*2.2*(K?K.spd:1);}cr.rotation.x=VIRV.crank;
   hm.updateMatrixWorld(true);kn.getWorldPosition(_vK);if(!P.atk||FS.st!=='idle')armIK(fig.armR,fig.elbowR,_vK,k,_vPole);}
+/* ONGEN HEITTO (ei latausta): nopea kiskaisu – käsi nousee taakse yläviistoon (0,08 s), piiskaa eteen (0,14 s) ja palautuu (0,3 s); vapa kallistuu taakse
+   nousun ajan. Oikean käden lisäkulma, joten yleinen asento pysyy pohjana. */
+function rodCastPose(dt){const hm=typeof heldMesh!=='undefined'?heldMesh:null;if(!hm||hm.userData.virv||!hm.userData.bend||hm.parent!==fig.hand||P.dead||P.insp){P.rodHoldK=0;return;}
+  if(!hm.userData.q0)hm.userData.q0=hm.quaternion.clone();hm.quaternion.copy(hm.userData.q0);
+  // kalastusasento: kun siima on vedessä, käsi pysyy edessä ja vapa osoittaa veteen (26° ylös)
+  const fishing=FS.st!=='idle'&&FS.st!=='charge';P.rodHoldK=lerp(P.rodHoldK||0,fishing?1:0,kExp(6,dt));
+  const t=playTime-(P.castT??-9),c=t>=0&&t<=.52;let a=0,pa=FS.st==='hang'||FS.st==='unhook'?.9:FS.st==='fight'?.8:FS.st==='pull'?.65:.45;
+  if(c){a=t<.08?-1.7*sstep(0,1,t/.08):t<.22?lerp(-1.7,.35,sstep(0,1,(t-.08)/.14)):lerp(.35,0,sstep(0,1,(t-.22)/.3));pa=t<.08?lerp(.45,1.85,sstep(0,1,t/.08)):t<.22?lerp(1.85,-.15,sstep(0,1,(t-.08)/.14)):lerp(-.15,.45,sstep(0,1,(t-.22)/.3));P.yaw=lerpAngle(P.yaw,camYaw+Math.PI,kExp(25,dt));}
+  const h=P.rodHoldK,w=c?1:h;a+=-.85*h;P._cOff=[a,Math.min(0,a+.85*h)*.35-.35*h];fig.armR.rotation.x+=P._cOff[0];fig.elbowR.rotation.x+=P._cOff[1];
+  if(w<.01)return;fig.g.updateMatrixWorld(true);const fx=Math.sin(P.yaw),fz=Math.cos(P.yaw),cp=Math.cos(pa);_vZ.set(fx*cp,Math.sin(pa),fz*cp).normalize();_vX.set(0,1,0).cross(_vZ).normalize();_vY.crossVectors(_vZ,_vX);
+  _vM.makeBasis(_vX,_vY,_vZ);_vq.setFromRotationMatrix(_vM);hm.parent.getWorldQuaternion(_vq2);_vq.premultiply(_vq2.invert());hm.quaternion.slerp(_vq,w);}
 /* ---------------- PÄÄSILMUKKA (fish.js fishTick kutsuu) ---------------- */
-function fpTick(dt){fpFlopTick(dt);if(FS.fm&&(FS.st==='pull'||FS.st==='fight'))fpFishUpd(dt);else if(FS.fm&&FS.st!=='pull'&&FS.st!=='fight')fpFishDrop();}
+function fpTick(dt){fpFlopTick(dt);fishSpoilTick(dt);nauPlaqueTick();if(FS.fm&&(FS.st==='pull'||FS.st==='fight'))fpFishUpd(dt);else if(FS.fm&&FS.st!=='pull'&&FS.st!=='fight')fpFishDrop();}

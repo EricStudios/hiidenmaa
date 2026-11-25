@@ -886,6 +886,32 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.27 – kalastuksen fysiikka (js/fishphys.js; päätökset docs/KALASTUS_SUUNNITELMA.md)
+- **Heitto:** aina sallittu, ballistinen (painovoima 9,8, ilmanvastus `FP_DRAG` 0,38, tuuli `FP_WIND_K` 0,25 × tuulen nopeus). Lähtönopeus `fpV0(D)`: 35° täydellä voimalla = D.
+  D: onki 16, kuparivapa 20, hiidenvapa 24, kuparikela 22, hiisikela 30 m. Onki heittää heti täydellä voimalla (kiskaisu 0,5 s); kela: vasen pohjassa 0,2–1,2 s → voima 25–100 %.
+- **Tilat** `FS.st`: charge → fly → wait/bite (koho) | spin (viehe) | land → retr | pull/fight → hang → unhook. Pelaaja enintään 5 m heittopaikasta (`FISH_KEEP_R`), roikkuvan kalan kanssa 3 m.
+- **Maalla:** onki: klikkaus vetää koho takaisin 6 m/s; kela: pidä vasenta. Maata pitkin 0,5 % / m katkeaminen; viehe jää maahan, siima lyhenee 30 %.
+- **Koho:** syötin syvyys `rig.fd` 0–2 m (0,1 m askel pöydällä, oletus 0,8); vesi matalampi → syötti pohjassa (6 % koukku tarttuu nostossa). Kalaton vesi (ei nimeä) → ei tärppejä (HUD kertoo).
+- **Viehe:** vajoaa 0,22 m/s (jigi 2×, pintavaappu kelluu), nousee 0,5 m/s kelatessa (vähintään 0,25 m). Pohja: 0,5 s armo, sitten 20 % / s → viehe ja siima menetetään.
+  Tärppi: pinnalla (alle 0,25 m) ×0,95, pohjassa (0,25 m sisällä) ×0,7. Ranta (alle 0,3 m tai alle 2,6 m pelaajasta) → kelataan ilman kautta kärkeen.
+- **Lajit ja syvyys** (`FISH_Z`, `fishDepthK`): pohjakalat (lahna, turska, kuha, made, kiiski, kampela, suutari) ×1,8 syötti pohjassa, ×0,35 irti (×0,6 yli 1,4 m);
+  muut: ahven 0,5–2, hauki 0,2–1,5, silakka 0,8–2, lohi 0,3–1,5, ruutana 0,2–1,2, suonsilmä 0–0,6, muikku 1–2, särki 0,2–1,2, toutain 0–0,8, siika 1–2, meritaimen 0–1,2 m
+  (×1,4 sisällä, −1,2 / m ulkona, väh. ×0,3; pohjassa ×0,8). Tärppiväli jaetaan syvyyden sopivuudella (`fishDepthFit` 0,4–1,4).
+- **Kala siimassa:** häivytys 0,6 s, kyljellään, heilunta 0,12 + 1,5 × voima m (`fpStr`: koko + paino + iso laji). Onki vetää 3,2 × (1 − 0,45 × voima) m/s; virveli
+  kelan nopeus × 1,4 × (1 − 0,35 × voima), 4 s ilman kelausta → irtoaa. Nosto alle 2,4 m pelaajasta (iso kala: väsytys loppuun).
+- **Roikkuva kala:** klikkaus ottaa. Syvä koukku 3–10 % arvon persentiilin mukaan → minipeli: alue 20 % (−2 %/yritys, väh. 12 %), nopeus 0,14 + 0,07/yritys, mittari +0,42/s alueella,
+  −0,28/s muuten, alku 0,35. Pois käveleminen/vaihto → kala putoaa (pomppu 0,35, rinne, sätkii 20 s), vedessä 0,5 s → ui pois (katoaa).
+- **Saalislappu** `lappu(kuva, html)`: vasen reuna 41 % korkeudella, 6 s, enintään 3. Ennätys: kultainen reuna + musiikki `ennatyskala` (kerran, ei pomotaistelussa).
+- **Kalat repussa:** `fl` = yksilöt {kg, cm, t}; `fishRoll` 70 % tavallisia (q 0,22–0,52, 0,1 kg / 2 cm), 30 % tarkkoja. Pino 20. Automaattinen pinoutuminen vain samalle painolle ja
+  pituudelle; käsin saman lajin kalat samaan pinoon. Päällimmäinen (viimeksi lisätty) syödään, vapautetaan, ripustetaan ja pudotetaan ensin. Pilaantuu 4 päivässä (reppu + arkut)
+  → Pilaantunut kala (ruoka 2, sairastuttaa aina 70 s). Raaka kala: sairastuminen 75 %, loinen 50 % (1–10 min, nälkä ×1,2).
+- **Vapautus:** E kala kädessä veden äärellä → repliikki (pieni/iso/mikä tahansa), +1 XP, seuraava tärppi samassa vedessä ×0,9 aika.
+- **Naulakot:** Kalanaulakko (1 kala, taso 3) ja Palkintotaulu (3 kalaa, taso 6, puu 6 + rauta 2 + pihka 2). Paikka tähtäyksen mukaan. Laatan tiedot lähellä (4,5 m) katsottaessa.
+  Kalastajan nimi `flags.angler` (enintään 24 merkkiä).
+- **Kalakirja:** lajisivulla syvyys + palkintolaatta (kalastaja, päivä, kello, paino, pituus, luokka); sivu "Mikä vaikuttaa saaliiseen"; huhu 20 % vedelle tullessa (0,5 pv väli) → laji ilman kuvaa.
+- **Kalastuspakki:** kyljissä enintään 8 viehettä/koukkua (2 / laji).
+- **Virveli kädessä:** vasen käsi (toinen käsi vapautetaan), oikea IK kammelle, kampi 2,2 kierrosta/s × kelan nopeus kelatessa.
+
 ## v3.26 – lammet ja haku
 - Kaikki kartan lammet ovat nimettyjä kalastusvesiä (myös pienet ja matalat). DEV-valikon kartan paljastus näyttää kaikkien vesien nimet.
 - DEV-valikon esinehaku löytää yleissanoilla (esim. ase, kala, keitto) ja kategoriapainikkeilla, kuten repun ja rakennusvalikon haku.

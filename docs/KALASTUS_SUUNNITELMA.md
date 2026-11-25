@@ -1,6 +1,6 @@
 # Kalastuksen uudistus (v3.28–) – suunnitelma ja työstöprompti
 
-Tila: **suunniteltu, odottaa aloituslupaa**. Käyttäjän toiveet 25.11.2026, kirjoitettu selkeäksi työohjeeksi. Avoimet kysymykset ovat lopussa:
+Tila: **toteutettu v3.27** (25.11.2026, `js/fishphys.js` + fish.js, tackle.js, fishbook.js). Uudet kalastusmuutokset kirjataan tänne ja kehitysmuistioon.. Käyttäjän toiveet 25.11.2026, kirjoitettu selkeäksi työohjeeksi. Avoimet kysymykset ovat lopussa:
 kun käyttäjä vastaa, päivitä vastaus kohtaan "Päätetty" ja poista kysymys. Pohjana on v3.27 (commit `c053d40`), jossa on jo
 yksilökalat (paino ja pituus), kala kädessä, loinen, värillinen saalisilmoitus ja pohjaan vajoava viehe.
 
@@ -131,3 +131,25 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
     koukun irrotus, viehe pohjaan, kala ui karkuun, vapautus. **Lisäksi musiikin paikkamerkki "ennätyskala"-teemalle**
     (`music/`-kansioon, soi uuden ennätyksen saalislapun kanssa). Ääniä ei generoida.
 23. **Kaikki erät A–D yhteen PR:ään** (erät tehdään ja testataan silti erikseen, commit jokaisen jälkeen).
+
+## Lisäykset ja toteutuksen päätökset (v3.27)
+**Käyttäjän lisäykset kesken työn:**
+- **Kohon syvyys 0–2 m** säädetään Kalastajan pöydällä (`rig.fd`, 0,1 m askel, oletus 0,8). Ongella voi kalastaa myös matalassa vedessä.
+  Syötti pohjassa → nostossa koukku tarttuu **6 %** (paljon harvemmin kuin virvelin 20 % / s). Tällöin koukku ja mato menetetään.
+- **Syvyys vaikuttaa lajeihin** (`FISH_Z`): pohjakalat ×1,8 pohjassa, muut viihtyvät lajikohtaisella syvyydellä. Lajien todennäköisyydet tarkistettiin realistisiksi ja
+  monipuolisiksi kaikilla syvyyksillä; ruutana siirtyi välivesikalaksi (0,2–1,2 m). Kaikki tekijät on kirjattu kalakirjan sivulle "Mikä vaikuttaa saaliiseen".
+- **Huhu vedeltä:** vedelle tullessa 20 % (enintään puolen päivän välein): "Kuulin huhun, että tästä vedestä voi saada lajia: X. Katso kalakirjasta." Laji paljastuu kirjaan ilman kuvaa.
+- **Heittoanimaatiot:** onki = nopea kiskaisu ilman latausta (käsi taakse yläviistoon, piiskaus eteen, 0,5 s). Virveli: lataus nostaa kädet ja vavan taakse, heitto heilauttaa eteen.
+  Kalastaessa käsi pysyy edessä ja vapa osoittaa veteen. Virveli on vasemmassa kädessä, ja oikea käsi on kammella.
+- **"Kireitä siimoja"** siiman vaihdossa tulee nyt saalislapun tavoin vasemmalta.
+
+**Päätin itse:**
+- Virveli vaatii molemmat kädet: kun se otetaan käteen, toisen käden esine (kilpi, pakki, kirja) vapautetaan.
+- Maalla oleva viehe tai koho: onki vetää sen klikkauksella 6 m/s, kelalla pidetään vasenta pohjassa.
+- Kala vedossa: onki vetää itse, virvelillä pidetään vasenta pohjassa. Jos virvelillä ei kelaa 4 sekuntiin, kala irtoaa.
+- Roikkuvan kalan pudottaa 3 m kävely, esineen vaihto, uinti tai kuolema.
+- Kalastajan nimeä voi muuttaa Asetukset › Ohjaus › Kalastus (vain pelin aikana).
+- Palkintotaulu: taso 6, puu 6 + rauta 2 + pihka 2. E ilman kalaa ottaa kalan alas.
+- Pilaantuminen koskee reppua ja arkkuja (2 s välein). Naulakossa kala ei pilaannu, ja alas otettu kala säilyttää pyyntiaikansa.
+- Saalislappu sijoittuu vasempaan reunaan 41 % korkeudelle, tila- ja chat-alueiden väliin.
+

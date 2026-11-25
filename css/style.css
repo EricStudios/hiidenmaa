@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.26';
+:root{--css-v:'3.27';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1188,3 +1188,19 @@ body:not(.showBH) #menu .mbtn.bhUsed small.bh,body:not(.showBH) #menu .mbtn.bhUs
 #hookG.in .hgZ{box-shadow:0 0 12px #ff6a5a inset;opacity:1}
 #hookG .hgF{margin-top:7px;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}#hookG .hgF i{display:block;height:100%;background:#7ad87a;width:35%}
 #hookG .hgH{margin-top:6px;font-size:11.5px;color:rgba(243,230,196,.7)}
+/* v3.27 naulakon kultainen laatta: tiedot katsottaessa (fish.js nauPlaqueTick) */
+#plaqueInfo{position:absolute;left:calc(50% + 46px);top:38%;min-width:220px;padding:9px 14px 10px;border-radius:5px;background:linear-gradient(160deg,rgba(74,56,20,.94),rgba(40,30,12,.94));
+  border:1px solid #d4a83a;box-shadow:0 0 14px rgba(212,168,58,.35),0 4px 14px rgba(0,0,0,.55);color:#f6e7b8;font-size:13px;pointer-events:none;z-index:4}
+#plaqueInfo .plT{font:400 17px 'Uncial Antiqua',serif;color:#ffe08a;margin-bottom:5px;text-shadow:0 1px 2px #000}
+#plaqueInfo .plR{display:flex;justify-content:space-between;gap:16px;padding:1px 0}#plaqueInfo .plR span{color:#cdb67a}#plaqueInfo .plR b{color:#fff6dc}
+/* v3.27 kalastajan nimi (näppäimistöllä, toimii hiiren lukituksessa) */
+#nameDlg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:9000}
+#nameDlg .ndBox{min-width:min(360px,86vw);padding:16px 20px;background:rgba(28,22,14,.96);border:1px solid #d4a83a;border-radius:6px;text-align:center;color:#f3e6c4}
+#nameDlg .ndT{font:400 20px 'Uncial Antiqua',serif;color:#ffe08a}#nameDlg .ndS{font-size:12.5px;opacity:.8;margin:4px 0 10px}
+#nameDlg .ndI{font-size:20px;font-weight:700;padding:6px 10px;border-bottom:2px solid #d4a83a;min-height:30px}#nameDlg .ndI i{animation:ndBlink 1s steps(1) infinite;font-style:normal;color:#ffe08a}
+#nameDlg .ndH{font-size:11.5px;opacity:.7;margin-top:8px}@keyframes ndBlink{50%{opacity:0}}
+/* v3.27 kalakirjan palkintolaatta ja kohon syvyys pöydällä */
+.fbPlaque{margin:6px auto 8px;max-width:92%;padding:5px 10px;border-radius:4px;background:linear-gradient(160deg,#e8c25a,#a8801e);color:#2a1c06;text-align:center;box-shadow:inset 0 0 0 1px rgba(255,240,180,.6),0 2px 5px rgba(0,0,0,.35)}
+.fbPlaque b{display:block;font-size:13px}.fbPlaque span{font-size:11.5px}
+.fbF li{margin:5px 0;line-height:1.35}
+.tkDepth{margin:8px 0 4px;padding:6px 8px;background:rgba(0,0,0,.22);border-left:3px solid #7ab8d8}.tkDepth div{display:flex;align-items:center;gap:8px;margin:4px 0}.tkDepth b{min-width:54px;text-align:center}

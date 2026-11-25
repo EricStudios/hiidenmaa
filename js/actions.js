@@ -230,7 +230,7 @@ function eat(s){const f=ITEMS[s.id].food;
   P.hunger=Math.min(100,P.hunger+f.h);if(P.hunger>=99.5){P.hunger=100;P.buffs.taysi=Math.max(P.buffs.taysi||0,60+(f.kyl?f.kyl*KYL_FULL:0));if(f.kyl)flags.potFull=1;}   /* v3.02 pataruoka pitää täyden vatsan pidempään */
   if(f.kyl)P.buffs.ravittu=Math.max(P.buffs.ravittu||0,f.kyl);   /* v2.00: täyteen syöty = 100, ja ensimmäinen pudotus vasta 60 s:n kuluttua */
   if(f.hp)P.heal+=f.hp;if(f.st)P.stam=Math.min(maxStam(),P.stam+f.st);
-  if(f.raw&&Math.random()<(f.fish?RAW_FISH_SICK:.45)){P.buffs.pahoinvointi=40;msg(f.fish?'Raaka kala kääntää vatsaa.':'Raaka liha kääntää vatsaa.','warn');}   // kaikki raa'at lihat (v2.80)
+  if(f.raw&&(f.spoiled||Math.random()<(f.fish?RAW_FISH_SICK:.45))){P.buffs.pahoinvointi=f.spoiled?70:40;msg(f.spoiled?'Pilaantunut kala – vatsa menee sekaisin.':f.fish?'Raaka kala kääntää vatsaa.':'Raaka liha kääntää vatsaa.','warn');}   // kaikki raa'at lihat (v2.80)
   if(f.fish&&f.raw&&Math.random()<RAW_FISH_LOINEN){const t=LOINEN_T[0]+Math.random()*(LOINEN_T[1]-LOINEN_T[0]);P.buffs.loinen=Math.max(P.buffs.loinen||0,t);msg(`Raa'assa kalassa oli loinen – ruoka kuluu nopeammin (${Math.round(t/60)} min).`,'warn');}   // v3.27
   if(f.buff)P.buffs[f.buff]=300;if(!f.raw)flags.ate=1;
   const liq=LIQUID_FOOD.test(s.id);s.n--;if(s.n<=0)inv[inv.indexOf(s)]=null;invDirty=true;sfx('eat');if(liq){const k=2+Math.floor(Math.random()*3);for(let i=0;i<k;i++)setTimeout(()=>plSnd('kaytto','juominen',{p:1+(Math.random()-.5)*.08}),i*520);}else plSnd('kaytto','syominen');msg(`${liq?'Söit lusikalla':'Söit'}: ${ITEMS[s.id].n}`);   /* v3.08 käyttäjä: nestemäinen ruoka → juomisääni 2–4 kertaa */
@@ -269,7 +269,7 @@ function pieceLabel(p){if(PIECES[p.t].store)return 'Avaa '+PIECES[p.t].n.toLower
   case 'patanuotio':return potLabel(p);   // v3.02
   case 'vedenkeraaja':return waterLabel(p);   // v3.06
   case 'pelto':case 'kohopenkki':return fieldLabel(p);   // v3.06 farm.js, v3.07 kohopenkki
-  case 'kalapoyta':return tkTableLabel(p);case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':return nauLabel(p);   // v3.06 fish.js
+  case 'kalapoyta':return tkTableLabel(p);case 'katiska':return katLabel(p);case 'savustin':return savLabel(p);case 'kalanaulakko':case 'palkintotaulu':return nauLabel(p);   // v3.06 fish.js
   case 'soihtuteline':case 'kivisoihtu':case 'seinasoihtu':return `Polttoainetta ${fuelText(torchRem(p),p)} – lisää`;
   case 'sanky':return isNight()?'Nuku':'Aseta herätyspaikka';
   case 'arkku':return 'Avaa arkku';
@@ -295,7 +295,7 @@ function interact(){if(P.insp)inspectStop();
     case 'patanuotio':potOpen(p);break;   // v3.02 keittopadan ikkuna
     case 'vedenkeraaja':waterInteract(p);break;   // v3.06
     case 'pelto':case 'kohopenkki':fieldInteract(p);break;   // v3.06 farm.js, v3.07 kohopenkki
-    case 'kalapoyta':tkTableOpen(p);break;case 'katiska':katInteract(p);break;case 'savustin':savInteract(p);break;case 'kalanaulakko':nauInteract(p);break;   // v3.06 fish.js
+    case 'kalapoyta':tkTableOpen(p);break;case 'katiska':katInteract(p);break;case 'savustin':savInteract(p);break;case 'kalanaulakko':case 'palkintotaulu':nauInteract(p);break;   // v3.06 fish.js
     case 'seinasoihtu':case 'soihtuteline':case 'kivisoihtu':torchFuelAdd(p);break;   // v2.91
     case 'sanky':sleepAt(p);break;
     case 'arkku':case 'tynnyri':openChest(p);break;

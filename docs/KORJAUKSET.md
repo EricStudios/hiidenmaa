@@ -689,3 +689,21 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - CSS-animaatio (`forwards`) käynnistyy alusta, kun elementti tai sen vanhempi palaa `display:none`:sta näkyviin (HUD piilotetaan valikossa) → "Vesistö löydetty" ja pikapaikan nimi
   näkyivät uudelleen. Korjaus: `el.onanimationend=()=>el.classList.remove('on')`. **Sääntö:** kertaluonteinen animaatioluokka poistetaan animaation päätyttyä.
 
+## 97. Valmistus ilman aineita – virtuaalinen osoitin klikkasi estettyä nappia (v3.27)
+- v3.25:n virtuaalinen osoitin (`VC`, input.js) lähettää `MouseEvent('click')`-tapahtumat `dispatchEvent`:llä. **Selain ei suodata keinotekoisia tapahtumia estetyiltä
+  (`disabled`) napeilta** → `onclick` laukesi ja "Valmista" toimi ilman aineita (ei DEV-tilassa). Korjaus: `vcFire` ohittaa click/dblclick/auxclick/mousedown, kun kohde tai sen
+  vanhempi on estetty (`vcDis`), ja `craft` tarkistaa itse aineet (`hasReq`) ja aseman. **Sääntö:** toiminnon funktio tarkistaa aina ehtonsa itse – napin `disabled` on vain ulkoasu.
+- Samassa erässä `//` rivin keskellä katkaisi taas koodin (fish.js, KORJAUKSET 49) – käytä `/* */`.
+
+## 98. Eläimet nykivät vesirajassa (v3.27)
+- `moveMob`: kun seuraava askel oli syvässä vedessä, kävelyvaiheessa (`shoreW`) suuntaa käännettiin 90° **joka ruudulla** → eläin pyöri paikallaan; jahdissa liike pysähtyi
+  joka ruudulla. Korjaus: ensin liu'utaan rantaa pitkin (x tai z erikseen), vasta kun kumpikaan ei käy, valitaan suunta kuivalle maalle `shoreDir` (16 suuntaa) enintään 0,8 s välein.
+  **Sääntö:** esteeseen törmäävä tekoäly ei saa vaihtaa suuntaa joka ruudulla – käytä liukumista ja aikaväliä.
+
+## 99. Lisäkulma katosi animaatiossa ja testin vavan kärki oli väärässä paikassa (v3.27)
+- Käsivarren lisäkulma (`fig.armR.rotation.x += a`) sekoittuu seuraavan ruudun pehmennykseen (`lerpAngle` nykyisestä kohti tavoitetta), jos sitä ei poisteta ensin → asento
+  ei näy tai kertyy. Korjaus kuten E-käsiliikkeessä (`P._eOff`): tallenna lisäys (`P._cOff`) ja vähennä se ennen pehmennystä. Vavan suunta asetetaan maailmassa (kvaternio
+  vanhemman käänteisellä), jolloin käden kierto ei käännä vapaa pystyyn.
+- Testeissä pelaajan siirto `P.pos.set` ei siirrä mallia ennen `update()`-kutsua → `heldMesh`-kärki oli vanhassa paikassa (heitto 300 m). `fpTip` palauttaa varapaikan, jos kärki on
+  yli 4 m pelaajasta. Yksilökalat (pinot) täyttävät repun testeissä nopeasti – tyhjennä reppu ennen testiä.
+

@@ -3,7 +3,12 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.26, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.27, 25.11.2026)
+
+- **Versio 3.27 – KALASTUKSEN UUSI FYSIIKKA** (`js/fishphys.js`, suunnitelma ja kaikki päätökset `docs/KALASTUS_SUUNNITELMA.md` – lue se ennen kalastusmuutoksia):
+  ballistinen heitto (35° pisin), virvelin lataus ja vasen käsi + veivaus, maalle lasku, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m + lajien syvyys, kala näkyy vedossa,
+  pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa, pilaantuminen, naulakot + kultainen laatta, kirjan tekijäsivu ja huhut, pakin koristeet. Korjattu:
+  valmistus ilman aineita (virtuaalinen osoitin klikkasi estettyjä nappeja) ja eläinten nykiminen rannassa. Ks. versioloki v3.27.
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +439,43 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.27 (KALASTUKSEN UUSI FYSIIKKA + korjaukset – käyttäjä 25.11., suunnitelma `docs/KALASTUS_SUUNNITELMA.md`, 23 vastausta + lisäykset; uusi tiedosto `js/fishphys.js`)
+- **Korjaukset:** (1) Virtuaalinen osoitin (v3.25) lähetti `click`-tapahtuman myös estettyyn (`disabled`) nappiin → **valmistus ilman aineita ilman DEV-tilaa**.
+  `vcFire` ohittaa estetyt ohjaimet (`vcDis`), `craft` tarkistaa aineet ja aseman itse (KORJAUKSET 97). DEV-tarkistus: kaikki DEV-toiminnot vaativat `DEV`:n (ok).
+  (2) Eläimet nykivät vesirajassa: kävelyvaiheessa suunta käännettiin 90° joka ruudulla → nyt liu'utaan rantaa pitkin, ja suunta kuivalle maalle valitaan kerran
+  (`shoreDir`, 0,8 s väli; KORJAUKSET 98). (3) Kalastuksen kirjoitusvirheet: viehteet → **vieheet**, ongen ohjeet, kuparivavan kuvaus.
+- **Heitto (fishphys.js):** ballistinen lento kärjestä katseen suuntaan, ilmanvastus `FP_DRAG` 0,38 → pisin heitto ~35° (+-1°). `fpV0(D)` laskee lähtönopeuden niin,
+  että 35° täydellä voimalla = vavan matka: onki 16, kuparivapa 20, hiidenvapa 24, virveli kelan mukaan 22 / 30 m (`FP_ROD_D`, `rigStats.dmax`). Onki: ei latausta, heitto heti
+  (nopea kiskaisu `rodCastPose`). Kela: lataus vasen pohjassa 0,2–1,2 s (voima 25–100 %, HUD-palkki). Tuuli siirtää lentoa ja kohoa (`FP_WIND_K` 0,25). Heiton voi tehdä aina.
+- **Maalle:** koho/viehe kelataan takaisin (onki: klikkaus vetää 6 m/s; kela: pidä vasenta). Maata pitkin siima katkeaa 5 % / 10 m (`FP_LAND_SNAP`), viehe jää maahan poimittavaksi.
+- **Virveli:** viehe vajoaa `TK_SINK` 0,22 m/s (jigi 2×), nousee kelatessa; pohjassa 0,5 s armonaika, sitten 20 % / s kiinni (`FP_BOT_*`); tärppi pinnalla ×0,95, pohjassa ×0,7.
+  Kelataan kärkeen asti (rannalta ilman kautta). **Vasemmassa kädessä** (`virvHeld`, toinen käsi vapautetaan), oikea käsi IK:lla kammen nupissa, kampi pyörii kelatessa
+  (`virvPose`, `tkDressRod` crank). Lataus nostaa kädet ja vavan taakse, heitto heilauttaa eteen.
+- **Onki:** kohon syvyys 0–2 m Kalastajan pöydällä (`rig.fd`, oletus 0,8; `TK_FD`) – myös matala vesi käy (nimetyssä vedessä). Syötti pohjassa → nostossa 6 % koukku tarttuu
+  (`TK_ONKI_SNAG`: koukku + mato menetetään, siima lyhenee). Kalastusasento: käsi edessä, vapa 23–26° ylös (`rodCastPose`, `P.rodHoldK`).
+- **Syvyys ja lajit:** `FISH_Z` (pohjakala 'b' ×1,8 pohjassa / ×0,35 irti; muut [a,b] m: ×1,4 sisällä, −1,2/m), vaikuttaa lajiin (`fishPick`) ja tärppiväliin (`fishDepthFit`).
+  Ruutana välivedessä 0,2–1,2 m (realistisuus). Tarkistettu jakauma: järvi/meri/suo monipuolinen kaikilla syvyyksillä.
+- **Kala siimassa:** näkyy jo vedossa (`fpPullStart`, häivytys 0,6 s), kyljellään pää pelaajaan, sivuttaisheilunta painon ja koon mukaan (`fpStr`). Onki vetää itse;
+  virvelillä pidä vasenta (4 s löysänä → irtoaa). Iso kala: vanha väsytys, kalan paikka edistyksen mukaan. Kärjessä roikkuu kunnes klikkaat.
+- **Pudotus:** pois käveleminen (3 m), esineen vaihto, kuolema tai uinti → kala putoaa, pomppii, vierii rinteessä (`fpFlop`); vedessä 0,5 s → kääntyy ja ui pois, "Kala pääsi karkuun".
+  Maassa E poimii; 20 s jälkeen rauhoittunut kala muuttuu tavalliseksi pudonneeksi esineeksi.
+- **Syvä koukku:** 3–10 % kalan arvon mukaan → minipeli (`HG`: punainen alue liikkuu, viiva hiirellä, mittari täyttyy alueella; tyhjä = uusi yritys nopeammalla alueella).
+- **Saalislappu:** ilmoitus vasta irrotuksessa: vasemmalta liukuva lappu (`lappu`, 6 s, enintään 3, piirroskuva + värilliset tekstit). Myös "Kireitä siimoja!" siiman vaihdossa.
+  Ennätyskalasta musiikki `music/raw/tapahtumat/ennatyskala` (paikkamerkki, `MUS_FB.rec`, boot.js 'rec' = kerran).
+- **Kalat repussa:** yksilöt `fl:[{kg,cm,t}]` (n = fl.length). 70 % "tavallisia" (0,1 kg / 2 cm), 30 % tarkkoja (`fishRoll`; kirjan arvojakauma samasta). Sama paino + pituus pinoutuu
+  itsestään (20), käsin raahaamalla eriarvoiset saman lajin kalat pinoon (järjestys säilyy, päällimmäinen käytetään). Siirto/jako/pudotus siirtää yksilöt (`flTake`) → ei monistusta.
+  Tooltip: paino, pituus, luokka, tuoreus, kevyin/raskain/keskiarvo + 5 päällimmäistä. **Pilaantuu 4 päivässä** → Pilaantunut kala (sairastuttaa aina).
+- **Vapautus:** vaihteleva repliikki koon mukaan, +1 XP, seuraava tärppi samassa vedessä 10 % nopeammin.
+- **Naulakot:** Kalanaulakko 1 + uusi **Palkintotaulu** 3 kalaa (taso 6). E kala kädessä ripustaa (vaihto palauttaa vanhan reppuun, purku/rikkoutuminen pudottaa kalat),
+  oikean muotoinen malli, kultainen laatta; katsottaessa tiedot (kalastaja, päivä, kello, laji, paino, pituus, luokka). Nimi kysytään ensimmäisellä ripustuksella (näppäimistö,
+  toimii lukituksessa), vaihto Asetukset › Ohjaus › Kalastus. Tallennus `d.fs` (vanha `f/kg` muunnetaan).
+- **Kalakirja:** lajin syvyys, palkintolaatta parhaasta kalasta, sivu "Mikä vaikuttaa saaliiseen" (kaikki tekijät), huhut: vedelle tullessa 20 % (enintään 0,5 päivän välein)
+  "Kuulin huhun…" → laji näkyy kirjassa ilman kuvaa (`fbHint`).
+- **Kalastuspakki:** vieheet ja koukut roikkuvat kyljissä (enintään 8; maassa, pöydällä ja kädessä, `pakkiSig` päivittää).
+- **Äänet:** 11 uutta paikkamerkkiä `sounds2/kalastus/raw/` (AANILISTA.md) + musiikki `ennatyskala` (process_sounds.py X_PARTS › tapahtumat).
+- Tarkistus: uusi v3.27-rivi (heitto, maa, viehe, syvyys, kala, minipeli, lappu, pinot ilman monistusta, pilaantuminen, naulakot, kirja, pakki, virveli, korjaukset);
+  v3.06/v3.14/v3.16-rivit päivitetty uuteen fysiikkaan.
 
 ### v3.26 (lammet, DEV-paljastus, DEV-haku – käyttäjä 19.11., PR #50 yhdistetty → uusi PR)
 - **Kaikki lammet nimetään** (fish.js, vesivaiheen loppuun): ennen alle 5 ruudun (80 m²) ja matalat (pohja yli −0,45 m) lammet jäivät ilman nimeä ja kalastusvettä → DEV:n

@@ -179,7 +179,8 @@ function updatePlayer(dt){
   if(P.drawing){tLx=-1.58;tRx=-1.5;tRz=.5;}
   if(heldMesh&&ITEMS[heldId].cat==='bow'){if(P.drawing)tLz=-.3;}
   if(P.atk)P.recT=.55;else P.recT=Math.max(0,(P.recT||0)-dt);if(!P.atk&&P.recT>0&&!P.drawing&&!P.blocking)rate=Math.min(rate,5);// iskun jälkeen kädet palaavat lepoon pehmeästi
-  if(P._eOff){fig.armR.rotation.x-=P._eOff[0];fig.elbowR.rotation.x-=P._eOff[1];P._eOff=null;}   // v3.06 E-toiminnon käsiliike (lisäys poistetaan ennen pehmennystä)
+  if(P._eOff){fig.armR.rotation.x-=P._eOff[0];fig.elbowR.rotation.x-=P._eOff[1];P._eOff=null;}
+  if(P._cOff){fig.armR.rotation.x-=P._cOff[0];fig.elbowR.rotation.x-=P._cOff[1];P._cOff=null;}   // v3.27 ongen heiton lisäkulma (rodCastPose) pois ennen pehmennystä   // v3.06 E-toiminnon käsiliike (lisäys poistetaan ennen pehmennystä)
   inspectRestore();   // v2.99 F-tarkastelun IK ei jää käsivarren perusasennoksi (nykiminen paluussa)
   chopRestore();   // v3.08 sama hakkuun IK:lle
   armWCRestore();   // v3.25 käden irrotus esineestä ei jää perusasentoon (värinä)
@@ -209,7 +210,7 @@ function updatePlayer(dt){
   armClear(fig.armL,fig.elbowL,fig.handL);
   carvePose();   // v2.91 pihkakuvion kaiverrus
   if(typeof bookPose==='function')bookPose();
-  if(typeof virvPose==='function')virvPose(dt);   // v3.27 virveli vasemmassa kädessä, oikea veivaa (fishphys.js)   // v3.15 kalakirja molemmissa käsissä lukiessa
+  if(typeof virvPose==='function'){virvPose(dt);rodCastPose(dt);}   // v3.27 virveli vasemmassa kädessä, oikea veivaa (fishphys.js)   // v3.15 kalakirja molemmissa käsissä lukiessa
   {const ea=playTime-(P.eT??-9);if(ea>=0&&ea<E_ANIM_T&&!P.atk&&!P.carve&&!P.insp&&!P.drawing&&!P.dead){const k=Math.sin(ea/E_ANIM_T*Math.PI);P._eOff=[-.62*k,-.38*k];fig.armR.rotation.x+=P._eOff[0];fig.elbowR.rotation.x+=P._eOff[1];}}   // v3.06 (käyttäjä): E-toiminnossa käsi käy hieman eteen ja takaisin
   if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand,dt);armWorldClear(fig.armL,fig.elbowL,fig.handL,dt);}else{AWC.R.e=AWC.R.a=AWC.L.e=AWC.L.a=0;}   // v2.88, v3.25 pehmeä kerros
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.

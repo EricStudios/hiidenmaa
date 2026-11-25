@@ -18,7 +18,7 @@ const FB={dist:{},page:0,turn:null};
 /* ---------------- ARVO ---------------- */
 function fbLen(sp,kg,r){const B=FISH_B[sp];return Math.round(FISH_LEN[sp]*Math.cbrt(kg/B.kg[1])*(.93+.14*r));}
 function fbDist(sp){if(FB.dist[sp])return FB.dist[sp];const B=FISH_B[sp],rnd=mulberry32(sp.split('').reduce((a,c)=>a*31+c.charCodeAt(0),7)|0),W=[],L=[];
-  for(let i=0;i<FB_N;i++){const q=rnd(),kg=B.kg[0]+(B.kg[1]-B.kg[0])*q*q*(.6+.4*rnd());W.push(kg);L.push(fbLen(sp,kg,rnd()));}
+  for(let i=0;i<FB_N;i++){const r=fishRoll(sp,rnd);W.push(r.kg);L.push(r.cm);}   // v3.27 sama jakauma kuin saaliissa
   const ws=[...W].sort((a,b)=>a-b),ls=[...L].sort((a,b)=>a-b),pr=(arr,v)=>{let lo=0,hi=arr.length;while(lo<hi){const m=(lo+hi)>>1;if(arr[m]<v)lo=m+1;else hi=m;}return lo/arr.length;};
   const S=W.map((w,i)=>.6*pr(ws,w)+.4*pr(ls,L[i])).sort((a,b)=>a-b);return FB.dist[sp]={ws,ls,S,pr};}
 // arvo: pw = painopisteet, pl = kokopisteet, pct = yhteispisteiden persentiili, cls = luokan indeksi
@@ -30,7 +30,7 @@ function fbPage(sp){return FB_FIRST_SP+FB_SP.indexOf(sp);}
 /* ---------------- SAALIS (fish.js fishLand) ---------------- */
 // kirjaa saaliin: pituus, arvo, paras yksilö, luokkatilasto, toiveet ja saavutukset → palauttaa ilmoitustekstin
 function fbCatch(sp,kg,first,rec,cm0){const F=fishF(),cm=cm0||fbLen(sp,kg,Math.random()),V=fishValue(sp,kg,cm);F.best=F.best||{};F.cls=F.cls||{};F.cls[V.cls]=(F.cls[V.cls]||0)+1;
-  const b=F.best[sp];if(!b||V.s>b.s)F.best[sp]={kg,cm,s:+V.s.toFixed(4),pct:+V.pct.toFixed(4),cls:V.cls,d:dayN};
+  const b=F.best[sp];if(!b||V.s>b.s)F.best[sp]={kg,cm,s:+V.s.toFixed(4),pct:+V.pct.toFixed(4),cls:V.cls,d:dayN,tod:+dayT.toFixed(4),nm:flags.angler||''};   /* v3.27 palkintolaatta */
   if(V.cls>=5)F.legend=(F.legend||0)+1;fbWishCheck(sp,V);
   const C=FB_CLS[V.cls],text=`Sait: ${ITEMS[sp].n} ${fbKg(kg)} kg, ${cm} cm (${C.n})${first?' – uusi laji!':''}${rec?' – uusi ennätys!':''} – katso kalakirjan sivu ${fbPage(sp)}`;
   /* v3.27 käyttäjä: värillinen saalisviesti – muu teksti harmaa, laji valkoinen, paino ja harvinaisuus arvoluokan värillä */
@@ -100,9 +100,10 @@ const FB_ART={};
 function fishArt(sp,W,H,sil){const k=sp+W+'x'+H+(sil?'s':'');if(FB_ART[k])return FB_ART[k];const c=document.createElement('canvas');c.width=W*2;c.height=H*2;const g=c.getContext('2d');g.scale(2,2);
   const S=FISH_SHAPE[sp],h=S?S.h/S.l:.4;fishArtDraw(g,sp,W*.46,H*.5,Math.min(W*.36,H*.46/Math.max(.45,h*1.55)),{sil});return FB_ART[k]=c.toDataURL();}   // korkearunkoiset (lahna, ruutana) pienempinä
 /* ---------------- KIRJA ---------------- */
+function fbHint(sp){const F=fishF();return !!(F.hint&&F.hint[sp]);}   // v3.27 huhu vedeltä: tiedot ilman kuvaa
 function fbKnown(sp){const F=fishF();return !!F.n[sp]||(DEV&&typeof DEVF!=='undefined'&&!!DEVF.fishReveal);}
 function fbPages(){const F=fishF(),P0=[],tot=fishTotal(F),known=FB_SP.filter(fbKnown).length,W=fbWish();
-  const toc=[['Arvoluokat',2],['Toivekalat',3],['Kalat',FB_FIRST_SP],['Vedet',FB_FIRST_SP+FB_SP.length],['Tavoitteet',FB_FIRST_SP+FB_SP.length+1],['Tietoa: vedet',FB_FIRST_SP+FB_SP.length+2],['Tietoa: ajat ja sää',FB_FIRST_SP+FB_SP.length+3],['Tietoa: vieheet ja varusteet',FB_FIRST_SP+FB_SP.length+4]];
+  const toc=[['Arvoluokat',2],['Toivekalat',3],['Kalat',FB_FIRST_SP],['Vedet',FB_FIRST_SP+FB_SP.length],['Tavoitteet',FB_FIRST_SP+FB_SP.length+1],['Tietoa: vedet',FB_FIRST_SP+FB_SP.length+2],['Tietoa: ajat ja sää',FB_FIRST_SP+FB_SP.length+3],['Tietoa: vieheet ja varusteet',FB_FIRST_SP+FB_SP.length+4],['Tietoa: mikä vaikuttaa saaliiseen',FB_FIRST_SP+FB_SP.length+5]];
   P0.push(`<div class="fbTitle">Kalastajan kirja</div><div class="fbOrn"></div><p class="fbC">Saaliita ${tot} · lajeja ${known}/${FB_SP.length}${F.wishN?` · toiveita täytetty ${F.wishN}`:''}</p>
     <h4>Sisällys</h4><ol class="fbToc">${toc.map(([t,p])=>`<li data-go="${p}"><span>${t}</span><i></i><b>${p}</b></li>`).join('')}</ol>`);
   const cnt=F.cls||{};P0.push(`<h3>Arvoluokat</h3><p class="fbS">Jokaisen kalan arvo lasketaan painosta ja pituudesta lajin omaa jakaumaa vasten (paino 60 %, koko 40 %).</p>
@@ -112,9 +113,10 @@ function fbPages(){const F=fishF(),P0=[],tot=fishTotal(F),known=FB_SP.filter(fbK
     <span>${w.c?FB_CLS[w.c].n+' tai parempi':'mikä tahansa koko'} · ${['helppo','keskivaikea','vaikea'][w.t]}</span><em>${w.ok?'✔ täytetty':'+'+w.xp+' XP'}</em></div></div>`).join('')}`);
   for(const sp of FB_SP){const B=FISH_B[sp],k=fbKnown(sp),n=F.n[sp]||0,b=(F.best||{})[sp],wt={lake:'järvet',sea:'meri',bog:'suolammet'}[B.w],best=B.t.indexOf(Math.max(...B.t)),wx=Object.entries(B.wx).sort((a,c)=>c[1]-a[1])[0],
       lures=Object.keys(TK_LURE).filter(l=>TK_LURE[l].best.includes(sp)).map(l=>ITEMS[l].n);
-    P0.push(k?`<h3>${ITEMS[sp].n}</h3><div class="fbArt"><img src="${fishArt(sp,280,130)}"></div>
+    const hi=!k&&fbHint(sp),pl=b&&b.nm!=null?`<div class="fbPlaque"><b>🏆 ${esc(b.nm||'tuntematon')}</b><span>päivä ${(b.d??0)+1}${b.tod!=null?', klo '+fishClock(b.tod):''} · ${fbKg(b.kg)} kg · ${b.cm} cm · ${FB_CLS[b.cls].n}</span></div>`:'';
+    P0.push(k||hi?`<h3>${ITEMS[sp].n}</h3><div class="fbArt"><img src="${fishArt(sp,280,130,!k)}"></div>${hi?'<p class="fbS">Kuulit tästä lajista huhuna – kuva piirretään, kun saat sen.</p>':''}${pl}
       <table class="fbT"><tr><td>Saatu</td><td>${n} kpl</td></tr><tr><td>Ennätys</td><td>${fbKg(F.rec[sp]||0)} kg</td></tr>${b?`<tr><td>Arvokkain</td><td>${fbKg(b.kg)} kg · ${b.cm} cm ${fbClsTag(b.cls,b.pct)}</td></tr><tr><td></td><td class="fbS">parempi kuin ${fbPct(b.pct)} % lajinsa kaloista (päivä ${b.d})</td></tr>`:''}
-      <tr><td>Vesi</td><td>${wt}</td></tr><tr><td>Parhaiten</td><td>${FISH_PH[best]}${wx&&wx[1]>1?', '+FISH_WXN[wx[0]]:''}</td></tr><tr><td>Koko</td><td>${fbKg(B.kg[0])}–${fbKg(B.kg[1])} kg, enintään ~${FISH_LEN[sp]} cm${B.big?' · väsytettävä':''}</td></tr>
+      <tr><td>Vesi</td><td>${wt}</td></tr><tr><td>Syvyys</td><td>${fishDepthText(sp)}</td></tr><tr><td>Parhaiten</td><td>${FISH_PH[best]}${wx&&wx[1]>1?', '+FISH_WXN[wx[0]]:''}</td></tr><tr><td>Koko</td><td>${fbKg(B.kg[0])}–${fbKg(B.kg[1])} kg, enintään ~${FISH_LEN[sp]} cm${B.big?' · väsytettävä':''}</td></tr>
       ${lures.length?`<tr><td>Vieheet</td><td>${lures.join(', ')}</td></tr>`:''}</table>`
       :`<h3>???</h3><div class="fbArt"><img src="${fishArt(sp,280,130,1)}"></div><p class="fbS">Et ole vielä saanut tätä lajia. Vihje: ${wt}${B.big?', iso kala':''}.</p>`);}
   const ws=WBS.filter(w=>F.wb[w.id]);P0.push(`<h3>Vedet</h3>${ws.length?`<ul class="fbL">${ws.map(w=>`<li>${w.name} <small>(${{lake:'järvi',sea:'meri',bog:'suolampi'}[w.type]}${w.bogg?', soinen':''})</small></li>`).join('')}</ul>`:'<p class="fbS">Et ole vielä löytänyt nimettyjä vesiä.</p>'}
@@ -130,6 +132,19 @@ function fbPages(){const F=fishF(),P0=[],tot=fishTotal(F),known=FB_SP.filter(fbK
   P0.push(`<h3>Tietoa: vieheet ja varusteet</h3><p class="fbS">Kela tekee vavasta virvelin. Vieheet eivät sovi pikkukaloille. Vahvempi siima kestää, mutta kalat huomaavat sen.</p>
     <ul class="fbL">${Object.entries(TK_LURE).map(([id,U])=>`<li><b>${ITEMS[id].n}</b>: ${U.best.map(sp=>fbKnown(sp)?ITEMS[sp].n:'???').join(', ')} <small>(${{bright:'kirkas valo',dim:'hämärä',dark:'pimeä'}[U.light]||'kaikki valot'})</small></li>`).join('')}</ul>
     <p class="fbS">Koukut: pieni = pikkukalat, iso = isot kalat, väkä = kala ei irtoa. Kohot: korkki näyttää arat tärpit, hehku näkyy yöllä.</p>`);
+  /* v3.27 käyttäjä: kaikki saaliiseen vaikuttavat tekijät (arvot samat kuin koodissa) */
+  P0.push(`<h3>Tietoa: mikä vaikuttaa saaliiseen</h3><ul class="fbL fbF">
+    <li><b>Vesi</b> – järvi, meri tai suolampi ratkaisee lajit. Nimetyn veden oma laji on 1,6× yleisempi.</li>
+    <li><b>Aika ja sää</b> – jokaisella lajilla on omat aamu-, päivä-, ilta- ja yökertoimensa sekä mieluisa sää (ks. edellinen sivu).</li>
+    <li><b>Syötin syvyys (onki)</b> – kohon kohdan voi säätää Kalastajan pöydällä 0–2 m. Pohjakalat (lahna, kuha, made, kiiski, turska, kampela, suutari) syövät pohjasta 1,8× ja välivedestä vain 0,35×. Muut lajit viihtyvät oman syvyytensä sisällä 1,4× (lajin sivulla). Matalakin vesi käy, kun koho on lähellä pintaa.</li>
+    <li><b>Pohja</b> – pohjassa makaava ongen koukku voi tarttua nostettaessa (6 %): koukku ja mato menetetään.</li>
+    <li><b>Vieheen syvyys (virveli)</b> – viehe vajoaa 0,22 m/s (jigi 2×) ja nousee kelatessa. Pintaa pitkin tärppi −5 %, pohjaa pitkin −30 %. Pohjassa 0,5 s jälkeen viehe tarttuu kiinni 20 %:n todennäköisyydellä sekunnissa.</li>
+    <li><b>Syötti</b> – mato koukussa: tärppi noin kolmanneksen useammin. Syötti voi kadota.</li>
+    <li><b>Vapa ja siima</b> – parempi vapa tärppää useammin ja heittää pidemmälle. Vahva siima kestää, mutta kalat näkevät sen.</li>
+    <li><b>Koukku ja koho</b> – koukun koko valikoi isoja tai pieniä kaloja; koho pidentää tärppi-ikkunaa (hehkukoho yöllä).</li>
+    <li><b>Heitto</b> – pisin heitto noin 35° ylöspäin. Kelalla voima ladataan pitämällä vasenta pohjassa. Tuuli siirtää heittoa ja kohoa.</li>
+    <li><b>Vapautus</b> – vapautettu kala: +1 XP ja seuraava tärppi samassa vedessä 10 % nopeammin.</li>
+    <li><b>Saaliin käsittely</b> – syvälle nielty koukku (3–10 % arvon mukaan) irrotetaan pitämällä viiva punaisella alueella. Raaka kala pilaantuu ${FISH_SPOIL_D} päivässä; raakana syöminen sairastuttaa usein ja voi tuoda loisen.</li></ul>`);
   if(P0.length%2)P0.push('<div class="fbEnd">✦</div>');return P0;}
 function fishBookOpen(){if(openPanel!=='fish')togglePanel('fish');else fishBookRender();}
 function fishBookRender(){const el=document.getElementById('fishBody');if(!el)return;const P0=fbPages();FB.pages=P0;FB.page=clamp(FB.page-(FB.page%2),0,P0.length-2);const i=FB.page;

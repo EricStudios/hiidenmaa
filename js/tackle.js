@@ -54,7 +54,7 @@ function tkFieldLine(lineId,src){const w=equipped('weapon');if(!w||ITEMS[w.id].c
 function tkFieldTick(dt){if(!TKA.on)return;if(P.dead||state==='dead'||equipped('weapon')!==TKA.slot||dist2(P.pos.x,P.pos.z,TKA.x,TKA.z)>.8){TKA.on=false;msg('Siiman vaihto keskeytyi.','warn');return;}
   if(state==='play')TKA.t+=dt*(DEV&&typeof DEVF!=='undefined'&&DEVF.fishFast?10:1);if(TKA.t<TKA.T)return;TKA.on=false;
   const box=TKA.src,i=box?box.findIndex(b=>b&&b.id===TKA.line):-1;let ok=false;if(i>=0){box[i].n--;if(box[i].n<=0)box[i]=null;ok=true;}else if(invCount(TKA.line)){invRemove(TKA.line,1);ok=true;}
-  if(!ok){msg('Siima katosi pakista – vaihto peruttiin.','warn');return;}tkSetPart(TKA.slot,'line',TKA.line,true);msg(`Uusi siima kiinni: ${ITEMS[TKA.line].n}. Kireitä siimoja!`,'loot');}
+  if(!ok){msg('Siima katosi pakista – vaihto peruttiin.','warn');return;}tkSetPart(TKA.slot,'line',TKA.line,true);lappu(icon(TKA.line),`<span class="mG">Uusi siima kiinni:</span> <b class="mW">${ITEMS[TKA.line].n}</b><br><b style="color:#e8c070">Kireitä siimoja!</b>`);}   // v3.27 lappu vasemmalta
 /* ---------------- OSIEN VAIHTO (pöytä) ---------------- */
 // palauttaa vanhan osan reppuun (kulunut siima heitetään pois); id null = irrota
 function tkSetPart(s,slot,id,noRet){const r=rigOf(s),old=r[slot];if(slot==='lure'&&id&&!r.reel){msg('Viehe sopii vain virveliin – kiinnitä ensin kela. Onkiessa käytetään matoa.','warn');return false;}   // v3.27 onki ei käytä vieheitä
@@ -138,18 +138,27 @@ const tkPakkiOk=id=>{const d=ITEMS[id];return !!d&&(d.cat==='rod'||(d.tk&&d.tk!=
 function pakkiSlots(lv){return PAKKI_SLOTS[lv||0]||12;}
 function pakkiNorm(o){o.lv=o.lv||0;o.box=o.box||[];while(o.box.length<pakkiSlots(o.lv))o.box.push(null);return o;}
 // 3D-pakki: väri, helat ja koko tason mukaan; kahva origossa (kädessä roikkuu)
-function tkPakkiMesh(lv,held){lv=lv||0;const g=new THREE.Group(),s=1+lv*.08,W=.46*s,H=.24*s,D=.26*s,c=PAKKI_COL[lv]||PAKKI_COL[0],m=tkMat('pk'+lv,c,{roughness:.55,metalness:lv>=2?.15:0}),
+function tkPakkiMesh(lv,held,box){lv=lv||0;const g=new THREE.Group(),s=1+lv*.08,W=.46*s,H=.24*s,D=.26*s,c=PAKKI_COL[lv]||PAKKI_COL[0],m=tkMat('pk'+lv,c,{roughness:.55,metalness:lv>=2?.15:0}),
     tr=tkMat('pkt'+lv,lv>=3?0x5fe6d9:lv>=1?0xc8a050:0x8a6a3a,{metalness:.6,roughness:.35}),y0=held?-H-.06:0;
   g.add(bx(W,H*.62,D,m,0,y0+H*.31,0),bx(W*1.02,H*.38,D*1.02,m,0,y0+H*.81,0),bx(W*1.03,.012,D*1.03,tr,0,y0+H*.62,0));
   for(const sx of [-1,1]){g.add(bx(.03,H*.6,D*1.04,tr,sx*W*.42,y0+H*.31,0));if(lv>=1)g.add(bx(.05,.04,.012,tr,sx*W*.3,y0+H*.62,D*.52));}
   g.add(bx(.18*s,.02,.02,tkMat('pkh',0x2a1a0e),0,y0+H+.07,0),bx(.02,.07,.02,tr,-.08*s,y0+H+.035,0),bx(.02,.07,.02,tr,.08*s,y0+H+.035,0));
   if(lv>=2)g.add(bx(W*.5,.05,.004,tkMat('pkp',0xe8dcc0),0,y0+H*.35,D*.505));if(lv>=3){const gl=bx(.05,.05,.01,tkMat('pkg',0x5fe6d9,{emissive:0x2a8a80,emissiveIntensity:.8}),0,y0+H*.81,D*.52);g.add(gl);}
-  g.traverse(o=>{if(o.isMesh)o.castShadow=true;});return g;}
-function tkPakkiHeld(s){pakkiNorm(s);const g=tkPakkiMesh(s.lv,true);g.position.set(0,-.02,.02);return g;}
+  if(box)tkPakkiDeco(g,box,W,H,D,y0);g.traverse(o=>{if(o.isMesh)o.castShadow=true;});return g;}
+/* v3.27 käyttäjä: pakissa olevat vieheet ja koukut roikkuvat koristeina pakin kyljissä (enintään 4 / kylki); pakkiSig muuttuu → malli päivittyy */
+const PAKKI_DECO_MAX=8;
+function pakkiDecoList(box){const L=[];for(const b of box||[]){if(!b||!ITEMS[b.id])continue;const t=ITEMS[b.id].tk;if(t==='lure'||t==='hook')for(let i=0;i<Math.min(b.n,2)&&L.length<PAKKI_DECO_MAX;i++)L.push(b.id);}return L;}
+const pakkiSig=box=>pakkiDecoList(box).join(',');
+function tkPakkiDeco(g,box,W,H,D,y0){const L=pakkiDecoList(box),ring=tkMat('pkr',0xb8bcc4,{metalness:.8,roughness:.25});
+  L.forEach((id,i)=>{const side=i%2?1:-1,k=Math.floor(i/2),z=-D*.33+k*D*.22,x=side*(W*.52+.006),y=y0+H*.74,h=new THREE.Group();h.position.set(x,y,z);g.add(h);
+    h.add(new THREE.Mesh(new THREE.TorusGeometry(.008,.0018,4,8),ring));let m;if(ITEMS[id].tk==='lure')m=tkLureMesh(TK_LURE[id],.75);
+    else{m=new THREE.Mesh(new THREE.TorusGeometry(id==='isokoukku'?.012:.009,.0018,4,8,Math.PI*1.3),tkMat('pkh'+id,id==='isokoukku'?0xd98a4e:id==='vakakoukku'?0xa8b0b8:0xe8e0c8,{metalness:.7,roughness:.3}));}
+    m.position.y=-.035;m.rotation.y=side>0?Math.PI/2:-Math.PI/2;h.add(m);h.rotation.z=side*.08;});}
+function tkPakkiHeld(s){pakkiNorm(s);const g=tkPakkiMesh(s.lv,true,s.box);g.position.set(0,-.02,.02);return g;}
 const PKW={f:null,list:[]};   // maassa olevat pakit (flags.pakit) ja niiden 3D
 function pakkiList(){if(!Array.isArray(flags.pakit))flags.pakit=[];return flags.pakit;}
 function tkPakkiSync(){if(PKW.f===flags)return;for(const e of PKW.list){scene.remove(e.m);const i=interactables.indexOf(e.it);if(i>=0)interactables.splice(i,1);}PKW.list=[];PKW.f=flags;for(const o of pakkiList())tkPakkiSpawn(o);}
-function tkPakkiSpawn(o){pakkiNorm(o);const m=tkPakkiMesh(o.lv);m.position.set(o.x,o.y,o.z);m.rotation.y=o.ry||0;scene.add(m);
+function tkPakkiSpawn(o){pakkiNorm(o);const m=tkPakkiMesh(o.lv,false,o.box);o._sig=pakkiSig(o.box);m.position.set(o.x,o.y,o.z);m.rotation.y=o.ry||0;scene.add(m);
   const it={x:o.x,y:o.y+.3,z:o.z,r:2,pakki:o,label:()=>`Kalastuspakki (taso ${o.lv+1}) – E avaa · vasen nostaa`,use:()=>tkPakkiOpen(o),off:()=>P.inDun};interactables.push(it);PKW.list.push({o,m,it});}
 function tkPakkiOpen(o){pakkiNorm(o);if(openPanel)closePanels(true);togglePanel('chest');curChest={found:true,pakki:o,title:`Kalastuspakki (taso ${o.lv+1}, ${pakkiSlots(o.lv)} paikkaa)`,data:{items:o.box}};tkSnd('pakki_auki')||plSnd('kaytto','arkku_auki',{v:.7,p:1.15});renderChest();}
 function tkPakkiCarry(o,from){if(invCount('kalapakki')){msg('Voit kantaa vain yhden kalastuspakin kerrallaan.','warn');return false;}const i=inv.indexOf(null);if(i<0){msg('Reppu on täynnä.','warn');return false;}
@@ -190,7 +199,7 @@ function tkTableMesh(g){const W=MAT.wood,dk=mat(0x4a3420),top=bx(1.8,.08,.8,W,0,
   // pakkipaikka: tumma kehys pöydän oikeassa päässä
   const fr=mat(0x2a1a0e);g.add(bx(.56,.012,.36,mat(0x5a3e24),.58,.905,.04),bx(.56,.02,.02,fr,.58,.91,.22),bx(.56,.02,.02,fr,.58,.91,-.14),bx(.02,.02,.36,fr,.3,.91,.04),bx(.02,.02,.36,fr,.86,.91,.04));
   const pk=new THREE.Group();pk.position.set(.58,.91,.04);g.add(pk);g.userData.pkM=pk;}
-function tkTableVis(p){const g=p.mesh&&p.mesh.userData.pkM;if(!g)return;while(g.children.length)g.remove(g.children[0]);if(p.data.pk){const m=tkPakkiMesh(p.data.pk.lv||0);m.rotation.y=Math.PI/2*0;g.add(m);m.traverse(o=>{o.userData.piece=p;});}}
+function tkTableVis(p){const g=p.mesh&&p.mesh.userData.pkM;if(!g)return;while(g.children.length)g.remove(g.children[0]);if(p.data.pk){const m=tkPakkiMesh(p.data.pk.lv||0,false,p.data.pk.box);p.data.pk._sig=pakkiSig(p.data.pk.box);m.rotation.y=Math.PI/2*0;g.add(m);m.traverse(o=>{o.userData.piece=p;});}}
 function tkTableLabel(p){return p.data.pk?'Kalastajan pöytä – E avaa · vasen nostaa pakin':'Kalastajan pöytä – E: vavan osat, perkaus ja pakki';}
 let tkCur=null,tkSel=0;
 function tkTableOpen(p){tkCur=p;if(openPanel!=='tk')togglePanel('tk');else tkRender();tkSnd('pakki_auki');}
@@ -228,7 +237,9 @@ function tkRender(){const el=document.getElementById('tkBody');if(!el||!tkCur)re
   if(s){const r=rigOf(s);L+='<div class="tkSlots">';for(const [k,nm,DEF] of TK_SLOTS){if(k==='lure'&&!r.reel)continue;if(k==='float'&&r.reel&&r.lure)continue;const cur=r[k],av=tkAvail(k);
       L+=`<div class="tkSlot"><div class="tkCur">${cur?ic(cur):'<span class="ic q">–</span>'}<div><small>${nm}</small><b>${cur?ITEMS[cur].n:'ei'}${k==='line'&&cur?` <i>${Math.round((r.lw??1)*100)} %</i>`:''}</b></div>${cur&&k!=='line'&&k!=='hook'?`<button class="btn sm" data-off="${k}">Irrota</button>`:''}</div>`+
         `<div class="tkAv">${Object.keys(av).length?Object.entries(av).map(([id,n])=>`<button class="tkPart${id===cur?' cur':''}" data-k="${k}" data-id="${id}" title="${ITEMS[id].d}">${ic(id)}<span>${ITEMS[id].n}</span><small>×${n}</small></button>`).join(''):`<span class="note">Ei muita ${{Siima:'siimoja',Koukku:'koukkuja',Kela:'keloja',Koho:'kohoja',Viehe:'vieheitä'}[nm]} – valmista niitä pöydän ääressä (valmistus).</span>`}</div></div>`;}
-    L+='</div>';}
+    L+='</div>';
+    /* v3.27 käyttäjä: kohon kohta – syötin syvyys 0–2 m (vaikuttaa lajeihin, ks. kalakirja) */
+    if(!(r.reel&&r.lure)){const fd=r.fd!=null?r.fd:TK_FD_DEF;L+=`<div class="tkDepth"><small>Kohon kohta – syötin syvyys</small><div><button class="btn sm" data-fd="-1">−</button><b>${tkFmt(Math.round(fd*10)/10)} m</b><button class="btn sm" data-fd="1">+</button></div><span class="note keep">${fd<.3?'pintavesi':fd<1?'matala väli':fd<1.6?'välivesi':'syvä – pohjakaloille'} · pohjassa koukku voi tarttua</span></div>`;}}
   const M=s?`<h3>${ITEMS[s.id].n}: ${rodName(s)}</h3><table class="tkProps">${tkPropsList(s).map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>`+
     `<details class="tkCombos"><summary>Yhdistelmät (${TK_COMBOS.length})</summary><ul>${TK_COMBOS.map(c=>`<li><b>${c.n}</b>: ${Object.entries(c.need).map(([k,v])=>v.map(x=>x===0?'ei kelaa':ITEMS[x].n).join(' / ')).join(' + ')} → ${c.t}</li>`).join('')}</ul></details>`:'';
   const raw=Object.keys(FISH_DEF).filter(id=>invCount(id)>0),nr=raw.reduce((a,id)=>a+invCount(id),0);let nf=0;for(const id of raw){const k=FISH_DEF[id].k;nf+=invCount(id)*(k>=2?3:k>1?2:1);}
@@ -239,6 +250,7 @@ function tkRender(){const el=document.getElementById('tkBody');if(!el||!tkCur)re
   else R+=`<p class="note">${invCount('kalapakki')?'Ota pakki vasempaan käteen ja napsauta pöydän pakkipaikkaa – pöydällä sen voi päivittää ja sen osat ovat käytössä.':'Valmista kalastuspakki pöydällä (valmistus) – siihen mahtuvat vavat, osat ja vieheet.'}</p>`;
   el.innerHTML=`<div class="tkL">${L}</div><div class="tkM">${M}</div><div class="tkR">${R}</div>`;
   el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{tkSel=+b.dataset.r;tkRender();});
+  el.querySelectorAll('[data-fd]').forEach(b=>b.onclick=()=>{const r=rigOf(s);r.fd=clamp(Math.round(((r.fd!=null?r.fd:TK_FD_DEF)+(+b.dataset.fd)*TK_FD_STEP)*10)/10,TK_FD[0],TK_FD[1]);tkSnd('koukun_vaihto');tkRender();});
   el.querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>{tkSetPart(s,b.dataset.off,null);tkSnd('koukun_vaihto');tkRender();});
   el.querySelectorAll('.tkPart').forEach(b=>b.onclick=()=>{const k=b.dataset.k,id=b.dataset.id,r=rigOf(s);if(r[k]===id&&!(k==='line'&&(r.lw??1)<1))return;if(k==='lure'&&!r.reel){msg('Viehe sopii vain virveliin – kiinnitä ensin kela. Onkiessa käytetään matoa.','warn');return;}if(!tkTake(id))return;tkSetPart(s,k,id);
     tkSnd(k==='line'?'siiman_vaihto':'koukun_vaihto')||sfx('craft');msg(`${ITEMS[s.id].n}: ${ITEMS[id].n} kiinni.${k==='reel'&&!rigOf(s).lure?' Vapa on nyt virveli – kiinnitä viehe tai käytä kohoa ja matoa.':''}`);tkRender();});
@@ -247,6 +259,10 @@ function tkRender(){const el=document.getElementById('tkBody');if(!el||!tkCur)re
   const u=document.getElementById('tkUpPk');if(u)u.onclick=()=>{const c=PAKKI_UP[(pk.lv||0)+1];if(!c||!hasReq(c))return;payReq(c);pk.lv++;pakkiNorm(pk);tkTableVis(tkCur);sfx('craft');plSnd('rakentaminen','valmistus');msg(`Kalastuspakki tasolla ${pk.lv+1}: ${pakkiSlots(pk.lv)} paikkaa.`,'loot');tkRender();};}
 function tkGut(){let fil=0,per=0;for(const id of Object.keys(FISH_DEF)){const n=invCount(id);if(!n)continue;const k=FISH_DEF[id].k;invRemove(id,n);fil+=n*(k>=2?3:k>1?2:1);per+=n;}
   if(!per)return;giveOrDrop('kalafilee',fil,P.pos.x,P.pos.y+1,P.pos.z);giveOrDrop('perkeet',per,P.pos.x,P.pos.y+1,P.pos.z);tkSnd('perkaus')||sfx('craft');msg(`Perkasit ${per} kalaa: ${fil} fileetä ja ${per} perkeet.`,'loot');bump('gut');}
+// v3.27 pakin koristeet ajan tasalle, kun sisältö muuttuu (maassa ja pöydällä; kädessä updateGear-avain)
+function tkDecoSync(){for(const e of PKW.list){const sg=pakkiSig(e.o.box);if(sg!==e.o._sig){scene.remove(e.m);const m=tkPakkiMesh(e.o.lv,false,e.o.box);m.position.copy(e.m.position);m.rotation.y=e.m.rotation.y;scene.add(m);e.m=m;e.o._sig=sg;}}
+  for(const p of pieces)if(p.t==='kalapoyta'&&p.data.pk&&pakkiSig(p.data.pk.box)!==p.data.pk._sig)tkTableVis(p);
+  {const o=equipped('offhand');if(o&&o.id==='kalapakki'&&offKey&&offKey.split('#')[2]!==pakkiSig(o.box))updateGear();}}
 /* ---------------- HUD ---------------- */
 function tkHud(el){if(TKA.on){el.hidden=false;el.className='wait';el.innerHTML=`<span>Vaihdetaan siimaa… ilman pöytää tämä kestää ikuisuuden · ${Math.ceil(TKA.T-TKA.t)} s</span><div class="fb"><i class="pr" style="width:${Math.round(TKA.t/TKA.T*100)}%"></i></div>`;return true;}
   if(FS.st==='spin'){el.hidden=false;el.className='wait';const d=Math.hypot(FS.bx-P.pos.x,FS.bz-P.pos.z),bd=fpBaitDepth();el.innerHTML=`<span>${FS.body?FS.body.name+' · ':''}${ITEMS[FS.rod.lureId].n} · ${Math.round(d)} m · syvyys ${tkFmt(Math.round(bd.d*10)/10)} m${bd.bot?' (pohjassa!)':''} · pidä vasenta kelataksesi</span>`;return true;}
@@ -284,6 +300,6 @@ function tkIcon(g,id,d,circ,line,poly){const hx=n=>'#'+n.toString(16).padStart(6
 /* ---------------- ÄÄNET (sounds2/kalastus/, paikkamerkit; peli käyttää vasta kun käsittelyrakenne on tehty) ---------------- */
 function tkSnd(ev,o){return typeof plSnd==='function'?plSnd('kalastus',ev,o):false;}
 /* ---------------- PÄÄSILMUKKA ---------------- */
-function tkTick(dt){tkPakkiSync();tkFieldTick(dt);tkDangleTick(dt);if((tkTick.w=(tkTick.w||0)-dt)<=0){tkTick.w=.25;tkWowTick();if(FS.st==='idle')fishHud();}if(openPanel==='tk'&&tkCur&&!pieces.includes(tkCur))closePanels();}
+function tkTick(dt){tkPakkiSync();tkFieldTick(dt);tkDangleTick(dt);if((tkTick.w=(tkTick.w||0)-dt)<=0){tkTick.w=.25;tkWowTick();if(FS.st==='idle')fishHud();tkDecoSync();}if(openPanel==='tk'&&tkCur&&!pieces.includes(tkCur))closePanels();}
 // paistettava filee nuotiolla/grillillä
 COOKABLE.kalafilee='filepaisti';COOK_T.kalafilee=[5,2];

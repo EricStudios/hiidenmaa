@@ -120,9 +120,10 @@ const FISH_SHAPE={ahven:{l:14,h:7,m:'bars',fin:'#d84a2a',spine:1},hauki:{l:18,h:
   sarki:{l:13,h:6,fin:'#d8442a',eye:'#d8442a',m:'line'},kiiski:{l:10.5,h:5.5,m:'dots',spine:1},toutain:{l:16,h:7,m:'line',fin:'#b8a8a0'},kampela:{l:13,h:10,m:'dots',flat:1},
   meritaimen:{l:16,h:6,m:'xs'},suutari:{l:13,h:7.5,eye:'#d8442a',fin:'#8a8a3a'}};
 for(const [id,f] of Object.entries(FISH_DEF)){const k=f.k,big=k>=2?' Iso kala – täyttää kaksinkertaisesti.':k>1?' Keskikokoinen kala.':'';
-  ITEMS[id]={n:f.n,w:k>=2?1.5:k>1?.8:.3,s:1,cat:'fish',c:f.c,fishI:1,food:{h:Math.round(5*k),raw:true,fish:1},d:`Tuore ${f.n.toLowerCase()}. Paista nuotiolla tai grillillä, savusta savustimessa tai keitä padassa. Käteen otettuna: hiiren oikea syö (raakana riskialtista), E veden äärellä vapauttaa.${big}`};   // v3.27 yksilö (paino/pituus paikassa), käteen
+  ITEMS[id]={n:f.n,w:k>=2?1.5:k>1?.8:.3,s:20,cat:'fish',c:f.c,fishI:1,food:{h:Math.round(5*k),raw:true,fish:1},d:`Tuore ${f.n.toLowerCase()}. Paista nuotiolla tai grillillä, savusta savustimessa tai keitä padassa. Käteen otettuna: hiiren oikea syö (raakana riskialtista), E veden äärellä vapauttaa.${big}`};   // v3.27 yksilö (paino/pituus paikassa), käteen
   ITEMS[id+'p']={n:'Paistettu '+f.n.toLowerCase(),w:k>=2?1.2:k>1?.6:.25,s:20,c:f.c,fishI:2,food:{h:Math.round(25*k),hp:Math.round(12*k)},d:`Nuotiolla paistettu ${f.n.toLowerCase()}.${big}`};}
 Object.assign(ITEMS,{
+  pilakala:{n:'Pilaantunut kala',w:.3,s:20,c:'#6a7a4a',fishI:4,food:{h:2,raw:true,spoiled:1},d:'Raaka kala pilaantui (4 päivää). Haisee pahalta – syöminen sairastuttaa varmasti. Kelpaa ehkä katiskan syötiksi.'},   // v3.27
   savukala:{n:'Savukala',w:.15,s:30,c:'#a8742e',fishI:3,food:{h:30,hp:15,st:10},rar:'unc',d:'Savustimessa kuivattu kala: kevyt ja säilyy. Iso kala antaa kaksi.'},
   kalakeitto:{n:'Kalakeitto',w:.6,s:10,c:'#d8c8a0',food:{h:55,hp:30,kyl:240},rar:'unc',d:'Ahvenista, sienistä ja vedestä padassa keitetty keitto.'},
   lohikeitto:{n:'Lohikeitto',w:.7,s:10,c:'#e8b890',food:{h:72,hp:40,st:15,kyl:330},rar:'rare',d:'Kermainen lohikeitto kauran ja veden kanssa. (Harvinainen)'},
@@ -310,7 +311,7 @@ function icon(id){
   const W='#8a5a32';
   if(d&&d.fishI&&FISH_SHAPE[id.replace(/p$/,'')]){fishIcon(g,id,d,circ,line);}
   else if(d&&(d.tk||id==='kalafilee'||id==='filepaisti'||id==='perkeet')&&typeof tkIcon==='function')tkIcon(g,id,d,circ,line,poly);   // v3.14 kalastusvarusteet (tackle.js)
-  else if(d&&d.fishI){const f=FISH_DEF[id.replace(/p$/,'')]||{c:'#a8742e',c2:'#e0b060'},ck=d.fishI===2,sm=d.fishI===3,body=sm?'#a8742e':ck?'#a8642e':f.c,belly=sm?'#d8a050':ck?'#d89a5a':f.c2;
+  else if(d&&d.fishI){const f=FISH_DEF[id.replace(/p$/,'')]||{c:'#a8742e',c2:'#e0b060'},ck=d.fishI===2,sm=d.fishI===3,rot=d.fishI===4,body=rot?'#5e6e3e':sm?'#a8742e':ck?'#a8642e':f.c,belly=rot?'#9aa070':sm?'#d8a050':ck?'#d89a5a':f.c2;
     g.save();g.translate(24,25);g.rotate(-.35);g.fillStyle=body;g.beginPath();g.ellipse(-2,0,15,7,0,0,TAU);g.fill();g.fillStyle=belly;g.beginPath();g.ellipse(-2,2.5,12,3.5,0,0,TAU);g.fill();
     g.fillStyle=body;g.beginPath();g.moveTo(11,0);g.lineTo(21,-7);g.lineTo(19,0);g.lineTo(21,7);g.closePath();g.fill();g.strokeStyle='#1e1a14';g.lineWidth=1.2;g.beginPath();g.ellipse(-2,0,15,7,0,0,TAU);g.stroke();
     circ(-11,-1.5,1.8,ck||sm?'#3a2010':'#f4f0e0');if(!ck&&!sm)circ(-11,-1.5,.9,'#111');if(ck||sm){line(-6,-5,-4,5,1.2,'#6a3a14');line(0,-6,2,5,1.2,'#6a3a14');line(6,-5,7,4,1.2,'#6a3a14');}
