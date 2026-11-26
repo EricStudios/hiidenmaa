@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.34, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.35, 26.11.2026)
+
+- **Versio 3.35** – koukun irrotus reiluksi (ei nopeudu, ±16 % pehmeästi), kiduksiin-ilmoitus, hiiriohje; vesi samenee syvyyden mukaan ja merenpohja tummenee.
 
 - **Versio 3.34** – siimakerä riittää 10 siimaan (kulumismittari kuten kilvellä, `TK_LINE_USES`/`s.lu`/`tkLineTake`); siimat himmeitä ja yöllä tummia, hiidensiima hohtaa hieman (`tkLineLook`).
 
@@ -458,6 +460,14 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.35 (koukun irrotus ja vesi – käyttäjä 26.11.)
+- **Koukun irrotus (minipeli `HG`):** alue nopeutui joka yrityksellä (+0,07) ja kapeni → nyt nopeus `hgSpeed` = `HG_SP0` 0,16 × (1 ± 16 %) kahdella hitaalla siniaallolla,
+  suunta kääntyy pehmeästi (`kExp`), leveys pysyy `HG_ZW` 0,2. Otsikko ja ilmoitus: "Koukku/Uistin jäi pahasti kiinni – kiduksiin!".
+  **Hiiriohje** `.hgMouse` (SVG-hiiri, CSS-silmukka sivuttain), häipyy kun hiirtä liikutetaan; näytetään 10 ensimmäisellä kerralla (`localStorage.hiidenmaa_hgHint`, `HG_HINT_N`).
+- **Vesi:** sameus `1−e^(−polku·0,85)` (ennen 0,5) ja syvän veden väri/peitto 1,5–12 m (ennen 2–22 m) → syvä pohja ja sen varjot eivät näy; ei lisälaskentaa.
+  **Merenpohja** tummenee syvyyden mukaan maaston värikartassa (`terrCol`, h < 0 → 0–7 m, 70 %) – ilmainen ajon aikana.
+- Tarkistusrivi v3.35; testi `scratchpad/t328/water.mjs` (kuvat).
 
 ### v3.34 (siimakerä – käyttäjä 26.11.)
 - **1 siimakerä = 10 uutta siimaa.** Jokainen kiinnitys (E repusta, pöytä, pakin kenttävaihto) kuluttaa 1/10 (`tkLineTake`, slotin `lu`); kulumismittari repussa kuten kilvellä (`slotBar`),

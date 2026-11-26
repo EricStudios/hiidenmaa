@@ -163,18 +163,30 @@ function fpFlopTick(dt){const wy=water.position.y;for(let i=FLOPS.length-1;i>=0;
     const tl=F.m.userData.tail;if(tl)tl.rotation.x=Math.sin(F.age*20)*.8*ag;F.it.x=F.x;F.it.y=F.y+.2;F.it.z=F.z;}}
 function fpSwimDir(F){let best=Math.random()*TAU,bd=-1e9;for(let i=0;i<12;i++){const a=i/12*TAU,s=water.position.y-terrainH(F.x+Math.sin(a)*5,F.z+Math.cos(a)*5);if(s>bd){bd=s;best=a;}}return best;}
 /* ---------------- SYVÄLLE NIELTY KOUKKU: minipeli ---------------- */
-const HG={on:false,el:null,c:.5,cv:.15,zw:.2,mk:.5,fill:.35,tries:0,t:0};
+/* v3.35 käyttäjä: alue ei nopeudu ollenkaan (ennen +0,07 / yritys ja kapeni) – nopeus vaihtelee pehmeästi ±16 % (HG_SPV) perusnopeuden HG_SP0 ympärillä,
+   suunta kääntyy pehmeästi (nopeus lähestyy tavoitetta kExp). Ilmoitus: koukku/uistin jäi kiduksiin. Ohjeena hiiren kuva, joka liikkuu sivuttain silmukassa;
+   häipyy kun hiirtä liikutetaan; näytetään 10 ensimmäisellä kerralla (localStorage hiidenmaa_hgHint). */
+const HG_SP0=.16,HG_SPV=.16,HG_ZW=.2,HG_HINT_N=10;
+const HG={on:false,el:null,c:.5,cv:0,dir:1,zw:HG_ZW,mk:.5,fill:.35,tries:0,t:0,ph:[0,0],hint:false,moved:0};
 function fpHookP(){const V=typeof fishValue==='function'?fishValue(FS.sp,FS.kg,FS.cm||fbLen(FS.sp,FS.kg,.5)):null;return lerp(FP_HOOK_P[0],FP_HOOK_P[1],V?clamp(V.pct,0,1):.3);}
-function fpUnhookStart(){Object.assign(HG,{on:true,c:.5,cv:(Math.random()<.5?-1:1)*.14,zw:.2,mk:.5,fill:.35,tries:0,t:0});FS.st='unhook';
-  let el=document.getElementById('hookG');if(!el){el=document.createElement('div');el.id='hookG';el.innerHTML='<div class="hgT">Koukku on syvällä kalan kurkussa!</div><div class="hgBar"><i class="hgZ"></i><i class="hgM"></i></div><div class="hgF"><i></i></div><div class="hgH">Liikuta hiirtä – pidä viiva punaisella alueella</div>';document.getElementById('hud').appendChild(el);}
+function hgHintN(v){try{if(v!=null)localStorage.setItem('hiidenmaa_hgHint',String(v));return +(localStorage.getItem('hiidenmaa_hgHint')||0);}catch(e){return 0;}}
+const HG_MOUSE='<svg viewBox="0 0 40 46" width="40" height="46"><path d="M4 23h-3m3 0l3-3m-3 3l3 3M36 23h3m-3 0l-3-3m3 3l-3 3" stroke="#f3e6c4" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".75"/><rect x="11" y="6" width="18" height="30" rx="9" fill="rgba(20,16,12,.55)" stroke="#f3e6c4" stroke-width="2"/><line x1="20" y1="6" x2="20" y2="17" stroke="#f3e6c4" stroke-width="1.6"/><rect x="18.6" y="10" width="2.8" height="5" rx="1.4" fill="#e8a44a"/></svg>';
+function fpUnhookStart(){const lure=!!(FS.spin&&FS.rod&&FS.rod.lureId),thing=lure?'Uistin':'Koukku';
+  Object.assign(HG,{on:true,c:.5,cv:0,dir:Math.random()<.5?-1:1,zw:HG_ZW,mk:.5,fill:.35,tries:0,t:0,ph:[Math.random()*6,Math.random()*6],moved:0});FS.st='unhook';
+  let el=document.getElementById('hookG');if(!el){el=document.createElement('div');el.id='hookG';el.innerHTML='<div class="hgT"></div><div class="hgBar"><i class="hgZ"></i><i class="hgM"></i></div><div class="hgF"><i></i></div><div class="hgMouse">'+HG_MOUSE+'</div><div class="hgH">Liikuta hiirtä sivuttain – pidä viiva punaisella alueella</div>';document.getElementById('hud').appendChild(el);}
+  el.querySelector('.hgT').textContent=`${thing} jäi pahasti kiinni – kiduksiin!`;msg(`${thing} jäi kalan kiduksiin kiinni – irrota varovasti.`,'warn');
+  const n=hgHintN();HG.hint=n<HG_HINT_N;el.querySelector('.hgMouse').classList.toggle('off',!HG.hint);el.querySelector('.hgMouse').style.display=HG.hint?'':'none';if(HG.hint)hgHintN(n+1);
   el.hidden=false;HG.el=el;tkSnd('koukku_syvalla');}
-function fpUnhookMove(dx){if(!HG.on)return false;HG.mk=clamp(HG.mk+dx*.0026,0,1);return true;}
-function fpUnhookTick(dt){if(!HG.on)return;if(fpHangCheck(dt)){fpUnhookEnd();return;}HG.t+=dt;const sp=.14+.07*HG.tries;
-  if(Math.random()<dt*.9)HG.cv=(Math.random()<.5?-1:1)*sp*(.6+Math.random()*.8);HG.c+=HG.cv*dt;if(HG.c<HG.zw/2){HG.c=HG.zw/2;HG.cv=Math.abs(HG.cv);}if(HG.c>1-HG.zw/2){HG.c=1-HG.zw/2;HG.cv=-Math.abs(HG.cv);}
+function fpUnhookMove(dx){if(!HG.on)return false;HG.mk=clamp(HG.mk+dx*.0026,0,1);HG.moved+=Math.abs(dx);if(HG.hint&&HG.moved>40){HG.hint=false;HG.el&&HG.el.querySelector('.hgMouse').classList.add('off');}return true;}
+// nopeus: perus × (1 ± 16 %) pehmeästi (kaksi hidasta siniaaltoa), ei kasva yrityksistä
+function hgSpeed(t){return HG_SP0*(1+HG_SPV*(.6*Math.sin(t*.9+HG.ph[0])+.4*Math.sin(t*1.7+HG.ph[1])));}
+function fpUnhookTick(dt){if(!HG.on)return;if(fpHangCheck(dt)){fpUnhookEnd();return;}HG.t+=dt;
+  if(Math.random()<dt*.35)HG.dir=-HG.dir;if(HG.c<=HG.zw/2+.02)HG.dir=1;else if(HG.c>=1-HG.zw/2-.02)HG.dir=-1;
+  HG.cv+=(HG.dir*hgSpeed(HG.t)-HG.cv)*kExp(3,dt);HG.c=clamp(HG.c+HG.cv*dt,HG.zw/2,1-HG.zw/2);
   const inZ=Math.abs(HG.mk-HG.c)<=HG.zw/2;HG.fill=clamp(HG.fill+(inZ?.42:-.28)*dt,0,1);
   const el=HG.el;el.querySelector('.hgZ').style.cssText=`left:${(HG.c-HG.zw/2)*100}%;width:${HG.zw*100}%`;el.querySelector('.hgM').style.left=`${HG.mk*100}%`;el.querySelector('.hgF i').style.width=`${HG.fill*100}%`;el.classList.toggle('in',inZ);
   if(HG.fill>=1){fpUnhookEnd();tkSnd('koukun_irrotus');fishTake(false,true);return;}
-  if(HG.fill<=0){HG.tries++;HG.fill=.35;HG.zw=Math.max(.12,HG.zw-.02);el.querySelector('.hgT').textContent=`Uusi yritys (${HG.tries + 1}) – koukku ei vielä irronnut`;tkSnd('koukku_syvalla');}}
+  if(HG.fill<=0){HG.tries++;HG.fill=.35;el.querySelector('.hgT').textContent=`Uusi yritys (${HG.tries + 1}) – ${FS.spin?'uistin':'koukku'} on yhä kiduksissa`;tkSnd('koukku_syvalla');}}
 function fpUnhookEnd(){HG.on=false;if(HG.el)HG.el.hidden=true;}
 /* ---------------- SAALISLAPPU (vasemmalta) ---------------- */
 function lappu(img,html,o){o=o||{};let box=document.getElementById('lappuBox');if(!box){box=document.createElement('div');box.id='lappuBox';document.getElementById('hud').appendChild(box);}

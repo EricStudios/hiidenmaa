@@ -636,6 +636,15 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('siiman ulkonäkö',typeof tkLineLook==='function'&&/tkLineLook/.test(fishMeshUpd.toString())&&/tkLineLook/.test(tkDangleTick.toString())&&(()=>{const m=new THREE.LineBasicMaterial(),l0=lightK;lightK=0;tkLineLook(m);const n=m.color.r+m.color.g+m.color.b;lightK=1;tkLineLook(m);const d=m.color.r+m.color.g+m.color.b;lightK=l0;return n<d*.4&&m.opacity<.6;})());
     ck('käyttö',/tkLineTake/.test(tkNoTarget.toString())&&/tkLineTake/.test(tkTake.toString())&&/tkLineTake/.test(tkFieldTick.toString())&&/slot!=='line'/.test(tkSetPart.toString()));
     return e.length?'puuttuu: '+e.join(', '):true;});
+  t('v3.35: koukun irrotus – ei nopeudu (±16 % pehmeästi), kiduksiin-ilmoitus, hiiriohje 10 kertaa; vesi samenee syvyyden mukaan, merenpohja tummenee',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    {HG.ph=[1,2];let mn=9,mx=0;for(let t=0;t<120;t+=.05){const v=hgSpeed(t);mn=Math.min(mn,v);mx=Math.max(mx,v);}ck('nopeus '+mn.toFixed(3)+'–'+mx.toFixed(3),HG_SPV===.16&&mn>=HG_SP0*.84-1e-6&&mx<=HG_SP0*1.16+1e-6&&mx-mn>HG_SP0*.15);}
+    ck('ei kiihdy',!/tries/.test(hgSpeed.toString())&&!/zw-/.test(fpUnhookTick.toString())&&/kExp/.test(fpUnhookTick.toString()));
+    ck('kidukset',/kiduksiin/.test(fpUnhookStart.toString())&&/Uistin/.test(fpUnhookStart.toString()));
+    ck('hiiriohje',HG_HINT_N===10&&/hgMouse/.test(fpUnhookStart.toString())&&/off/.test(fpUnhookMove.toString())&&typeof hgHintN==='function');
+    ck('vesi',/path\*\.85/.test(WATER_MATS.low.fragmentShader)&&/smoothstep\(1\.5,12\./.test(WATER_MATS.low.fragmentShader));
+    {const a=terrCol(0,0,-.1,0,'sea'),b=terrCol(0,0,-7,0,'sea');ck('pohja',b[0]+b[1]+b[2]<(a[0]+a[1]+a[2])*.6);}
+    return e.length?'puuttuu: '+e.join(', '):true;});
   t('v3.27: kalastuksen uusi fysiikka – ballistinen heitto (35° pisin, vapa ratkaisee), virvelin lataus, maalle lasku ja katkeaminen, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m ja lajien syvyys, kala näkyy vedossa, pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa (ei monistusta), pilaantuminen, naulakot ja laatta, kirja, pakin koristeet, virveli vasemmassa kädessä',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     {const r=[0,15,25,35,45,60].map(a=>fpRange(fpV0(16),a*Math.PI/180)),mx=r.indexOf(Math.max(...r));ck('35° pisin',mx===3&&Math.abs(r[3]-16)<.3&&fpV0(30)>fpV0(16));}
@@ -1519,7 +1528,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
       res=a&&b&&c&&d&&e&&f||`virhe kellunta ${a} jäähy ${b} hukkuminen ${c} hauta ${d} raja ${e} kuolema ${f}`;}
     finally{P.pos.copy(sv[0]);P.vy=sv[1];P.stam=sv[2];P.hp=sv[3];P.maxHp=sv[4];state=sv[5];P.swim=sv[6];P.underT=sv[7];P.drownT=sv[8];P.swCd=sv[9];keys[BIND.jump]=sv[10];P.subm=false;recalcMaxW();}return res;});
   t('v2.18 vesi: syvyyskartta + varjostin (läpinäkyvä, tummuu syvällä, rantahäivytys), aallot tuulen mukaan, veden alla sumu/kuplat/zoomi, asetukset esiasetuksissa, K ei tee mitään',()=>{
-    const a=WATER_DEP.image.width===HN&&typeof waveAt==='function'&&water.material.isShaderMaterial&&/wDep/.test(water.material.fragmentShader)&&/smoothstep\(2\.,22\.,d\)/.test(water.material.fragmentShader)&&/waterDepSet/.test(terraSetVertex.toString());
+    const a=WATER_DEP.image.width===HN&&typeof waveAt==='function'&&water.material.isShaderMaterial&&/wDep/.test(water.material.fragmentShader)&&/smoothstep\(1\.5,12\.,d\)/.test(water.material.fragmentShader)/* v3.35 sameus syvyyden mukaan (ennen 2–22 m) */&&/waterDepSet/.test(terraSetVertex.toString());
     const b=/WIND\.spd/.test(updateWater.toString())&&/waterFx/.test(updateWater.toString())&&/CAM_UW/.test(updateCamera.toString())&&/skyDome/.test(updateCamera.toString())&&/uwZoomK/.test(updateCamera.toString())&&/P\.subm/.test(updatePlayer.toString())&&water.geometry.attributes.position.count===(SET.waterMega?161*161:SET.waterHQ?97*97:65*65)&&!PRESETS.some(p=>'waterMega' in p||'waterHQ' in p||'shoreSpray' in p||'shUltra' in p);
     const c=PRESETS[3].waterFx===false&&PRESETS[4].waterFx===true&&PRESETS[5].uwFx===false&&PRESETS[6].uwFx===true&&PRESETS[5].waterOpt===true&&PRESETS[6].waterOpt===false&&SET_DEF.waterFx===false&&SET_PAGES.gfx.includes('uwFx');
     const d=!ACTIONS.some(x=>x[0]==='full')&&!('full' in BIND)&&typeof toggleFullscreen==='undefined';

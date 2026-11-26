@@ -886,6 +886,10 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.35 – koukun irrotus ja vesi
+- Syvä koukku: alue liikkuu tasaisesti (nopeus vaihtelee pehmeästi ±16 %, ei kiihdy eikä kapene yrityksistä); "kiduksiin!"-ilmoitus; hiiriohje 10 ensimmäisellä kerralla.
+- Vesi samenee syvyyden mukaan (pohja häipyy 2–3 m:ssä, lähes peittävä ~12 m), merenpohja tummenee syvemmällä.
+
 ## v3.34 – siimakerä
 - Yksi siimakerä (pellava-, jänne-, punottu, hiidensiima) riittää 10 siimaan; kulumismittari repussa kuten kilvellä. Siimat eivät pinoudu. Irrotettu siima leikataan pois.
 - Siimat ovat vähän läpinäkyviä ja seuraavat valoa (yöllä tummia); hiidensiima hohtaa yöllä hieman vaaleansinisenä.

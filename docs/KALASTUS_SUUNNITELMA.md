@@ -224,3 +224,8 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 - Irrotettu siima ei palaa keräksi.
 - Siimojen ulkonäkö (käyttäjä 26.11.): ei kirkkaita – läpikuultavia ja valon mukaan tummuvia (`tkLineLook`); hiidensiima hohtaa yöllä hieman vaaleansinisenä.
 - Maalta veteen raahattu koho/viehe jatkaa kalastusta (`fpReenter`: tärppiaikataulu, vesistö, syvyys).
+
+## Erä v3.35 – TOTEUTETTU 26.11. (käyttäjä: koukun irrotus)
+- Alue ei nopeudu yrityksistä; nopeus vaihtelee pehmeästi ±16 % (`hgSpeed`), leveys vakio. Ilmoitus "Koukku/Uistin jäi pahasti kiinni – kiduksiin!".
+- Hiiriohje (sivuttain liikkuva hiiren kuva), häipyy hiirtä liikutettaessa, 10 kertaa (`hiidenmaa_hgHint`).
+
