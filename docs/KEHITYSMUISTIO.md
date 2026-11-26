@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.32, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.33, 26.11.2026)
+
+- **Versio 3.33** – ongen siima kiinteä myös ennen tärppiä (koho raahautuu, ei kelausta/ilmoitusta), katkennut siima vaihdetaan E:llä repusta, koho kalan mukana, M-kartan ulos zoomatun reunuksen siivous. Ks. versioloki ja KALASTUS_SUUNNITELMA › Erä v3.33.
 
 - **Versio 3.32** – reiluus: grafiikka-asetukset ja FPS eivät muuta pelin fysiikkaa. Hyppy, nuolet, tähtäysviiva ja ongen heitto lasketaan tarkasti
   (sama tulos 20–144 FPS). Auditointi: spawnaus, tekoäly ja törmäykset eivät riipu asetuksista. Ks. versioloki v3.32 ja Pysyvä periaate alla.
@@ -454,6 +456,15 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.33 (ongen siima – käyttäjä 26.11.)
+- **Kiinteä siima ennen tärppiä** (`fpFreeTether`, `FS.Lf` laskeutuessa, `fpLineNow`): liikkuminen ei kelaa siimaa eikä anna ilmoitusta ("Siima kelautui sisään" poistettu, `FISH_KEEP_R` ei käytössä);
+  koho/viehe raahautuu perässä, maalle raahattu → `land`; maata pitkin katkeaminen `FP_LAND_SNAP` / m. Uinti ei enää kelaa siimaa.
+- **Katkennut siima pois** (`tkLineBreak`, `fpLandSnap`, `fpOnkiSnag`): `r.line=null` (ennen lyheni 30 %). **E** solmii uuden repusta (`tkLineInPack`, paras), pakista ei (`tkFieldLine` estää).
+- **Koho saaliin jälkeen:** `fishMeshUpd` hang/unhook → koho kalan siimassa kärjen alla, piiloon kun kala otetaan (ennen jäi maahan ja hyppäsi seuraavassa heitossa).
+- **M-kartta ulos zoomattuna** (`drawBigMap`): reunus tyhjennetään joka ruutu (ennen tuuliviirut ja pilvet jäivät jälkinä), pilvet/viirut rajataan kartan alueelle (`mapClip`), kartalle kehys.
+- Korjattu myös oma lipsahdus: `tkFieldLine`-rivin `//`-kommentti olisi poistanut "Kelaa ensin siima sisään" -tarkistuksen (tarkistus v2.23 huomasi).
+- Testi `scratchpad/t328/teth2.mjs`, `map.mjs`; tarkistusrivi v3.33; KORJAUKSET 104–105.
 
 ### v3.32 (grafiikka ei saa muuttaa pelattavuutta – käyttäjä 26.11.)
 - **Auditointi** (testit `scratchpad/t328/det.mjs`, `spawn.mjs`, `fps.mjs`): samoilla syötteillä pelaajan reitti on identtinen Low/Medium/Ultra; olentojen määrä yöllä sama (20–23 elossa,

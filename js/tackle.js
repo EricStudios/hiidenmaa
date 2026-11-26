@@ -33,7 +33,7 @@ function lureCond(U,wb){const b=tkBright(),lk=U.light==='bright'?.7+.6*b:U.light
 function tkRig(){return FS.slot&&FS.slot.rig?FS.slot.rig:null;}
 function tkWear(u){const r=tkRig();if(!r||!r.line)return;const L=TK_LINE[r.line];r.lw=Math.max(0,(r.lw??1)-u/L.dur);if(r.lw<=0){r.line=null;r.lw=1;invDirty=true;updateGear();msg('Siima kului loppuun ja katkesi – kiinnitä uusi siima (pöytä tai pakki).','warn');}}
 function tkLineBreak(){const r=tkRig();if(!r)return '';let t='';if(r.reel&&r.lure){t=` Viehe (${ITEMS[r.lure].n.toLowerCase()}) meni kalan mukana.`;r.lure=null;}
-  if(r.line){r.lw=(r.lw??1)-.3;if(r.lw<=0){r.line=null;r.lw=1;t+=' Siima on nyt liian lyhyt – vaihda uusi.';}else t+=' Solmit siiman uudelleen (siima lyheni).';}invDirty=true;updateGear();return t;}
+  if(r.line){r.line=null;r.lw=1;t+=' Solmi uusi siima repusta (E).';}invDirty=true;updateGear();return t;}   // v3.33 käyttäjä: katkennut siima korvataan repun siimalla (E), ei pakista
 function tkSnapCheck(){const r=tkRig();if(!r||!r.line)return false;if(Math.random()>=TK_SNAP*(1.6-(r.lw??1)))return false;
   plSnd('onkiminen','siima_katkeaa',{v:.9});FS.bait=false;const ex=tkLineBreak();fishReset('Siima napsahti poikki iskussa!'+ex,'warn');return true;}
 function tkBaitSync(){const r=tkRig();if(r&&!FS.spin&&FS.st!=='idle'){if(r.bait&&!FS.bait){r.bait=0;updateGear();}}}
@@ -43,12 +43,16 @@ function tkSnag(){const r=tkRig();let t='Viehe tarttui pohjaan';if(r){const ln=r
   plSnd('onkiminen','siima_katkeaa',{v:.8});fishReset(t,'warn');}
 /* ---------------- MATO KOUKKUUN (E vapa kädessä) ---------------- */
 function tkNoTarget(){const w=equipped('weapon');if(!w||ITEMS[w.id].cat!=='rod'||FS.st!=='idle')return false;const r=rigOf(w);
+  if(!r.line){const id=tkLineInPack();if(!id){msg('Vavassa ei ole siimaa. Tarvitset siimaa repussa (pakissa oleva ei riitä – siirrä se reppuun) tai Kalastajan pöydän.','warn');return true;}
+    invRemove(id,1);r.line=id;r.lw=1;invDirty=true;updateGear();tkSnd('siiman_vaihto')||plSnd('kaytto','poiminta',{v:.5});msg(`Solmit uuden siiman (${ITEMS[id].n.toLowerCase()}) vapaan – voit heittää.`);return true;}   // v3.33 kuten mato: E
   if(r.reel&&r.lure){msg('Virvelissä on viehe – mato sopii vain kohon kanssa (irrota viehe pöydällä).');return true;}
   if(r.bait){msg('Koukussa on jo mato. Heitä vasemmalla.');return true;}
   if(!invCount('mato')){msg('Sinulla ei ole matoja. Niitä löytyy maata kaivaessa tai kuokkiessa.','warn');return true;}
   invRemove('mato',1);r.bait=1;invDirty=true;updateGear();tkSnd('mato_koukkuun')||plSnd('kaytto','poiminta',{v:.5});msg('Laitoit madon koukkuun – kalat tärppäävät noin kolmanneksen useammin.');return true;}
+// v3.33: paras siima repussa (vain reppu, ei pakki)
+function tkLineInPack(){let best=null;for(const id in TK_LINE)if(invCount(id)&&(!best||TK_LINE[id].ten>TK_LINE[best].ten))best=id;return best;}
 /* ---------------- SIIMAN VAIHTO KENTÄLLÄ (pakista, hidas) ---------------- */
-function tkFieldLine(lineId,src){const w=equipped('weapon');if(!w||ITEMS[w.id].cat!=='rod'){msg('Ota vapa käteen vaihtaaksesi siiman.','warn');return;}if(FS.st!=='idle'){msg('Kelaa ensin siima sisään.','warn');return;}
+function tkFieldLine(lineId,src){const w=equipped('weapon');if(!w||ITEMS[w.id].cat!=='rod'){msg('Ota vapa käteen vaihtaaksesi siiman.','warn');return;}if(!rigOf(w).line&&src){msg('Katkennut siima korvataan repussa olevalla siimalla (E) – pakista se ei onnistu. Siirrä siima reppuun.','warn');return;}   /* v3.33 */if(FS.st!=='idle'){msg('Kelaa ensin siima sisään.','warn');return;}
   Object.assign(TKA,{on:true,t:0,T:TK_FIELD_LINE,line:lineId,src,slot:w,x:P.pos.x,z:P.pos.z});closePanels();tkSnd('siiman_vaihto');
   msg(`Vaihdat siimaa (${ITEMS[lineId].n.toLowerCase()}) – ilman pöytää tämä kestää ikuisuuden… (${TK_FIELD_LINE} s, pysy paikallasi)`,'quest');}
 function tkFieldTick(dt){if(!TKA.on)return;if(P.dead||state==='dead'||equipped('weapon')!==TKA.slot||dist2(P.pos.x,P.pos.z,TKA.x,TKA.z)>.8){TKA.on=false;msg('Siiman vaihto keskeytyi.','warn');return;}
@@ -267,7 +271,7 @@ function tkDecoSync(){for(const e of PKW.list){const sg=pakkiSig(e.o.box);if(sg!
 function tkHud(el){if(TKA.on){el.hidden=false;el.className='wait';el.innerHTML=`<span>Vaihdetaan siimaa… ilman pöytää tämä kestää ikuisuuden · ${Math.ceil(TKA.T-TKA.t)} s</span><div class="fb"><i class="pr" style="width:${Math.round(TKA.t/TKA.T*100)}%"></i></div>`;return true;}
   if(FS.st==='spin'){el.hidden=false;el.className='wait';const d=Math.hypot(FS.bx-P.pos.x,FS.bz-P.pos.z),bd=fpBaitDepth();el.innerHTML=`<span>${FS.body?FS.body.name+' · ':''}${ITEMS[FS.rod.lureId].n} · ${Math.round(d)} m · syvyys ${tkFmt(Math.round(bd.d*10)/10)} m${bd.bot?' (pohjassa!)':''} · pidä vasenta kelataksesi</span>`;return true;}
   if(FS.st==='idle'){const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='rod'&&state==='play'){const r=rigOf(w);let t='';
-      if(!r.line)t='Vavassa ei ole siimaa – vaihda siima pöydällä tai pakista';else if(!r.bait&&!(r.reel&&r.lure)&&invCount('mato'))t='E: mato koukkuun · vasen heittää';
+      if(!r.line)t=tkLineInPack()?'E: solmi uusi siima repusta':'Vavassa ei ole siimaa – siimaa tarvitaan repussa (tai Kalastajan pöytä)';else if(!r.bait&&!(r.reel&&r.lure)&&invCount('mato'))t='E: mato koukkuun · vasen heittää';
       if(t){el.hidden=false;el.className='wait tkHint';el.innerHTML=`<span>${t}</span>`;return true;}}
     el.hidden=true;return true;}
   return false;}

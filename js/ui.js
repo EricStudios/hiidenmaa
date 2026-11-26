@@ -749,6 +749,10 @@ function drawWindStreaks(g,W){const t=performance.now()/1000,sp=12+WIND.spd*6,le
     g.strokeStyle=`rgba(230,240,245,${al.toFixed(3)})`;g.lineWidth=1.6;g.beginPath();g.moveTo(px,py);g.lineTo(px-WIND.x*len,py-WIND.z*len);g.stroke();}g.restore();}
 function drawPlayerArrow(g,x,y,s){g.save();g.translate(x,y);g.rotate(-camYaw);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=1.5;g.beginPath();g.moveTo(0,-s);g.lineTo(s*.7,s*.8);g.lineTo(0,s*.4);g.lineTo(-s*.7,s*.8);g.closePath();g.fill();g.stroke();g.restore();}
 function drawBigMap(){const c=$('#bigmap'),g=c.getContext('2d'),W=c.width,v=mapView(),S=W/v.sw;
+  /* v3.33 käyttäjä: ulos zoomattuna kartan ympärille jäi edellisten ruutujen tuuliviiruja ja pilviä (reunusta ei tyhjennetty) → reunus tyhjennetään
+     joka ruutu, pilvet ja viirut rajataan kartan alueelle (mapClip) ja kartan ympärille piirretään kehys */
+  const out=v.sw>MAPW,mx0=-v.x0*S,mx1=(MAPW-v.x0)*S,mapClip=()=>{if(out){g.beginPath();g.rect(mx0,mx0,mx1-mx0,mx1-mx0);g.clip();}};
+  if(out){g.save();g.setTransform(1,0,0,1,0,0);g.fillStyle='#12171c';g.fillRect(0,0,W,W);g.restore();}
   g.imageSmoothingEnabled=true;g.drawImage(MAPC,v.x0,v.y0,v.sw,v.sw,0,0,W,W);
   if(bldDirty)drawBld();g.imageSmoothingEnabled=false;g.drawImage(BLDC,v.x0,v.y0,v.sw,v.sw,0,0,W,W);g.imageSmoothingEnabled=true;
   const t=FOGTMP.getContext('2d');t.globalCompositeOperation='source-over';t.clearRect(0,0,W,W);t.drawImage(FOGC,v.x0*FOGK,v.y0*FOGK,v.sw*FOGK,v.sw*FOGK,0,0,W,W);
@@ -758,8 +762,9 @@ function drawBigMap(){const c=$('#bigmap'),g=c.getContext('2d'),W=c.width,v=mapV
     lay(CLOUDSH,6,1,.45,2.2,.22);lay(CLOUDC2,4,.8,.6,2.6,.55);lay(CLOUDC,7,1,.4,2,.85);}
   t.globalCompositeOperation='source-over';g.drawImage(FOGTMP,0,0);
   /* v1.20 (lista 2, kohta 10): ohuet pilvet liikkuvat tuulen mukana myös avatun alueen päällä (n. 20 % peitto) */
-  {g.save();g.globalAlpha=.2;g.scale(2.4,2.4);g.translate((mapCO.x*5+mapCO.y*.5)%256,(mapCO.y*5-mapCO.x*.5)%256);g.fillStyle=g.createPattern(CLOUDC,'repeat');g.fillRect(-256,-256,W/2.4+512,W/2.4+512);g.restore();}
-  drawWindStreaks(g,W);
+  {g.save();mapClip();g.globalAlpha=.2;g.scale(2.4,2.4);g.translate((mapCO.x*5+mapCO.y*.5)%256,(mapCO.y*5-mapCO.x*.5)%256);g.fillStyle=g.createPattern(CLOUDC,'repeat');g.fillRect(-256,-256,W/2.4+512,W/2.4+512);g.restore();}
+  g.save();mapClip();drawWindStreaks(g,W);g.restore();
+  if(out){g.save();g.strokeStyle='rgba(232,164,74,.55)';g.lineWidth=2;g.strokeRect(mx0-1,mx0-1,mx1-mx0+2,mx1-mx0+2);g.strokeStyle='rgba(0,0,0,.5)';g.lineWidth=1;g.strokeRect(mx0-3.5,mx0-3.5,mx1-mx0+7,mx1-mx0+7);g.restore();}   // v3.33 kehys
   /* v1.07 tuulikompassi kartan päällä oikeassa yläkulmassa, mutta ei peitä mitään: läpikuultava tausta, häipyy (alfa ~0,12) kun hiiri
      on sen kohdalla, ja kartan merkit + pelaajan nuoli piirretään sen PÄÄLLE (ennen v1.06 kompassi peitti ne) */
   {const hov=mapMouse&&mapMouse.x>W-175&&mapMouse.y<180;mapWindA+=((hov?.12:.9)-mapWindA)*.25;g.save();g.globalAlpha=mapWindA;drawWindCompass(g,W-90,62,46);g.restore();}

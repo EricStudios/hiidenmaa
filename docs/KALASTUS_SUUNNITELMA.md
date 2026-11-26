@@ -209,3 +209,13 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 - **Virveli:** kelaa kuten nyt, ja lisäksi raahaus kävelemällä toimii.
 - **Optimointi:** Ultra ja High ennallaan, Medium ja Low kevyempiä. Kalojen mallit ja tekstuurit sekä piirron toisto kevennetään matalilla esiasetuksilla. **Fysiikka ei saa muuttua.**
 - **Vavat:** kaikki vavat +0,3 m (kuparivapa ja hiidenvapa 2,35 m), **onki 2,6 m**.
+
+## Erä v3.33 – TOTEUTETTU 26.11. (käyttäjä 26.11.: siima kiinteä myös ennen tärppiä)
+- **Ei kelausta eikä ilmoitusta liikkuessa.** Siiman pituus `FS.Lf` = kärki → koho/viehe laskeutuessa (virvelillä kelaus lyhentää). Kun pelaaja kävelee
+  (maalla tai vedessä, myös uidessa) kauemmas, koho/viehe raahautuu perässä (`fpFreeTether`). Maalle raahattu koho → tila `land` (vasen vetää takaisin).
+- **Katkeaminen vain pienellä todennäköisyydellä:** maata pitkin raahatessa `FP_LAND_SNAP` 0,5 % / m (sama kuin kelatessa), lisäksi entiset (iskun napsahdus, kireys, pohjaan tarttuminen).
+- **Katkennut siima on poissa** (ei enää "solmit uudelleen, siima lyheni"). Uusi siima solmitaan **E:llä repusta** (kuten mato; paras siima repussa `tkLineInPack`).
+  Pakissa oleva ei riitä (pakin hidas kenttävaihto estetään, kun vavassa ei ole siimaa). Kalastajan pöytä toimii kuten ennen.
+- **Koho ei jää maahan saaliin jälkeen:** kärjessä roikkuessa (hang/unhook) koho/viehe on kalan siimassa ja katoaa, kun kala otetaan (`fishMeshUpd`).
+- Esineen vaihto kelaa siiman hiljaa (ei ilmoitusta).
+

@@ -735,3 +735,13 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Korjaus: pelaaja `P.pos.y+=P.vy*dt+gH` (`gH=½g·dt²`), nuolet ja tähtäysviiva: painovoima puoliksi ennen ja jälkeen siirron; ilmanvastuksellinen heitto pieninä välivaiheina.
   **Sääntö:** kaikki pelin kannalta merkitsevä liike tarkalla integroinnilla; testi `tarkistus.mjs` v3.32 (hypyn korkeus 20/30/60/144 FPS).
 
+## 104. Koho jäi saaliin jälkeen maahan ja siima kelautui liikkuessa (v3.33)
+- `fishMeshUpd` asetti joka ruutu `FS.bob.visible=!FS.fm`; nostossa (`fishLift`) kala siirtyy `FS.dg`:hen ja `FS.fm` nollataan → koho tuli näkyviin viimeiseen
+  `FS.E`-paikkaan maahan ja "teleporttasi" vasta seuraavassa heitossa. Korjaus: hang/unhook-tiloissa koho sijoitetaan roikkuvan kalan siimaan (tai piiloon).
+- Vapaa siima kelautui sisään etäisyydestä (`FISH_KEEP_R`) ja uidessa → nyt kiinteä siima `fpFreeTether`. **Sääntö:** näkyvyys, jonka useampi tila jakaa, asetetaan tilakohtaisesti.
+
+## 105. M-kartan ulos zoomattu reunus keräsi tuuliviirujen jälkiä (v3.33)
+- `drawBigMap` piirsi kartan pienempänä keskelle (`mapView`, `mapZ` < 1), mutta canvasia ei tyhjennetty → reunukseen jäivät edellisten ruutujen viirut ja pilvet.
+  Korjaus: ulos zoomattuna koko canvas täytetään (`#12171c`), pilvet ja viirut rajataan kartan alueelle (`mapClip`), kehys. **Sääntö:** animoidun canvasin joka ruutu alkaa tyhjennyksellä,
+  jos piirto ei peitä koko pintaa.
+

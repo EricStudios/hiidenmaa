@@ -114,8 +114,8 @@ function fishClick(){if(P.dead||state!=='play')return;const st=FS.st;   // v3.27
   if(st==='idle'){const rod=rodDef();if(rod&&rod.reel&&rod.line!==null)fpChargeStart();else fishCast(1);}
   else if(st==='wait'){if(fpOnkiSnag())return;FS.E.y=water.position.y;fpRetrStart();}else if(st==='bite'){if(fpOnkiSnag())return;fishHook();}
   else if(st==='land'&&!(FS.rod&&FS.rod.reel))fpRetrStart();else if(st==='hang')fishTake();}
-function fishCast(pw){const rod=rodDef();if(!rod)return;if(P.inDun){msg('Täällä ei ole kalavettä.','warn');return;}if(P.swim){msg('Et voi onkia uidessa.','warn');return;}
-  if(rod.line===null){msg('Vavassa ei ole siimaa – kiinnitä siima Kalastajan pöydällä (tai pakista kentällä, hitaasti).','warn');return;}   // v3.14
+function fishCast(pw){const rod=rodDef();if(!rod)return;FS.Lf=0;FS.landM=0;   /* v3.33 uusi siiman pituus laskeutuessa */if(P.inDun){msg('Täällä ei ole kalavettä.','warn');return;}if(P.swim){msg('Et voi onkia uidessa.','warn');return;}
+  if(rod.line===null){msg('Vavassa ei ole siimaa – paina E solmiaksesi uuden siiman repusta (tai kiinnitä se Kalastajan pöydällä).','warn');return;}   // v3.14
   if(typeof TKA!=='undefined'&&TKA.on){msg('Vaihdat vielä siimaa – odota tai liiku keskeyttääksesi.','warn');return;}
   if(P.stam<3){msg('Liian uupunut.','warn');return;}P.stam-=3;P.stamDelay=1;
   /* v3.27 käyttäjä: heiton voi tehdä aina ja mihin suuntaan tahansa – ballistinen lento vavan kärjestä katseen suuntaan (fishphys.js) */
@@ -148,7 +148,8 @@ function fishTick(dt){const rod=rodDef();rodBendTick(dt);fpTick(dt);if(typeof he
     else if(FS.st==='unhook'){fpUnhookTick(dt);if(FS.st!=='unhook')return;}
     else if(FS.st==='charge'){if(!rod||(FS.slot&&equipped('weapon')!==FS.slot)||P.dead||P.swim||P.inDun){FS.st='idle';fishHud();return;}fpChargeTick(dt);fishHud();return;}
     else if((FS.st==='pull'||FS.st==='fight')&&(!rod||(FS.slot&&equipped('weapon')!==FS.slot)||P.dead||P.inDun||P.swim||state==='dead')){fpLoseOnLine();return;}   // v3.29 kala siimassa: vain käsiesineen vaihto irrottaa (ei etäisyysrajaa – raahaus)
-    else if(FS.st!=='pull'&&FS.st!=='fight'&&(!rod||(FS.slot&&equipped('weapon')!==FS.slot)||P.dead||P.inDun||P.swim||state==='dead'||dist2(P.pos.x,P.pos.z,FS.ox,FS.oz)>FISH_KEEP_R*FISH_KEEP_R)){fishReset(rod&&!P.dead?'Siima kelautui sisään – pysy paikallasi kalastaessa.':null);return;}
+    else if(FS.st!=='pull'&&FS.st!=='fight'&&(!rod||(FS.slot&&equipped('weapon')!==FS.slot)||P.dead||P.inDun||state==='dead')){fishReset();return;}   // v3.33 käyttäjä: ei kelausta liikkuessa eikä ilmoitusta – siima on kiinteä (fpFreeTether), esineen vaihto kelaa hiljaa
+    if((FS.st==='wait'||FS.st==='bite'||FS.st==='spin'||FS.st==='land')&&fpFreeTether(dt))return;
     if(FS.st==='fly')fpFly(dt);
     else if(FS.st==='wait'){if(FS.t>=FS.nibAt){FS.nibAt=FS.t+5+Math.random()*18;FS.dip=.35;plSnd('onkiminen','nykaisy',{v:.35,pos:{x:FS.bx,y:water.position.y,z:FS.bz}});
         if(FS.bait&&Math.random()<FISH_STEAL*(FS.rod.steal||1)){FS.bait=false;FS.biteAt=FS.t+(FS.biteAt-FS.t)/FISH_BAIT_K;msg('Syötti katosi koukusta.');}}
@@ -261,7 +262,10 @@ function fishMeshes(on){if(on&&!FS.bob){const g=new THREE.Group(),t=new THREE.Me
 const _fsTip=new THREE.Vector3(),_fsQ=new THREE.Quaternion();
 const FP_LN=16;
 /* v3.27: koho/viehe päätteen FS.E kohdalla; siima taipuvana kaarena (löysä odottaessa, kireä kelatessa ja väsyttäessä); kalan suu siiman päässä */
-function fishMeshUpd(){if(!FS.bob||!FS.E)return;const wy=water.position.y,E=FS.E;fpTip(_fsTip);let bx=E.x,by=E.y,bz=E.z;
+function fishMeshUpd(){if(!FS.bob)return;
+  /* v3.33 käyttäjä: koho jäi saaliin jälkeen maahan ja hyppäsi takaisin seuraavassa heitossa → kärjessä roikkuessa koho/viehe on kalan siimassa */
+  if(FS.st==='hang'||FS.st==='unhook'){const D=FS.dg;if(D){fpTip(_fsTip);const p=D.piv.position,k=FS.spin?.95:.55;FS.bob.position.set(lerp(_fsTip.x,p.x,k),lerp(_fsTip.y,p.y,k)+(FS.spin?0:.02),lerp(_fsTip.z,p.z,k));FS.bob.visible=true;}else FS.bob.visible=false;if(FS.line)FS.line.visible=false;return;}
+  if(!FS.E)return;const wy=water.position.y,E=FS.E;fpTip(_fsTip);let bx=E.x,by=E.y,bz=E.z;
   if(FS.st==='wait'||FS.st==='bite')by=wy+.02+Math.sin(playTime*2.2)*.012-(FS.dip||0)*.12;else if(FS.st==='spin')by=E.y+Math.sin(playTime*6)*.02;
   FS.bob.position.set(bx,by,bz);FS.bob.visible=!FS.fm;if(FS.fm){bx=FS.fm.position.x;by=FS.fm.position.y;bz=FS.fm.position.z;}
   const hold=mouseL&&locked,d=Math.hypot(bx-_fsTip.x,by-_fsTip.y,bz-_fsTip.z),st=FS.st,

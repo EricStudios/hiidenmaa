@@ -618,6 +618,15 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('heitto',/dt\*240/.test(fpFly.toString()));
     {const g=22,v=JUMP_V,h=[20,30,60,144].map(f=>{const dt=1/f;let y=0,vy=v,m=0;for(let i=0;i<f*2;i++){vy-=g*dt;y+=vy*dt+g/2*dt*dt;m=Math.max(m,y);}return m;});ck('korkeus '+h.map(x=>x.toFixed(3)).join('/'),Math.max(...h)-Math.min(...h)<.03);}
     return e.length?'puuttuu: '+e.join(', '):true;});
+  t('v3.33: ongen siima kiinteä ennen tärppiä (ei kelausta eikä ilmoitusta liikkuessa, koho raahautuu), katkennut siima pois → uusi repusta E:llä (ei pakista), koho roikkuvan kalan siimassa, M-kartan ulos zoomatun reunuksen tyhjennys',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('ei kelausta',!/kelautui/.test(fishTick.toString())&&!/FISH_KEEP_R/.test(fishTick.toString())&&/fpFreeTether/.test(fishTick.toString())&&typeof fpFreeTether==='function'&&/FP_LAND_SNAP/.test(fpFreeTether.toString()));
+    ck('pituus',/FS\.Lf=fpLineNow\(\)/.test(fpSplash.toString())&&/FS\.Lf=0/.test(fishCast.toString()));
+    ck('katkeaa kokonaan',/r\.line=null/.test(tkLineBreak.toString())&&!/lyheni/.test(tkLineBreak.toString()+fpLandSnap.toString()+fpOnkiSnag.toString()));
+    ck('E-siima',/tkLineInPack/.test(tkNoTarget.toString())&&typeof tkLineInPack==='function'&&/pakista se ei onnistu/.test(tkFieldLine.toString()));
+    ck('koho kalan mukana',/FS\.st==='hang'\|\|FS\.st==='unhook'/.test(fishMeshUpd.toString()));
+    ck('kartan reunus',/mapClip/.test(drawBigMap.toString())&&/fillRect\(0,0,W,W\)/.test(drawBigMap.toString()));
+    return e.length?'puuttuu: '+e.join(', '):true;});
   t('v3.27: kalastuksen uusi fysiikka – ballistinen heitto (35° pisin, vapa ratkaisee), virvelin lataus, maalle lasku ja katkeaminen, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m ja lajien syvyys, kala näkyy vedossa, pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa (ei monistusta), pilaantuminen, naulakot ja laatta, kirja, pakin koristeet, virveli vasemmassa kädessä',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     {const r=[0,15,25,35,45,60].map(a=>fpRange(fpV0(16),a*Math.PI/180)),mx=r.indexOf(Math.max(...r));ck('35° pisin',mx===3&&Math.abs(r[3]-16)<.3&&fpV0(30)>fpV0(16));}

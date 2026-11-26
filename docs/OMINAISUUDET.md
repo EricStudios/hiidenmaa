@@ -886,6 +886,12 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.33 – ongen siima
+- Siima kiinteä heiton jälkeen: liikkuessa koho/viehe raahautuu perässä (ei kelausta, ei ilmoitusta); maata pitkin voi katketa 0,5 % / m.
+- Katkennut siima on poissa → **E** solmii uuden siiman repusta (paras), pakista ei. Pöytä toimii kuten ennen.
+- Kärjessä roikkuvan kalan siimassa on koho/viehe; se katoaa, kun kala otetaan.
+- M-kartta ulos zoomattuna: tumma reunus ja kehys, pilvet ja tuuliviirut vain kartan päällä.
+
 ## v3.32 – fysiikka sama kaikilla asetuksilla
 - Hyppy 1,12 m (`JUMP_V` 7,02, g 22) kaikilla ruudunpäivityksillä; nuolet, tähtäysviiva ja ongen heitto lasketaan tarkasti → sama rata 20–144 FPS.
 - Grafiikka-asetukset eivät vaikuta spawnaukseen, tekoälyyn, törmäyksiin tai vahinkoon (vain piirtoon).

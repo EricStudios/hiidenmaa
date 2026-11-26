@@ -37,16 +37,16 @@ function fpFly(dt){const E=FS.E,V=FS.V,w=fpWind(),wy=water.position.y,ns=Math.ma
     V.x+=-FP_DRAG*(V.x-w.x)*h;V.y+=(-FP_G-FP_DRAG*V.y)*h;V.z+=-FP_DRAG*(V.z-w.z)*h;E.x+=V.x*h;E.y+=V.y*h;E.z+=V.z*h;
     const th=terrainH(E.x,E.z);
     if(th<wy-.05&&E.y<=wy){E.y=wy;fpSplash();return;}
-    if(E.y<=th+.03){E.y=th+.03;FS.where='land';FS.st='land';FS.landM=0;tkSnd('viehe_maahan')||plSnd('kaytto','poiminta',{v:.3,p:.7});return;}}
+    if(E.y<=th+.03){E.y=th+.03;FS.where='land';FS.st='land';FS.landM=0;FS.Lf=fpLineNow();tkSnd('viehe_maahan')||plSnd('kaytto','poiminta',{v:.3,p:.7});return;}}
   if(FS.t>8){FS.where='land';FS.st='land';}}
-function fpSplash(){const E=FS.E,wy=water.position.y,th=terrainH(E.x,E.z);FS.where='water';FS.body=wbAt(E.x,E.z);FS.bx=E.x;FS.bz=E.z;
+function fpSplash(){const E=FS.E,wy=water.position.y,th=terrainH(E.x,E.z);FS.where='water';FS.Lf=fpLineNow();FS.body=wbAt(E.x,E.z);FS.bx=E.x;FS.bz=E.z;
   plSnd('onkiminen','loiskahdus',{v:.7,pos:{x:E.x,y:wy,z:E.z}});if(typeof burst==='function')burst(E.x,wy+.05,E.z,0xcfe8f0,5,1.4);
   if(FS.spin){FS.st='spin';FS.ld=0;FS.reelT=0;FS.botT=0;return;}
   FS.st='wait';FS.noFish=!FS.body;if(FS.noFish){FS.biteAt=1e12;FS.nibAt=1e12;}else fishWaitPlan(true);   /* v3.27 kohon syvyys 0–2 m → myös matala vesi käy */
   const bd=fpBaitDepth();FS.bot=bd.bot;if(bd.bot&&!FS.noFish)tkSnd('viehe_pohjaan');}
 // v3.27 ongen syötti pohjassa: nostettaessa koukku voi tarttua (TK_ONKI_SNAG, paljon harvemmin kuin virvelin viehe) → koukku ja syötti menetetään, siima lyhenee
 function fpOnkiSnag(){if(FS.spin||!FS.bot||Math.random()>=TK_ONKI_SNAG)return false;const r=tkRig();let t='Koukku tarttui pohjaan ja siima katkesi';
-  if(r){if(r.hook){t+=` – ${ITEMS[r.hook].n.toLowerCase()} jäi pohjaan (varalla luukoukku)`;r.hook=null;}r.bait=0;FS.bait=false;if(r.line){r.lw=(r.lw??1)-.3;if(r.lw<=0){r.line=null;r.lw=1;t+='. Siima on nyt liian lyhyt – vaihda uusi';}else t+='. Solmit siiman uudelleen (siima lyheni)';}invDirty=true;updateGear();}
+  if(r){if(r.hook){t+=` – ${ITEMS[r.hook].n.toLowerCase()} jäi pohjaan (varalla luukoukku)`;r.hook=null;}r.bait=0;FS.bait=false;if(r.line){r.line=null;r.lw=1;t+='. Solmi uusi siima repusta (E)';}invDirty=true;updateGear();}
   plSnd('onkiminen','siima_katkeaa',{v:.8});fishReset(t+'.','warn');return true;}
 /* ---------------- KOHO VEDESSÄ: syötin syvyys (kohon korkeus, pöytä) ---------------- */
 // syötin syvyys ja onko se pohjassa: koho → rig.fd (pöydällä säädetty) tai vesi on matalampi → pohjassa; viehe → FS.ld
@@ -54,6 +54,20 @@ function fpBaitDepth(){const E=FS.E||{x:FS.bx,z:FS.bz},deep=water.position.y-ter
   const r=FS.slot&&FS.slot.rig,fd=r&&r.fd!=null?r.fd:TK_FD_DEF,d=Math.min(fd,Math.max(0,deep-.05));return {d,bot:fd>=deep-.1,deep};}
 function fpWaitDrift(dt){const E=FS.E;if(!E)return;const w=fpWind(),k=.03;FS.drift=(FS.drift||0);if(FS.drift>2.5)return;const nx=E.x+w.x*k*dt,nz=E.z+w.z*k*dt;
   if(terrainH(nx,nz)<water.position.y-.4){FS.drift+=Math.hypot(nx-E.x,nz-E.z);E.x=nx;E.z=nz;FS.bx=nx;FS.bz=nz;}}
+/* v3.33 käyttäjä: KIINTEÄ SIIMA MYÖS ENNEN TÄRPPIÄ. Siiman pituus FS.Lf = kärki → koho/viehe laskeutuessa (virvelillä kelaus lyhentää). Kun pelaaja
+   kävelee (maalla tai vedessä) kauemmas, koho/viehe raahautuu perässä – ei kelausta eikä ilmoitusta. Maalle raahattu koho siirtyy tilaan land;
+   maata pitkin raahatessa siima voi katketa vain pienellä todennäköisyydellä FP_LAND_SNAP / m (kuten kelatessa). */
+function fpLineNow(){const t=fpTip(),E=FS.E;return E?Math.max(FP_TETHER_MIN,Math.hypot(E.x-t.x,E.y-t.y,E.z-t.z)):FP_TETHER_MIN;}
+function fpFreeTether(dt){const E=FS.E;if(!E)return false;const tip=fpTip(),wy=water.position.y,d3=Math.hypot(E.x-tip.x,E.y-tip.y,E.z-tip.z);
+  if(!(FS.Lf>0))FS.Lf=Math.max(FP_TETHER_MIN,d3);
+  if(FS.st==='spin'&&mouseL&&locked&&state==='play')FS.Lf=Math.max(FP_TETHER_MIN,Math.min(FS.Lf,d3));   // virvelin kelaus lyhentää siimaa
+  const dy=Math.max(0,tip.y-E.y),Lh=Math.sqrt(Math.max(.04,FS.Lf*FS.Lf-dy*dy)),hx=E.x-tip.x,hz=E.z-tip.z,hd=Math.hypot(hx,hz)||1e-4;
+  if(hd<=Lh)return false;
+  const nx=tip.x+hx/hd*Lh,nz=tip.z+hz/hd*Lh,mv=hd-Lh,th=terrainH(nx,nz),wet=th<wy-.05;E.x=nx;E.z=nz;FS.bx=nx;FS.bz=nz;
+  if(wet){if(FS.st!=='spin')E.y=wy;return false;}
+  E.y=th+.03;if(FS.st!=='land'){FS.st='land';FS.where='land';FS.landM=FS.landM||0;fishHud();}
+  FS.landM=(FS.landM||0)+mv;while(FS.landM>=1){FS.landM-=1;if(Math.random()<FP_LAND_SNAP){fpLandSnap();return true;}}
+  return false;}
 /* ---------------- KELAUS TAKAISIN (ilman kalaa) ---------------- */
 function fpRetrStart(){FS.st='retr';FS.landM=FS.landM||0;FS.fin=0;}
 function fpReelV(){const K=FS.rod&&FS.rod.reel;return K?TK_REEL_V*K.spd*1.6:FP_RETR_V;}
@@ -67,7 +81,7 @@ function fpRetr(dt){const E=FS.E,tip=fpTip(),wy=water.position.y;const auto=!(FS
 // siima katkeaa maata pitkin vedettäessä: viehe jää maahan poimittavaksi
 function fpLandSnap(){const r=tkRig(),E=FS.E;let t='Siima tarttui maastoon ja katkesi.';
   if(r){if(r.lure){spawnDrop(r.lure,1,E.x,E.y+.15,E.z);t+=` ${ITEMS[r.lure].n} jäi maahan – poimi se.`;r.lure=null;}
-    if(r.line){r.lw=(r.lw??1)-.3;if(r.lw<=0){r.line=null;r.lw=1;t+=' Siima on nyt liian lyhyt – vaihda uusi.';}else t+=' Solmit siiman uudelleen (siima lyheni).';}invDirty=true;updateGear();}
+    if(r.line){r.line=null;r.lw=1;t+=' Solmi uusi siima repusta (E).';}invDirty=true;updateGear();}
   plSnd('onkiminen','siima_katkeaa',{v:.8});fishReset(t,'warn');}
 /* ---------------- VIEHE VEDESSÄ (virveli) ---------------- */
 function fpSpin(dt){const hold=mouseL&&locked&&state==='play',E=FS.E,R=FS.rod,U=R.lure,wy=water.position.y,dx=P.pos.x-E.x,dz=P.pos.z-E.z,d=Math.hypot(dx,dz)||1;
