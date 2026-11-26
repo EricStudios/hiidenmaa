@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.30, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.31, 26.11.2026)
+
+- **Versio 3.31** – Seikkailijan nimi aina näkyvissä Asetukset › Ohjaus -sivun ylimpänä (ennen vain pelin aikana sivun pohjalla), päävalikosta asetettu nimi = oletusnimi kaikille maailmoille.
 
 - **Versio 3.30** – valikon taustojen sade, lumi ja pöly eivät enää kulje säännöllisinä riveinä koko näytössä (satunnaiset paikat `mbgH`/`mbgDrift`),
   hiukkaskerroksen tasainen syntytahti ja tiheys ruudun koon mukaan, seikkailijan nimen pyyhintä (Asetukset › Seikkailija › 🗑 Pyyhi). Ks. versioloki v3.30.
@@ -447,6 +449,12 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.31 (nimen asetus löytyy – käyttäjä 26.11. "missä nimen päättäminen")
+- Seikkailija-osio oli vain pelin aikana Ohjaus-sivun pohjalla palautusnapin alla → ei löytynyt. Nyt se on **Ohjaus-sivun ylimpänä ja aina näkyvissä**, myös päävalikossa.
+- **Oletusnimi** `pNameDef` (localStorage `hiidenmaa_pname`): päävalikossa asetettu nimi koskee kaikkia maailmoja; pelissä asetettu nimi tallentuu maailmaan (`flags.pname`, menee edelle) ja oletukseksi.
+  `pName()` = maailman nimi → oletusnimi. Pyyhi poistaa molemmat (valikossa vain oletuksen). `anglerAsk(cb,cur,defOnly)`.
+- Tarkistettu: v3.30 ei poistanut vanhoja ominaisuuksia (poistetut rivit olivat korvattuja versioita samoista riveistä); tarkistus KAIKKI OK, full157 kartat 0 ja 3 ilman virheitä.
 
 ### v3.30 (koko näytön valikkohiukkaset, nimen pyyhintä – käyttäjä 26.11.)
 - **Valikon taustat:** myrskyn/myrskytuulen sade (`mbgRain` + Myrsky), Routaluolan suun lumi ja Kalmankammion pöly laskettiin hilasta (`(i*97+t*v) % W`). Isolla ruudulla

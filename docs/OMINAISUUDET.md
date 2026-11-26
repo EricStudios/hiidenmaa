@@ -886,6 +886,10 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.31 – seikkailijan nimi
+- Asetukset › Ohjaus › **⚔️ Seikkailija** (sivun ylin osio, aina näkyvissä): Aseta nimi / vaihda / 🗑 Pyyhi. Päävalikossa asetettu nimi on oletus kaikille maailmoille
+  (`pNameDef`, localStorage), pelissä asetettu tallentuu myös maailmaan (`flags.pname`). Enintään 24 merkkiä.
+
 ## v3.30 – valikon hiukkaset koko näytössä, nimen pyyhintä
 - **Valikon taustat:** sade, lumi ja pöly satunnaisina pisaroina (`mbgH`/`mbgDrift`, nopeus 0,75–1,25×), ei rivejä millään ruudun koolla.
 - **Hiukkaskerros:** tasainen syntytahti (`mfxLife`), tiheys pinta-alan mukaan 0,75–1,6× (`mfxWant`), alkujoukko eri-ikäinen, lumi/sade elävät ruudun läpi.

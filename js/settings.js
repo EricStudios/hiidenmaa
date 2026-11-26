@@ -355,7 +355,8 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
     bindSet(SET_PAGES.snd);$('#bPageReset').onclick=()=>resetPage('snd');
     for(const k of ['volMaster','musicVol','creVol','plVol','uiVol','ambVol','notifVol','btnVol'])bindSld('sv_'+k,v=>{SET[k]=+v;$('#sv_'+k+'V').textContent=Math.round(SET[k]*100)+' %';if(window.__mus)window.__mus.apply();},()=>saveSet());
   }else if(setTab==='ctl'){
-    body.innerHTML=`<div class="setGrid">${
+    /* v3.30 käyttäjä ("missä nimen päättäminen"): Seikkailija-osio sivun ylimpänä ja aina näkyvissä – myös päävalikossa (oletusnimi uusille maailmoille, pNameDef) */
+    body.innerHTML=`<h4 class="setSub">⚔️ Seikkailija</h4><div class="setGrid">${row('Seikkailijan nimi',`<button class="btn sm" id="s_angler">${(started?pName():pNameDef())?esc(started?pName():pNameDef())+' – vaihda':'Aseta nimi'}</button> <button class="btn sm" id="s_anglerDel"${(started?pName():pNameDef())?'':' hidden'}>🗑 Pyyhi</button>`,started?'nimesi tässä maailmassa – näkyy naulakon kultaisessa laatassa ja kalakirjan palkintolaatassa':'oletusnimi kaikille maailmoille – näkyy naulakon kultaisessa laatassa ja kalakirjan palkintolaatassa')}</div><h4 class="setSub">Ohjaus</h4><div class="setGrid">${
       setRow('Hiiren rulla vaihtaa pikapaikkaa','wheelHotbar',null,'rulla vaihtaa pikapaikkaa zoomin sijaan; zoom säädetään alta')+
       row('Kameran etäisyys'+(isDef('zoom')?' <span class="defTag">oletus</span>':''),sldHTML('sZoom',2.2,10,.1,SET.zoom),`<span id="sZoomV">${(+SET.zoom).toFixed(1)} m</span>`)+
       row('Kääntymisen herkkyys'+(isDef('sens')?' <span class="defTag">oletus</span>':''),sldHTML('sSens',.2,3,.05,SET.sens),`<span id="sSensV">${(+SET.sens).toFixed(2)}×</span>`)+
@@ -374,12 +375,12 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       row('Chatin ja ilmoitusten koko'+(isDef('chatScale')?' <span class="defTag">oletus</span>':''),sldHTML('sChat',.6,1.6,.05,SET.chatScale),`<span id="sChatV">${Math.round(SET.chatScale*100)} %</span>`)+   /* v2.99 */
       `<div class="note" style="grid-column:1/-1;margin:-4px 0 4px">Koko pelin näkymän päällä oleva HUD: palkit, pikapaikat, kartta, kello, tehtävä, tavoite, viestit, tähtäin, pomopalkki, bannerit ja olentojen palkit. Jokainen osa kasvaa omasta reunastaan, joten mikään ei mene päällekkäin reunan yli. Paneelit (reppu, rakentaminen, kartta) eivät muutu.</div>`
     }</div>`+resetBtn+
-      (started?`<h4 class="setSub" style="margin-top:22px">Seikkailija</h4><div class="setGrid">${row('Seikkailijan nimi',`<button class="btn sm" id="s_angler">${pName()?esc(pName())+' – vaihda':'Aseta nimi'}</button> <button class="btn sm" id="s_anglerDel"${pName()?'':' hidden'}>🗑 Pyyhi</button>`,'nimesi tässä maailmassa – näkyy mm. naulakon kultaisessa laatassa ja kalakirjan palkintolaatassa')}</div>`:'')+   /* v3.27 */
+   /* v3.27 */
       `<h4 class="setSub" style="margin-top:22px">Kehittäjä</h4><div class="setGrid">${row('Kehittäjätyökalut (DEV)',tglHTML('s_devOn',DEV),DEV?'DEV-valikko (Ä), 10× nopeus (V), jumalvoimat, kaikki ohjeet auki – vaihto lataa sivun uudelleen (peli tallennetaan)':'kehittäjien testityökalut – oletus pois; vaihto lataa sivun uudelleen (peli tallennetaan)')}</div>`+
       `<div class="proSec"><h4 class="setSub">Ammattilaisille ja vertailuun</h4><div class="setGrid">${row('Vanha maailman lataus (v3.09)',tglHTML('s_oldLoad',!!SET.oldLoad),'ennen v3.10:tä käytetty tapa: maailmaa ei piirretä valmiiksi latausruudussa, joten intro lataa näkyvästi – vain vertailuun ja testaukseen. Vaihto lataa pelin uudelleen (peli tallennetaan).')}</div></div>`;   /* v1.82; v3.10 vanha lataus */
     bindSet(SET_PAGES.ctl);$('#bPageReset').onclick=()=>resetPage('ctl');hintRowsBind();
-    {const an=$('#s_angler'),ad=$('#s_anglerDel');if(an)an.onclick=()=>anglerAsk(()=>{an.textContent=pName()+' – vaihda';if(ad)ad.hidden=false;},pName());   // v3.29 seikkailijan nimi
-      if(ad)ad.onclick=()=>{pNameClear();if(an)an.textContent='Aseta nimi';ad.hidden=true;};}   // v3.30 käyttäjä: nimen voi pyyhkiä pois
+    {const an=$('#s_angler'),ad=$('#s_anglerDel'),nm=()=>started?pName():pNameDef();if(an)an.onclick=()=>anglerAsk(()=>{an.textContent=nm()+' – vaihda';if(ad)ad.hidden=false;},nm(),!started);   // v3.29 seikkailijan nimi
+      if(ad)ad.onclick=()=>{if(started)pNameClear();else pNameDef('');if(an)an.textContent='Aseta nimi';ad.hidden=true;};}   // v3.30 käyttäjä: nimen voi pyyhkiä pois
     $('#s_oldLoad').onclick=()=>{const go=()=>{try{if(started&&!P.dead)saveGame(true);}catch(e){}SET.oldLoad=!SET.oldLoad;saveSet();location.reload();};   // v3.10
       keyDialog(SET.oldLoad?'Palataanko uuteen maailman lataukseen?':'Otetaanko vanha maailman lataus (v3.09) käyttöön?',[['Vahvista',go],['Peruuta',null]],'Peli tallennetaan ja ladataan uudelleen.');};
     $('#s_devOn').onclick=()=>{const go=()=>{try{if(started&&!P.dead)saveGame(true);localStorage.setItem('hiidenmaa_devon',DEV?'0':'1');}catch(e){}location.reload();};

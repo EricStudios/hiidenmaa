@@ -371,14 +371,16 @@ function nauPlaqueTick(){const el=document.getElementById('plaqueInfo')||(()=>{c
 // kalastajan nimi: näppäimistöllä kirjoitettava ikkuna (toimii hiiren lukituksessa), Enter hyväksyy, Esc peruu
 const ANG={on:false,v:'',cb:null};
 // v3.29 käyttäjä: yleinen seikkailijan nimi (flags.pname; vanha flags.angler siirretään)
-function pName(){if(!flags.pname&&flags.angler){flags.pname=flags.angler;delete flags.angler;}return flags.pname||'';}
+// v3.30: oletusnimi kaikille maailmoille (localStorage hiidenmaa_pname) – asetetaan myös päävalikosta; maailman oma nimi (flags.pname) menee edelle
+function pNameDef(v){try{if(v===undefined)return localStorage.getItem('hiidenmaa_pname')||'';if(v)localStorage.setItem('hiidenmaa_pname',v);else localStorage.removeItem('hiidenmaa_pname');}catch(e){}return v||'';}
+function pName(){if(!flags.pname&&flags.angler){flags.pname=flags.angler;delete flags.angler;}return flags.pname||pNameDef()||'';}
 // v3.30 käyttäjä: nimen pyyhkiminen (Asetukset › Seikkailija › Pyyhi). Jo kaiverretut laatat ja kirjan palkintolaatat säilyvät ennätyksinä; seuraava ripustus kysyy nimen uudelleen.
-function pNameClear(){const had=pName();delete flags.pname;delete flags.angler;if(had)msg('Seikkailijan nimi pyyhitty.');}
-function anglerAsk(cb,cur){ANG.on=true;ANG.v=cur||'';ANG.cb=cb;let el=document.getElementById('nameDlg');if(!el){el=document.createElement('div');el.id='nameDlg';document.body.appendChild(el);}el.hidden=false;anglerDraw();}
+function pNameClear(){const had=pName();delete flags.pname;delete flags.angler;pNameDef('');if(had&&typeof msg==='function')msg('Seikkailijan nimi pyyhitty.');}
+function anglerAsk(cb,cur,defOnly){ANG.on=true;ANG.v=cur||'';ANG.cb=cb;ANG.defOnly=!!defOnly;let el=document.getElementById('nameDlg');if(!el){el=document.createElement('div');el.id='nameDlg';document.body.appendChild(el);}el.hidden=false;anglerDraw();}
 function anglerDraw(){const el=document.getElementById('nameDlg');if(el)el.innerHTML=`<div class="ndBox"><div class="ndT">⚔️ Seikkailijan nimi</div><div class="ndS">Nimesi tällä saarella – kaiverretaan myös naulakon kultaiseen laattaan.</div><div class="ndI">${esc(ANG.v)}<i>|</i></div><div class="ndH">Kirjoita nimi · Enter hyväksyy · Esc peruu</div></div>`;}
 addEventListener('keydown',e=>{if(!ANG.on)return;e.preventDefault();e.stopImmediatePropagation();
   if(e.key==='Escape'){ANG.on=false;document.getElementById('nameDlg').hidden=true;return;}
-  if(e.key==='Enter'){const v=ANG.v.trim().slice(0,24);if(!v)return;flags.pname=v;delete flags.angler;ANG.on=false;document.getElementById('nameDlg').hidden=true;msg(`Seikkailijan nimi: ${v}`);const cb=ANG.cb;ANG.cb=null;if(cb)cb();return;}
+  if(e.key==='Enter'){const v=ANG.v.trim().slice(0,24);if(!v)return;if(!ANG.defOnly){flags.pname=v;delete flags.angler;}pNameDef(v);ANG.on=false;document.getElementById('nameDlg').hidden=true;msg(`Seikkailijan nimi: ${v}`);const cb=ANG.cb;ANG.cb=null;if(cb)cb();return;}
   if(e.key==='Backspace'){ANG.v=ANG.v.slice(0,-1);anglerDraw();return;}if(e.key.length===1&&ANG.v.length<24&&/[\p{L}\p{N} '\-.]/u.test(e.key)){ANG.v+=e.key;anglerDraw();}},true);
 Object.assign(COOKABLE,Object.fromEntries(Object.keys(FISH_DEF).map(id=>[id,id+'p'])));   // nuotio ja grilli paistavat kalat
 for(const id in FISH_DEF){const k=FISH_DEF[id].k;COOK_T[id]=k>=2?[9,4]:k>1?[7,3]:[5,2];}

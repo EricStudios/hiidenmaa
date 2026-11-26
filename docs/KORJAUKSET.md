@@ -722,3 +722,9 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Korjaus: oma satunnainen paikka ja nopeus per pisara (`mbgH(i,k)`, `mbgDrift`), tasainen syntytahti `want/mfxLife`, alkujoukko eri-ikäinen (`p.l0`), elinikä ruudun korkeuden mukaan.
   **Sääntö:** älä sijoita toistuvia hiukkasia `i*vakio % koko` -kaavalla – käytä tiivistettä (`mbgH`). Hiukkasten uusinta tasaisella tahdilla, ei täyttämällä vajetta kerralla.
 
+
+## 102. Tarkistuksen kalastus- ja vesikulhotesti kaatuivat satunnaisesti (v3.31)
+- v3.06-rivin onkitesti arpoo rantapaikan `Math.random`illa: osassa paikoista kala ei päädy maalle (syvä ranta, raahaus veteen) → satunnainen `onki … pull/retr`.
+  Sama kaatui myös ilman muutoksia (1/5 ajoa). Seuraava v3.04-vesikulhotesti peri edellisen testin jättämän tilan (asento/kalastus) → kulho kaatui jo ennen tarkistusta.
+- Korjaus: onkitesti yrittää enintään 3 eri paikassa (`fishReset` välissä); vesikulhotesti aloittaa puhtaasta tilasta (`fishReset`, `inspectStop`, ei uintia, 10 päivitystä).
+  **Sääntö:** testi, joka arpoo paikan, yrittää useammin; testi ei saa nojata edellisen testin jättämään tilaan.
