@@ -219,3 +219,8 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 - **Koho ei jää maahan saaliin jälkeen:** kärjessä roikkuessa (hang/unhook) koho/viehe on kalan siimassa ja katoaa, kun kala otetaan (`fishMeshUpd`).
 - Esineen vaihto kelaa siiman hiljaa (ei ilmoitusta).
 
+## Erä v3.34 – TOTEUTETTU 26.11. (käyttäjä: "1 siimakerällä saa uuden siiman 10 kertaa, sama kulumamittari kuin kilvellä")
+- `TK_LINE_USES` 10, slotin `lu` = käytetyt siimat, `tkLineTake(id, säiliö)` (reppu tai pakin box; osittain käytetty ensin), palkki `slotBar`. Siimat `s:1`.
+- Irrotettu siima ei palaa keräksi.
+- Siimojen ulkonäkö (käyttäjä 26.11.): ei kirkkaita – läpikuultavia ja valon mukaan tummuvia (`tkLineLook`); hiidensiima hohtaa yöllä hieman vaaleansinisenä.
+- Maalta veteen raahattu koho/viehe jatkaa kalastusta (`fpReenter`: tärppiaikataulu, vesistö, syvyys).

@@ -745,3 +745,7 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   Korjaus: ulos zoomattuna koko canvas täytetään (`#12171c`), pilvet ja viirut rajataan kartan alueelle (`mapClip`), kehys. **Sääntö:** animoidun canvasin joka ruutu alkaa tyhjennyksellä,
   jos piirto ei peitä koko pintaa.
 
+## 106. Vavan kärjen välimuisti antoi vanhan paikan siirron jälkeen (v3.34)
+- `fpTip` välimuistitti kärjen `playTime`:n ja `heldMesh`:n perusteella. Jos pelaaja siirtyi samalla pelihetkellä (testi, teleportti), kärki oli satojen metrien päässä →
+  kiinteän siiman kiinnitys (`fpFreeTether`) veti kohon maalle. Korjaus: avaimeen pelaajan x/z. **Sääntö:** välimuistin avaimeen kaikki, mistä tulos riippuu.
+

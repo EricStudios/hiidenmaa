@@ -73,6 +73,7 @@ function updateMobBars(){let k=0;camera.getWorldDirection(_cd);
   for(;k<mobBars.length;k++)mobBars[k].hidden=true;}
 /* v2.46: ruudun palkki (soihdun polttoaine, kilven kunto) – sama arvo HTML:ään ja paikallaan päivitykseen (invBarsTick) */
 function slotBar(s){if(!s)return null;const d=ITEMS[s.id];if(d.cat==='shield'&&(s.shHit||s.shBrk!=null))return{off:s.shBrk!=null,w:s.shBrk!=null?Math.min(100,(playTime-s.shBrk)/SHIELD_FIX*100):100-(s.shHit||0)/(SHIELD_HITS[s.id]||15)*100};
+  if(d.tk==='line'&&s.lu>0)return{off:false,w:100-s.lu/TK_LINE_USES*100};   // v3.33 siimakerän kulumismittari
   if(s.id==='soihtu')return{off:s.lit===false,w:Math.max(0,(s.fuel??torchMax(s))/torchMax(s)*100)};return null;}
 /* v2.46: palkit päivitetään paikallaan – ennen koko reppu/arkku piirrettiin uudelleen sekunnin välein (soihtu kädessä), jolloin hiiren alla oleva
    korostus vilkkui ja kesken osunut uudelleenpiirto saattoi hukata valintaklikkauksen (painallus ja vapautus eri elementeissä). Jos palkki puuttuu

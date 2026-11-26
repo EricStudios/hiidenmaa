@@ -23,7 +23,7 @@ const _fpT=new THREE.Vector3();
 // v3.29 optimointi: kärki lasketaan kerran ruudussa (updateMatrixWorld rekursiivisesti vain kerran); Low/Medium-ulkoasu FISH_LQ (settings.js applyGfx → fishLQSet)
 let FISH_LQ=false;const _fpTC={t:-1,v:new THREE.Vector3()};
 function fishLQSet(pi){FISH_LQ=pi>=0&&pi<=4;}
-function fpTip(out){out=out||_fpT;if(_fpTC.t===playTime&&_fpTC.h===(typeof heldMesh!=='undefined'?heldMesh:null)&&playTime>0)return out.copy(_fpTC.v);fpTip0(out);_fpTC.t=playTime;_fpTC.h=typeof heldMesh!=='undefined'?heldMesh:null;_fpTC.v.copy(out);return out;}
+function fpTip(out){out=out||_fpT;if(_fpTC.t===playTime&&_fpTC.h===(typeof heldMesh!=='undefined'?heldMesh:null)&&_fpTC.px===P.pos.x&&_fpTC.pz===P.pos.z&&playTime>0)return out.copy(_fpTC.v);fpTip0(out);_fpTC.t=playTime;_fpTC.h=typeof heldMesh!=='undefined'?heldMesh:null;_fpTC.px=P.pos.x;_fpTC.pz=P.pos.z;_fpTC.v.copy(out);return out;}   // v3.34: avaimena myös pelaajan paikka (siirron jälkeen ei vanhaa kärkeä – KORJAUKSET 106)
 function fpTip0(out){if(typeof heldMesh!=='undefined'&&heldMesh&&heldMesh.userData.tip){heldMesh.updateMatrixWorld(true);heldMesh.userData.tip.getWorldPosition(out);}
   else if(typeof heldMesh!=='undefined'&&heldMesh){heldMesh.updateMatrixWorld(true);out.set(0,0,ROD_LEN-.1);heldMesh.localToWorld(out);}else out.set(P.pos.x,P.pos.y+1.6,P.pos.z);
   if(dist2(out.x,out.z,P.pos.x,P.pos.z)>16||Math.abs(out.y-P.pos.y)>5)out.set(P.pos.x-Math.sin(camYaw)*1.6,P.pos.y+1.9,P.pos.z-Math.cos(camYaw)*1.6);return out;}   // malli ei vielä päivittynyt (siirto/teleport)
@@ -57,6 +57,10 @@ function fpWaitDrift(dt){const E=FS.E;if(!E)return;const w=fpWind(),k=.03;FS.dri
 /* v3.33 käyttäjä: KIINTEÄ SIIMA MYÖS ENNEN TÄRPPIÄ. Siiman pituus FS.Lf = kärki → koho/viehe laskeutuessa (virvelillä kelaus lyhentää). Kun pelaaja
    kävelee (maalla tai vedessä) kauemmas, koho/viehe raahautuu perässä – ei kelausta eikä ilmoitusta. Maalle raahattu koho siirtyy tilaan land;
    maata pitkin raahatessa siima voi katketa vain pienellä todennäköisyydellä FP_LAND_SNAP / m (kuten kelatessa). */
+// koho/viehe palaa veteen (raahaus maalta): sama kuin laskeutuminen ilman loiskausta – uusi tärppiaikataulu, vesistö ja syvyys
+function fpReenter(){const E=FS.E,wy=water.position.y;FS.where='water';FS.body=wbAt(E.x,E.z);FS.bx=E.x;FS.bz=E.z;FS.drift=0;
+  if(FS.spin){FS.st='spin';FS.ld=0;FS.reelT=0;FS.botT=0;E.y=wy-.05;}else{E.y=wy;FS.st='wait';FS.noFish=!FS.body;if(FS.noFish){FS.biteAt=1e12;FS.nibAt=1e12;}else fishWaitPlan(true);const bd=fpBaitDepth();FS.bot=bd.bot;}
+  if(typeof fishHud==='function')fishHud();}
 function fpLineNow(){const t=fpTip(),E=FS.E;return E?Math.max(FP_TETHER_MIN,Math.hypot(E.x-t.x,E.y-t.y,E.z-t.z)):FP_TETHER_MIN;}
 function fpFreeTether(dt){const E=FS.E;if(!E)return false;const tip=fpTip(),wy=water.position.y,d3=Math.hypot(E.x-tip.x,E.y-tip.y,E.z-tip.z);
   if(!(FS.Lf>0))FS.Lf=Math.max(FP_TETHER_MIN,d3);
@@ -64,7 +68,7 @@ function fpFreeTether(dt){const E=FS.E;if(!E)return false;const tip=fpTip(),wy=w
   const dy=Math.max(0,tip.y-E.y),Lh=Math.sqrt(Math.max(.04,FS.Lf*FS.Lf-dy*dy)),hx=E.x-tip.x,hz=E.z-tip.z,hd=Math.hypot(hx,hz)||1e-4;
   if(hd<=Lh)return false;
   const nx=tip.x+hx/hd*Lh,nz=tip.z+hz/hd*Lh,mv=hd-Lh,th=terrainH(nx,nz),wet=th<wy-.05;E.x=nx;E.z=nz;FS.bx=nx;FS.bz=nz;
-  if(wet){if(FS.st!=='spin')E.y=wy;return false;}
+  if(wet){if(FS.st==='land')fpReenter();else if(FS.st!=='spin')E.y=wy;return false;}   // v3.34 käyttäjä: maalta veteen raahattu koho/viehe kalastaa taas
   E.y=th+.03;if(FS.st!=='land'){FS.st='land';FS.where='land';FS.landM=FS.landM||0;fishHud();}
   FS.landM=(FS.landM||0)+mv;while(FS.landM>=1){FS.landM-=1;if(Math.random()<FP_LAND_SNAP){fpLandSnap();return true;}}
   return false;}

@@ -886,6 +886,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.34 – siimakerä
+- Yksi siimakerä (pellava-, jänne-, punottu, hiidensiima) riittää 10 siimaan; kulumismittari repussa kuten kilvellä. Siimat eivät pinoudu. Irrotettu siima leikataan pois.
+- Siimat ovat vähän läpinäkyviä ja seuraavat valoa (yöllä tummia); hiidensiima hohtaa yöllä hieman vaaleansinisenä.
+- Maalle päätynyt koho/viehe, joka raahataan takaisin veteen, kalastaa taas normaalisti.
+
 ## v3.33 – ongen siima
 - Siima kiinteä heiton jälkeen: liikkuessa koho/viehe raahautuu perässä (ei kelausta, ei ilmoitusta); maata pitkin voi katketa 0,5 % / m.
 - Katkennut siima on poissa → **E** solmii uuden siiman repusta (paras), pakista ei. Pöytä toimii kuten ennen.

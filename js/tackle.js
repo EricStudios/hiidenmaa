@@ -44,11 +44,14 @@ function tkSnag(){const r=tkRig();let t='Viehe tarttui pohjaan';if(r){const ln=r
 /* ---------------- MATO KOUKKUUN (E vapa kädessä) ---------------- */
 function tkNoTarget(){const w=equipped('weapon');if(!w||ITEMS[w.id].cat!=='rod'||FS.st!=='idle')return false;const r=rigOf(w);
   if(!r.line){const id=tkLineInPack();if(!id){msg('Vavassa ei ole siimaa. Tarvitset siimaa repussa (pakissa oleva ei riitä – siirrä se reppuun) tai Kalastajan pöydän.','warn');return true;}
-    invRemove(id,1);r.line=id;r.lw=1;invDirty=true;updateGear();tkSnd('siiman_vaihto')||plSnd('kaytto','poiminta',{v:.5});msg(`Solmit uuden siiman (${ITEMS[id].n.toLowerCase()}) vapaan – voit heittää.`);return true;}   // v3.33 kuten mato: E
+    tkLineTake(id,inv);r.line=id;r.lw=1;invDirty=true;updateGear();tkSnd('siiman_vaihto')||plSnd('kaytto','poiminta',{v:.5});msg(`Solmit uuden siiman (${ITEMS[id].n.toLowerCase()}) vapaan – voit heittää.`);return true;}   // v3.33 kuten mato: E
   if(r.reel&&r.lure){msg('Virvelissä on viehe – mato sopii vain kohon kanssa (irrota viehe pöydällä).');return true;}
   if(r.bait){msg('Koukussa on jo mato. Heitä vasemmalla.');return true;}
   if(!invCount('mato')){msg('Sinulla ei ole matoja. Niitä löytyy maata kaivaessa tai kuokkiessa.','warn');return true;}
   invRemove('mato',1);r.bait=1;invDirty=true;updateGear();tkSnd('mato_koukkuun')||plSnd('kaytto','poiminta',{v:.5});msg('Laitoit madon koukkuun – kalat tärppäävät noin kolmanneksen useammin.');return true;}
+// v3.33 käyttäjä: siimakerästä kuluu 1/10 jokaisella uudella siimalla (s.lu, palkki slotBar). Säiliö = inv tai pakin box. Osittain käytetty kerä ensin.
+function tkLineTake(id,box){box=box||inv;let i=-1;for(let k=0;k<box.length;k++){const b=box[k];if(b&&b.id===id){if(b.lu>0){i=k;break;}if(i<0)i=k;}}if(i<0)return false;
+  const b=box[i];b.lu=(b.lu||0)+1;if(b.lu>=TK_LINE_USES){b.lu=0;b.n--;if(b.n<=0)box[i]=null;}invDirty=true;return true;}
 // v3.33: paras siima repussa (vain reppu, ei pakki)
 function tkLineInPack(){let best=null;for(const id in TK_LINE)if(invCount(id)&&(!best||TK_LINE[id].ten>TK_LINE[best].ten))best=id;return best;}
 /* ---------------- SIIMAN VAIHTO KENTÄLLÄ (pakista, hidas) ---------------- */
@@ -57,12 +60,12 @@ function tkFieldLine(lineId,src){const w=equipped('weapon');if(!w||ITEMS[w.id].c
   msg(`Vaihdat siimaa (${ITEMS[lineId].n.toLowerCase()}) – ilman pöytää tämä kestää ikuisuuden… (${TK_FIELD_LINE} s, pysy paikallasi)`,'quest');}
 function tkFieldTick(dt){if(!TKA.on)return;if(P.dead||state==='dead'||equipped('weapon')!==TKA.slot||dist2(P.pos.x,P.pos.z,TKA.x,TKA.z)>.8){TKA.on=false;msg('Siiman vaihto keskeytyi.','warn');return;}
   if(state==='play')TKA.t+=dt*(DEV&&typeof DEVF!=='undefined'&&DEVF.fishFast?10:1);if(TKA.t<TKA.T)return;TKA.on=false;
-  const box=TKA.src,i=box?box.findIndex(b=>b&&b.id===TKA.line):-1;let ok=false;if(i>=0){box[i].n--;if(box[i].n<=0)box[i]=null;ok=true;}else if(invCount(TKA.line)){invRemove(TKA.line,1);ok=true;}
+  const box=TKA.src;let ok=(box&&tkLineTake(TKA.line,box))||(invCount(TKA.line)&&tkLineTake(TKA.line,inv));   /* v3.33 kerästä 1/10 */
   if(!ok){msg('Siima katosi pakista – vaihto peruttiin.','warn');return;}tkSetPart(TKA.slot,'line',TKA.line,true);lappu(icon(TKA.line),`<span class="mG">Uusi siima kiinni:</span> <b class="mW">${ITEMS[TKA.line].n}</b><br><b style="color:#e8c070">Kireitä siimoja!</b>`);}   // v3.27 lappu vasemmalta
 /* ---------------- OSIEN VAIHTO (pöytä) ---------------- */
 // palauttaa vanhan osan reppuun (kulunut siima heitetään pois); id null = irrota
 function tkSetPart(s,slot,id,noRet){const r=rigOf(s),old=r[slot];if(slot==='lure'&&id&&!r.reel){msg('Viehe sopii vain virveliin – kiinnitä ensin kela. Onkiessa käytetään matoa.','warn');return false;}   // v3.27 onki ei käytä vieheitä
-  if(old&&!noRet&&!(slot==='line'&&(r.lw??1)<.999))giveOrDrop(old,1,P.pos.x,P.pos.y+1,P.pos.z);else if(old&&slot==='line'&&(r.lw??1)<.999&&!noRet)msg('Kulunut siima heitettiin pois.');
+  if(old&&!noRet&&slot!=='line')giveOrDrop(old,1,P.pos.x,P.pos.y+1,P.pos.z);else if(old&&slot==='line'&&!noRet)msg('Vanha siima leikattiin pois.');   // v3.33: siima tulee kerästä (1/10), joten irrotettu siima ei palaa keräksi
   r[slot]=id;if(slot==='line')r.lw=1;if(slot==='reel'&&!id&&r.lure){if(!noRet)giveOrDrop(r.lure,1,P.pos.x,P.pos.y+1,P.pos.z);r.lure=null;}if(slot==='lure'&&id)r.bait=0;
   invDirty=true;updateGear();}
 /* ---------------- 3D: vavan osat, koho, viehe, mato ---------------- */
@@ -84,7 +87,7 @@ function tkDressRod(g,s){const r=rigOf(s),hk=g.userData.hook;g.traverse(o=>{if(o
     /* v3.27 kampi pyörii kelatessa (fishphys.js virvPose): nivel kelan akselilla, varsi + nuppi; oikea käsi seuraa nuppia (IK) */
     const cr=new THREE.Group();cr.position.set(.03,-.07,.24);g.add(cr);cr.add(bx(.008,.05,.008,tkMat('rhd',0x2a2a2a),0,-.022,0));const kn=bx(.022,.014,.014,tkMat('rkn',0xd8c8a0),.012,-.046,0);cr.add(kn);
     g.userData.crank=cr;g.userData.knob=kn;g.userData.virv=1;}
-  if(!hk)return;const base=[...hk.children],ln=base[0];if(ln&&r.line)ln.material=tkMat('ln'+r.line,TK_LINE[r.line].col);if(ln)ln.visible=!!r.line;
+  if(!hk)return;const base=[...hk.children],ln=base[0];if(ln&&r.line)ln.material=tkMat('ln'+r.line,TK_LINE[r.line].col,Object.assign({transparent:true,opacity:.55,depthWrite:false},r.line==='hiidensiima'?{emissive:0x3a8ab0,emissiveIntensity:.22}:{}));   /* v3.34 vavan siima: vähän läpinäkyvä, valaistu (tumma yöllä); hiidensiima hohtaa hieman */if(ln)ln.visible=!!r.line;
   if(!r.line){for(const c of base)c.visible=false;return;}
   if(r.reel&&r.lure){const U=TK_LURE[r.lure],L=tkLureMesh(U,.7);L.position.y=-.33;hk.add(L);base.forEach((c,i)=>{if(i>1)c.visible=false;});}   // viehe korvaa koukun (vieheessä oma koukku)
   else{if(r.float){const F=TK_FLOAT[r.float],fl=tkFloatMesh(F,.45);fl.position.y=-.12;hk.add(fl);}
@@ -126,6 +129,12 @@ function tkFishMesh(sp,len){const f=FISH_DEF[sp],S=FISH_SHAPE[sp]||{l:14,h:6},g=
     const pu=new THREE.Mesh(new THREE.SphereGeometry(L*.014,6,4),tkMat('fp',0x080808,{roughness:.1}));pu.position.set(H*.12,L*.375,s*T*.72);g.add(pu);
     const pf=new THREE.Mesh(shp([[0,0],[-H*.3,-L*.12],[-H*.05,-L*.1]]),fm);pf.position.set(-H*.12,L*.24,s*T*.55);pf.rotation.y=s*.6;g.add(pf);}
   g.userData.tail=tail;g.traverse(o=>{if(o.isMesh)o.castShadow=!lq;});return g;}
+/* v3.34 käyttäjä: siimat eivät saa olla kirkkaita – vähän läpinäkyviä mutta erottuvia, yöllä tummia (valo lightK). Hiidensiima hohtaa yöllä hieman vaaleansinisenä. */
+const _tkLC=new THREE.Color(),_tkLG=new THREE.Color(0x8fdcff),_tkLB=new THREE.Color(0xc8c8c0);
+function tkLineLook(m){if(!m)return;const w=typeof equipped==='function'?equipped('weapon'):null,r=(FS.slot&&FS.slot.rig)||(w&&w.rig)||null,id=r&&r.line||'pellavasiima',L=TK_LINE[id]||TK_LINE.pellavasiima;
+  const day=P.inDun?.1:clamp(typeof lightK==='number'?lightK:1,0,1),lit=.18+.82*day;_tkLC.setHex(L.col).lerp(_tkLB,.35).multiplyScalar(lit);
+  let op=.42+.1*day;if(id==='hiidensiima'){const gk=(1-day)*.38;_tkLC.r=Math.max(_tkLC.r,_tkLG.r*gk);_tkLC.g=Math.max(_tkLC.g,_tkLG.g*gk);_tkLC.b=Math.max(_tkLC.b,_tkLG.b*gk);op=Math.max(op,.42+.18*(1-day));}
+  m.color.copy(_tkLC);m.transparent=true;m.opacity=op;m.depthWrite=false;}
 function tkDangle(sp,kg,hold){if(!FISH_DEF[sp]||typeof heldMesh==='undefined'||!heldMesh)return;const L=Math.min(.95,.16+Math.cbrt(Math.max(.02,kg))*.24);
   const piv=new THREE.Group(),fish=tkFishMesh(sp,L);fish.position.y=-.04-L*.5;piv.add(fish);   // suu ylhäällä koukussa
   const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(6),3));const ln=new THREE.Line(lg,new THREE.LineBasicMaterial({color:0xe8e8e0}));ln.frustumCulled=false;
@@ -136,7 +145,7 @@ function tkDangleTick(dt){for(let i=TKD.length-1;i>=0;i--){const D=TKD[i];D.t+=d
     heldMesh.updateMatrixWorld(true);tip.getWorldPosition(_tkTip);const k=D.hold?Math.max(.22,1-D.t/TK_DANGLE):Math.max(0,1-D.t/TK_DANGLE),drop=.35;
     const hk=D.hold?FP_HANG_K:1;D.sv+=(-D.sw*9-D.sv*.6)*dt+(Math.random()-.5)*k*14*hk*dt;   /* v3.29 koukussa 2× rimpuilu */D.sw+=D.sv*dt;D.piv.position.set(_tkTip.x,_tkTip.y-drop,_tkTip.z);D.piv.rotation.set(D.sw*.35,camYaw,D.sw);
     D.fish.rotation.y=Math.sin(D.t*18*Math.sqrt(hk)+D.ph)*Math.min(1,.55*k*hk);const tl=D.fish.userData.tail;if(tl)tl.rotation.x=Math.sin(D.t*22*Math.sqrt(hk)+D.ph)*Math.min(1.1,.7*k*hk);
-    const a=D.ln.geometry.attributes.position;a.setXYZ(0,_tkTip.x,_tkTip.y,_tkTip.z);a.setXYZ(1,D.piv.position.x,D.piv.position.y-.06,D.piv.position.z);a.needsUpdate=true;}}
+    const a=D.ln.geometry.attributes.position;a.setXYZ(0,_tkTip.x,_tkTip.y,_tkTip.z);a.setXYZ(1,D.piv.position.x,D.piv.position.y-.06,D.piv.position.z);a.needsUpdate=true;tkLineLook(D.ln.material);}}
 /* ---------------- KALASTUSPAKKI ---------------- */
 const tkPakkiOk=id=>{const d=ITEMS[id];return !!d&&(d.cat==='rod'||(d.tk&&d.tk!=='pakki')||id==='mato'||id==='perkeet'||id==='kalakirja');};
 function pakkiSlots(lv){return PAKKI_SLOTS[lv||0]||12;}
@@ -209,7 +218,8 @@ let tkCur=null,tkSel=0;
 function tkTableOpen(p){tkCur=p;if(openPanel!=='tk')togglePanel('tk');else tkRender();tkSnd('pakki_auki');}
 function tkRods(){const out=[];inv.forEach(s=>{if(s&&ITEMS[s.id].cat==='rod')out.push(s);});const pk=tkCur&&tkCur.data.pk;if(pk)pk.box.forEach(s=>{if(s&&ITEMS[s.id].cat==='rod')out.push(s);});return out;}
 function tkAvail(tk){const m={};const add=s=>{if(s&&ITEMS[s.id].tk===tk)m[s.id]=(m[s.id]||0)+s.n;};inv.forEach(add);const pk=tkCur&&tkCur.data.pk;if(pk)pk.box.forEach(add);return m;}
-function tkTake(id){if(invCount(id)){invRemove(id,1);return true;}const pk=tkCur&&tkCur.data.pk;if(pk){const i=pk.box.findIndex(b=>b&&b.id===id);if(i>=0){pk.box[i].n--;if(pk.box[i].n<=0)pk.box[i]=null;return true;}}return false;}
+function tkTake(id){if(ITEMS[id]&&ITEMS[id].tk==='line'){if(invCount(id))return tkLineTake(id,inv);const pk=tkCur&&tkCur.data.pk;return !!(pk&&tkLineTake(id,pk.box));}   /* v3.33 siimakerä: 1/10 */
+  if(invCount(id)){invRemove(id,1);return true;}const pk=tkCur&&tkCur.data.pk;if(pk){const i=pk.box.findIndex(b=>b&&b.id===id);if(i>=0){pk.box[i].n--;if(pk.box[i].n<=0)pk.box[i]=null;return true;}}return false;}
 const tkFmt=v=>String(Math.round(v*100)/100).replace('.',',');
 function tkPropsList(s){const r=rigOf(s),S=rigStats(s),o=[],R=ITEMS[s.id].rod,pc=v=>(v>=0?'+':'−')+Math.abs(Math.round(v*100))+' %';
   o.push(['Tyyppi',S.virveli?(S.spin?'Virveli (viehe: kelaa vasen pohjassa)':'Virveli (koho ja syötti, pitkä heitto)'):'Onki (koho ja syötti)']);
@@ -228,7 +238,7 @@ function tkLureList(U){const good=[],bad=[],W={lake:'järvet',sea:'meri',bog:'su
   return [['Vahvuudet',good.join(', ')||'–'],['Heikkoudet',bad.join(', ')],['Parhaat kalat',U.best.map(x=>FISH_DEF[x].n).join(', ')+' (×2,2)']];}
 function tkProps(s,o){const d=ITEMS[s.id];
   if(d.cat==='rod'){o.push(...tkPropsList(s));return;}
-  if(d.tk==='line'){const L=TK_LINE[s.id];o.push(['Kestävyys',`×${tkFmt(L.ten)}`],['Kesto','noin '+L.dur+' kalaa'],['Näkyvyys',L.vis>1?`tärppi ${Math.round((L.vis-1)*100)} % harvemmin`:'huomaamaton'],['Satunnainen katkeaminen','pieni, kasvaa kulumisen myötä']);}
+  if(d.tk==='line'){const L=TK_LINE[s.id];o.push(['Kestävyys',`×${tkFmt(L.ten)}`],['Kesto','noin '+L.dur+' kalaa'],['Näkyvyys',L.vis>1?`tärppi ${Math.round((L.vis-1)*100)} % harvemmin`:'huomaamaton'],['Satunnainen katkeaminen','pieni, kasvaa kulumisen myötä'],['Kerässä',`${TK_LINE_USES-(s.lu||0)} / ${TK_LINE_USES} siimaa`]);}
   if(d.tk==='hook'){const H=TK_HOOK[s.id];o.push(['Isot lajit',H.big===1?'perus':`×${tkFmt(H.big)}`],['Pikkukalat',H.small===1?'perus':`×${tkFmt(H.small)}`],['Tarttuminen virvelissä',Math.round(H.hk*100)+' %']);
     if(H.steal<1)o.push(['Syötti pysyy',`varkaudet ×${tkFmt(H.steal)}`]);if(H.keep)o.push(['Väkä','kala ei irtoa']);}
   if(d.tk==='reel'){const K=TK_REEL[s.id];o.push(['Tekee vavasta','virvelin'],['Heittomatka vieheellä',`${TK_SPIN_MIN}–${K.cast} m`],['Kelausnopeus',`${tkFmt(TK_REEL_V*K.spd)} m/s`],['Väsytysteho',`+${Math.round((K.fk-1)*100)} %`]);if(K.tk<1)o.push(['Siiman jännitys',`−${Math.round((1-K.tk)*100)} %`]);}

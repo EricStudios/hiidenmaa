@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.33, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.34, 26.11.2026)
+
+- **Versio 3.34** – siimakerä riittää 10 siimaan (kulumismittari kuten kilvellä, `TK_LINE_USES`/`s.lu`/`tkLineTake`); siimat himmeitä ja yöllä tummia, hiidensiima hohtaa hieman (`tkLineLook`).
 
 - **Versio 3.33** – ongen siima kiinteä myös ennen tärppiä (koho raahautuu, ei kelausta/ilmoitusta), katkennut siima vaihdetaan E:llä repusta, koho kalan mukana, M-kartan ulos zoomatun reunuksen siivous. Ks. versioloki ja KALASTUS_SUUNNITELMA › Erä v3.33.
 
@@ -456,6 +458,17 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.34 (siimakerä – käyttäjä 26.11.)
+- **1 siimakerä = 10 uutta siimaa.** Jokainen kiinnitys (E repusta, pöytä, pakin kenttävaihto) kuluttaa 1/10 (`tkLineTake`, slotin `lu`); kulumismittari repussa kuten kilvellä (`slotBar`),
+  tietoikkunassa "Kerässä x / 10 siimaa". Osittain käytetty kerä kulutetaan ensin. Siimat eivät enää pinoudu (`s:1`, kuten kilvet) → kulumistieto ei katoa yhdistäessä.
+- Pöydällä irrotettu siima ei palaa keräksi ("Vanha siima leikattiin pois") – muuten kerästä saisi loputtomasti siimaa.
+- **Siimojen ulkonäkö** (`tkLineLook`, käyttäjä): heitetty ja roikkuvan kalan siima ei enää kirkas (ennen #e8e8e0 75 % aina) → siiman väri × valo (`lightK`), 42–52 % läpinäkyvä, yöllä tumma;
+  hiidensiima hohtaa yöllä hieman vaaleansinisenä. Vavan siima (mesh) läpikuultava 55 %, hiidensiimalla heikko hehku.
+- **Maalta veteen raahattu koho/viehe kalastaa taas** (`fpReenter`, käyttäjä): uusi tärppiaikataulu, vesistö ja syvyys kuten laskeutuessa.
+- **Vavan kärjen välimuisti** (`fpTip`/`_fpTC`) avaimena myös pelaajan paikka – siirron jälkeen vanha kärki (satoja metrejä pois) veti kohoa väärään suuntaan (KORJAUKSET 106).
+- Tarkistus: onkitesti varmistaa siiman (aiempi testi voi katkaista sen v3.33:n jälkeen). Rinnakkaisajoissa (3 selainta) tarkistus voi kaataa ketjun (pelaaja kuolee testien välissä) – aja tarkistus yksin.
+- Tarkistusrivi v3.34; testit `scratchpad/t328/spool.mjs`, `line.mjs`, `reenter.mjs`.
 
 ### v3.33 (ongen siima – käyttäjä 26.11.)
 - **Kiinteä siima ennen tärppiä** (`fpFreeTether`, `FS.Lf` laskeutuessa, `fpLineNow`): liikkuminen ei kelaa siimaa eikä anna ilmoitusta ("Siima kelautui sisään" poistettu, `FISH_KEEP_R` ei käytössä);

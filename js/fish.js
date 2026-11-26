@@ -270,7 +270,7 @@ function fishMeshUpd(){if(!FS.bob)return;
   FS.bob.position.set(bx,by,bz);FS.bob.visible=!FS.fm;if(FS.fm){bx=FS.fm.position.x;by=FS.fm.position.y;bz=FS.fm.position.z;}
   const hold=mouseL&&locked,d=Math.hypot(bx-_fsTip.x,by-_fsTip.y,bz-_fsTip.z),st=FS.st,
     sl=st==='fly'?.02:st==='wait'||st==='bite'?.06:st==='land'?.05:st==='spin'?(hold?.012:.035):st==='retr'?(hold||!FS.rod.reel?.015:.04):st==='fight'?.004*(1-FS.ten):st==='pull'?(FS.tight?.008:.045):.03,sag=Math.min(2.5,d*sl);
-  const n=FISH_LQ?10:FP_LN,a=FS.line.geometry.attributes.position;for(let i=0;i<n;i++){const t=i/(n-1);a.setXYZ(i,lerp(_fsTip.x,bx,t),lerp(_fsTip.y,by+(FS.fm?0:.1),t)-4*t*(1-t)*sag,lerp(_fsTip.z,bz,t));}FS.line.geometry.setDrawRange(0,n);a.needsUpdate=true;}   // v3.29 Low/Medium: 10 pistettä
+  const n=FISH_LQ?10:FP_LN,a=FS.line.geometry.attributes.position;for(let i=0;i<n;i++){const t=i/(n-1);a.setXYZ(i,lerp(_fsTip.x,bx,t),lerp(_fsTip.y,by+(FS.fm?0:.1),t)-4*t*(1-t)*sag,lerp(_fsTip.z,bz,t));}FS.line.geometry.setDrawRange(0,n);a.needsUpdate=true;if(typeof tkLineLook==='function')tkLineLook(FS.line.material);}   // v3.29 Low/Medium: 10 pistettä
 /* ---------------- HUD: tärppi ja väsytys ---------------- */
 function fishHud(){const el=document.getElementById('fishHud');if(!el)return;if(typeof tkHud==='function'&&tkHud(el))return;
   {const st=FS.st,sh=t=>{el.hidden=false;el.className='wait';el.innerHTML=t;return true;};   // v3.27 uudet tilat
