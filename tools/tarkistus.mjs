@@ -633,7 +633,7 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     {const box=[{id:'pellavasiima',n:1}],ws=[];for(let k=0;k<10;k++){ck('otto '+k,tkLineTake('pellavasiima',box));if(box[0])ws.push(Math.round(slotBar(box[0]).w));}ck('palkki '+ws.join(','),ws.length===9&&ws[0]===90&&ws[8]===10&&box[0]===null&&!tkLineTake('pellavasiima',box));}
     ck('maalta veteen',typeof fpReenter==='function'&&/fpReenter/.test(fpFreeTether.toString())&&/fishWaitPlan/.test(fpReenter.toString()));
     ck('kärjen välimuisti',/_fpTC\.px===P\.pos\.x/.test(fpTip.toString()));
-    ck('siiman ulkonäkö',typeof tkLineLook==='function'&&/tkLineLook/.test(fishMeshUpd.toString())&&/tkLineLook/.test(tkDangleTick.toString())&&(()=>{const m=new THREE.LineBasicMaterial(),l0=lightK;lightK=0;tkLineLook(m);const n=m.color.r+m.color.g+m.color.b;lightK=1;tkLineLook(m);const d=m.color.r+m.color.g+m.color.b;lightK=l0;return n<d*.4&&m.opacity<.6;})());
+    ck('siiman ulkonäkö',typeof tkLineLook==='function'&&/tkLineLook/.test(fishMeshUpd.toString())&&/tkLineLook/.test(tkDangleTick.toString())&&(()=>{const m=new THREE.LineBasicMaterial(),l0=lightK;lightK=0;tkLineLook(m);const n=m.color.r+m.color.g+m.color.b;lightK=1;tkLineLook(m);const d=m.color.r+m.color.g+m.color.b;lightK=l0;return n<d*.4&&m.opacity<.3;})());
     ck('käyttö',/tkLineTake/.test(tkNoTarget.toString())&&/tkLineTake/.test(tkTake.toString())&&/tkLineTake/.test(tkFieldTick.toString())&&/slot!=='line'/.test(tkSetPart.toString()));
     return e.length?'puuttuu: '+e.join(', '):true;});
   t('v3.35: koukun irrotus – ei nopeudu (±16 % pehmeästi), kiduksiin-ilmoitus, hiiriohje 10 kertaa; vesi samenee syvyyden mukaan, merenpohja tummenee',()=>{

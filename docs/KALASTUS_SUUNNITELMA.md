@@ -231,4 +231,4 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 
 ## Erä v3.36 – TOTEUTETTU 26.11. (käyttäjä: "onki taas kelaa")
 - Vapaan siiman pituus pelaajasta + 0,6 m löysää (`FP_SLACK`), ei vavan kärjestä → ei räikkää (koho ei hiivi sisään kääntyessä).
-
+- v3.37 (käyttäjä): siimat läpinäkyvämpiä (28 %), pellava harmaa, muut omalla värillään himmeinä.

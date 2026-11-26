@@ -87,7 +87,7 @@ function tkDressRod(g,s){const r=rigOf(s),hk=g.userData.hook;g.traverse(o=>{if(o
     /* v3.27 kampi pyörii kelatessa (fishphys.js virvPose): nivel kelan akselilla, varsi + nuppi; oikea käsi seuraa nuppia (IK) */
     const cr=new THREE.Group();cr.position.set(.03,-.07,.24);g.add(cr);cr.add(bx(.008,.05,.008,tkMat('rhd',0x2a2a2a),0,-.022,0));const kn=bx(.022,.014,.014,tkMat('rkn',0xd8c8a0),.012,-.046,0);cr.add(kn);
     g.userData.crank=cr;g.userData.knob=kn;g.userData.virv=1;}
-  if(!hk)return;const base=[...hk.children],ln=base[0];if(ln&&r.line)ln.material=tkMat('ln'+r.line,TK_LINE[r.line].col,Object.assign({transparent:true,opacity:.55,depthWrite:false},r.line==='hiidensiima'?{emissive:0x3a8ab0,emissiveIntensity:.22}:{}));   /* v3.34 vavan siima: vähän läpinäkyvä, valaistu (tumma yöllä); hiidensiima hohtaa hieman */if(ln)ln.visible=!!r.line;
+  if(!hk)return;const base=[...hk.children],ln=base[0];if(ln&&r.line)ln.material=tkMat('ln'+r.line,r.line==='pellavasiima'?0x8e8e8a:TK_LINE[r.line].col,Object.assign({transparent:true,opacity:.3,depthWrite:false},r.line==='hiidensiima'?{emissive:0x3a8ab0,emissiveIntensity:.22}:{}));   /* v3.34 vavan siima: vähän läpinäkyvä, valaistu (tumma yöllä); hiidensiima hohtaa hieman */if(ln)ln.visible=!!r.line;
   if(!r.line){for(const c of base)c.visible=false;return;}
   if(r.reel&&r.lure){const U=TK_LURE[r.lure],L=tkLureMesh(U,.7);L.position.y=-.33;hk.add(L);base.forEach((c,i)=>{if(i>1)c.visible=false;});}   // viehe korvaa koukun (vieheessä oma koukku)
   else{if(r.float){const F=TK_FLOAT[r.float],fl=tkFloatMesh(F,.45);fl.position.y=-.12;hk.add(fl);}
@@ -130,10 +130,10 @@ function tkFishMesh(sp,len){const f=FISH_DEF[sp],S=FISH_SHAPE[sp]||{l:14,h:6},g=
     const pf=new THREE.Mesh(shp([[0,0],[-H*.3,-L*.12],[-H*.05,-L*.1]]),fm);pf.position.set(-H*.12,L*.24,s*T*.55);pf.rotation.y=s*.6;g.add(pf);}
   g.userData.tail=tail;g.traverse(o=>{if(o.isMesh)o.castShadow=!lq;});return g;}
 /* v3.34 käyttäjä: siimat eivät saa olla kirkkaita – vähän läpinäkyviä mutta erottuvia, yöllä tummia (valo lightK). Hiidensiima hohtaa yöllä hieman vaaleansinisenä. */
-const _tkLC=new THREE.Color(),_tkLG=new THREE.Color(0x8fdcff),_tkLB=new THREE.Color(0xc8c8c0);
+const _tkLC=new THREE.Color(),_tkLG=new THREE.Color(0x8fdcff),_tkLB=new THREE.Color(0x8e8e8a),TK_LINE_OP=.28;   // v3.37 käyttäjä: läpinäkyvämpi – erottuu vain vähän; pellava harmaa, muut omalla värillään himmeinä
 function tkLineLook(m){if(!m)return;const w=typeof equipped==='function'?equipped('weapon'):null,r=(FS.slot&&FS.slot.rig)||(w&&w.rig)||null,id=r&&r.line||'pellavasiima',L=TK_LINE[id]||TK_LINE.pellavasiima;
-  const day=P.inDun?.1:clamp(typeof lightK==='number'?lightK:1,0,1),lit=.18+.82*day;_tkLC.setHex(L.col).lerp(_tkLB,.35).multiplyScalar(lit);
-  let op=.42+.1*day;if(id==='hiidensiima'){const gk=(1-day)*.38;_tkLC.r=Math.max(_tkLC.r,_tkLG.r*gk);_tkLC.g=Math.max(_tkLC.g,_tkLG.g*gk);_tkLC.b=Math.max(_tkLC.b,_tkLG.b*gk);op=Math.max(op,.42+.18*(1-day));}
+  const day=P.inDun?.1:clamp(typeof lightK==='number'?lightK:1,0,1),lit=.18+.82*day;if(id==='pellavasiima')_tkLC.copy(_tkLB);else _tkLC.setHex(L.col).lerp(_tkLB,.4);_tkLC.multiplyScalar(lit);
+  let op=TK_LINE_OP*(.8+.2*day);if(id==='hiidensiima'){const gk=(1-day)*.38;_tkLC.r=Math.max(_tkLC.r,_tkLG.r*gk);_tkLC.g=Math.max(_tkLC.g,_tkLG.g*gk);_tkLC.b=Math.max(_tkLC.b,_tkLG.b*gk);op=Math.max(op,TK_LINE_OP+.12*(1-day));}
   m.color.copy(_tkLC);m.transparent=true;m.opacity=op;m.depthWrite=false;}
 function tkDangle(sp,kg,hold){if(!FISH_DEF[sp]||typeof heldMesh==='undefined'||!heldMesh)return;const L=Math.min(.95,.16+Math.cbrt(Math.max(.02,kg))*.24);
   const piv=new THREE.Group(),fish=tkFishMesh(sp,L);fish.position.y=-.04-L*.5;piv.add(fish);   // suu ylhäällä koukussa

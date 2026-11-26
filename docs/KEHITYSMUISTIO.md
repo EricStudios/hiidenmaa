@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.36, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.37, 26.11.2026)
+
+- **Versio 3.37** – siimat läpinäkyvämpiä (erottuu vain vähän, `TK_LINE_OP` 0,28): pellava harmaa, muut omalla värillään himmeinä; vavan siima 30 %.
 
 - **Versio 3.36** – onki ei enää "kelaa" itsestään (siiman pituus pelaajasta, ei heiluvasta kärjestä); kalan syönnin siivous. Hahmon katoamista kalaa syödessä ei saatu toistettua – ks. versioloki.
 
@@ -462,6 +464,10 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.37 (siimojen näkyvyys – käyttäjä 26.11.)
+- `tkLineLook`: läpinäkyvyys `TK_LINE_OP` 0,28 (yöllä ×0,8; ennen 0,42–0,52), pellavasiima harmaa `0x8e8e8a`, muut siimat oma väri 40 % harmaaseen; hiidensiima hohtaa yöllä edelleen hieman.
+  Vavan siima (mesh) 30 % (ennen 55 %), pellava harmaa. Tarkistusrivi v3.34: läpinäkyvyys < 0,3.
 
 ### v3.36 (käyttäjä 26.11.: "onki taas kelaa", "ukko katoaa jos syön kalan")
 - **Räikkä pois:** v3.33:n vapaa siima mitattiin vavan kärjestä; kärki liikkuu joka kääntymisellä ja heilahduksella → koho vedettiin hiukan lähemmäs eikä se palannut,
