@@ -61,13 +61,16 @@ function fpWaitDrift(dt){const E=FS.E;if(!E)return;const w=fpWind(),k=.03;FS.dri
 function fpReenter(){const E=FS.E,wy=water.position.y;FS.where='water';FS.body=wbAt(E.x,E.z);FS.bx=E.x;FS.bz=E.z;FS.drift=0;
   if(FS.spin){FS.st='spin';FS.ld=0;FS.reelT=0;FS.botT=0;E.y=wy-.05;}else{E.y=wy;FS.st='wait';FS.noFish=!FS.body;if(FS.noFish){FS.biteAt=1e12;FS.nibAt=1e12;}else fishWaitPlan(true);const bd=fpBaitDepth();FS.bot=bd.bot;}
   if(typeof fishHud==='function')fishHud();}
-function fpLineNow(){const t=fpTip(),E=FS.E;return E?Math.max(FP_TETHER_MIN,Math.hypot(E.x-t.x,E.y-t.y,E.z-t.z)):FP_TETHER_MIN;}
-function fpFreeTether(dt){const E=FS.E;if(!E)return false;const tip=fpTip(),wy=water.position.y,d3=Math.hypot(E.x-tip.x,E.y-tip.y,E.z-tip.z);
-  if(!(FS.Lf>0))FS.Lf=Math.max(FP_TETHER_MIN,d3);
-  if(FS.st==='spin'&&mouseL&&locked&&state==='play')FS.Lf=Math.max(FP_TETHER_MIN,Math.min(FS.Lf,d3));   // virvelin kelaus lyhentää siimaa
-  const dy=Math.max(0,tip.y-E.y),Lh=Math.sqrt(Math.max(.04,FS.Lf*FS.Lf-dy*dy)),hx=E.x-tip.x,hz=E.z-tip.z,hd=Math.hypot(hx,hz)||1e-4;
-  if(hd<=Lh)return false;
-  const nx=tip.x+hx/hd*Lh,nz=tip.z+hz/hd*Lh,mv=hd-Lh,th=terrainH(nx,nz),wet=th<wy-.05;E.x=nx;E.z=nz;FS.bx=nx;FS.bz=nz;
+/* v3.36 käyttäjä ("onki taas kelaa"): siima mitattiin heiluvasta vavan kärjestä → jokainen kääntyminen/heilahdus veti kohoa lähemmäs eikä se palannut
+   (räikkä) ja koho tuntui kelautuvan sisään. Nyt pituus FS.Lf mitataan vaakasuoraan pelaajan vartalosta (+ FP_SLACK löysää), joten paikallaan
+   seistessä ja kääntyessä koho ei liiku lainkaan; vain poispäin käveleminen raahaa sitä. */
+const FP_SLACK=.6;
+function fpLineNow(){const E=FS.E;return E?Math.max(FP_TETHER_MIN,Math.hypot(E.x-P.pos.x,E.z-P.pos.z)+FP_SLACK):FP_TETHER_MIN;}
+function fpFreeTether(dt){const E=FS.E;if(!E)return false;const wy=water.position.y,hx=E.x-P.pos.x,hz=E.z-P.pos.z,hd=Math.hypot(hx,hz)||1e-4;
+  if(!(FS.Lf>0))FS.Lf=fpLineNow();
+  if(FS.st==='spin'&&mouseL&&locked&&state==='play')FS.Lf=Math.max(FP_TETHER_MIN,Math.min(FS.Lf,hd+FP_SLACK));   // virvelin kelaus lyhentää siimaa
+  if(hd<=FS.Lf)return false;
+  const Lh=FS.Lf,nx=P.pos.x+hx/hd*Lh,nz=P.pos.z+hz/hd*Lh,mv=hd-Lh,th=terrainH(nx,nz),wet=th<wy-.05;E.x=nx;E.z=nz;FS.bx=nx;FS.bz=nz;
   if(wet){if(FS.st==='land')fpReenter();else if(FS.st!=='spin')E.y=wy;return false;}   // v3.34 käyttäjä: maalta veteen raahattu koho/viehe kalastaa taas
   E.y=th+.03;if(FS.st!=='land'){FS.st='land';FS.where='land';FS.landM=FS.landM||0;fishHud();}
   FS.landM=(FS.landM||0)+mv;while(FS.landM>=1){FS.landM-=1;if(Math.random()<FP_LAND_SNAP){fpLandSnap();return true;}}

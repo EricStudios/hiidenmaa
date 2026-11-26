@@ -749,3 +749,7 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - `fpTip` välimuistitti kärjen `playTime`:n ja `heldMesh`:n perusteella. Jos pelaaja siirtyi samalla pelihetkellä (testi, teleportti), kärki oli satojen metrien päässä →
   kiinteän siiman kiinnitys (`fpFreeTether`) veti kohon maalle. Korjaus: avaimeen pelaajan x/z. **Sääntö:** välimuistin avaimeen kaikki, mistä tulos riippuu.
 
+## 107. Kiinteä siima "kelautui" vähitellen sisään (v3.36)
+- `fpFreeTether` rajoitti kohon etäisyyttä liikkuvasta pisteestä (vavan kärki). Aina kun kärki heilahti poispäin, koho vedettiin perään; kun kärki palasi, koho ei palannut → räikkä.
+  Korjaus: mittaa vakaasta pisteestä (pelaajan vartalo) ja anna löysää (`FP_SLACK`). **Sääntö:** yksisuuntainen rajoite (vain vetää) liikkuvaan pisteeseen tarvitsee löysää tai vakaan ankkurin.
+

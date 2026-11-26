@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.35, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.36, 26.11.2026)
+
+- **Versio 3.36** – onki ei enää "kelaa" itsestään (siiman pituus pelaajasta, ei heiluvasta kärjestä); kalan syönnin siivous. Hahmon katoamista kalaa syödessä ei saatu toistettua – ks. versioloki.
 
 - **Versio 3.35** – koukun irrotus reiluksi (ei nopeudu, ±16 % pehmeästi), kiduksiin-ilmoitus, hiiriohje; vesi samenee syvyyden mukaan ja merenpohja tummenee.
 
@@ -460,6 +462,14 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.36 (käyttäjä 26.11.: "onki taas kelaa", "ukko katoaa jos syön kalan")
+- **Räikkä pois:** v3.33:n vapaa siima mitattiin vavan kärjestä; kärki liikkuu joka kääntymisellä ja heilahduksella → koho vedettiin hiukan lähemmäs eikä se palannut,
+  joten se "kelautui" vähitellen sisään. Nyt `FS.Lf` = vaakaetäisyys pelaajasta + `FP_SLACK` 0,6 m (`fpLineNow`/`fpFreeTether`). Testi: 10 s kääntyilyä → koho liikkui 0,2 m (tuuli), kävely raahaa.
+- **Kalan syönti** (`eat`): syödyn kalan yksilö pois `fl`-pinosta (`flTake`), viimeinen käteen varattu kala vapautetaan (`s.eq=false`, `updateGear`).
+- **Hahmon katoaminen kalaa syödessä:** ei toistunut testeissä (kala kädestä/pikapaikasta, raaka/kypsä, koko saalisketju, syönti kesken tarkasteluanimaation – hahmo näkyvissä, paikallaan, mittakaava 1).
+  Ideajonoon: pyydä käyttäjältä tarkempi tilanne (kuva, raaka vai kypsä, kädestä vai pikapaikasta).
+- Tarkistusrivi v3.36.
 
 ### v3.35 (koukun irrotus ja vesi – käyttäjä 26.11.)
 - **Koukun irrotus (minipeli `HG`):** alue nopeutui joka yrityksellä (+0,07) ja kapeni → nyt nopeus `hgSpeed` = `HG_SP0` 0,16 × (1 ± 16 %) kahdella hitaalla siniaallolla,

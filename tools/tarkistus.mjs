@@ -645,6 +645,11 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('vesi',/path\*\.85/.test(WATER_MATS.low.fragmentShader)&&/smoothstep\(1\.5,12\./.test(WATER_MATS.low.fragmentShader));
     {const a=terrCol(0,0,-.1,0,'sea'),b=terrCol(0,0,-7,0,'sea');ck('pohja',b[0]+b[1]+b[2]<(a[0]+a[1]+a[2])*.6);}
     return e.length?'puuttuu: '+e.join(', '):true;});
+  t('v3.36: onki ei kelaa itsestään – vapaan siiman pituus pelaajasta (ei heiluvasta kärjestä), syödyn kalan yksilö pinosta pois',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('räikkä pois',!/fpTip/.test(fpFreeTether.toString())&&/P\.pos\.x/.test(fpFreeTether.toString())&&FP_SLACK>0&&!/fpTip/.test(fpLineNow.toString()));
+    ck('syönti',/flTake\(s,1\)/.test(eat.toString())&&/s\.eq=false/.test(eat.toString()));
+    return e.length?'puuttuu: '+e.join(', '):true;});
   t('v3.27: kalastuksen uusi fysiikka – ballistinen heitto (35° pisin, vapa ratkaisee), virvelin lataus, maalle lasku ja katkeaminen, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m ja lajien syvyys, kala näkyy vedossa, pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa (ei monistusta), pilaantuminen, naulakot ja laatta, kirja, pakin koristeet, virveli vasemmassa kädessä',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     {const r=[0,15,25,35,45,60].map(a=>fpRange(fpV0(16),a*Math.PI/180)),mx=r.indexOf(Math.max(...r));ck('35° pisin',mx===3&&Math.abs(r[3]-16)<.3&&fpV0(30)>fpV0(16));}

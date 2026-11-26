@@ -229,3 +229,6 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 - Alue ei nopeudu yrityksistä; nopeus vaihtelee pehmeästi ±16 % (`hgSpeed`), leveys vakio. Ilmoitus "Koukku/Uistin jäi pahasti kiinni – kiduksiin!".
 - Hiiriohje (sivuttain liikkuva hiiren kuva), häipyy hiirtä liikutettaessa, 10 kertaa (`hiidenmaa_hgHint`).
 
+## Erä v3.36 – TOTEUTETTU 26.11. (käyttäjä: "onki taas kelaa")
+- Vapaan siiman pituus pelaajasta + 0,6 m löysää (`FP_SLACK`), ei vavan kärjestä → ei räikkää (koho ei hiivi sisään kääntyessä).
+
