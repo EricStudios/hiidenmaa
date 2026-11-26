@@ -167,6 +167,7 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 
 **Muut (ei kalastus):**
 5. **Seikkailijan nimi** asetuksiin kalastajan nimen tilalle: yleinen pelaajan nimi (Asetukset › Ohjaus), jota laatat ja kirja käyttävät (`flags.angler` → esim. `flags.pname`, vanha nimi siirretään).
+   - v3.30 (käyttäjä): nimen voi myös **pyyhkiä** (Asetukset › Seikkailija › 🗑 Pyyhi, `pNameClear`). Jo kaiverretut laatat säilyvät ennätyksinä; seuraava ripustus kysyy nimen uudelleen.
 6. **Koko näyttö: valikon taustan vesi- ja sadeanimaatio käyttäytyy oudosti** (valikon taustakuva `menubg.js`, kuva käyttäjältä 25.11.: sade, lehdet ja vesi venyvät tai siirtyvät).
    Tarkista kaikki koko näytön asettelut ja piirrot (kankaan koko vs. `innerWidth`/`devicePixelRatio`, `resize`-tapahtuma, taustan skaalaus ja rajaus).
 7. **Selaimen zoom (Ctrl + rulla / Ctrl ±) pois pelistä.** Pienempi zoom kasvattaa piirtoresoluutiota → peli hidastuu, ja zoom muuttaa HUD:ia.

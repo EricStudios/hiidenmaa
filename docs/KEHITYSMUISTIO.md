@@ -3,7 +3,10 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.29, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.30, 26.11.2026)
+
+- **Versio 3.30** – valikon taustojen sade, lumi ja pöly eivät enää kulje säännöllisinä riveinä koko näytössä (satunnaiset paikat `mbgH`/`mbgDrift`),
+  hiukkaskerroksen tasainen syntytahti ja tiheys ruudun koon mukaan, seikkailijan nimen pyyhintä (Asetukset › Seikkailija › 🗑 Pyyhi). Ks. versioloki v3.30.
 
 - **Versio 3.29** – kiinteä ongen siima + raahaus, täysi reppu (kala jää koukkuun, karkaa 10–30 s), rimpuilu, pidemmät vavat, lappu ylemmäs, seikkailijan nimi,
   selaimen zoomin esto ja kompensointi, koko näytön valikkotausta, kalastuksen optimointi Low–Medium. Ks. versioloki v3.29.
@@ -444,6 +447,15 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.30 (koko näytön valikkohiukkaset, nimen pyyhintä – käyttäjä 26.11.)
+- **Valikon taustat:** myrskyn/myrskytuulen sade (`mbgRain` + Myrsky), Routaluolan suun lumi ja Kalmankammion pöly laskettiin hilasta (`(i*97+t*v) % W`). Isolla ruudulla
+  hila jää näkyviin vinoina, peräkkäin kulkevina jonoina. Nyt jokaisella on oma satunnainen alkupaikka ja nopeus 0,75–1,25× (`mbgH(i,k)` tiiviste, `mbgDrift`), eikä kuvio riipu ruudun koosta.
+- **Hiukkaskerros (MFX):** täyttö 6/ruutu teki ryppäitä, jotka syntyivät yläreunaan ja kuolivat yhtä aikaa (aallot). Nyt uusia syntyy tasaisella tahdilla
+  `määrä / arvioitu elinikä` (`mfxLife`, `MFX.sb`), alkujoukko on eri-ikäinen (`p.l0`, häivytys siitä), määrä skaalautuu pinta-alaan 0,75–1,6× (`mfxWant`, 1280×720 = 1),
+  lumi ja sade elävät ruudun läpi (elinikä korkeuden mukaan), ja leijuvat hiukkaset (kuura, pöly, valopöly) syntyvät koko ruudulle eivätkä vain yläreunaan.
+- **Seikkailijan nimi:** Asetukset › Seikkailija › 🗑 Pyyhi (`pNameClear`). Jo kaiverretut laatat ja kirjan palkintolaatat säilyvät ennätyksinä; seuraava ripustus kysyy nimen uudelleen.
+- Tarkistusrivi v3.30; v1.51-rivi päivitetty uuteen sateen piirtoon.
 
 ### v3.29 (kiinteä siima, täysi reppu, zoom, koko näyttö, optimointi – käyttäjä 25.–26.11., suunnitelma `docs/KALASTUS_SUUNNITELMA.md` › v3.29 + vastaukset)
 - **Kiinteä siima** (`fpPull`): kala on siiman päässä `FS.L` (pituus koukkuun tarttuessa). Onki ei kelaa: vapa nousee (`FS.lift`, siima lyhenee `FP_LIFT_GAIN` 2,2 m) ja kalan voi

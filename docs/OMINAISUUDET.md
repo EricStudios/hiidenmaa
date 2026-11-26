@@ -886,6 +886,11 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.30 – valikon hiukkaset koko näytössä, nimen pyyhintä
+- **Valikon taustat:** sade, lumi ja pöly satunnaisina pisaroina (`mbgH`/`mbgDrift`, nopeus 0,75–1,25×), ei rivejä millään ruudun koolla.
+- **Hiukkaskerros:** tasainen syntytahti (`mfxLife`), tiheys pinta-alan mukaan 0,75–1,6× (`mfxWant`), alkujoukko eri-ikäinen, lumi/sade elävät ruudun läpi.
+- **Seikkailijan nimi:** voi pyyhkiä (Asetukset › Seikkailija › 🗑 Pyyhi); vanhat laatat säilyvät.
+
 ## v3.29 – kiinteä siima, täysi reppu, zoom ja optimointi
 - **Siima:** kala siiman päässä (`FS.L`). Onki: vapa nousee (siima lyhenee 2,2 m), raahaus kävelemällä (ei rajaa, ei katkeamista). Virveli: kelaus lyhentää + raahaus. Nosto kärkeen:
   kala alle 1,4 m kärjestä tai siima ei ylety pinnalle; ongella vasen nostaa maalla olevan kalan alle 4 m päästä. Irtoaa vain käsiesineen vaihdosta (maalla sätkii, vedessä ui pois).

@@ -372,6 +372,8 @@ function nauPlaqueTick(){const el=document.getElementById('plaqueInfo')||(()=>{c
 const ANG={on:false,v:'',cb:null};
 // v3.29 käyttäjä: yleinen seikkailijan nimi (flags.pname; vanha flags.angler siirretään)
 function pName(){if(!flags.pname&&flags.angler){flags.pname=flags.angler;delete flags.angler;}return flags.pname||'';}
+// v3.30 käyttäjä: nimen pyyhkiminen (Asetukset › Seikkailija › Pyyhi). Jo kaiverretut laatat ja kirjan palkintolaatat säilyvät ennätyksinä; seuraava ripustus kysyy nimen uudelleen.
+function pNameClear(){const had=pName();delete flags.pname;delete flags.angler;if(had)msg('Seikkailijan nimi pyyhitty.');}
 function anglerAsk(cb,cur){ANG.on=true;ANG.v=cur||'';ANG.cb=cb;let el=document.getElementById('nameDlg');if(!el){el=document.createElement('div');el.id='nameDlg';document.body.appendChild(el);}el.hidden=false;anglerDraw();}
 function anglerDraw(){const el=document.getElementById('nameDlg');if(el)el.innerHTML=`<div class="ndBox"><div class="ndT">⚔️ Seikkailijan nimi</div><div class="ndS">Nimesi tällä saarella – kaiverretaan myös naulakon kultaiseen laattaan.</div><div class="ndI">${esc(ANG.v)}<i>|</i></div><div class="ndH">Kirjoita nimi · Enter hyväksyy · Esc peruu</div></div>`;}
 addEventListener('keydown',e=>{if(!ANG.on)return;e.preventDefault();e.stopImmediatePropagation();

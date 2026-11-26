@@ -715,3 +715,10 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Koko näytön vaihto lähettää useita `resize`-tapahtumia kesken vaihdon → valikon tausta piirrettiin väärän kokoisena ja hiukkaset jäivät vanhoihin koordinaatteihin.
   Korjaus: `mbgResize` odottaa 150 ms, kunnes koko on asettunut (myös `fullscreenchange`), skaalaa hiukkaset ja nollaa kohtauksen tilan.
   **Sääntö:** koon muutokseen sidottu raskas uudelleenpiirto aina viiveellä (debounce), ja vanhat koordinaatit skaalataan.
+
+## 101. Valikon sade ja lumi kulkivat koko näytössä säännöllisinä riveinä (v3.30)
+- Taustakohtausten pisarat laskettiin hilasta `x=(i*97+t*v) % (W+100)`, `y=(i*61+t*v2) % (H+40)`. Pienellä ruudulla modulo pyörähtää usein ja kuvio näyttää satunnaiselta,
+  mutta isolla ruudulla pisteet jäävät samoille vinoille suorille → peräkkäiset jonot. Lisäksi hiukkaskerros täytti puuttuvat 6/ruutu: ryppäät syntyivät yhtä aikaa ja kuolivat yhtä aikaa (aallot).
+- Korjaus: oma satunnainen paikka ja nopeus per pisara (`mbgH(i,k)`, `mbgDrift`), tasainen syntytahti `want/mfxLife`, alkujoukko eri-ikäinen (`p.l0`), elinikä ruudun korkeuden mukaan.
+  **Sääntö:** älä sijoita toistuvia hiukkasia `i*vakio % koko` -kaavalla – käytä tiivistettä (`mbgH`). Hiukkasten uusinta tasaisella tahdilla, ei täyttämällä vajetta kerralla.
+
