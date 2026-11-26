@@ -454,6 +454,7 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 - Seikkailija-osio oli vain pelin aikana Ohjaus-sivun pohjalla palautusnapin alla → ei löytynyt. Nyt se on **Ohjaus-sivun ylimpänä ja aina näkyvissä**, myös päävalikossa.
 - **Oletusnimi** `pNameDef` (localStorage `hiidenmaa_pname`): päävalikossa asetettu nimi koskee kaikkia maailmoja; pelissä asetettu nimi tallentuu maailmaan (`flags.pname`, menee edelle) ja oletukseksi.
   `pName()` = maailman nimi → oletusnimi. Pyyhi poistaa molemmat (valikossa vain oletuksen). `anglerAsk(cb,cur,defOnly)`.
+- **Epävakaat testit (ideajono):** satunnaiseen paikkaan perustuvat tarkistusrivit (v2.08 piiritys, v3.06 onki, rakennusosien putoaminen) kaatuvat välillä myös ilman muutoksia → tee niistä deterministisiä (kiinteä paikka / useampi yritys), KORJAUKSET 102.
 - Tarkistettu: v3.30 ei poistanut vanhoja ominaisuuksia (poistetut rivit olivat korvattuja versioita samoista riveistä); tarkistus KAIKKI OK, full157 kartat 0 ja 3 ilman virheitä.
 
 ### v3.30 (koko näytön valikkohiukkaset, nimen pyyhintä – käyttäjä 26.11.)
