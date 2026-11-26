@@ -5,6 +5,9 @@
 /* ---------------- INPUT ---------------- */
 const keys={};let mouseL=false,mouseR=false,locked=false,lockFailed=false,invertY=false;
 const canvas=renderer.domElement;
+/* v3.29 käyttäjä: selaimen zoom pois pelistä – Ctrl/Cmd + rulla (myös kosketuslevyn nipistys) ja Ctrl + / − / 0 estetään; jäljelle jäävä zoom kompensoidaan (settings.js browserZoom) */
+addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey)e.preventDefault();},{passive:false,capture:true});
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&/^(Equal|Minus|NumpadAdd|NumpadSubtract|Digit0|Numpad0|BracketRight|Slash)$/.test(e.code))e.preventDefault();},true);
 /* v3.20 käyttäjä: latausruudun aikana (riimukivi näkyvissä) näppäimet ja napsautukset eivät liikuta hahmoa eivätkä tee mitään; jäljelle jääneet painallukset nollataan. */
 function ldBusy(){const b=window.__ldBusy;return !!b&&Date.now()-b<60000;}   // vain myöhemmät latausruudut (uusi maailma, tallennus), turvaraja 60 s
 /* v3.25 käyttäjä: näppäily (välilyönti, WASD …) skriptien latautuessa antoi virheen "openPanel is not defined" – käsittelijät viittasivat myöhemmin ladattaviin

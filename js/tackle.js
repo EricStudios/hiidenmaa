@@ -102,7 +102,7 @@ function tkBobDress(){const b=FS.bob;if(!b)return;const r=FS.slot&&FS.slot.rig?F
 /* ---------------- 3D-KALA KOUKUSSA (sätkii 3 s noston jälkeen) ---------------- */
 const TKD=[];
 function tkFishMesh(sp,len){const f=FISH_DEF[sp],S=FISH_SHAPE[sp]||{l:14,h:6},g=new THREE.Group(),L=len,H=L*S.h/S.l*(S.eel?1.2:1),T=S.flat?H*.16:H*.46;   // y = pituus (pää +), x = selkä (+) / vatsa (−), z = kylki
-  const geo=new THREE.SphereGeometry(.5,20,14),p=geo.attributes.position,col=new Float32Array(p.count*3),c1=new THREE.Color(f.c),c2=new THREE.Color(f.c2),cc=new THREE.Color(),dk=new THREE.Color(0x14120c),wh=new THREE.Color(0xffffff),r=mulberry32(sp.length*977+sp.charCodeAt(0));
+  const lq=typeof FISH_LQ!=='undefined'&&FISH_LQ,geo=new THREE.SphereGeometry(.5,lq?12:20,lq?8:14),   /* v3.29 Low/Medium kevyempi */p=geo.attributes.position,col=new Float32Array(p.count*3),c1=new THREE.Color(f.c),c2=new THREE.Color(f.c2),cc=new THREE.Color(),dk=new THREE.Color(0x14120c),wh=new THREE.Color(0xffffff),r=mulberry32(sp.length*977+sp.charCodeAt(0));
   const spots=[];for(let i=0;i<16;i++)spots.push([r()-.5,r()*.45-.05,.035+r()*.04]);
   for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);const t=y+.5,tp=S.eel?.85+.15*Math.min(1,t*3):t<.5?.4+.6*Math.pow(t/.5,.7):1;x*=tp;z*=tp;
     const bel=clamp((-x+.06)/.28,0,1);cc.copy(c1).lerp(c2,bel*.85);
@@ -121,7 +121,7 @@ function tkFishMesh(sp,len){const f=FISH_DEF[sp],S=FISH_SHAPE[sp]||{l:14,h:6},g=
   for(const s of [-1,1]){const e=new THREE.Mesh(new THREE.SphereGeometry(L*.026,8,6),tkMat('fe'+(S.eye||'x'),S.eye?new THREE.Color(S.eye).getHex():0xe8e0a0,{roughness:.2}));e.position.set(H*.12,L*.37,s*T*.62);g.add(e);
     const pu=new THREE.Mesh(new THREE.SphereGeometry(L*.014,6,4),tkMat('fp',0x080808,{roughness:.1}));pu.position.set(H*.12,L*.375,s*T*.72);g.add(pu);
     const pf=new THREE.Mesh(shp([[0,0],[-H*.3,-L*.12],[-H*.05,-L*.1]]),fm);pf.position.set(-H*.12,L*.24,s*T*.55);pf.rotation.y=s*.6;g.add(pf);}
-  g.userData.tail=tail;g.traverse(o=>{if(o.isMesh)o.castShadow=true;});return g;}
+  g.userData.tail=tail;g.traverse(o=>{if(o.isMesh)o.castShadow=!lq;});return g;}
 function tkDangle(sp,kg,hold){if(!FISH_DEF[sp]||typeof heldMesh==='undefined'||!heldMesh)return;const L=Math.min(.95,.16+Math.cbrt(Math.max(.02,kg))*.24);
   const piv=new THREE.Group(),fish=tkFishMesh(sp,L);fish.position.y=-.04-L*.5;piv.add(fish);   // suu ylhäällä koukussa
   const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(6),3));const ln=new THREE.Line(lg,new THREE.LineBasicMaterial({color:0xe8e8e0}));ln.frustumCulled=false;
@@ -130,8 +130,8 @@ const _tkTip=new THREE.Vector3();
 function tkDangleTick(dt){for(let i=TKD.length-1;i>=0;i--){const D=TKD[i];D.t+=dt;const tip=heldMesh&&heldMesh.userData.tip;
     if(!tip||(D.t>TK_DANGLE&&!D.hold)){scene.remove(D.piv,D.ln);D.piv.traverse(o=>{if(o.geometry)o.geometry.dispose();});D.ln.geometry.dispose();TKD.splice(i,1);continue;}
     heldMesh.updateMatrixWorld(true);tip.getWorldPosition(_tkTip);const k=D.hold?Math.max(.22,1-D.t/TK_DANGLE):Math.max(0,1-D.t/TK_DANGLE),drop=.35;
-    D.sv+=(-D.sw*9-D.sv*.6)*dt+(Math.random()-.5)*k*14*dt;D.sw+=D.sv*dt;D.piv.position.set(_tkTip.x,_tkTip.y-drop,_tkTip.z);D.piv.rotation.set(D.sw*.35,camYaw,D.sw);
-    D.fish.rotation.y=Math.sin(D.t*18+D.ph)*.55*k;const tl=D.fish.userData.tail;if(tl)tl.rotation.x=Math.sin(D.t*22+D.ph)*.7*k;
+    const hk=D.hold?FP_HANG_K:1;D.sv+=(-D.sw*9-D.sv*.6)*dt+(Math.random()-.5)*k*14*hk*dt;   /* v3.29 koukussa 2× rimpuilu */D.sw+=D.sv*dt;D.piv.position.set(_tkTip.x,_tkTip.y-drop,_tkTip.z);D.piv.rotation.set(D.sw*.35,camYaw,D.sw);
+    D.fish.rotation.y=Math.sin(D.t*18*Math.sqrt(hk)+D.ph)*Math.min(1,.55*k*hk);const tl=D.fish.userData.tail;if(tl)tl.rotation.x=Math.sin(D.t*22*Math.sqrt(hk)+D.ph)*Math.min(1.1,.7*k*hk);
     const a=D.ln.geometry.attributes.position;a.setXYZ(0,_tkTip.x,_tkTip.y,_tkTip.z);a.setXYZ(1,D.piv.position.x,D.piv.position.y-.06,D.piv.position.z);a.needsUpdate=true;}}
 /* ---------------- KALASTUSPAKKI ---------------- */
 const tkPakkiOk=id=>{const d=ITEMS[id];return !!d&&(d.cat==='rod'||(d.tk&&d.tk!=='pakki')||id==='mato'||id==='perkeet'||id==='kalakirja');};
@@ -273,8 +273,8 @@ function tkHud(el){if(TKA.on){el.hidden=false;el.className='wait';el.innerHTML=`
   return false;}
 /* ---------------- ENSIMMÄINEN ONKI (wow-ilmoitus) ---------------- */
 function tkWowTick(){const F=fishF();if(F.rod1)return;if(!inv.some(s=>s&&ITEMS[s.id].cat==='rod'))return;F.rod1=1;if(fishTotal(F)>0)return;
-  const el=document.createElement('div');el.id='tkWow';el.innerHTML=`<div class="tw1">Ensimmäinen onkesi!</div><div class="tw2">Vasen heittää veteen · E laittaa madon koukkuun · tärpätessä vasen nopeasti.<br>Kalastajan pöydällä vaihdat siiman, koukun, kelan, kohon ja vieheen.</div><div class="tw3">Kireitä siimoja!</div>`;
-  document.body.appendChild(el);tkSnd('eka_onki');setTimeout(()=>el.classList.add('out'),7000);setTimeout(()=>el.remove(),8200);}
+  /* v3.29 käyttäjä: ei enää ruudun keskelle – sama vasemmalta kurkistava lappu kuin saaliissa */
+  lappu(icon('onki'),`<b class="mW" style="font-size:15px">Ensimmäinen onkesi!</b><br><span class="mG">Vasen heittää veteen (noin 35° ylös pisin) · E laittaa madon koukkuun · kun koho nykii, vasen nostaa kalan.<br>Kalastajan pöydällä vaihdat siiman, koukun, kelan, kohon ja vieheen.</span><br><b style="color:#e8c070">Kireitä siimoja!</b>`,{t:9});tkSnd('eka_onki');}
 /* ---------------- KUVAKKEET (items.js icon → tkIcon) ---------------- */
 function tkIcon(g,id,d,circ,line,poly){const hx=n=>'#'+n.toString(16).padStart(6,'0'),T=d.tk;g.lineCap='round';
   if(T==='line'){const c=hx(TK_LINE[id].col);circ(24,24,15,'#6a4a2a','#2a1a0c');circ(24,24,11,c);for(let i=0;i<5;i++){g.strokeStyle='rgba(0,0,0,.18)';g.lineWidth=1;g.beginPath();g.arc(24,24,4+i*1.6,0,TAU);g.stroke();}circ(24,24,3.2,'#3a2614');

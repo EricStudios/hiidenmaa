@@ -707,3 +707,11 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - Testeissä pelaajan siirto `P.pos.set` ei siirrä mallia ennen `update()`-kutsua → `heldMesh`-kärki oli vanhassa paikassa (heitto 300 m). `fpTip` palauttaa varapaikan, jos kärki on
   yli 4 m pelaajasta. Yksilökalat (pinot) täyttävät repun testeissä nopeasti – tyhjennä reppu ennen testiä.
 
+
+## 100. Selaimen zoom hidasti peliä, ja koko näytön vaihto sotki valikon taustan (v3.29)
+- Piirtoresoluutio oli `min(devicePixelRatio, 1.5)`. Kun selaimen zoomia pienennetään, `devicePixelRatio` pienenee mutta `innerWidth` kasvaa. Rajauksen takia
+  (esim. HiDPI-näyttö, dpr 2 → 1,5) piirrettävien pikselien määrä kasvoi → peli hidastui, ja HUD pieneni. Korjaus: zoomin pikanäppäimet estetään (input.js), ja jäljelle jäävä
+  zoom kompensoidaan (`browserZoom()` = outerWidth / innerWidth pyöristettynä zoomitasoon): resoluutio lasketaan 100 %:n dpr:stä ja kerrotaan zoomilla, `--hudK` ja `--invK` jaetaan zoomilla.
+- Koko näytön vaihto lähettää useita `resize`-tapahtumia kesken vaihdon → valikon tausta piirrettiin väärän kokoisena ja hiukkaset jäivät vanhoihin koordinaatteihin.
+  Korjaus: `mbgResize` odottaa 150 ms, kunnes koko on asettunut (myös `fullscreenchange`), skaalaa hiukkaset ja nollaa kohtauksen tilan.
+  **Sääntö:** koon muutokseen sidottu raskas uudelleenpiirto aina viiveellä (debounce), ja vanhat koordinaatit skaalataan.

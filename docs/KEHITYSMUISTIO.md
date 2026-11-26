@@ -3,7 +3,10 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.28, 25.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.29, 26.11.2026)
+
+- **Versio 3.29** – kiinteä ongen siima + raahaus, täysi reppu (kala jää koukkuun, karkaa 10–30 s), rimpuilu, pidemmät vavat, lappu ylemmäs, seikkailijan nimi,
+  selaimen zoomin esto ja kompensointi, koko näytön valikkotausta, kalastuksen optimointi Low–Medium. Ks. versioloki v3.29.
 
 - **Versio 3.28** – tasonimike ja taso repun oikeaan alakulmaan (ei peity koko näytöllä).
 
@@ -441,6 +444,25 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.29 (kiinteä siima, täysi reppu, zoom, koko näyttö, optimointi – käyttäjä 25.–26.11., suunnitelma `docs/KALASTUS_SUUNNITELMA.md` › v3.29 + vastaukset)
+- **Kiinteä siima** (`fpPull`): kala on siiman päässä `FS.L` (pituus koukkuun tarttuessa). Onki ei kelaa: vapa nousee (`FS.lift`, siima lyhenee `FP_LIFT_GAIN` 2,2 m) ja kalan voi
+  **raahata kävelemällä taaksepäin** – se seuraa maata pitkin, siima ei katkea eikä etäisyysrajaa ole. Virveli kelaa (siima lyhenee) ja raahaus toimii myös. Kala nousee kärkeen,
+  kun se on kärjen alla (alle 1,4 m) tai siima ei enää yllä maahan/veteen; ongella vasen nostaa maalla olevan kalan (alle 4 m). Iso kala: väsytyksen jälkeen siiman päähän.
+  Kala irtoaa vain, jos **käsiesine vaihtuu** (tai kuolema/uinti; `fpLoseOnLine`): maalla jää sätkimään, vedessä ui pois. Roikkuva kala ei putoa kävellessä.
+- **Täysi reppu:** kalaa ei koskaan pudoteta esineenä (`fishGive` ei pudota, `fishCanFit`). Otto täydellä repulla → "Reppu on täynnä", kala jää koukkuun ja **karkaa 10–30 s**
+  kuluttua (`FS.fullT`, `FP_FULL_T`) pomppaamalla maalle. Maassa sätkivää kalaa ei voi poimia täyteen reppuun; katiskaan jäävät kalat, naulakon vaihto/alas otto estetään.
+- **Rimpuilu:** maalla 1,5× (`FP_FLOP_K`), koukussa 2× (`FP_HANG_K`). **Koho** piilossa aina, kun kala on siimassa tai kärjessä.
+- **Vavat:** onki 2,6 m, kuparivapa ja hiidenvapa 2,35 m (`ROD_LENS`/`rodLen`). Ongen vapa nousee vedossa 0,6 → 1,2 rad.
+- **Lappu** 41 % → 33 %. **Ensimmäisen ongen ilmoitus** ("Kireitä siimoja!") tulee lappuna, ei enää ruudun keskelle.
+- **Seikkailijan nimi** (`pName()`, `flags.pname`; vanha `flags.angler` siirretään) – Asetukset › Ohjaus › Seikkailija; laatat ja kirja käyttävät sitä.
+- **Selaimen zoom:** Ctrl/Cmd + rulla (myös nipistys) ja Ctrl + / − / 0 estetään (input.js). Jäljelle jäävä zoom kompensoidaan: `browserZoom()` (outerWidth / innerWidth
+  pyöristettynä zoomitasoon) → piirtoresoluutio (applyGfx, sama pikselimäärä kuin 100 %:ssa), HUD (`hudK`) ja reppu (`fitInv`). Valikot ja asetussivut eivät kompensoidu.
+- **Koko näyttö, valikon tausta:** koon vaihto käsitellään 150 ms viiveellä, kun koko on asettunut (`mbgResize`, myös `fullscreenchange`); hiukkaset skaalataan uuteen kokoon
+  ja kohtauksen tila nollataan (ennen useat resize-tapahtumat kesken vaihdon piirsivät taustan väärän kokoisena).
+- **Optimointi:** kaikilla esiasetuksilla näkymättömät – kalastus-HUD 10 Hz (ennen DOM joka ruutu), vavan kärki kerran ruudussa (`_fpTC`), kalan häivytys vain kunnes valmis.
+  Low–Medium+ (`FISH_LQ`, `fishLQSet` applyGfx): kalamalli 12×8 (ennen 20×14), ei kalojen varjoja, siima 10 pistettä (16), puolet roiskeista. Ultra/High ennallaan, fysiikka sama.
+- Tarkistus: uusi v3.29-rivi; v3.06-rivin onki kävelee nyt kalan luo (kiinteä siima).
 
 ### v3.28 (tasonimike repun kulmaan – käyttäjä 25.11.)
 - Tasonimike (esim. "Haaksirikkoutunut") näkyi vain repun ollessa auki HUD:n tasomittarin yläpuolella, ja koko näytöllä isompi reppu peitti sen. Nyt nimike ja taso ovat

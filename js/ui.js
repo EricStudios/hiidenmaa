@@ -328,7 +328,7 @@ addEventListener('keyup',e=>{if(e.key==='Shift'){const t=$('#itemTip');if(t)t.hi
 function renderLog(){const fm=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
   $('#logBody').innerHTML=msgLog.length?[...msgLog].reverse().map(m=>`<div class="lg ${m.cls}"><span class="num">${fm(m.at)}</span>${m.t.replace(/</g,'&lt;')}</div>`).join(''):'<div class="note">Ei ilmoituksia vielä.</div>';}
 // v1.32: kiinteän kokoinen reppu skaalataan pienelle näytölle sopivaksi.
-function fitInv(){const el=$('#inv');if(el)el.style.setProperty('--invK',Math.min(1,(innerWidth-16)/1131,(innerHeight-16)/732).toFixed(3));}
+function fitInv(){const el=$('#inv');if(!el)return;const z=typeof browserZoom==='function'?browserZoom():1;el.style.setProperty('--invK',(Math.min(1/z,(innerWidth-16)/1131,(innerHeight-16)/732)).toFixed(3));}   // v3.29 zoom kompensoidaan
 addEventListener('resize',fitInv);
 // v1.40 (lista 4, kohta 28): näppäinopasteet – paneelin oikeaan yläkulmaan "Sulje: P / Tab", pelinäkymän vasempaan alakulmaan "Päävalikko: P".
 const PANEL_KEY={inv:['#inv','inv'],build:['#build','build'],chest:['#chest','interact'],smelt:['#smeltP','interact'],fish:['#fishP',null],pot:['#potP','interact'],prog:['#progP','prog'],log:['#logP','log'],map:['#mapP','map'],dev:['#devP',null],devm:['#devMP',null],devi:['#devIP',null]};

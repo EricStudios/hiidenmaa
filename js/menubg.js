@@ -283,7 +283,12 @@ MBG_SCENES.push(
 /* ---------- ohjaus ---------- */
 function mbgInit(){if(MBG.cv)return;const c=document.createElement('canvas');c.id='menuBg';c.setAttribute('aria-hidden','true');
   const f=$('#menuFade');(f&&f.parentNode?f.parentNode:document.body).insertBefore(c,f||null);MBG.cv=c;MBG.g=c.getContext('2d');MBG.st=document.createElement('canvas');MBG.sg=MBG.st.getContext('2d');
-  addEventListener('resize',()=>{if(MBG.i>=0)mbgSet(MBG.i,true);});}
+  addEventListener('resize',mbgResize);addEventListener('fullscreenchange',mbgResize);}
+/* v3.29 käyttäjä: koko näytössä tausta ja hiukkaset (sade, lehdet, vesi) käyttäytyivät oudosti – koon vaihto tulee useana resize-tapahtumana ja kesken vaihdon.
+   Nyt piirretään uudelleen vasta kun koko on asettunut (150 ms), hiukkaset skaalataan uuteen kokoon ja kohtauksen tila (vanhat koordinaatit) nollataan. */
+let mbgRT=0;
+function mbgResize(){clearTimeout(mbgRT);mbgRT=setTimeout(()=>{const W0=MFX.W,H0=MFX.H;mfxSize();if(W0&&H0&&(W0!==MFX.W||H0!==MFX.H)){const kx=MFX.W/W0,ky=MFX.H/H0;for(const p of MFX.P){p.x*=kx;p.y*=ky;}}
+  if(MBG.cv&&MBG.i>=0){MBG.s={};mbgSet(MBG.i,true);}},150);}
 function mbgSize(){const W=Math.max(320,Math.round(innerWidth*MBG_RES)),H=Math.max(200,Math.round(innerHeight*MBG_RES));
   if(MBG.W!==W||MBG.H!==H){MBG.W=W;MBG.H=H;MBG.cv.width=MBG.st.width=W;MBG.cv.height=MBG.st.height=H;return true;}return false;}
 function mbgSet(i,keepT){mbgSize();MBG.i=i;const S=MBG_SCENES[i],u=Math.min(MBG.W/1000,MBG.H/560);MBG.u=u;MBG.sg.clearRect(0,0,MBG.W,MBG.H);
@@ -353,7 +358,7 @@ const MFX_KIND=['embers','motes','snowlite','fireflies','wisps','dust','runes','
 const MFX_N={frost:70,spores:60,embers:70,motes:60,snowlite:90,fireflies:45,wisps:30,dust:55,runes:34,storm:160,snow:170,magic:80};
 function mfxSprite(c){if(MFX.spr[c])return MFX.spr[c];const v=document.createElement('canvas');v.width=v.height=32;const g=v.getContext('2d'),gr=g.createRadialGradient(16,16,0,16,16,16);
   gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.18,c);gr.addColorStop(.5,c.replace(/[\d.]+\)$/,'.25)'));gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,32,32);return MFX.spr[c]=v;}
-function mfxInit(){if(MFX.cv)return;MFX.cv=$('#menuFx');if(!MFX.cv)return;MFX.g=MFX.cv.getContext('2d');mfxSize();addEventListener('resize',mfxSize);
+function mfxInit(){if(MFX.cv)return;MFX.cv=$('#menuFx');if(!MFX.cv)return;MFX.g=MFX.cv.getContext('2d');mfxSize();addEventListener('resize',mbgResize);
   const M=$('#menu');M.addEventListener('mousemove',e=>{MFX.mx=e.clientX;MFX.my=e.clientY;});M.addEventListener('mouseleave',()=>{MFX.mx=MFX.my=-999;});
   M.addEventListener('mouseover',e=>{const b=e.target.closest&&e.target.closest('.mbtn,.btn,.mBack,.world');if(!b||b.contains(e.relatedTarget))return;const r=b.getBoundingClientRect();
     for(let i=0;i<7;i++)mfxPush(mfxSpark(r.right-6-Math.random()*20,r.top+Math.random()*r.height,'rgba(255,170,80,1)',60));});

@@ -156,7 +156,7 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 
 ---
 
-## Seuraava erä (v3.29) – suunniteltu, ei vielä toteutettu (käyttäjä 25.11.)
+## Erä v3.29 – TOTEUTETTU 26.11. (käyttäjä 25.11.)
 **Kalastus:**
 1. **Koho pois näkyvistä, kun kala on koukussa.** Nyt koho jää maahan tai veteen, kun kala tulee onkeen ja nousee kärkeen. Koho piilotetaan vedon ja roikkumisen ajaksi
    (`fishMeshes`/`FS.bob`: myös `hang`/`unhook`-tiloissa ja kun kala on siimassa), tai se seuraa siimaa kalan suun yläpuolella.
@@ -185,7 +185,7 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 12. **Täysi reppu:** kalat eivät putoa maahan esineinä, vaan tulee ilmoitus "Reppu on täynnä".
 13. **Kala voi karata koukusta 10–30 sekunnissa:** se pomppaa irti maalle, josta se voi sätkiä takaisin veteen (sama pudotusfysiikka kuin v3.27:ssä).
 
-### Kysyttävä käyttäjältä ennen v3.29:n toteutusta (ehdotukseni suluissa)
+### Kysytyt kysymykset (vastaukset alla)
 - **Raahaus:** mitä tapahtuu, kun nostettua kalaa raahataan kävelemällä kauas? (Ehdotus: kala raahautuu maata pitkin, siima ei katkea, ei etäisyysrajaa.
   Vaihtoehdot: kala roikkuu aina ilmassa, tai yli 8 m raahaus voi katkaista siiman.)
 - **Karkausajastin (10–30 s):** milloin se käy? (Ehdotus: vain kun kala roikkuu tai sitä raahataan, ei vedossa eikä väsytyksessä.
@@ -197,3 +197,13 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 - **Virveli:** koskeeko kiinteä siima ja raahaus myös virveliä? (Ehdotus: ei – virveli kelaa kärkeen kuten nyt, mutta raahaus kävelemällä toimii myös sillä.)
 - **Optimointi:** saako matalilla esiasetuksilla keventää näkyvästi (esim. roiskeet, siiman pisteet, kalan varjo)? (Ehdotus: Ultra ja High ennallaan, Medium ja Low kevyempiä.)
 - **Pidempi onki:** riittääkö 2,6 m, vai koskeeko pidennys myös kupari- ja hiidenvapaa? (Ehdotus: kaikki vavat +0,5 m.)
+
+### Vastaukset (käyttäjä 26.11.) – v3.29 toteutetaan näillä
+- **Raahaus:** kala raahautuu maata pitkin, siima ei katkea, etäisyysrajaa ei ole.
+- **Karkaus 10–30 s:** **vain täyden repun kanssa.** Kun reppu on täynnä, kala jää koukkuun ja tulee ilmoitus. Jos tilaa ei tule ajoissa, kala pomppaa irti maalle.
+- **Täysi reppu:** "Reppu on täynnä" – kala jää roikkumaan koukkuun (ei pudoteta esineenä).
+- **Lappu:** 41 % → 33 %.
+- **Rimpuilu:** maalla 1,5×, koukussa 2×.
+- **Virveli:** kelaa kuten nyt, ja lisäksi raahaus kävelemällä toimii.
+- **Optimointi:** Ultra ja High ennallaan, Medium ja Low kevyempiä. Kalojen mallit ja tekstuurit sekä piirron toisto kevennetään matalilla esiasetuksilla. **Fysiikka ei saa muuttua.**
+- **Vavat:** kaikki vavat +0,3 m (kuparivapa ja hiidenvapa 2,35 m), **onki 2,6 m**.

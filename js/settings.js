@@ -100,18 +100,23 @@ function autoOn(k){if(SET.noAuto)return false;if(k==='q'&&shUltraOn())return fal
 // v2.63 HUD-skaala: CSS-muuttuja --hudK (#hud zoom, maailmaan sidotut tekstit ja palkit kumoavat ja skaalaavat itse; css/style.css)
 // Yli 100 %: rajoitetaan näytön koon mukaan (HUD tarvitsee noin HUD_MIN_W × HUD_MIN_H pikseliä ilman päällekkäisyyksiä), 100 % ja alle ennallaan.
 const HUD_MIN_W=1000,HUD_MIN_H=620;
-function hudK(){const k=clamp(+SET.hudScale||1,.6,1.5);return k>1?Math.max(1,Math.min(k,innerWidth/HUD_MIN_W,innerHeight/HUD_MIN_H)):k;}
+/* v3.29 käyttäjä: SELAIMEN ZOOM ei muuta peliä. Arvio browserZoom() = outerWidth / innerWidth pyöristettynä selaimen zoomitasoon (Chrome/Edge/Firefox; ikkunan
+   kehys ±6 %). HUD (--hudK), reppu (--invK) ja piirtoresoluutio (applyGfx) kompensoidaan zoomilla → sama koko ja sama suorituskyky. Ctrl + rulla ja Ctrl + / − / 0
+   estetään pelissä (input.js). */
+const ZOOM_LV=[.25,.33,.5,.67,.75,.8,.9,1,1.1,1.25,1.5,1.75,2,2.5,3,4,5];
+function browserZoom(){const r=outerWidth&&innerWidth?outerWidth/innerWidth:1;if(!isFinite(r)||r<.2||r>5.5)return 1;let b=1,bd=9;for(const z of ZOOM_LV){const d=Math.abs(z-r)/z;if(d<bd){bd=d;b=z;}}return bd<.06?b:1;}
+function hudK(){const z=browserZoom(),k0=clamp(+SET.hudScale||1,.6,1.5),k=k0>1?Math.max(1,Math.min(k0,innerWidth*z/HUD_MIN_W,innerHeight*z/HUD_MIN_H)):k0;return k/z;}
 function hudScaleApply(){const k=hudK();document.documentElement.style.setProperty('--hudK',String(+k.toFixed(3)));document.documentElement.style.setProperty('--chatK',String(clamp(+SET.chatScale||1,.6,1.6)));}   // v2.99 --chatK: viestit (chat) ja ilmoitukset
-addEventListener('resize',()=>hudScaleApply());
+let zoomLast=1;addEventListener('resize',()=>{hudScaleApply();const z=browserZoom();if(z!==zoomLast){zoomLast=z;if(typeof renderer!=='undefined'&&started)applyGfx();}});   // v3.29 zoomin muutos → resoluutio
 function applyGfx(){if(typeof hintApply==='function')hintApply();   /* v3.08 */
   hudScaleApply();
   if(typeof blendApply==='function')blendApply(+SET.biomeBlend||0);   // v2.65 biomien sekoitus
   if(+SET.terrFineX>8)SET.terrFineX='8';   // v2.65 16× poistettu (vanha tallennettu arvo → 8×)
   if(typeof TFINE!=='undefined')terrFineSet(+SET.terrFineX||(SET.terrFine?2:0));   // v2.63 tiheämpi maaston väritys (Extra 4/8/16 ohittaa esiasetuksen 2×)
-  {const pi=presetIdx();deckSoftSet(pi===7||(pi<0&&(+SET.renderDist||0)>=520));}   // v2.49 pehmeä pilvimatto Ultralla
+  {const pi=presetIdx();deckSoftSet(pi===7||(pi<0&&(+SET.renderDist||0)>=520));if(typeof fishLQSet==='function')fishLQSet(pi);}   // v3.29 kalastuksen kevyt ulkoasu Low–Medium+   // v2.49 pehmeä pilvimatto Ultralla
   if(typeof grassDirty!=='undefined')grassDirty=true;   // v1.00 ruohon tiheys vaihtui
   for(const k of ['res','fx','dist'])if(!autoOn(k))AUTO[k]=0;if(!autoOn('q')&&typeof QUAL!=='undefined')QUAL.lvl=0;
-  const dpr=devicePixelRatio||1,pr=(SET.res==='native'?Math.min(dpr,2):Math.min(dpr,1.5)*(+SET.res||1))*AUTO_K.res[AUTO.res];
+  const zK=browserZoom(),dpr=(devicePixelRatio||1)/zK,pr=(SET.res==='native'?Math.min(dpr,2):Math.min(dpr,1.5)*(+SET.res||1))*AUTO_K.res[AUTO.res]*zK;   // v3.29 zoom ei muuta piirrettävien pikselien määrää
   if(Math.abs(renderer.getPixelRatio()-pr)>.001){renderer.setPixelRatio(pr);renderer.setSize(innerWidth,innerHeight);}
   {const ps=+SET.ptRes||384,l=LIGHTS[0];if(l.shadow.mapSize.x!==ps){l.shadow.mapSize.set(ps,ps);if(l.shadow.map){l.shadow.map.dispose();l.shadow.map=null;}l.shadow.needsUpdate=true;}}
   sun.shadow.autoUpdate=shUltraOn()||SET.shRate!=='slow'&&!SET.shFar;   // v1.44 shFar: ai.js päivittää itse; v1.80 shUltra: joka ruutu
@@ -369,11 +374,11 @@ function renderSettings(){const t=$('#setTabs');t.innerHTML='';
       row('Chatin ja ilmoitusten koko'+(isDef('chatScale')?' <span class="defTag">oletus</span>':''),sldHTML('sChat',.6,1.6,.05,SET.chatScale),`<span id="sChatV">${Math.round(SET.chatScale*100)} %</span>`)+   /* v2.99 */
       `<div class="note" style="grid-column:1/-1;margin:-4px 0 4px">Koko pelin näkymän päällä oleva HUD: palkit, pikapaikat, kartta, kello, tehtävä, tavoite, viestit, tähtäin, pomopalkki, bannerit ja olentojen palkit. Jokainen osa kasvaa omasta reunastaan, joten mikään ei mene päällekkäin reunan yli. Paneelit (reppu, rakentaminen, kartta) eivät muutu.</div>`
     }</div>`+resetBtn+
-      (started?`<h4 class="setSub" style="margin-top:22px">Kalastus</h4><div class="setGrid">${row('Kalastajan nimi',`<button class="btn sm" id="s_angler">${flags.angler?esc(flags.angler)+' – vaihda':'Aseta nimi'}</button>`,'kaiverretaan naulakon kultaiseen laattaan ja kalakirjan palkintolaattaan (tämä maailma)')}</div>`:'')+   /* v3.27 */
+      (started?`<h4 class="setSub" style="margin-top:22px">Seikkailija</h4><div class="setGrid">${row('Seikkailijan nimi',`<button class="btn sm" id="s_angler">${pName()?esc(pName())+' – vaihda':'Aseta nimi'}</button>`,'nimesi tässä maailmassa – näkyy mm. naulakon kultaisessa laatassa ja kalakirjan palkintolaatassa')}</div>`:'')+   /* v3.27 */
       `<h4 class="setSub" style="margin-top:22px">Kehittäjä</h4><div class="setGrid">${row('Kehittäjätyökalut (DEV)',tglHTML('s_devOn',DEV),DEV?'DEV-valikko (Ä), 10× nopeus (V), jumalvoimat, kaikki ohjeet auki – vaihto lataa sivun uudelleen (peli tallennetaan)':'kehittäjien testityökalut – oletus pois; vaihto lataa sivun uudelleen (peli tallennetaan)')}</div>`+
       `<div class="proSec"><h4 class="setSub">Ammattilaisille ja vertailuun</h4><div class="setGrid">${row('Vanha maailman lataus (v3.09)',tglHTML('s_oldLoad',!!SET.oldLoad),'ennen v3.10:tä käytetty tapa: maailmaa ei piirretä valmiiksi latausruudussa, joten intro lataa näkyvästi – vain vertailuun ja testaukseen. Vaihto lataa pelin uudelleen (peli tallennetaan).')}</div></div>`;   /* v1.82; v3.10 vanha lataus */
     bindSet(SET_PAGES.ctl);$('#bPageReset').onclick=()=>resetPage('ctl');hintRowsBind();
-    {const an=$('#s_angler');if(an)an.onclick=()=>anglerAsk(()=>{an.textContent=flags.angler+' – vaihda';},flags.angler||'');}   // v3.27 kalastajan nimi
+    {const an=$('#s_angler');if(an)an.onclick=()=>anglerAsk(()=>{an.textContent=pName()+' – vaihda';},pName());}   // v3.29 seikkailijan nimi
     $('#s_oldLoad').onclick=()=>{const go=()=>{try{if(started&&!P.dead)saveGame(true);}catch(e){}SET.oldLoad=!SET.oldLoad;saveSet();location.reload();};   // v3.10
       keyDialog(SET.oldLoad?'Palataanko uuteen maailman lataukseen?':'Otetaanko vanha maailman lataus (v3.09) käyttöön?',[['Vahvista',go],['Peruuta',null]],'Peli tallennetaan ja ladataan uudelleen.');};
     $('#s_devOn').onclick=()=>{const go=()=>{try{if(started&&!P.dead)saveGame(true);localStorage.setItem('hiidenmaa_devon',DEV?'0':'1');}catch(e){}location.reload();};

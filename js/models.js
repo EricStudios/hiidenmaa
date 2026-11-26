@@ -331,7 +331,7 @@ function makeHeld(id){
       g.add(poly([[.18,.05],[.18+L-.14,.05],[.18+L,0],[.18+L-.14,-.05],[.18,-.05]],.03,bm));break;}
     case 'lapio':{shaft(g,.95,W);g.add(poly([[.82,.1],[1.0,.1],[1.12,.0],[1.0,-.1],[.82,-.1]],.03,metalOf(0x8a96a3,{roughness:.5})));const gr=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.06),W);gr.position.set(0,0,-.08);g.add(gr);break;}
     case 'onki':case 'kuparivapa':case 'hiidenvapa':{   // v3.08 käyttäjä: 3-osainen taipuva vapa (tyvi → keski → kärki, nivelet userData.bend), koukku kärjen päässä
-      const simple=id==='onki',c=id==='kuparivapa'?0xd98a4e:0x5fe6d9,wood=smat(simple?0x9a7a4a:0x5a3a22),L=ROD_LEN,segs=[[0,1.15,.019,.014],[1.15,.5,.014,.009],[1.65,L-1.65-.1,.009,.004]];
+      const simple=id==='onki',c=id==='kuparivapa'?0xd98a4e:0x5fe6d9,wood=smat(simple?0x9a7a4a:0x5a3a22),L=rodLen(id),segs=[[0,1.15,.019,.014],[1.15,.5,.014,.009],[1.65,L-1.65-.1,.009,.004]];
       let parent=g;const bends=[];
       segs.forEach(([z0,len,r0,r1],k)=>{const sg=new THREE.Group();sg.position.z=k?segs[k-1][1]:-.1;parent.add(sg);if(k)bends.push(sg);
         const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,len,7),k===2&&!simple?mat(c,{metalness:.4,roughness:.4}):wood);m.rotation.x=Math.PI/2;m.position.z=len/2;m.castShadow=true;sg.add(m);parent=sg;});

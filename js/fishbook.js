@@ -30,7 +30,7 @@ function fbPage(sp){return FB_FIRST_SP+FB_SP.indexOf(sp);}
 /* ---------------- SAALIS (fish.js fishLand) ---------------- */
 // kirjaa saaliin: pituus, arvo, paras yksilö, luokkatilasto, toiveet ja saavutukset → palauttaa ilmoitustekstin
 function fbCatch(sp,kg,first,rec,cm0){const F=fishF(),cm=cm0||fbLen(sp,kg,Math.random()),V=fishValue(sp,kg,cm);F.best=F.best||{};F.cls=F.cls||{};F.cls[V.cls]=(F.cls[V.cls]||0)+1;
-  const b=F.best[sp];if(!b||V.s>b.s)F.best[sp]={kg,cm,s:+V.s.toFixed(4),pct:+V.pct.toFixed(4),cls:V.cls,d:dayN,tod:+dayT.toFixed(4),nm:flags.angler||''};   /* v3.27 palkintolaatta */
+  const b=F.best[sp];if(!b||V.s>b.s)F.best[sp]={kg,cm,s:+V.s.toFixed(4),pct:+V.pct.toFixed(4),cls:V.cls,d:dayN,tod:+dayT.toFixed(4),nm:pName()};   /* v3.27 palkintolaatta */
   if(V.cls>=5)F.legend=(F.legend||0)+1;fbWishCheck(sp,V);
   const C=FB_CLS[V.cls],text=`Sait: ${ITEMS[sp].n} ${fbKg(kg)} kg, ${cm} cm (${C.n})${first?' – uusi laji!':''}${rec?' – uusi ennätys!':''} – katso kalakirjan sivu ${fbPage(sp)}`;
   /* v3.27 käyttäjä: värillinen saalisviesti – muu teksti harmaa, laji valkoinen, paino ja harvinaisuus arvoluokan värillä */

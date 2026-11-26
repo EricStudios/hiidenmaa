@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.28';
+:root{--css-v:'3.29';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1170,7 +1170,7 @@ body.noActH #prompt{display:none!important}
 /* v3.21 valikon nappien ohjerivit vain kunnes nappia on käytetty (SET.alwaysBtnHints → body.showBH) */
 body:not(.showBH) #menu .mbtn.bhUsed small.bh,body:not(.showBH) #menu .mbtn.bhUsed .bh{display:none}
 /* v3.27 SAALISLAPPU: liukuu vasemmalta (kurkistaa 0,4 s), pysyy 6 s, liukuu pois; enintään 3 allekkain (fishphys.js lappu) – vasemman reunan väli tilarivin ja chatin välissä */
-#lappuBox{position:absolute;left:0;top:41%;display:flex;flex-direction:column;gap:6px;pointer-events:none;z-index:4}
+#lappuBox{position:absolute;left:0;top:33%;display:flex;flex-direction:column;gap:6px;pointer-events:none;z-index:4}
 #lappuBox .lappu{display:flex;align-items:center;gap:10px;max-width:min(440px,70vw);padding:8px 16px 8px 12px;border-radius:0 6px 6px 0;
   background:linear-gradient(90deg,rgba(46,34,22,.95),rgba(30,23,16,.9));border:1px solid rgba(232,164,74,.35);border-left:none;box-shadow:0 4px 16px rgba(0,0,0,.5),inset 0 0 18px rgba(232,164,74,.06);
   transform:translateX(-105%);opacity:0;transition:transform .42s cubic-bezier(.2,.9,.3,1.15),opacity .3s}

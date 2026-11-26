@@ -886,6 +886,18 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.29 – kiinteä siima, täysi reppu, zoom ja optimointi
+- **Siima:** kala siiman päässä (`FS.L`). Onki: vapa nousee (siima lyhenee 2,2 m), raahaus kävelemällä (ei rajaa, ei katkeamista). Virveli: kelaus lyhentää + raahaus. Nosto kärkeen:
+  kala alle 1,4 m kärjestä tai siima ei ylety pinnalle; ongella vasen nostaa maalla olevan kalan alle 4 m päästä. Irtoaa vain käsiesineen vaihdosta (maalla sätkii, vedessä ui pois).
+- **Täysi reppu:** ei pudotuksia. Kala jää koukkuun ja karkaa 10–30 s kuluttua maalle; sätkivää kalaa ei voi poimia; katiska pitää kalat; naulakko ei vaihda/anna kalaa.
+- **Rimpuilu:** maalla hyppyväli / 1,5, hyppy √1,5 korkeampi; koukussa heilunta ja pyrstö 2×.
+- **Vavat:** onki 2,6 m, kupari- ja hiidenvapa 2,35 m.
+- **Lappu** 33 % korkeudella; ensimmäisen ongen ohje lappuna (9 s).
+- **Seikkailijan nimi** (Asetukset › Ohjaus › Seikkailija, `flags.pname`).
+- **Selaimen zoom:** Ctrl + rulla / + / − / 0 estetty; zoom kompensoidaan resoluutiossa, HUD:ssa ja repussa (`browserZoom`).
+- **Valikon tausta** piirretään uudelleen koon asetuttua (150 ms, myös koko näytön vaihto).
+- **Optimointi Low–Medium+:** kalamalli 12×8, ei kalojen varjoja, siima 10 pistettä, puolet roiskeista. Kaikilla: kalastus-HUD 10 Hz.
+
 ## v3.28 – tasonimike repussa
 - Tasonimike ja taso näkyvät repun oikeassa alakulmassa (`#invLvl`, ui.js `updateHUD`). HUD:n tasomittari oikeassa alakulmassa ilman nimikettä.
 
@@ -910,7 +922,7 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   → Pilaantunut kala (ruoka 2, sairastuttaa aina 70 s). Raaka kala: sairastuminen 75 %, loinen 50 % (1–10 min, nälkä ×1,2).
 - **Vapautus:** E kala kädessä veden äärellä → repliikki (pieni/iso/mikä tahansa), +1 XP, seuraava tärppi samassa vedessä ×0,9 aika.
 - **Naulakot:** Kalanaulakko (1 kala, taso 3) ja Palkintotaulu (3 kalaa, taso 6, puu 6 + rauta 2 + pihka 2). Paikka tähtäyksen mukaan. Laatan tiedot lähellä (4,5 m) katsottaessa.
-  Kalastajan nimi `flags.angler` (enintään 24 merkkiä).
+  Seikkailijan nimi `flags.pname` (v3.29; ennen `flags.angler`), enintään 24 merkkiä.
 - **Kalakirja:** lajisivulla syvyys + palkintolaatta (kalastaja, päivä, kello, paino, pituus, luokka); sivu "Mikä vaikuttaa saaliiseen"; huhu 20 % vedelle tullessa (0,5 pv väli) → laji ilman kuvaa.
 - **Kalastuspakki:** kyljissä enintään 8 viehettä/koukkua (2 / laji).
 - **Virveli kädessä:** vasen käsi (toinen käsi vapautetaan), oikea IK kammelle, kampi 2,2 kierrosta/s × kelan nopeus kelatessa.
