@@ -611,6 +611,13 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('pyyhintä',(()=>{const o=flags.pname,d=pNameDef();flags.pname='Testi';pNameClear();const ok=pName()==='';if(o)flags.pname=o;if(d)pNameDef(d);return ok;})());
     ck('v3.31 nimi aina näkyvissä (Ohjaus ylimpänä, myös valikossa) + oletusnimi',/Seikkailija<\/h4>/.test(renderSettings.toString())&&!/started\?`<h4 class="setSub" style="margin-top:22px">Seikkailija/.test(renderSettings.toString())&&typeof pNameDef==='function'&&/defOnly/.test(anglerAsk.toString()));
     return e.length?'puuttuu: '+e.join(', '):true;});
+  t('v3.32: fysiikka ei riipu ruudunpäivityksestä – hyppy tarkkana parabelina (sama korkeus 20–144 FPS), nuolet ja tähtäysviiva puolikkaalla painovoimalla, ongen heitto välivaiheilla ≤ 1/240 s',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('hyppy',JUMP_V===7.02&&/gH=11\*dt\*dt/.test(updatePlayer.toString())&&/P\.vy\*dt\+gH/.test(updatePlayer.toString()));
+    ck('nuoli',/p\.g\*dt\*\.5/.test(updateProjs.toString())&&/bs\.g\*dt\*\.5/.test(bowTraj.toString()));
+    ck('heitto',/dt\*240/.test(fpFly.toString()));
+    {const g=22,v=JUMP_V,h=[20,30,60,144].map(f=>{const dt=1/f;let y=0,vy=v,m=0;for(let i=0;i<f*2;i++){vy-=g*dt;y+=vy*dt+g/2*dt*dt;m=Math.max(m,y);}return m;});ck('korkeus '+h.map(x=>x.toFixed(3)).join('/'),Math.max(...h)-Math.min(...h)<.03);}
+    return e.length?'puuttuu: '+e.join(', '):true;});
   t('v3.27: kalastuksen uusi fysiikka – ballistinen heitto (35° pisin, vapa ratkaisee), virvelin lataus, maalle lasku ja katkeaminen, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m ja lajien syvyys, kala näkyy vedossa, pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa (ei monistusta), pilaantuminen, naulakot ja laatta, kirja, pakin koristeet, virveli vasemmassa kädessä',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     {const r=[0,15,25,35,45,60].map(a=>fpRange(fpV0(16),a*Math.PI/180)),mx=r.indexOf(Math.max(...r));ck('35° pisin',mx===3&&Math.abs(r[3]-16)<.3&&fpV0(30)>fpV0(16));}

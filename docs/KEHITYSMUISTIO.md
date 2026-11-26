@@ -3,7 +3,12 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.31, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.32, 26.11.2026)
+
+- **Versio 3.32** – reiluus: grafiikka-asetukset ja FPS eivät muuta pelin fysiikkaa. Hyppy, nuolet, tähtäysviiva ja ongen heitto lasketaan tarkasti
+  (sama tulos 20–144 FPS). Auditointi: spawnaus, tekoäly ja törmäykset eivät riipu asetuksista. Ks. versioloki v3.32 ja Pysyvä periaate alla.
+- **PYSYVÄ PERIAATE (käyttäjä 26.11.):** grafiikka vaikuttaa vain pelaajan omaan näkymään – pelin säännöt, fysiikka, spawnaus ja tekoäly samat kaikilla
+  asetuksilla ja FPS:illä (kuin moninpelissä). Uusi liike/painovoima: tarkka integrointi (puolikas painovoima ennen ja jälkeen tai `+½gdt²`), ei `SET.*`-arvoja pelilogiikkaan.
 
 - **Versio 3.31** – Seikkailijan nimi aina näkyvissä Asetukset › Ohjaus -sivun ylimpänä (ennen vain pelin aikana sivun pohjalla), päävalikosta asetettu nimi = oletusnimi kaikille maailmoille.
 
@@ -449,6 +454,16 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.32 (grafiikka ei saa muuttaa pelattavuutta – käyttäjä 26.11.)
+- **Auditointi** (testit `scratchpad/t328/det.mjs`, `spawn.mjs`, `fps.mjs`): samoilla syötteillä pelaajan reitti on identtinen Low/Medium/Ultra; olentojen määrä yöllä sama (20–23 elossa,
+  vaihtelu yhtä suurta saman asetuksen sisällä); spawnaus (`spawnTick`/`spawnSpot`), tekoäly, törmäykset ja näköyhteys (`pointBlocked`) eivät lue grafiikka-asetuksia.
+  Sumun takana olevia olentoja ei piirretä/animoida, mutta niiden tekoäly päivittyy normaalisti.
+- **Löytyi ja korjattiin: hyppy riippui FPS:stä** (20 FPS 1,00 m, 30 FPS 1,06 m, 60 FPS 1,12 m, 144 FPS 1,15 m) → tarkka parabeli (`gH=½·22·dt²`), `JUMP_V` 7,02 → **1,12 m kaikilla**.
+- **Nuolet** (`updateProjs`) ja **tähtäysviiva** (`bowTraj`, laski aina 60 FPS:llä): painovoima puoliksi ennen ja jälkeen siirron → sama rata kaikilla FPS:illä, viiva vastaa oikeaa nuolta.
+- **Ongen heitto** (`fpFly`, ilmanvastus): välivaiheet ≤ 1/240 s → heiton pituus ei riipu FPS:stä.
+- **Jäljelle jäävät (vain näkymää, raportoitu käyttäjälle):** näkyvyysmatka (Low sumu ~30 m yöllä, Ultra ~250 m), ruoho/usva pois Low-asetuksilla → hieman parempi näkyvyys;
+  visuaaliset efektit kuluttavat samaa `Math.random`-jonoa kuin pelilogiikka (ei suosi ketään, mutta estää täsmälleen toistettavan simuloinnin – moninpelissä palvelin päättäisi).
 
 ### v3.31 (nimen asetus löytyy – käyttäjä 26.11. "missä nimen päättäminen")
 - Seikkailija-osio oli vain pelin aikana Ohjaus-sivun pohjalla palautusnapin alla → ei löytynyt. Nyt se on **Ohjaus-sivun ylimpänä ja aina näkyvissä**, myös päävalikossa.

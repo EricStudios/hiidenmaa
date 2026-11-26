@@ -18,6 +18,9 @@ let torchFl=null,torchBarT=0,torchIgn=0,shDark=0;const torchPh=[Math.random()*TA
 const OVER_STAM=5;   // v2.67 ylikuorman kestävyyskulutus (/s)
 const SHIELD_STAM=1,SHIELD_REST=20;   // v2.85 kilven pito 1/s, uupuneena nosto vasta 20 kestävyydellä
 const AFK_NOSTR_INSP=.3;   // v2.99 esine oikeassa kädessä: rapsutuksen tilalla 30 % F-tarkastelu, 70 % hengitys ja pään pyörittely
+/* v3.32 käyttäjä: grafiikka/FPS ei saa muuttaa pelin fysiikkaa. Hyppy lasketaan tarkkana parabelina → huippu v²/2g = 1,12 m kaikilla
+   ruudunpäivityksillä (ennen 20 FPS 1,00 m … 144 FPS 1,15 m). JUMP_V valittu niin, että korkeus = entinen 60 FPS:n hyppy. */
+const JUMP_V=7.02;
 function updatePlayer(dt){
   if(P.dead)return;updatePlayerBurn(dt);if(P.dead)return;
   P.invul=Math.max(0,P.invul-dt);P.stagger=Math.max(0,P.stagger-dt);P.hurtFlash=Math.max(0,P.hurtFlash-dt);
@@ -70,14 +73,15 @@ function updatePlayer(dt){
   {const jd=state==='play'&&kd('jump');if(jd&&!P.jumpHeld){if(devOn('fly')&&playTime-(P.jumpTap||-9)<.35){P.flying=!P.flying;P.vy=0;msg(P.flying?'Lento päällä (välilyönti ylös, Shift alas).':'Lento pois.');P.jumpTap=-9;}else P.jumpTap=playTime;}P.jumpHeld=jd;if(!devOn('fly'))P.flying=false;}
   const vK=DEV&&keys.KeyV?6:1;   // v1.92: V pohjassa myös lento 6× nopeampi
   if(P.flying){const fs=(keys.ControlLeft||keys.ControlRight?32:16)*vK;P.vel.x=lerp(P.vel.x,dx*fs,kExp(6,dt));P.vel.z=lerp(P.vel.z,dz*fs,kExp(6,dt));}
-  if(state==='play'&&kd('jump')&&P.onGround&&!P.swim&&P.stam>=8&&!over&&!P.flying&&!P.inTent){P.vy=7.2;P.onGround=false;P.stam-=8*(P.upK||1);P.stamDelay=.8;}
+  if(state==='play'&&kd('jump')&&P.onGround&&!P.swim&&P.stam>=8&&!over&&!P.flying&&!P.inTent){P.vy=JUMP_V;P.onGround=false;P.stam-=8*(P.upK||1);P.stamDelay=.8;}
   const lad=!P.swim&&!P.dead&&ladderAt(P.pos);P.onLadder=!!lad;
+  let gH=0;
   if(P.flying){P.vy=lerp(P.vy,((kd('jump')?9:0)-(keys.ShiftLeft||keys.ShiftRight?9:0))*vK,kExp(6,dt));P.onGround=false;}
   else if(P.swim){if(P.swUp){const top=wy+waveAt(P.pos.x,P.pos.z)-1.3+Math.sin(playTime*1.7)*.06;P.vy=lerp(P.vy,clamp((top-P.pos.y)*2.2,-1.5,2.6),kExp(3,dt));}
     else P.vy=lerp(P.vy,-.42,kExp(1.5,dt));}   // v2.18: hidas vajoaminen ilman välilyöntiä
   else if(lad&&(kd('fwd')||kd('jump')||kd('back'))){P.vy=kd('back')&&!kd('fwd')&&!kd('jump')?-2.6:2.6;P.onGround=false;}
   else if(lad&&!P.onGround){P.vy=Math.max(P.vy,-1);}
-  else P.vy-=22*dt;
+  else{P.vy-=22*dt;gH=11*dt*dt;}   // v3.32: tarkka parabeli (gH) – hypyn korkeus ei riipu ruudunpäivityksestä (KORJAUKSET 103)
   const feet=P.pos.y;
   P.pos.x+=P.vel.x*dt;P.pos.z+=P.vel.z*dt;
   // v0.86 erillinen tönäisy (hirvi, karhu: def.kb): ei muuta tavallista liikefysiikkaa, vaimenee e^(−4,5 t) → matka ≈ kb / 4,5 m
@@ -87,7 +91,7 @@ function updatePlayer(dt){
   const _ix=P.pos.x,_iz=P.pos.z;
   if(!nc){COL_CROUCH=!!P.crouch;collideXZ(P.pos,.38,P.crouch?1.5:1.8,feet);COL_CROUCH=false;limbPush(feet);}
   if(P.onIce&&dt>0){const cx=P.pos.x-_ix,cz=P.pos.z-_iz;if(Math.abs(cx)>1e-4)P.vel.x*=.35;if(Math.abs(cz)>1e-4)P.vel.z*=.35;}   // v3.06 jäällä seinään törmäys pysäyttää liu'un   // v2.88 raajat (pää, kädet, kyynärpäät, polvet) osana osumalaatikkoa
-  P.pos.y+=P.vy*dt;
+  P.pos.y+=P.vy*dt+gH;
   const ceil=nc?1e9:ceilingAt(P.pos.x,P.pos.z,.38,feet+1.8);if(P.vy>0&&P.pos.y+1.8>ceil){P.pos.y=ceil-1.8;P.vy=0;}
   const g=nc?(P.inDun?DUN.y:terrainH(P.pos.x,P.pos.z)):groundAt(P.pos.x,P.pos.z,.38,feet);
   if(P.pos.y<=g+.02&&P.vy<=0){if(!P.onGround&&P.vy<-4)P.landT=.25;if(!P.onGround&&P.vy<-15&&!P.flying){const fd=(-P.vy-15)*6;P.hp-=fd;P.fallT=playTime;floatText('-'+Math.round(fd),P.pos.x,P.pos.y+2,P.pos.z,'#e0614f');if(P.hp<=0)playerDie();}P.pos.y=g;P.vy=0;P.onGround=true;}

@@ -186,8 +186,8 @@ function bowAimPoint(max){const p=camRayPoint(max),{o,d}=camRay();let best=o.dis
 const AIM_MARKS=[10,20,30,40,50,60,70,80,100,120,150];
 function bowTraj(){const am=ammoId()||'nuolet',a=AMMO_STATS[am]||AMMO_STATS.nuolet,bs=bowShot(Math.min(1,P.bowDraw||0),am),from=new V3(P.pos.x,P.pos.y+1.5,P.pos.z);
   const dir=bowAimPoint(70).sub(from).normalize();from.addScaledVector(dir,.6);const p=from.clone(),v=dir.multiplyScalar(bs.v),x0=p.x,z0=p.z,dt=1/60,marks=[];let mi=0,land=null;
-  for(let i=0;i<60*5;i++){v.y-=bs.g*dt;if(!P.inDun){const wa=WIND.spd*ARROW_WIND*dt*a.wind;v.x+=WIND.x*wa;v.z+=WIND.z*wa;}
-    const ox=p.x,oy=p.y,oz=p.z;p.addScaledVector(v,dt);const hd=Math.hypot(p.x-x0,p.z-z0);
+  for(let i=0;i<60*5;i++){v.y-=bs.g*dt*.5;if(!P.inDun){const wa=WIND.spd*ARROW_WIND*dt*a.wind;v.x+=WIND.x*wa;v.z+=WIND.z*wa;}
+    const ox=p.x,oy=p.y,oz=p.z;p.addScaledVector(v,dt);v.y-=bs.g*dt*.5;   /* v3.32 sama tarkka rata kuin nuolella */const hd=Math.hypot(p.x-x0,p.z-z0);
     while(mi<AIM_MARKS.length&&hd>=AIM_MARKS[mi]){const pd=Math.hypot(ox-x0,oz-z0),k=hd>pd?(AIM_MARKS[mi]-pd)/(hd-pd):1;marks.push({d:AIM_MARKS[mi],p:new V3(ox+(p.x-ox)*k,oy+(p.y-oy)*k,oz+(p.z-oz)*k)});mi++;}
     {const vl=v.length()||1,tx=p.x+v.x/vl*.45,ty=p.y+v.y/vl*.45,tz=p.z+v.z/vl*.45,g=P.inDun?DUN.y:terrainH(tx,tz);   // kärki osuu (kuten arrowContact)
       let hitB=null;if(ty>=g){const n=Math.max(1,Math.ceil(vl*dt/.25));for(let j=1;j<=n&&!hitB;j++){const k=j/n,bx=ox+(p.x-ox)*k+v.x/vl*.45,by=oy+(p.y-oy)*k+v.y/vl*.45,bz=oz+(p.z-oz)*k+v.z/vl*.45;if(arrowBlocked(bx,by,bz))hitB=new V3(bx,by,bz);}}

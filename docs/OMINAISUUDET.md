@@ -886,6 +886,10 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.32 – fysiikka sama kaikilla asetuksilla
+- Hyppy 1,12 m (`JUMP_V` 7,02, g 22) kaikilla ruudunpäivityksillä; nuolet, tähtäysviiva ja ongen heitto lasketaan tarkasti → sama rata 20–144 FPS.
+- Grafiikka-asetukset eivät vaikuta spawnaukseen, tekoälyyn, törmäyksiin tai vahinkoon (vain piirtoon).
+
 ## v3.31 – seikkailijan nimi
 - Asetukset › Ohjaus › **⚔️ Seikkailija** (sivun ylin osio, aina näkyvissä): Aseta nimi / vaihda / 🗑 Pyyhi. Päävalikossa asetettu nimi on oletus kaikille maailmoille
   (`pNameDef`, localStorage), pelissä asetettu tallentuu myös maailmaan (`flags.pname`). Enintään 24 merkkiä.

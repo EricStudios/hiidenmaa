@@ -32,6 +32,7 @@ fysiikan arvot ovat viiteoppaassa `docs/OMINAISUUDET.md`. Toistuvat viat ja niid
   `index.html`:n skriptilistaan oikeaan kohtaan.
 - Jokainen JS-tiedosto alkaa `'use strict';`. Samaa ylimmän tason nimeä ei saa määritellä kahdesti.
 - v3.22: pehmennys aina `kExp(nopeus,dt)` (core.js), ei `Math.min(1,dt*nopeus)` – esiasetus/FPS ei saa muuttaa ajoitusta (KORJAUKSET 93).
+- v3.32: **grafiikka vaikuttaa vain näkymään** – pelilogiikka ei lue grafiikka-`SET`-arvoja; painovoimaliike tarkasti (puolikas g ennen+jälkeen tai `+½gdt²`, KORJAUKSET 103).
 - Rivin keskellä vain `/* */`-kommentti; `//` vain rivin loppuun (muuten perässä oleva koodi ei suoritu – KORJAUKSET 49).
 - Tyylit ovat tiedostossa `css/style.css`. v3.07: ei selaimen omia vierityspalkkeja – teemoitettu liukuri kaikkialla (DEV-valikot poikkeus). Fontit: Uncial Antiqua (otsikot), Alegreya Sans (teksti).
 

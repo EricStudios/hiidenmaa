@@ -33,7 +33,7 @@ function fpChargeTick(dt){if(mouseL&&locked&&state==='play'){FS.ch=Math.min(FP_C
   const k=clamp((FS.ch-FP_CH[0])/(FP_CH[1]-FP_CH[0]),0,1),pw=FP_PW_MIN+(1-FP_PW_MIN)*k;FS.st='idle';fishCast(pw);}
 function fpChargeK(){return clamp((FS.ch-FP_CH[0])/(FP_CH[1]-FP_CH[0]),0,1);}
 /* ---------------- LENTO ---------------- */
-function fpFly(dt){const E=FS.E,V=FS.V,w=fpWind(),wy=water.position.y;for(let s=0;s<2;s++){const h=dt/2;
+function fpFly(dt){const E=FS.E,V=FS.V,w=fpWind(),wy=water.position.y,ns=Math.max(2,Math.ceil(dt*240));for(let s=0;s<ns;s++){const h=dt/ns;   /* v3.32: välivaihe ≤ 1/240 s → heiton pituus sama kaikilla FPS:illä */
     V.x+=-FP_DRAG*(V.x-w.x)*h;V.y+=(-FP_G-FP_DRAG*V.y)*h;V.z+=-FP_DRAG*(V.z-w.z)*h;E.x+=V.x*h;E.y+=V.y*h;E.z+=V.z*h;
     const th=terrainH(E.x,E.z);
     if(th<wy-.05&&E.y<=wy){E.y=wy;fpSplash();return;}

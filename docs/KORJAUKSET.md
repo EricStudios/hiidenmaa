@@ -728,3 +728,10 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
   Sama kaatui myös ilman muutoksia (1/5 ajoa). Seuraava v3.04-vesikulhotesti peri edellisen testin jättämän tilan (asento/kalastus) → kulho kaatui jo ennen tarkistusta.
 - Korjaus: onkitesti yrittää enintään 3 eri paikassa (`fishReset` välissä); vesikulhotesti aloittaa puhtaasta tilasta (`fishReset`, `inspectStop`, ei uintia, 10 päivitystä).
   **Sääntö:** testi, joka arpoo paikan, yrittää useammin; testi ei saa nojata edellisen testin jättämään tilaan.
+
+## 103. Hyppy ja lentoradat riippuivat ruudunpäivityksestä (v3.32)
+- Puoli-implisiittinen Euler (`vy-=g·dt; y+=vy·dt`) jää jokaisella askeleella `½g·dt²` alle oikean paraabelin → isolla askeleella (matala FPS) hyppy jäi matalammaksi:
+  20 FPS 1,00 m vs 144 FPS 1,15 m. Sama nuolissa, ja jousen tähtäysviiva laski aina 1/60 s askeleella → matalalla FPS:llä viiva ja oikea nuoli erosivat.
+- Korjaus: pelaaja `P.pos.y+=P.vy*dt+gH` (`gH=½g·dt²`), nuolet ja tähtäysviiva: painovoima puoliksi ennen ja jälkeen siirron; ilmanvastuksellinen heitto pieninä välivaiheina.
+  **Sääntö:** kaikki pelin kannalta merkitsevä liike tarkalla integroinnilla; testi `tarkistus.mjs` v3.32 (hypyn korkeus 20/30/60/144 FPS).
+
