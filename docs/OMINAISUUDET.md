@@ -886,6 +886,10 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.38 – ohjeet kertaalleen, usva rajattu
+- Kalastuksen ohjetekstit näkyvät kukin vain ensimmäisellä kerralla (8 s); tiedot (voima, nimi, paino, palkit, varoitukset) aina.
+- Kohteiden usva vain porteilla ja Hautakummulla; tavalliset rauniot ja arkkukivet ilman usvaa.
+
 ## v3.37 – siimojen näkyvyys
 - Siimat erottuvat vain vähän (läpinäkyvyys 28 %, yöllä tummia): pellava harmaa, muut omalla värillään himmeinä; hiidensiima hohtaa yöllä hieman.
 

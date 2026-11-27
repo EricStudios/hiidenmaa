@@ -245,7 +245,7 @@ const FISH_REL_LINES={small:['Annetaan sen vielä kasvaa.','Käy hakemassa isova
 function fishReleaseLine(sp,f){const B=FISH_B[sp],k=f&&B?clamp((f.kg-B.kg[0])/(B.kg[1]-B.kg[0]),0,1):.5,L=FISH_REL_LINES[k<.25?'small':k>.6?'big':'any'].concat(FISH_REL_LINES.any);return L[Math.floor(Math.random()*L.length)];}
 function fishHeldHint(el){const s=equipped('weapon');if(!s||!ITEMS[s.id]||ITEMS[s.id].cat!=='fish')return false;el.hidden=false;el.className='wait';
   const top=flTop(s),nau=lookTarget&&lookTarget.kind==='piece'&&(lookTarget.p.t==='kalanaulakko'||lookTarget.p.t==='palkintotaulu');
-  el.innerHTML=`<span>${ITEMS[s.id].n}${top?' '+fishKg(top.kg)+' kg':''}${s.n>1?' (pinossa '+s.n+')':''} · oikea: syö${nau?' · E: ripusta naulakkoon':fishHeldWater()?' · E: vapauta veteen':''}</span>`;return true;}
+  el.innerHTML=`<span>${fjoin(ITEMS[s.id].n+(top?' '+fishKg(top.kg)+' kg':'')+(s.n>1?' (pinossa '+s.n+')':''),fhint('eat','oikea: syö'),nau?fhint('nau','E: ripusta naulakkoon'):fishHeldWater()?fhint('release','E: vapauta veteen'):'')}</span>`;return true;}
 /* ---------------- TAVOITTEET (Kalastajan kirja, XP) ---------------- */
 const FISH_GOALS=[{id:'eka',t:'Ongi ensimmäinen kala',xp:10,ok:F=>fishTotal(F)>=1},{id:'kymmenen',t:'Ongi 10 kalaa',xp:15,ok:F=>fishTotal(F)>=10},
   {id:'lajit3',t:'Ongi kolme eri lajia',xp:20,ok:F=>Object.keys(F.n).length>=3},{id:'hauki4',t:'Ongi yli 4 kg hauki',xp:25,ok:F=>(F.rec.hauki||0)>4},
@@ -272,20 +272,23 @@ function fishMeshUpd(){if(!FS.bob)return;
     sl=st==='fly'?.02:st==='wait'||st==='bite'?.06:st==='land'?.05:st==='spin'?(hold?.012:.035):st==='retr'?(hold||!FS.rod.reel?.015:.04):st==='fight'?.004*(1-FS.ten):st==='pull'?(FS.tight?.008:.045):.03,sag=Math.min(2.5,d*sl);
   const n=FISH_LQ?10:FP_LN,a=FS.line.geometry.attributes.position;for(let i=0;i<n;i++){const t=i/(n-1);a.setXYZ(i,lerp(_fsTip.x,bx,t),lerp(_fsTip.y,by+(FS.fm?0:.1),t)-4*t*(1-t)*sag,lerp(_fsTip.z,bz,t));}FS.line.geometry.setDrawRange(0,n);a.needsUpdate=true;if(typeof tkLineLook==='function')tkLineLook(FS.line.material);}   // v3.29 Low/Medium: 10 pistettä
 /* ---------------- HUD: tärppi ja väsytys ---------------- */
+/* v3.38 käyttäjä: kalastuksen OHJEET (vasen/oikea/E …) vain ensimmäisellä kerralla 8 s (tkHintOnce, localStorage hiidenmaa_tkHint); TIEDOT (voima, nimi, paino, palkit) näkyvät aina */
+const fhint=(k,t)=>typeof tkHintOnce==='function'&&tkHintOnce(k)?t:'';
+const fjoin=(...a)=>a.filter(Boolean).join(' · ');
 function fishHud(){const el=document.getElementById('fishHud');if(!el)return;if(typeof tkHud==='function'&&tkHud(el))return;
   {const st=FS.st,sh=t=>{el.hidden=false;el.className='wait';el.innerHTML=t;return true;};   // v3.27 uudet tilat
-    if(st==='charge'){const k=fpChargeK();el.hidden=false;el.className='wait';el.innerHTML=`<span>Heiton voima ${Math.round((FP_PW_MIN+(1-FP_PW_MIN)*k)*100)} % · päästä irti heittääksesi (katso noin 35° ylös = pisin)</span><div class="fb"><i class="pr" style="width:${Math.round(k*100)}%"></i></div>`;return;}
+    if(st==='charge'){const k=fpChargeK();el.hidden=false;el.className='wait';el.innerHTML=`<span>${fjoin('Heiton voima '+Math.round((FP_PW_MIN+(1-FP_PW_MIN)*k)*100)+' %',fhint('charge','päästä irti heittääksesi (katso noin 35° ylös = pisin)'))}</span><div class="fb"><i class="pr" style="width:${Math.round(k*100)}%"></i></div>`;return;}
     if(st==='fly'){el.hidden=true;return;}
-    if(st==='land'||st==='retr'){if(FS.rod&&FS.rod.reel){sh(`<span>${st==='land'?'Viehe on maassa – ':''}pidä vasenta kelataksesi</span>`);return;}if(st==='land'){sh('<span>Koho on maassa – vasen vetää sen takaisin</span>');return;}el.hidden=true;return;}
-    if(st==='pull'){if(!FISH_B[FS.sp]){el.hidden=true;return;}sh(`<span>${ITEMS[FS.sp].n} siimassa – ${FS.spin?'pidä vasenta kelataksesi · ':'vapa nousee · '}kävele taaksepäin raahataksesi${FS.spin?'':' · maalla vasen nostaa'}</span>`);return;}   // v3.29
+    if(st==='land'||st==='retr'){const t=FS.rod&&FS.rod.reel?fhint('reel',(st==='land'?'Viehe on maassa – ':'')+'pidä vasenta kelataksesi'):st==='land'?fhint('landOnki','Koho on maassa – vasen vetää sen takaisin'):'';if(t){sh(`<span>${t}</span>`);return;}el.hidden=true;return;}
+    if(st==='pull'){if(!FISH_B[FS.sp]){el.hidden=true;return;}{const h=fhint(FS.spin?'pullS':'pull',(FS.spin?'pidä vasenta kelataksesi · ':'vapa nousee · ')+'kävele taaksepäin raahataksesi'+(FS.spin?'':' · maalla vasen nostaa'));sh(`<span>${ITEMS[FS.sp].n} siimassa${h?' – '+h:''}</span>`);}return;}   // v3.29
     if(st==='unhook'){el.hidden=true;return;}
-    if((st==='wait'||st==='bite')&&FS.noFish){sh('<span>Täällä ei näytä olevan kaloja – heitä syvempään, nimettyyn veteen · vasen nostaa</span>');return;}}   /* v3.14 virveli, siiman vaihto, mato-vihje */if(FS.st==='hang'){el.hidden=false;el.className='wait';const ht=`<span>${ITEMS[FS.sp].n} koukussa · vasen: ota kala${FS.fullT>0?` · reppu täynnä – karkaa ${Math.ceil(FS.fullT)} s`:''}</span>`;if(el._h!==ht){el._h=ht;el.innerHTML=ht;}return;}   // v3.27
+    if((st==='wait'||st==='bite')&&FS.noFish){sh('<span>Täällä ei näytä olevan kaloja – heitä syvempään, nimettyyn veteen · vasen nostaa</span>');return;}}   /* v3.14 virveli, siiman vaihto, mato-vihje */if(FS.st==='hang'){el.hidden=false;el.className='wait';const ht=`<span>${fjoin(ITEMS[FS.sp].n+' koukussa',fhint('hang','vasen: ota kala'),FS.fullT>0?'reppu täynnä – karkaa '+Math.ceil(FS.fullT)+' s':'')}</span>`;if(el._h!==ht){el._h=ht;el.innerHTML=ht;}return;}   // v3.27
   if(FS.st==='idle'&&fishHeldHint(el))return;
   const on=FS.st==='bite'||FS.st==='fight'||FS.st==='wait';el.hidden=!on;if(!on)return;
   el.className=FS.st==='bite'?'bite':FS.st==='fight'?'fight':'wait';
   if(FS.st==='wait'||FS.st==='bite'){   // v3.27 tärppi ei näy HUDissa – katso kohoa
-    if(FS.st==='bite')el.className='wait';el.innerHTML=`<span>${FS.body?FS.body.name:''}${FS.bait?' · syötti: mato':''} · vasen kelaa sisään</span>`;return;}
-  el.innerHTML=`<div class="fl">Väsytys: ${ITEMS[FS.sp].n}</div><div class="fb"><i class="ten${FS.ten>.8?' hi':''}" style="width:${Math.round(FS.ten*100)}%"></i></div><div class="fb"><i class="pr" style="width:${Math.round(FS.prog*100)}%"></i></div><div class="fh">${FS.pullOn?'Kala vetää – päästä irti!':'Kelaa: pidä vasenta'}</div>`;}
+    if(FS.st==='bite')el.className='wait';{const t=fjoin(FS.body?FS.body.name:'',FS.bait?'syötti: mato':'',fhint('wait','vasen kelaa sisään'));if(!t){el.hidden=true;return;}el.innerHTML=`<span>${t}</span>`;}return;}
+  el.innerHTML=`<div class="fl">Väsytys: ${ITEMS[FS.sp].n}</div><div class="fb"><i class="ten${FS.ten>.8?' hi':''}" style="width:${Math.round(FS.ten*100)}%"></i></div><div class="fb"><i class="pr" style="width:${Math.round(FS.prog*100)}%"></i></div><div class="fh">${FS.pullOn?'Kala vetää – päästä irti!':fhint('fight','Kelaa: pidä vasenta')}</div>`;}
 /* v3.24 käyttäjä: VESISTÖN NIMI. Ensimmäisellä kerralla isompi "Vesistö löydetty" + nimi alla; myöhemmin rannalle tultaessa vain nimi pienemmällä. Sama nimi ei
    koskaan kahdesti peräkkäin (F.wbLast) ja näkyy uudelleen aikaisintaan WB_AGAIN_D (5) vuorokauden päästä (F.wbSeen). Kulkee aluebannerien jonossa (showWbBanner, ui.js). */
 const WB_AGAIN_D=5;

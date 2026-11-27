@@ -278,11 +278,16 @@ function tkDecoSync(){for(const e of PKW.list){const sg=pakkiSig(e.o.box);if(sg!
   for(const p of pieces)if(p.t==='kalapoyta'&&p.data.pk&&pakkiSig(p.data.pk.box)!==p.data.pk._sig)tkTableVis(p);
   {const o=equipped('offhand');if(o&&o.id==='kalapakki'&&offKey&&offKey.split('#')[2]!==pakkiSig(o.box))updateGear();}}
 /* ---------------- HUD ---------------- */
+/* v3.38 käyttäjä: vavan vihjeet (mato koukkuun / solmi siima / ei siimaa) vain ensimmäisellä kerralla, 8 s (localStorage hiidenmaa_tkHint) */
+const TK_HINT_T=8000,_tkHS={};
+function tkHintOnce(k){let seen={};try{seen=JSON.parse(localStorage.getItem('hiidenmaa_tkHint')||'{}');}catch(e){}const now=performance.now();
+  if(_tkHS[k]==null){if(seen[k])return false;_tkHS[k]=now;seen[k]=1;try{localStorage.setItem('hiidenmaa_tkHint',JSON.stringify(seen));}catch(e){}}
+  return now-_tkHS[k]<TK_HINT_T;}
 function tkHud(el){if(TKA.on){el.hidden=false;el.className='wait';el.innerHTML=`<span>Vaihdetaan siimaa… ilman pöytää tämä kestää ikuisuuden · ${Math.ceil(TKA.T-TKA.t)} s</span><div class="fb"><i class="pr" style="width:${Math.round(TKA.t/TKA.T*100)}%"></i></div>`;return true;}
-  if(FS.st==='spin'){el.hidden=false;el.className='wait';const d=Math.hypot(FS.bx-P.pos.x,FS.bz-P.pos.z),bd=fpBaitDepth();el.innerHTML=`<span>${FS.body?FS.body.name+' · ':''}${ITEMS[FS.rod.lureId].n} · ${Math.round(d)} m · syvyys ${tkFmt(Math.round(bd.d*10)/10)} m${bd.bot?' (pohjassa!)':''} · pidä vasenta kelataksesi</span>`;return true;}
-  if(FS.st==='idle'){const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='rod'&&state==='play'){const r=rigOf(w);let t='';
-      if(!r.line)t=tkLineInPack()?'E: solmi uusi siima repusta':'Vavassa ei ole siimaa – siimaa tarvitaan repussa (tai Kalastajan pöytä)';else if(!r.bait&&!(r.reel&&r.lure)&&invCount('mato'))t='E: mato koukkuun · vasen heittää';
-      if(t){el.hidden=false;el.className='wait tkHint';el.innerHTML=`<span>${t}</span>`;return true;}}
+  if(FS.st==='spin'){el.hidden=false;el.className='wait';const d=Math.hypot(FS.bx-P.pos.x,FS.bz-P.pos.z),bd=fpBaitDepth();el.innerHTML=`<span>${FS.body?FS.body.name+' · ':''}${ITEMS[FS.rod.lureId].n} · ${Math.round(d)} m · syvyys ${tkFmt(Math.round(bd.d*10)/10)} m${bd.bot?' (pohjassa!)':''}${(h=>h?' · '+h:'')(typeof fhint==='function'?fhint('spin','pidä vasenta kelataksesi'):'')}</span>`;return true;}
+  if(FS.st==='idle'){const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='rod'&&state==='play'){const r=rigOf(w);let t='',k='';
+      if(!r.line){k=tkLineInPack()?'solmi':'eisiima';t=k==='solmi'?'E: solmi uusi siima repusta':'Vavassa ei ole siimaa – siimaa tarvitaan repussa (tai Kalastajan pöytä)';}else if(!r.bait&&!(r.reel&&r.lure)&&invCount('mato')){k='mato';t='E: mato koukkuun · vasen heittää';}
+      if(t&&tkHintOnce(k)){el.hidden=false;el.className='wait tkHint';el.innerHTML=`<span>${t}</span>`;return true;}}
     el.hidden=true;return true;}
   return false;}
 /* ---------------- ENSIMMÄINEN ONKI (wow-ilmoitus) ---------------- */

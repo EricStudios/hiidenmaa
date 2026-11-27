@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.37, 26.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.38, 27.11.2026)
+
+- **Versio 3.38** – kalastuksen ohjeet (vasen/oikea/E) vain ensimmäisellä kerralla 8 s, tiedot aina; usva vain porteilla ja Hautakummulla.
 
 - **Versio 3.37** – siimat läpinäkyvämpiä (erottuu vain vähän, `TK_LINE_OP` 0,28): pellava harmaa, muut omalla värillään himmeinä; vavan siima 30 %.
 
@@ -464,6 +466,13 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.38 (käyttäjä 27.11.: ohjetekstit pois, usva vain tietyissä paikoissa)
+- **Kalastuksen ohjeet kertaalleen:** `tkHintOnce(k)` (tackle.js, localStorage `hiidenmaa_tkHint`, `TK_HINT_T` 8 s) + `fhint(k,t)`/`fjoin` (fish.js). Ohjeet: mato koukkuun / solmi siima / ei siimaa
+  (idle), heiton lataus, kelaus (viehe/koho maassa), vedossa raahaus, odotus "vasen kelaa sisään", väsytys "Kelaa: pidä vasenta", koukussa "vasen: ota kala", kala kädessä "oikea: syö" / "E: ripusta" / "E: vapauta",
+  virvelin "pidä vasenta kelataksesi". **Tiedot pysyvät:** heiton voima + palkki, vesistö, syötti, kalan nimi/paino, etäisyys/syvyys, väsytyspalkit, "Kala vetää – päästä irti!", täyden repun ajastin, "ei kaloja täällä".
+- **Usva** (`updateMist`): vain portit (`kind 'portal'`) ja Hautakumpu – ei enää tavallisilla raunioilla (talonpohjat, sortunut talo, linnake) eikä arkkukivillä.
+- Tarkistusrivi v3.38.
 
 ### v3.37 (siimojen näkyvyys – käyttäjä 26.11.)
 - `tkLineLook`: läpinäkyvyys `TK_LINE_OP` 0,28 (yöllä ×0,8; ennen 0,42–0,52), pellavasiima harmaa `0x8e8e8a`, muut siimat oma väri 40 % harmaaseen; hiidensiima hohtaa yöllä edelleen hieman.

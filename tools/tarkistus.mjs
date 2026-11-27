@@ -650,6 +650,13 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('räikkä pois',!/fpTip/.test(fpFreeTether.toString())&&/P\.pos\.x/.test(fpFreeTether.toString())&&FP_SLACK>0&&!/fpTip/.test(fpLineNow.toString()));
     ck('syönti',/flTake\(s,1\)/.test(eat.toString())&&/s\.eq=false/.test(eat.toString()));
     return e.length?'puuttuu: '+e.join(', '):true;});
+  t('v3.38: kalastuksen ohjeet vain ensimmäisellä kerralla (8 s), tiedot aina; usva vain porteilla ja Hautakummulla (ei raunioilla/arkkukivillä)',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    {let o=null;try{o=localStorage.getItem('hiidenmaa_tkHint');localStorage.removeItem('hiidenmaa_tkHint');}catch(x){}const a=tkHintOnce('_testi'),b=tkHintOnce('_testi');delete _tkHS._testi;const c=tkHintOnce('_testi');
+      try{if(o!=null)localStorage.setItem('hiidenmaa_tkHint',o);else localStorage.removeItem('hiidenmaa_tkHint');}catch(x){}ck('kerran '+a+b+c,a&&b&&!c&&TK_HINT_T===8000);}
+    ck('ohjeet',/fhint\('wait'/.test(fishHud.toString())&&/fhint\('hang'/.test(fishHud.toString())&&/fhint\('eat'/.test(fishHeldHint.toString())&&/tkHintOnce\(k\)/.test(tkHud.toString())&&/fhint\('spin'/.test(tkHud.toString()));
+    ck('usva',/L\.kind!=='portal'&&k!=='barrow'/.test(updateMist.toString())&&!/'ruin'/.test(updateMist.toString()));
+    return e.length?'puuttuu: '+e.join(', '):true;});
   t('v3.27: kalastuksen uusi fysiikka – ballistinen heitto (35° pisin, vapa ratkaisee), virvelin lataus, maalle lasku ja katkeaminen, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m ja lajien syvyys, kala näkyy vedossa, pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa (ei monistusta), pilaantuminen, naulakot ja laatta, kirja, pakin koristeet, virveli vasemmassa kädessä',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     {const r=[0,15,25,35,45,60].map(a=>fpRange(fpV0(16),a*Math.PI/180)),mx=r.indexOf(Math.max(...r));ck('35° pisin',mx===3&&Math.abs(r[3]-16)<.3&&fpV0(30)>fpV0(16));}
