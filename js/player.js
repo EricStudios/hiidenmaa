@@ -64,7 +64,7 @@ function updatePlayer(dt){
   if(P.blocking&&!devOn('stam')&&!P.buffs.sisu){P.stam-=SHIELD_STAM*dt;P.stamDelay=Math.max(P.stamDelay,.4);if(P.stam<=0){P.stam=0;P.blocking=false;P.shTired=true;msg('Olet uupunut – kilpi on liian raskas pidettäväksi.','warn');}}
   P.stamDelay-=dt;if(P.stamDelay<=0&&!P.swUp){let r=22*P.fx.stamRegen*(P.swim?.25:1);P.stam=Math.min(maxStam(),P.stam+r*dt);}
   if(P.blocking&&P.stam<=0)P.blocking=false;
-  P.stam=Math.max(0,P.stam);if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu
+  P.stam=Math.max(0,P.stam);if(!isFinite(P.stam))P.stam=maxStam();if(!isFinite(P.hp))P.hp=maxHp()*.5;   /* v3.42 NaN-suoja (KORJAUKSET 108) */if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu
   // velocity
   P.onIce=P.inDun&&P.onGround&&iceAt(P.pos.x,P.pos.z);   // v3.06 Routaluolan jäälätäkkö: lähes kitkaton (ICE_GRIP)
   {const gk=P.onIce?ICE_GRIP:P.onGround?12:3;P.vel.x=lerp(P.vel.x,dx*speed,kExp(gk,dt));P.vel.z=lerp(P.vel.z,dz*speed,kExp(gk,dt));}
@@ -105,6 +105,7 @@ function updatePlayer(dt){
   else if(dl>0)P.yaw=lerpAngle(P.yaw,Math.atan2(P.vel.x,P.vel.z),kExp(10,dt));
   // attack
   if(P.atk&&(P.turnWait||0)>0){P.turnWait-=dt;if(P.turnWait<=0)P.yaw=camYaw+Math.PI;}
+  else if(P.atk&&!(P.atk.dur>0&&isFinite(P.atk.hitAt)))P.atk=null;   // v3.42 rikkinäinen lyönti pois (hahmo ei katoa)
   else if(P.atk){P.atk.t+=dt;if(!P.atk.done&&P.atk.t>=P.atk.hitAt){P.atk.done=true;if(P.atk.w&&P.atk.w.range)plSnd('lyonnit','huitaisu');doMeleeHit(P.atk.w);}if(P.atk.t>=P.atk.dur){P._atkOv=P.atk.t-P.atk.dur;P.atk=null;}}
   if(!P.atk&&mouseL&&state==='play'&&w.cat==='weapon'&&locked)startAttack();
   if(P._atkOv!=null){if(P.atk&&P.atk.t===0)P.atk.t=Math.min(P._atkOv,.05);P._atkOv=null;}   // v3.22: pohjassa pidetyn iskun ylijäämä seuraavaan → sama tahti joka FPS:llä

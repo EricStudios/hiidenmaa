@@ -886,6 +886,14 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.42 – syväkerroin, nykäisyliike, kala vasemmalla
+- Koukuilla ja vieheillä ominaisuus **Jää pahasti kalaan** (kerroin irrotusminipelin todennäköisyyteen, enintään 30 %): pieni koukku 1,2, iso 0,7, väkäkoukku 1,6; vieheet 0,7–1,4.
+- Ongen isku: pelaaja nykäisee vavan ylös, vedossa vapa pysyy korkealla ja kaarella, heiluu ja taipuu kalan painon ja voiman mukaan.
+- Kala kädessä: vasen ja oikea syövät (ei lyöntiä). Ei-ase kädessä lyönti käyttää nyrkkien arvoja.
+
+## v3.41 – isku ei tuo kalaa luokse
+- Isku liikauttaa kalaa ~0,5 m. Vapa nousee vain vasen pohjassa (siima lyhenee enintään 2,2 m); kauempaa kala raahataan kävelemällä taaksepäin.
+
 ## v3.40 – pehmeä isku
 - Tärpin klikkaus: koho nykäisee kohti vapaa ja painuu, siima kiristyy pehmeästi, kala ilmestyy (häivytys) ja rimpuilee sivuttain. Vapa nousee; kaukaa kala raahataan taaksepäin kävellen.
 

@@ -207,7 +207,7 @@ Object.assign(ITEMS.kuparivapa,{rod:{k:.95,ten:1.1,big:.1,bw:1.1},d:'Kuparisilat
 Object.assign(ITEMS.hiidenvapa,{rod:{k:.9,ten:1.2,big:.2,bw:1.2},d:'Hiidenkiven siruista taottu runko: isot kalat keskimäärin 20 % painavampia, isot lajit yleisempiä ja siima kestää enemmän. (Harvinainen)'});
 const TK_LINE_USES=10;   // v3.33 käyttäjä: 1 siimakerä = 10 uutta siimaa, kulumismittari kuten kilvellä
 const TK_LINE={pellavasiima:{ten:1,dur:12,vis:1,col:0xe0d8c0},jannesiima:{ten:1.25,dur:25,vis:1.06,col:0xc8a070},punottusiima:{ten:1.55,dur:45,vis:1.12,col:0x6a8a5a},hiidensiima:{ten:1.9,dur:80,vis:1.18,col:0x5fe6d9}};
-const TK_HOOK={pienikoukku:{big:.85,small:1.2,hk:.65,steal:1},isokoukku:{big:1.3,small:.7,hk:.75,steal:1},vakakoukku:{big:1.05,small:1,hk:.88,steal:.45,keep:1}};
+const TK_HOOK={pienikoukku:{big:.85,small:1.2,hk:.65,steal:1,deep:1.2},isokoukku:{big:1.3,small:.7,hk:.75,steal:1,deep:.7},vakakoukku:{big:1.05,small:1,hk:.88,steal:.45,keep:1,deep:1.6}};   // v3.42 deep = kuinka helposti jää pahasti kalan suuhun/kiduksiin (irrotusminipeli ×)
 const TK_REEL={kuparikela:{cast:22,spd:1.25,fk:1.15,tk:1,col:0xd98a4e},hiisikela:{cast:30,spd:1.6,fk:1.3,tk:.85,col:0x5fe6d9}};
 const TK_FLOAT={puukoho:{win:0,steal:1,col:0xd83a2a},korkkikoho:{win:.15,steal:.8,col:0xe8b04a},hehkukoho:{win:.05,night:.3,steal:1,col:0x7af0d0,glow:1}};
 /* Vieheet: w = vesi (järvi/meri/suo), ph = [aamu, päivä, ilta, yö], wx = sää, light = valo, jossa paras (bright kirkas päivä, dim hämärä/pilvi, dark yö/sumu), best = parhaat kalat ×2,2.
@@ -222,6 +222,8 @@ const TK_LURE={
   verilusikka:{col:0xa82a22,c2:0xe8d0a0,sh:'spoon',best:['hauki','suutari','kuha'],w:{lake:1.1,sea:.8,bog:1.4},ph:[1,1,1.2,.9],wx:{sade:1.3,sumu:1.2,pilvi:1.1},light:'dim',d:'Puolukalla punaiseksi värjätty lusikka erottuu sameassa vedessä.'},
   pintavaappu:{col:0x3a3a2a,c2:0xd8c8a0,sh:'plug',top:1,best:['hauki','toutain','meritaimen'],w:{lake:1.3,sea:.9,bog:1},ph:[1.4,.6,1.5,.8],wx:{selkea:1.1,tuuli:.6,myrsky:.5},light:null,d:'Pinnalla pulputtava sulkavaappu – tyynellä säällä aamuin illoin.'},
   nahkajigi:{col:0x8a5a32,c2:0xd8a060,sh:'jig',soft:1,best:['kuha','ahven','kampela'],w:{lake:1.2,sea:1.1,bog:.9},ph:[1,1,1.1,1.2],wx:{pilvi:1.2,tihku:1.1},light:null,d:'Pehmeä nahkajigi pomppii pohjaa pitkin.'}};
+// v3.42 käyttäjä: vieheiden 'jää pahasti kalaan' -kerroin (kolmihaarakoukut useammin, ohuet lusikat harvemmin)
+const TK_LURE_DEEP={kuparilusikka:.85,rautapilkki:1.4,puuvaappu:1.3,hiidenhohtoviehe:1,pohjolanlusikka:.7,valkelippa:.9,verilusikka:.9};for(const k in TK_LURE)TK_LURE[k].deep=TK_LURE_DEEP[k]??1;
 /* Nimetyt yhdistelmät (pieni etu): osat = vaaditut (taulukko = jokin näistä); rod = runko, reel 0 = ei kelaa. */
 const TK_COMBOS=[
   {id:'perinne',n:'Perinneonki',need:{rod:['onki'],line:['pellavasiima'],hook:['pienikoukku'],float:['puukoho'],reel:[0]},fx:{k:.92},t:'tärppi 8 % useammin'},

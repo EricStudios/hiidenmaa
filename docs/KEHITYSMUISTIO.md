@@ -3,7 +3,11 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.40, 27.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.42, 27.11.2026)
+
+- **Versio 3.42** – korjattu: hahmo katosi, kun kala (tai muu ei-ase) kädessä painoi vasenta (lyönnin kesto NaN). Vasen syö nyt kalan. Koukuilla ja vieheillä ominaisuus "jää pahasti kalaan"; ongen isku = nykäisyliike, vapa korkealla ja kaarella kalan painon mukaan.
+
+- **Versio 3.41** – isku liikauttaa kalaa vain vähän; vapa nousee vain vasen pohjassa (ennen itsestään → kala lennähti heti luokse).
 
 - **Versio 3.40** – pehmeä isku: koho nykäisee ja painuu, siima kiristyy pehmeästi, kala häivyttyy näkyviin rimpuilemaan; vapa nousee, kaukaa kala raahataan.
 
@@ -470,6 +474,21 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.42 (käyttäjä 27.11.: "ukkoni katosi kun yritin syödä ruutanan", syväkerroin, nykäisyliike)
+- **Korjattu (KORJAUKSET 108):** vasen klikkaus kala kädessä meni `startAttack`iin. Kalalla ei ole `spd`/`st` → `P.atk.dur` = NaN, asento NaN → pelaajan malli (119 osaa) katosi pysyvästi, myös kestävyys NaN.
+  `curWeapon` täydentää puuttuvat lyöntiarvot nyrkeistä (`FIST_W`), `onPrimary` syö kalan (`w.cat==='fish'`, kuten oikea), player.js poistaa rikkinäisen lyönnin ja palauttaa NaN-kestävyyden/-terveyden.
+- **Syväkerroin `deep`:** `TK_HOOK` (pieni 1,2, iso 0,7, väkä 1,6) ja `TK_LURE_DEEP` (kuparilusikka 0,85, rautapilkki 1,4, puuvaappu 1,3, hohto 1, pohjola 0,7, valkelippa 0,9, verilusikka 0,9).
+  `fpDeepK()` kertoo irrotusminipelin todennäköisyyden (`fpHookP`, enintään 30 %). Pöydän tietoihin rivi "Jää pahasti kalaan" (`tkDeepTxt`). Mitattu: pieni 11,2 %, iso 6,6 %, väkä 15,0 %.
+- **Nykäisyliike (onki):** `rodCastPose` – isku 0,1 s:ssa ylös (+0,55) ja takaisin 0,6 s:ssa, vedossa vapa korkealla (`.95+lift*.3`) ja heiluu kalan voiman `FS.S` mukaan; `rodBendTick` taipuu vedossa
+  painon mukaan (0,22 + kg × 0,5, värinä). Testi: kärki 3,34 → 3,86 m 0,1 s:ssa, taipuma ≤ 0,48.
+- Tarkistusrivi v3.42; v3.06-onkirivi pitää vasenta vedossa (v3.41 jälkeen vapa ei nouse itsestään).
+
+### v3.41 (käyttäjä 27.11.: "nykäisy tuo heti sen luokse")
+- `fpPull`: `FS.lift` kasvoi itsestään (1,2/s, pitäen 2,2/s) → siima lyheni 2,2 m alle sekunnissa ja lähellä oleva kala nostettiin heti kärkeen. Nyt vapa nousee **vain vasen pohjassa**
+  (0,9/s, vasta iskun jälkeen), ja isku lyhentää siimaa vain `FP_STRIKE_J` 0,55 m pehmeästi (myös kala, ei vain koho). Testi: koho 17,3 m → 2 s ilman pitoa 16,5 m; 1,5 s pitoa → 12,8 m.
+- Ohje: "pidä vasenta nostaaksesi vapaa · kävele taaksepäin raahataksesi".
+- Tarkistusrivi v3.41.
 
 ### v3.40 (käyttäjä 27.11.: isku pehmeäksi)
 - **Isku** (`FP_STRIKE_T` 0,45 s, `FP_STRIKE_J` 0,55 m): tärpin klikkauksesta koho nykäisee 0,1 s:ssa kohti vapaa ja painuu pinnan alle (−0,33 m), siiman taipuma kiristyy pehmeästi

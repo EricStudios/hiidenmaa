@@ -3,12 +3,15 @@
 'use strict';
 
 /* ---------------- PLAYER ACTIONS ---------------- */
-function curWeapon(){const w=equipped('weapon');return w?{...ITEMS[w.id],id:w.id,q:w.q||1}:{n:'Nyrkit',dmg:3,dt:'blunt',range:1.8,st:4,spd:.45,id:null,q:1};}
+const FIST_W={n:'Nyrkit',dmg:3,dt:'blunt',range:1.8,st:4,spd:.45};
+/* v3.42 ei-ase kädessä (kala, ruoka…): puuttuvat lyöntiarvot nyrkeistä, muuten lyönnin kesto NaN ja hahmo katoaa (KORJAUKSET 108) */
+function curWeapon(){const w=equipped('weapon');if(!w)return{...FIST_W,id:null,q:1};const d=ITEMS[w.id]||{};const o={...d,id:w.id,q:w.q||1};for(const k of['dmg','range','st','spd'])if(!(typeof o[k]==='number'&&isFinite(o[k])))o[k]=FIST_W[k];if(!o.dt)o.dt='blunt';return o;}
 let lastStamMsgT=-99;
 function onPrimary(){
   if(P.dead||P.stagger>0)return;
   const w=curWeapon();
   if(w.cat==='bowl'){bowlUse();return;}   // v2.91 kulho / vesikulho
+  if(w.cat==='fish'){const s=equipped('weapon');if(s){eat(s);updateGear();}return;}   // v3.42 kala kädessä: myös vasen syö (ei lyöntiä)
   if(typeof tkPrimary==='function'&&tkPrimary(w))return;
   if(typeof fbPrimary==='function'&&fbPrimary(w))return;   // v3.15 kalakirja kädessä → avaa   // v3.14 kalastuspakki: lasku maahan/pöydälle ja nosto (tackle.js)
   if(w.cat==='rod'){fishClick();return;}   // v3.06 onki (fish.js)

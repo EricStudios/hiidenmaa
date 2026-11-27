@@ -753,3 +753,8 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - `fpFreeTether` rajoitti kohon etäisyyttä liikkuvasta pisteestä (vavan kärki). Aina kun kärki heilahti poispäin, koho vedettiin perään; kun kärki palasi, koho ei palannut → räikkä.
   Korjaus: mittaa vakaasta pisteestä (pelaajan vartalo) ja anna löysää (`FP_SLACK`). **Sääntö:** yksisuuntainen rajoite (vain vetää) liikkuvaan pisteeseen tarvitsee löysää tai vakaan ankkurin.
 
+## 108. Hahmo katosi, kun kala kädessä painoi vasenta (v3.42)
+- `onPrimary` → `startAttack()` kaikille esineille, joille ei ollut omaa haaraa. Kalalla (ja muilla ei-aseilla) ei ole `spd`/`st` → `dur=(undefined+.2)/PCOMBAT` = NaN,
+  lyöntiasento NaN → koko pelaajan malli katosi (matriisit NaN) ja `P.stam-=NaN` rikkoi kestävyyden.
+  Korjaus: `curWeapon` täydentää puuttuvat `dmg`/`range`/`st`/`spd` nyrkeistä (`FIST_W`); kala vasemmalla syödään; player.js pudottaa lyönnin, jonka `dur`/`hitAt` ei ole äärellinen, ja palauttaa NaN-kestävyyden.
+  **Sääntö:** uusi esineluokka, jonka voi pitää kädessä → oma `onPrimary`-haara tai kelvolliset lyöntiarvot. Testi: `fig.g.traverse` → `matrixWorld` äärellinen.

@@ -239,11 +239,11 @@ function tkLureList(U){const good=[],bad=[],W={lake:'järvet',sea:'meri',bog:'su
 function tkProps(s,o){const d=ITEMS[s.id];
   if(d.cat==='rod'){o.push(...tkPropsList(s));return;}
   if(d.tk==='line'){const L=TK_LINE[s.id];o.push(['Kestävyys',`×${tkFmt(L.ten)}`],['Kesto','noin '+L.dur+' kalaa'],['Näkyvyys',L.vis>1?`tärppi ${Math.round((L.vis-1)*100)} % harvemmin`:'huomaamaton'],['Satunnainen katkeaminen','pieni, kasvaa kulumisen myötä'],['Kerässä',`${TK_LINE_USES-(s.lu||0)} / ${TK_LINE_USES} siimaa`]);}
-  if(d.tk==='hook'){const H=TK_HOOK[s.id];o.push(['Isot lajit',H.big===1?'perus':`×${tkFmt(H.big)}`],['Pikkukalat',H.small===1?'perus':`×${tkFmt(H.small)}`],['Tarttuminen virvelissä',Math.round(H.hk*100)+' %']);
+  if(d.tk==='hook'){const H=TK_HOOK[s.id];o.push(['Jää pahasti kalaan',tkDeepTxt(H.deep)],['Isot lajit',H.big===1?'perus':`×${tkFmt(H.big)}`],['Pikkukalat',H.small===1?'perus':`×${tkFmt(H.small)}`],['Tarttuminen virvelissä',Math.round(H.hk*100)+' %']);
     if(H.steal<1)o.push(['Syötti pysyy',`varkaudet ×${tkFmt(H.steal)}`]);if(H.keep)o.push(['Väkä','kala ei irtoa']);}
   if(d.tk==='reel'){const K=TK_REEL[s.id];o.push(['Tekee vavasta','virvelin'],['Heittomatka vieheellä',`${TK_SPIN_MIN}–${K.cast} m`],['Kelausnopeus',`${tkFmt(TK_REEL_V*K.spd)} m/s`],['Väsytysteho',`+${Math.round((K.fk-1)*100)} %`]);if(K.tk<1)o.push(['Siiman jännitys',`−${Math.round((1-K.tk)*100)} %`]);}
   if(d.tk==='float'){const F=TK_FLOAT[s.id];o.push(['Tärppi-ikkuna',F.win?`+${tkFmt(F.win)} s`:'perus']);if(F.night)o.push(['Yöllä',`+${tkFmt(F.win+F.night)} s (hohtaa)`]);if(F.steal<1)o.push(['Syötti',`varkaudet ×${tkFmt(F.steal)}`]);}
-  if(d.tk==='lure')o.push(...tkLureList(TK_LURE[s.id]),['Kuluminen','ei kulu – voi tarttua pohjaan matalassa (hyvin harvoin)']);
+  if(d.tk==='lure')o.push(...tkLureList(TK_LURE[s.id]),['Jää pahasti kalaan',tkDeepTxt(TK_LURE[s.id].deep)],['Kuluminen','ei kulu – voi tarttua pohjaan matalassa (hyvin harvoin)']);
   if(d.tk==='pakki'){pakkiNorm(s);const n=s.box.filter(Boolean).length;let w=0;for(const b of s.box)if(b)w+=ITEMS[b.id].w*b.n;o.push(['Taso',`${s.lv+1} / 4`],['Paikkoja',`${n} / ${pakkiSlots(s.lv)}`],['Sisällön paino',tkFmt(w)]);}}
 function tkRender(){const el=document.getElementById('tkBody');if(!el||!tkCur)return;const rods=tkRods();if(tkSel>=rods.length)tkSel=0;const s=rods[tkSel];
   const pk=tkCur.data.pk,ic=id=>`<span class="ic" style="background-image:url(${icon(id)})"></span>`;
@@ -280,6 +280,8 @@ function tkDecoSync(){for(const e of PKW.list){const sg=pakkiSig(e.o.box);if(sg!
 /* ---------------- HUD ---------------- */
 /* v3.38 käyttäjä: vavan vihjeet (mato koukkuun / solmi siima / ei siimaa) vain ensimmäisellä kerralla, 8 s (localStorage hiidenmaa_tkHint) */
 const TK_HINT_T=8000,_tkHS={};
+// v3.42 'jää pahasti kalaan' -kerroin tekstinä
+function tkDeepTxt(k){k=k??1;return (k>=1.35?'usein':k>=1.1?'melko usein':k>.9?'tavallisesti':k>.75?'harvemmin':'harvoin')+` (×${tkFmt(k)})`;}
 function tkHintOnce(k){let seen={};try{seen=JSON.parse(localStorage.getItem('hiidenmaa_tkHint')||'{}');}catch(e){}const now=performance.now();
   if(_tkHS[k]==null){if(seen[k])return false;_tkHS[k]=now;seen[k]=1;try{localStorage.setItem('hiidenmaa_tkHint',JSON.stringify(seen));}catch(e){}}
   return now-_tkHS[k]<TK_HINT_T;}

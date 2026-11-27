@@ -242,3 +242,9 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 
 ## Erä v3.40 – TOTEUTETTU 27.11.
 - Pehmeä isku: koho nykäisee 0,55 m ja painuu, siima kiristyy 0,3 s, kala häivyttyy näkyviin ja rimpuilee (`FP_STRIKE_T`/`FP_STRIKE_J`).
+
+## Erä v3.41 – TOTEUTETTU 27.11.
+- Vapa nousee vain vasen pohjassa (ei itsestään); isku liikauttaa kalaa vain 0,55 m.
+
+## Erä v3.42 – TOTEUTETTU 27.11.
+- Koukun/vieheen `deep` (jää pahasti kalaan) → `fpDeepK` × irrotusminipelin todennäköisyys; ongen nykäisyliike ja kalan painon mukainen kaari; kala vasemmalla syödään.
