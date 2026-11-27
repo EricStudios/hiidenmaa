@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.38, 27.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.39, 27.11.2026)
+
+- **Versio 3.39** – kaikki kalastuksen tekstirivit vain ensimmäisellä kerralla, teksti alas (esinenimen yläpuolelle); ongen vasen = vavan nosto kaarena (ei kelausta).
 
 - **Versio 3.38** – kalastuksen ohjeet (vasen/oikea/E) vain ensimmäisellä kerralla 8 s, tiedot aina; usva vain porteilla ja Hautakummulla.
 
@@ -466,6 +468,14 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.39 (käyttäjä 27.11.)
+- **Kaikki tämän tyyppiset tekstit kertaalleen:** myös "Täällä ei näytä olevan kaloja…" (`nofish`), odotusrivi (vesistö/syötti/ohje), "X siimassa", "X koukussa", kala kädessä -rivi (`heldFish`).
+  Toiminnalliset jäävät: heiton voima + palkki, väsytyspalkit + "Kala vetää – päästä irti!", vieheen etäisyys/syvyys, täyden repun ajastin, siiman kenttävaihdon edistyminen.
+- **Paikka:** `#fishHud` ruudun keskeltä alas `bottom: 108px` (pikapaikkojen päälle, `#hotName` 80 px yläpuolelle – ei päällekkäin; mitattu 597–612 px vs 625–644 px).
+- **Ongen vasen = nosto:** ongella ei ole kelaa → `fpRetrStart` tekee kaaren (`FS.arc`, `FP_LIFT_T` 0,55 s): koho/syötti lennähtää ilman kautta käteen (ei liu'u pintaa pitkin, ei tartu maahan).
+  Ohjetekstit "vasen nostaa vavan" / "vasen nostaa sen takaisin". Virveli kelaa kuten ennen.
+- Tarkistusrivi v3.39; testi `scratchpad/t328/lift.mjs`, `hudpos.mjs`.
 
 ### v3.38 (käyttäjä 27.11.: ohjetekstit pois, usva vain tietyissä paikoissa)
 - **Kalastuksen ohjeet kertaalleen:** `tkHintOnce(k)` (tackle.js, localStorage `hiidenmaa_tkHint`, `TK_HINT_T` 8 s) + `fhint(k,t)`/`fjoin` (fish.js). Ohjeet: mato koukkuun / solmi siima / ei siimaa

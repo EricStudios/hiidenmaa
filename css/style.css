@@ -1,5 +1,5 @@
 /* Layout: full-screen WebGL world; HUD pinned to corners; panels float centered like carved boards. Single deliberate dark look. */
-:root{--css-v:'3.38';
+:root{--css-v:'3.39';
   --peat:#13110e; --bark:#221d18; --panel:rgba(22,19,15,.9); --line:#4b4034; --line2:#6b5a46;
   --bone:#eee5d3; --dim:#a99d89; --ember:#e8893b; --frost:#8fd8cf; --blood:#c8463b; --stam:#e3bf50; --hunger:#c08a4d; --moss:#86a457; --bad:#d0584a;
   --font-d:'Uncial Antiqua', 'Palatino Linotype', Georgia, serif;
@@ -1028,7 +1028,7 @@ button:focus,select:focus{outline:none}
 #chest[data-st="loyto"]{background:radial-gradient(ellipse at 50% 0%,rgba(230,180,80,.16),transparent 60%),repeating-linear-gradient(180deg,#2e2014 0,#2e2014 30px,#24180e 30px,#24180e 32px);border:3px solid #6a5022;box-shadow:inset 0 0 0 2px #3a2a12,0 20px 60px rgba(0,0,0,.7)}
 #chest[data-st="kivi"]{background:repeating-linear-gradient(0deg,#3a3936 0,#3a3936 24px,#2a2927 24px,#2a2927 26px),#33322f;border:3px solid #1c1b19;box-shadow:inset 0 0 0 2px #55534e,0 20px 60px rgba(0,0,0,.7)}
 /* v3.06 onkiminen (fish.js): tärppi, väsytys, vesien nimet, kalastajan kirja */
-#fishHud{position:fixed;left:50%;top:calc(50% + 46px);transform:translateX(-50%);min-width:220px;text-align:center;font-size:13px;color:var(--fg);pointer-events:none;text-shadow:0 1px 3px #000}
+#fishHud{position:fixed;left:50%;top:auto;bottom:calc(108px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);   /* v3.39 käyttäjä: alas pikapaikkojen päälle, esinenimen (#hotName 80 px) yläpuolelle – ei päällekkäin */min-width:220px;text-align:center;font-size:13px;color:var(--fg);pointer-events:none;text-shadow:0 1px 3px #000}
 #fishHud.wait{opacity:.7}
 #fishHud.bite b{display:block;font:900 44px 'Uncial Antiqua',serif;color:#ffd24a;animation:fishPulse .3s infinite alternate;line-height:1} #fishHud.bite span{font-weight:700;color:#ffe9a8}
 @keyframes fishPulse{from{transform:scale(1)}to{transform:scale(1.25)}}

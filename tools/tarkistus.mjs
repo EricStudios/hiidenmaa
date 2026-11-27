@@ -657,6 +657,12 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     ck('ohjeet',/fhint\('wait'/.test(fishHud.toString())&&/fhint\('hang'/.test(fishHud.toString())&&/fhint\('eat'/.test(fishHeldHint.toString())&&/tkHintOnce\(k\)/.test(tkHud.toString())&&/fhint\('spin'/.test(tkHud.toString()));
     ck('usva',/L\.kind!=='portal'&&k!=='barrow'/.test(updateMist.toString())&&!/'ruin'/.test(updateMist.toString()));
     return e.length?'puuttuu: '+e.join(', '):true;});
+  t('v3.39: kaikki kalastusteksti-rivit vain ensimmäisellä kerralla, teksti alhaalla esinenimen yläpuolella, ongen vasen = nosto kaarena (ei kelausta)',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('kerran',/fhint\('nofish'/.test(fishHud.toString())&&/tkHintOnce\('heldFish'\)/.test(fishHeldHint.toString())&&/fhint\('hang',ITEMS/.test(fishHud.toString()));
+    {const cs=getComputedStyle(document.getElementById('fishHud'));ck('paikka',cs.top==='auto'||/bottom/.test([...document.styleSheets].map(s=>{try{return [...s.cssRules].map(r=>r.cssText).join('');}catch(x){return '';}}).join('').match(/#fishHud \{[^}]*\}/)?.[0]||''));}
+    ck('nosto',FP_LIFT_T>0&&/FS\.arc=/.test(fpRetrStart.toString())&&/FS\.arc/.test(fpRetr.toString())&&/vasen nostaa vavan/.test(fishHud.toString()));
+    return e.length?'puuttuu: '+e.join(', '):true;});
   t('v3.27: kalastuksen uusi fysiikka – ballistinen heitto (35° pisin, vapa ratkaisee), virvelin lataus, maalle lasku ja katkeaminen, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m ja lajien syvyys, kala näkyy vedossa, pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa (ei monistusta), pilaantuminen, naulakot ja laatta, kirja, pakin koristeet, virveli vasemmassa kädessä',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     {const r=[0,15,25,35,45,60].map(a=>fpRange(fpV0(16),a*Math.PI/180)),mx=r.indexOf(Math.max(...r));ck('35° pisin',mx===3&&Math.abs(r[3]-16)<.3&&fpV0(30)>fpV0(16));}

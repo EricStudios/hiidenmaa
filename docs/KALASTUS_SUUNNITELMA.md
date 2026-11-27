@@ -235,3 +235,7 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 
 ## Erä v3.38 – TOTEUTETTU 27.11.
 - Kalastuksen ohjetekstit (vasen/oikea/E) vain ensimmäisellä kerralla 8 s (`tkHintOnce`/`fhint`); tiedot aina.
+
+## Erä v3.39 – TOTEUTETTU 27.11.
+- Kaikki kalastuksen tekstirivit kertaalleen, teksti alas (`#fishHud` bottom 108 px).
+- Ongen vasen = nosto kaarena (`FS.arc`, `FP_LIFT_T` 0,55 s), ei kelausta ilman kelaa.

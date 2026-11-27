@@ -76,9 +76,14 @@ function fpFreeTether(dt){const E=FS.E;if(!E)return false;const wy=water.positio
   FS.landM=(FS.landM||0)+mv;while(FS.landM>=1){FS.landM-=1;if(Math.random()<FP_LAND_SNAP){fpLandSnap();return true;}}
   return false;}
 /* ---------------- KELAUS TAKAISIN (ilman kalaa) ---------------- */
-function fpRetrStart(){FS.st='retr';FS.landM=FS.landM||0;FS.fin=0;}
+/* v3.39 käyttäjä: "onki kelaantuu vaikka ei ole kelaa" – ongella (ei kelaa) vasen NOSTAA vavan: koho/syötti lennähtää kaarena ilman kautta käteen (FP_LIFT_T), ei liu'u pintaa pitkin */
+const FP_LIFT_T=.55;
+function fpRetrStart(){FS.st='retr';FS.landM=FS.landM||0;FS.fin=0;FS.arc=null;
+  if(!(FS.rod&&FS.rod.reel)&&FS.E){FS.arc={t:0,x:FS.E.x,y:FS.E.y,z:FS.E.z};plSnd('onkiminen','heitto',{v:.35,p:1.15});}}
 function fpReelV(){const K=FS.rod&&FS.rod.reel;return K?TK_REEL_V*K.spd*1.6:FP_RETR_V;}
 function fpRetr(dt){const E=FS.E,tip=fpTip(),wy=water.position.y;const auto=!(FS.rod&&FS.rod.reel),hold=mouseL&&locked&&state==='play';
+  if(FS.arc){const A=FS.arc;A.t+=dt;const k=Math.min(1,A.t/FP_LIFT_T),e=k*k*(3-2*k),hgt=Math.sin(Math.PI*k)*(1.2+Math.hypot(tip.x-A.x,tip.z-A.z)*.12);
+    E.x=lerp(A.x,tip.x,e);E.z=lerp(A.z,tip.z,e);E.y=lerp(A.y,tip.y-.4,e)+hgt;FS.bx=E.x;FS.bz=E.z;if(k>=1){FS.arc=null;fishReset();}return;}   // nosto: kaari ilman kautta, ei maahan tarttumista
   if(!auto&&!hold&&!FS.fin)return;
   const dx=tip.x-E.x,dz=tip.z-E.z,d=Math.hypot(dx,dz);
   if(FS.fin||d<FP_TIP_R){FS.fin=(FS.fin||0)+dt;const k=Math.min(1,FS.fin/.25);E.x=lerp(E.x,tip.x,k);E.y=lerp(E.y,tip.y-.4,k);E.z=lerp(E.z,tip.z,k);if(k>=1){fishReset();}return;}
