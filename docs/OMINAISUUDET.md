@@ -886,6 +886,9 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.40 – pehmeä isku
+- Tärpin klikkaus: koho nykäisee kohti vapaa ja painuu, siima kiristyy pehmeästi, kala ilmestyy (häivytys) ja rimpuilee sivuttain. Vapa nousee; kaukaa kala raahataan taaksepäin kävellen.
+
 ## v3.39 – tekstit alas ja kertaalleen, ongen nosto
 - Kalastuksen tekstirivit (myös "ei kaloja", kalan nimi kädessä, koukussa) vain ensimmäisellä kerralla; teksti pikapaikkojen yläpuolella, ei esinenimen päällä.
 - Onki (ei kelaa): vasen nostaa vavan – koho lennähtää kaarena käteen 0,55 s:ssa. Virveli kelaa.

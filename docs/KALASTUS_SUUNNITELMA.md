@@ -239,3 +239,6 @@ Nämä menevät yllä olevan määrittelyn edelle, jos ne ovat ristiriidassa sen
 ## Erä v3.39 – TOTEUTETTU 27.11.
 - Kaikki kalastuksen tekstirivit kertaalleen, teksti alas (`#fishHud` bottom 108 px).
 - Ongen vasen = nosto kaarena (`FS.arc`, `FP_LIFT_T` 0,55 s), ei kelausta ilman kelaa.
+
+## Erä v3.40 – TOTEUTETTU 27.11.
+- Pehmeä isku: koho nykäisee 0,55 m ja painuu, siima kiristyy 0,3 s, kala häivyttyy näkyviin ja rimpuilee (`FP_STRIKE_T`/`FP_STRIKE_J`).

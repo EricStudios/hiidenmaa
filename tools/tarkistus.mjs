@@ -663,6 +663,11 @@ const r=await p.evaluate(()=>{const g=window.__game;g.newGame();g.setState('play
     {const cs=getComputedStyle(document.getElementById('fishHud'));ck('paikka',cs.top==='auto'||/bottom/.test([...document.styleSheets].map(s=>{try{return [...s.cssRules].map(r=>r.cssText).join('');}catch(x){return '';}}).join('').match(/#fishHud \{[^}]*\}/)?.[0]||''));}
     ck('nosto',FP_LIFT_T>0&&/FS\.arc=/.test(fpRetrStart.toString())&&/FS\.arc/.test(fpRetr.toString())&&/vasen nostaa vavan/.test(fishHud.toString()));
     return e.length?'puuttuu: '+e.join(', '):true;});
+  t('v3.40: pehmeä isku – koho nykäisee ja painuu, siima kiristyy pehmeästi, kala häivyttyy näkyviin; kiinteä siima + raahaus säilyy',()=>{
+    const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
+    ck('isku',FP_STRIKE_T>0&&FP_STRIKE_J>0&&/FS\.sk0=playTime/.test(fpPullStart.toString())&&!/FS\.bob\.visible=false/.test(fpPullStart.toString())&&/strike/.test(fishMeshUpd.toString())&&/FP_STRIKE_T\*\.35/.test(fpFishUpd.toString()));
+    ck('raahaus',/FS\.lift\*FP_LIFT_GAIN/.test(fpPull.toString())&&FP_LIFT_GAIN===2.2);
+    return e.length?'puuttuu: '+e.join(', '):true;});
   t('v3.27: kalastuksen uusi fysiikka – ballistinen heitto (35° pisin, vapa ratkaisee), virvelin lataus, maalle lasku ja katkeaminen, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m ja lajien syvyys, kala näkyy vedossa, pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa (ei monistusta), pilaantuminen, naulakot ja laatta, kirja, pakin koristeet, virveli vasemmassa kädessä',()=>{
     const e=[];const ck=(n,v)=>{if(!v)e.push(n);};
     {const r=[0,15,25,35,45,60].map(a=>fpRange(fpV0(16),a*Math.PI/180)),mx=r.indexOf(Math.max(...r));ck('35° pisin',mx===3&&Math.abs(r[3]-16)<.3&&fpV0(30)>fpV0(16));}

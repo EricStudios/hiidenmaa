@@ -267,9 +267,12 @@ function fishMeshUpd(){if(!FS.bob)return;
   if(FS.st==='hang'||FS.st==='unhook'){const D=FS.dg;if(D){fpTip(_fsTip);const p=D.piv.position,k=FS.spin?.95:.55;FS.bob.position.set(lerp(_fsTip.x,p.x,k),lerp(_fsTip.y,p.y,k)+(FS.spin?0:.02),lerp(_fsTip.z,p.z,k));FS.bob.visible=true;}else FS.bob.visible=false;if(FS.line)FS.line.visible=false;return;}
   if(!FS.E)return;const wy=water.position.y,E=FS.E;fpTip(_fsTip);let bx=E.x,by=E.y,bz=E.z;
   if(FS.st==='wait'||FS.st==='bite')by=wy+.02+Math.sin(playTime*2.2)*.012-(FS.dip||0)*.12;else if(FS.st==='spin')by=E.y+Math.sin(playTime*6)*.02;
-  FS.bob.position.set(bx,by,bz);FS.bob.visible=!FS.fm;if(FS.fm){bx=FS.fm.position.x;by=FS.fm.position.y;bz=FS.fm.position.z;}
+  const sk=playTime-(FS.sk0??-9),strike=!!FS.fm&&(FS.st==='pull'||FS.st==='fight')&&sk<FP_STRIKE_T&&FS.bob0;
+  if(strike){const j=1-Math.pow(1-Math.min(1,sk/.14),3),dx=_fsTip.x-FS.bob0.x,dz=_fsTip.z-FS.bob0.z,dl=Math.hypot(dx,dz)||1;   /* v3.40 isku: koho nykäisee kohti vapaa ja painuu pinnan alle */
+    bx=FS.bob0.x+dx/dl*FP_STRIKE_J*j;bz=FS.bob0.z+dz/dl*FP_STRIKE_J*j;by=wy+.02-Math.min(.35,sk*.9);}
+  FS.bob.position.set(bx,by,bz);FS.bob.visible=!FS.fm||strike;if(FS.fm&&!strike){bx=FS.fm.position.x;by=FS.fm.position.y;bz=FS.fm.position.z;}
   const hold=mouseL&&locked,d=Math.hypot(bx-_fsTip.x,by-_fsTip.y,bz-_fsTip.z),st=FS.st,
-    sl=st==='fly'?.02:st==='wait'||st==='bite'?.06:st==='land'?.05:st==='spin'?(hold?.012:.035):st==='retr'?(hold||!FS.rod.reel?.015:.04):st==='fight'?.004*(1-FS.ten):st==='pull'?(FS.tight?.008:.045):.03,sag=Math.min(2.5,d*sl);
+    sl0=st==='fly'?.02:st==='wait'||st==='bite'?.06:st==='land'?.05:st==='spin'?(hold?.012:.035):st==='retr'?(hold||!FS.rod.reel?.015:.04):st==='fight'?.004*(1-FS.ten):st==='pull'?(FS.tight?.008:.045):.03,sl=(st==='pull'||st==='fight')&&sk<FP_STRIKE_T?lerp(.06,sl0,sstep(0,FP_STRIKE_T*.7,sk)):sl0,sag=Math.min(2.5,d*sl);   /* v3.40 siima kiristyy pehmeästi iskussa */
   const n=FISH_LQ?10:FP_LN,a=FS.line.geometry.attributes.position;for(let i=0;i<n;i++){const t=i/(n-1);a.setXYZ(i,lerp(_fsTip.x,bx,t),lerp(_fsTip.y,by+(FS.fm?0:.1),t)-4*t*(1-t)*sag,lerp(_fsTip.z,bz,t));}FS.line.geometry.setDrawRange(0,n);a.needsUpdate=true;if(typeof tkLineLook==='function')tkLineLook(FS.line.material);}   // v3.29 Low/Medium: 10 pistettä
 /* ---------------- HUD: tärppi ja väsytys ---------------- */
 /* v3.38 käyttäjä: kalastuksen OHJEET (vasen/oikea/E …) vain ensimmäisellä kerralla 8 s (tkHintOnce, localStorage hiidenmaa_tkHint); TIEDOT (voima, nimi, paino, palkit) näkyvät aina */

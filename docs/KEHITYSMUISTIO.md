@@ -3,7 +3,9 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.39, 27.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.40, 27.11.2026)
+
+- **Versio 3.40** – pehmeä isku: koho nykäisee ja painuu, siima kiristyy pehmeästi, kala häivyttyy näkyviin rimpuilemaan; vapa nousee, kaukaa kala raahataan.
 
 - **Versio 3.39** – kaikki kalastuksen tekstirivit vain ensimmäisellä kerralla, teksti alas (esinenimen yläpuolelle); ongen vasen = vavan nosto kaarena (ei kelausta).
 
@@ -468,6 +470,12 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.40 (käyttäjä 27.11.: isku pehmeäksi)
+- **Isku** (`FP_STRIKE_T` 0,45 s, `FP_STRIKE_J` 0,55 m): tärpin klikkauksesta koho nykäisee 0,1 s:ssa kohti vapaa ja painuu pinnan alle (−0,33 m), siiman taipuma kiristyy pehmeästi
+  (`sstep`, fishMeshUpd), kala alkaa häivyttyä näkyviin 0,16 s jälkeen (0,7 s:ssa näkyvissä) kohon kohdalle ja rimpuilee sivuttain (`fpFishUpd`). Ennen koho katosi heti ja siima kiristyi hetkessä.
+- **Varmistettu:** vapa nousee (`FS.lift`, siima lyhenee 2,2 m), koukku pysyy kalassa, kaukaa (testissä 13,8 m) kala raahataan kävelemällä taaksepäin.
+- Tarkistusrivi v3.40; testi `scratchpad/t328/strike.mjs`.
 
 ### v3.39 (käyttäjä 27.11.)
 - **Kaikki tämän tyyppiset tekstit kertaalleen:** myös "Täällä ei näytä olevan kaloja…" (`nofish`), odotusrivi (vesistö/syötti/ohje), "X siimassa", "X koukussa", kala kädessä -rivi (`heldFish`).

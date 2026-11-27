@@ -113,9 +113,11 @@ function fpSpin(dt){const hold=mouseL&&locked&&state==='play',E=FS.E,R=FS.rod,U=
   return false;}
 /* ---------------- KALA SIIMASSA (veto ja taistelu) ---------------- */
 function fpStr(){const B=FISH_B[FS.sp];if(!B)return .2;const kq=clamp((FS.kg-B.kg[0])/(B.kg[1]-B.kg[0]),0,1);return clamp(.15*FISH_DEF[FS.sp].k+.55*kq+(B.big?.15:0),0,1);}
-function fpPullStart(){const E=FS.E||{x:FS.bx,y:water.position.y,z:FS.bz};FS.E=E;FS.H0={x:E.x,z:E.z};FS.pt=0;FS.loose=0;FS.S=fpStr();FS.ph=Math.random()*6;FS.lift=0;
+/* v3.40 käyttäjä: ISKU PEHMEÄKSI – koho nykäisee kohti vapaa (FP_STRIKE_J m) ja painuu, siima kiristyy pehmeästi FP_STRIKE_T:n aikana, kala häivyttyy kohon kohdalle ja alkaa rimpuilla */
+const FP_STRIKE_T=.45,FP_STRIKE_J=.55;
+function fpPullStart(){const E=FS.E||{x:FS.bx,y:water.position.y,z:FS.bz};FS.E=E;FS.sk0=playTime;FS.bob0={x:E.x,z:E.z};FS.H0={x:E.x,z:E.z};FS.pt=0;FS.loose=0;FS.S=fpStr();FS.ph=Math.random()*6;FS.lift=0;
   {const t=fpTip();FS.L=Math.max(FP_TETHER_MIN,Math.hypot(E.x-t.x,E.y-t.y,E.z-t.z));}   // v3.29 siiman pituus koukkuun tarttuessa (kiinteä; virvelillä kelaus lyhentää)
-  if(FISH_B[FS.sp]){fpFishDrop();const L=fpFishLen(FS.sp,FS.kg),m=tkFishMesh(FS.sp,L);fpFadeMats(m,0);scene.add(m);FS.fm=m;FS.fa=0;if(FS.bob)FS.bob.visible=false;}}
+  if(FISH_B[FS.sp]){fpFishDrop();const L=fpFishLen(FS.sp,FS.kg),m=tkFishMesh(FS.sp,L);fpFadeMats(m,0);scene.add(m);FS.fm=m;FS.fa=0;}}   // v3.40 koho näkyy iskun ajan (fishMeshUpd)
 function fpFishLen(sp,kg){return Math.min(.95,.16+Math.cbrt(Math.max(.02,kg))*.24);}
 function fpFadeMats(g,a){g.traverse(o=>{if(!o.isMesh)return;if(!o.userData.fpm){o.material=o.material.clone();o.userData.fpm=o.material.opacity;}o.material.transparent=a<.999||o.userData.fpm<1;o.material.opacity=o.userData.fpm*a;});}
 function fpFishDrop(){if(FS.fm){scene.remove(FS.fm);FS.fm.traverse(o=>{if(o.isMesh){if(o.geometry)o.geometry.dispose();if(o.userData.fpm!=null)o.material.dispose();}});FS.fm=null;}}
@@ -138,7 +140,7 @@ function fpFishY(){const E=FS.E,wy=water.position.y,th=terrainH(E.x,E.z);E.y=th<
 // kalan 3D: kyljellään (pää kohti pelaajaa), sivuttaisheilunta painon ja koon mukaan, häivytys näkyviin
 const _fpX=new THREE.Vector3(),_fpY=new THREE.Vector3(),_fpZ=new THREE.Vector3(0,1,0),_fpM=new THREE.Matrix4();
 function fpFishUpd(dt){const m=FS.fm;if(!m)return;const E=FS.E,dx=P.pos.x-E.x,dz=P.pos.z-E.z,d=Math.hypot(dx,dz)||1,wet=terrainH(E.x,E.z)<water.position.y-.08,S=FS.S||.3,t=FS.t;
-  if(!(FS.fa>=1&&m.userData.faded)){FS.fa=Math.min(1,(FS.fa||0)+dt/FP_FADE_T);fpFadeMats(m,FS.fa);if(FS.fa>=1)m.userData.faded=1;}   // v3.29 häivytys vain kunnes valmis
+  if(!(FS.fa>=1&&m.userData.faded)){if(playTime-(FS.sk0??-9)>FP_STRIKE_T*.35)FS.fa=Math.min(1,(FS.fa||0)+dt/FP_FADE_T);fpFadeMats(m,FS.fa);if(FS.fa>=1)m.userData.faded=1;}   // v3.40 kala näkyviin iskun jälkeen   // v3.29 häivytys vain kunnes valmis
   const A=wet?(.12+1.5*S)*(FS.st==='fight'&&FS.pullOn?1.6:1):.06,sw=Math.sin(t*(2.2-S)+FS.ph)*A+Math.sin(t*5.3+FS.ph*2)*A*.25;
   const px=-dz/d,pz=dx/d;m.position.set(E.x+px*sw,E.y,E.z+pz*sw);
   const yaw=Math.cos(t*(2.2-S)+FS.ph)*.5*(wet?1:.3);_fpY.set(dx/d,0,dz/d).applyAxisAngle(_fpZ,yaw);_fpX.crossVectors(_fpY,_fpZ);_fpM.makeBasis(_fpX,_fpY,_fpZ);m.quaternion.setFromRotationMatrix(_fpM);
