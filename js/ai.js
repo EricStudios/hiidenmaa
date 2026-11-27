@@ -398,6 +398,9 @@ function sunBurnAI(m,dt){const d=m.def;
   animMob(m,dt);
   if(t>=5.2){m.f.g.rotation.z=0;m.sunKill=1;m.hp=0;stopBurn(m);m.burnT=1;killMob(m);m.burnT=0;}
   return true;}
+// v3.27 suunta vesirajalta kuivalle maalle: 16 suuntaa, 3 m päässä maata (ja 1,5 m), lähinnä nykyisen vastasuuntaa
+function shoreDir(m){const back=m.yaw+Math.PI;let best=back,bs=-1e9;for(let i=0;i<16;i++){const a=back+i/16*TAU,sx=Math.sin(a),sz=Math.cos(a);
+    const h1=terrainH(m.pos.x+sx*1.5,m.pos.z+sz*1.5),h3=terrainH(m.pos.x+sx*3,m.pos.z+sz*3);if(h1<-.6)continue;const sc=Math.min(h1,h3)*.5-Math.abs(Math.atan2(Math.sin(a-back),Math.cos(a-back)));if(sc>bs){bs=sc;best=a;}}return best;}
 function moveMob(m,tx,tz,spd,dt){
   spd*=MOB_SPD;
   // v0.83: Aarnimetsässä hirviöt ovat vihaisia ja liikkuvat 20 % nopeammin (biomi tarkistetaan sekunnin välein)
@@ -409,8 +412,12 @@ function moveMob(m,tx,tz,spd,dt){
   let vx=0,vz=0;if(l>.01&&spd>0){const sx=Math.sin(m.yaw),sz=Math.cos(m.yaw),uk=m.dun||m.fly?1:uphillK(m.pos.x,m.pos.z,sx,sz);vx=sx*spd*uk;vz=sz*spd*uk;}   // v2.20: ylämäki hidastaa (90° = puolet)
   if(m.dun&&!m.fly&&iceAt(m.pos.x,m.pos.z)){const k=kExp(ICE_GRIP,dt);m.ivx=lerp(m.ivx??vx,vx,k);m.ivz=lerp(m.ivz??vz,vz,k);vx=m.ivx;vz=m.ivz;}else{m.ivx=vx;m.ivz=vz;}   // v3.06 jäällä olennotkin liukuvat
   m.vel.x*=Math.max(0,1-dt*6);m.vel.z*=Math.max(0,1-dt*6);
-  const nx=m.pos.x+(vx+m.vel.x)*dt,nz=m.pos.z+(vz+m.vel.z)*dt;
-  if(!m.dun&&terrainH(nx,nz)<-.7&&terrainH(m.pos.x,m.pos.z)>=-.7){m.wander=null;if(m.state!=='chase'){if(!(m.shoreW>0)){m.shoreT=SHORE_CALM;m.shoreYaw=m.yaw+Math.PI*(.8+Math.random()*.4);m.state='idle';m.fearT=0;}else m.shoreYaw+=Math.PI*.5;}return;}   // v2.99 vesiraja: pysähdys ja rauhoittuminen, sitten pois vedestä
+  let nx=m.pos.x+(vx+m.vel.x)*dt,nz=m.pos.z+(vz+m.vel.z)*dt;
+  /* v3.27 KORJAUS (käyttäjä): vesirajalla eläin nyki – kävelyvaiheessa uusi suunta käännettiin 90° joka ruudulla ja jahdissa liike pysähtyi
+     joka ruudulla. Nyt ensin liu'utaan rantaa pitkin (x tai z erikseen); vasta kun kumpikaan ei käy, valitaan KERRAN suunta kuivalle maalle (shoreDir). */
+  if(!m.dun&&terrainH(nx,nz)<-.7&&terrainH(m.pos.x,m.pos.z)>=-.7){
+    if(terrainH(nx,m.pos.z)>=-.7)nz=m.pos.z;else if(terrainH(m.pos.x,nz)>=-.7)nx=m.pos.x;
+    else{m.wander=null;if(m.state!=='chase'){if(!(m.shoreW>0)){m.shoreT=SHORE_CALM;m.state='idle';m.fearT=0;}if(!(m.shoreDT>playTime)){m.shoreYaw=shoreDir(m);m.shoreDT=playTime+.8;}}return;}}   // v2.99 vesiraja: pysähdys ja rauhoittuminen, sitten pois vedestä
   const ox=m.pos.x,oz=m.pos.z;m.pos.x=nx;m.pos.z=nz;
   _hitl.length=0;collideXZ(m.pos,m.def.r,m.type==='vartija'?6:1.6,m.pos.y,_hitl);
   const moved=Math.hypot(m.pos.x-ox,m.pos.z-oz);

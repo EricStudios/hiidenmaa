@@ -3,7 +3,47 @@
 Tämä on projektin muisti. Päivitä se jokaisen muutoserän jälkeen: versioloki, muuttuneet arvot,
 uudet päätökset ja ideajono. Lyhyesti ja asiallisesti, ei keskustelulokia.
 
-## ⭐ TÄRKEINTÄ NYT (päivitetty v3.26, 19.11.2026)
+## ⭐ TÄRKEINTÄ NYT (päivitetty v3.42, 27.11.2026)
+
+- **Versio 3.42** – korjattu: hahmo katosi, kun kala (tai muu ei-ase) kädessä painoi vasenta (lyönnin kesto NaN). Vasen syö nyt kalan. Koukuilla ja vieheillä ominaisuus "jää pahasti kalaan"; ongen isku = nykäisyliike, vapa korkealla ja kaarella kalan painon mukaan.
+
+- **Versio 3.41** – isku liikauttaa kalaa vain vähän; vapa nousee vain vasen pohjassa (ennen itsestään → kala lennähti heti luokse).
+
+- **Versio 3.40** – pehmeä isku: koho nykäisee ja painuu, siima kiristyy pehmeästi, kala häivyttyy näkyviin rimpuilemaan; vapa nousee, kaukaa kala raahataan.
+
+- **Versio 3.39** – kaikki kalastuksen tekstirivit vain ensimmäisellä kerralla, teksti alas (esinenimen yläpuolelle); ongen vasen = vavan nosto kaarena (ei kelausta).
+
+- **Versio 3.38** – kalastuksen ohjeet (vasen/oikea/E) vain ensimmäisellä kerralla 8 s, tiedot aina; usva vain porteilla ja Hautakummulla.
+
+- **Versio 3.37** – siimat läpinäkyvämpiä (erottuu vain vähän, `TK_LINE_OP` 0,28): pellava harmaa, muut omalla värillään himmeinä; vavan siima 30 %.
+
+- **Versio 3.36** – onki ei enää "kelaa" itsestään (siiman pituus pelaajasta, ei heiluvasta kärjestä); kalan syönnin siivous. Hahmon katoamista kalaa syödessä ei saatu toistettua – ks. versioloki.
+
+- **Versio 3.35** – koukun irrotus reiluksi (ei nopeudu, ±16 % pehmeästi), kiduksiin-ilmoitus, hiiriohje; vesi samenee syvyyden mukaan ja merenpohja tummenee.
+
+- **Versio 3.34** – siimakerä riittää 10 siimaan (kulumismittari kuten kilvellä, `TK_LINE_USES`/`s.lu`/`tkLineTake`); siimat himmeitä ja yöllä tummia, hiidensiima hohtaa hieman (`tkLineLook`).
+
+- **Versio 3.33** – ongen siima kiinteä myös ennen tärppiä (koho raahautuu, ei kelausta/ilmoitusta), katkennut siima vaihdetaan E:llä repusta, koho kalan mukana, M-kartan ulos zoomatun reunuksen siivous. Ks. versioloki ja KALASTUS_SUUNNITELMA › Erä v3.33.
+
+- **Versio 3.32** – reiluus: grafiikka-asetukset ja FPS eivät muuta pelin fysiikkaa. Hyppy, nuolet, tähtäysviiva ja ongen heitto lasketaan tarkasti
+  (sama tulos 20–144 FPS). Auditointi: spawnaus, tekoäly ja törmäykset eivät riipu asetuksista. Ks. versioloki v3.32 ja Pysyvä periaate alla.
+- **PYSYVÄ PERIAATE (käyttäjä 26.11.):** grafiikka vaikuttaa vain pelaajan omaan näkymään – pelin säännöt, fysiikka, spawnaus ja tekoäly samat kaikilla
+  asetuksilla ja FPS:illä (kuin moninpelissä). Uusi liike/painovoima: tarkka integrointi (puolikas painovoima ennen ja jälkeen tai `+½gdt²`), ei `SET.*`-arvoja pelilogiikkaan.
+
+- **Versio 3.31** – Seikkailijan nimi aina näkyvissä Asetukset › Ohjaus -sivun ylimpänä (ennen vain pelin aikana sivun pohjalla), päävalikosta asetettu nimi = oletusnimi kaikille maailmoille.
+
+- **Versio 3.30** – valikon taustojen sade, lumi ja pöly eivät enää kulje säännöllisinä riveinä koko näytössä (satunnaiset paikat `mbgH`/`mbgDrift`),
+  hiukkaskerroksen tasainen syntytahti ja tiheys ruudun koon mukaan, seikkailijan nimen pyyhintä (Asetukset › Seikkailija › 🗑 Pyyhi). Ks. versioloki v3.30.
+
+- **Versio 3.29** – kiinteä ongen siima + raahaus, täysi reppu (kala jää koukkuun, karkaa 10–30 s), rimpuilu, pidemmät vavat, lappu ylemmäs, seikkailijan nimi,
+  selaimen zoomin esto ja kompensointi, koko näytön valikkotausta, kalastuksen optimointi Low–Medium. Ks. versioloki v3.29.
+
+- **Versio 3.28** – tasonimike ja taso repun oikeaan alakulmaan (ei peity koko näytöllä).
+
+- **Versio 3.27 – KALASTUKSEN UUSI FYSIIKKA** (`js/fishphys.js`, suunnitelma ja kaikki päätökset `docs/KALASTUS_SUUNNITELMA.md` – lue se ennen kalastusmuutoksia):
+  ballistinen heitto (35° pisin), virvelin lataus ja vasen käsi + veivaus, maalle lasku, vieheen vajoaminen ja pohja, kohon syvyys 0–2 m + lajien syvyys, kala näkyy vedossa,
+  pudotus/karkaus, minipeli, saalislappu, yksilökalat pinoissa, pilaantuminen, naulakot + kultainen laatta, kirjan tekijäsivu ja huhut, pakin koristeet. Korjattu:
+  valmistus ilman aineita (virtuaalinen osoitin klikkasi estettyjä nappeja) ja eläinten nykiminen rannassa. Ks. versioloki v3.27.
 
 - **Versio 3.16 – KALASTUSPÄIVITYS VALMIS (v3.14–v3.16, PR #49, käyttäjä yhdistää):** v3.14 kalastusvarusteet (`js/tackle.js`: vapa osista Kalastajan pöydällä, 4 siimaa,
   3 koukkua, kelat → virveli, kohot, 9 viehettä, 8 yhdistelmää, kuluminen, mato E:llä, kalastuspakki, perkaus, 3D-kala), v3.15 kalakirja (`js/fishbook.js`: aukeama, piirretyt kalat,
@@ -434,6 +474,168 @@ myös vajotessaan. Heikkoudet (`weak`): ks. `MOBDEF`. Pelaaja: kävely 4,6, juok
 | Kalmanvartija | 900 | 3,6 | 22–28 | 4 hyökkäystä, kutsuu kalmoja 50 %:ssa; v0.89 ryntäys 25 %/8 s, ennakko +40 %, kivi 30 % hitaampi |
 
 ## Versioloki
+
+### v3.42 (käyttäjä 27.11.: "ukkoni katosi kun yritin syödä ruutanan", syväkerroin, nykäisyliike)
+- **Korjattu (KORJAUKSET 108):** vasen klikkaus kala kädessä meni `startAttack`iin. Kalalla ei ole `spd`/`st` → `P.atk.dur` = NaN, asento NaN → pelaajan malli (119 osaa) katosi pysyvästi, myös kestävyys NaN.
+  `curWeapon` täydentää puuttuvat lyöntiarvot nyrkeistä (`FIST_W`), `onPrimary` syö kalan (`w.cat==='fish'`, kuten oikea), player.js poistaa rikkinäisen lyönnin ja palauttaa NaN-kestävyyden/-terveyden.
+- **Syväkerroin `deep`:** `TK_HOOK` (pieni 1,2, iso 0,7, väkä 1,6) ja `TK_LURE_DEEP` (kuparilusikka 0,85, rautapilkki 1,4, puuvaappu 1,3, hohto 1, pohjola 0,7, valkelippa 0,9, verilusikka 0,9).
+  `fpDeepK()` kertoo irrotusminipelin todennäköisyyden (`fpHookP`, enintään 30 %). Pöydän tietoihin rivi "Jää pahasti kalaan" (`tkDeepTxt`). Mitattu: pieni 11,2 %, iso 6,6 %, väkä 15,0 %.
+- **Nykäisyliike (onki):** `rodCastPose` – isku 0,1 s:ssa ylös (+0,55) ja takaisin 0,6 s:ssa, vedossa vapa korkealla (`.95+lift*.3`) ja heiluu kalan voiman `FS.S` mukaan; `rodBendTick` taipuu vedossa
+  painon mukaan (0,22 + kg × 0,5, värinä). Testi: kärki 3,34 → 3,86 m 0,1 s:ssa, taipuma ≤ 0,48.
+- Tarkistusrivi v3.42; v3.06-onkirivi pitää vasenta vedossa (v3.41 jälkeen vapa ei nouse itsestään).
+
+### v3.41 (käyttäjä 27.11.: "nykäisy tuo heti sen luokse")
+- `fpPull`: `FS.lift` kasvoi itsestään (1,2/s, pitäen 2,2/s) → siima lyheni 2,2 m alle sekunnissa ja lähellä oleva kala nostettiin heti kärkeen. Nyt vapa nousee **vain vasen pohjassa**
+  (0,9/s, vasta iskun jälkeen), ja isku lyhentää siimaa vain `FP_STRIKE_J` 0,55 m pehmeästi (myös kala, ei vain koho). Testi: koho 17,3 m → 2 s ilman pitoa 16,5 m; 1,5 s pitoa → 12,8 m.
+- Ohje: "pidä vasenta nostaaksesi vapaa · kävele taaksepäin raahataksesi".
+- Tarkistusrivi v3.41.
+
+### v3.40 (käyttäjä 27.11.: isku pehmeäksi)
+- **Isku** (`FP_STRIKE_T` 0,45 s, `FP_STRIKE_J` 0,55 m): tärpin klikkauksesta koho nykäisee 0,1 s:ssa kohti vapaa ja painuu pinnan alle (−0,33 m), siiman taipuma kiristyy pehmeästi
+  (`sstep`, fishMeshUpd), kala alkaa häivyttyä näkyviin 0,16 s jälkeen (0,7 s:ssa näkyvissä) kohon kohdalle ja rimpuilee sivuttain (`fpFishUpd`). Ennen koho katosi heti ja siima kiristyi hetkessä.
+- **Varmistettu:** vapa nousee (`FS.lift`, siima lyhenee 2,2 m), koukku pysyy kalassa, kaukaa (testissä 13,8 m) kala raahataan kävelemällä taaksepäin.
+- Tarkistusrivi v3.40; testi `scratchpad/t328/strike.mjs`.
+
+### v3.39 (käyttäjä 27.11.)
+- **Kaikki tämän tyyppiset tekstit kertaalleen:** myös "Täällä ei näytä olevan kaloja…" (`nofish`), odotusrivi (vesistö/syötti/ohje), "X siimassa", "X koukussa", kala kädessä -rivi (`heldFish`).
+  Toiminnalliset jäävät: heiton voima + palkki, väsytyspalkit + "Kala vetää – päästä irti!", vieheen etäisyys/syvyys, täyden repun ajastin, siiman kenttävaihdon edistyminen.
+- **Paikka:** `#fishHud` ruudun keskeltä alas `bottom: 108px` (pikapaikkojen päälle, `#hotName` 80 px yläpuolelle – ei päällekkäin; mitattu 597–612 px vs 625–644 px).
+- **Ongen vasen = nosto:** ongella ei ole kelaa → `fpRetrStart` tekee kaaren (`FS.arc`, `FP_LIFT_T` 0,55 s): koho/syötti lennähtää ilman kautta käteen (ei liu'u pintaa pitkin, ei tartu maahan).
+  Ohjetekstit "vasen nostaa vavan" / "vasen nostaa sen takaisin". Virveli kelaa kuten ennen.
+- Tarkistusrivi v3.39; testi `scratchpad/t328/lift.mjs`, `hudpos.mjs`.
+
+### v3.38 (käyttäjä 27.11.: ohjetekstit pois, usva vain tietyissä paikoissa)
+- **Kalastuksen ohjeet kertaalleen:** `tkHintOnce(k)` (tackle.js, localStorage `hiidenmaa_tkHint`, `TK_HINT_T` 8 s) + `fhint(k,t)`/`fjoin` (fish.js). Ohjeet: mato koukkuun / solmi siima / ei siimaa
+  (idle), heiton lataus, kelaus (viehe/koho maassa), vedossa raahaus, odotus "vasen kelaa sisään", väsytys "Kelaa: pidä vasenta", koukussa "vasen: ota kala", kala kädessä "oikea: syö" / "E: ripusta" / "E: vapauta",
+  virvelin "pidä vasenta kelataksesi". **Tiedot pysyvät:** heiton voima + palkki, vesistö, syötti, kalan nimi/paino, etäisyys/syvyys, väsytyspalkit, "Kala vetää – päästä irti!", täyden repun ajastin, "ei kaloja täällä".
+- **Usva** (`updateMist`): vain portit (`kind 'portal'`) ja Hautakumpu – ei enää tavallisilla raunioilla (talonpohjat, sortunut talo, linnake) eikä arkkukivillä.
+- Tarkistusrivi v3.38.
+
+### v3.37 (siimojen näkyvyys – käyttäjä 26.11.)
+- `tkLineLook`: läpinäkyvyys `TK_LINE_OP` 0,28 (yöllä ×0,8; ennen 0,42–0,52), pellavasiima harmaa `0x8e8e8a`, muut siimat oma väri 40 % harmaaseen; hiidensiima hohtaa yöllä edelleen hieman.
+  Vavan siima (mesh) 30 % (ennen 55 %), pellava harmaa. Tarkistusrivi v3.34: läpinäkyvyys < 0,3.
+
+### v3.36 (käyttäjä 26.11.: "onki taas kelaa", "ukko katoaa jos syön kalan")
+- **Räikkä pois:** v3.33:n vapaa siima mitattiin vavan kärjestä; kärki liikkuu joka kääntymisellä ja heilahduksella → koho vedettiin hiukan lähemmäs eikä se palannut,
+  joten se "kelautui" vähitellen sisään. Nyt `FS.Lf` = vaakaetäisyys pelaajasta + `FP_SLACK` 0,6 m (`fpLineNow`/`fpFreeTether`). Testi: 10 s kääntyilyä → koho liikkui 0,2 m (tuuli), kävely raahaa.
+- **Kalan syönti** (`eat`): syödyn kalan yksilö pois `fl`-pinosta (`flTake`), viimeinen käteen varattu kala vapautetaan (`s.eq=false`, `updateGear`).
+- **Hahmon katoaminen kalaa syödessä:** ei toistunut testeissä (kala kädestä/pikapaikasta, raaka/kypsä, koko saalisketju, syönti kesken tarkasteluanimaation – hahmo näkyvissä, paikallaan, mittakaava 1).
+  Ideajonoon: pyydä käyttäjältä tarkempi tilanne (kuva, raaka vai kypsä, kädestä vai pikapaikasta).
+- Tarkistusrivi v3.36.
+
+### v3.35 (koukun irrotus ja vesi – käyttäjä 26.11.)
+- **Koukun irrotus (minipeli `HG`):** alue nopeutui joka yrityksellä (+0,07) ja kapeni → nyt nopeus `hgSpeed` = `HG_SP0` 0,16 × (1 ± 16 %) kahdella hitaalla siniaallolla,
+  suunta kääntyy pehmeästi (`kExp`), leveys pysyy `HG_ZW` 0,2. Otsikko ja ilmoitus: "Koukku/Uistin jäi pahasti kiinni – kiduksiin!".
+  **Hiiriohje** `.hgMouse` (SVG-hiiri, CSS-silmukka sivuttain), häipyy kun hiirtä liikutetaan; näytetään 10 ensimmäisellä kerralla (`localStorage.hiidenmaa_hgHint`, `HG_HINT_N`).
+- **Vesi:** sameus `1−e^(−polku·0,85)` (ennen 0,5) ja syvän veden väri/peitto 1,5–12 m (ennen 2–22 m) → syvä pohja ja sen varjot eivät näy; ei lisälaskentaa.
+  **Merenpohja** tummenee syvyyden mukaan maaston värikartassa (`terrCol`, h < 0 → 0–7 m, 70 %) – ilmainen ajon aikana.
+- Tarkistusrivi v3.35; testi `scratchpad/t328/water.mjs` (kuvat).
+
+### v3.34 (siimakerä – käyttäjä 26.11.)
+- **1 siimakerä = 10 uutta siimaa.** Jokainen kiinnitys (E repusta, pöytä, pakin kenttävaihto) kuluttaa 1/10 (`tkLineTake`, slotin `lu`); kulumismittari repussa kuten kilvellä (`slotBar`),
+  tietoikkunassa "Kerässä x / 10 siimaa". Osittain käytetty kerä kulutetaan ensin. Siimat eivät enää pinoudu (`s:1`, kuten kilvet) → kulumistieto ei katoa yhdistäessä.
+- Pöydällä irrotettu siima ei palaa keräksi ("Vanha siima leikattiin pois") – muuten kerästä saisi loputtomasti siimaa.
+- **Siimojen ulkonäkö** (`tkLineLook`, käyttäjä): heitetty ja roikkuvan kalan siima ei enää kirkas (ennen #e8e8e0 75 % aina) → siiman väri × valo (`lightK`), 42–52 % läpinäkyvä, yöllä tumma;
+  hiidensiima hohtaa yöllä hieman vaaleansinisenä. Vavan siima (mesh) läpikuultava 55 %, hiidensiimalla heikko hehku.
+- **Maalta veteen raahattu koho/viehe kalastaa taas** (`fpReenter`, käyttäjä): uusi tärppiaikataulu, vesistö ja syvyys kuten laskeutuessa.
+- **Vavan kärjen välimuisti** (`fpTip`/`_fpTC`) avaimena myös pelaajan paikka – siirron jälkeen vanha kärki (satoja metrejä pois) veti kohoa väärään suuntaan (KORJAUKSET 106).
+- Tarkistus: onkitesti varmistaa siiman (aiempi testi voi katkaista sen v3.33:n jälkeen). Rinnakkaisajoissa (3 selainta) tarkistus voi kaataa ketjun (pelaaja kuolee testien välissä) – aja tarkistus yksin.
+- Tarkistusrivi v3.34; testit `scratchpad/t328/spool.mjs`, `line.mjs`, `reenter.mjs`.
+
+### v3.33 (ongen siima – käyttäjä 26.11.)
+- **Kiinteä siima ennen tärppiä** (`fpFreeTether`, `FS.Lf` laskeutuessa, `fpLineNow`): liikkuminen ei kelaa siimaa eikä anna ilmoitusta ("Siima kelautui sisään" poistettu, `FISH_KEEP_R` ei käytössä);
+  koho/viehe raahautuu perässä, maalle raahattu → `land`; maata pitkin katkeaminen `FP_LAND_SNAP` / m. Uinti ei enää kelaa siimaa.
+- **Katkennut siima pois** (`tkLineBreak`, `fpLandSnap`, `fpOnkiSnag`): `r.line=null` (ennen lyheni 30 %). **E** solmii uuden repusta (`tkLineInPack`, paras), pakista ei (`tkFieldLine` estää).
+- **Koho saaliin jälkeen:** `fishMeshUpd` hang/unhook → koho kalan siimassa kärjen alla, piiloon kun kala otetaan (ennen jäi maahan ja hyppäsi seuraavassa heitossa).
+- **M-kartta ulos zoomattuna** (`drawBigMap`): reunus tyhjennetään joka ruutu (ennen tuuliviirut ja pilvet jäivät jälkinä), pilvet/viirut rajataan kartan alueelle (`mapClip`), kartalle kehys.
+- Korjattu myös oma lipsahdus: `tkFieldLine`-rivin `//`-kommentti olisi poistanut "Kelaa ensin siima sisään" -tarkistuksen (tarkistus v2.23 huomasi).
+- Testi `scratchpad/t328/teth2.mjs`, `map.mjs`; tarkistusrivi v3.33; KORJAUKSET 104–105.
+
+### v3.32 (grafiikka ei saa muuttaa pelattavuutta – käyttäjä 26.11.)
+- **Auditointi** (testit `scratchpad/t328/det.mjs`, `spawn.mjs`, `fps.mjs`): samoilla syötteillä pelaajan reitti on identtinen Low/Medium/Ultra; olentojen määrä yöllä sama (20–23 elossa,
+  vaihtelu yhtä suurta saman asetuksen sisällä); spawnaus (`spawnTick`/`spawnSpot`), tekoäly, törmäykset ja näköyhteys (`pointBlocked`) eivät lue grafiikka-asetuksia.
+  Sumun takana olevia olentoja ei piirretä/animoida, mutta niiden tekoäly päivittyy normaalisti.
+- **Löytyi ja korjattiin: hyppy riippui FPS:stä** (20 FPS 1,00 m, 30 FPS 1,06 m, 60 FPS 1,12 m, 144 FPS 1,15 m) → tarkka parabeli (`gH=½·22·dt²`), `JUMP_V` 7,02 → **1,12 m kaikilla**.
+- **Nuolet** (`updateProjs`) ja **tähtäysviiva** (`bowTraj`, laski aina 60 FPS:llä): painovoima puoliksi ennen ja jälkeen siirron → sama rata kaikilla FPS:illä, viiva vastaa oikeaa nuolta.
+- **Ongen heitto** (`fpFly`, ilmanvastus): välivaiheet ≤ 1/240 s → heiton pituus ei riipu FPS:stä.
+- **Jäljelle jäävät (vain näkymää, raportoitu käyttäjälle):** näkyvyysmatka (Low sumu ~30 m yöllä, Ultra ~250 m), ruoho/usva pois Low-asetuksilla → hieman parempi näkyvyys;
+  visuaaliset efektit kuluttavat samaa `Math.random`-jonoa kuin pelilogiikka (ei suosi ketään, mutta estää täsmälleen toistettavan simuloinnin – moninpelissä palvelin päättäisi).
+
+### v3.31 (nimen asetus löytyy – käyttäjä 26.11. "missä nimen päättäminen")
+- Seikkailija-osio oli vain pelin aikana Ohjaus-sivun pohjalla palautusnapin alla → ei löytynyt. Nyt se on **Ohjaus-sivun ylimpänä ja aina näkyvissä**, myös päävalikossa.
+- **Oletusnimi** `pNameDef` (localStorage `hiidenmaa_pname`): päävalikossa asetettu nimi koskee kaikkia maailmoja; pelissä asetettu nimi tallentuu maailmaan (`flags.pname`, menee edelle) ja oletukseksi.
+  `pName()` = maailman nimi → oletusnimi. Pyyhi poistaa molemmat (valikossa vain oletuksen). `anglerAsk(cb,cur,defOnly)`.
+- **Epävakaat testit (ideajono):** satunnaiseen paikkaan perustuvat tarkistusrivit (v2.08 piiritys, v3.06 onki, rakennusosien putoaminen) kaatuvat välillä myös ilman muutoksia → tee niistä deterministisiä (kiinteä paikka / useampi yritys), KORJAUKSET 102.
+- Tarkistettu: v3.30 ei poistanut vanhoja ominaisuuksia (poistetut rivit olivat korvattuja versioita samoista riveistä); tarkistus KAIKKI OK, full157 kartat 0 ja 3 ilman virheitä.
+
+### v3.30 (koko näytön valikkohiukkaset, nimen pyyhintä – käyttäjä 26.11.)
+- **Valikon taustat:** myrskyn/myrskytuulen sade (`mbgRain` + Myrsky), Routaluolan suun lumi ja Kalmankammion pöly laskettiin hilasta (`(i*97+t*v) % W`). Isolla ruudulla
+  hila jää näkyviin vinoina, peräkkäin kulkevina jonoina. Nyt jokaisella on oma satunnainen alkupaikka ja nopeus 0,75–1,25× (`mbgH(i,k)` tiiviste, `mbgDrift`), eikä kuvio riipu ruudun koosta.
+- **Hiukkaskerros (MFX):** täyttö 6/ruutu teki ryppäitä, jotka syntyivät yläreunaan ja kuolivat yhtä aikaa (aallot). Nyt uusia syntyy tasaisella tahdilla
+  `määrä / arvioitu elinikä` (`mfxLife`, `MFX.sb`), alkujoukko on eri-ikäinen (`p.l0`, häivytys siitä), määrä skaalautuu pinta-alaan 0,75–1,6× (`mfxWant`, 1280×720 = 1),
+  lumi ja sade elävät ruudun läpi (elinikä korkeuden mukaan), ja leijuvat hiukkaset (kuura, pöly, valopöly) syntyvät koko ruudulle eivätkä vain yläreunaan.
+- **Seikkailijan nimi:** Asetukset › Seikkailija › 🗑 Pyyhi (`pNameClear`). Jo kaiverretut laatat ja kirjan palkintolaatat säilyvät ennätyksinä; seuraava ripustus kysyy nimen uudelleen.
+- Tarkistusrivi v3.30; v1.51-rivi päivitetty uuteen sateen piirtoon.
+
+### v3.29 (kiinteä siima, täysi reppu, zoom, koko näyttö, optimointi – käyttäjä 25.–26.11., suunnitelma `docs/KALASTUS_SUUNNITELMA.md` › v3.29 + vastaukset)
+- **Kiinteä siima** (`fpPull`): kala on siiman päässä `FS.L` (pituus koukkuun tarttuessa). Onki ei kelaa: vapa nousee (`FS.lift`, siima lyhenee `FP_LIFT_GAIN` 2,2 m) ja kalan voi
+  **raahata kävelemällä taaksepäin** – se seuraa maata pitkin, siima ei katkea eikä etäisyysrajaa ole. Virveli kelaa (siima lyhenee) ja raahaus toimii myös. Kala nousee kärkeen,
+  kun se on kärjen alla (alle 1,4 m) tai siima ei enää yllä maahan/veteen; ongella vasen nostaa maalla olevan kalan (alle 4 m). Iso kala: väsytyksen jälkeen siiman päähän.
+  Kala irtoaa vain, jos **käsiesine vaihtuu** (tai kuolema/uinti; `fpLoseOnLine`): maalla jää sätkimään, vedessä ui pois. Roikkuva kala ei putoa kävellessä.
+- **Täysi reppu:** kalaa ei koskaan pudoteta esineenä (`fishGive` ei pudota, `fishCanFit`). Otto täydellä repulla → "Reppu on täynnä", kala jää koukkuun ja **karkaa 10–30 s**
+  kuluttua (`FS.fullT`, `FP_FULL_T`) pomppaamalla maalle. Maassa sätkivää kalaa ei voi poimia täyteen reppuun; katiskaan jäävät kalat, naulakon vaihto/alas otto estetään.
+- **Rimpuilu:** maalla 1,5× (`FP_FLOP_K`), koukussa 2× (`FP_HANG_K`). **Koho** piilossa aina, kun kala on siimassa tai kärjessä.
+- **Vavat:** onki 2,6 m, kuparivapa ja hiidenvapa 2,35 m (`ROD_LENS`/`rodLen`). Ongen vapa nousee vedossa 0,6 → 1,2 rad.
+- **Lappu** 41 % → 33 %. **Ensimmäisen ongen ilmoitus** ("Kireitä siimoja!") tulee lappuna, ei enää ruudun keskelle.
+- **Seikkailijan nimi** (`pName()`, `flags.pname`; vanha `flags.angler` siirretään) – Asetukset › Ohjaus › Seikkailija; laatat ja kirja käyttävät sitä.
+- **Selaimen zoom:** Ctrl/Cmd + rulla (myös nipistys) ja Ctrl + / − / 0 estetään (input.js). Jäljelle jäävä zoom kompensoidaan: `browserZoom()` (outerWidth / innerWidth
+  pyöristettynä zoomitasoon) → piirtoresoluutio (applyGfx, sama pikselimäärä kuin 100 %:ssa), HUD (`hudK`) ja reppu (`fitInv`). Valikot ja asetussivut eivät kompensoidu.
+- **Koko näyttö, valikon tausta:** koon vaihto käsitellään 150 ms viiveellä, kun koko on asettunut (`mbgResize`, myös `fullscreenchange`); hiukkaset skaalataan uuteen kokoon
+  ja kohtauksen tila nollataan (ennen useat resize-tapahtumat kesken vaihdon piirsivät taustan väärän kokoisena).
+- **Optimointi:** kaikilla esiasetuksilla näkymättömät – kalastus-HUD 10 Hz (ennen DOM joka ruutu), vavan kärki kerran ruudussa (`_fpTC`), kalan häivytys vain kunnes valmis.
+  Low–Medium+ (`FISH_LQ`, `fishLQSet` applyGfx): kalamalli 12×8 (ennen 20×14), ei kalojen varjoja, siima 10 pistettä (16), puolet roiskeista. Ultra/High ennallaan, fysiikka sama.
+- Tarkistus: uusi v3.29-rivi; v3.06-rivin onki kävelee nyt kalan luo (kiinteä siima).
+
+### v3.28 (tasonimike repun kulmaan – käyttäjä 25.11.)
+- Tasonimike (esim. "Haaksirikkoutunut") näkyi vain repun ollessa auki HUD:n tasomittarin yläpuolella, ja koko näytöllä isompi reppu peitti sen. Nyt nimike ja taso ovat
+  **repun oikeassa alakulmassa** (`#invLvl`, reunasisennyksessä 7 px alareunasta, ei peitä mitään). HUD:n tasomittari (`#lvlbox`) pysyy paikallaan ilman nimikettä. Tarkistusrivi v3.16 › nimike päivitetty.
+
+### v3.27 (KALASTUKSEN UUSI FYSIIKKA + korjaukset – käyttäjä 25.11., suunnitelma `docs/KALASTUS_SUUNNITELMA.md`, 23 vastausta + lisäykset; uusi tiedosto `js/fishphys.js`)
+- **Korjaukset:** (1) Virtuaalinen osoitin (v3.25) lähetti `click`-tapahtuman myös estettyyn (`disabled`) nappiin → **valmistus ilman aineita ilman DEV-tilaa**.
+  `vcFire` ohittaa estetyt ohjaimet (`vcDis`), `craft` tarkistaa aineet ja aseman itse (KORJAUKSET 97). DEV-tarkistus: kaikki DEV-toiminnot vaativat `DEV`:n (ok).
+  (2) Eläimet nykivät vesirajassa: kävelyvaiheessa suunta käännettiin 90° joka ruudulla → nyt liu'utaan rantaa pitkin, ja suunta kuivalle maalle valitaan kerran
+  (`shoreDir`, 0,8 s väli; KORJAUKSET 98). (3) Kalastuksen kirjoitusvirheet: viehteet → **vieheet**, ongen ohjeet, kuparivavan kuvaus.
+- **Heitto (fishphys.js):** ballistinen lento kärjestä katseen suuntaan, ilmanvastus `FP_DRAG` 0,38 → pisin heitto ~35° (+-1°). `fpV0(D)` laskee lähtönopeuden niin,
+  että 35° täydellä voimalla = vavan matka: onki 16, kuparivapa 20, hiidenvapa 24, virveli kelan mukaan 22 / 30 m (`FP_ROD_D`, `rigStats.dmax`). Onki: ei latausta, heitto heti
+  (nopea kiskaisu `rodCastPose`). Kela: lataus vasen pohjassa 0,2–1,2 s (voima 25–100 %, HUD-palkki). Tuuli siirtää lentoa ja kohoa (`FP_WIND_K` 0,25). Heiton voi tehdä aina.
+- **Maalle:** koho/viehe kelataan takaisin (onki: klikkaus vetää 6 m/s; kela: pidä vasenta). Maata pitkin siima katkeaa 5 % / 10 m (`FP_LAND_SNAP`), viehe jää maahan poimittavaksi.
+- **Virveli:** viehe vajoaa `TK_SINK` 0,22 m/s (jigi 2×), nousee kelatessa; pohjassa 0,5 s armonaika, sitten 20 % / s kiinni (`FP_BOT_*`); tärppi pinnalla ×0,95, pohjassa ×0,7.
+  Kelataan kärkeen asti (rannalta ilman kautta). **Vasemmassa kädessä** (`virvHeld`, toinen käsi vapautetaan), oikea käsi IK:lla kammen nupissa, kampi pyörii kelatessa
+  (`virvPose`, `tkDressRod` crank). Lataus nostaa kädet ja vavan taakse, heitto heilauttaa eteen.
+- **Onki:** kohon syvyys 0–2 m Kalastajan pöydällä (`rig.fd`, oletus 0,8; `TK_FD`) – myös matala vesi käy (nimetyssä vedessä). Syötti pohjassa → nostossa 6 % koukku tarttuu
+  (`TK_ONKI_SNAG`: koukku + mato menetetään, siima lyhenee). Kalastusasento: käsi edessä, vapa 23–26° ylös (`rodCastPose`, `P.rodHoldK`).
+- **Syvyys ja lajit:** `FISH_Z` (pohjakala 'b' ×1,8 pohjassa / ×0,35 irti; muut [a,b] m: ×1,4 sisällä, −1,2/m), vaikuttaa lajiin (`fishPick`) ja tärppiväliin (`fishDepthFit`).
+  Ruutana välivedessä 0,2–1,2 m (realistisuus). Tarkistettu jakauma: järvi/meri/suo monipuolinen kaikilla syvyyksillä.
+- **Kala siimassa:** näkyy jo vedossa (`fpPullStart`, häivytys 0,6 s), kyljellään pää pelaajaan, sivuttaisheilunta painon ja koon mukaan (`fpStr`). Onki vetää itse;
+  virvelillä pidä vasenta (4 s löysänä → irtoaa). Iso kala: vanha väsytys, kalan paikka edistyksen mukaan. Kärjessä roikkuu kunnes klikkaat.
+- **Pudotus:** pois käveleminen (3 m), esineen vaihto, kuolema tai uinti → kala putoaa, pomppii, vierii rinteessä (`fpFlop`); vedessä 0,5 s → kääntyy ja ui pois, "Kala pääsi karkuun".
+  Maassa E poimii; 20 s jälkeen rauhoittunut kala muuttuu tavalliseksi pudonneeksi esineeksi.
+- **Syvä koukku:** 3–10 % kalan arvon mukaan → minipeli (`HG`: punainen alue liikkuu, viiva hiirellä, mittari täyttyy alueella; tyhjä = uusi yritys nopeammalla alueella).
+- **Saalislappu:** ilmoitus vasta irrotuksessa: vasemmalta liukuva lappu (`lappu`, 6 s, enintään 3, piirroskuva + värilliset tekstit). Myös "Kireitä siimoja!" siiman vaihdossa.
+  Ennätyskalasta musiikki `music/raw/tapahtumat/ennatyskala` (paikkamerkki, `MUS_FB.rec`, boot.js 'rec' = kerran).
+- **Kalat repussa:** yksilöt `fl:[{kg,cm,t}]` (n = fl.length). 70 % "tavallisia" (0,1 kg / 2 cm), 30 % tarkkoja (`fishRoll`; kirjan arvojakauma samasta). Sama paino + pituus pinoutuu
+  itsestään (20), käsin raahaamalla eriarvoiset saman lajin kalat pinoon (järjestys säilyy, päällimmäinen käytetään). Siirto/jako/pudotus siirtää yksilöt (`flTake`) → ei monistusta.
+  Tooltip: paino, pituus, luokka, tuoreus, kevyin/raskain/keskiarvo + 5 päällimmäistä. **Pilaantuu 4 päivässä** → Pilaantunut kala (sairastuttaa aina).
+- **Vapautus:** vaihteleva repliikki koon mukaan, +1 XP, seuraava tärppi samassa vedessä 10 % nopeammin.
+- **Naulakot:** Kalanaulakko 1 + uusi **Palkintotaulu** 3 kalaa (taso 6). E kala kädessä ripustaa (vaihto palauttaa vanhan reppuun, purku/rikkoutuminen pudottaa kalat),
+  oikean muotoinen malli, kultainen laatta; katsottaessa tiedot (kalastaja, päivä, kello, laji, paino, pituus, luokka). Nimi kysytään ensimmäisellä ripustuksella (näppäimistö,
+  toimii lukituksessa), vaihto Asetukset › Ohjaus › Kalastus. Tallennus `d.fs` (vanha `f/kg` muunnetaan).
+- **Kalakirja:** lajin syvyys, palkintolaatta parhaasta kalasta, sivu "Mikä vaikuttaa saaliiseen" (kaikki tekijät), huhut: vedelle tullessa 20 % (enintään 0,5 päivän välein)
+  "Kuulin huhun…" → laji näkyy kirjassa ilman kuvaa (`fbHint`).
+- **Kalastuspakki:** vieheet ja koukut roikkuvat kyljissä (enintään 8; maassa, pöydällä ja kädessä, `pakkiSig` päivittää).
+- **Äänet:** 11 uutta paikkamerkkiä `sounds2/kalastus/raw/` (AANILISTA.md) + musiikki `ennatyskala` (process_sounds.py X_PARTS › tapahtumat).
+- Tarkistus: uusi v3.27-rivi (heitto, maa, viehe, syvyys, kala, minipeli, lappu, pinot ilman monistusta, pilaantuminen, naulakot, kirja, pakki, virveli, korjaukset);
+  v3.06/v3.14/v3.16-rivit päivitetty uuteen fysiikkaan.
 
 ### v3.26 (lammet, DEV-paljastus, DEV-haku – käyttäjä 19.11., PR #50 yhdistetty → uusi PR)
 - **Kaikki lammet nimetään** (fish.js, vesivaiheen loppuun): ennen alle 5 ruudun (80 m²) ja matalat (pohja yli −0,45 m) lammet jäivät ilman nimeä ja kalastusvettä → DEV:n

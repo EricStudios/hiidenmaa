@@ -83,10 +83,11 @@ function thrownTick(dt){for(const o of THROWN){if(o.rest)continue;o.t+=dt;o.v.y-
 function gearUnlock(){for(const o of THROWN)scene.remove(o.m);THROWN.length=0;P.gearLock=false;updateGear();}
 function updateGear(){if(P.gearLock)return;updateBack();
   {const w0=equipped('weapon');if(!w0||w0.id!=='vasara')setBuildSel(null);}
-  const w=equipped('weapon'),o0=equipped('offhand'),bookR=!w&&!!o0&&o0.id==='kalakirja',wid=w?w.id:bookR?'kalakirja':null,wkey=wid&&ITEMS[wid].cat==='rod'&&typeof rigSig==='function'?wid+'#'+rigSig(w):wid;   // v3.14 vavan osat näkyvät (tackle.js)
-  if(wkey!==heldKey){if(heldMesh)heldMesh.parent.remove(heldMesh);heldMesh=null;heldId=wid;heldKey=wkey;if(wid){heldMesh=makeHeld(wid);if(ITEMS[wid].cat==='rod'&&typeof tkDressRod==='function')tkDressRod(heldMesh,w);(ITEMS[wid].cat==='bow'?fig.handL:fig.hand).add(heldMesh);}}
+  const w=equipped('weapon'),o0=equipped('offhand'),bookR=!w&&!!o0&&o0.id==='kalakirja',wid=w?w.id:bookR?'kalakirja':null,wkey=wid&&ITEMS[wid].cat==='rod'&&typeof rigSig==='function'?wid+'#'+rigSig(w):wid&&ITEMS[wid].cat==='fish'?wid+'#'+((flTop(w)||{}).kg||0):wid;   // v3.27 kala kädessä painon kokoisena   // v3.14 vavan osat näkyvät (tackle.js)
+  if(wkey!==heldKey){if(heldMesh)heldMesh.parent.remove(heldMesh);heldMesh=null;heldId=wid;heldKey=wkey;if(wid){heldMesh=makeHeld(wid);if(ITEMS[wid].cat==='rod'&&typeof tkDressRod==='function')tkDressRod(heldMesh,w);(ITEMS[wid].cat==='bow'||virvHeld(w)?fig.handL:fig.hand).add(heldMesh);}}   // v3.27 virveli vasemmassa kädessä
+  if(virvHeld(w)&&o0&&o0.eq){o0.eq=false;msg('Virveli vaatii molemmat kädet – toinen käsi vapautettiin.');}   // v3.27
   const o=equipped('offhand'),oid=o&&!bookR&&!(ITEMS[o.id].cat==='shield'&&o.shBrk!=null)?o.id:null;   // v3.15 pelkkä kirja on oikeassa kädessä   // v1.39 (kohta 18): rikki oleva kilpi ei ole kädessä
-  const okey=oid==='kalapakki'?oid+'#'+(o.lv||0):oid;   // v3.14 pakin ulkoasu tason mukaan
+  const okey=oid==='kalapakki'?oid+'#'+(o.lv||0)+'#'+(typeof pakkiSig==='function'?pakkiSig(o.box):''):oid;   // v3.14 pakin ulkoasu tason mukaan
   if(okey!==offKey){if(offMesh)fig.handL.remove(offMesh);offMesh=null;offId=oid;offKey=okey;if(oid){offMesh=ITEMS[oid].cat==='shield'?makeShield(oid):oid==='kalapakki'&&typeof tkPakkiHeld==='function'?tkPakkiHeld(o):makeHeld(oid);fig.handL.add(offMesh);}}
   const a=equipped('armor'),aid=a?a.id:null;
   if(aid!==armorId){armorId=aid;const c=aid==='rautapanssari'?0x6c747c:aid==='kuparipanssari'?0x8a5228:aid==='nahkavaatteet'||aid==='karhuhaarniska'?0x6a4a30:aid==='hiidenpanssari'?0x2a3036:0x8a6a46;const cm=smat(c);for(const m of fig.cloth)m.material=cm;buildArmor(fig,aid);}
@@ -95,6 +96,7 @@ function updateGear(){if(P.gearLock)return;updateBack();
 /* ---------------- INVENTORY ---------------- */
 function invCount(id){let n=0;for(const s of inv)if(s&&s.id===id)n+=s.n;return n;}
 function invAdd(id,n,q=1){const d=ITEMS[id];if(!d)return n;
+  if(d.cat==='fish'&&typeof fishGive==='function'){let left=0;for(let i=0;i<n;i++)if(fishGive(id,null,null,true)>0)left++;return left;}   // v3.27 raaka kala aina yksilönä (paino ja pituus)
   if(d.s>1)for(const s of inv){if(n<=0)break;if(s&&s.id===id&&s.n<d.s){const k=Math.min(n,d.s-s.n);s.n+=k;n-=k;}}
   for(let i=0;i<inv.length&&n>0;i++){if(!inv[i]){const k=Math.min(n,d.s);inv[i]={id,n:k,q};n-=k;}}
   if(!flags.seen[id])flags.seen[id]=1;if(d.cat&&d.cat!=='armor'&&d.cat!=='offhand'&&d.cat!=='shield'&&d.cat!=='bow'&&playTime>5)P.newItem={id,t:playTime};   /* v2.98 uusi esine → AFK-tarkastelu (inspect.js) */
@@ -112,17 +114,19 @@ const PACK_UP=[null,{nahka:6,puu:4},{nahka:12,kupari:4}];
 const invN=()=>32+8*P.packLv;
 // Repun päivitys: lisää paikkoja (+8) ja kantokykyä (+40 painoa) tasoa kohti.
 function setPack(lv){P.packLv=lv;recalcMaxW();while(inv.length<invN())inv.push(null);invDirty=true;}
-function equipGroup(cat){return ['weapon','bow','hammer','shovel','bowl','rod'].includes(cat)?'weapon':['shield','offhand'].includes(cat)?'offhand':cat;}
+function equipGroup(cat){return ['weapon','bow','hammer','shovel','bowl','rod','fish'].includes(cat)?'weapon':['shield','offhand'].includes(cat)?'offhand':cat;}
 function equipped(cat){const grouped=cat==='weapon'||cat==='offhand';
   for(const s of inv){if(!s||!s.eq)continue;const c=ITEMS[s.id].cat;if(grouped?equipGroup(c)===cat:c===cat)return s;}
   return null;}
+// v3.27 virveli (vapa + kela) pidetään vasemmassa kädessä, oikea veivaa – toinen käsi ei voi pitää muuta
+function virvHeld(s){return !!(s&&s.eq!==false&&ITEMS[s.id]&&ITEMS[s.id].cat==='rod'&&s.rig&&s.rig.reel);}
 function toggleEquip(s){const cat=ITEMS[s.id].cat;if(!cat)return;
   if(s.eq){s.eq=false;}else{const g=equipGroup(cat);for(const o of inv)if(o&&o.eq&&equipGroup(ITEMS[o.id].cat)===g)o.eq=false;s.eq=true;}
-  if(cat==='bow'&&s.eq){for(const o of inv)if(o&&o.eq&&equipGroup(ITEMS[o.id].cat)==='offhand')o.eq=false;}
-  if(equipGroup(cat)==='offhand'&&s.eq){const w=equipped('weapon');if(w&&ITEMS[w.id].cat==='bow')w.eq=false;}
+  if((cat==='bow'||virvHeld(s))&&s.eq){for(const o of inv)if(o&&o.eq&&equipGroup(ITEMS[o.id].cat)==='offhand')o.eq=false;}
+  if(equipGroup(cat)==='offhand'&&s.eq){const w=equipped('weapon');if(w&&(ITEMS[w.id].cat==='bow'||virvHeld(w)))w.eq=false;}
   invDirty=true;updateGear();if(cat!=='hammer'||!s.eq)setBuildSel(null);sfx('pickup');}
 // v1.32 (lista 3, kohdat 3 ja 29): pikapaikan numero syö ruoan (ainoa tapa syödä), ottaa nuolet käyttöön (pysyvät valittuina) tai varustaa.
-function useSlot(i){const s=inv[i];if(!s)return;const d=ITEMS[s.id];if(d.food)eat(s);else if(d.potion)drink(s);else if(AMMO.includes(s.id)){if(flags.ammo!==s.id){flags.ammo=s.id;msg(`Ammus: ${d.n}`);sfx('pickup',1.2,.4);}invDirty=true;}else if(d.use)itemUse(s);   /* v3.06 pulloposti, kalastajan kirja (fish.js) */else if(d.cat)toggleEquip(s);}
+function useSlot(i){const s=inv[i];if(!s)return;const d=ITEMS[s.id];if(d.cat==='fish')toggleEquip(s);   /* v3.27 kala käteen, oikea syö */else if(d.food)eat(s);else if(d.potion)drink(s);else if(AMMO.includes(s.id)){if(flags.ammo!==s.id){flags.ammo=s.id;msg(`Ammus: ${d.n}`);sfx('pickup',1.2,.4);}invDirty=true;}else if(d.use)itemUse(s);   /* v3.06 pulloposti, kalastajan kirja (fish.js) */else if(d.cat)toggleEquip(s);}
 function giveOrDrop(id,n,x,y,z,q=1){const left=invAdd(id,n,q);if(left>0){spawnDrop(id,left,x,y,z,q);msg('Reppu on täynnä.','warn');}if(n-left>0){msg(`+${n-left} ${ITEMS[id].n}`,'loot');}}
 let invDirty=true;
 
@@ -227,7 +231,7 @@ function beaconTick(d,dt){const B=d.beacon,m=d.mesh;if(!B)return;B.g.position.se
 function removeDrop(d){scene.remove(d.mesh);if(d.beacon){scene.remove(d.beacon.g);d.beacon.g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose();});d.beacon=null;}const i=drops.indexOf(d);if(i>=0)drops.splice(i,1);if(d.light){const j=lightSources.indexOf(d.light);if(j>=0)lightSources.splice(j,1);d.light=null;}}
 // v1.32 (lista 3, kohta 26): pelaajan pudottama esine lentää aina kameran suuntaan eteenpäin, noin kaksi kertaa entistä kauemmas (~2,5–3 m).
 function playerDrop(id,n,q,src){const fx=-Math.sin(camYaw),fz=-Math.cos(camYaw);if(id==='kalapakki'&&src&&typeof tkPakkiDrop==='function'&&tkPakkiDrop(src))return;   /* v3.14 pakki lasketaan maahan sisältöineen */spawnDrop(id,n,P.pos.x+fx*.6,P.pos.y+1.1,P.pos.z+fz*.6,q,false,true);
-  const d=drops[drops.length-1];if(src&&src.rig&&n===1)d.ex={rig:src.rig};   /* v3.14 vavan osat säilyvät */const j=(Math.random()-.5)*.6;d.vx=fx*4.2-fz*j;d.vz=fz*4.2+fx*j;d.vy=3.4+Math.random()*.6;}
+  const d=drops[drops.length-1];if(src&&src.rig&&n===1)d.ex={rig:src.rig};if(isFishSlot(src))d.ex={fl:flTake(src,n)};   /* v3.27 kalat yksilöinä (päällimmäiset n; kutsuja vähentää n:n) */   /* v3.14 vavan osat säilyvät */const j=(Math.random()-.5)*.6;d.vx=fx*4.2-fz*j;d.vz=fz*4.2+fx*j;d.vy=3.4+Math.random()*.6;}
 // v1.17: ulottuvuus, jossa pelaaja on ('world', 'barrow' = Hautakumpu tai ulottuvuuden id). Maassa olevan esineen katoamisajastin käy vain samassa ulottuvuudessa.
 function curDim(){return P.inDun?(P.realm||'barrow'):'world';}
 let dropFullT=0;
@@ -365,8 +369,8 @@ function updateProjs(dt){updateHitMarks(dt);
   for(let i=projs.length-1;i>=0;i--){const p=projs[i];p.t+=dt;arrowGlowTick(p);if(p.light){p.light.x=p.m.position.x;p.light.y=p.m.position.y;p.light.z=p.m.position.z;
       p.light.i=1.5*Math.max(.25,1-p.t*.12*rainK);}
     if(p.stuck){if(p.fire&&p.flame&&p.flame.visible){if(p.fT&&!p.light){const k=Math.max(.3,1-p.t/p.fT);p.flame.scale.setScalar(k);p.glowK=1-p.t/p.fT;}else if(!p.light&&p.t>3.2&&!arrowFade.some(f=>f.p===p))p.glowK=Math.max(0,1-(p.t-3.2)/1.8);if(p.t>(p.fT||5))p.flame.visible=false;}if(p.t>(p.fire?8:10)){dropLight(p);scene.remove(p.m);projs.splice(i,1);}continue;}   // v1.98: ajastin alkaa osumasta: 10 s (tulinuoli 8 s)
-    p.v.y-=p.g*dt;if(p.kind==='arrow'&&!P.inDun){const wa=WIND.spd*ARROW_WIND*dt*(p.windK??1);p.v.x+=WIND.x*wa;p.v.z+=WIND.z*wa;} // v0.84: tuuli kallistaa nuolen rataa (13 m/s ≈ 0,5 m / 30 m)
-    let cont=0;if(p.kind==='arrow'){cont=arrowStep(p,dt);p.m.lookAt(_tmpV.copy(p.m.position).add(p.v));}else{p.m.position.addScaledVector(p.v,dt);p.m.rotation.x+=dt*5;}
+    p.v.y-=p.g*dt*.5;if(p.kind==='arrow'&&!P.inDun){const wa=WIND.spd*ARROW_WIND*dt*(p.windK??1);p.v.x+=WIND.x*wa;p.v.z+=WIND.z*wa;} // v0.84: tuuli kallistaa nuolen rataa (13 m/s ≈ 0,5 m / 30 m)
+    let cont=0;if(p.kind==='arrow'){cont=arrowStep(p,dt);p.v.y-=p.g*dt*.5;p.m.lookAt(_tmpV.copy(p.m.position).add(p.v));}else{p.m.position.addScaledVector(p.v,dt);p.v.y-=p.g*dt*.5;p.m.rotation.x+=dt*5;}   /* v3.32: painovoima puoliksi ennen ja jälkeen siirron = tarkka rata kaikilla FPS:illä (KORJAUKSET 103) */
     const pos=p.m.position;let hit=false;
     if(p.owner==='player'){const hm=headShot(p,pos,dt);if(hm){const m=hm;m.fireHit=!!p.fire;damageMob(m,p.dmg*1.1,'pierce',p.v.x,p.v.z);hitMarker(pos.x,pos.y,pos.z,true);m.fireHit=false;if(p.fire)igniteMob(m);floatText('Pääosuma!',pos.x,pos.y+.4,pos.z,'#ff5a4a');hit=true;}
      if(!hit)for(const m of mobs){if(m.dead)continue;const r=m.def.r+.35,cy=m.pos.y+m.def.r*1.6*(m.type==='vartija'?2.4:1);if(dist2(pos.x,pos.z,m.pos.x,m.pos.z)<r*r&&pos.y>m.pos.y-.2&&pos.y<cy+1.2){m.fireHit=!!p.fire;damageMob(m,p.dmg,'pierce',p.v.x,p.v.z);hitMarker(pos.x,pos.y,pos.z);m.fireHit=false;if(p.fire)igniteMob(m);hit=true;break;}}

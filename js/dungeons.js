@@ -565,7 +565,7 @@ function updateMist(dt){
      (määrä × koko² × peitto ≈ sama), joten ne näyttävät yhtä paksuilta. Maanpinnan usva pysyy täysimääräisenä Normaalilla. */
   const dun=P.inDun,D=dun&&P.realm?REALMS[P.realm]:null,ML=SET.mist??1,hi=ML>=2,q0=AUTO_K.fx[AUTO.fx],q=q0*Math.min(1,ML),fxN=q0*(hi?1:ML>=1?.5:ML*.5),szK=hi?1:1.2,opK=hi?1:1.39;
   let ax=P.pos.x,az=P.pos.z,on=dun,col=D?D.mist:0xa8a49a;const ult=!!SET.smokeUltra;let near=1;
-  if(!dun){const R0=ult?60:SMK_R0;let bd=R0*R0;for(const k in LOC){const L=LOC[k];if(L.kind!=='portal'&&L.kind!=='rock'&&L.kind!=='ruin'&&k!=='barrow')continue;const d2=dist2(L.x,L.z,P.pos.x,P.pos.z);if(d2<bd){bd=d2;ax=L.x;az=L.z;on=true;}}col=0xc9d6da;
+  if(!dun){const R0=ult?60:SMK_R0;let bd=R0*R0;for(const k in LOC){const L=LOC[k];if(L.kind!=='portal'&&k!=='barrow')continue;   /* v3.38 käyttäjä: usva vain erityisissä paikoissa (portit, Hautakumpu) – ei tavallisilla raunioilla (talonpohjat) eikä arkkukivillä */const d2=dist2(L.x,L.z,P.pos.x,P.pos.z);if(d2<bd){bd=d2;ax=L.x;az=L.z;on=true;}}col=0xc9d6da;
     if(!ult)near=on?SMK_K*sstep(SMK_R0,SMK_R1,Math.sqrt(bd)):0;}   /* v2.43: ilmestyy lähestyttäessä, 80 % */
   const n=MIST.length*q*near;
   MIST.forEach((s,i)=>{

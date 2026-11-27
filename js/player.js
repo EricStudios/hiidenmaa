@@ -18,6 +18,9 @@ let torchFl=null,torchBarT=0,torchIgn=0,shDark=0;const torchPh=[Math.random()*TA
 const OVER_STAM=5;   // v2.67 ylikuorman kestävyyskulutus (/s)
 const SHIELD_STAM=1,SHIELD_REST=20;   // v2.85 kilven pito 1/s, uupuneena nosto vasta 20 kestävyydellä
 const AFK_NOSTR_INSP=.3;   // v2.99 esine oikeassa kädessä: rapsutuksen tilalla 30 % F-tarkastelu, 70 % hengitys ja pään pyörittely
+/* v3.32 käyttäjä: grafiikka/FPS ei saa muuttaa pelin fysiikkaa. Hyppy lasketaan tarkkana parabelina → huippu v²/2g = 1,12 m kaikilla
+   ruudunpäivityksillä (ennen 20 FPS 1,00 m … 144 FPS 1,15 m). JUMP_V valittu niin, että korkeus = entinen 60 FPS:n hyppy. */
+const JUMP_V=7.02;
 function updatePlayer(dt){
   if(P.dead)return;updatePlayerBurn(dt);if(P.dead)return;
   P.invul=Math.max(0,P.invul-dt);P.stagger=Math.max(0,P.stagger-dt);P.hurtFlash=Math.max(0,P.hurtFlash-dt);
@@ -61,7 +64,7 @@ function updatePlayer(dt){
   if(P.blocking&&!devOn('stam')&&!P.buffs.sisu){P.stam-=SHIELD_STAM*dt;P.stamDelay=Math.max(P.stamDelay,.4);if(P.stam<=0){P.stam=0;P.blocking=false;P.shTired=true;msg('Olet uupunut – kilpi on liian raskas pidettäväksi.','warn');}}
   P.stamDelay-=dt;if(P.stamDelay<=0&&!P.swUp){let r=22*P.fx.stamRegen*(P.swim?.25:1);P.stam=Math.min(maxStam(),P.stam+r*dt);}
   if(P.blocking&&P.stam<=0)P.blocking=false;
-  P.stam=Math.max(0,P.stam);if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu
+  P.stam=Math.max(0,P.stam);if(!isFinite(P.stam))P.stam=maxStam();if(!isFinite(P.hp))P.hp=maxHp()*.5;   /* v3.42 NaN-suoja (KORJAUKSET 108) */if(devOn('stam')||P.buffs.sisu)P.stam=maxStam();// DEV: kestävyys ei kulu
   // velocity
   P.onIce=P.inDun&&P.onGround&&iceAt(P.pos.x,P.pos.z);   // v3.06 Routaluolan jäälätäkkö: lähes kitkaton (ICE_GRIP)
   {const gk=P.onIce?ICE_GRIP:P.onGround?12:3;P.vel.x=lerp(P.vel.x,dx*speed,kExp(gk,dt));P.vel.z=lerp(P.vel.z,dz*speed,kExp(gk,dt));}
@@ -70,14 +73,15 @@ function updatePlayer(dt){
   {const jd=state==='play'&&kd('jump');if(jd&&!P.jumpHeld){if(devOn('fly')&&playTime-(P.jumpTap||-9)<.35){P.flying=!P.flying;P.vy=0;msg(P.flying?'Lento päällä (välilyönti ylös, Shift alas).':'Lento pois.');P.jumpTap=-9;}else P.jumpTap=playTime;}P.jumpHeld=jd;if(!devOn('fly'))P.flying=false;}
   const vK=DEV&&keys.KeyV?6:1;   // v1.92: V pohjassa myös lento 6× nopeampi
   if(P.flying){const fs=(keys.ControlLeft||keys.ControlRight?32:16)*vK;P.vel.x=lerp(P.vel.x,dx*fs,kExp(6,dt));P.vel.z=lerp(P.vel.z,dz*fs,kExp(6,dt));}
-  if(state==='play'&&kd('jump')&&P.onGround&&!P.swim&&P.stam>=8&&!over&&!P.flying&&!P.inTent){P.vy=7.2;P.onGround=false;P.stam-=8*(P.upK||1);P.stamDelay=.8;}
+  if(state==='play'&&kd('jump')&&P.onGround&&!P.swim&&P.stam>=8&&!over&&!P.flying&&!P.inTent){P.vy=JUMP_V;P.onGround=false;P.stam-=8*(P.upK||1);P.stamDelay=.8;}
   const lad=!P.swim&&!P.dead&&ladderAt(P.pos);P.onLadder=!!lad;
+  let gH=0;
   if(P.flying){P.vy=lerp(P.vy,((kd('jump')?9:0)-(keys.ShiftLeft||keys.ShiftRight?9:0))*vK,kExp(6,dt));P.onGround=false;}
   else if(P.swim){if(P.swUp){const top=wy+waveAt(P.pos.x,P.pos.z)-1.3+Math.sin(playTime*1.7)*.06;P.vy=lerp(P.vy,clamp((top-P.pos.y)*2.2,-1.5,2.6),kExp(3,dt));}
     else P.vy=lerp(P.vy,-.42,kExp(1.5,dt));}   // v2.18: hidas vajoaminen ilman välilyöntiä
   else if(lad&&(kd('fwd')||kd('jump')||kd('back'))){P.vy=kd('back')&&!kd('fwd')&&!kd('jump')?-2.6:2.6;P.onGround=false;}
   else if(lad&&!P.onGround){P.vy=Math.max(P.vy,-1);}
-  else P.vy-=22*dt;
+  else{P.vy-=22*dt;gH=11*dt*dt;}   // v3.32: tarkka parabeli (gH) – hypyn korkeus ei riipu ruudunpäivityksestä (KORJAUKSET 103)
   const feet=P.pos.y;
   P.pos.x+=P.vel.x*dt;P.pos.z+=P.vel.z*dt;
   // v0.86 erillinen tönäisy (hirvi, karhu: def.kb): ei muuta tavallista liikefysiikkaa, vaimenee e^(−4,5 t) → matka ≈ kb / 4,5 m
@@ -87,7 +91,7 @@ function updatePlayer(dt){
   const _ix=P.pos.x,_iz=P.pos.z;
   if(!nc){COL_CROUCH=!!P.crouch;collideXZ(P.pos,.38,P.crouch?1.5:1.8,feet);COL_CROUCH=false;limbPush(feet);}
   if(P.onIce&&dt>0){const cx=P.pos.x-_ix,cz=P.pos.z-_iz;if(Math.abs(cx)>1e-4)P.vel.x*=.35;if(Math.abs(cz)>1e-4)P.vel.z*=.35;}   // v3.06 jäällä seinään törmäys pysäyttää liu'un   // v2.88 raajat (pää, kädet, kyynärpäät, polvet) osana osumalaatikkoa
-  P.pos.y+=P.vy*dt;
+  P.pos.y+=P.vy*dt+gH;
   const ceil=nc?1e9:ceilingAt(P.pos.x,P.pos.z,.38,feet+1.8);if(P.vy>0&&P.pos.y+1.8>ceil){P.pos.y=ceil-1.8;P.vy=0;}
   const g=nc?(P.inDun?DUN.y:terrainH(P.pos.x,P.pos.z)):groundAt(P.pos.x,P.pos.z,.38,feet);
   if(P.pos.y<=g+.02&&P.vy<=0){if(!P.onGround&&P.vy<-4)P.landT=.25;if(!P.onGround&&P.vy<-15&&!P.flying){const fd=(-P.vy-15)*6;P.hp-=fd;P.fallT=playTime;floatText('-'+Math.round(fd),P.pos.x,P.pos.y+2,P.pos.z,'#e0614f');if(P.hp<=0)playerDie();}P.pos.y=g;P.vy=0;P.onGround=true;}
@@ -101,6 +105,7 @@ function updatePlayer(dt){
   else if(dl>0)P.yaw=lerpAngle(P.yaw,Math.atan2(P.vel.x,P.vel.z),kExp(10,dt));
   // attack
   if(P.atk&&(P.turnWait||0)>0){P.turnWait-=dt;if(P.turnWait<=0)P.yaw=camYaw+Math.PI;}
+  else if(P.atk&&!(P.atk.dur>0&&isFinite(P.atk.hitAt)))P.atk=null;   // v3.42 rikkinäinen lyönti pois (hahmo ei katoa)
   else if(P.atk){P.atk.t+=dt;if(!P.atk.done&&P.atk.t>=P.atk.hitAt){P.atk.done=true;if(P.atk.w&&P.atk.w.range)plSnd('lyonnit','huitaisu');doMeleeHit(P.atk.w);}if(P.atk.t>=P.atk.dur){P._atkOv=P.atk.t-P.atk.dur;P.atk=null;}}
   if(!P.atk&&mouseL&&state==='play'&&w.cat==='weapon'&&locked)startAttack();
   if(P._atkOv!=null){if(P.atk&&P.atk.t===0)P.atk.t=Math.min(P._atkOv,.05);P._atkOv=null;}   // v3.22: pohjassa pidetyn iskun ylijäämä seuraavaan → sama tahti joka FPS:llä
@@ -179,7 +184,8 @@ function updatePlayer(dt){
   if(P.drawing){tLx=-1.58;tRx=-1.5;tRz=.5;}
   if(heldMesh&&ITEMS[heldId].cat==='bow'){if(P.drawing)tLz=-.3;}
   if(P.atk)P.recT=.55;else P.recT=Math.max(0,(P.recT||0)-dt);if(!P.atk&&P.recT>0&&!P.drawing&&!P.blocking)rate=Math.min(rate,5);// iskun jälkeen kädet palaavat lepoon pehmeästi
-  if(P._eOff){fig.armR.rotation.x-=P._eOff[0];fig.elbowR.rotation.x-=P._eOff[1];P._eOff=null;}   // v3.06 E-toiminnon käsiliike (lisäys poistetaan ennen pehmennystä)
+  if(P._eOff){fig.armR.rotation.x-=P._eOff[0];fig.elbowR.rotation.x-=P._eOff[1];P._eOff=null;}
+  if(P._cOff){fig.armR.rotation.x-=P._cOff[0];fig.elbowR.rotation.x-=P._cOff[1];P._cOff=null;}   // v3.27 ongen heiton lisäkulma (rodCastPose) pois ennen pehmennystä   // v3.06 E-toiminnon käsiliike (lisäys poistetaan ennen pehmennystä)
   inspectRestore();   // v2.99 F-tarkastelun IK ei jää käsivarren perusasennoksi (nykiminen paluussa)
   chopRestore();   // v3.08 sama hakkuun IK:lle
   armWCRestore();   // v3.25 käden irrotus esineestä ei jää perusasentoon (värinä)
@@ -208,7 +214,8 @@ function updatePlayer(dt){
 
   armClear(fig.armL,fig.elbowL,fig.handL);
   carvePose();   // v2.91 pihkakuvion kaiverrus
-  if(typeof bookPose==='function')bookPose();   // v3.15 kalakirja molemmissa käsissä lukiessa
+  if(typeof bookPose==='function')bookPose();
+  if(typeof virvPose==='function'){virvPose(dt);rodCastPose(dt);}   // v3.27 virveli vasemmassa kädessä, oikea veivaa (fishphys.js)   // v3.15 kalakirja molemmissa käsissä lukiessa
   {const ea=playTime-(P.eT??-9);if(ea>=0&&ea<E_ANIM_T&&!P.atk&&!P.carve&&!P.insp&&!P.drawing&&!P.dead){const k=Math.sin(ea/E_ANIM_T*Math.PI);P._eOff=[-.62*k,-.38*k];fig.armR.rotation.x+=P._eOff[0];fig.elbowR.rotation.x+=P._eOff[1];}}   // v3.06 (käyttäjä): E-toiminnossa käsi käy hieman eteen ja takaisin
   if(!(P.atk||P.chopW>.05||P.drawK>.2||P.gripK>.3)){fig.g.updateMatrixWorld(true);armWorldClear(fig.armR,fig.elbowR,fig.hand,dt);armWorldClear(fig.armL,fig.elbowL,fig.handL,dt);}else{AWC.R.e=AWC.R.a=AWC.L.e=AWC.L.a=0;}   // v2.88, v3.25 pehmeä kerros
   // Jousen veto: oikea käsi jänteellä nuolen kannan kohdalla.

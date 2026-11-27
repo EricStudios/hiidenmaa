@@ -1,7 +1,7 @@
 /* Hiidenmaa – main.js
    Valikko, pääsilmukka ja testirajapinta window.__game */
 'use strict';
-window.__JSV2='3.26';   // v1.58: versiotarkistus (viimeinen skripti)
+window.__JSV2='3.42';   // v1.58: versiotarkistus (viimeinen skripti)
 // v1.24 KORJAUS (KORJAUKSET 22): valikkokameran tila esitellään ennen kuin startPlay voidaan kutsua (karttavaihdon jälkeinen automaattinen
 // aloitus tapahtuu jo tiedoston alussa; ennen let-muuttujat olivat vielä alustamatta → ReferenceError → peli jäi mustaksi).
 let frameErrShown=false;
@@ -116,10 +116,12 @@ function musicBiome(dt){const b=(typeof BIO_SND!=='undefined'&&BIO_SND[biomeHere
 /* v2.86 VIIMEISEN POMON MUSIIKKI (Kalmanvartija, tyyppi 'vartija'): alle puolet terveydestä → 'vboss' (vartija_puolivali) kuolemaan asti tai kunnes
    taistelu keskeytyy (pomopalkki poistuu, pelaaja kuolee); kun pomo alkaa kuolla → 'vend' (vartija_kuolema) soi kerran loppuun (enintään 10 min;
    jos kappale ei ala 8 s:ssa, palataan normaaliin). Puuttuva kappale = vanha käytös (pomotaistelu). */
-const MUS_FB={m:null,vd:null};
+const MUS_FB={m:null,vd:null,rec:null};
 function musicCtx(dt){const M=window.__mus,has=p=>!!(M&&M.has&&M.has(p));
   if(typeof BB!=='undefined'&&BB.m&&BB.m.type==='vartija')MUS_FB.m=BB.m;
   {const fb=MUS_FB.m;if(fb&&fb.dead){MUS_FB.m=null;if(!MUS_FB.vd&&has('mu/ulottuvuudet/vartija_kuolema_'))MUS_FB.vd={t:playTime,seen:false};}else if(fb&&!mobs.includes(fb))MUS_FB.m=null;}
+  if(MUS_FB.rec){const V=MUS_FB.rec,st=M.state;if(st.track&&st.track.indexOf('ennatyskala')>=0)V.seen=true;else if(V.seen&&!st.playing)V.done=true;   // v3.27 ennätyskalan teema soi kerran
+    if(!V.done&&playTime-V.t<180&&(V.seen||playTime-V.t<8))return 'rec';MUS_FB.rec=null;}
   if(MUS_FB.vd){const V=MUS_FB.vd,st=M.state;if(st.track&&st.track.indexOf('vartija_kuolema')>=0)V.seen=true;else if(V.seen&&!st.playing)V.done=true;
     if(!V.done&&playTime-V.t<600&&(V.seen||playTime-V.t<8))return 'vend';MUS_FB.vd=null;}
   if(typeof BB!=='undefined'&&BB.m&&!BB.m.dead&&!P.dead)return BB.m.type==='vartija'&&BB.m.hp<=BB.m.maxHp*.5&&has('mu/ulottuvuudet/vartija_puolivali_')?'vboss':'boss';

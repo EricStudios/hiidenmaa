@@ -247,11 +247,12 @@ function removeLooked(){
   if(p.data.lv)for(let i=1;i<=p.data.lv;i++)for(const [id,n] of Object.entries(STORE_UP[i]))giveOrDrop(id,n,p.x,p.y+1,p.z);
   if(p.t==='patanuotio'&&p.data.pot)giveOrDrop(p.data.spo?'pilapata':'keittopata',1,p.x,p.y+1,p.z);   // v3.02 asennettu pata takaisin
   if(p.t==='sulatin')smRefund(p);   // v3.06 jono, valmiit ja polttoaine takaisin
+  if(typeof nauRefund==='function')nauRefund(p);   // v3.27 naulakon kalat maahan (ei katoa)
   removePiece(p);sfx(/^kivi/.test(p.t)?'crumble':'woodBreak');plSnd('rakentaminen','purku',{pos:{x:p.x,y:p.y,z:p.z}});burst(p.x,p.y+.5,p.z,0x8a5a32,8,3);
 }
 function damagePiece(p,d,src){if(src==='mob'&&PIECES[p.t].mobProof)return;p.hp-=d;burst(p.x,p.y+1,p.z,0x8a5a32,4,2);if(p.hp>0)setPieceDamage(p);
   if(p.hp<=0&&PIECES[p.t].glass){shatterGlass(p);return;}
-  if(p.hp<=0){removePiece(p);sfx(/^kivi/.test(p.t)?'crumble':'woodBreak',1,clamp(1.1-Math.hypot(P.pos.x-p.x,P.pos.z-p.z)/60,.15,1));msg(`${PIECES[p.t].n} tuhoutui!`,'warn');if(PIECES[p.t].store)p.data.items.forEach(s=>s&&spawnDrop(s.id,s.n,p.x,p.y+.5,p.z,s.q));}}
+  if(p.hp<=0){removePiece(p);sfx(/^kivi/.test(p.t)?'crumble':'woodBreak',1,clamp(1.1-Math.hypot(P.pos.x-p.x,P.pos.z-p.z)/60,.15,1));msg(`${PIECES[p.t].n} tuhoutui!`,'warn');if(PIECES[p.t].store)p.data.items.forEach(s=>{if(!s)return;spawnDrop(s.id,s.n,p.x,p.y+.5,p.z,s.q);if(s.fl)drops[drops.length-1].ex={fl:s.fl};});if(typeof nauRefund==='function')nauRefund(p);}}   // v3.27 kalat yksilöinä
 /* v2.07: lasi-ikkunan lasi särkyy (helinä, sinertävät sirpaleet), kehys jää aukkoikkunaksi täydellä kestävyydellä */
 function shatterGlass(p){const to=PIECES[p.t].glass,{x,y,z,rot,f}=p;removePiece(p);const np=addPiece(to,x,y,z,rot,undefined,undefined,f);
   for(let i=0;i<3;i++)burst(x,y+1.5,z,0xbfe6f2,8,4);sfx('crumble',2.2,clamp(1.1-Math.hypot(P.pos.x-x,P.pos.z-z)/50,.15,1));sfx('pickup',2.6,clamp(.9-Math.hypot(P.pos.x-x,P.pos.z-z)/50,.1,.8));

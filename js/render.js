@@ -140,6 +140,7 @@ function terrCol(x,z,h,slope,b){b=b||biomeAt(x,z,h);let c;
     else c=[.48+n,.47+n,.44+n];
     if(h>33){const t=sstep(33,38,h);c=[lerp(c[0],.92,t),lerp(c[1],.94,t),lerp(c[2],.96,t)];}
     if(slope>.75&&b!=='sea'&&b!=='beach'){const t=sstep(.75,1.3,slope);c=[lerp(c[0],.45,t),lerp(c[1],.44,t),lerp(c[2],.41,t)];}
+    if(h<0){const k=sstep(0,7,-h)*.7;c=[lerp(c[0],.09,k),lerp(c[1],.12,k),lerp(c[2],.14,k)];}   // v3.35 käyttäjä: merenpohja tummenee syvyyden mukaan (ei vaaleaa hiekkaa syvällä)
     if(Math.hypot(x-LOC.circle.x,z-LOC.circle.z)<13){c=[c[0]*.75,c[1]*.75,c[2]*.8];}
     if(Math.hypot(x-LOC.barrow.x,z-LOC.barrow.z)<10.5||barrowMound(x,z)>.2){c=[.33+n,.36+n,.22];}   // v2.43: myös kieleke portin takana
     return c;}
@@ -277,14 +278,14 @@ function waterMat(low){return new THREE.ShaderMaterial({uniforms:WATER_U,transpa
           return;}
         float nv=max(dot(N,V),0.),fres=.02+.98*pow(1.-nv,5.);
         float vy=max(V.y,.1),path=max(d,0.)/vy;
-        float alpha=1.-exp(-path*.5);
-        float dk=smoothstep(2.,22.,d);
+        float alpha=1.-exp(-path*.85);   /* v3.35 käyttäjä: vesi samenee syvyyden mukaan – pohja ja sen terävät varjot häipyvät jo 2–3 m:ssä (ennen .5) */
+        float dk=smoothstep(1.5,12.,d);   /* syvän veden väri ja peitto jo ~12 m:ssä (ennen 22 m) */
         #ifdef LOWPOLY
         if(uSmooth<.5)dk=floor(dk*5.+.5)/5.;   /* väri portaittain; v2.63 Extra: pehmeä rantavärin vaihtuminen (uSmooth) */
         #endif
         vec3 lit=uAmbC+uSunC*max(uSun.y,0.)*.55;
         vec3 body=mix(uShal,uDeep,clamp(dk+(1.-exp(-path*.08))*.35,0.,1.))*lit;
-        alpha=clamp(mix(alpha,.985,dk),0.,.985);
+        alpha=clamp(mix(alpha,.995,dk),0.,.995);
         vec3 R=reflect(-V,N);R.y=abs(R.y);vec3 sky=mix(uSkyHor,uSkyTop,pow(clamp(R.y,0.,1.),.55));
         float sr=max(dot(R,normalize(uSun)),0.);vec3 spec=uSunC*(pow(sr,260.)*2.5+pow(sr,40.)*.18)*step(0.,uSun.y);
         #ifdef LOWPOLY

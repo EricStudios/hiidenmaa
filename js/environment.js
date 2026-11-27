@@ -246,6 +246,7 @@ function effects(){const e=[],wt=invWeight(),b=P.buffs,add=(key,name,kind,desc,t
   if(P.hunger<=0)add('nalka','Nälkä','bad','Menetät terveyttä, kävely −15 %, isku −20 %, kestävyys palautuu puolet hitaammin. Syö!');
   else if(P.hunger<25)add('nalkainen','Nälkäinen','bad','Isku −10 %, kestävyys palautuu 15 % ja terveys 50 % hitaammin. Syö pian.');
   if(b.pahoinvointi)add('pahoinvointi','Pahoinvointi','bad','Raa\'asta lihasta: terveys ei palaudu itsestään, kestävyys palautuu puolet hitaammin.',b.pahoinvointi);
+  if(b.loinen)add('loinen','Loinen','bad',`Raa'asta kalasta: nälkä kasvaa ${Math.round((LOINEN_K-1)*100)} % nopeammin.`,b.loinen);   // v3.27
   if(b.markakengat)add('markakengat','Märät kengät','bad','Kaadoit vesikulhon jaloillesi: liikkuminen −22 %.',b.markakengat);   // v3.04
   if(b.vihainen)add('vihainen','Vihainen','bad','Harmittaa! Kestävyys kuluu 20 % nopeammin.',b.vihainen);
   if(b.vatsakipu)add('vatsakipu','Vatsakipu','bad','Liiasta syömisestä: kävely −10 %, kestävyys palautuu 30 % hitaammin ja kramppi vie välillä kestävyyttä.',b.vatsakipu);
@@ -335,7 +336,7 @@ function survival(dt){if(P.buffs.vihainen&&P._stP!=null&&P.stam<P._stP)P.stam=Ma
   calcFx();
   P.crampT-=dt;if(P.buffs.vatsakipu&&P.crampT<=0){P.crampT=8+Math.random()*6;plSnd('keho','mahakipu');P.stam=Math.max(0,P.stam-12);P.stamDelay=Math.max(P.stamDelay,1);floatText('Auts!',P.pos.x,P.pos.y+2,P.pos.z,'#c9a66b');}
   if(P.buffs.kylla){P.hunger=100;P.buffs.taysi=60;}   // v2.00 sisujuoma: kylläisyys täynnä 5 min
-  if(!P.buffs.taysi)P.hunger=Math.max(0,P.hunger-dt*(100/1000)*(cold?1.3:1)*(P.atk||kd('run')?1.15:1)*homeHungerK()*(P.buffs.ravittu?KYL_K:1));   /* v3.02 Kylläinen (pataruoka) */   /* v2.09: kodin lämpö hidastaa nälkää */if(devOn('food'))P.hunger=100;   // DEV: ei nälkää; v2.00: täyteen syötyä 60 s ei kulu
+  if(!P.buffs.taysi)P.hunger=Math.max(0,P.hunger-dt*(100/1000)*(cold?1.3:1)*(P.atk||kd('run')?1.15:1)*homeHungerK()*(P.buffs.ravittu?KYL_K:1)*(P.buffs.loinen?LOINEN_K:1));   /* v3.27 loinen */   /* v3.02 Kylläinen (pataruoka) */   /* v2.09: kodin lämpö hidastaa nälkää */if(devOn('food'))P.hunger=100;   // DEV: ei nälkää; v2.00: täyteen syötyä 60 s ei kulu
   if(P.buffs.elpyminen)P.hp=Math.min(maxHp(),P.hp+dt);   // v2.00 elpymisjuoma: +1 terveys / s
   // regen
   let reg=P.hunger>35?.35:P.hunger>0?.15:0;if(P.buffs.levannyt)reg+=.6;reg*=P.fx.hpRegen;if(P.hunger>0&&!P.buffs.pahoinvointi)reg+=homeHealRate();   // v2.09 kodin lämpö +0,5 / +1,0 hp/s

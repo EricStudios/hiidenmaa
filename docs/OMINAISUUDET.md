@@ -886,6 +886,100 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
 - **Poistu-ruksi** tallentaa pelin aina juuri ennen sulkemista (kuten Tallenna nyt), sulkuruutu vahvistaa tallennuksen.
 - **Korjattu:** lapion virhe kaadetun puun vieressä, kirveen hakkuun nykäisy, Windows-tekstin ja logon keskitys, vinkki katoaa valikon avautuessa/sulkeutuessa.
 
+## v3.42 – syväkerroin, nykäisyliike, kala vasemmalla
+- Koukuilla ja vieheillä ominaisuus **Jää pahasti kalaan** (kerroin irrotusminipelin todennäköisyyteen, enintään 30 %): pieni koukku 1,2, iso 0,7, väkäkoukku 1,6; vieheet 0,7–1,4.
+- Ongen isku: pelaaja nykäisee vavan ylös, vedossa vapa pysyy korkealla ja kaarella, heiluu ja taipuu kalan painon ja voiman mukaan.
+- Kala kädessä: vasen ja oikea syövät (ei lyöntiä). Ei-ase kädessä lyönti käyttää nyrkkien arvoja.
+
+## v3.41 – isku ei tuo kalaa luokse
+- Isku liikauttaa kalaa ~0,5 m. Vapa nousee vain vasen pohjassa (siima lyhenee enintään 2,2 m); kauempaa kala raahataan kävelemällä taaksepäin.
+
+## v3.40 – pehmeä isku
+- Tärpin klikkaus: koho nykäisee kohti vapaa ja painuu, siima kiristyy pehmeästi, kala ilmestyy (häivytys) ja rimpuilee sivuttain. Vapa nousee; kaukaa kala raahataan taaksepäin kävellen.
+
+## v3.39 – tekstit alas ja kertaalleen, ongen nosto
+- Kalastuksen tekstirivit (myös "ei kaloja", kalan nimi kädessä, koukussa) vain ensimmäisellä kerralla; teksti pikapaikkojen yläpuolella, ei esinenimen päällä.
+- Onki (ei kelaa): vasen nostaa vavan – koho lennähtää kaarena käteen 0,55 s:ssa. Virveli kelaa.
+
+## v3.38 – ohjeet kertaalleen, usva rajattu
+- Kalastuksen ohjetekstit näkyvät kukin vain ensimmäisellä kerralla (8 s); tiedot (voima, nimi, paino, palkit, varoitukset) aina.
+- Kohteiden usva vain porteilla ja Hautakummulla; tavalliset rauniot ja arkkukivet ilman usvaa.
+
+## v3.37 – siimojen näkyvyys
+- Siimat erottuvat vain vähän (läpinäkyvyys 28 %, yöllä tummia): pellava harmaa, muut omalla värillään himmeinä; hiidensiima hohtaa yöllä hieman.
+
+## v3.36 – onki ei kelaa itsestään
+- Heitetyn siiman pituus mitataan pelaajasta (+0,6 m löysää): kääntyminen ja vavan heilunta eivät liikuta kohoa, vain poispäin käveleminen raahaa sitä.
+
+## v3.35 – koukun irrotus ja vesi
+- Syvä koukku: alue liikkuu tasaisesti (nopeus vaihtelee pehmeästi ±16 %, ei kiihdy eikä kapene yrityksistä); "kiduksiin!"-ilmoitus; hiiriohje 10 ensimmäisellä kerralla.
+- Vesi samenee syvyyden mukaan (pohja häipyy 2–3 m:ssä, lähes peittävä ~12 m), merenpohja tummenee syvemmällä.
+
+## v3.34 – siimakerä
+- Yksi siimakerä (pellava-, jänne-, punottu, hiidensiima) riittää 10 siimaan; kulumismittari repussa kuten kilvellä. Siimat eivät pinoudu. Irrotettu siima leikataan pois.
+- Siimat ovat vähän läpinäkyviä ja seuraavat valoa (yöllä tummia); hiidensiima hohtaa yöllä hieman vaaleansinisenä.
+- Maalle päätynyt koho/viehe, joka raahataan takaisin veteen, kalastaa taas normaalisti.
+
+## v3.33 – ongen siima
+- Siima kiinteä heiton jälkeen: liikkuessa koho/viehe raahautuu perässä (ei kelausta, ei ilmoitusta); maata pitkin voi katketa 0,5 % / m.
+- Katkennut siima on poissa → **E** solmii uuden siiman repusta (paras), pakista ei. Pöytä toimii kuten ennen.
+- Kärjessä roikkuvan kalan siimassa on koho/viehe; se katoaa, kun kala otetaan.
+- M-kartta ulos zoomattuna: tumma reunus ja kehys, pilvet ja tuuliviirut vain kartan päällä.
+
+## v3.32 – fysiikka sama kaikilla asetuksilla
+- Hyppy 1,12 m (`JUMP_V` 7,02, g 22) kaikilla ruudunpäivityksillä; nuolet, tähtäysviiva ja ongen heitto lasketaan tarkasti → sama rata 20–144 FPS.
+- Grafiikka-asetukset eivät vaikuta spawnaukseen, tekoälyyn, törmäyksiin tai vahinkoon (vain piirtoon).
+
+## v3.31 – seikkailijan nimi
+- Asetukset › Ohjaus › **⚔️ Seikkailija** (sivun ylin osio, aina näkyvissä): Aseta nimi / vaihda / 🗑 Pyyhi. Päävalikossa asetettu nimi on oletus kaikille maailmoille
+  (`pNameDef`, localStorage), pelissä asetettu tallentuu myös maailmaan (`flags.pname`). Enintään 24 merkkiä.
+
+## v3.30 – valikon hiukkaset koko näytössä, nimen pyyhintä
+- **Valikon taustat:** sade, lumi ja pöly satunnaisina pisaroina (`mbgH`/`mbgDrift`, nopeus 0,75–1,25×), ei rivejä millään ruudun koolla.
+- **Hiukkaskerros:** tasainen syntytahti (`mfxLife`), tiheys pinta-alan mukaan 0,75–1,6× (`mfxWant`), alkujoukko eri-ikäinen, lumi/sade elävät ruudun läpi.
+- **Seikkailijan nimi:** voi pyyhkiä (Asetukset › Seikkailija › 🗑 Pyyhi); vanhat laatat säilyvät.
+
+## v3.29 – kiinteä siima, täysi reppu, zoom ja optimointi
+- **Siima:** kala siiman päässä (`FS.L`). Onki: vapa nousee (siima lyhenee 2,2 m), raahaus kävelemällä (ei rajaa, ei katkeamista). Virveli: kelaus lyhentää + raahaus. Nosto kärkeen:
+  kala alle 1,4 m kärjestä tai siima ei ylety pinnalle; ongella vasen nostaa maalla olevan kalan alle 4 m päästä. Irtoaa vain käsiesineen vaihdosta (maalla sätkii, vedessä ui pois).
+- **Täysi reppu:** ei pudotuksia. Kala jää koukkuun ja karkaa 10–30 s kuluttua maalle; sätkivää kalaa ei voi poimia; katiska pitää kalat; naulakko ei vaihda/anna kalaa.
+- **Rimpuilu:** maalla hyppyväli / 1,5, hyppy √1,5 korkeampi; koukussa heilunta ja pyrstö 2×.
+- **Vavat:** onki 2,6 m, kupari- ja hiidenvapa 2,35 m.
+- **Lappu** 33 % korkeudella; ensimmäisen ongen ohje lappuna (9 s).
+- **Seikkailijan nimi** (Asetukset › Ohjaus › Seikkailija, `flags.pname`).
+- **Selaimen zoom:** Ctrl + rulla / + / − / 0 estetty; zoom kompensoidaan resoluutiossa, HUD:ssa ja repussa (`browserZoom`).
+- **Valikon tausta** piirretään uudelleen koon asetuttua (150 ms, myös koko näytön vaihto).
+- **Optimointi Low–Medium+:** kalamalli 12×8, ei kalojen varjoja, siima 10 pistettä, puolet roiskeista. Kaikilla: kalastus-HUD 10 Hz.
+
+## v3.28 – tasonimike repussa
+- Tasonimike ja taso näkyvät repun oikeassa alakulmassa (`#invLvl`, ui.js `updateHUD`). HUD:n tasomittari oikeassa alakulmassa ilman nimikettä.
+
+## v3.27 – kalastuksen fysiikka (js/fishphys.js; päätökset docs/KALASTUS_SUUNNITELMA.md)
+- **Heitto:** aina sallittu, ballistinen (painovoima 9,8, ilmanvastus `FP_DRAG` 0,38, tuuli `FP_WIND_K` 0,25 × tuulen nopeus). Lähtönopeus `fpV0(D)`: 35° täydellä voimalla = D.
+  D: onki 16, kuparivapa 20, hiidenvapa 24, kuparikela 22, hiisikela 30 m. Onki heittää heti täydellä voimalla (kiskaisu 0,5 s); kela: vasen pohjassa 0,2–1,2 s → voima 25–100 %.
+- **Tilat** `FS.st`: charge → fly → wait/bite (koho) | spin (viehe) | land → retr | pull/fight → hang → unhook. Pelaaja enintään 5 m heittopaikasta (`FISH_KEEP_R`), roikkuvan kalan kanssa 3 m.
+- **Maalla:** onki: klikkaus vetää koho takaisin 6 m/s; kela: pidä vasenta. Maata pitkin 0,5 % / m katkeaminen; viehe jää maahan, siima lyhenee 30 %.
+- **Koho:** syötin syvyys `rig.fd` 0–2 m (0,1 m askel pöydällä, oletus 0,8); vesi matalampi → syötti pohjassa (6 % koukku tarttuu nostossa). Kalaton vesi (ei nimeä) → ei tärppejä (HUD kertoo).
+- **Viehe:** vajoaa 0,22 m/s (jigi 2×, pintavaappu kelluu), nousee 0,5 m/s kelatessa (vähintään 0,25 m). Pohja: 0,5 s armo, sitten 20 % / s → viehe ja siima menetetään.
+  Tärppi: pinnalla (alle 0,25 m) ×0,95, pohjassa (0,25 m sisällä) ×0,7. Ranta (alle 0,3 m tai alle 2,6 m pelaajasta) → kelataan ilman kautta kärkeen.
+- **Lajit ja syvyys** (`FISH_Z`, `fishDepthK`): pohjakalat (lahna, turska, kuha, made, kiiski, kampela, suutari) ×1,8 syötti pohjassa, ×0,35 irti (×0,6 yli 1,4 m);
+  muut: ahven 0,5–2, hauki 0,2–1,5, silakka 0,8–2, lohi 0,3–1,5, ruutana 0,2–1,2, suonsilmä 0–0,6, muikku 1–2, särki 0,2–1,2, toutain 0–0,8, siika 1–2, meritaimen 0–1,2 m
+  (×1,4 sisällä, −1,2 / m ulkona, väh. ×0,3; pohjassa ×0,8). Tärppiväli jaetaan syvyyden sopivuudella (`fishDepthFit` 0,4–1,4).
+- **Kala siimassa:** häivytys 0,6 s, kyljellään, heilunta 0,12 + 1,5 × voima m (`fpStr`: koko + paino + iso laji). Onki vetää 3,2 × (1 − 0,45 × voima) m/s; virveli
+  kelan nopeus × 1,4 × (1 − 0,35 × voima), 4 s ilman kelausta → irtoaa. Nosto alle 2,4 m pelaajasta (iso kala: väsytys loppuun).
+- **Roikkuva kala:** klikkaus ottaa. Syvä koukku 3–10 % arvon persentiilin mukaan → minipeli: alue 20 % (−2 %/yritys, väh. 12 %), nopeus 0,14 + 0,07/yritys, mittari +0,42/s alueella,
+  −0,28/s muuten, alku 0,35. Pois käveleminen/vaihto → kala putoaa (pomppu 0,35, rinne, sätkii 20 s), vedessä 0,5 s → ui pois (katoaa).
+- **Saalislappu** `lappu(kuva, html)`: vasen reuna 41 % korkeudella, 6 s, enintään 3. Ennätys: kultainen reuna + musiikki `ennatyskala` (kerran, ei pomotaistelussa).
+- **Kalat repussa:** `fl` = yksilöt {kg, cm, t}; `fishRoll` 70 % tavallisia (q 0,22–0,52, 0,1 kg / 2 cm), 30 % tarkkoja. Pino 20. Automaattinen pinoutuminen vain samalle painolle ja
+  pituudelle; käsin saman lajin kalat samaan pinoon. Päällimmäinen (viimeksi lisätty) syödään, vapautetaan, ripustetaan ja pudotetaan ensin. Pilaantuu 4 päivässä (reppu + arkut)
+  → Pilaantunut kala (ruoka 2, sairastuttaa aina 70 s). Raaka kala: sairastuminen 75 %, loinen 50 % (1–10 min, nälkä ×1,2).
+- **Vapautus:** E kala kädessä veden äärellä → repliikki (pieni/iso/mikä tahansa), +1 XP, seuraava tärppi samassa vedessä ×0,9 aika.
+- **Naulakot:** Kalanaulakko (1 kala, taso 3) ja Palkintotaulu (3 kalaa, taso 6, puu 6 + rauta 2 + pihka 2). Paikka tähtäyksen mukaan. Laatan tiedot lähellä (4,5 m) katsottaessa.
+  Seikkailijan nimi `flags.pname` (v3.29; ennen `flags.angler`), enintään 24 merkkiä.
+- **Kalakirja:** lajisivulla syvyys + palkintolaatta (kalastaja, päivä, kello, paino, pituus, luokka); sivu "Mikä vaikuttaa saaliiseen"; huhu 20 % vedelle tullessa (0,5 pv väli) → laji ilman kuvaa.
+- **Kalastuspakki:** kyljissä enintään 8 viehettä/koukkua (2 / laji).
+- **Virveli kädessä:** vasen käsi (toinen käsi vapautetaan), oikea IK kammelle, kampi 2,2 kierrosta/s × kelan nopeus kelatessa.
+
 ## v3.26 – lammet ja haku
 - Kaikki kartan lammet ovat nimettyjä kalastusvesiä (myös pienet ja matalat). DEV-valikon kartan paljastus näyttää kaikkien vesien nimet.
 - DEV-valikon esinehaku löytää yleissanoilla (esim. ase, kala, keitto) ja kategoriapainikkeilla, kuten repun ja rakennusvalikon haku.
@@ -954,15 +1048,15 @@ kun ominaisuus tai arvo muuttuu (tiedosto ja funktio suluissa, jotta kohta löyt
   Maailmanennätysvonkale (hiiri luokan päälle: "parempi kuin X % lajinsa kaloista"). Saaliista ilmoitus: "Sait: Hauki 6,1 kg, 99 cm (Harvinainen) – katso kalakirjan sivu 5".
 - **Toivekalat:** kolme toivetta (helppo, keskivaikea, vaikea), vaihtuvat 7 päivän välein, täytetystä XP:tä. Saavutukset: Toive täyttyi, Toiveiden kalastaja, Toiveiden täyttäjä,
   Vaikea toive, Kirja täynnä, Ennätyskala.
-- **Tietosivut:** lajien osuudet vesityypeittäin, parhaat ajat ja sää, viehteet ja varusteet.
+- **Tietosivut:** lajien osuudet vesityypeittäin, parhaat ajat ja sää, vieheet ja varusteet.
 - **Kirja kädessä:** vasempaan käteen; vasen klikkaus avaa (oikea käsi tyhjä), K avaa aina. Pelkkä kirja on oikeassa kädessä (F-tarkastelu). Lukiessa kirja molemmissa käsissä.
 
 ## v3.14 – kalastusvarusteet
 - **Kalastajan pöytä** (Viljely ja kalastus, taso 3, puu 6 + naru 2): E avaa – vavan osat vaihdetaan heti, ominaisuudet listana, yhdistelmät, perkaus ja pakin päivitys.
-  Pöydän ääressä valmistetaan siimat, koukut, kelat, kohot, viehteet ja kalastuspakki.
+  Pöydän ääressä valmistetaan siimat, koukut, kelat, kohot, vieheet ja kalastuspakki.
 - **Vapa = runko** (onki, kuparivapa +10 % isot kalat, hiidenvapa +20 %) + siima (pellava, jänne, punottu, hiidensiima – vahvempi kestää, mutta tärppää harvemmin) + koukku
   (pieni, iso, väkä) + kela (ei, kupari, hiisi) + koho (puu, korkki, hehku) tai viehe (9 kpl). Siima kuluu ja voi katketa; vanha ehjä osa palaa reppuun, kulunut siima heitetään pois.
-- **Virveli** (kela + viehe): heitto 6–22 m (hiisikela 30 m), pidä vasenta kelataksesi, kala iskee kelatessa. Viehteillä parhaat kalat, vahvuudet ja heikkoudet (vesi, aika, sää, valo);
+- **Virveli** (kela + viehe): heitto 6–22 m (hiisikela 30 m), pidä vasenta kelataksesi, kala iskee kelatessa. Vieheillä parhaat kalat, vahvuudet ja heikkoudet (vesi, aika, sää, valo);
   eivät sovi pikkukaloille, voivat (hyvin harvoin) tarttua pohjaan matalassa – viehe ja siima menetetään.
 - **Mato:** vapa kädessä E laittaa madon koukkuun. **Kalastuspakki** vasemmassa kädessä (paino 20 + sisältö, 12–24 paikkaa, vain kalastustarvikkeet, yksi kerrallaan):
   vasen klikkaus laskee maahan tai pöydän pakkipaikalle, E avaa, vasen nostaa. Siiman voi vaihtaa pakista kentällä (30 s).

@@ -689,3 +689,72 @@ Testeissä three.js-reitille tarvitaan nyt otsake `Access-Control-Allow-Origin: 
 - CSS-animaatio (`forwards`) käynnistyy alusta, kun elementti tai sen vanhempi palaa `display:none`:sta näkyviin (HUD piilotetaan valikossa) → "Vesistö löydetty" ja pikapaikan nimi
   näkyivät uudelleen. Korjaus: `el.onanimationend=()=>el.classList.remove('on')`. **Sääntö:** kertaluonteinen animaatioluokka poistetaan animaation päätyttyä.
 
+## 97. Valmistus ilman aineita – virtuaalinen osoitin klikkasi estettyä nappia (v3.27)
+- v3.25:n virtuaalinen osoitin (`VC`, input.js) lähettää `MouseEvent('click')`-tapahtumat `dispatchEvent`:llä. **Selain ei suodata keinotekoisia tapahtumia estetyiltä
+  (`disabled`) napeilta** → `onclick` laukesi ja "Valmista" toimi ilman aineita (ei DEV-tilassa). Korjaus: `vcFire` ohittaa click/dblclick/auxclick/mousedown, kun kohde tai sen
+  vanhempi on estetty (`vcDis`), ja `craft` tarkistaa itse aineet (`hasReq`) ja aseman. **Sääntö:** toiminnon funktio tarkistaa aina ehtonsa itse – napin `disabled` on vain ulkoasu.
+- Samassa erässä `//` rivin keskellä katkaisi taas koodin (fish.js, KORJAUKSET 49) – käytä `/* */`.
+
+## 98. Eläimet nykivät vesirajassa (v3.27)
+- `moveMob`: kun seuraava askel oli syvässä vedessä, kävelyvaiheessa (`shoreW`) suuntaa käännettiin 90° **joka ruudulla** → eläin pyöri paikallaan; jahdissa liike pysähtyi
+  joka ruudulla. Korjaus: ensin liu'utaan rantaa pitkin (x tai z erikseen), vasta kun kumpikaan ei käy, valitaan suunta kuivalle maalle `shoreDir` (16 suuntaa) enintään 0,8 s välein.
+  **Sääntö:** esteeseen törmäävä tekoäly ei saa vaihtaa suuntaa joka ruudulla – käytä liukumista ja aikaväliä.
+
+## 99. Lisäkulma katosi animaatiossa ja testin vavan kärki oli väärässä paikassa (v3.27)
+- Käsivarren lisäkulma (`fig.armR.rotation.x += a`) sekoittuu seuraavan ruudun pehmennykseen (`lerpAngle` nykyisestä kohti tavoitetta), jos sitä ei poisteta ensin → asento
+  ei näy tai kertyy. Korjaus kuten E-käsiliikkeessä (`P._eOff`): tallenna lisäys (`P._cOff`) ja vähennä se ennen pehmennystä. Vavan suunta asetetaan maailmassa (kvaternio
+  vanhemman käänteisellä), jolloin käden kierto ei käännä vapaa pystyyn.
+- Testeissä pelaajan siirto `P.pos.set` ei siirrä mallia ennen `update()`-kutsua → `heldMesh`-kärki oli vanhassa paikassa (heitto 300 m). `fpTip` palauttaa varapaikan, jos kärki on
+  yli 4 m pelaajasta. Yksilökalat (pinot) täyttävät repun testeissä nopeasti – tyhjennä reppu ennen testiä.
+
+
+## 100. Selaimen zoom hidasti peliä, ja koko näytön vaihto sotki valikon taustan (v3.29)
+- Piirtoresoluutio oli `min(devicePixelRatio, 1.5)`. Kun selaimen zoomia pienennetään, `devicePixelRatio` pienenee mutta `innerWidth` kasvaa. Rajauksen takia
+  (esim. HiDPI-näyttö, dpr 2 → 1,5) piirrettävien pikselien määrä kasvoi → peli hidastui, ja HUD pieneni. Korjaus: zoomin pikanäppäimet estetään (input.js), ja jäljelle jäävä
+  zoom kompensoidaan (`browserZoom()` = outerWidth / innerWidth pyöristettynä zoomitasoon): resoluutio lasketaan 100 %:n dpr:stä ja kerrotaan zoomilla, `--hudK` ja `--invK` jaetaan zoomilla.
+- Koko näytön vaihto lähettää useita `resize`-tapahtumia kesken vaihdon → valikon tausta piirrettiin väärän kokoisena ja hiukkaset jäivät vanhoihin koordinaatteihin.
+  Korjaus: `mbgResize` odottaa 150 ms, kunnes koko on asettunut (myös `fullscreenchange`), skaalaa hiukkaset ja nollaa kohtauksen tilan.
+  **Sääntö:** koon muutokseen sidottu raskas uudelleenpiirto aina viiveellä (debounce), ja vanhat koordinaatit skaalataan.
+
+## 101. Valikon sade ja lumi kulkivat koko näytössä säännöllisinä riveinä (v3.30)
+- Taustakohtausten pisarat laskettiin hilasta `x=(i*97+t*v) % (W+100)`, `y=(i*61+t*v2) % (H+40)`. Pienellä ruudulla modulo pyörähtää usein ja kuvio näyttää satunnaiselta,
+  mutta isolla ruudulla pisteet jäävät samoille vinoille suorille → peräkkäiset jonot. Lisäksi hiukkaskerros täytti puuttuvat 6/ruutu: ryppäät syntyivät yhtä aikaa ja kuolivat yhtä aikaa (aallot).
+- Korjaus: oma satunnainen paikka ja nopeus per pisara (`mbgH(i,k)`, `mbgDrift`), tasainen syntytahti `want/mfxLife`, alkujoukko eri-ikäinen (`p.l0`), elinikä ruudun korkeuden mukaan.
+  **Sääntö:** älä sijoita toistuvia hiukkasia `i*vakio % koko` -kaavalla – käytä tiivistettä (`mbgH`). Hiukkasten uusinta tasaisella tahdilla, ei täyttämällä vajetta kerralla.
+
+
+## 102. Tarkistuksen kalastus- ja vesikulhotesti kaatuivat satunnaisesti (v3.31)
+- v3.06-rivin onkitesti arpoo rantapaikan `Math.random`illa: osassa paikoista kala ei päädy maalle (syvä ranta, raahaus veteen) → satunnainen `onki … pull/retr`.
+  Sama kaatui myös ilman muutoksia (1/5 ajoa). Seuraava v3.04-vesikulhotesti peri edellisen testin jättämän tilan (asento/kalastus) → kulho kaatui jo ennen tarkistusta.
+- Korjaus: onkitesti yrittää enintään 3 eri paikassa (`fishReset` välissä); vesikulhotesti aloittaa puhtaasta tilasta (`fishReset`, `inspectStop`, ei uintia, 10 päivitystä).
+  **Sääntö:** testi, joka arpoo paikan, yrittää useammin; testi ei saa nojata edellisen testin jättämään tilaan.
+
+## 103. Hyppy ja lentoradat riippuivat ruudunpäivityksestä (v3.32)
+- Puoli-implisiittinen Euler (`vy-=g·dt; y+=vy·dt`) jää jokaisella askeleella `½g·dt²` alle oikean paraabelin → isolla askeleella (matala FPS) hyppy jäi matalammaksi:
+  20 FPS 1,00 m vs 144 FPS 1,15 m. Sama nuolissa, ja jousen tähtäysviiva laski aina 1/60 s askeleella → matalalla FPS:llä viiva ja oikea nuoli erosivat.
+- Korjaus: pelaaja `P.pos.y+=P.vy*dt+gH` (`gH=½g·dt²`), nuolet ja tähtäysviiva: painovoima puoliksi ennen ja jälkeen siirron; ilmanvastuksellinen heitto pieninä välivaiheina.
+  **Sääntö:** kaikki pelin kannalta merkitsevä liike tarkalla integroinnilla; testi `tarkistus.mjs` v3.32 (hypyn korkeus 20/30/60/144 FPS).
+
+## 104. Koho jäi saaliin jälkeen maahan ja siima kelautui liikkuessa (v3.33)
+- `fishMeshUpd` asetti joka ruutu `FS.bob.visible=!FS.fm`; nostossa (`fishLift`) kala siirtyy `FS.dg`:hen ja `FS.fm` nollataan → koho tuli näkyviin viimeiseen
+  `FS.E`-paikkaan maahan ja "teleporttasi" vasta seuraavassa heitossa. Korjaus: hang/unhook-tiloissa koho sijoitetaan roikkuvan kalan siimaan (tai piiloon).
+- Vapaa siima kelautui sisään etäisyydestä (`FISH_KEEP_R`) ja uidessa → nyt kiinteä siima `fpFreeTether`. **Sääntö:** näkyvyys, jonka useampi tila jakaa, asetetaan tilakohtaisesti.
+
+## 105. M-kartan ulos zoomattu reunus keräsi tuuliviirujen jälkiä (v3.33)
+- `drawBigMap` piirsi kartan pienempänä keskelle (`mapView`, `mapZ` < 1), mutta canvasia ei tyhjennetty → reunukseen jäivät edellisten ruutujen viirut ja pilvet.
+  Korjaus: ulos zoomattuna koko canvas täytetään (`#12171c`), pilvet ja viirut rajataan kartan alueelle (`mapClip`), kehys. **Sääntö:** animoidun canvasin joka ruutu alkaa tyhjennyksellä,
+  jos piirto ei peitä koko pintaa.
+
+## 106. Vavan kärjen välimuisti antoi vanhan paikan siirron jälkeen (v3.34)
+- `fpTip` välimuistitti kärjen `playTime`:n ja `heldMesh`:n perusteella. Jos pelaaja siirtyi samalla pelihetkellä (testi, teleportti), kärki oli satojen metrien päässä →
+  kiinteän siiman kiinnitys (`fpFreeTether`) veti kohon maalle. Korjaus: avaimeen pelaajan x/z. **Sääntö:** välimuistin avaimeen kaikki, mistä tulos riippuu.
+
+## 107. Kiinteä siima "kelautui" vähitellen sisään (v3.36)
+- `fpFreeTether` rajoitti kohon etäisyyttä liikkuvasta pisteestä (vavan kärki). Aina kun kärki heilahti poispäin, koho vedettiin perään; kun kärki palasi, koho ei palannut → räikkä.
+  Korjaus: mittaa vakaasta pisteestä (pelaajan vartalo) ja anna löysää (`FP_SLACK`). **Sääntö:** yksisuuntainen rajoite (vain vetää) liikkuvaan pisteeseen tarvitsee löysää tai vakaan ankkurin.
+
+## 108. Hahmo katosi, kun kala kädessä painoi vasenta (v3.42)
+- `onPrimary` → `startAttack()` kaikille esineille, joille ei ollut omaa haaraa. Kalalla (ja muilla ei-aseilla) ei ole `spd`/`st` → `dur=(undefined+.2)/PCOMBAT` = NaN,
+  lyöntiasento NaN → koko pelaajan malli katosi (matriisit NaN) ja `P.stam-=NaN` rikkoi kestävyyden.
+  Korjaus: `curWeapon` täydentää puuttuvat `dmg`/`range`/`st`/`spd` nyrkeistä (`FIST_W`); kala vasemmalla syödään; player.js pudottaa lyönnin, jonka `dur`/`hitAt` ei ole äärellinen, ja palauttaa NaN-kestävyyden.
+  **Sääntö:** uusi esineluokka, jonka voi pitää kädessä → oma `onPrimary`-haara tai kelvolliset lyöntiarvot. Testi: `fig.g.traverse` → `matrixWorld` äärellinen.

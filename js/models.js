@@ -301,6 +301,8 @@ function poly(pts,thick,m){const sh=new THREE.Shape();sh.moveTo(pts[0][0],pts[0]
   const geo=new THREE.ExtrudeGeometry(sh,{depth:thick,bevelEnabled:false});geo.translate(0,0,-thick/2);geo.rotateY(-Math.PI/2);const me=new THREE.Mesh(geo,m);me.castShadow=true;return me;}
 function shaft(g,len,m,r=.032,z0=-.1){const me=new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.1,len,8),m);me.rotation.x=Math.PI/2;me.position.z=z0+len/2;me.castShadow=true;g.add(me);return me;}
 function makeHeld(id){
+  if(typeof FISH_DEF!=='undefined'&&FISH_DEF[id]&&typeof tkFishMesh==='function'){const w=typeof equipped==='function'?equipped('weapon'):null,kg=w&&w.id===id&&flTop(w)?flTop(w).kg:.4,L=Math.min(.95,.16+Math.cbrt(Math.max(.02,kg))*.24);
+    const g=new THREE.Group(),f=tkFishMesh(id,L);f.rotation.set(Math.PI/2,0,Math.PI/2);f.position.set(0,-.02,L*.18);g.add(f);g.userData.fish=1;return g;}   // v3.27 raaka kala kädessä painonsa kokoisena (tackle.js tkFishMesh)
   const g=new THREE.Group(),W=smat(0x7b4f2b),metalOf=(c,o)=>mat(c,Object.assign({metalness:.2,roughness:.55},o||{}));
   switch(id){
     case 'piikivikirves':{shaft(g,.85,W);const fm=mat(0x3e444c,{roughness:.35,metalness:.1});   // v1.53 lohkottu piikiviterä, nahkasidos ristiin
@@ -329,7 +331,7 @@ function makeHeld(id){
       g.add(poly([[.18,.05],[.18+L-.14,.05],[.18+L,0],[.18+L-.14,-.05],[.18,-.05]],.03,bm));break;}
     case 'lapio':{shaft(g,.95,W);g.add(poly([[.82,.1],[1.0,.1],[1.12,.0],[1.0,-.1],[.82,-.1]],.03,metalOf(0x8a96a3,{roughness:.5})));const gr=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.06),W);gr.position.set(0,0,-.08);g.add(gr);break;}
     case 'onki':case 'kuparivapa':case 'hiidenvapa':{   // v3.08 käyttäjä: 3-osainen taipuva vapa (tyvi → keski → kärki, nivelet userData.bend), koukku kärjen päässä
-      const simple=id==='onki',c=id==='kuparivapa'?0xd98a4e:0x5fe6d9,wood=smat(simple?0x9a7a4a:0x5a3a22),L=ROD_LEN,segs=[[0,1.15,.019,.014],[1.15,.5,.014,.009],[1.65,L-1.65-.1,.009,.004]];
+      const simple=id==='onki',c=id==='kuparivapa'?0xd98a4e:0x5fe6d9,wood=smat(simple?0x9a7a4a:0x5a3a22),L=rodLen(id),segs=[[0,1.15,.019,.014],[1.15,.5,.014,.009],[1.65,L-1.65-.1,.009,.004]];
       let parent=g;const bends=[];
       segs.forEach(([z0,len,r0,r1],k)=>{const sg=new THREE.Group();sg.position.z=k?segs[k-1][1]:-.1;parent.add(sg);if(k)bends.push(sg);
         const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,len,7),k===2&&!simple?mat(c,{metalness:.4,roughness:.4}):wood);m.rotation.x=Math.PI/2;m.position.z=len/2;m.castShadow=true;sg.add(m);parent=sg;});

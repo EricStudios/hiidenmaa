@@ -5,6 +5,9 @@
 /* ---------------- INPUT ---------------- */
 const keys={};let mouseL=false,mouseR=false,locked=false,lockFailed=false,invertY=false;
 const canvas=renderer.domElement;
+/* v3.29 käyttäjä: selaimen zoom pois pelistä – Ctrl/Cmd + rulla (myös kosketuslevyn nipistys) ja Ctrl + / − / 0 estetään; jäljelle jäävä zoom kompensoidaan (settings.js browserZoom) */
+addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey)e.preventDefault();},{passive:false,capture:true});
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&/^(Equal|Minus|NumpadAdd|NumpadSubtract|Digit0|Numpad0|BracketRight|Slash)$/.test(e.code))e.preventDefault();},true);
 /* v3.20 käyttäjä: latausruudun aikana (riimukivi näkyvissä) näppäimet ja napsautukset eivät liikuta hahmoa eivätkä tee mitään; jäljelle jääneet painallukset nollataan. */
 function ldBusy(){const b=window.__ldBusy;return !!b&&Date.now()-b<60000;}   // vain myöhemmät latausruudut (uusi maailma, tallennus), turvaraja 60 s
 /* v3.25 käyttäjä: näppäily (välilyönti, WASD …) skriptien latautuessa antoi virheen "openPanel is not defined" – käsittelijät viittasivat myöhemmin ladattaviin
@@ -80,6 +83,7 @@ addEventListener('mousemove',e=>{
   let dx=0,dy=0;
   if(locked){dx=e.movementX;dy=e.movementY;}else if(lockFailed&&(e.buttons&1||e.buttons&2)){dx=e.movementX;dy=e.movementY;}
   if(Math.abs(dx)>200||Math.abs(dy)>200)return;
+  if(typeof HG!=='undefined'&&HG.on&&locked){fpUnhookMove(dx);return;}   // v3.27 koukun irrotuksen minipeli: hiiri liikuttaa viivaa, kamera pysyy
   const k=.0028*(+SET.sens||1);camYaw-=dx*k;camPitch=clamp(camPitch+dy*k*(invertY?-1:1),-.6,1.25);   // v1.54 kääntymisen herkkyys
 });
 // Rulla: zoom tai (asetus) pikapaikan vaihto – valittu pikapaikka varustetaan heti jos esine on varustettava
@@ -104,7 +108,10 @@ const VC={x:innerWidth/2,y:innerHeight/2,on:false,el:null,hov:null,down:null};
 function vcSync(){if(!inReady())return;const on=locked&&!!openPanel&&state==='ui';if(on!==VC.on){VC.on=on;VC.el.hidden=!on;if(!on)vcHover(null);else{VC.x=clamp(VC.x,0,innerWidth-1);VC.y=clamp(VC.y,0,innerHeight-1);vcMove(0,0,true);}}}
 const vcAt=()=>{const t=document.elementFromPoint(VC.x,VC.y);return t||document.body;};
 const vcInit=(e,extra)=>Object.assign({bubbles:true,cancelable:true,composed:true,view:window,clientX:VC.x,clientY:VC.y,screenX:VC.x,screenY:VC.y,button:e?e.button:0,buttons:e?e.buttons:0,shiftKey:e&&e.isTrusted?!!e.shiftKey:!!(e&&e.shiftKey)||!!(keys.ShiftLeft||keys.ShiftRight),ctrlKey:e&&e.isTrusted?!!e.ctrlKey:!!(e&&e.ctrlKey)||!!(keys.ControlLeft||keys.ControlRight),altKey:!!(e&&e.altKey),metaKey:!!(e&&e.metaKey)},extra||{});
-function vcFire(type,e,extra,tgt){const t=tgt||vcAt();t.dispatchEvent(type==='wheel'?new WheelEvent(type,vcInit(e,extra)):new MouseEvent(type,vcInit(e,extra)));return t;}
+/* v3.27 KORJAUS (käyttäjä): keinotekoinen klikkaus laukaisi myös estetyn (disabled) napin onclickin → valmistus ilman aineita. Selain ei
+   suodata dispatchEventiä, joten estetyt ohjaimet ohitetaan itse (KORJAUKSET 97). */
+const VC_BTN_EV=/^(click|dblclick|auxclick|mousedown)$/,vcDis=t=>!!(t&&t.closest&&t.closest('button:disabled,input:disabled,select:disabled,textarea:disabled,fieldset:disabled,[aria-disabled="true"]'));
+function vcFire(type,e,extra,tgt){const t=tgt||vcAt();if(VC_BTN_EV.test(type)&&vcDis(t))return t;t.dispatchEvent(type==='wheel'?new WheelEvent(type,vcInit(e,extra)):new MouseEvent(type,vcInit(e,extra)));return t;}
 // :hover ei toimi keinotekoisilla tapahtumilla → hiiren alla oleva elementti ja sen vanhemmat saavat luokan .vh (CSS:ssä samat tyylit kuin :hover)
 function vcHover(t){if(t===VC.hov)return;const old=new Set();for(let a=VC.hov;a&&a!==document.body;a=a.parentElement)old.add(a);const nw=new Set();for(let a=t;a&&a!==document.body;a=a.parentElement)nw.add(a);
   for(const a of old)if(!nw.has(a))a.classList.remove('vh');for(const a of nw)a.classList.add('vh');

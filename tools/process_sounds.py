@@ -916,7 +916,7 @@ BIO_FI = [('meadow', 'rantaniitty', 'Rantaniitty'), ('koivu', 'koivulehto', 'Koi
           ('kangas', 'jakalakangas', 'Jäkäläkangas'), ('aarni', 'aarnimetsa', 'Aarnimetsä'), ('moor', 'kalmanummi', 'Kalmanummi'), ('tunturi', 'tunturikangas', 'Tunturikangas'),
           ('rakka', 'rakka', 'Rakka'), ('mountain', 'kivivuori', 'Kivivuori'), ('peak', 'routahuiput', 'Routahuiput'), ('beach', 'hietaranta', 'Hietaranta'), ('sea', 'meri', 'Meri')]
 REALM_FI = [('portal1', 'routaluola', 'Routaluola'), ('portal2', 'kalmankammio', 'Kalmankammio'), ('portal3', 'aarnihauta', 'Aarnihauta')]
-MUSIC_EV = {'menu1', 'menu2', 'hautakumpu', 'pomotaistelu', 'vartija_puolivali', 'vartija_kuolema'} | {fi for _, fi, _ in BIO_FI} | {fi for _, fi, _ in REALM_FI}   # v2.66 stereo, parempi laatu
+MUSIC_EV = {'menu1', 'menu2', 'hautakumpu', 'pomotaistelu', 'vartija_puolivali', 'vartija_kuolema', 'ennatyskala'} | {fi for _, fi, _ in BIO_FI} | {fi for _, fi, _ in REALM_FI}   # v2.66 stereo, parempi laatu
 AMB_PL = REALM_FI + [('barrow', 'hautakumpu', 'Hautakumpu')]
 NAT_BIO = [('korpimetsa', 'Korpimetsä'), ('koivulehto', 'Koivulehto'), ('aarnimetsa', 'Aarnimetsä'), ('upposuo', 'Upposuo'), ('kalmanummi', 'Kalmanummi'), ('rantaniitty', 'Rantaniitty')]   # v2.67 biomien sivuäänet (käyttäjä: metsäiset + niitty)   # v2.61 tunnelmaäänien paikat
 X_PARTS = [   # (kansio, etuliite, listan nimi, otsikko, ryhmät)
@@ -929,7 +929,8 @@ X_PARTS = [   # (kansio, etuliite, listan nimi, otsikko, ryhmät)
          + [('hautakumpu', 'Hautakummun luolasto: alkaa sisään astuessa (häivytys)', 'dark barrow crypt ambient music'),
             ('pomotaistelu', 'pomotaistelu (Jäätär, Kalmaherra, Aarnihirviö, Kalmanvartija): alkaa pomon herätessä, loppuu häivyttäen taistelun päättyessä', 'epic boss battle music, nordic drums choir'),
             ('vartija_puolivali', 'viimeinen pomo (Kalmanvartija) alle puolet terveydestä: soi kuolemaan asti tai kunnes taistelu keskeytyy; kappaleen loputtua alkaa uudelleen 2 s tauon jälkeen', 'epic final boss battle music, intense choir drums climax'),
-            ('vartija_kuolema', 'viimeinen pomo (Kalmanvartija) alkaa kuolla: soi kerran alusta loppuun (ei katkea, vaikka kuolema-animaatio loppuu)', 'triumphant victory music, epic finale nordic choir')])]),
+            ('vartija_kuolema', 'viimeinen pomo (Kalmanvartija) alkaa kuolla: soi kerran alusta loppuun (ei katkea, vaikka kuolema-animaatio loppuu)', 'triumphant victory music, epic finale nordic choir')]),
+        ('tapahtumat', 'Tapahtumat (v3.27)', '🏆', [('ennatyskala', 'uusi ennätyskala (saalislappu): lyhyt teema soi kerran loppuun (ei pomotaistelun aikana)', 'short triumphant fishing fanfare, nordic folk, joyful')])]),
     ('ilmoitukset', 'i', 'AANILISTA_ILMOITUKSET.csv', 'Ilmoitukset ja löydöt', [
         ('ilmoitukset', 'Ilmoitukset', '💬', [('ilmoitus', 'viesti tai ilmoitus ruudulle (vasen reuna); enintään 0,35 s välein', 'ui notification soft, message pop')]),
         ('biomit', 'Uusi alue löydetty', '🗺️', [('biomi_yhteinen', 'uusi alue löydetty (aluebanneri) – soi, jos alueella ei ole omaa ääntä', 'discovery chime, new area found, mystical reveal')]
